@@ -1,0 +1,386 @@
+/**
+ * src/styles/accessibility.css
+ *
+ * Global accessibility styles — Phase 10
+ *
+ * Provides:
+ *   - Universal focus-visible indicators
+ *   - Screen-reader-only utility class
+ *   - Semantic landmark helpers
+ *   - Touch target minimums
+ *   - Reduced-motion overrides
+ *   - Color-contrast-safe error/success/warning states
+ *   - Accessible loading states
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCREEN READER ONLY — visually hidden but accessible
+   ═══════════════════════════════════════════════════════════════════════════ */
+.sr-only,
+.a11y-sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FOCUS INDICATORS — universal visible focus for keyboard users
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Universal focus-visible ring for all interactive elements */
+:focus-visible {
+  outline: var(--a11y-focus-ring-width, 2px) solid var(--a11y-focus-ring-color, var(--color-primary, #d81b60));
+  outline-offset: var(--a11y-focus-ring-offset, 2px);
+}
+
+/* Buttons — ensure focus ring is visible even on icon buttons */
+button:focus-visible,
+.btn:focus-visible {
+  outline: var(--a11y-focus-ring-width, 2px) solid var(--a11y-focus-ring-color, var(--color-primary, #d81b60));
+  outline-offset: var(--a11y-focus-ring-offset, 2px);
+}
+
+/* Icon buttons need extra padding so the ring isn't clipped */
+.icon-btn:focus-visible {
+  outline-offset: 3px;
+}
+
+/* Links — visible focus */
+a:focus-visible {
+  outline: var(--a11y-focus-ring-width, 2px) solid var(--a11y-focus-ring-color, var(--color-primary, #d81b60));
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Form inputs — visible focus */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none; /* Use box-shadow for inputs so it doesn't fight the border */
+  border-color: var(--a11y-focus-ring-color, var(--color-primary, #d81b60)) !important;
+  box-shadow: var(--input-focus-ring, 0 0 0 4px rgba(216, 27, 96, 0.15));
+}
+
+/* Dark mode focus ring color */
+body.dark-mode :focus-visible {
+  outline-color: var(--a11y-focus-ring-color-dark, var(--pr-color-rose-300, #f06292));
+}
+
+body.dark-mode input:focus-visible,
+body.dark-mode textarea:focus-visible,
+body.dark-mode select:focus-visible {
+  border-color: var(--a11y-focus-ring-color-dark, var(--pr-color-rose-300, #f06292)) !important;
+  box-shadow: 0 0 0 4px rgba(240, 98, 146, 0.2);
+}
+
+/* Remove default outline only when focus-visible is supported
+   (prevents removing it for older browsers that need it) */
+@supports not selector(:focus-visible) {
+  :focus {
+    outline: var(--a11y-focus-ring-width, 2px) solid var(--a11y-focus-ring-color, var(--color-primary, #d81b60));
+    outline-offset: var(--a11y-focus-ring-offset, 2px);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TOUCH TARGETS — minimum 44×44px for interactive elements
+   ═══════════════════════════════════════════════════════════════════════════ */
+button,
+a,
+input[type="checkbox"],
+input[type="radio"],
+[role="button"],
+[role="tab"],
+[role="menuitem"] {
+  min-height: var(--a11y-touch-target-min, 44px);
+}
+
+/* Exception: small inline elements like badge counts */
+.notif-bell-badge,
+.header-lang-code,
+.settings-countdown-num {
+  min-height: auto;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ACCESSIBLE ERROR / SUCCESS / WARNING STATES
+   Use icon + text + semantic color (never color alone)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.a11y-error,
+[role="alert"] {
+  color: var(--a11y-error-icon-color, var(--state-error, #ef4444));
+}
+
+.a11y-success {
+  color: var(--a11y-success-icon-color, var(--state-success, #10b981));
+}
+
+.a11y-warning {
+  color: var(--a11y-warning-icon-color, var(--state-warning, #f59e0b));
+}
+
+/* Accessible validation states for form fields */
+.a11y-field-error input,
+.a11y-field-error textarea,
+.a11y-field-error select,
+input[aria-invalid="true"],
+textarea[aria-invalid="true"],
+select[aria-invalid="true"] {
+  border-color: var(--state-error, #ef4444) !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+}
+
+.a11y-field-error .a11y-field-error-msg {
+  color: var(--state-error, #ef4444);
+  font-size: 0.8rem;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.a11y-field-error .a11y-field-error-msg::before {
+  content: '⚠';
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ACCESSIBLE LOADING STATES
+   Announce loading to screen readers, don't just show a spinner
+   ═══════════════════════════════════════════════════════════════════════════ */
+.a11y-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.a11y-loading .a11y-loading-text {
+  /* Always provide text alongside spinners */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ACCESSIBLE PROGRESS — text equivalent for progress bars
+   ═══════════════════════════════════════════════════════════════════════════ */
+.a11y-progress-text {
+  /* Screen reader accessible progress text */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SKIP NAVIGATION — styling handled inline in SkipNavigation.jsx
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ACCESSIBLE DIALOG BACKDROP — prevent background scrolling
+   ═══════════════════════════════════════════════════════════════════════════ */
+body.a11y-dialog-open {
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ACCESSIBLE TABLES — proper table semantics
+   ═══════════════════════════════════════════════════════════════════════════ */
+table[role="table"],
+table.a11y-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table.a11y-table th {
+  text-align: left;
+  font-weight: 600;
+  padding: var(--table-padding-y, 12px) var(--table-padding-x, 16px);
+  background: var(--table-header-bg, var(--surface-card-alt, #f5f5f5));
+  border-bottom: 2px solid var(--border-color, rgba(0,0,0,0.1));
+}
+
+table.a11y-table td {
+  padding: var(--table-padding-y, 12px) var(--table-padding-x, 16px);
+  border-bottom: 1px solid var(--border-color-subtle, rgba(0,0,0,0.05));
+}
+
+table.a11y-table tbody tr:hover {
+  background: var(--table-row-hover-bg, var(--surface-highlight, rgba(0,0,0,0.03)));
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ACCESSIBLE SKIP LINKS — navigation helpers
+   ═══════════════════════════════════════════════════════════════════════════ */
+.a11y-skip-link {
+  position: absolute;
+  top: -100%;
+  left: 16px;
+  z-index: 11000;
+  padding: 12px 24px;
+  background: var(--color-primary, #d81b60);
+  color: var(--text-on-primary, #fff);
+  border-radius: 0 0 8px 8px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: top 0.15s ease;
+}
+
+.a11y-skip-link:focus {
+  top: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   REDUCED MOTION — additional refinements beyond tokens.css
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  /* Disable all decorative animations */
+  .a11y-reduce-motion * {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* Parallax and auto-scroll effects */
+  [style*="transform: translate"],
+  [style*="transform: scale"],
+  [style*="transform: rotate"] {
+    transition: none !important;
+  }
+
+  /* Prevent flashing */
+  @keyframes notif-badge-glow { 0%, 100% { opacity: 1; } 50% { opacity: 1; } }
+  @keyframes notif-badge-glow-dark { 0%, 100% { opacity: 1; } 50% { opacity: 1; } }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   HIGH CONTRAST MODE — respect forced-colors media query
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (forced-colors: active) {
+  /* Ensure focus indicators are visible in forced-colors mode */
+  :focus-visible {
+    outline: 2px solid LinkText;
+  }
+
+  /* Ensure borders are visible */
+  .card,
+  .settings-section,
+  .a11y-dialog {
+    border: 1px solid LinkText;
+  }
+
+  /* Progress bars should be visible */
+  [role="progressbar"] > div {
+    background: LinkText !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PRINT STYLES — accessibility for print
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media print {
+  /* Hide navigation, show main content */
+  .app-header,
+  .bottom-nav-bar,
+  .a11y-skip-link {
+    display: none !important;
+  }
+
+  /* Ensure main content is visible */
+  #a11y-main-content,
+  main {
+    display: block !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EXTERNAL LINK INDICATOR — accessible way to indicate external links
+   ═══════════════════════════════════════════════════════════════════════════ */
+a[target="_blank"]::after {
+  content: ' ↗';
+  font-size: 0.7em;
+  vertical-align: super;
+  opacity: 0.6;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE ACCESSIBILITY — ensure usability at all viewport sizes
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 320px) {
+  /* Ensure buttons are still usable on very small screens */
+  button,
+  a {
+    min-height: 40px;
+  }
+}
+
+/* Zoom/reflow: content must not be clipped at 200% zoom */
+@media (min-resolution: 192dpi) {
+  body {
+    overflow-x: hidden;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RTL FUTURE-PROOFING — use logical CSS properties
+   ═══════════════════════════════════════════════════════════════════════════ */
+.a11y-rtl-aware {
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+  padding-inline-start: 0;
+  padding-inline-end: 0;
+  inset-inline-start: 0;
+  inset-inline-end: 0;
+  border-inline-start: 0;
+  border-inline-end: 0;
+}
+
+/* Logical properties for common UI patterns */
+.a11y-dialog-body {
+  padding-inline-start: 0;
+  padding-inline-end: 0;
+}
+
+.a11y-drawer {
+  /* Drawer positioning uses logical properties */
+}
+
+/* Lists and navigation */
+.a11y-menu {
+  padding-inline: 4px;
+}
+
+/* Validation issue items */
+.validationIssue,
+.a11y-validation-issue {
+  padding-inline: 12px;
+}
+
+/* Block placement */
+.ls-block-placement {
+  padding-inline: 0;
+}
+
+/* Learning shell sidebar */
+.ls-shell-sidebar-module {
+  padding-inline: 0;
+}
+
+/* Blockquote */
+blockquote {
+  border-inline-start: 3px solid var(--color-primary, #3b82f6);
+  padding-inline-start: 16px;
+}
+
+/* Code blocks */
+code {
+  font-family: var(--pr-font-mono, monospace);
+}

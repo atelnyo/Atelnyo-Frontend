@@ -1,0 +1,417 @@
+/**
+ * src/components/creator/ContentPerformance.css
+ *
+ * Styles for Content Performance Analytics
+ */
+
+/* ─── Container ─────────────────────────────────────────────────── */
+.cp-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.cp-header {
+  margin-bottom: 24px;
+}
+
+.cp-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--text-primary, #1f2937);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cp-header h2 i {
+  color: #d81b60;
+}
+
+.cp-subtitle {
+  margin: 8px 0 0 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+/* ─── Loading / Error ───────────────────────────────────────────── */
+.cp-loading,
+.cp-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.cp-loading i {
+  font-size: 2rem;
+  color: #d81b60;
+  margin-bottom: 12px;
+  animation: cp-spin 1s linear infinite;
+}
+
+@keyframes cp-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.cp-error i {
+  font-size: 2rem;
+  color: #ef4444;
+  margin-bottom: 12px;
+}
+
+.cp-error button {
+  margin-top: 12px;
+  padding: 8px 16px;
+  background: #d81b60;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* ─── Performance Summary ───────────────────────────────────────── */
+.cp-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.cp-summary-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+
+.cp-summary-main {
+  background: linear-gradient(135deg, #fdf2f8, #fce7f3);
+  border-color: #fbcfe8;
+}
+
+.cp-summary-grade {
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.cp-summary-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary, #1f2937);
+}
+
+.cp-summary-label {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.cp-summary-subtitle {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+/* ─── Filters ───────────────────────────────────────────────────── */
+.cp-filters {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.cp-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cp-filter-group label {
+  font-size: 0.85rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.cp-filter-group select {
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  background: white;
+  cursor: pointer;
+}
+
+.cp-filter-group select:focus {
+  outline: none;
+  border-color: #d81b60;
+}
+
+/* ─── Section ───────────────────────────────────────────────────── */
+.cp-section {
+  margin-bottom: 32px;
+}
+
+.cp-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 1.1rem;
+  color: var(--text-primary, #1f2937);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cp-section h3 i {
+  color: #f59e0b;
+}
+
+/* ─── Top Performers ────────────────────────────────────────────── */
+.cp-top-performers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cp-top-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.cp-top-rank {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.cp-top-title {
+  flex: 1;
+  font-weight: 500;
+  color: var(--text-primary, #1f2937);
+}
+
+.cp-top-type {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  text-transform: capitalize;
+}
+
+/* ─── Content Grid ──────────────────────────────────────────────── */
+.cp-content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+/* ─── Content Card ──────────────────────────────────────────────── */
+.cp-content-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cp-content-card:hover {
+  border-color: #d81b60;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.cp-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.cp-card-type {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-transform: capitalize;
+}
+
+.cp-card-grade {
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.cp-card-title {
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+  margin-bottom: 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cp-card-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.cp-metric {
+  text-align: center;
+}
+
+.cp-metric-value {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary, #1f2937);
+}
+
+.cp-metric-label {
+  font-size: 0.65rem;
+  color: #9ca3af;
+  text-transform: uppercase;
+}
+
+.cp-card-bar {
+  height: 4px;
+  background: #f3f4f6;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.cp-card-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* ─── Empty State ───────────────────────────────────────────────── */
+.cp-empty {
+  text-align: center;
+  padding: 48px;
+  color: #9ca3af;
+}
+
+.cp-empty i {
+  font-size: 2rem;
+  margin-bottom: 12px;
+}
+
+/* ─── Modal ─────────────────────────────────────────────────────── */
+.cp-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+}
+
+.cp-modal {
+  background: white;
+  border-radius: 16px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.cp-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #f3f4f6;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cp-modal h3 {
+  margin: 0;
+  padding: 24px 24px 16px;
+  font-size: 1.25rem;
+  color: var(--text-primary, #1f2937);
+}
+
+.cp-modal-content {
+  padding: 0 24px 24px;
+}
+
+.cp-modal-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.cp-modal-stat {
+  text-align: center;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.cp-modal-stat-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary, #1f2937);
+}
+
+.cp-modal-stat-label {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.cp-modal-recommendations {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.cp-modal-recommendations h4 {
+  margin: 0 0 12px 0;
+  color: #166534;
+  font-size: 0.9rem;
+}
+
+.cp-modal-recommendations ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #166534;
+  font-size: 0.85rem;
+}
+
+.cp-modal-recommendations li {
+  margin-bottom: 8px;
+}

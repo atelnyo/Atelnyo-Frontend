@@ -1,0 +1,185 @@
+/* ─── StableVideoPlayer Styles ─────────────────────────────────────── */
+
+.svp-container {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+}
+
+.svp-wrapper {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Loading state */
+.svp-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  font-size: 0.85rem;
+  z-index: 5;
+}
+
+.svp-loading i {
+  font-size: 1.5rem;
+  animation: svp-spin 1s linear infinite;
+}
+
+@keyframes svp-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Error state */
+.svp-error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.85);
+  color: #94a3b8;
+  font-size: 0.85rem;
+  cursor: pointer;
+  z-index: 5;
+}
+
+.svp-error i {
+  opacity: 0.5;
+}
+
+.svp-retry {
+  padding: 6px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: white;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.svp-retry:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Empty state */
+.svp-empty {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.svp-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 40px 20px;
+  background: var(--surface-bg, #f1f5f9);
+  border-radius: 12px;
+  color: var(--text-secondary, #64748b);
+  font-size: 0.85rem;
+}
+
+.svp-placeholder i {
+  font-size: 2rem;
+  opacity: 0.3;
+}
+
+/* Preview (compact card) */
+.svp-preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #000;
+  cursor: pointer;
+}
+
+.svp-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.svp-preview:hover .svp-preview-img {
+  transform: scale(1.05);
+}
+
+.svp-preview-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1e293b, #334155);
+  color: white;
+  font-size: 2rem;
+  opacity: 0.5;
+}
+
+.svp-preview-play {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.svp-preview:hover .svp-preview-play {
+  opacity: 1;
+}
+
+.svp-preview-play i {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  color: #1e293b;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  padding-left: 3px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .svp-loading,
+  .svp-error {
+    font-size: 0.75rem;
+  }
+
+  .svp-preview-play i {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .svp-placeholder {
+    background: var(--surface-bg, #1e293b);
+  }
+
+  .svp-preview-placeholder {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+  }
+}

@@ -1,0 +1,71 @@
+# ci.yml — Atelnyo Frontend CI pipeline
+#
+# Runs on every PR to main and every push to main. Two parallel jobs:
+#   1. syntax-lint    — @babel/parser scan of src/ for JSX/TS syntax errors
+#   2. closure-leak   — static analyzer for nested-helper closure bugs
+
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Cancel in-progress runs on the same PR when a new commit is pushed.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ────────────────────────────────────────────────────────────────────
+  # Job 1 — Syntax lint (Babel parser)
+  # ────────────────────────────────────────────────────────────────────
+  syntax-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Node 20+: wrangler 4 (Deploy Worker) and current Vite tooling
+          # require >=20. Node 18 hit EOL 2025-04 and broke wrangler deploys.
+          node-version: 20
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Syntax lint
+        run: node scripts/_pre-launch-syntax-lint.cjs src
+
+  # ────────────────────────────────────────────────────────────────────
+  # Job 2 — Closure-leak scan
+  # ────────────────────────────────────────────────────────────────────
+  closure-leak:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Node 20+: wrangler 4 (Deploy Worker) and current Vite tooling
+          # require >=20. Node 18 hit EOL 2025-04 and broke wrangler deploys.
+          node-version: 20
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Closure-leak scan
+        run: node scripts/lint-closure-leak.cjs

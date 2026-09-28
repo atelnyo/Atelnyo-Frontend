@@ -1,0 +1,3613 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   §46 — DESIGN TOKENS
+   Centralized values for spacing, typography, motion, elevation, color.
+   Every learning component inherits from these — no random hard-coded
+   values throughout the Learning Space.
+   ═══════════════════════════════════════════════════════════════════════ */
+:root {
+  /* ── Spacing (4px base) ─────────────────────────────────── */
+  --ls-space-1: 4px;
+  --ls-space-2: 8px;
+  --ls-space-3: 12px;
+  --ls-space-4: 16px;
+  --ls-space-5: 20px;
+  --ls-space-6: 24px;
+  --ls-space-8: 32px;
+  --ls-space-10: 40px;
+  --ls-space-12: 48px;
+  --ls-space-16: 64px;
+
+  /* ── Typography ─────────────────────────────────────────── */
+  --ls-type-display: 1.75rem;
+  --ls-type-h1: 1.5rem;
+  --ls-type-h2: 1.25rem;
+  --ls-type-h3: 1.05rem;
+  --ls-type-body: 0.95rem;
+  --ls-type-sm: 0.88rem;
+  --ls-type-xs: 0.78rem;
+  --ls-type-2xs: 0.68rem;
+  --ls-type-leading: 1.6;
+  --ls-type-leading-tight: 1.35;
+  --ls-type-leading-relaxed: 1.75;
+
+  /* ── Motion ─────────────────────────────────────────────── */
+  --ls-ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ls-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ls-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ls-ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ls-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ls-duration-fast: 0.12s;
+  --ls-duration-normal: 0.2s;
+  --ls-duration-slow: 0.35s;
+
+  /* ── Elevation ──────────────────────────────────────────── */
+  --ls-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --ls-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --ls-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --ls-shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.2);
+
+  /* ── Radius ─────────────────────────────────────────────── */
+  --ls-radius-sm: 6px;
+  --ls-radius-md: 10px;
+  --ls-radius-lg: 12px;
+  --ls-radius-xl: 16px;
+  --ls-radius-full: 9999px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LEARNING SHELL — §1-§60 Responsive Layout Architecture
+   
+   Reusable shell that provides:
+     • Desktop: sidebar curriculum + main content area
+     • Tablet: collapsible sidebar + wider content
+     • Mobile: full-width content + bottom-sheet curriculum
+     • Content width tiers: content / wide / full
+     • Sticky action area for Continue/Previous
+     • Calm, focused learning environment
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ─── Shell Layout ─────────────────────────────────────────────── */
+.ls-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--pink-bg, #fff);
+  color: var(--text-primary, #111827);
+}
+
+.ls-shell-body {
+  display: flex;
+  flex: 1;
+  position: relative;
+}
+
+/* ─── Header ───────────────────────────────────────────────────── */
+.ls-shell-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  background: var(--surface-card, #fff);
+  border-bottom: 1px solid var(--border-color, rgba(216, 27, 96, 0.1));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  min-height: 52px;
+}
+
+.dark-mode .ls-shell-header {
+  background: rgba(17, 24, 39, 0.92);
+}
+
+.ls-shell-header-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: none;
+  border-radius: 10px;
+  color: var(--text-primary, #111827);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+.ls-shell-header-back:hover {
+  background: var(--surface-card-alt, #f1f5f9);
+}
+.ls-shell-header-back:focus-visible {
+  outline: 2px solid var(--color-primary, #3b82f6);
+  outline-offset: 2px;
+}
+
+.ls-shell-header-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  overflow: hidden;
+}
+.ls-shell-header-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+.ls-shell-header-subtitle {
+  font-size: 0.72rem;
+  color: var(--text-secondary, #6b7280);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ls-shell-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.ls-shell-header-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: none;
+  border-radius: 10px;
+  color: var(--text-secondary, #6b7280);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  font-size: 0.95rem;
+}
+.ls-shell-header-btn:hover {
+  background: var(--surface-card-alt, #f1f5f9);
+  color: var(--color-primary, #3b82f6);
+}
+.ls-shell-header-btn:focus-visible {
+  outline: 2px solid var(--color-primary, #3b82f6);
+  outline-offset: 2px;
+}
+.ls-shell-header-btn.is-active {
+  color: var(--color-primary, #3b82f6);
+  background: rgba(59, 130, 246, 0.08);
+}
+
+/* ─── Progress bar in header ───────────────────────────────────── */
+.ls-shell-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--border-color, rgba(216, 27, 96, 0.1));
+  overflow: hidden;
+}
+.ls-shell-progress-fill {
+  height: 100%;
+  background: var(--color-primary, #3b82f6);
+  transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  border-radius: 0 3px 3px 0;
+}
+
+/* ─── Sidebar (Desktop Curriculum) ─────────────────────────────── */
+.ls-shell-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border-color, rgba(216, 27, 96, 0.1));
+  background: var(--surface-card, #fff);
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 0;
+  /* Independent scroll — header stays fixed */
+  height: calc(100vh - 52px);
+  height: calc(100dvh - 52px);
+  position: sticky;
+  top: 52px;
+}
+
+.dark-mode .ls-shell-sidebar {
+  background: var(--surface-card, #1a1f2e);
+  border-right-color: rgba(255, 255, 255, 0.06);
+}
+
+.ls-shell-sidebar-header {
+  padding: 0 16px 12px;
+  border-bottom: 1px solid var(--border-color, rgba(216, 27, 96, 0.1));
+  margin-bottom: 8px;
+}
+.ls-shell-sidebar-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary, #6b7280);
+  margin: 0;
+}
+.ls-shell-sidebar-meta {
+  font-size: 0.72rem;
+  color: var(--text-secondary, #6b7280);
+  margin-top: 4px;
+}
+
+/* Module list in sidebar */
+.ls-shell-sidebar-module {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.ls-shell-sidebar-module-item {
+  margin: 0;
+  padding: 0;
+}
+.ls-shell-sidebar-module-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: inherit;
+  font-size: 0.85rem;
+  color: var(--text-primary, #111827);
+  line-height: 1.4;
+}
+.ls-shell-sidebar-module-btn:hover {
+  background: var(--surface-card-alt, #f1f5f9);
+}
+.ls-shell-sidebar-module-btn:focus-visible {
+  outline: 2px solid var(--color-primary, #3b82f6);
+  outline-offset: -2px;
+}
+.ls-shell-sidebar-module-btn.is-current {
+  background: rgba(59, 130, 246, 0.06);
+  color: var(--color-primary, #3b82f6);
+  font-weight: 600;
+}
+.ls-shell-sidebar-module-btn.is-completed {
+  color: var(--text-secondary, #6b7280);
+}
+.ls-shell-sidebar-module-btn.is-future {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.ls-shell-sidebar-module-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  flex-shrink: 0;
+  background: var(--surface-card-alt, #f1f5f9);
+  color: var(--text-secondary, #6b7280);
+}
+.ls-shell-sidebar-module-btn.is-current .ls-shell-sidebar-module-icon {
+  background: var(--color-primary, #3b82f6);
+  color: #fff;
+}
+.ls-shell-sidebar-module-btn.is-completed .ls-shell-sidebar-module-icon {
+  background: #10b981;
+  color: #fff;
+}
+
+.ls-shell-sidebar-module-text {
+  flex: 1;
+  min-width: 0;
+}
+.ls-shell-sidebar-module-title {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ls-shell-sidebar-module-dots {
+  display: flex;
+  gap: 3px;
+  margin-top: 3px;
+}
+.ls-shell-sidebar-module-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--border-color, #e5e7eb);
+}
+.ls-shell-sidebar-module-dot.is-done {
+  background: #10b981;
+}
+
+.ls-shell-sidebar-footer {
+  padding: var(--ls-space-3, 12px) var(--ls-space-4, 16px);
+  margin-top: auto;
+}
+
+/* ─── Main Content Area ────────────────────────────────────────── */
+.ls-shell-content {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Content Width Tiers ──────────────────────────────────────── */
+/* §11-§13 — Not one fixed width for every block type */
+.ls-shell-content-inner {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Content width — readable text (70ch max) */
+.ls-width-content {
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Standard content width — images, standard media (800px) */
+.ls-width-standard {
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Wide content — video, interactive workspaces (960px) */
+.ls-width-wide {
+  max-width: 960px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Full available width — complex canvas, data tables */
+.ls-width-full {
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ─── §30 — Reading Typography ─────────────────────────────────── */
+/* Learning content needs comfortable reading rhythm — not dashboard text. */
+.ls-reading {
+  font-size: var(--ls-type-body, 0.95rem);
+  line-height: var(--ls-type-leading, 1.6);
+  color: var(--text-primary, #111827);
+}
+.ls-reading p {
+  margin: 0 0 var(--ls-space-4, 16px);
+  line-height: var(--ls-type-leading-relaxed, 1.75);
+}
+.ls-reading h2 {
+  font-size: var(--ls-type-h2, 1.25rem);
+  font-weight: 700;
+  line-height: var(--ls-type-leading-tight, 1.35);
+  margin: var(--ls-space-8, 32px) 0 var(--ls-space-3, 12px);
+  color: var(--text-primary, #111827);
+}
+.ls-reading h3 {
+  font-size: var(--ls-type-h3, 1.05rem);
+  font-weight: 600;
+  line-height: var(--ls-type-leading-tight, 1.35);
+  margin: var(--ls-space-6, 24px) 0 var(--ls-space-2, 8px);
+  color: var(--text-primary, #111827);
+}
+.ls-reading ul,
+.ls-reading ol {
+  margin: 0 0 var(--ls-space-4, 16px);
+  padding-left: var(--ls-space-5, 20px);
+}
+.ls-reading li {
+  margin-bottom: var(--ls-space-2, 8px);
+  line-height: var(--ls-type-leading, 1.6);
+}
+.ls-reading code {
+  font-size: 0.88em;
+  padding: 2px 6px;
+  border-radius: var(--ls-radius-sm, 6px);
+  background: var(--surface-card-alt, #f1f5f9);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+.ls-reading blockquote {
+  margin: var(--ls-space-4, 16px) 0;
+  padding: var(--ls-space-3, 12px) var(--ls-space-4, 16px);
+  border-left: 3px solid var(--color-primary, #d81b60);
+  background: var(--surface-card-alt, #f8fafc);
+  border-radius: 0 var(--ls-radius-md, 10px) var(--ls-radius-md, 10px) 0;
+  color: var(--text-secondary, #6b7280);
+  font-style: italic;
+}
+
+/* ─── §6 — Content Rhythm ───────────────────────────────────────── */
+/* Section separation: consistent spacing, no giant walls of content. */
+.ls-section {
+  margin-bottom: var(--ls-space-6, 24px);
+}
+.ls-section + .ls-section {
+  margin-top: var(--ls-space-8, 32px);
+}
+.ls-section--flush {
+  margin-top: 0;
+}
+.ls-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--border-color, rgba(216, 27, 96, 0.1));
+  margin: var(--ls-space-6, 24px) 0;
+  border: none;
+}
+
+/* ─── §4 — Current Position Breadcrumb ──────────────────────────── */
+.ls-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--ls-space-2, 8px);
+  padding: var(--ls-space-2, 8px) var(--ls-space-5, 20px);
+  font-size: var(--ls-type-xs, 0.78rem);
+  color: var(--text-secondary, #6b7280);
+  background: var(--surface-card-alt, #f8fafc);
+  border-bottom: 1px solid var(--border-color, rgba(216, 27, 96, 0.06));
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.ls-breadcrumb::-webkit-scrollbar { display: none; }
+.ls-breadcrumb-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ls-space-1, 4px);
+  color: var(--text-secondary, #6b7280);
+  text-decoration: none;
+  transition: color var(--ls-duration-fast, 0.12s);
+}
+.ls-breadcrumb-item:hover {
+  color: var(--color-primary, #d81b60);
+}
+.ls-breadcrumb-item.is-current {
+  color: var(--text-primary, #111827);
+  font-weight: 600;
+}
+.ls-breadcrumb-lesson {
+  color: var(--color-primary, #d81b60);
+}
+.ls-breadcrumb-sep {
+  color: var(--text-tertiary, #d1d5db);
+  font-size: 0.6rem;
+  flex-shrink: 0;
+}
+@media (max-width: 599px) {
+  .ls-breadcrumb {
+    padding: var(--ls-space-1, 4px) var(--ls-space-3, 12px);
+  }
+}
+
+/* ─── Lesson Content Area ──────────────────────────────────────── */
+.ls-lesson-area {
+  flex: 1;
+  padding: 24px 0 120px; /* bottom padding for sticky action area */
+}
+
+.ls-lesson-area-inner {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* ─── Lesson Introduction ──────────────────────────────────────── */
+.ls-lesson-intro {
+  margin-bottom: 32px;
+}
+.ls-lesson-intro-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0 0 8px;
+  color: var(--text-primary, #111827);
+}
+.ls-lesson-intro-objective {
+  font-size: 0.92rem;
+  color: var(--text-secondary, #6b7280);
+  margin: 0;
+  line-height: 1.6;
+}
+.ls-lesson-intro-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 0.78rem;
+  color: var(--text-secondary, #6b7280);
+}
+.ls-lesson-intro-meta i {
+  opacity: 0.7;
+}
+
+/* §26 — Learning Objectives */
+.ls-lesson-intro-objectives {
+  margin-top: 16px;
+  padding: 16px 18px;
+  background: rgba(59, 130, 246, 0.04);
+  border-radius: 12px;
+  border: 1px solid rgba(59, 130, 246, 0.08);
+}
+.ls-lesson-intro-objectives-label {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary, #111827);
+  line-height: 1.4;
+}
+.ls-lesson-intro-objectives-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ls-lesson-intro-objectives-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--text-primary, #111827);
+}
+.ls-lesson-intro-objectives-item i {
+  color: #10b981;
+  margin-top: 3px;
+  flex-shrink: 0;
+  font-size: 0.8rem;
+}
+
+/* ─── Block Placement System ───────────────────────────────────── */
+/* §14-§17 — Every block renders inside a predictable layout contract */
+.ls-block-placement {
+  margin-bottom: 24px;
+}
+
+/* Vertical rhythm — §13 — different relationships, different spacing */
+.ls-block-placement + .ls-block-placement {
+  /* Default content gap */
+}
+
+/* Heading → paragraph: small relationship gap */
+.ls-block-placement--heading + .ls-block-placement--content {
+  margin-top: 8px;
+}
+
+/* Content → media: normal content gap */
+.ls-block-placement--content + .ls-block-placement--media {
+  margin-top: 20px;
+}
+
+/* Media → content: supporting explanation gap */
+.ls-block-placement--media + .ls-block-placement--content {
+  margin-top: 16px;
+}
+
+/* Content → interactive: larger transition gap */
+.ls-block-placement--content + .ls-block-placement--interactive {
+  margin-top: 32px;
+}
+
+/* Interactive → content: transition gap */
+.ls-block-placement--interactive + .ls-block-placement--content {
+  margin-top: 32px;
+}
+
+/* Interactive → interactive: larger gap */
+.ls-block-placement--interactive + .ls-block-placement--interactive {
+  margin-top: 40px;
+}
+
+/* ─── Block Width Wrapper ──────────────────────────────────────── */
+.ls-block-width {
+  width: 100%;
+}
+.ls-block-width--content {
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.ls-block-width--wide {
+  max-width: 960px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.ls-block-width--full {
+  max-width: calc(100vw - 40px);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ─── Block Error Isolation ────────────────────────────────────── */
+/* §17 — If one block fails, the lesson continues */
+.ls-block-error {
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px dashed var(--border-color, #e5e7eb);
+  background: var(--surface-card-alt, #f8fafc);
+  text-align: center;
+  color: var(--text-secondary, #6b7280);
+  font-size: 0.85rem;
+}
+.ls-block-error-icon {
+  font-size: 1.4rem;
+  margin-bottom: 8px;
+  opacity: 0.5;
+}
+.ls-block-error-label {
+  margin-bottom: 4px;
+}
+.ls-block-error-retry {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 8px;
+  background: var(--surface-card, #fff);
+  color: var(--color-primary, #3b82f6);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-top: 8px;
+}
+.ls-block-error-retry:hover {
+  background: rgba(59, 130, 246, 0.06);
+}
+
+/* ─── §9-§11 — Continue Button Multi-State ──────────────────────── */
+/* The Continue action must never appear frozen without explanation. */
+.ls-continue-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ls-space-2, 8px);
+  padding: var(--ls-space-3, 12px) var(--ls-space-5, 20px);
+  border: none;
+  border-radius: var(--ls-radius-md, 10px);
+  background: var(--color-primary, #d81b60);
+  color: var(--text-on-primary, #fff);
+  font-family: inherit;
+  font-size: var(--ls-type-body, 0.95rem);
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+  min-width: 44px;
+  transition: all var(--ls-duration-fast, 0.12s) var(--ls-ease-default);
+  box-shadow: 0 2px 8px rgba(216, 27, 96, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+.ls-continue-btn:hover:not([disabled]) {
+  background: var(--btn-primary-hover-bg, #c2185b);
+  box-shadow: 0 4px 12px rgba(216, 27, 96, 0.35);
+  transform: translateY(-1px);
+}
+.ls-continue-btn:active:not([disabled]) {
+  transform: scale(0.97) translateY(0);
+  box-shadow: 0 1px 4px rgba(216, 27, 96, 0.2);
+}
+.ls-continue-btn:focus-visible {
+  outline: 2px solid var(--color-primary, #3b82f6);
+  outline-offset: 2px;
+}
+.ls-continue-btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+/* §10 — Button busy state: pointer-events off + spinner overlay */
+.ls-continue-btn[aria-busy='true'] {
+  pointer-events: none;
+  opacity: 0.85;
+}
+.ls-continue-btn--secondary {
+  background: var(--surface-card, #fff);
+  color: var(--text-primary, #111827);
+  border: 1px solid var(--border-color, rgba(216, 27, 96, 0.15));
+  box-shadow: none;
+}
+.ls-continue-btn--secondary:hover:not([disabled]) {
+  background: var(--surface-card-alt, #f1f5f9);
+  border-color: var(--border-color-strong, rgba(216, 27, 96, 0.25));
+}
+.ls-continue-btn--small {
+  padding: var(--ls-space-2, 8px) var(--ls-space-3, 12px);
+  font-size: var(--ls-type-xs, 0.78rem);
+  min-height: 36px;
+}
+/* §10 — Progress indicator inside button */
+.ls-continue-btn .ls-btn-spinner {
+  display: inline-flex;
+  animation: ls-spin 0.8s linear infinite;
+}
+@keyframes ls-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ─── §16-§18 — Completion Moments ──────────────────────────────── */
+/* Match feedback intensity to achievement importance. */
+.ls-completion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--ls-space-8, 32px) var(--ls-space-5, 20px);
+  animation: ls-content-fadein 0.4s var(--ls-ease-out) both;
+}
+.ls-completion-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: #fff;
+  margin-bottom: var(--ls-space-4, 16px);
+  animation: ls-celebrate-pop 0.5s var(--ls-ease-bounce) both;
+}
+.ls-completion-icon--lesson {
+  background: linear-gradient(135deg, #10b981, #059669);
+  width: 56px;
+  height: 56px;
+  font-size: 1.3rem;
+}
+.ls-completion-icon--module {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+}
+.ls-completion-icon--course {
+  width: 80px;
+  height: 80px;
+  font-size: 2rem;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  box-shadow: 0 6px 24px rgba(245, 158, 11, 0.3);
+  position: relative;
+}
+.ls-completion-icon--course::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 3px solid rgba(245, 158, 11, 0.2);
+  animation: ls-celebrate-ring-pulse 2s ease-in-out infinite;
+}
+.ls-completion-title {
+  font-size: var(--ls-type-h2, 1.25rem);
+  font-weight: 700;
+  margin: 0 0 var(--ls-space-2, 8px);
+  color: var(--text-primary, #111827);
+}
+.ls-completion-desc {
+  font-size: var(--ls-type-sm, 0.88rem);
+  color: var(--text-secondary, #6b7280);
+  margin: 0 0 var(--ls-space-5, 20px);
+  max-width: 380px;
+  line-height: var(--ls-type-leading, 1.6);
+}
+.ls-completion-stats {
+  display: flex;
+  gap: var(--ls-space-5, 20px);
+  margin-bottom: var(--ls-space-5, 20px);
+}
+.ls-completion-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ls-space-1, 4px);
+}
+.ls-completion-stat strong {
+  font-size: var(--ls-type-h2, 1.25rem);
+  font-weight: 700;
+  color: var(--color-primary, #d81b60);
+}
+.ls-completion-stat span {
+  font-size: var(--ls-type-2xs, 0.68rem);
+  color: var(--text-secondary, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.ls-completion-actions {
+  display: flex;
+  gap: var(--ls-space-3, 12px);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.ls-completion-encouragement {
+  margin-top: var(--ls-space-4, 16px);
+  font-size: var(--ls-type-xs, 0.78rem);
+  color: var(--text-tertiary, #999);
+  font-style: italic;
+}
+
+/* ─── §19 — Error Categories ────────────────────────────────────── */
+/* Meaningful error types with specific recovery actions. */
+.ls-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--ls-space-8, 32px) var(--ls-space-5, 20px);
+}
+.ls-error-icon {
+  font-size: 2rem;
+  margin-bottom: var(--ls-space-3, 12px);
+}
+.ls-error--save .ls-error-icon { color: #ef4444; }
+.ls-error--network .ls-error-icon { color: #f59e0b; }
+.ls-error--lesson .ls-error-icon { color: #8b5cf6; }
+.ls-error--navigation .ls-error-icon { color: #3b82f6; }
+.ls-error-title {
+  font-size: var(--ls-type-h3, 1.05rem);
+  font-weight: 600;
+  margin: 0 0 var(--ls-space-2, 8px);
+  color: var(--text-primary, #111827);
+}
+.ls-error-desc {
+  font-size: var(--ls-type-sm, 0.88rem);
+  color: var(--text-secondary, #6b7280);
+  margin: 0 0 var(--ls-space-5, 20px);
+  max-width: 380px;
+  line-height: var(--ls-type-leading, 1.6);
+}
+.ls-error-actions {
+  display: flex;
+  gap: var(--ls-space-3, 12px);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* ─── §20 — Offline Banner ──────────────────────────────────────── */
+/* Calm, persistent — not disruptive toast. */
+.ls-offline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ls-space-2, 8px);
+  padding: var(--ls-space-2, 8px) var(--ls-space-4, 16px);
+  background: rgba(59, 130, 246, 0.06);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+  color: #1e40af;
+  font-size: var(--ls-type-xs, 0.78rem);
+  text-align: center;
+}
+.dark-mode .ls-offline {
+  background: rgba(59, 130, 246, 0.08);
+  border-bottom-color: rgba(59, 130, 246, 0.15);
+  color: #93c5fd;
+}
+
+/* ─── §37 — Unlock Toast ────────────────────────────────────────── */
+.ls-unlock-toast {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ls-space-2, 8px);
+  padding: var(--ls-space-3, 12px) var(--ls-space-4, 16px);
+  background: rgba(16, 185, 129, 0.08);
+  border-bottom: 1px solid rgba(16, 185, 129, 0.15);
+  color: #065f46;
+  font-size: var(--ls-type-sm, 0.88rem);
+  font-weight: 500;
+  text-align: center;
+  animation: ls-unlock-slidein 0.4s var(--ls-ease-spring) both;
+}
+@keyframes ls-unlock-slidein {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.dark-mode .ls-unlock-toast {
+  background: rgba(16, 185, 129, 0.1);
+  border-bottom-color: rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
+}
+
+/* ─── §38 — Confirmation Dialog ─────────────────────────────────── */
+.ls-confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--ls-space-4, 16px);
+  animation: ls-content-fadein 0.2s var(--ls-ease-out) both;
+}
+.ls-confirm-dialog {
+  background: var(--surface-card, #fff);
+  border-radius: var(--ls-radius-xl, 16px);
+  padding: var(--ls-space-6, 24px);
+  max-width: 400px;
+  width: 100%;
+  box-shadow: var(--ls-shadow-xl);
+  animation: ls-modal-pop 0.3s var(--ls-ease-spring) both;
+}
+.dark-mode .ls-confirm-dialog {
+  background: var(--surface-card, #1a1f2e);
+}
+.ls-confirm-title {
+  font-size: var(--ls-type-h3, 1.05rem);
+  font-weight: 600;
+  margin: 0 0 var(--ls-space-2, 8px);
+  color: var(--text-primary, #111827);
+}
+.ls-confirm-message {
+  font-size: var(--ls-type-sm, 0.88rem);
+  color: var(--text-secondary, #6b7280);
+  margin: 0 0 var(--ls-space-5, 20px);
+  line-height: var(--ls-type-leading, 1.6);
+}
+.ls-confirm-actions {
+  display: flex;
+  gap: var(--ls-space-3, 12px);
+  justify-content: flex-end;
+}
+.ls-confirm-actions .ls-btn--danger {
+  background: #ef4444;
+  color: #fff;
+  border-color: #ef4444;
+}
+.ls-confirm-actions .ls-btn--danger:hover {
+  background: #dc2626;
+}
+
+/* ─── §44 — Notification Queue ──────────────────────────────────── */
+.ls-notifications {
+  position: fixed;
+  top: 60px;
+  right: var(--ls-space-4, 16px);
+  z-index: 250;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ls-space-2, 8px);
+  max-width: 360px;
+  pointer-events: none;
+}
+.ls-notification {
+  display: flex;
+  align-items: center;
+  gap: var(--ls-space-2, 8px);
+  padding: var(--ls-space-3, 12px) var(--ls-space-4, 16px);
+  border-radius: var(--ls-radius-lg, 12px);
+  font-size: var(--ls-type-sm, 0.88rem);
+  box-shadow: var(--ls-shadow-lg);
+  pointer-events: auto;
+  animation: ls-notification-in 0.3s var(--ls-ease-spring) both;
+}
+@keyframes ls-notification-in {
+  from { opacity: 0; transform: translateX(16px) scale(0.95); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+.ls-notification--info {
+  background: rgba(59, 130, 246, 0.9);
+  color: #fff;
+}
+.ls-notification--success {
+  background: rgba(16, 185, 129, 0.9);
+  color: #fff;
+}
+.ls-notification--warning {
+  background: rgba(245, 158, 11, 0.9);
+  color: #fff;
+}
+.ls-notification--error {
+  background: rgba(239, 68, 68, 0.9);
+  color: #fff;
+}
+@media (max-width: 599px) {
+  .ls-notifications {
+    left: var(--ls-space-3, 12px);
+    right: var(--ls-space-3, 12px);
+    max-width: none;
+  }
+}
+
+/* ─── §43 — Screen Reader Only ──────────────────────────────────── */
+.ls-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ─── Sticky Action Area ───────────────────────────────────────── */
+/* §36-§37 — Previous / Continue with safe-area awareness */
+.ls-action-area {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 90;
+  background: var(--surface-card, #fff);
+  border-top: 1px solid var(--border-color, rgba(216, 27, 96, 0.1));
+  padding: 12px 20px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.dark-mode .ls-action-area {
+  background: rgba(17, 24, 39, 0.95);
+  border-top-color: rgba(255, 255, 255, 0.06);
+}
+
+.ls-action-area-inner {
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ls-action-area-spacer {
+  flex: 1;
+}
+
+/* ─── Mobile Curriculum Drawer ─────────────────────────────────── */
+/* §9 — Opens through responsive pattern (bottom sheet) */
+.ls-mobile-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+.ls-mobile-drawer-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ls-mobile-drawer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 201;
+  background: var(--surface-card, #fff);
+  border-radius: 20px 20px 0 0;
+  max-height: 80vh;
+  max-height: 80dvh;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.ls-mobile-drawer.is-open {
+  transform: translateY(0);
+}
+
+.dark-mode .ls-mobile-drawer {
+  background: var(--surface-card, #1a1f2e);
+}
+
+.ls-mobile-drawer-handle {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0 4px;
+}
+.ls-mobile-drawer-handle-bar {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border-color, #d1d5db);
+}
+
+.ls-mobile-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 20px 12px;
+  border-bottom: 1px solid var(--border-color, rgba(216, 27, 96, 0.1));
+}
+.ls-mobile-drawer-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  margin: 0;
+}
+.ls-mobile-drawer-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  color: var(--text-secondary, #6b7280);
+  cursor: pointer;
+  font-size: 1rem;
+}
+.ls-mobile-drawer-close:hover {
+  background: var(--surface-card-alt, #f1f5f9);
+}
+
+.ls-mobile-drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0 20px;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Module items in mobile drawer */
+.ls-mobile-drawer-module {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.ls-mobile-drawer-module-item {
+  margin: 0;
+  padding: 0;
+}
+.ls-mobile-drawer-module-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 20px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: var(--text-primary, #111827);
+  line-height: 1.4;
+}
+.ls-mobile-drawer-module-btn:hover {
+  background: var(--surface-card-alt, #f1f5f9);
+}
+.ls-mobile-drawer-module-btn.is-current {
+  background: rgba(59, 130, 246, 0.06);
+  color: var(--color-primary, #3b82f6);
+  font-weight: 600;
+}
+.ls-mobile-drawer-module-btn.is-completed {
+  color: var(--text-secondary, #6b7280);
+}
+.ls-mobile-drawer-module-btn.is-future {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* ─── Question Block System ──────────────────────────────────── */
+/* §14-§19 — Shared question foundation for all question types */
+.ls-question {
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color, rgba(216, 27, 96, 0.1));
+  background: var(--surface-card, #fff);
+}
+.ls-question-header {
+  margin-bottom: 16px;
+}
+.ls-question-text {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0 0 6px;
+  line-height: 1.4;
+  color: var(--text-primary, #111827);
+}
+.ls-question-description {
+  font-size: 0.88rem;
+  color: var(--text-secondary, #6b7280);
+  margin: 0;
+  line-height: 1.5;
+}
+.ls-question-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.ls-question-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 10px;
+  background: var(--surface-card, #fff);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: var(--text-primary, #111827);
+  text-align: left;
+}
+.ls-question-option:hover:not(.is-submitted) {
+  border-color: var(--color-primary, #3b82f6);
+  background: rgba(59, 130, 246, 0.04);
+}
+.ls-question-option:focus-visible {
+  outline: 2px solid var(--color-primary, #3b82f6);
+  outline-offset: 2px;
+}
+.ls-question-option.is-selected:not(.is-submitted) {
+  border-color: var(--color-primary, #3b82f6);
+  background: rgba(59, 130, 246, 0.06);
+}
+.ls-question-option.is-correct {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.06);
+}
+.ls-question-option.is-wrong {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.06);
+}
+.ls-question-option.is-submitted {
+  cursor: default;
+}
+.ls-question-option-indicator {
+  flex-shrink: 0;
+  width: 20px;
+  text-align: center;
+  color: var(--text-secondary, #6b7280);
+}
+.ls-question-option.is-selected .ls-question-option-indicator {
+  color: var(--color-primary, #3b82f6);
+}
+.ls-question-option.is-correct .ls-question-option-indicator {
+  color: #10b981;
+}
+.ls-question-option.is-wrong .ls-question-option-indicator {
+  color: #ef4444;
+}
+.ls-question-option-text {
+  flex: 1;
+  line-height: 1.4;
+}
+.ls-question-option-icon {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+}
+.ls-question-option.is-correct .ls-question-option-icon {
+  color: #10b981;
+}
+.ls-question-option.is-wrong .ls-question-option-icon {
+  color: #ef4444;
+}
+.ls-question-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.ls-question-feedback {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+.ls-question-feedback.is-correct {
+  background: rgba(16, 185, 129, 0.06);
+  color: #065f46;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+.ls-question-feedback.is-incorrect {
+  background: rgba(239, 68, 68, 0.06);
+  color: #991b1b;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+.ls-question-feedback i {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+.ls-question-feedback-explanation {
+  margin: 6px 0 0;
+  font-size: 0.82rem;
+  opacity: 0.8;
+  line-height: 1.5;
+}
+
+/* ─── Callout System ───────────────────────────────────────────── */
+/* §29 — Consistent educational callouts */
+.ls-callout {
+  padding: 16px 18px;
+  border-radius: 12px;
+  border-left: 4px solid;
+  margin: 16px 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+.ls-callout--important {
+  background: rgba(59, 130, 246, 0.06);
+  border-color: #3b82f6;
+}
+.ls-callout--tip {
+  background: rgba(16, 185, 129, 0.06);
+  border-color: #10b981;
+}
+.ls-callout--warning {
+  background: rgba(245, 158, 11, 0.06);
+  border-color: #f59e0b;
+}
+.ls-callout--example {
+  background: rgba(139, 92, 246, 0.06);
+  border-color: #8b5cf6;
+}
+.ls-callout--remember {
+  background: rgba(236, 72, 153, 0.06);
+  border-color: #ec4899;
+}
+
+.ls-callout-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.ls-callout-icon {
+  font-size: 0.85rem;
+}
+.ls-callout-body {
+  line-height: 1.6;
+}
+
+/* ─── Media Empty States ────────────────────────────────────── */
+/* §19-§20 — Fallback for broken/missing images and videos */
+.ls-block-media-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px 16px;
+  border-radius: 10px;
+  background: var(--surface-card-alt, #f8fafc);
+  border: 1px dashed var(--border-color, #e5e7eb);
+  text-align: center;
+}
+
+/* ─── Image Block ──────────────────────────────────────────── */
+.ls-block-image {
+  margin: 0;
+}
+.ls-block-image-wrapper {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.ls-block-image-skeleton {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ls-block-image-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px 16px;
+  color: var(--text-secondary);
+}
+
+/* ─── Video Block ──────────────────────────────────────────── */
+.ls-block-video-wrapper {
+  position: relative;
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface-card-alt, #f1f5f9);
+}
+@media (max-width: 599px) {
+  .ls-block-video-wrapper {
+    border-radius: 0;
+  }
+}
+
+/* ─── Loading States ───────────────────────────────────────────── */
+/* §45 — Progressive loading: shell → context → content → blocks */
+.ls-shell-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-from, rgba(0, 0, 0, 0.06)) 25%,
+    var(--skeleton-to, rgba(0, 0, 0, 0.10)) 50%,
+    var(--skeleton-from, rgba(0, 0, 0, 0.06)) 75%
+  );
+  background-size: 200% 100%;
+  animation: ls-skeleton-loading 1.5s infinite;
+  border-radius: 8px;
+}
+.dark-mode .ls-shell-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.08) 25%,
+    rgba(255, 255, 255, 0.16) 50%,
+    rgba(255, 255, 255, 0.08) 75%
+  );
+  background-size: 200% 100%;
+}
+
+@keyframes ls-skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ─── Empty States ─────────────────────────────────────────────── */
+.ls-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--text-secondary, #6b7280);
+}
+.ls-empty-state-icon {
+  font-size: 2.2rem;
+  color: var(--color-primary, #3b82f6);
+  opacity: 0.7;
+}
+.ls-empty-state h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--text-primary, #111827);
+}
+.ls-empty-state p {
+  margin: 0;
+  max-width: 380px;
+  font-size: 0.88rem;
+}
+
+/* ─── Error State ──────────────────────────────────────────────── */
+.ls-error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 72px 20px;
+  text-align: center;
+}
+.ls-error-state-icon {
+  font-size: 2.2rem;
+  color: var(--color-warning, #f59e0b);
+}
+.ls-error-state h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--text-primary, #111827);
+}
+.ls-error-state p {
+  margin: 0;
+  max-width: 380px;
+  font-size: 0.88rem;
+  color: var(--text-secondary, #6b7280);
+}
+.ls-error-state-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+/* ─── §2 — Progress Domains ────────────────────────────────────── */
+.ls-progress-domains {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--surface-card-alt, #f8fafc);
+  border: 1px solid var(--border-color, rgba(216, 27, 96, 0.08));
+  margin: 12px 0;
+}
+.ls-progress-domain {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ls-progress-domain-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+}
+.ls-progress-domain-label {
+  flex: 1;
+  font-weight: 500;
+  color: var(--text-primary, #111827);
+}
+.ls-progress-domain-count {
+  font-size: 0.78rem;
+  color: var(--text-secondary, #6b7280);
+}
+.ls-progress-domain-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border-color, #e5e7eb);
+  overflow: hidden;
+}
+.ls-progress-domain-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (max-width: 599px) {
+  .ls-progress-domains {
+    padding: 12px;
+    gap: 8px;
+  }
+}
+
+/* ─── §38-39 — Progress Explanation ────────────────────────────── */
+.ls-progress-explanation {
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--surface-card-alt, #f8fafc);
+  border: 1px solid var(--border-color, rgba(216, 27, 96, 0.08));
+  margin: 16px 0;
+}
+.ls-progress-explanation-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin: 0 0 10px;
+  color: var(--text-primary, #111827);
+}
+.ls-progress-explanation-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ls-progress-explanation-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--text-secondary, #6b7280);
+}
+.ls-progress-explanation-item.is-done {
+  color: var(--text-primary, #111827);
+}
+.ls-progress-explanation-check {
+  flex-shrink: 0;
+  width: 18px;
+  text-align: center;
+  font-weight: 600;
+}
+.ls-progress-explanation-item.is-done .ls-progress-explanation-check {
+  color: #10b981;
+}
+.ls-progress-explanation-label {
+  flex: 1;
+}
+.ls-progress-explanation-compact {
+  font-size: 0.78rem;
+  color: var(--text-secondary, #6b7280);
+  font-weight: 500;
+}
+
+/* ─── Focus Mode Foundation ────────────────────────────────────── */
+/* §39 — Future Focus Mode: reduces navigation distractions */
+.ls-shell.is-focus .ls-shell-sidebar {
+  display: none;
+}
+.ls-shell.is-focus .ls-shell-header-actions .ls-focus-exit {
+  display: inline-flex;
+}
+
+/* ─── Safe bottom spacing for mobile ───────────────────────────── */
+.ls-shell-content-inner {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS
+   §7-§8 — Tablet should not simply shrink desktop; adapt.
+   §8 — Mobile is a primary learning environment.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ─── Large Desktop (≥1200px): full sidebar + comfortable content ─ */
+@media (min-width: 1200px) {
+  .ls-shell-sidebar {
+    width: 300px;
+  }
+  .ls-shell-content-inner {
+    padding: 0 32px;
+  }
+}
+
+/* ─── Medium Desktop (900px–1199px): narrower sidebar ──────────── */
+@media (min-width: 900px) and (max-width: 1199px) {
+  .ls-shell-sidebar {
+    width: 260px;
+  }
+}
+
+/* ─── Tablet (600px–899px): collapsible sidebar, wider content ──── */
+/* §7 — Adapt the interface, not just shrink */
+@media (min-width: 600px) and (max-width: 899px) {
+  .ls-shell-sidebar {
+    display: none;
+  }
+  .ls-shell-content-inner {
+    padding: 0 24px;
+  }
+  .ls-lesson-area-inner {
+    max-width: 720px;
+  }
+  .ls-action-area-inner {
+    max-width: 720px;
+  }
+}
+
+/* ─── Mobile (<600px): full-width, bottom drawer, touch-friendly ── */
+/* §8 — Mobile is a primary learning environment, not reduced desktop */
+@media (max-width: 599px) {
+  .ls-shell-header {
+    padding: 8px 12px;
+    min-height: 48px;
+  }
+  .ls-shell-header-back {
+    width: 32px;
+    height: 32px;
+  }
+  .ls-shell-header-title {
+    font-size: 0.85rem;
+  }
+  .ls-shell-header-subtitle {
+    font-size: 0.68rem;
+  }
+  .ls-shell-header-btn {
+    width: 32px;
+    height: 32px;
+  }
+  .ls-shell-sidebar {
+    display: none;
+  }
+  .ls-shell-content-inner {
+    padding: 0 16px;
+  }
+  .ls-lesson-area {
+    padding-bottom: 100px;
+  }
+  .ls-lesson-area-inner {
+    padding: 0 16px;
+  }
+  .ls-lesson-intro-title {
+    font-size: 1.3rem;
+  }
+  .ls-block-placement {
+    margin-bottom: 20px;
+  }
+  .ls-block-width--full {
+    max-width: calc(100vw - 32px);
+  }
+  .ls-action-area {
+    padding: 10px 16px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+  .ls-callout {
+    padding: 14px 16px;
+    font-size: 0.85rem;
+  }
+  .ls-question {
+    padding: 16px;
+  }
+  .ls-question-option {
+    padding: 10px 14px;
+    font-size: 0.88rem;
+  }
+}
+
+/* ─── Very small screens (<380px) ──────────────────────────────── */
+@media (max-width: 379px) {
+  .ls-shell-header {
+    padding: 6px 10px;
+  }
+  .ls-shell-header-title {
+    font-size: 0.8rem;
+  }
+  .ls-lesson-area-inner {
+    padding: 0 12px;
+  }
+  .ls-lesson-intro-title {
+    font-size: 1.15rem;
+  }
+}
+
+/* ─── Landscape mobile ─────────────────────────────────────────── */
+@media (max-height: 500px) and (orientation: landscape) {
+  .ls-shell-header {
+    min-height: 44px;
+    padding: 6px 12px;
+  }
+  .ls-action-area {
+    padding: 8px 16px;
+  }
+}
+
+/* ─── Reduced motion ───────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .ls-shell-progress-fill {
+    transition: none;
+  }
+  .ls-mobile-drawer {
+    transition: none;
+  }
+  .ls-mobile-drawer-overlay {
+    transition: none;
+  }
+  .ls-shell-skeleton {
+    animation: none;
+  }
+}
+
+/* ─── Print ────────────────────────────────────────────────────── */
+@media print {
+  .ls-shell-sidebar,
+  .ls-shell-header,
+  .ls-action-area,
+  .ls-mobile-drawer,
+  .ls-mobile-drawer-overlay {
+    display: none !important;
+  }
+  .ls-shell-body {
+    display: block;
+  }
+  .ls-shell-content {
+    overflow: visible;
+  }
+  .ls-lesson-area {
+    padding-bottom: 0;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   §11-§13 — SAVE STATE MACHINE + INDICATORS
+   §32 — RECOVERY BANNER
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.ls-save-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  opacity: 0.85;
+  transition: opacity 0.3s ease;
+  white-space: nowrap;
+}
+
+.ls-save-indicator--error {
+  animation: ls-save-pulse 2s infinite;
+}
+
+@keyframes ls-save-pulse {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 0.5; }
+}
+
+.ls-recovery-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--pr-size-2, 8px);
+  padding: var(--pr-size-2, 8px) var(--pr-size-3, 12px);
+  margin: 0 var(--pr-size-4, 16px) var(--pr-size-2, 8px);
+  border-radius: var(--pr-radius-md, 8px);
+  font-size: var(--pr-font-sm, 0.8rem);
+  animation: ls-recovery-fadein 0.3s var(--pr-ease-out, cubic-bezier(0, 0, 0.2, 1));
+}
+
+@keyframes ls-recovery-fadein {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   §14 — MICRO-INTERACTIONS + UI POLISH
+   Button press feedback, progress pulse, smooth content transitions
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ─── §14 — Button press feedback ───────────────────────────────── */
+.ls-btn:active:not(:disabled) {
+  transform: scale(0.97);
+  transition: transform 0.08s var(--pr-ease-out, cubic-bezier(0, 0, 0.2, 1));
+}
+.ls-btn--primary:active:not(:disabled) {
+  box-shadow: 0 1px 3px rgba(216, 27, 96, 0.2);
+}
+.ls-shell-header-back:active,
+.ls-shell-header-btn:active {
+  transform: scale(0.92);
+  transition: transform 0.08s var(--pr-ease-out, cubic-bezier(0, 0, 0.2, 1));
+}
+
+/* ─── §14 — Focus-visible: keyboard users must see focus ──────────── */
+.ls-btn:focus-visible {
+  outline: 2px solid var(--color-primary, #3b82f6);
+  outline-offset: 2px;
+}
+
+/* ─── §14 — Progress fill pulse on update ────────────────────────── */
+@keyframes ls-progress-pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+.ls-shell-progress-fill {
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ─── §14 — Smooth content fade-in on lesson load ────────────────── */
+@keyframes ls-content-fadein {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.ls-lesson-area {
+  animation: ls-content-fadein 0.35s var(--pr-ease-out, cubic-bezier(0, 0, 0.2, 1));
+}
+
+/* ─── §37 — Unlock notification toast ────────────────────────────── */
+.ls-unlock-toast {
+  display: flex;
+  align-items: center;
+  gap: var(--pr-size-3, 12px);
+  padding: var(--pr-size-3, 12px) var(--pr-size-4, 16px);
+  border-radius: var(--pr-radius-lg, 12px);
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #065f46;
+  font-size: var(--pr-font-sm, 0.8rem);
+  animation: ls-unlock-slidein 0.4s var(--pr-ease-spring, cubic-bezier(0.16, 1, 0.3, 1));
+  margin-bottom: var(--pr-size-3, 12px);
+}
+@keyframes ls-unlock-slidein {
+  from { opacity: 0; transform: translateY(-12px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ─── §16 — Module completion subtle celebration ──────────────────── */
+@keyframes ls-celebrate-pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.ls-celebrate {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: var(--pr-size-4, 16px);
+}
+.ls-celebrate-ring {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid rgba(16, 185, 129, 0.3);
+  animation: ls-celebrate-ring-pulse 2s ease-in-out infinite;
+}
+@keyframes ls-celebrate-ring-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.15); opacity: 0.1; }
+}
+.ls-celebrate-spark {
+  position: absolute;
+  color: var(--color-primary, #d81b60);
+  font-size: 0.7rem;
+  animation: ls-celebrate-spark-fly 1.2s var(--pr-ease-out, cubic-bezier(0, 0, 0.2, 1)) forwards;
+}
+.ls-celebrate-spark--1 { top: -10px; right: -5px; animation-delay: 0.1s; }
+.ls-celebrate-spark--2 { top: -5px; left: -8px; animation-delay: 0.2s; }
+.ls-celebrate-spark--3 { bottom: 5px; right: -10px; animation-delay: 0.3s; }
+.ls-celebrate-spark--4 { bottom: 0; left: -5px; animation-delay: 0.4s; }
+@keyframes ls-celebrate-spark-fly {
+  0% { transform: translate(0, 0) scale(0); opacity: 0; }
+  30% { opacity: 1; }
+  100% { transform: translate(var(--spark-x, 10px), var(--spark-y, -15px)) scale(1); opacity: 0; }
+}
+.ls-celebrate-spark--1 { --spark-x: 15px; --spark-y: -20px; }
+.ls-celebrate-spark--2 { --spark-x: -15px; --spark-y: -15px; }
+.ls-celebrate-spark--3 { --spark-x: 18px; --spark-y: -10px; }
+.ls-celebrate-spark--4 { --spark-x: -12px; --spark-y: -18px; }
+.ls-session-done-badge {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+  animation: ls-celebrate-pop 0.5s var(--pr-ease-bounce, cubic-bezier(0.34, 1.56, 0.64, 1));
+  z-index: 1;
+}
+.ls-session-streak {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pr-size-2, 8px);
+  padding: var(--pr-size-2, 8px) var(--pr-size-3, 12px);
+  border-radius: var(--pr-radius-full, 9999px);
+  background: rgba(245, 158, 11, 0.1);
+  color: #92400e;
+  font-size: var(--pr-font-sm, 0.8rem);
+  font-weight: var(--pr-weight-semibold, 600);
+  margin: var(--pr-size-3, 12px) 0;
+}
+
+/* ─── §24 — Mobile Continue button: responsive, keyboard-aware ──── */
+@media (max-width: 599px) {
+  .ls-session-footer {
+    padding-bottom: calc(var(--pr-size-4, 16px) + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* ─── §10 — Continue button busy state ───────────────────────────── */
+.ls-session-continue[aria-busy='true'] {
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+/* ─── §42 — Keyboard shortcut hints ──────────────────────────────── */
+.ls-session-kbd {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pr-size-2, 8px);
+  font-size: var(--pr-font-xs, 0.72rem);
+  color: var(--text-tertiary, #999);
+  margin-top: var(--pr-size-2, 8px);
+}
+.ls-session-kbd kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  border: 1px solid var(--border-color, rgba(216, 27, 96, 0.1));
+  border-radius: var(--pr-radius-sm, 4px);
+  background: var(--surface-card-alt, #f8fafc);
+  font-family: var(--pr-font-sans, inherit);
+  font-size: 0.68rem;
+  color: var(--text-secondary, #6b7280);
+  line-height: 1.4;
+}
+.ls-session-kbd-sep {
+  opacity: 0.4;
+}
+@media (max-width: 599px) {
+  .ls-session-kbd {
+    display: none;
+  }
+}
+
+/* ─── §43 — Accessible status announcements (visually hidden) ──── */
+.ls-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ─── §21 — Inline save status for session header ────────────────── */
+.ls-session-save {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pr-size-1, 4px);
+  font-size: var(--pr-font-2xs, 0.625rem);
+  color: var(--text-tertiary, #999);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.ls-session-save.is-visible {
+  opacity: 1;
+}
+.ls-session-save.is-saving {
+  color: var(--pr-color-blue-500, #3b82f6);
+}
+.ls-session-save.is-saved {
+  color: var(--pr-color-emerald-500, #10b981);
+}
+.ls-session-save.is-failed {
+  color: var(--pr-color-red-500, #ef4444);
+  animation: ls-save-pulse 2s infinite;
+}
+
+/* ─── §28 — Hero section polish ──────────────────────────────────── */
+.ls-hero {
+  display: flex;
+  align-items: center;
+  gap: var(--pr-size-5, 20px);
+  padding: var(--pr-size-5, 20px) var(--pr-size-5, 20px);
+}
+.ls-hero-main {
+  flex: 1;
+  min-width: 0;
+}
+.ls-hero-main h1 {
+  font-size: var(--pr-font-3xl, 1.5rem);
+  font-weight: var(--pr-weight-bold, 700);
+  line-height: var(--pr-leading-tight, 1.25);
+  margin: 0 0 var(--pr-size-3, 12px);
+  color: var(--text-primary, #111827);
+}
+.ls-continue-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pr-size-2, 8px);
+  padding: var(--pr-size-3, 12px) var(--pr-size-5, 20px);
+  border: none;
+  border-radius: var(--pr-radius-lg, 12px);
+  background: var(--color-primary, #d81b60);
+  color: var(--text-on-primary, #fff);
+  font-family: inherit;
+  font-size: var(--pr-font-md, 0.95rem);
+  font-weight: var(--pr-weight-semibold, 600);
+  cursor: pointer;
+  transition: all var(--pr-duration-fast, 0.12s) var(--pr-ease-default, cubic-bezier(0.4, 0, 0.2, 1));
+  box-shadow: 0 2px 8px rgba(216, 27, 96, 0.25);
+  min-height: var(--pr-size-11, 44px);
+}
+.ls-continue-btn:hover {
+  background: var(--btn-primary-hover-bg, #c2185b);
+  box-shadow: 0 4px 12px rgba(216, 27, 96, 0.35);
+  transform: translateY(-1px);
+}
+.ls-continue-btn:active {
+  transform: scale(0.97) translateY(0);
+  box-shadow: 0 1px 4px rgba(216, 27, 96, 0.2);
+}
+.ls-continue-btn:focus-visible {
+  outline: 2px solid var(--color-primary, #3b82f6);
+  outline-offset: 2px;
+}
+.ls-resume-hint {
+  margin: var(--pr-size-2, 8px) 0 0;
+  font-size: var(--pr-font-sm, 0.8rem);
+  color: var(--text-secondary, #6b7280);
+  display: flex;
+  align-items: center;
+  gap: var(--pr-size-2, 8px);
+}
+.ls-complete-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pr-size-2, 8px);
+  padding: var(--pr-size-2, 8px) var(--pr-size-4, 16px);
+  border-radius: var(--pr-radius-full, 9999px);
+  background: rgba(16, 185, 129, 0.08);
+  color: #065f46;
+  font-weight: var(--pr-weight-semibold, 600);
+  font-size: var(--pr-font-sm, 0.8rem);
+}
+.ls-progress-ring {
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+  position: relative;
+}
+.ls-progress-ring::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--color-primary, #d81b60) calc(var(--ls-pct, 0%) * 3.6deg),
+    var(--border-color, #e5e7eb) 0
+  );
+  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
+}
+.ls-progress-ring span {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--pr-font-sm, 0.8rem);
+  font-weight: var(--pr-weight-bold, 700);
+  color: var(--text-primary, #111827);
+}
+
+/* ─── §21 — Welcome back banner ──────────────────────────────────── */
+.ls-welcome-back {
+  display: flex;
+  align-items: center;
+  gap: var(--pr-size-3, 12px);
+  padding: var(--pr-size-3, 12px) var(--pr-size-4, 16px);
+  margin: 0 var(--pr-size-4, 16px) var(--pr-size-3, 12px);
+  border-radius: var(--pr-radius-lg, 12px);
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  font-size: var(--pr-font-sm, 0.8rem);
+  color: #166534;
+  animation: ls-content-fadein 0.4s var(--pr-ease-out, cubic-bezier(0, 0, 0.2, 1));
+}
+.ls-welcome-back-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.ls-welcome-back strong {
+  font-weight: var(--pr-weight-semibold, 600);
+}
+.ls-welcome-back-btn {
+  margin-left: auto;
+  padding: var(--pr-size-1_5, 6px) var(--pr-size-3_5, 14px);
+  background: #10b981;
+  color: #fff;
+  border: none;
+  border-radius: var(--pr-radius-md, 8px);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--pr-font-xs, 0.72rem);
+  font-weight: var(--pr-weight-semibold, 600);
+  white-space: nowrap;
+  min-height: var(--pr-size-9, 36px);
+  transition: all var(--pr-duration-fast, 0.12s) var(--pr-ease-default);
+}
+.ls-welcome-back-btn:hover {
+  background: #059669;
+}
+.ls-welcome-back-btn:active {
+  transform: scale(0.97);
+}
+.ls-welcome-back-btn:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}
+
+/* ─── §20 — Offline banner ───────────────────────────────────────── */
+.ls-offline-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--pr-size-2, 8px);
+  padding: var(--pr-size-2, 8px) var(--pr-size-4, 16px);
+  background: rgba(59, 130, 246, 0.06);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+  color: #1e40af;
+  font-size: var(--pr-font-sm, 0.8rem);
+  text-align: center;
+  justify-content: center;
+}
+
+/* ─── §14 — XP popup (Duolingo-style floating +N XP) ────────────── */
+.ls-xp-popup {
+  position: fixed;
+  top: 64px;
+  right: var(--pr-size-4, 16px);
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  gap: var(--pr-size-1, 4px);
+  padding: var(--pr-size-2, 8px) var(--pr-size-3, 12px);
+  border-radius: var(--pr-radius-full, 9999px);
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  color: #92400e;
+  font-size: var(--pr-font-sm, 0.8rem);
+  font-weight: var(--pr-weight-bold, 700);
+  animation: ls-xp-float 1.5s var(--pr-ease-out, cubic-bezier(0, 0, 0.2, 1)) forwards;
+  pointer-events: none;
+}
+@keyframes ls-xp-float {
+  0% { opacity: 0; transform: translateY(8px) scale(0.9); }
+  15% { opacity: 1; transform: translateY(0) scale(1); }
+  75% { opacity: 1; transform: translateY(-20px); }
+  100% { opacity: 0; transform: translateY(-32px); }
+}
+
+/* ─── §45 — Modal polish ─────────────────────────────────────────── */
+.ls-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--pr-size-4, 16px);
+  animation: ls-content-fadein 0.2s var(--pr-ease-out, cubic-bezier(0, 0, 0.2, 1));
+}
+.ls-modal {
+  background: var(--surface-card, #fff);
+  border-radius: var(--pr-radius-xl, 16px);
+  padding: var(--pr-size-6, 24px);
+  max-width: 440px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  animation: ls-modal-pop 0.3s var(--pr-ease-spring, cubic-bezier(0.16, 1, 0.3, 1));
+}
+@keyframes ls-modal-pop {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ─── §45 — Skill nudge (weak skills reminder) ───────────────────── */
+.ls-skill-nudge {
+  display: flex;
+  align-items: center;
+  gap: var(--pr-size-2, 8px);
+  padding: var(--pr-size-3, 12px) var(--pr-size-4, 16px);
+  margin: 0 var(--pr-size-4, 16px) var(--pr-size-3, 12px);
+  border-radius: var(--pr-radius-lg, 12px);
+  background: rgba(139, 92, 246, 0.06);
+  border: 1px solid rgba(139, 92, 246, 0.12);
+  font-size: var(--pr-font-sm, 0.8rem);
+  color: #5b21b6;
+  animation: ls-content-fadein 0.3s var(--pr-ease-out, cubic-bezier(0, 0, 0.2, 1));
+}
+.ls-skill-nudge-cta {
+  margin-left: auto;
+  padding: var(--pr-size-1, 4px) var(--pr-size-3, 12px);
+  background: var(--pr-color-violet-500, #8b5cf6);
+  color: #fff;
+  border: none;
+  border-radius: var(--pr-radius-md, 8px);
+  font-family: inherit;
+  font-size: var(--pr-font-xs, 0.72rem);
+  font-weight: var(--pr-weight-semibold, 600);
+  cursor: pointer;
+  white-space: nowrap;
+  min-height: var(--pr-size-8, 32px);
+  transition: all var(--pr-duration-fast, 0.12s) var(--pr-ease-default);
+}
+.ls-skill-nudge-cta:hover {
+  background: var(--pr-color-violet-600, #7c3aed);
+}
+.ls-skill-nudge-cta:active {
+  transform: scale(0.97);
+}
+
+/* ─── §28 — Progress summary panel ───────────────────────────────── */
+.ls-progress-summary {
+  padding: var(--pr-size-4, 16px);
+}
+.ls-progress-stats {
+  display: flex;
+  gap: var(--pr-size-5, 20px);
+  margin-top: var(--pr-size-3, 12px);
+}
+.ls-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--pr-size-1, 4px);
+}
+.ls-stat strong {
+  font-size: var(--pr-font-xl, 1.15rem);
+  font-weight: var(--pr-weight-bold, 700);
+  color: var(--color-primary, #d81b60);
+}
+.ls-stat span {
+  font-size: var(--pr-font-xs, 0.72rem);
+  color: var(--text-secondary, #6b7280);
+}
+
+/* ─── §22 — Session step transitions ─────────────────────────────── */
+.ls-session-step {
+  animation: ls-content-fadein 0.3s var(--pr-ease-out, cubic-bezier(0, 0, 0.2, 1));
+}
+.ls-session-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ─── §15 — Session done screen polish ───────────────────────────── */
+.ls-session-done {
+  text-align: center;
+  padding: var(--pr-size-6, 24px) var(--pr-size-5, 20px);
+  animation: ls-content-fadein 0.4s var(--pr-ease-out, cubic-bezier(0, 0, 0.2, 1));
+}
+.ls-session-done h3 {
+  font-size: var(--pr-font-2xl, 1.25rem);
+  font-weight: var(--pr-weight-bold, 700);
+  margin: 0 0 var(--pr-size-2, 8px);
+  color: var(--text-primary, #111827);
+}
+.ls-session-done p {
+  font-size: var(--pr-font-sm, 0.8rem);
+  color: var(--text-secondary, #6b7280);
+  margin: 0 0 var(--pr-size-4, 16px);
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.ls-session-done-actions {
+  display: flex;
+  gap: var(--pr-size-3, 12px);
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: var(--pr-size-4, 16px);
+}
+
+/* ─── §42 — Module path node polish (curriculum list) ────────────── */
+.ls-module {
+  margin-bottom: var(--pr-size-2, 8px);
+  border-radius: var(--pr-radius-lg, 12px);
+  border: 1px solid var(--border-color, rgba(216, 27, 96, 0.1));
+  background: var(--surface-card, #fff);
+  overflow: hidden;
+  transition: border-color var(--pr-duration-fast, 0.12s), box-shadow var(--pr-duration-fast, 0.12s);
+}
+.ls-module:hover {
+  border-color: var(--border-color-strong, rgba(216, 27, 96, 0.25));
+}
+.ls-module.is-current {
+  border-color: var(--color-primary, #d81b60);
+  box-shadow: 0 0 0 1px rgba(216, 27, 96, 0.1);
+}
+.ls-module.is-completed {
+  opacity: 0.8;
+}
+.ls-module.is-future {
+  opacity: 0.5;
+}
+.ls-module-head {
+  display: flex;
+  align-items: center;
+  gap: var(--pr-size-3, 12px);
+  width: 100%;
+  padding: var(--pr-size-3, 12px) var(--pr-size-4, 16px);
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  font-size: var(--pr-font-sm, 0.8rem);
+  color: var(--text-primary, #111827);
+  min-height: var(--pr-size-11, 44px);
+  transition: background var(--pr-duration-fast, 0.12s);
+}
+.ls-module-head:hover {
+  background: var(--surface-card-alt, #f8fafc);
+}
+.ls-module-head:focus-visible {
+  outline: 2px solid var(--color-primary, #3b82f6);
+  outline-offset: -2px;
+}
+.ls-module-title {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--pr-size-2, 8px);
+}
+.ls-module-now {
+  font-size: var(--pr-font-2xs, 0.625rem);
+  font-style: normal;
+  color: var(--color-primary, #d81b60);
+  font-weight: var(--pr-weight-semibold, 600);
+}
+.ls-module-dots {
+  display: flex;
+  gap: 3px;
+}
+.ls-module-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--border-color, #e5e7eb);
+  display: inline-block;
+}
+.ls-module-dot.is-done {
+  background: #10b981;
+}
+.ls-module-meta {
+  font-size: var(--pr-font-2xs, 0.625rem);
+  color: var(--text-secondary, #6b7280);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: var(--pr-size-1, 4px);
+}
+.ls-module-go {
+  color: var(--text-tertiary, #999);
+  font-size: var(--pr-font-sm, 0.8rem);
+  transition: color var(--pr-duration-fast, 0.12s);
+}
+.ls-module:hover .ls-module-go {
+  color: var(--color-primary, #d81b60);
+}
+.ls-module-status {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  flex-shrink: 0;
+  background: var(--surface-card-alt, #f1f5f9);
+  color: var(--text-secondary, #6b7280);
+}
+.ls-module.is-completed .ls-module-status {
+  background: #10b981;
+  color: #fff;
+}
+.ls-module.is-current .ls-module-status {
+  background: var(--color-primary, #3b82f6);
+  color: #fff;
+}
+.ls-module-lock-label {
+  font-style: normal;
+  font-size: var(--pr-font-2xs, 0.625rem);
+}
+.ls-module-review {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pr-size-1, 4px);
+  padding: var(--pr-size-1, 4px) var(--pr-size-3, 12px);
+  margin: 0 var(--pr-size-4, 16px) var(--pr-size-2, 8px);
+  border: 1px solid var(--border-color, rgba(216, 27, 96, 0.1));
+  border-radius: var(--pr-radius-md, 8px);
+  background: none;
+  color: var(--text-secondary, #6b7280);
+  font-family: inherit;
+  font-size: var(--pr-font-xs, 0.72rem);
+  cursor: pointer;
+  min-height: var(--pr-size-8, 32px);
+  transition: all var(--pr-duration-fast, 0.12s) var(--pr-ease-default);
+}
+.ls-module-review:hover {
+  border-color: var(--color-primary, #3b82f6);
+  color: var(--color-primary, #3b82f6);
+}
+.ls-module-review:active {
+  transform: scale(0.97);
+}
+.ls-module-review:focus-visible {
+  outline: 2px solid var(--color-primary, #3b82f6);
+  outline-offset: 2px;
+}
+
+/* ─── §31 — Interactive block required/optional indicator ─────────── */
+.ls-block-required {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pr-size-1, 4px);
+  padding: 2px var(--pr-size-2, 8px);
+  border-radius: var(--pr-radius-full, 9999px);
+  font-size: var(--pr-font-2xs, 0.625rem);
+  font-weight: var(--pr-weight-semibold, 600);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.ls-block-required--required {
+  background: rgba(216, 27, 96, 0.08);
+  color: var(--color-primary, #d81b60);
+}
+.ls-block-required--optional {
+  background: rgba(107, 114, 128, 0.08);
+  color: var(--text-secondary, #6b7280);
+}
+
+/* ─── §39 — Session navigation ───────────────────────────────────── */
+.ls-session-nav {
+  display: flex;
+  gap: var(--pr-size-3, 12px);
+  justify-content: flex-end;
+}
+.ls-session-back {
+  min-height: var(--pr-size-10, 40px);
+}
+.ls-session-continue {
+  min-height: var(--pr-size-11, 44px);
+  padding-left: var(--pr-size-5, 20px);
+  padding-right: var(--pr-size-5, 20px);
+}
+.ls-session-footer {
+  padding: var(--pr-size-4, 16px) var(--pr-size-5, 20px);
+  border-top: 1px solid var(--border-color, rgba(216, 27, 96, 0.1));
+  margin-top: var(--pr-size-4, 16px);
+}
+.ls-session-hint {
+  font-size: var(--pr-font-xs, 0.72rem);
+  color: var(--text-secondary, #6b7280);
+  margin: 0 0 var(--pr-size-2, 8px);
+  text-align: center;
+}
+
+/* ─── §30 — Session header ───────────────────────────────────────── */
+.ls-session {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.ls-session-head {
+  display: flex;
+  align-items: center;
+  gap: var(--pr-size-3, 12px);
+  padding: var(--pr-size-3, 12px) var(--pr-size-5, 20px);
+  border-bottom: 1px solid var(--border-color, rgba(216, 27, 96, 0.1));
+}
+.ls-header-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: none;
+  border-radius: var(--pr-radius-md, 8px);
+  color: var(--text-primary, #111827);
+  cursor: pointer;
+  transition: background var(--pr-duration-fast, 0.12s);
+  flex-shrink: 0;
+}
+.ls-header-btn:hover {
+  background: var(--surface-card-alt, #f1f5f9);
+}
+.ls-header-btn:focus-visible {
+  outline: 2px solid var(--color-primary, #3b82f6);
+  outline-offset: 2px;
+}
+.ls-header-btn:active {
+  transform: scale(0.92);
+}
+.ls-session-head-title {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.ls-session-head-title strong {
+  font-size: var(--pr-font-md, 0.95rem);
+  font-weight: var(--pr-weight-semibold, 600);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ls-session-head-title span {
+  font-size: var(--pr-font-xs, 0.72rem);
+  color: var(--text-secondary, #6b7280);
+}
+.ls-session-head-progress {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+.ls-session-count {
+  font-size: var(--pr-font-sm, 0.8rem);
+  font-weight: var(--pr-weight-semibold, 600);
+  color: var(--text-secondary, #6b7280);
+}
+.ls-session-check {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #10b981;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  animation: ls-celebrate-pop 0.5s var(--pr-ease-bounce, cubic-bezier(0.34, 1.56, 0.64, 1));
+}
+.ls-session-hearts {
+  display: flex;
+  gap: 2px;
+  font-size: 0.7rem;
+}
+.ls-session-hearts .is-full {
+  color: #ef4444;
+}
+.ls-session-hearts .is-lost {
+  color: var(--border-color, #e5e7eb);
+  opacity: 0.5;
+}
+.ls-session-hearts.is-empty {
+  animation: ls-save-pulse 2s infinite;
+}
+
+/* ─── §22 — Step dot path ────────────────────────────────────────── */
+.ls-session-path {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--pr-size-2, 8px);
+  padding: var(--pr-size-3, 12px) var(--pr-size-5, 20px);
+}
+.ls-session-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--border-color, #e5e7eb);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--pr-duration-fast, 0.12s) var(--pr-ease-default);
+}
+.ls-session-dot.is-done {
+  background: #10b981;
+  width: 12px;
+  height: 12px;
+}
+.ls-session-dot.is-done i {
+  color: #fff;
+  font-size: 0.4rem;
+}
+.ls-session-dot.is-active {
+  background: var(--color-primary, #3b82f6);
+  width: 12px;
+  height: 12px;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+.ls-session-dot.is-past {
+  opacity: 0.6;
+}
+
+/* ─── §33 — Assessment head ──────────────────────────────────────── */
+.ls-session-assessment-head {
+  display: flex;
+  align-items: center;
+  gap: var(--pr-size-3, 12px);
+  padding: var(--pr-size-4, 16px);
+  margin: var(--pr-size-4, 16px) var(--pr-size-5, 20px);
+  border-radius: var(--pr-radius-lg, 12px);
+  background: rgba(59, 130, 246, 0.06);
+  border: 1px solid rgba(59, 130, 246, 0.1);
+}
+.ls-session-assessment-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--pr-radius-md, 8px);
+  background: var(--color-primary, #3b82f6);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.ls-session-assessment-head strong {
+  display: block;
+  font-size: var(--pr-font-md, 0.95rem);
+  font-weight: var(--pr-weight-semibold, 600);
+  color: var(--text-primary, #111827);
+}
+.ls-session-assessment-head span {
+  font-size: var(--pr-font-sm, 0.8rem);
+  color: var(--text-secondary, #6b7280);
+}
+
+/* ─── §22 — Path note (learner private notes) ────────────────────── */
+.ls-path-note {
+  padding: 0 var(--pr-size-4, 16px) var(--pr-size-2, 8px);
+}
+.ls-path-note-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pr-size-1, 4px);
+  padding: var(--pr-size-1, 4px) var(--pr-size-2, 8px);
+  border: none;
+  background: none;
+  color: var(--text-tertiary, #999);
+  font-family: inherit;
+  font-size: var(--pr-font-xs, 0.72rem);
+  cursor: pointer;
+  border-radius: var(--pr-radius-sm, 4px);
+  transition: color var(--pr-duration-fast, 0.12s), background var(--pr-duration-fast, 0.12s);
+}
+.ls-path-note-toggle:hover {
+  color: var(--text-secondary, #6b7280);
+  background: var(--surface-card-alt, #f8fafc);
+}
+.ls-path-note-toggle:focus-visible {
+  outline: 2px solid var(--color-primary, #3b82f6);
+  outline-offset: 2px;
+}
+.ls-path-note-has {
+  color: var(--color-primary, #d81b60);
+  font-style: normal;
+}
+.ls-note {
+  margin-top: var(--pr-size-2, 8px);
+  padding: var(--pr-size-3, 12px);
+  border-radius: var(--pr-radius-md, 8px);
+  background: var(--surface-card-alt, #f8fafc);
+  border: 1px solid var(--border-color, rgba(216, 27, 96, 0.08));
+  animation: ls-content-fadein 0.2s var(--pr-ease-out, cubic-bezier(0, 0, 0.2, 1));
+}
+.ls-note-head {
+  display: flex;
+  align-items: center;
+  gap: var(--pr-size-2, 8px);
+  font-size: var(--pr-font-xs, 0.72rem);
+  color: var(--text-secondary, #6b7280);
+  margin-bottom: var(--pr-size-2, 8px);
+}
+.ls-note-head em {
+  font-style: italic;
+  opacity: 0.6;
+  font-size: var(--pr-font-2xs, 0.625rem);
+}
+.ls-textarea {
+  width: 100%;
+  padding: var(--pr-size-3, 12px);
+  border: 1px solid var(--border-color, rgba(216, 27, 96, 0.1));
+  border-radius: var(--pr-radius-md, 8px);
+  background: var(--surface-card, #fff);
+  color: var(--text-primary, #111827);
+  font-family: inherit;
+  font-size: var(--pr-font-sm, 0.8rem);
+  line-height: var(--pr-leading-relaxed, 1.6);
+  resize: vertical;
+  transition: border-color var(--pr-duration-fast, 0.12s), box-shadow var(--pr-duration-fast, 0.12s);
+  min-height: 44px;
+}
+.ls-textarea:focus {
+  outline: none;
+  border-color: var(--color-primary, #3b82f6);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+.ls-note-actions {
+  display: flex;
+  gap: var(--pr-size-2, 8px);
+  margin-top: var(--pr-size-2, 8px);
+}
+.ls-note-status {
+  font-size: var(--pr-font-xs, 0.72rem);
+  margin-top: var(--pr-size-2, 8px);
+}
+.ls-note-status.is-saved {
+  color: #10b981;
+}
+.ls-note-status.is-error {
+  color: var(--pr-color-red-500, #ef4444);
+}
+
+.ls-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--pr-size-2, 8px);
+  padding: var(--pr-size-3, 12px) var(--pr-size-5, 20px);
+  border: 1px solid var(--border-color, rgba(216, 27, 96, 0.1));
+  border-radius: var(--pr-radius-md, 8px);
+  background: var(--surface-card, #fff);
+  color: var(--text-primary, #111827);
+  font-family: inherit;
+  font-size: var(--pr-font-sm, 0.8rem);
+  font-weight: var(--pr-weight-medium, 500);
+  cursor: pointer;
+  transition: all var(--pr-duration-fast, 0.12s) var(--pr-ease-default);
+  min-height: var(--pr-size-10, 40px);
+}
+.ls-btn:hover {
+  background: var(--surface-card-alt, #f1f5f9);
+}
+.ls-btn--primary {
+  background: var(--color-primary, #d81b60);
+  color: var(--text-on-primary, #fff);
+  border-color: var(--color-primary, #d81b60);
+  box-shadow: 0 2px 6px rgba(216, 27, 96, 0.2);
+}
+.ls-btn--primary:hover {
+  background: var(--btn-primary-hover-bg, #c2185b);
+  border-color: var(--btn-primary-hover-bg, #c2185b);
+  box-shadow: 0 4px 10px rgba(216, 27, 96, 0.3);
+}
+.ls-btn--small {
+  padding: var(--pr-size-1_5, 6px) var(--pr-size-3, 12px);
+  font-size: var(--pr-font-xs, 0.72rem);
+  min-height: var(--pr-size-8, 32px);
+}
+.ls-btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--text-secondary, #6b7280);
+}
+.ls-btn--ghost:hover {
+  color: var(--pr-color-red-500, #ef4444);
+  background: var(--pr-color-red-50, #fef2f2);
+}
+.ls-btn:disabled {
+  opacity: var(--opacity-disabled, 0.5);
+  cursor: not-allowed;
+}
+
+/* ─── §45 — Panel styles ─────────────────────────────────────────── */
+.ls-panel {
+  padding: var(--pr-size-4, 16px);
+  margin: 0 var(--pr-size-4, 16px) var(--pr-size-3, 12px);
+  border-radius: var(--pr-radius-lg, 12px);
+  border: 1px solid var(--border-color, rgba(216, 27, 96, 0.08));
+  background: var(--surface-card, #fff);
+}
+.ls-panel-title {
+  display: flex;
+  align-items: center;
+  gap: var(--pr-size-2, 8px);
+  font-size: var(--pr-font-md, 0.95rem);
+  font-weight: var(--pr-weight-semibold, 600);
+  color: var(--text-primary, #111827);
+  margin: 0 0 var(--pr-size-3, 12px);
+}
+
+/* ─── §22 — Loading label ────────────────────────────────────────── */
+.ls-loading-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--pr-size-2, 8px);
+  padding: var(--pr-size-4, 16px);
+  font-size: var(--pr-font-sm, 0.8rem);
+  color: var(--text-secondary, #6b7280);
+}
+
+/* ─── §35 — Empty state ──────────────────────────────────────────── */
+.ls-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--pr-size-3, 12px);
+  padding: var(--pr-size-10, 40px) var(--pr-size-5, 20px);
+  text-align: center;
+}
+.ls-state i {
+  font-size: 2rem;
+  opacity: 0.5;
+}
+.ls-state h3 {
+  margin: 0;
+  font-size: var(--pr-font-lg, 1.05rem);
+  font-weight: var(--pr-weight-semibold, 600);
+  color: var(--text-primary, #111827);
+}
+.ls-state p {
+  margin: 0;
+  font-size: var(--pr-font-sm, 0.8rem);
+  color: var(--text-secondary, #6b7280);
+  max-width: 360px;
+}
+.ls-state-actions {
+  display: flex;
+  gap: var(--pr-size-3, 12px);
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: var(--pr-size-2, 8px);
+}
+.ls-state--small {
+  padding: var(--pr-size-6, 24px) var(--pr-size-4, 16px);
+}
+.ls-state--small i {
+  font-size: 1.2rem;
+}
+
+/* ─── §22 — Page skeleton ────────────────────────────────────────── */
+.ls-skel-header {
+  display: flex;
+  align-items: center;
+  gap: var(--pr-size-3, 12px);
+  padding: var(--pr-size-3, 12px) var(--pr-size-4, 16px);
+  border-bottom: 1px solid var(--border-color, rgba(216, 27, 96, 0.1));
+}
+.ls-skel-header .ls-skeleton {
+  height: 16px;
+  border-radius: var(--pr-radius-sm, 4px);
+}
+.ls-skel-hero {
+  display: flex;
+  align-items: center;
+  gap: var(--pr-size-5, 20px);
+  padding: var(--pr-size-5, 20px) var(--pr-size-4, 16px);
+}
+.ls-skel-hero-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pr-size-3, 12px);
+}
+.ls-skel-hero-main .ls-skeleton {
+  height: 14px;
+  border-radius: var(--pr-radius-sm, 4px);
+}
+.ls-skel-hero-main .ls-skeleton:first-child {
+  height: 24px;
+  width: 60%;
+}
+.ls-skel-ring {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+}
+.ls-skel-panel {
+  padding: var(--pr-size-4, 16px) var(--pr-size-4, 16px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--pr-size-3, 12px);
+  margin: 0 var(--pr-size-4, 16px) var(--pr-size-3, 12px);
+  border-radius: var(--pr-radius-lg, 12px);
+  border: 1px solid var(--border-color, rgba(216, 27, 96, 0.08));
+  background: var(--surface-card, #fff);
+}
+.ls-skel-panel .ls-skeleton {
+  height: 14px;
+  border-radius: var(--pr-radius-sm, 4px);
+}
+.ls-skel-panel .ls-skeleton:first-child {
+  width: 40%;
+  height: 16px;
+}
+.ls-skel-modules {
+  padding: 0 var(--pr-size-4, 16px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--pr-size-2, 8px);
+}
+.ls-skel-module {
+  padding: var(--pr-size-3, 12px) var(--pr-size-4, 16px);
+  border-radius: var(--pr-radius-lg, 12px);
+  border: 1px solid var(--border-color, rgba(216, 27, 96, 0.08));
+  display: flex;
+  align-items: center;
+  gap: var(--pr-size-3, 12px);
+}
+.ls-skel-module .ls-skeleton {
+  height: 14px;
+  border-radius: var(--pr-radius-sm, 4px);
+}
+.ls-skel-module .ls-skeleton:first-child {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.ls-skel-module .ls-skeleton:last-child {
+  width: 30%;
+  flex-shrink: 0;
+}
+
+/* ─── §42 — Sidebar module count ─────────────────────────────────── */
+.ls-shell-sidebar-module-count {
+  font-size: var(--ls-type-2xs, 0.68rem);
+  color: var(--text-secondary, #6b7280);
+  flex-shrink: 0;
+}
+.ls-mobile-drawer-module-count {
+  font-size: var(--ls-type-xs, 0.78rem);
+  color: var(--text-secondary, #6b7280);
+}
+.ls-shell-sidebar-module-num {
+  font-size: 0.6rem;
+}
+.ls-mobile-drawer-progress {
+  padding: var(--ls-space-2, 8px) var(--ls-space-5, 20px) var(--ls-space-1, 4px);
+  font-size: var(--ls-type-sm, 0.88rem);
+  color: var(--text-secondary, #6b7280);
+}
+
+/* ─── §19 — Block error type label ──────────────────────────────── */
+.ls-block-error-type {
+  font-size: var(--ls-type-xs, 0.78rem);
+  opacity: 0.6;
+  margin-bottom: var(--ls-space-1, 4px);
+}
+
+/* ─── §12-§13 — Skeleton loading variants ──────────────────────── */
+.ls-skel-header {
+  border-bottom: 1px solid var(--border-color, rgba(216, 27, 96, 0.1));
+}
+.ls-skel-back {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--ls-radius-md, 10px);
+  flex-shrink: 0;
+}
+.ls-skel-header-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ls-skel-title {
+  width: 55%;
+  height: 16px;
+}
+.ls-skel-subtitle {
+  width: 35%;
+  height: 10px;
+}
+.ls-skel-sidebar {
+  padding: var(--ls-space-4, 16px);
+}
+.ls-skel-sidebar-title {
+  width: 60%;
+  height: 14px;
+  margin-bottom: 12px;
+}
+.ls-skel-sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-color, rgba(216, 27, 96, 0.05));
+}
+.ls-skel-sidebar-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.ls-skel-sidebar-text {
+  flex: 1;
+  height: 13px;
+}
+.ls-skel-content {
+  padding: var(--ls-space-6, 24px) var(--ls-space-8, 32px);
+}
+.ls-skel-content-heading {
+  width: 40%;
+  height: 24px;
+  margin-bottom: 12px;
+}
+.ls-skel-content-line {
+  width: 70%;
+  height: 14px;
+  margin-bottom: 8px;
+}
+.ls-skel-content-line--short {
+  width: 55%;
+  height: 14px;
+  margin-bottom: 24px;
+}
+.ls-skel-content-line--long {
+  width: 85%;
+  height: 14px;
+  margin-bottom: 8px;
+}
+.ls-skel-content-line--med {
+  width: 65%;
+  height: 14px;
+}
+.ls-skel-content-block {
+  width: 100%;
+  height: 120px;
+  border-radius: var(--ls-radius-lg, 12px);
+  margin-bottom: 16px;
+}
+
+/* ─── §36 — Session crash ────────────────────────────────────────── */
+.ls-session-crash {
+  padding: var(--pr-size-6, 24px);
+  text-align: center;
+}
+
+/* ─── §14 — Dark mode overrides for new micro-interaction classes ── */
+.dark-mode .ls-unlock-toast {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.25);
+  color: #6ee7b7;
+}
+.dark-mode .ls-welcome-back {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
+}
+.dark-mode .ls-offline-banner {
+  background: rgba(59, 130, 246, 0.08);
+  border-bottom-color: rgba(59, 130, 246, 0.15);
+  color: #93c5fd;
+}
+.dark-mode .ls-xp-popup {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #fcd34d;
+}
+.dark-mode .ls-skill-nudge {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.2);
+  color: #c4b5fd;
+}
+.dark-mode .ls-modal {
+  background: var(--surface-card, #1a1f2e);
+}
+.dark-mode .ls-modal-backdrop {
+  background: rgba(0, 0, 0, 0.7);
+}
+.dark-mode .ls-module {
+  background: var(--surface-card, #1a1f2e);
+}
+.dark-mode .ls-module:hover {
+  border-color: var(--border-color-strong, rgba(255, 255, 255, 0.1));
+}
+.dark-mode .ls-note {
+  background: rgba(255, 255, 255, 0.04);
+}
+.dark-mode .ls-textarea {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary, #e5e7eb);
+}
+.dark-mode .ls-textarea:focus {
+  border-color: var(--color-primary, #3b82f6);
+}
+.dark-mode .ls-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary, #e5e7eb);
+}
+.dark-mode .ls-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.dark-mode .ls-panel {
+  background: var(--surface-card, #1a1f2e);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+.dark-mode .ls-skel-panel {
+  background: var(--surface-card, #1a1f2e);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+.dark-mode .ls-skel-module {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+.dark-mode .ls-session-head {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+.dark-mode .ls-session-footer {
+  border-top-color: rgba(255, 255, 255, 0.06);
+}
+.dark-mode .ls-session-dot {
+  background: rgba(255, 255, 255, 0.1);
+}
+.dark-mode .ls-session-kbd kbd {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary, #9ca3af);
+}
+.dark-mode .ls-session-assessment-head {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.15);
+}
+.dark-mode .ls-path-note-toggle:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+.dark-mode .ls-module-head:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+.dark-mode .ls-session-back:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+.dark-mode .ls-recovery-banner {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+.dark-mode .ls-module-review {
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary, #9ca3af);
+}
+.dark-mode .ls-module-review:hover {
+  border-color: var(--color-primary, #3b82f6);
+  color: var(--color-primary, #3b82f6);
+}
+
+/* ─── §28 — Crash state polish ───────────────────────────────────── */
+.ls-crash-icon {
+  font-size: 2rem;
+  color: var(--color-warning, #f59e0b);
+}
+.ls-crash-title {
+  margin: 1rem 0 0.5rem;
+}
+.ls-crash-desc {
+  color: var(--text-secondary, #64748b);
+}
+.ls-crash-actions {
+  margin-top: 1rem;
+}
+
+/* ─── §42 — Sidebar footer stats ─────────────────────────────────── */
+.ls-sidebar-footer {
+  font-size: var(--pr-font-xs, 0.72rem);
+  color: var(--text-secondary, #6b7280);
+}
+.ls-sidebar-footer-row {
+  display: flex;
+  justify-content: space-between;
+}
+.ls-sidebar-footer-row + .ls-sidebar-footer-row {
+  padding-top: var(--pr-size-1, 4px);
+}
+
+/* ─── §42 — Nav label (inline status during transitions) ──────────── */
+.ls-nav-label {
+  font-size: var(--pr-font-sm, 0.8rem);
+  color: var(--text-secondary, #6b7280);
+}
+
+/* ─── §10 — Optional progress line ────────────────────────────────── */
+.ls-progress-optional {
+  margin-top: var(--pr-size-2, 8px);
+  font-size: var(--pr-font-xs, 0.72rem);
+  color: var(--text-secondary, #6b7280);
+}
+
+/* ─── §28 — Workspace toggle button reset ─────────────────────────── */
+.ls-workspace-toggle {
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+}
+.ls-workspace-arrow {
+  float: right;
+  font-size: var(--pr-font-2xs, 0.625rem);
+  color: var(--text-tertiary, #999);
+}
+
+/* ─── §28 — Certificate action buttons ────────────────────────────── */
+.ls-cert-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+/* ─── §28 — Social share row ──────────────────────────────────────── */
+.ls-share-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.ls-share-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary, #6b7280);
+}
+.ls-share-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--pr-radius-md, 8px);
+  color: #fff;
+  font-size: 0.85rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: opacity var(--pr-duration-fast, 0.12s);
+}
+.ls-share-btn:hover {
+  opacity: 0.85;
+}
+.ls-share-btn--fb { background: #1877f2; }
+.ls-share-btn--x { background: #000; }
+.ls-share-btn--li { background: #0a66c2; }
+.ls-share-btn--wa { background: #25d366; }
+.ls-share-btn--native { background: var(--color-primary, #3b82f6); }
+
+/* ─── §14 — No-activities badge ────────────────────────────────────── */
+.ls-complete-badge--empty {
+  background: var(--surface-card, #f1f5f9);
+  color: var(--text-secondary, #64748b);
+}
+
+/* ─── §14 — Reduced motion: kill all non-essential animations ──── */
+@media (prefers-reduced-motion: reduce) {
+  .ls-btn:active:not(:disabled),
+  .ls-shell-header-back:active,
+  .ls-shell-header-btn:active,
+  .ls-header-btn:active {
+    transform: none;
+  }
+  .ls-lesson-area,
+  .ls-content-fadein,
+  .ls-unlock-toast,
+  .ls-welcome-back,
+  .ls-skill-nudge,
+  .ls-session-step,
+  .ls-session-done,
+  .ls-note,
+  .ls-xp-popup {
+    animation: none;
+  }
+  .ls-celebrate-spark,
+  .ls-celebrate-ring,
+  .ls-celebrate-spark--1,
+  .ls-celebrate-spark--2,
+  .ls-celebrate-spark--3,
+  .ls-celebrate-spark--4 {
+    animation: none;
+  }
+  .ls-session-done-badge {
+    animation: none;
+  }
+  .ls-session-check {
+    animation: none;
+  }
+  .ls-save-indicator--error {
+    animation: none;
+  }
+  .ls-modal {
+    animation: none;
+  }
+  .ls-shell-progress-fill {
+    transition: none;
+  }
+  .ls-continue-btn {
+    transition: none;
+  }
+  .ls-continue-btn:hover {
+    transform: none;
+  }
+  .ls-module-head {
+    transition: none;
+  }
+  .ls-session-dot {
+    transition: none;
+  }
+}
+
+/* ─── §36 — Mobile session improvements ────────────────────────── */
+@media (max-width: 599px) {
+  .ls-hero {
+    padding: var(--pr-size-4, 16px);
+    gap: var(--pr-size-3, 12px);
+  }
+  .ls-hero-main h1 {
+    font-size: var(--pr-font-2xl, 1.25rem);
+  }
+  .ls-progress-ring {
+    width: 56px;
+    height: 56px;
+  }
+  .ls-session-head {
+    padding: var(--pr-size-2, 8px) var(--pr-size-3, 12px);
+    min-height: var(--pr-size-11, 44px);
+  }
+  .ls-session-path {
+    gap: var(--pr-size-1_5, 6px);
+    padding: var(--pr-size-2, 8px) var(--pr-size-3, 12px);
+  }
+  .ls-session-dot {
+    width: 8px;
+    height: 8px;
+  }
+  .ls-session-dot.is-done,
+  .ls-session-dot.is-active {
+    width: 10px;
+    height: 10px;
+  }
+  .ls-progress-stats {
+    gap: var(--pr-size-3, 12px);
+  }
+  .ls-panel {
+    margin: 0 var(--pr-size-3, 12px) var(--pr-size-3, 12px);
+    padding: var(--pr-size-3, 12px);
+  }
+  .ls-module-head {
+    padding: var(--pr-size-3, 12px);
+    min-height: var(--pr-size-12, 48px);
+  }
+  .ls-xp-popup {
+    top: 56px;
+    right: var(--pr-size-3, 12px);
+    font-size: var(--pr-font-xs, 0.72rem);
+  }
+}
+
+/* ─── §36 — Very small screens ─────────────────────────────────── */
+@media (max-width: 379px) {
+  .ls-hero-main h1 {
+    font-size: var(--pr-font-xl, 1.15rem);
+  }
+  .ls-continue-btn {
+    font-size: var(--pr-font-sm, 0.8rem);
+    padding: var(--pr-size-2, 8px) var(--pr-size-4, 16px);
+  }
+}
+
+/* ─── §36 — Landscape mobile ─────────────────────────────────────── */
+@media (max-height: 500px) and (orientation: landscape) {
+  .ls-session-head {
+    min-height: var(--pr-size-9, 36px);
+    padding: var(--pr-size-1_5, 6px) var(--pr-size-3, 12px);
+  }
+  .ls-session-path {
+    padding: var(--pr-size-1, 4px) var(--pr-size-3, 12px);
+  }
+  .ls-session-footer {
+    padding: var(--pr-size-2, 8px) var(--pr-size-4, 16px);
+  }
+  .ls-celebrate {
+    margin-bottom: var(--pr-size-2, 8px);
+  }
+  .ls-celebrate-ring,
+  .ls-session-done-badge {
+    width: 48px;
+    height: 48px;
+    font-size: 1rem;
+  }
+}
+
+/* ─── §36 — Tablet ───────────────────────────────────────────────── */
+@media (min-width: 600px) and (max-width: 899px) {
+  .ls-hero-main h1 {
+    font-size: var(--pr-font-4xl, 1.75rem);
+  }
+  .ls-session-footer {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* ─── §36 — Large desktop ────────────────────────────────────────── */
+@media (min-width: 1200px) {
+  .ls-hero {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .ls-progress-summary {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* ─── §36 — Dark mode for new classes ────────────────────────────── */
+.dark-mode .ls-crash-desc {
+  color: var(--text-secondary, #9ca3af);
+}
+.dark-mode .ls-sidebar-footer {
+  color: var(--text-secondary, #9ca3af);
+}
+.dark-mode .ls-nav-label {
+  color: var(--text-secondary, #9ca3af);
+}
+.dark-mode .ls-progress-optional {
+  color: var(--text-secondary, #9ca3af);
+}
+.dark-mode .ls-workspace-arrow {
+  color: var(--text-tertiary, #6b7280);
+}
+.dark-mode .ls-complete-badge--empty {
+  background: var(--surface-card, #1a1f2e);
+  color: var(--text-secondary, #9ca3af);
+}
+.dark-mode .ls-breadcrumb {
+  background: var(--surface-card, #1a1f2e);
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+.dark-mode .ls-breadcrumb-item {
+  color: var(--text-secondary, #9ca3af);
+}
+.dark-mode .ls-breadcrumb-item.is-current {
+  color: var(--text-primary, #e5e7eb);
+}
+.dark-mode .ls-breadcrumb-lesson {
+  color: var(--color-primary, #60a5fa);
+}
+.dark-mode .ls-shell-sidebar-footer {
+  color: var(--text-secondary, #9ca3af);
+}
+.dark-mode .ls-reading blockquote {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-secondary, #9ca3af);
+}
+.dark-mode .ls-reading code {
+  background: rgba(255, 255, 255, 0.06);
+}
+.dark-mode .ls-divider {
+  background: rgba(255, 255, 255, 0.06);
+}
+.dark-mode .ls-offline {
+  background: rgba(59, 130, 246, 0.08);
+  border-bottom-color: rgba(59, 130, 246, 0.15);
+  color: #93c5fd;
+}
+.dark-mode .ls-continue-btn--secondary {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary, #e5e7eb);
+}
+.dark-mode .ls-continue-btn--secondary:hover:not([disabled]) {
+  background: rgba(255, 255, 255, 0.08);
+}
+.dark-mode .ls-question-feedback.is-correct {
+  background: rgba(16, 185, 129, 0.08);
+  color: #6ee7b7;
+  border-color: rgba(16, 185, 129, 0.2);
+}
+.dark-mode .ls-question-feedback.is-incorrect {
+  background: rgba(239, 68, 68, 0.08);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.2);
+}
+.dark-mode .ls-notifications {
+  /* Notifications use solid bg, no dark override needed */
+}
+.dark-mode .ls-skel-header {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+/* ─── §15 — Reduced motion: new classes ──────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .ls-continue-btn:hover:not([disabled]) {
+    transform: none;
+  }
+  .ls-continue-btn:active:not([disabled]) {
+    transform: none;
+  }
+  .ls-completion {
+    animation: none;
+  }
+  .ls-completion-icon {
+    animation: none;
+  }
+  .ls-completion-icon--course::after {
+    animation: none;
+  }
+  .ls-continue-btn .ls-btn-spinner {
+    animation-duration: 2s;
+  }
+  .ls-unlock-toast {
+    animation: none;
+  }
+  .ls-notification {
+    animation: none;
+  }
+  .ls-confirm-backdrop {
+    animation: none;
+  }
+  .ls-confirm-dialog {
+    animation: none;
+  }
+}

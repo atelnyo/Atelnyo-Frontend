@@ -1,0 +1,119 @@
+{
+  "supportedLanguages": ["ht", "en", "es", "fr"],
+  "defaultMarket": "HT",
+  "defaultLanguage": "ht",
+  "languageLabels": {
+    "ht": { "label": "Kreyòl", "native": "Kreyòl", "flag": "🇭🇹" },
+    "en": { "label": "English", "native": "English", "flag": "🇬🇧" },
+    "es": { "label": "Español", "native": "Español", "flag": "🇪🇸" },
+    "fr": { "label": "Français", "native": "Français", "flag": "🇫🇷" }
+  },
+  "marketLabels": {
+    "HT": { "name": "Ayiti", "flag": "🇭🇹" },
+    "DO": { "name": "República Dominicana", "flag": "🇩🇴" },
+    "CU": { "name": "Cuba", "flag": "🇨🇺" },
+    "CA": { "name": "Canada", "flag": "🇨🇦" },
+    "US": { "name": "United States", "flag": "🇺🇸" },
+    "FR": { "name": "France", "flag": "🇫🇷" },
+    "BS": { "name": "Bahamas", "flag": "🇧🇸" },
+    "TC": { "name": "Turks & Caicos", "flag": "🇹🇨" },
+    "GP": { "name": "Guadeloupe", "flag": "🇬🇵" },
+    "MQ": { "name": "Martinique", "flag": "🇲🇶" },
+    "CH": { "name": "Switzerland", "flag": "🇨🇭" },
+    "BE": { "name": "Belgium", "flag": "🇧🇪" },
+    "BR": { "name": "Brazil", "flag": "🇧🇷" }
+  },
+  "markets": {
+    "HT": {
+      "defaultLanguage": "ht",
+      "supportedLanguages": ["ht", "fr"],
+      "currency": "USD",
+      "timezone": "America/Port-au-Prince",
+      "marketEnabled": true
+    },
+    "DO": {
+      "defaultLanguage": "es",
+      "supportedLanguages": ["es", "ht", "fr"],
+      "currency": "DOP",
+      "timezone": "America/Santo_Domingo",
+      "marketEnabled": true
+    },
+    "CU": {
+      "defaultLanguage": "es",
+      "supportedLanguages": ["es", "ht", "fr"],
+      "currency": "CUP",
+      "timezone": "America/Havana",
+      "marketEnabled": true
+    },
+    "CA": {
+      "defaultLanguage": "en",
+      "supportedLanguages": ["en", "fr", "ht"],
+      "currency": "CAD",
+      "timezone": "America/Toronto",
+      "marketEnabled": true
+    },
+    "US": {
+      "defaultLanguage": "en",
+      "supportedLanguages": ["en", "ht", "fr", "es"],
+      "currency": "USD",
+      "timezone": "America/New_York",
+      "marketEnabled": true
+    },
+    "FR": {
+      "defaultLanguage": "fr",
+      "supportedLanguages": ["fr", "ht", "en"],
+      "currency": "EUR",
+      "timezone": "Europe/Paris",
+      "marketEnabled": true
+    },
+    "BS": {
+      "defaultLanguage": "en",
+      "supportedLanguages": ["en", "ht"],
+      "currency": "BSD",
+      "timezone": "America/Nassau",
+      "marketEnabled": true
+    },
+    "TC": {
+      "defaultLanguage": "en",
+      "supportedLanguages": ["en", "ht", "fr"],
+      "currency": "USD",
+      "timezone": "America/Grand_Turk",
+      "marketEnabled": true
+    },
+    "GP": {
+      "defaultLanguage": "fr",
+      "supportedLanguages": ["fr", "ht"],
+      "currency": "EUR",
+      "timezone": "America/Guadeloupe",
+      "marketEnabled": true
+    },
+    "MQ": {
+      "defaultLanguage": "fr",
+      "supportedLanguages": ["fr", "ht"],
+      "currency": "EUR",
+      "timezone": "America/Martinique",
+      "marketEnabled": true
+    },
+    "CH": {
+      "defaultLanguage": "fr",
+      "supportedLanguages": ["fr", "ht", "en"],
+      "currency": "CHF",
+      "timezone": "Europe/Zurich",
+      "marketEnabled": true
+    },
+    "BE": {
+      "defaultLanguage": "fr",
+      "supportedLanguages": ["fr", "ht", "en"],
+      "currency": "EUR",
+      "timezone": "Europe/Brussels",
+      "marketEnabled": true
+    },
+    "BR": {
+      "defaultLanguage": "ht",
+      "supportedLanguages": ["ht", "fr", "en"],
+      "currency": "BRL",
+      "timezone": "America/Manaus",
+      "marketEnabled": true
+    }
+  }
+}

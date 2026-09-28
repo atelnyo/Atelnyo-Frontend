@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  public/sitemap.xml — PERMANENT REDIRECT FILE (not a URL list!)
+
+  WHY THIS FILE IS EMPTY OF URLs:
+  This file used to hand-curate 23 URLs. It drifted out of sync with
+  reality twice: it advertised /legal/privacy + /legal/terms (the DB
+  slugs are privacy-policy + terms-of-service → every crawler hit a
+  soft-404, GSC "Introuvable (404)") and it omitted the /help/<topic>
+  pages entirely. Any hand-maintained URL list WILL drift again.
+
+  The single source of truth is now the backend's dynamic sitemap
+  (backend/explore/views/sitemap_view.py), which reads real routes +
+  DB slugs: https://api.atelnyo.site/sitemap.xml
+
+  wrangler.toml sets run_worker_first = ["/sitemap.xml"], so requests
+  to https://atelnyo.site/sitemap.xml hit the worker's proxy branch
+  and are served from the backend — this static file is only reached
+  if that config is removed, and it then politely points crawlers at
+  the real sitemap instead of serving a stale URL list.
+
+  This is a valid sitemap-index (sitemaps.org protocol): a sitemap
+  index file may also be submitted directly as a sitemap.
+-->
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>https://api.atelnyo.site/sitemap.xml</loc>
+  </sitemap>
+</sitemapindex>

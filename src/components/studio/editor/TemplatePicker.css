@@ -1,0 +1,30 @@
+/* TemplatePicker.css */
+
+.template-picker { padding: 24px; text-align: center; }
+.template-picker h3 { font-size: 24px; margin: 0 0 8px; }
+.tp-subtitle { color: #666; margin: 0 0 24px; font-size: 15px; }
+.tp-loading { padding: 40px; color: #888; }
+
+.tp-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px; max-width: 900px; margin: 0 auto;
+}
+.tp-card {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 24px 16px; border: 2px solid #e0e0e0; border-radius: 12px;
+  background: #fff; cursor: pointer; transition: all 0.2s; text-align: center;
+}
+.tp-card:hover {
+  border-color: #4caf50; background: #f8fff8; transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
+}
+.tp-icon { font-size: 36px; margin-bottom: 8px; }
+.tp-name { font-size: 16px; margin: 0 0 6px; font-weight: 700; color: #333; }
+.tp-desc { font-size: 13px; color: #666; margin: 0 0 12px; line-height: 1.4; }
+.tp-meta { display: flex; gap: 8px; font-size: 12px; color: #888; }
+.tp-diff {
+  padding: 2px 8px; border-radius: 10px; font-weight: 600; text-transform: capitalize;
+}
+.tp-diff-beginner { background: #e8f5e9; color: #2e7d32; }
+.tp-diff-intermediate { background: #fff3e0; color: #e65100; }
+.tp-diff-advanced { background: #fce4ec; color: #c62828; }

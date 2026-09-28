@@ -1,0 +1,361 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   checkout.css — CheckoutModal (PayPal PRIMARY / Stripe SECONDARY)
+   Built on the shared design tokens (tokens.css) + wallet/modal patterns.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.checkout-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000; /* above toast tier (9999) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 8, 20, 0.62);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  padding: 16px;
+  animation: checkout-fade 0.18s ease-out;
+}
+
+.checkout-modal {
+  width: 100%;
+  max-width: 440px;
+  max-height: 92vh;
+  overflow-y: auto;
+  background: var(--surface, #ffffff);
+  color: var(--text-primary, #101828);
+  border-radius: 18px;
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.08));
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+  padding: 22px;
+  position: relative;
+  animation: checkout-pop 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+.dark-mode .checkout-modal,
+[data-theme='dark'] .checkout-modal {
+  background: var(--surface, #17151f);
+  color: var(--text-primary, #f2f2f7);
+  border-color: var(--border, rgba(255, 255, 255, 0.09));
+}
+
+.checkout-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface-alt, rgba(0, 0, 0, 0.06));
+  color: var(--text-secondary, #667085);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.checkout-close:hover {
+  background: var(--surface-hover, rgba(0, 0, 0, 0.12));
+  transform: rotate(90deg);
+}
+
+.checkout-head {
+  margin-bottom: 16px;
+}
+
+.checkout-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.checkout-title i {
+  color: var(--pink-primary, #d81b60);
+}
+
+.checkout-amount {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text-secondary, #667085);
+}
+
+.checkout-amount strong {
+  color: var(--text-primary, #101828);
+  font-size: 1.05rem;
+}
+
+/* ─── Provider selector — PayPal PRIMARY first & prominent ─────────────── */
+.checkout-providers {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.checkout-provider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border, rgba(0, 0, 0, 0.1));
+  background: var(--surface, #ffffff);
+  color: var(--text-primary, #101828);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.12s;
+  position: relative;
+}
+
+.dark-mode .checkout-provider,
+[data-theme='dark'] .checkout-provider {
+  background: var(--surface-alt, rgba(255, 255, 255, 0.04));
+  border-color: var(--border, rgba(255, 255, 255, 0.1));
+}
+
+.checkout-provider:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.checkout-provider.is-primary.is-active {
+  border-color: #ffc439;
+  background: linear-gradient(135deg, rgba(255, 196, 57, 0.14), rgba(255, 255, 255, 0.02));
+  box-shadow: 0 0 0 3px rgba(255, 196, 57, 0.25);
+}
+
+.dark-mode .checkout-provider.is-primary.is-active {
+  background: linear-gradient(135deg, rgba(255, 196, 57, 0.16), rgba(255, 255, 255, 0.03));
+}
+
+.checkout-provider.is-active {
+  border-color: var(--pink-primary, #d81b60);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pink-primary, #d81b60) 20%, transparent);
+}
+
+.checkout-provider-badge {
+  position: absolute;
+  top: -7px;
+  right: 10px;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: #ffc439;
+  color: #1a1200;
+  text-transform: uppercase;
+}
+
+.checkout-provider-badge.is-secondary {
+  background: var(--pink-primary, #d81b60);
+  color: #fff;
+}
+
+.checkout-provider-logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.checkout-provider-logo.pp {
+  background: #ffc439;
+  color: #003087;
+  font-style: italic;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+
+.checkout-provider-logo.st {
+  background: linear-gradient(135deg, #635bff, #7a73ff);
+  color: #fff;
+  font-size: 1rem;
+}
+
+.checkout-provider-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.checkout-provider-meta strong {
+  font-size: 0.95rem;
+}
+
+.checkout-provider-meta small {
+  font-size: 0.76rem;
+  color: var(--text-secondary, #667085);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.checkout-provider-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border, rgba(0, 0, 0, 0.15));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  font-size: 0.7rem;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.checkout-provider.is-active .checkout-provider-check {
+  background: var(--pink-primary, #d81b60);
+  border-color: var(--pink-primary, #d81b60);
+  color: #fff;
+}
+
+/* ─── Body states ──────────────────────────────────────────────────────── */
+.checkout-body {
+  min-height: 120px;
+}
+
+.checkout-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 28px 10px;
+  text-align: center;
+  color: var(--text-secondary, #667085);
+  font-size: 0.92rem;
+}
+
+.checkout-state i {
+  font-size: 2.4rem;
+}
+
+.checkout-success i {
+  color: #16a34a;
+}
+
+.checkout-cancelled i {
+  color: #f59e0b;
+}
+
+.checkout-error i {
+  color: #dc2626;
+}
+
+.checkout-spinner {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid color-mix(in srgb, var(--pink-primary, #d81b60) 25%, transparent);
+  border-top-color: var(--pink-primary, #d81b60);
+  animation: checkout-spin 0.8s linear infinite;
+}
+
+.checkout-paypal-buttons {
+  min-height: 90px;
+}
+
+.checkout-subscription {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: stretch;
+  text-align: center;
+  padding: 8px 0;
+}
+
+.checkout-hint {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #667085);
+}
+
+.checkout-stripe {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.checkout-stripe-card {
+  border: 1.5px solid var(--border, rgba(0, 0, 0, 0.12));
+  border-radius: 10px;
+  padding: 14px;
+  background: var(--surface-alt, rgba(0, 0, 0, 0.03));
+}
+
+/* ─── Buttons ──────────────────────────────────────────────────────────── */
+
+/* Checkout module uses global .btn-primary / .btn-secondary.
+   Module-specific theming is applied via scoped selectors below. */
+
+.checkout .btn-primary {
+  background: linear-gradient(135deg, #ffc439, #ffb300);
+  color: #1a1200;
+}
+
+.checkout .btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(255, 196, 57, 0.4);
+}
+
+.checkout .btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.checkout .btn-secondary {
+  border: 1.5px solid var(--border, rgba(0, 0, 0, 0.15));
+  color: var(--text-primary, #101828);
+}
+
+.checkout .btn-secondary:hover:not(:disabled) {
+  background: var(--surface-alt, rgba(0, 0, 0, 0.06));
+}
+
+/* ─── Animations ───────────────────────────────────────────────────────── */
+@keyframes checkout-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes checkout-pop {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes checkout-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Mobile ───────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .checkout-modal {
+    padding: 18px;
+    border-radius: 16px;
+  }
+
+  .checkout-provider-meta small {
+    white-space: normal;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .checkout-overlay,
+  .checkout-modal {
+    animation: none;
+  }
+}

@@ -1,0 +1,234 @@
+/**
+ * src/components/AlgorithmTransparency.css
+ *
+ * Styles for Algorithm Transparency / Explainability component
+ */
+
+.at-container {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 12px;
+}
+
+/* ─── Reasons ───────────────────────────────────────────────────── */
+.at-reasons {
+  margin-bottom: 12px;
+}
+
+.at-reasons-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+  margin-bottom: 10px;
+}
+
+.at-reasons-header i {
+  color: #f59e0b;
+}
+
+.at-reasons-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.at-reason {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: #f3f4f6;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  color: #4b5563;
+}
+
+.at-reason i {
+  font-size: 0.65rem;
+  color: #9ca3af;
+}
+
+.at-reason-tag {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+/* ─── Toggle Details ────────────────────────────────────────────── */
+.at-toggle-details {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 0;
+  border: none;
+  border-top: 1px solid #f3f4f6;
+  background: none;
+  color: #6b7280;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.at-toggle-details:hover {
+  color: #d81b60;
+}
+
+/* ─── Score Breakdown ───────────────────────────────────────────── */
+.at-score-breakdown {
+  padding: 12px 0;
+}
+
+.at-score-breakdown h4 {
+  margin: 0 0 10px 0;
+  font-size: 0.85rem;
+  color: var(--text-primary, #1f2937);
+}
+
+.at-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.at-bar-row {
+  display: grid;
+  grid-template-columns: 100px 1fr 40px;
+  align-items: center;
+  gap: 8px;
+}
+
+.at-bar-label {
+  font-size: 0.7rem;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.at-bar-label i {
+  font-size: 0.6rem;
+  width: 12px;
+  text-align: center;
+}
+
+.at-bar-track {
+  height: 6px;
+  background: #f3f4f6;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.at-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.at-bar-trending { background: linear-gradient(90deg, #d81b60, #f43f5e); }
+.at-bar-popularity { background: linear-gradient(90deg, #f97316, #f59e0b); }
+.at-bar-engagement { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+.at-bar-quality { background: linear-gradient(90deg, #10b981, #34d399); }
+.at-bar-freshness { background: linear-gradient(90deg, #06b6d4, #22d3ee); }
+
+.at-bar-value {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+  text-align: right;
+}
+
+.at-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 8px;
+  margin-top: 8px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 0.85rem;
+  color: var(--text-primary, #1f2937);
+}
+
+/* ─── Feedback ──────────────────────────────────────────────────── */
+.at-feedback {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  border-top: 1px solid #f3f4f6;
+  margin-top: 12px;
+}
+
+.at-feedback-label {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-right: auto;
+}
+
+.at-feedback-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.at-feedback-btn:hover {
+  transform: scale(1.1);
+}
+
+.at-feedback-yes:hover {
+  background: #dcfce7;
+  border-color: #86efac;
+  color: #16a34a;
+}
+
+.at-feedback-no:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+
+.at-feedback-dismiss:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #6b7280;
+}
+
+.at-feedback-thanks {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  border-top: 1px solid #f3f4f6;
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: #10b981;
+}
+
+/* ─── Privacy Note ──────────────────────────────────────────────── */
+.at-privacy {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px;
+  background: #f9fafb;
+  border-radius: 8px;
+  margin-top: 12px;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  line-height: 1.4;
+}
+
+.at-privacy i {
+  margin-top: 2px;
+  color: #9ca3af;
+}

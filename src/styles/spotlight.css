@@ -1,0 +1,833 @@
+/* ═══════════════════════════════════════════════════════════════
+   Spotlight Identity — CSS Styles
+   Digital identity showcase for creators on Atelnyo
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Variables ───────────────────────────────────────────────── */
+:root {
+  --spotlight-primary: #a855f7;
+  --spotlight-primary-light: #c084fc;
+  --spotlight-primary-dark: #7c3aed;
+  --spotlight-gradient: linear-gradient(135deg, #a855f7, #6366f1);
+  --spotlight-bg: #faf5ff;
+  --spotlight-border: #e9d5ff;
+  --spotlight-shadow: 0 4px 24px rgba(168, 85, 247, 0.15);
+  --spotlight-radius: 16px;
+  --spotlight-radius-sm: 12px;
+  --spotlight-radius-xs: 8px;
+
+  /* Trust levels */
+  --trust-new: #ef4444;
+  --trust-growing: #f59e0b;
+  --trust-trusted: #3b82f6;
+  --trust-verified: #22c55e;
+
+  /* Achievement colors */
+  --ach-badge: #fbbf24;
+  --ach-course: #34d399;
+  --ach-certificate: #8b5cf6;
+  --ach-review: #f59e0b;
+  --ach-spotlight: #a855f7;
+  --ach-streak: #ef4444;
+  --ach-milestone: #3b82f6;
+  --ach-verified: #2563eb;
+}
+
+/* ─── Spotlight Identity Container ────────────────────────────── */
+.spotlight-identity {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+/* ─── Identity Header ─────────────────────────────────────────── */
+.spotlight-identity-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  border-radius: var(--spotlight-radius);
+  background: var(--bg-primary, #fff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.spotlight-identity-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--spotlight-gradient);
+}
+
+/* ─── Avatar ──────────────────────────────────────────────────── */
+.spotlight-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--spotlight-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+}
+
+.spotlight-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.spotlight-avatar i {
+  font-size: 32px;
+  color: #fff;
+}
+
+/* ─── User Info ───────────────────────────────────────────────── */
+.spotlight-user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.spotlight-user-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.spotlight-user-name h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary, #1e293b);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.spotlight-username {
+  font-size: 13px;
+  color: var(--text-secondary, #64748b);
+  margin: 0;
+}
+
+/* ─── Badges ──────────────────────────────────────────────────── */
+.spotlight-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.spotlight-badge--verified {
+  color: #3b82f6;
+  background: #eff6ff;
+}
+
+.spotlight-badge--spotlight {
+  color: #a855f7;
+  background: #f5f3ff;
+}
+
+.spotlight-badge--featured {
+  color: #f59e0b;
+  background: #fffbeb;
+}
+
+/* ─── Trust Score Badge ───────────────────────────────────────── */
+.trust-score-badge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.trust-score-ring {
+  position: relative;
+}
+
+.trust-score-ring svg {
+  transform: rotate(-90deg);
+}
+
+.trust-score-ring circle {
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+.trust-score-number {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.trust-score-value {
+  font-weight: 700;
+  line-height: 1;
+}
+
+.trust-score-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ─── Stats Grid ──────────────────────────────────────────────── */
+.spotlight-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.spotlight-stat {
+  padding: 16px 12px;
+  border-radius: var(--spotlight-radius-sm);
+  background: var(--bg-primary, #fff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.spotlight-stat:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--spotlight-shadow);
+}
+
+.spotlight-stat-icon {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.spotlight-stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary, #1e293b);
+  line-height: 1.2;
+}
+
+.spotlight-stat-label {
+  font-size: 11px;
+  color: var(--text-secondary, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+/* ─── Achievement Filters ─────────────────────────────────────── */
+.spotlight-filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.spotlight-filters::-webkit-scrollbar {
+  height: 4px;
+}
+
+.spotlight-filters::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.spotlight-filters::-webkit-scrollbar-thumb {
+  background: var(--border-color, #e2e8f0);
+  border-radius: 2px;
+}
+
+.spotlight-filter-btn {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  background: var(--bg-secondary, #f1f5f9);
+  color: var(--text-secondary, #64748b);
+}
+
+.spotlight-filter-btn:hover {
+  background: var(--bg-tertiary, #e2e8f0);
+}
+
+.spotlight-filter-btn--active {
+  background: var(--spotlight-primary, #a855f7);
+  color: #fff;
+}
+
+.spotlight-filter-btn--active:hover {
+  background: var(--spotlight-primary-dark, #7c3aed);
+}
+
+/* ─── Achievement Feed ────────────────────────────────────────── */
+.spotlight-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ─── Achievement Card ────────────────────────────────────────── */
+.achievement-card {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--spotlight-radius-sm);
+  background: var(--bg-secondary, #f8fafc);
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.achievement-card:hover {
+  transform: translateX(4px);
+  border-color: var(--border-color, #e2e8f0);
+}
+
+.achievement-card--featured {
+  background: linear-gradient(135deg, var(--spotlight-primary-light, #c084fc) 15%, var(--spotlight-primary-light, #c084fc) 8%);
+  border: 1px solid var(--spotlight-border, #e9d5ff);
+}
+
+.achievement-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--spotlight-radius-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.achievement-card-icon i {
+  font-size: 16px;
+}
+
+.achievement-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.achievement-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.achievement-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary, #1e293b);
+  line-height: 1.3;
+}
+
+.achievement-card-featured {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.achievement-card-description {
+  font-size: 12px;
+  color: var(--text-secondary, #64748b);
+  margin: 0;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.achievement-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.achievement-card-user {
+  font-size: 11px;
+  color: var(--text-tertiary, #94a3b8);
+}
+
+.achievement-card-time {
+  font-size: 11px;
+  color: var(--text-tertiary, #94a3b8);
+}
+
+/* ─── Empty State ─────────────────────────────────────────────── */
+.spotlight-empty {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-secondary, #64748b);
+}
+
+.spotlight-empty i {
+  font-size: 32px;
+  opacity: 0.3;
+  margin-bottom: 12px;
+}
+
+.spotlight-empty p {
+  margin: 0;
+}
+
+/* ─── Loading State ───────────────────────────────────────────── */
+.spotlight-loading {
+  padding: 24px;
+  text-align: center;
+}
+
+.spotlight-loading i {
+  font-size: 24px;
+  color: var(--spotlight-primary, #a855f7);
+}
+
+.spotlight-loading p {
+  margin-top: 12px;
+  color: var(--text-secondary, #64748b);
+}
+
+/* ─── Error State ─────────────────────────────────────────────── */
+.spotlight-error {
+  padding: 24px;
+  text-align: center;
+}
+
+.spotlight-error i {
+  font-size: 24px;
+  color: #ef4444;
+}
+
+.spotlight-error p {
+  margin-top: 12px;
+  color: var(--text-secondary, #64748b);
+}
+
+/* ─── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .spotlight-identity {
+    padding: 16px 12px;
+  }
+
+  .spotlight-identity-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+    padding: 20px 16px;
+  }
+
+  .spotlight-user-name {
+    justify-content: center;
+  }
+
+  .spotlight-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .spotlight-stat {
+    padding: 12px 8px;
+  }
+
+  .spotlight-stat-value {
+    font-size: 20px;
+  }
+
+  .spotlight-filters {
+    gap: 6px;
+  }
+
+  .spotlight-filter-btn {
+    padding: 5px 12px;
+    font-size: 11px;
+  }
+
+  .achievement-card {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .achievement-card-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .achievement-card-title {
+    font-size: 12px;
+  }
+
+  .achievement-card-description {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .spotlight-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .spotlight-avatar {
+    width: 64px;
+    height: 64px;
+  }
+
+  .spotlight-user-name h2 {
+    font-size: 18px;
+  }
+}
+
+/* ─── Dark Mode ───────────────────────────────────────────────── */
+[data-theme="dark"] .spotlight-identity-header,
+[data-theme="dark"] .spotlight-stat {
+  background: var(--bg-primary, #1e293b);
+  border-color: var(--border-color, #334155);
+}
+
+[data-theme="dark"] .achievement-card {
+  background: var(--bg-secondary, #334155);
+}
+
+[data-theme="dark"] .achievement-card--featured {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(168, 85, 247, 0.08));
+  border-color: rgba(168, 85, 247, 0.3);
+}
+
+[data-theme="dark"] .spotlight-filter-btn {
+  background: var(--bg-secondary, #334155);
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme="dark"] .spotlight-filter-btn:hover {
+  background: var(--bg-tertiary, #475569);
+}
+
+/* ─── Animations ──────────────────────────────────────────────── */
+@keyframes spotlight-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes spotlight-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.spotlight-animate-in {
+  animation: spotlight-slide-in 0.3s ease forwards;
+}
+
+.achievement-card {
+  animation: spotlight-slide-in 0.2s ease forwards;
+}
+
+.achievement-card:nth-child(1) { animation-delay: 0ms; }
+.achievement-card:nth-child(2) { animation-delay: 50ms; }
+.achievement-card:nth-child(3) { animation-delay: 100ms; }
+.achievement-card:nth-child(4) { animation-delay: 150ms; }
+.achievement-card:nth-child(5) { animation-delay: 200ms; }
+
+/* ═══════════════════════════════════════════════════════════════
+   Business Spotlight Card — Business identity in Spotlight
+   ═══════════════════════════════════════════════════════════════ */
+
+.business-spotlight-card {
+  background: var(--bg-primary, #fff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--spotlight-radius);
+  padding: 20px;
+  margin-bottom: 16px;
+  transition: all 0.2s ease;
+}
+
+.business-spotlight-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--spotlight-shadow);
+}
+
+.business-spotlight-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.business-spotlight-logo {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--spotlight-radius-sm);
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--spotlight-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.business-spotlight-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.business-spotlight-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.business-spotlight-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.business-spotlight-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary, #1e293b);
+}
+
+.business-spotlight-name a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.business-spotlight-name a:hover {
+  color: var(--spotlight-primary, #a855f7);
+}
+
+.business-spotlight-verified {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #3b82f6;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.business-spotlight-category {
+  display: inline-block;
+  font-size: 12px;
+  color: var(--text-secondary, #64748b);
+  background: var(--bg-secondary, #f1f5f9);
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-top: 4px;
+}
+
+.business-spotlight-tagline {
+  font-size: 13px;
+  color: var(--text-secondary, #64748b);
+  margin: 4px 0 0 0;
+  line-height: 1.4;
+}
+
+.business-spotlight-description {
+  font-size: 14px;
+  color: var(--text-primary, #334155);
+  line-height: 1.6;
+  margin: 0 0 16px 0;
+}
+
+.business-spotlight-expand {
+  background: none;
+  border: none;
+  color: var(--spotlight-primary, #a855f7);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 4px;
+  padding: 0;
+}
+
+.business-spotlight-expand:hover {
+  text-decoration: underline;
+}
+
+.business-spotlight-services {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.business-spotlight-services-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+}
+
+.business-spotlight-service-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: var(--bg-secondary, #f1f5f9);
+  color: var(--text-primary, #334155);
+}
+
+.business-spotlight-service-more {
+  font-size: 11px;
+  color: var(--spotlight-primary, #a855f7);
+  font-weight: 600;
+}
+
+.business-spotlight-achievements {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.business-spotlight-achievement {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid;
+  background: var(--bg-primary, #fff);
+}
+
+.business-spotlight-achievement i {
+  font-size: 12px;
+}
+
+.business-spotlight-stats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border-color, #e2e8f0);
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  margin-bottom: 16px;
+}
+
+.business-spotlight-rating {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #1e293b);
+}
+
+.business-spotlight-review-count {
+  font-weight: 400;
+  color: var(--text-secondary, #64748b);
+}
+
+.business-spotlight-views {
+  font-size: 13px;
+  color: var(--text-secondary, #64748b);
+}
+
+.business-spotlight-website {
+  font-size: 13px;
+  color: var(--spotlight-primary, #a855f7);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.business-spotlight-website:hover {
+  text-decoration: underline;
+}
+
+.business-spotlight-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.business-spotlight-view-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: var(--spotlight-gradient);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.business-spotlight-view-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+}
+
+/* ─── Dark Mode ───────────────────────────────────────────────── */
+[data-theme="dark"] .business-spotlight-card {
+  background: var(--bg-primary, #1e293b);
+  border-color: var(--border-color, #334155);
+}
+
+[data-theme="dark"] .business-spotlight-achievement {
+  background: var(--bg-secondary, #334155);
+}
+
+[data-theme="dark"] .business-spotlight-service-tag {
+  background: var(--bg-secondary, #334155);
+}
+
+/* ─── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .business-spotlight-card {
+    padding: 16px;
+  }
+
+  .business-spotlight-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .business-spotlight-name {
+    justify-content: center;
+  }
+
+  .business-spotlight-stats {
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .business-spotlight-footer {
+    justify-content: center;
+  }
+}

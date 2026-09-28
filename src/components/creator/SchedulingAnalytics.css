@@ -1,0 +1,363 @@
+/**
+ * src/components/creator/SchedulingAnalytics.css
+ *
+ * Styles for Scheduling Analytics component
+ */
+
+/* ─── Container ─────────────────────────────────────────────────── */
+.sched-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.sched-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.sched-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--text-primary, #1f2937);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sched-header h2 i {
+  color: #8b5cf6;
+}
+
+/* ─── Period Selector ───────────────────────────────────────────── */
+.sched-period-selector {
+  display: flex;
+  gap: 4px;
+  background: #f3f4f6;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.sched-period-selector button {
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sched-period-selector button.sched-active {
+  background: white;
+  color: #8b5cf6;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* ─── Loading / Error ───────────────────────────────────────────── */
+.sched-loading,
+.sched-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.sched-loading i {
+  font-size: 2rem;
+  color: #8b5cf6;
+  margin-bottom: 12px;
+  animation: sched-spin 1s linear infinite;
+}
+
+@keyframes sched-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.sched-error i {
+  font-size: 2rem;
+  color: #ef4444;
+  margin-bottom: 12px;
+}
+
+.sched-error button {
+  margin-top: 12px;
+  padding: 8px 16px;
+  background: #8b5cf6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* ─── Section ───────────────────────────────────────────────────── */
+.sched-section {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.sched-section h3 {
+  margin: 0;
+  padding: 16px 20px;
+  font-size: 1rem;
+  color: var(--text-primary, #1f2937);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.sched-section h3 i {
+  color: #8b5cf6;
+}
+
+/* ─── Best Times ────────────────────────────────────────────────── */
+.sched-best-times {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.sched-best-times h4 {
+  margin: 0 0 16px 0;
+  font-size: 1rem;
+  color: var(--text-primary, #1f2937);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sched-best-times h4 i {
+  color: #f59e0b;
+}
+
+.sched-times-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.sched-time-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.sched-time-rank {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: white;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.sched-time-info {
+  flex: 1;
+}
+
+.sched-time-day {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.sched-time-hour {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+}
+
+.sched-time-score {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+/* ─── Heatmap ───────────────────────────────────────────────────── */
+.sched-heatmap {
+  padding: 20px;
+  overflow-x: auto;
+}
+
+.sched-heatmap-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sched-heatmap-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sched-heatmap-day {
+  width: 35px;
+  font-size: 0.7rem;
+  color: #9ca3af;
+  text-align: right;
+}
+
+.sched-heatmap-cell {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  transition: transform 0.1s;
+}
+
+.sched-heatmap-cell:hover {
+  transform: scale(1.3);
+}
+
+.sched-heatmap-hours {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.sched-heatmap-hour-label {
+  width: 60px;
+  font-size: 0.65rem;
+  color: #9ca3af;
+}
+
+.sched-heatmap-legend {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 0.7rem;
+  color: #9ca3af;
+}
+
+.sched-heatmap-scale {
+  display: flex;
+  gap: 2px;
+}
+
+.sched-heatmap-scale-cell {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+}
+
+/* ─── Day Chart ─────────────────────────────────────────────────── */
+.sched-day-chart {
+  width: 100%;
+  height: 150px;
+  padding: 20px;
+}
+
+.sched-chart-label {
+  fill: #9ca3af;
+  font-size: 10px;
+}
+
+/* ─── Recommendations ───────────────────────────────────────────── */
+.sched-recommendations {
+  background: linear-gradient(135deg, #fdf2f8, #fce7f3);
+  border: 1px solid #fbcfe8;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.sched-recommendations h4 {
+  margin: 0 0 16px 0;
+  font-size: 1rem;
+  color: #9d174d;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sched-recommendations h4 i {
+  color: #f59e0b;
+}
+
+.sched-recommendations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.sched-recommendation-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.sched-rec-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fdf2f8;
+  color: #d81b60;
+  border-radius: 10px;
+  font-size: 1rem;
+}
+
+.sched-rec-content {
+  flex: 1;
+}
+
+.sched-rec-title {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-bottom: 2px;
+}
+
+.sched-rec-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary, #1f2937);
+  margin-bottom: 4px;
+}
+
+.sched-rec-desc {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+/* ─── Empty State ───────────────────────────────────────────────── */
+.sched-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  color: #9ca3af;
+}
+
+.sched-empty i {
+  font-size: 2rem;
+  margin-bottom: 12px;
+}

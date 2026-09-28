@@ -1,0 +1,611 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   src/styles/creator-analytics.css — Creator Analytics Dashboard
+   (Phase 38 — /sheet/analytics → <CreatorAnalytics>)
+
+   Previously the ca-* classes had NO stylesheet at all — the page
+   rendered as raw unstyled HTML. This file provides the full design
+   system for the dashboard: KPI cards, SVG charts, top-products table,
+   audience grid, loading/error states, dark mode, and responsive
+   rules. Includes defensive bottom padding so the always-mounted
+   fixed BottomNavBar (z-index 2500) never occludes the last content.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Shell ─────────────────────────────────────────────────────────── */
+.creator-analytics {
+  --ca-primary: var(--pink-primary, #d81b60);
+  --ca-bg: var(--bg-page, #f8fafc);
+  --ca-surface: var(--card-bg, #ffffff);
+  --ca-text: var(--text-main, #1e293b);
+  --ca-text-secondary: var(--text-secondary, #64748b);
+  --ca-border: var(--border-color, #e2e8f0);
+  --ca-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --ca-shadow-lg: 0 10px 25px rgba(0,0,0,0.08), 0 4px 10px rgba(0,0,0,0.04);
+  --ca-radius: 16px;
+
+  background: var(--ca-bg);
+  min-height: 100vh;
+  max-width: 1000px;
+  margin: 0 auto;
+  /* Defensive bottom padding: BottomNavBar stays mounted on every route
+     (including /sheet/*). body.sheet-open usually hides it, but the
+     padding is the belt-and-suspenders against a failed / not-yet-applied
+     sheet-open — same pattern as .spotlight-detail-page. */
+  padding: 24px 20px 100px;
+  font-family: system-ui, -apple-system, sans-serif;
+  animation: caFadeIn 0.4s ease-out;
+}
+
+.dark-mode .creator-analytics {
+  --ca-bg: #0f172a;
+  --ca-surface: #1e293b;
+  --ca-text: #f1f5f9;
+  --ca-text-secondary: #94a3b8;
+  --ca-border: #334155;
+  --ca-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+  --ca-shadow-lg: 0 10px 25px rgba(0,0,0,0.4), 0 4px 10px rgba(0,0,0,0.2);
+}
+
+@keyframes caFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Header ────────────────────────────────────────────────────────── */
+.ca-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.ca-header-title h1 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 6px;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--ca-text);
+}
+
+.ca-header-title h1 i {
+  color: var(--ca-primary);
+}
+
+.ca-header-title p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ca-text-secondary);
+}
+
+.ca-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ca-period-btn,
+.ca-refresh-btn {
+  padding: 8px 14px;
+  border: 1.5px solid var(--ca-border);
+  border-radius: 10px;
+  background: var(--ca-surface);
+  color: var(--ca-text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ca-period-btn:hover,
+.ca-refresh-btn:hover {
+  border-color: var(--ca-primary);
+  color: var(--ca-primary);
+}
+
+.ca-period-btn.active {
+  background: var(--ca-primary);
+  border-color: var(--ca-primary);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(216, 27, 96, 0.3);
+}
+
+.ca-refresh-btn {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ─── Welcome (new creator) ─────────────────────────────────────────── */
+.ca-welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 16px 18px;
+  margin-bottom: 18px;
+  background: linear-gradient(135deg, rgba(216,27,96,0.06), rgba(99,102,241,0.05));
+  border: 1px solid rgba(216,27,96,0.15);
+  border-radius: var(--ca-radius);
+}
+
+.ca-welcome i {
+  font-size: 1.3rem;
+  color: var(--ca-primary);
+}
+
+.ca-welcome strong {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ca-text);
+}
+
+.ca-welcome p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--ca-text-secondary);
+}
+
+/* ─── Sections ──────────────────────────────────────────────────────── */
+.ca-section {
+  background: var(--ca-surface);
+  border: 1px solid var(--ca-border);
+  border-radius: var(--ca-radius);
+  padding: 20px;
+  margin-bottom: 18px;
+  box-shadow: var(--ca-shadow);
+  transition: box-shadow 0.2s ease;
+}
+
+.ca-section:hover {
+  box-shadow: var(--ca-shadow-lg);
+}
+
+.ca-section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ca-text);
+  margin: 0 0 16px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--ca-border);
+}
+
+.ca-section-title i {
+  color: var(--ca-primary);
+}
+
+.ca-charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.ca-section-half {
+  margin-bottom: 0;
+}
+
+/* ─── KPI grid ──────────────────────────────────────────────────────── */
+.ca-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 12px;
+}
+
+.ca-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--ca-surface);
+  border: 1px solid var(--ca-border);
+  border-radius: 14px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ca-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--ca-shadow-lg);
+}
+
+.ca-card-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  background: rgba(216, 27, 96, 0.08);
+  color: var(--ca-primary);
+}
+
+.ca-card[data-accent="emerald"] .ca-card-icon { background: rgba(16,185,129,0.1); color: #10b981; }
+.ca-card[data-accent="sky"] .ca-card-icon { background: rgba(56,189,248,0.12); color: #38bdf8; }
+.ca-card[data-accent="violet"] .ca-card-icon { background: rgba(139,92,246,0.12); color: #8b5cf6; }
+.ca-card[data-accent="amber"] .ca-card-icon { background: rgba(245,158,11,0.12); color: #f59e0b; }
+.ca-card[data-accent="indigo"] .ca-card-icon { background: rgba(99,102,241,0.12); color: #6366f1; }
+.ca-card[data-accent="cyan"] .ca-card-icon { background: rgba(6,182,212,0.12); color: #06b6d4; }
+.ca-card[data-accent="pink"] .ca-card-icon { background: rgba(236,72,153,0.12); color: #ec4899; }
+.ca-card[data-accent="teal"] .ca-card-icon { background: rgba(20,184,166,0.12); color: #14b8a6; }
+.ca-card[data-accent="slate"] .ca-card-icon { background: rgba(100,116,139,0.12); color: #64748b; }
+
+.ca-card-body {
+  min-width: 0;
+}
+
+.ca-card-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ca-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ca-card-value {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--ca-text);
+  line-height: 1.2;
+  margin-top: 2px;
+}
+
+.ca-card-subtitle {
+  font-size: 0.72rem;
+  color: var(--ca-text-secondary);
+  margin-top: 2px;
+}
+
+/* ─── Charts ────────────────────────────────────────────────────────── */
+.ca-chart-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.ca-chart {
+  width: 100%;
+  height: auto;
+  min-width: 280px;
+}
+
+/* SVG axis labels (BarChart <text class="ca-chart-label">) — explicit fill
+   so they stay readable in both light and dark mode instead of relying
+   on inherited currentColor. Scoped under .creator-analytics like the
+   other shared-namespace rules (ca-* is also used by CreatorApply). */
+.creator-analytics .ca-chart-label {
+  fill: var(--ca-text-secondary);
+}
+
+.ca-chart-empty {
+  padding: 24px;
+  text-align: center;
+  color: var(--ca-text-secondary);
+  font-size: 0.85rem;
+}
+
+.ca-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  font-size: 0.75rem;
+  color: var(--ca-text-secondary);
+}
+
+.ca-legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 4px;
+  vertical-align: -1px;
+}
+
+/* ─── Top products table ────────────────────────────────────────────── */
+.ca-table-wrap {
+  overflow-x: auto;
+}
+
+.ca-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.ca-table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ca-text-secondary);
+  border-bottom: 2px solid var(--ca-border);
+  white-space: nowrap;
+}
+
+.ca-table td {
+  padding: 10px 12px;
+  color: var(--ca-text);
+  border-bottom: 1px solid var(--ca-border);
+}
+
+.ca-table tr:last-child td {
+  border-bottom: none;
+}
+
+.ca-table-cell-name {
+  font-weight: 600;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ─── Audience ──────────────────────────────────────────────────────── */
+.ca-audience {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.ca-audience-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 16px;
+  background: rgba(216, 27, 96, 0.04);
+  border: 1px solid var(--ca-border);
+  border-radius: 14px;
+  text-align: center;
+}
+
+.ca-audience-item i {
+  font-size: 1.1rem;
+  color: var(--ca-primary);
+}
+
+.ca-audience-item strong {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--ca-text);
+}
+
+.ca-audience-item span {
+  font-size: 0.75rem;
+  color: var(--ca-text-secondary);
+}
+
+/* ─── Loading / Error ───────────────────────────────────────────────── */
+.ca-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 55vh;
+  color: var(--ca-text-secondary);
+  font-size: 0.9rem;
+}
+
+.ca-loading i {
+  font-size: 1.3rem;
+  color: var(--ca-primary);
+}
+
+/* All error/empty rules are scoped under .creator-analytics: the ca-*
+   namespace is shared with CreatorApply (mwen.css, which defines its own
+   .ca-error). Without the scope, this file — imported after index.css in
+   main.jsx — would silently override CreatorApply's error UI. */
+.creator-analytics .ca-error {
+  text-align: center;
+  padding: 48px 16px;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.creator-analytics .ca-error i {
+  font-size: 2rem;
+  color: #ef4444;
+}
+
+.creator-analytics .ca-error h3 {
+  margin: 12px 0 6px;
+  font-size: 1.1rem;
+  color: var(--ca-text);
+}
+
+.creator-analytics .ca-error p {
+  margin: 0 0 18px;
+  font-size: 0.85rem;
+  color: var(--ca-text-secondary);
+}
+
+/* Empty state used by TopProducts when no products have been sold. */
+.creator-analytics .ca-empty {
+  padding: 24px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--ca-text-secondary);
+}
+
+.creator-analytics .ca-retry-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 999px;
+  background: var(--ca-primary);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(216, 27, 96, 0.2);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.creator-analytics .ca-retry-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(216, 27, 96, 0.3);
+}
+
+.creator-analytics .ca-retry-btn:active {
+  transform: translateY(0);
+}
+
+/* ─── Responsive ────────────────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .creator-analytics {
+    padding: 16px 12px 90px;
+  }
+
+  .ca-charts-row {
+    grid-template-columns: 1fr;
+  }
+
+  .ca-section-half {
+    margin-bottom: 0;
+  }
+
+  .ca-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ca-header-actions {
+    justify-content: flex-end;
+  }
+
+  .ca-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ca-table-cell-name {
+    max-width: 140px;
+  }
+}
+
+@media (max-width: 380px) {
+  .ca-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Profile Clicks (click_breakdown section) ─────────────────────── */
+.ca-clicks-note {
+  margin: 0 0 14px;
+  font-size: 0.82rem;
+  color: var(--ca-text-secondary);
+}
+
+.ca-clicks-total {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(216, 27, 96, 0.08), rgba(139, 92, 246, 0.08));
+  border: 1px solid var(--ca-border);
+}
+
+.ca-clicks-total i {
+  color: var(--ca-primary);
+  font-size: 1.1rem;
+}
+
+.ca-clicks-total strong {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--ca-text);
+}
+
+.ca-clicks-total span {
+  font-size: 0.78rem;
+  color: var(--ca-text-secondary);
+}
+
+.ca-clicks-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ca-clicks-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--ca-surface);
+  border: 1px solid var(--ca-border);
+}
+
+.ca-clicks-item-icon {
+  width: 18px;
+  text-align: center;
+  color: var(--ca-primary);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.ca-clicks-item-label {
+  min-width: 130px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ca-text);
+}
+
+.ca-clicks-item-bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--ca-primary) 12%, transparent);
+  overflow: hidden;
+}
+
+.ca-clicks-item-fill {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--ca-primary), var(--violet, #8b5cf6));
+  transition: width 0.4s ease;
+}
+
+.ca-clicks-item-count {
+  min-width: 42px;
+  text-align: right;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--ca-text);
+}
+
+@media (max-width: 480px) {
+  .ca-clicks-item-label {
+    min-width: 96px;
+    font-size: 0.78rem;
+  }
+}

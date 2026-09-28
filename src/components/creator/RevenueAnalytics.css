@@ -1,0 +1,316 @@
+/**
+ * src/components/creator/RevenueAnalytics.css
+ *
+ * Styles for Revenue Analytics Dashboard
+ */
+
+/* ─── Container ─────────────────────────────────────────────────── */
+.rev-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.rev-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.rev-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--text-primary, #1f2937);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rev-header h2 i {
+  color: #10b981;
+}
+
+/* ─── Period Selector ───────────────────────────────────────────── */
+.rev-period-selector {
+  display: flex;
+  gap: 4px;
+  background: #f3f4f6;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.rev-period-selector button {
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.rev-period-selector button.rev-active {
+  background: white;
+  color: #10b981;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* ─── Loading / Error ───────────────────────────────────────────── */
+.rev-loading,
+.rev-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.rev-loading i {
+  font-size: 2rem;
+  color: #10b981;
+  margin-bottom: 12px;
+  animation: rev-spin 1s linear infinite;
+}
+
+@keyframes rev-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.rev-error i {
+  font-size: 2rem;
+  color: #ef4444;
+  margin-bottom: 12px;
+}
+
+.rev-error button {
+  margin-top: 12px;
+  padding: 8px 16px;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* ─── Metrics ───────────────────────────────────────────────────── */
+.rev-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.rev-metric-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.rev-metric-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  border-radius: 12px;
+  color: #10b981;
+  font-size: 1.25rem;
+}
+
+.rev-metric-content {
+  flex: 1;
+}
+
+.rev-metric-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary, #1f2937);
+}
+
+.rev-metric-label {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.rev-metric-change {
+  font-size: 0.75rem;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rev-metric-change.rev-positive {
+  color: #10b981;
+}
+
+.rev-metric-change.rev-negative {
+  color: #ef4444;
+}
+
+/* ─── Section ───────────────────────────────────────────────────── */
+.rev-section {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.rev-section h3 {
+  margin: 0;
+  padding: 16px 20px;
+  font-size: 1rem;
+  color: var(--text-primary, #1f2937);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.rev-section h3 i {
+  color: #10b981;
+}
+
+/* ─── Chart ─────────────────────────────────────────────────────── */
+.rev-chart {
+  width: 100%;
+  height: 200px;
+  padding: 20px;
+}
+
+.rev-chart-label {
+  fill: #9ca3af;
+  font-size: 9px;
+}
+
+.rev-chart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  color: #9ca3af;
+}
+
+.rev-chart-empty i {
+  font-size: 2rem;
+  margin-bottom: 12px;
+}
+
+/* ─── Revenue by Type ───────────────────────────────────────────── */
+.rev-by-type {
+  padding: 20px;
+}
+
+.rev-type-bar {
+  display: flex;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #f3f4f6;
+  margin-bottom: 16px;
+}
+
+.rev-type-segment {
+  transition: width 0.3s ease;
+}
+
+.rev-type-segment:hover {
+  opacity: 0.8;
+}
+
+.rev-type-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.rev-type-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rev-type-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.rev-type-name {
+  color: #4b5563;
+  font-size: 0.85rem;
+}
+
+.rev-type-value {
+  color: #6b7280;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+/* ─── Transaction Table ─────────────────────────────────────────── */
+.rev-table-wrap {
+  overflow-x: auto;
+}
+
+.rev-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.rev-table th,
+.rev-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.rev-table th {
+  background: #f9fafb;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.rev-table td {
+  font-size: 0.9rem;
+  color: var(--text-primary, #1f2937);
+}
+
+.rev-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.rev-amount {
+  font-weight: 600;
+  color: #10b981;
+}
+
+.rev-status {
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+/* ─── Empty State ───────────────────────────────────────────────── */
+.rev-empty {
+  text-align: center;
+  padding: 32px;
+  color: #9ca3af;
+}

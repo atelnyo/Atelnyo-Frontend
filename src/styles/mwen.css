@@ -1,0 +1,2384 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   src/styles/mwen.css — Mwen (My Space) page styles
+   Modern & Clean Redesign
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Design Tokens (component-scoped) ─────────────────────────── */
+:root {
+  --mwen-radius-sm: 10px;
+  --mwen-radius-md: 14px;
+  --mwen-radius-lg: 18px;
+  --mwen-radius-xl: 24px;
+  --mwen-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --mwen-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
+  --mwen-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.02);
+  --mwen-shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.07), 0 2px 8px rgba(0, 0, 0, 0.03);
+  --mwen-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --mwen-transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body.dark-mode {
+  --mwen-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.1);
+  --mwen-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.15);
+  --mwen-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.25), 0 2px 6px rgba(0, 0, 0, 0.15);
+  --mwen-shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+
+/* ─── Page Container ────────────────────────────────────────────── */
+.mwen-page {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding-bottom: 100px;
+}
+
+/* ═══ Hero Section ═════════════════════════════════════════════════ */
+.mwen-hero {
+  position: relative;
+  padding: 24px 16px 8px;
+  overflow: hidden;
+}
+
+/* Subtle decorative gradient bg behind the hero */
+.mwen-hero::before {
+  content: '';
+  position: absolute;
+  top: -60%;
+  left: -20%;
+  right: -20%;
+  height: 200%;
+  background: radial-gradient(ellipse at 50% 30%, rgba(216, 27, 96, 0.04) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mwen-hero-profile {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 20px 18px;
+  margin-bottom: 8px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--mwen-radius-lg);
+  text-align: left;
+  box-shadow: var(--mwen-shadow-md);
+  transition: box-shadow var(--mwen-transition),
+              border-color var(--mwen-transition),
+              transform var(--mwen-transition);
+}
+
+.mwen-hero-profile:hover {
+  border-color: rgba(216, 27, 96, 0.12);
+  box-shadow: var(--mwen-shadow-hover);
+}
+
+.mwen-hero-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #d81b60, #ff5e8a, #c2185b);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.35rem;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(216, 27, 96, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Avatar image fills the circle */
+.mwen-hero-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  position: absolute;
+  inset: 0;
+}
+
+.mwen-hero-avatar:has(.mwen-hero-avatar-img) {
+  background: none;
+  box-shadow: 0 4px 14px rgba(216, 27, 96, 0.2);
+}
+
+/* Subtle ring around avatar */
+.mwen-hero-avatar::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 2px solid rgba(216, 27, 96, 0.1);
+  pointer-events: none;
+}
+
+.mwen-hero-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.mwen-hero-title {
+  color: var(--text-main);
+  margin: 0 0 3px;
+  font-size: 1.2rem;
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.mwen-hero-username {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  display: block;
+  font-weight: 500;
+}
+
+.mwen-hero-desc {
+  position: relative;
+  z-index: 1;
+  color: var(--text-secondary);
+  margin: 8px auto 0;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  max-width: 400px;
+  padding: 0 4px;
+}
+
+/* ─── Premium subscription chip (plan + expiry) ─────────────────── */
+.mwen-premium-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, rgba(216, 27, 96, 0.14), rgba(250, 204, 21, 0.16));
+  border: 1px solid rgba(216, 27, 96, 0.35);
+  color: var(--pr-color-pink-600, #d81b60);
+  box-shadow: 0 1px 6px rgba(216, 27, 96, 0.12);
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+
+.mwen-premium-chip i {
+  font-size: 0.85rem;
+}
+
+.mwen-premium-chip-label {
+  letter-spacing: 0.02em;
+}
+
+.mwen-premium-chip-plan {
+  padding-left: 6px;
+  border-left: 1px solid rgba(216, 27, 96, 0.3);
+  text-transform: capitalize;
+}
+
+.mwen-premium-chip-exp {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+body.dark-mode .mwen-premium-chip {
+  color: var(--pr-color-yellow-300, #fde68a);
+  background: linear-gradient(135deg, rgba(216, 27, 96, 0.22), rgba(250, 204, 21, 0.12));
+  border-color: rgba(250, 204, 21, 0.35);
+}
+
+body.dark-mode .mwen-premium-chip-exp {
+  color: var(--text-tertiary, #9ca3af);
+}
+
+/* ─── Edit Profile Button ───────────────────────────────────────── */
+.mwen-edit-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all var(--mwen-transition-fast);
+  font-size: 0.85rem;
+  backdrop-filter: blur(4px);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mwen-edit-btn:hover {
+  background: rgba(216, 27, 96, 0.08);
+  border-color: var(--pink-primary);
+  color: var(--pink-primary);
+  transform: scale(1.08);
+  box-shadow: 0 2px 8px rgba(216, 27, 96, 0.15);
+}
+
+.mwen-edit-btn:active {
+  transform: scale(0.92);
+}
+
+/* ═══ Navigation / Analytics Cards ════════════════════════════════ */
+
+/* Nav card grid container — single column on phones, two columns on
+   tablets / desktops so the cards never stretch to full container
+   width (they previously did: a 36px icon card at 976px wide on a
+   1440px screen). minmax(0, 1fr) keeps the columns equal and lets
+   the hint text wrap instead of forcing a fixed min width. */
+.mwen-nav-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  padding: 4px 12px;
+}
+
+@media (min-width: 640px) {
+  .mwen-nav-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.mwen-analytics-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--mwen-radius-md);
+  cursor: pointer;
+  transition: all var(--mwen-transition);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--mwen-shadow-sm);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Affiliate status card — informational variant of the quick-nav card.
+   Shows the user's REAL application state (pending / suspended /
+   rejected) instead of an active-looking Affiliate dashboard. Not
+   clickable (role="status" in JSX); the badge makes the state
+   scannable at a glance. */
+.mwen-status-card {
+  cursor: default;
+}
+.mwen-status-card:hover {
+  transform: none;
+  box-shadow: var(--mwen-shadow-sm);
+  border-color: var(--border-color);
+}
+.mwen-status-card:hover::before {
+  opacity: 0;
+}
+.mwen-status-card:hover .mwen-analytics-card-icon {
+  transform: none;
+}
+.mwen-status-card:active {
+  transform: none;
+}
+.mwen-status-badge {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  background: rgba(128, 128, 128, 0.08);
+}
+.mwen-status-badge--pending {
+  color: #b45309;
+  border-color: rgba(245, 158, 11, 0.4);
+  background: rgba(245, 158, 11, 0.12);
+}
+.mwen-status-badge--suspended {
+  color: #b91c1c;
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.12);
+}
+.mwen-status-badge--rejected {
+  color: #475569;
+  border-color: rgba(100, 116, 139, 0.4);
+  background: rgba(100, 116, 139, 0.12);
+}
+body.dark-mode .mwen-status-badge--pending {
+  color: #fbbf24;
+}
+body.dark-mode .mwen-status-badge--suspended {
+  color: #f87171;
+}
+body.dark-mode .mwen-status-badge--rejected {
+  color: #cbd5e1;
+}
+
+.mwen-analytics-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(216, 27, 96, 0.03), transparent);
+  opacity: 0;
+  transition: opacity var(--mwen-transition);
+  pointer-events: none;
+}
+
+.mwen-analytics-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--mwen-shadow-hover);
+  border-color: rgba(216, 27, 96, 0.15);
+}
+
+.mwen-analytics-card:hover::before {
+  opacity: 1;
+}
+
+.mwen-analytics-card:active {
+  transform: translateY(0) scale(0.995);
+}
+
+/* Card icon container — clean circular style */
+.mwen-analytics-card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 1.15rem;
+  transition: all var(--mwen-transition);
+}
+
+.mwen-analytics-card:hover .mwen-analytics-card-icon {
+  transform: scale(1.08);
+}
+
+
+.mwen-analytics-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.mwen-analytics-card-title {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--text-main);
+  margin-bottom: 3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mwen-analytics-card-hint {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mwen-analytics-card-arrow {
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  flex-shrink: 0;
+  opacity: 0.5;
+  transition: all var(--mwen-transition-fast);
+}
+
+.mwen-analytics-card:hover .mwen-analytics-card-arrow {
+  transform: translateX(4px);
+  opacity: 1;
+  color: var(--pink-primary);
+}
+
+/* ═══ Section Tabs ════════════════════════════════════════════════ */
+
+.mwen-section-tabs-wrap {
+  /* Wrapper for the scrollable tab bar. Holds the bar's margin so the
+     right-edge fade affordance (::after) can overlay the bar's rounded
+     corner without inheriting the bar's horizontal scroll — a pseudo on
+     the scrolling element itself would scroll away with the content.
+     ``position: relative`` anchors the fade; ``is-overflowing`` is
+     toggled from Mwen.jsx so the fade only appears when the bar
+     actually overflows (scrollWidth > clientWidth). */
+  position: relative;
+  margin: 16px 12px 12px;
+}
+
+.mwen-section-tabs {
+  /* Explicit ``flex-direction: row`` + ``flex-wrap: nowrap`` so the
+     tabs stay in a single horizontal bar even if a parent resets
+     ``flex-wrap`` or a Chromium quirk flips the axis on the button
+     element (the user reported "yo pa byen rete nan bar yo, youn
+     moute sou lòt" — the tabs were collapsing to a column under
+     tight viewport constraints). ``overflow-x: auto`` is the
+     safety net: when 4 tabs + icons + count badges exceed the
+     container width on a narrow screen, the bar scrolls
+     horizontally instead of stacking vertically. */
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  background: var(--pink-light);
+  padding: 4px;
+  border-radius: var(--mwen-radius-md);
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-x pan-y;
+  /* Snap each tab into view when swiping — keeps the 5th tab (Activity)
+     reachable on narrow screens without a free-form half-scrolled stop.
+     ``proximity`` (not ``mandatory``): mandatory can fight programmatic /
+     focus-driven scrolls on a bar that only occasionally overflows. */
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 8px;
+}
+
+.mwen-section-tabs-wrap::after {
+  /* Right-edge fade — a visual cue that more tabs are reachable by
+     swiping. Hidden until the bar overflows (``is-overflowing`` class
+     set from JS) so a bar that fits its container shows no phantom
+     gradient. ``pointer-events: none`` keeps the overlay from eating
+     taps on the last visible tab. */
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: 0;
+  bottom: 4px;
+  width: 34px;
+  border-radius: 0 var(--mwen-radius-md) var(--mwen-radius-md) 0;
+  background: linear-gradient(to left, var(--pink-light) 12%, transparent);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--mwen-transition-fast);
+  z-index: 2;
+}
+
+.mwen-section-tabs-wrap.is-overflowing::after {
+  opacity: 1;
+}
+
+.mwen-section-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.mwen-section-tab {
+  /* ``flex: 1 1 0%`` (not the shorthand ``flex: 1``) so the grow +
+     shrink + 0% basis are all explicit. ``min-width: 0`` lets the
+     button shrink below its intrinsic content width when the
+     container is narrow; without it Chromium keeps the button at
+     its min-content size and overflows the parent (which then
+     doesn't scroll because the children claim their full
+     min-content first). ``min-width: 64px`` is the floor: below
+     that, the icon + truncated label + count badge become
+     unreadable, so we let ``overflow-x: auto`` on the parent
+     handle the overflow instead of further compression. */
+  flex: 1 1 0%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: inherit;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all var(--mwen-transition);
+  white-space: nowrap;
+  min-width: 64px;
+  position: relative;
+  scroll-snap-align: start;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  /* Touch-friendly tap target (WCAG 2.5.8 / Material 48dp guidance —
+     iOS Safari's 38px floor, Android ~44px). The tab bar is a
+     primary navigation surface on mobile, so the whole pill must be
+     comfortably tappable even with the ``overflow-x: auto`` bar. */
+  min-height: 44px;
+}
+
+.mwen-section-tab:focus-visible {
+  /* Keyboard navigation: a visible focus ring that survives the bar's
+     horizontal scroll — ``outline-offset: -3px`` keeps it inside the
+     pill (an outside offset would be clipped by ``overflow-x: auto``
+     on the bar and invisible on the leftmost/rightmost tab). */
+  outline: 2px solid var(--pink-primary);
+  outline-offset: -3px;
+  border-radius: 10px;
+}
+
+.mwen-section-tab-label {
+  /* Label safety net: ellipsize instead of overflowing into the next
+     tab when the pill is squeezed (long translations, count badges).
+     ``min-width: 0`` lets the flex item shrink below its intrinsic
+     content width so the bar never forces horizontal page overflow;
+     ``overflow: hidden`` + ``text-overflow: ellipsis`` degrade to a
+     clean "…" rather than text collision. */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 130px;
+}
+
+.mwen-section-tab i {
+  font-size: 0.85rem;
+  opacity: 0.6;
+  transition: opacity var(--mwen-transition-fast);
+}
+
+.mwen-section-tab:hover {
+  color: var(--pink-primary);
+  background: rgba(216, 27, 96, 0.06);
+}
+
+.mwen-section-tab:hover i {
+  opacity: 0.9;
+}
+
+.mwen-section-tab.active {
+  background: var(--pink-primary);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(216, 27, 96, 0.3);
+}
+
+.mwen-section-tab.active i {
+  opacity: 1;
+}
+
+.mwen-section-tab-count {
+  font-size: 0.62rem;
+  font-weight: 700;
+  background: rgba(216, 27, 96, 0.12);
+  color: var(--pink-primary);
+  padding: 2px 7px;
+  border-radius: 999px;
+  line-height: 1.4;
+  min-width: 18px;
+  text-align: center;
+}
+
+.mwen-section-tab.active .mwen-section-tab-count {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+/* ═══ Section Content ═════════════════════════════════════════════ */
+
+.mwen-section {
+  padding: 0 12px;
+}
+
+.mwen-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 4px 10px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--text-main);
+}
+
+.mwen-section-count {
+  font-size: 0.65rem;
+  font-weight: 600;
+  background: var(--pink-light);
+  color: var(--pink-primary);
+  padding: 2px 9px;
+  border-radius: 999px;
+}
+
+/* ═══ Empty State ══════════════════════════════════════════════════ */
+
+.mwen-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 56px 24px 48px;
+  text-align: center;
+  animation: mwen-fade-in 0.4s ease-out;
+}
+
+.mwen-empty-icon-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(216, 27, 96, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.mwen-empty i {
+  font-size: 2rem;
+  color: var(--pink-primary);
+  opacity: 0.4;
+}
+
+.mwen-empty h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.mwen-empty p {
+  margin: 0;
+  font-size: 0.82rem;
+  max-width: 280px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.mwen-empty-cta {
+  padding: 10px 24px;
+  border-radius: 999px;
+  border: none;
+  background: var(--pink-primary);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--mwen-transition);
+  margin-top: 4px;
+  box-shadow: 0 4px 12px rgba(216, 27, 96, 0.2);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mwen-empty-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(216, 27, 96, 0.3);
+  filter: brightness(1.05);
+}
+
+.mwen-empty-cta:active {
+  transform: translateY(0);
+}
+
+/* ═══ Row Cards (Saved Talents / Music / Recent) ══════════════════ */
+
+.mwen-row-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mwen-row-card {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--mwen-radius-md);
+  overflow: hidden;
+  transition: all var(--mwen-transition);
+  box-shadow: var(--mwen-shadow-sm);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mwen-row-card:hover {
+  border-color: rgba(216, 27, 96, 0.15);
+  box-shadow: var(--mwen-shadow-hover);
+  transform: translateY(-1px);
+}
+
+.mwen-row-card:active {
+  transform: translateY(0) scale(0.995);
+}
+
+.mwen-row-orphan {
+  opacity: 0.5;
+}
+
+/* CTA — explicit flex + color inheritance. Without `color: inherit`,
+   browsers apply their own user-agent colors to <button> text, which
+   can briefly show wrong hues (especially in dark mode) before the
+   title/sub rules apply. Inheriting from the parent row card keeps
+   the visual hierarchy stable regardless of how the surrounding
+   theme is configured. */
+.mwen-row-cta {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  /* `color: inherit` is the key fix here — without it, the CTA button
+     can apply its own UA color to descendants and break the title/sub
+     hierarchy. See the unified <MwenEntityRow> in Mwen.jsx. */
+  color: inherit;
+  min-width: 0;
+  transition: background var(--mwen-transition-fast);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mwen-row-cta:hover {
+  background: rgba(216, 27, 96, 0.03);
+}
+
+.mwen-row-cta-static {
+  cursor: default;
+}
+
+.mwen-row-cta-static:hover {
+  background: transparent;
+}
+
+/* ─── Images (Avatar / Cover) ────────────────────────────────────
+   Both avatar and cover are normalized to the same 56px box so the
+   row card height is consistent regardless of entity kind. This is
+   the root cause fix for the "yo pa amelyore youn moute sou lòt"
+   complaint: in the Recent view, talent rows (48px img) and music
+   rows (56px img) used to land at different math heights when the
+   parent row-card used `align-items: center` + image shrinking.
+   Unifying both to 56px makes every row line up at the same
+   baseline whether it's a Talent, Music, Orphan, or Course card. */
+
+.mwen-row-avatar,
+.mwen-row-cover {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--mwen-radius-sm);
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--pink-light);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+/* Orphan fallback (deleted catalog entity / placeholder) — keeps
+   the 56px box so it aligns with real avatars/covers in the
+   recent list. */
+.mwen-row-avatar-orphan {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  color: var(--text-secondary);
+  background: var(--pink-light);
+  width: 56px;
+  height: 56px;
+  border-radius: var(--mwen-radius-sm);
+  flex-shrink: 0;
+}
+
+/* Gradient placeholder used when an image is missing or fails to
+   load. The hue itself comes from the JSX (driven by the entity
+   name) and is applied inline so the same talent always shows the
+   same color across reloads. The CLS is locked here so the
+   placeholder doesn't reflow when the real image arrives. */
+.mwen-row-avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: #fff;
+}
+
+/* ─── Text Metadata ──────────────────────────────────────────────
+   Title + sub pair made explicit by promoting ``.mwen-row-meta`` to
+   a flex column container with vertical centering. This guarantees
+   the title stacks above the sub line (one on top of the other)
+   even if a CSS reset were applied globally. ``baseline`` alignment
+   for the column items keeps multi-line ellipsis-truncated text
+   readable. */
+
+.mwen-row-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+}
+
+.mwen-row-title {
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.35;
+}
+
+/* Sub line — switched from `display:flex` to `display:block` so the
+   lone <i>-as-flex-anonymous-item baseline drift that some
+   Chromium builds produce (seen as the title/sub not stacking
+   correctly when the user clicks into the row) no longer bites.
+   Browsers reliably baseline-align raw text + inline icons as part
+   of a normal inline flow; anonymous flex items were the bug. */
+.mwen-row-sub {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.45;
+}
+
+.mwen-row-sub i {
+  font-size: 0.65rem;
+  margin-right: 3px;
+}
+
+/* ─── Action Button (Unsave) ───────────────────────────────────── */
+
+.mwen-row-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+  border-radius: var(--mwen-radius-sm);
+  margin-right: 6px;
+  transition: all var(--mwen-transition-fast);
+  font-size: 0.9rem;
+  opacity: 0.5;
+}
+
+.mwen-row-card:hover .mwen-row-action {
+  opacity: 1;
+}
+
+/* Touch devices have no :hover, so keep the unsave affordance fully
+   visible instead of dimmed at 0.5 (undiscoverable tap target). */
+@media (hover: none) {
+  .mwen-row-action {
+    opacity: 1;
+  }
+}
+
+.mwen-row-action:hover {
+  color: var(--pink-primary);
+  background: rgba(216, 27, 96, 0.08);
+  opacity: 1;
+}
+
+.mwen-row-action:active {
+  transform: scale(0.85);
+}
+
+/* ═══ Loading Skeletons ════════════════════════════════════════════ */
+
+.mwen-skel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.mwen-skel-row {
+  height: 68px;
+  border-radius: var(--mwen-radius-md);
+  background: linear-gradient(90deg,
+    var(--skeleton-from, #f0f0f0) 25%,
+    var(--skeleton-to, #e8e8e8) 50%,
+    var(--skeleton-from, #f0f0f0) 75%
+  );
+  background-size: 200% 100%;
+  animation: mwen-shimmer 1.8s ease-in-out infinite;
+  box-shadow: var(--mwen-shadow-sm);
+}
+
+@keyframes mwen-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes mwen-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+body.dark-mode .mwen-skel-row {
+  background: linear-gradient(90deg, #2a2a35 25%, #34343f 50%, #2a2a35 75%);
+  background-size: 200% 100%;
+}
+
+/* ═══ Responsive ══════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PROMPT 22 — Creator Apply Styles (Refactored)
+   ═══════════════════════════════════════════════════════════════════════════
+   Full-responsive · Dark-mode-ready · Touch-friendly · Accessible
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Design Tokens (scoped) ──────────────────────────────────── */
+.creator-apply-sheet {
+  --ca-pink: var(--pink-primary, #d81b60);
+  --ca-pink-light: rgba(216, 27, 96, 0.08);
+  --ca-pink-glow: rgba(216, 27, 96, 0.3);
+  --ca-green: #10b981;
+  --ca-green-light: rgba(16, 185, 129, 0.06);
+  --ca-border: var(--border-color, #eee);
+  --ca-bg: var(--bg-page, #ffdae9);
+  --ca-surface: var(--card-bg, #fff);
+  --ca-text: var(--text-main, #333);
+  --ca-text-sec: var(--text-secondary, #666);
+  --ca-text-muted: var(--text-secondary, #999);
+  --ca-radius: 14px;
+  --ca-radius-sm: 10px;
+  --ca-space-xs: 4px;
+  --ca-space-sm: 8px;
+  --ca-space-md: 16px;
+  --ca-space-lg: 24px;
+  --ca-space-xl: 32px;
+}
+
+/* ─── Shell ───────────────────────────────────────────────────── */
+.creator-apply-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: var(--ca-bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: ca-fade-in 0.3s ease-out;
+}
+@keyframes ca-fade-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Header ──────────────────────────────────────────────────── */
+.creator-apply-header {
+  display: flex;
+  align-items: center;
+  gap: var(--ca-space-md);
+  padding: var(--ca-space-md) var(--ca-space-md) var(--ca-space-md) var(--ca-space-sm);
+  border-bottom: 1px solid var(--ca-border);
+  background: var(--ca-surface);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+.creator-apply-header h2 {
+  flex: 1;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ca-pink);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--ca-space-sm);
+  min-width: 0;
+}
+.creator-apply-header h2 i {
+  font-size: 1.05rem;
+  flex-shrink: 0;
+}
+.creator-apply-header .icon-btn {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--ca-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ca-text-sec);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 0.2s ease;
+}
+.creator-apply-header .icon-btn:hover,
+.creator-apply-header .icon-btn:focus-visible {
+  background: var(--ca-pink-light);
+  color: var(--ca-pink);
+}
+.creator-apply-header .icon-btn:active { transform: scale(0.94); }
+
+/* ─── Content ─────────────────────────────────────────────────── */
+.creator-apply-content {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--ca-space-md) var(--ca-space-md) 140px;
+  max-width: 680px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── Skeleton Loading ────────────────────────────────────────── */
+.ca-skel-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ca-space-md);
+  padding: var(--ca-space-lg) 0;
+}
+.ca-skel-row {
+  height: 56px;
+  border-radius: var(--ca-radius);
+  background: linear-gradient(90deg, var(--skeleton-from, #f0f0f0) 25%, var(--skeleton-to, #e8e8e8) 50%, var(--skeleton-from, #f0f0f0) 75%);
+  background-size: 200% 100%;
+  animation: mwen-shimmer 1.8s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   INTRODUCTION PAGE
+   ═══════════════════════════════════════════════════════════════════════════ */
+.ca-intro {
+  animation: ca-fade-in 0.4s ease-out;
+  padding-bottom: 40px;
+}
+.ca-intro-hero {
+  text-align: center;
+  padding: var(--ca-space-xl) var(--ca-space-md);
+}
+.ca-intro-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--ca-pink), #ff5e8a);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  margin: 0 auto var(--ca-space-md);
+  box-shadow: 0 10px 30px var(--ca-pink-glow);
+}
+.ca-intro-title {
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  font-weight: 800;
+  color: var(--ca-text);
+  margin: 0 0 var(--ca-space-sm);
+  line-height: 1.2;
+}
+.ca-intro-subtitle {
+  font-size: 0.95rem;
+  color: var(--ca-text-sec);
+  max-width: 420px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Benefits grid */
+.ca-intro-benefits { padding: var(--ca-space-md) 0; }
+.ca-intro-benefits h3,
+.ca-intro-responsibilities h4,
+.ca-intro-how-it-works h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ca-text);
+  margin: 0 0 var(--ca-space-md);
+}
+.ca-intro-benefit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--ca-space-sm);
+}
+.ca-intro-benefit {
+  display: flex;
+  align-items: center;
+  gap: var(--ca-space-sm);
+  padding: 14px;
+  background: var(--ca-surface);
+  border: 1px solid var(--ca-border);
+  border-radius: var(--ca-radius);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ca-text);
+  transition: all 0.2s ease;
+  cursor: default;
+}
+.ca-intro-benefit i {
+  color: var(--ca-pink);
+  font-size: 1.1rem;
+  width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.ca-intro-benefit:hover {
+  border-color: rgba(216, 27, 96, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+
+/* Responsibilities */
+.ca-intro-responsibilities { padding: var(--ca-space-md) 0; }
+.ca-intro-responsibilities ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.ca-intro-responsibilities li {
+  padding: 10px 0;
+  font-size: 0.88rem;
+  color: var(--ca-text-sec);
+  display: flex;
+  align-items: center;
+  gap: var(--ca-space-sm);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+.ca-intro-responsibilities li:last-child { border-bottom: none; }
+.ca-intro-responsibilities li i { color: var(--ca-green); flex-shrink: 0; }
+
+/* How it works */
+.ca-intro-how-it-works { padding: var(--ca-space-md) 0; }
+.ca-intro-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--ca-space-sm);
+}
+.ca-intro-how-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--ca-surface);
+  border: 1px solid var(--ca-border);
+  border-radius: var(--ca-radius-sm);
+  font-size: 0.82rem;
+  color: var(--ca-text);
+}
+.ca-intro-step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--ca-pink);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* CTA */
+.ca-intro-cta {
+  text-align: center;
+  padding: var(--ca-space-xl) 0 var(--ca-space-md);
+}
+.ca-intro-start {
+  padding: 16px 48px;
+  font-size: 1.05rem;
+  border-radius: var(--ca-radius);
+  min-height: 52px;
+}
+.ca-intro-disclaimer {
+  margin-top: var(--ca-space-sm);
+  font-size: 0.78rem;
+  color: var(--ca-text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STEP WIZARD
+   ═══════════════════════════════════════════════════════════════════════════ */
+.ca-wizard-container {
+  padding: var(--ca-space-sm) 0;
+}
+
+/* Step indicator — horizontal scroll on mobile, centered on desktop */
+.ca-steps {
+  display: flex;
+  gap: 2px;
+  padding: var(--ca-space-md) 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+}
+.ca-steps::-webkit-scrollbar { display: none; }
+
+.ca-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ca-space-xs);
+  min-width: 56px;
+  flex-shrink: 0;
+  position: relative;
+  scroll-snap-align: center;
+}
+.ca-step-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border: 2px solid var(--ca-border);
+  color: var(--ca-text-muted);
+  background: var(--ca-surface);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.ca-step-active .ca-step-dot {
+  border-color: var(--ca-pink);
+  background: var(--ca-pink);
+  color: #fff;
+  box-shadow: 0 3px 12px var(--ca-pink-glow);
+  transform: scale(1.1);
+}
+.ca-step-done .ca-step-dot {
+  border-color: var(--ca-green);
+  background: var(--ca-green);
+  color: #fff;
+}
+.ca-step-label {
+  font-size: 0.6rem;
+  color: var(--ca-text-muted);
+  white-space: nowrap;
+  text-align: center;
+  transition: color 0.2s;
+}
+.ca-step-active .ca-step-label {
+  color: var(--ca-pink);
+  font-weight: 600;
+}
+.ca-step-done .ca-step-label {
+  color: var(--ca-green);
+}
+
+/* Connector lines between steps */
+.ca-step + .ca-step::before {
+  content: '';
+  position: absolute;
+  top: 16px;
+  left: -4px;
+  width: 8px;
+  height: 2px;
+  background: var(--ca-border);
+  z-index: -1;
+  transition: background 0.3s;
+}
+.ca-step-done + .ca-step::before {
+  background: var(--ca-green);
+}
+
+/* Autosave indicator */
+.ca-autosave {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  color: var(--ca-green);
+  padding: var(--ca-space-xs) 0;
+  justify-content: flex-end;
+  animation: ca-fade-in 0.3s ease-out;
+}
+
+/* ─── Step Content ────────────────────────────────────────────── */
+.ca-step-content {
+  padding: var(--ca-space-md) 0;
+  animation: ca-fade-in 0.3s ease-out;
+}
+.ca-step-header {
+  margin-bottom: var(--ca-space-lg);
+}
+.ca-step-header h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--ca-text);
+  margin: var(--ca-space-sm) 0 var(--ca-space-xs);
+}
+.ca-step-header p {
+  font-size: 0.88rem;
+  color: var(--ca-text-sec);
+  line-height: 1.5;
+}
+.ca-step-icon {
+  font-size: 1.4rem;
+  color: var(--ca-pink);
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--ca-pink-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ─── Form Fields ─────────────────────────────────────────────── */
+.ca-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ca-space-md);
+}
+.ca-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--ca-space-md);
+}
+.ca-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ca-space-xs);
+}
+.ca-field-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ca-text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ca-field-hint {
+  font-size: 0.72rem;
+  color: var(--ca-text-muted);
+  line-height: 1.4;
+}
+.ca-field-counter {
+  font-size: 0.65rem;
+  color: var(--ca-text-muted);
+  text-align: right;
+}
+
+/* ─── Required markers + smart per-field errors ─────────────── */
+.ca-req-legend {
+  font-size: 0.72rem;
+  color: var(--ca-text-muted);
+  margin: 6px 0 0;
+}
+.ca-req-star {
+  color: #ef4444;
+  font-weight: 700;
+}
+.ca-field-label .ca-req-star {
+  margin-left: 1px;
+}
+.ca-field-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: #dc2626;
+  line-height: 1.4;
+  animation: ca-field-error-in 0.25s ease-out;
+}
+.ca-field-error i {
+  margin-top: 2px;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+@keyframes ca-field-error-in {
+  from { opacity: 0; transform: translateY(-2px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+/* Invalid input highlight — scoped so it can never leak outside the sheet */
+.creator-apply-sheet .ca-field input.is-invalid,
+.creator-apply-sheet .ca-field select.is-invalid,
+.creator-apply-sheet .ca-field textarea.is-invalid {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12) !important;
+  background: rgba(239, 68, 68, 0.04) !important;
+}
+
+/* ─── Terms ───────────────────────────────────────────────────── */
+.ca-terms-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ca-space-md);
+}
+.ca-terms-item {
+  display: flex;
+  gap: var(--ca-space-md);
+  padding: 16px;
+  border: 1.5px solid var(--ca-border);
+  border-radius: var(--ca-radius);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 0.2s ease;
+  align-items: flex-start;
+  user-select: none;
+}
+.ca-terms-item:hover {
+  border-color: rgba(216, 27, 96, 0.25);
+  background: rgba(216, 27, 96, 0.02);
+}
+.ca-terms-checked {
+  border-color: var(--ca-green) !important;
+  background: var(--ca-green-light) !important;
+}
+.ca-terms-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ca-space-xs);
+}
+.ca-terms-item.ca-terms-invalid {
+  border-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.05) !important;
+}
+.ca-terms-item input[type="checkbox"] {
+  margin-top: 3px;
+  width: 20px;
+  height: 20px;
+  accent-color: var(--ca-pink);
+  flex-shrink: 0;
+}
+.ca-terms-item strong {
+  font-size: 0.9rem;
+  color: var(--ca-text);
+  display: block;
+}
+.ca-terms-item p {
+  font-size: 0.8rem;
+  color: var(--ca-text-sec);
+  margin: 4px 0 0;
+  line-height: 1.5;
+}
+.ca-terms-required {
+  font-size: 0.82rem;
+  color: #f59e0b;
+  padding: var(--ca-space-sm) 0;
+  display: flex;
+  align-items: center;
+  gap: var(--ca-space-sm);
+}
+
+/* ─── Review ──────────────────────────────────────────────────── */
+.ca-review-sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ca-space-md);
+}
+.ca-review-section {
+  border: 1px solid var(--ca-border);
+  border-radius: var(--ca-radius);
+  overflow: hidden;
+}
+.ca-review-section h4 {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ca-pink);
+  padding: 12px var(--ca-space-md);
+  margin: 0;
+  background: var(--ca-pink-light);
+  border-bottom: 1px solid var(--ca-border);
+}
+.ca-review-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 10px var(--ca-space-md);
+  border-bottom: 1px solid var(--ca-border);
+  gap: var(--ca-space-sm);
+}
+.ca-review-field:last-child { border-bottom: none; }
+.ca-review-label {
+  font-size: 0.78rem;
+  color: var(--ca-text-sec);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+.ca-review-value {
+  font-size: 0.85rem;
+  color: var(--ca-text);
+  font-weight: 600;
+  text-align: right;
+  max-width: 60%;
+  word-break: break-word;
+}
+
+/* ─── Submit Step ─────────────────────────────────────────────── */
+.ca-step-submit {
+  text-align: center;
+  padding: var(--ca-space-xl) 0;
+}
+.ca-step-submit-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--ca-pink), #ff5e8a);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  margin: 0 auto var(--ca-space-md);
+  box-shadow: 0 10px 30px var(--ca-pink-glow);
+}
+.ca-submit-summary {
+  display: flex;
+  gap: var(--ca-space-lg);
+  justify-content: center;
+  margin: var(--ca-space-lg) 0;
+}
+.ca-submit-stat { text-align: center; }
+.ca-submit-stat-value {
+  display: block;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--ca-pink);
+}
+.ca-submit-stat-label {
+  font-size: 0.72rem;
+  color: var(--ca-text-sec);
+}
+.ca-submit-btn {
+  padding: 16px 52px;
+  font-size: 1.05rem;
+  border-radius: var(--ca-radius);
+  min-height: 52px;
+}
+
+/* ─── Step Navigation (sticky footer) ─────────────────────────── */
+.ca-step-nav {
+  display: flex;
+  gap: var(--ca-space-md);
+  padding: var(--ca-space-md) 0;
+  border-top: 1px solid var(--ca-border);
+  margin-top: var(--ca-space-sm);
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  background: color-mix(in srgb, var(--ca-surface) 92%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+.ca-step-nav .btn-primary,
+.ca-step-nav .btn-secondary {
+  min-height: 48px;
+  padding: 12px 24px;
+}
+
+/* ─── Error Banner ────────────────────────────────────────────── */
+.ca-error {
+  text-align: center;
+  padding: var(--ca-space-xl);
+  animation: ca-fade-in 0.3s ease-out;
+}
+.ca-error i {
+  font-size: 2.5rem;
+  color: #ef4444;
+  margin-bottom: var(--ca-space-md);
+}
+.ca-error p {
+  font-size: 0.95rem;
+  color: var(--ca-text-sec);
+  margin-bottom: var(--ca-space-md);
+  white-space: pre-line;
+}
+.ca-error-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--ca-space-sm);
+  padding: 12px var(--ca-space-md);
+  background: rgba(239, 68, 68, 0.06);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--ca-radius-sm);
+  color: #dc2626;
+  font-size: 0.85rem;
+  margin-bottom: var(--ca-space-md);
+  animation: ca-fade-in 0.3s ease-out;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STATUS DASHBOARD
+   ═══════════════════════════════════════════════════════════════════════════ */
+.ca-dashboard {
+  animation: ca-fade-in 0.4s ease-out;
+  padding-bottom: var(--ca-space-xl);
+}
+.ca-dash-hero {
+  display: flex;
+  gap: var(--ca-space-md);
+  padding: var(--ca-space-lg);
+  background: var(--ca-surface);
+  border-left: 4px solid var(--ca-pink);
+  border-radius: var(--ca-radius);
+  margin-bottom: var(--ca-space-md);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+.ca-dash-hero-icon {
+  font-size: 2.5rem;
+  display: flex;
+  align-items: center;
+}
+.ca-dash-status {
+  font-size: clamp(1.1rem, 4vw, 1.3rem);
+  font-weight: 800;
+  color: var(--ca-text);
+  margin: 0 0 var(--ca-space-xs);
+}
+.ca-dash-hint {
+  font-size: 0.88rem;
+  color: var(--ca-text-sec);
+  margin: 0;
+}
+.ca-dash-estimate {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--ca-text-sec);
+  margin-top: var(--ca-space-sm);
+  padding: 6px 12px;
+  background: rgba(56, 189, 248, 0.08);
+  border-radius: 8px;
+}
+
+/* Stats grid */
+.ca-dash-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--ca-space-sm);
+  margin-bottom: var(--ca-space-md);
+}
+.ca-dash-stat {
+  text-align: center;
+  padding: var(--ca-space-md);
+  background: var(--ca-surface);
+  border: 1px solid var(--ca-border);
+  border-radius: var(--ca-radius-sm);
+}
+.ca-dash-stat-value {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--ca-text);
+}
+.ca-dash-stat-label {
+  font-size: 0.65rem;
+  color: var(--ca-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Timeline */
+.ca-dash-timeline { margin-bottom: var(--ca-space-md); }
+.ca-dash-timeline h4 {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--ca-text);
+  margin: 0 0 var(--ca-space-md);
+}
+.ca-dash-timeline-item {
+  display: flex;
+  gap: var(--ca-space-md);
+  padding: var(--ca-space-sm) 0;
+  position: relative;
+}
+.ca-dash-timeline-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ca-pink);
+  flex-shrink: 0;
+  margin-top: 4px;
+  position: relative;
+  z-index: 1;
+}
+.ca-dash-timeline-item::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 18px;
+  bottom: -4px;
+  width: 2px;
+  background: var(--ca-border);
+}
+.ca-dash-timeline-item:last-child::before { display: none; }
+.ca-dash-timeline-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ca-dash-timeline-content strong {
+  font-size: 0.82rem;
+  color: var(--ca-text);
+}
+.ca-dash-timeline-content span {
+  font-size: 0.75rem;
+  color: var(--ca-text-sec);
+}
+.ca-dash-timeline-content small {
+  font-size: 0.65rem;
+  color: var(--ca-text-muted);
+}
+
+/* Rejection / Need Info */
+.ca-dash-rejection,
+.ca-dash-need-info {
+  display: flex;
+  gap: var(--ca-space-md);
+  padding: var(--ca-space-md);
+  background: var(--ca-surface);
+  border-radius: var(--ca-radius);
+  margin-bottom: var(--ca-space-md);
+  border: 1px solid #fecaca;
+}
+.ca-dash-rejection i { color: #ef4444; font-size: 1.1rem; flex-shrink: 0; margin-top: 2px; }
+.ca-dash-need-info { border-color: #fed7aa; }
+.ca-dash-need-info i,
+.ca-info-need-icon { color: #f97316; flex-shrink: 0; margin-top: 2px; }
+.ca-dash-rejection strong,
+.ca-dash-need-info strong {
+  font-size: 0.88rem;
+  color: var(--ca-text);
+  display: block;
+}
+.ca-dash-rejection p,
+.ca-dash-need-info p {
+  font-size: 0.82rem;
+  color: var(--ca-text-sec);
+  margin: var(--ca-space-xs) 0 0;
+  line-height: 1.5;
+}
+
+/* Next action */
+.ca-next-action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ca-space-sm);
+  margin-top: var(--ca-space-sm);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE — Mobile First
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Small phones (< 380px) */
+@media (max-width: 380px) {
+  .ca-intro-icon { width: 64px; height: 64px; font-size: 1.8rem; }
+  .ca-step-dot { width: 28px; height: 28px; font-size: 0.65rem; }
+  .ca-step { min-width: 48px; }
+  .ca-field-row { grid-template-columns: 1fr; }
+  .ca-submit-summary { gap: var(--ca-space-md); }
+}
+
+/* Mobile (< 600px) */
+@media (max-width: 600px) {
+  .creator-apply-content {
+    padding: var(--ca-space-sm) var(--ca-space-sm) 120px;
+  }
+  .ca-intro-hero { padding: var(--ca-space-lg) var(--ca-space-sm); }
+  .ca-intro-benefit-grid { grid-template-columns: repeat(2, 1fr); }
+  .ca-intro-steps { grid-template-columns: 1fr; }
+  .ca-step-header h3 { font-size: 1.1rem; }
+  .ca-dash-hero { flex-direction: column; gap: var(--ca-space-sm); }
+  .ca-dash-stats { gap: 6px; }
+  .ca-dash-stat { padding: var(--ca-space-sm); }
+  .ca-step-nav {
+    padding: var(--ca-space-sm) 0 var(--ca-space-md);
+  }
+  .ca-submit-btn,
+  .ca-intro-start {
+    width: 100%;
+    padding: 16px;
+  }
+}
+
+/* Tablet (600px–900px) */
+@media (min-width: 601px) and (max-width: 900px) {
+  .creator-apply-content {
+    max-width: 600px;
+    padding: var(--ca-space-md) var(--ca-space-lg) 140px;
+  }
+}
+
+/* Large screens (> 900px) */
+@media (min-width: 901px) {
+  .creator-apply-content {
+    max-width: 720px;
+  }
+}
+
+/* ═══ Accessibility ══════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  .creator-apply-sheet,
+  .ca-intro,
+  .ca-step-content,
+  .ca-dashboard,
+  .ca-error,
+  .ca-error-banner,
+  .ca-field-error,
+  .ca-autosave {
+    animation: none !important;
+  }
+  .ca-step-dot { transition: none; }
+  .ca-intro-benefit:hover { transform: none; }
+}
+@media (prefers-contrast: more) {
+  .ca-step-dot,
+  .ca-intro-benefit,
+  .ca-terms-item {
+    border-width: 2px;
+  }
+}
+
+/* ═══ Print ══════════════════════════════════════════════════════ */
+@media print {
+  .creator-apply-sheet { position: static; }
+  .creator-apply-header,
+  .ca-step-nav,
+  .ca-autosave { display: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ═══ PROMPT 22 — Welcome Checklist Styles ════════════════════════════════
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.wcl-container {
+  background: var(--card-bg, #fff);
+  border: 1px solid var(--border-color, #eee);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.wcl-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+.wcl-header-left {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.wcl-header-left i {
+  font-size: 1.5rem;
+  color: var(--pink-primary, #d81b60);
+  margin-top: 2px;
+}
+.wcl-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main, #333);
+  margin: 0 0 2px;
+}
+.wcl-subtitle {
+  font-size: 0.78rem;
+  color: var(--text-secondary, #666);
+  margin: 0;
+}
+
+.wcl-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Progress ring */
+.wcl-progress-ring {
+  width: 40px;
+  height: 40px;
+}
+.wcl-ring-svg {
+  width: 100%;
+  height: 100%;
+}
+.wcl-ring-bg {
+  fill: none;
+  stroke: var(--border-color, #eee);
+  stroke-width: 3;
+}
+.wcl-ring-fill {
+  fill: none;
+  stroke: var(--pink-primary, #d81b60);
+  stroke-width: 3;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.5s ease;
+}
+.wcl-ring-text {
+  fill: var(--text-main, #333);
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.wcl-dismiss {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary, #999);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+.wcl-dismiss:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--text-main, #333);
+}
+
+/* Steps */
+.wcl-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.wcl-step {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 10px;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+.wcl-step:hover {
+  border-color: var(--border-color, #eee);
+}
+.wcl-step-done {
+  opacity: 0.7;
+}
+.wcl-step-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.wcl-step-check {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--border-color, #ddd);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-secondary, #999);
+  flex-shrink: 0;
+  transition: all 0.25s;
+}
+.wcl-step-checked {
+  border-color: #10b981;
+  background: #10b981;
+  color: #fff;
+}
+.wcl-step-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.wcl-step-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-main, #333);
+}
+.wcl-step-done-label {
+  font-size: 0.65rem;
+  color: #10b981;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.wcl-step-right {
+  display: flex;
+  align-items: center;
+}
+.wcl-step-btn {
+  padding: 6px 14px;
+  border: 1.5px solid var(--pink-primary, #d81b60);
+  background: transparent;
+  color: var(--pink-primary, #d81b60);
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.wcl-step-btn:hover {
+  background: var(--pink-primary, #d81b60);
+  color: #fff;
+}
+.wcl-step-check-icon {
+  color: #10b981;
+  font-size: 1.1rem;
+}
+
+/* Progress bar */
+.wcl-progress-bar-track {
+  height: 4px;
+  background: var(--border-color, #eee);
+  border-radius: 4px;
+  margin-top: 16px;
+  overflow: hidden;
+}
+.wcl-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--pink-primary, #d81b60), #ff5e8a);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+/* Dismiss button */
+.wcl-dismiss-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary, #999);
+  font-size: 0.72rem;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  padding: 8px 0;
+  font-family: inherit;
+  width: 100%;
+  text-align: center;
+  transition: color 0.2s;
+}
+.wcl-dismiss-btn:hover {
+  color: var(--text-main, #333);
+}
+
+/* Dark mode */
+body.dark-mode .wcl-container {
+  background: var(--card-bg, #1e1e2a);
+  border-color: var(--border-color, #2a2a35);
+}
+body.dark-mode .wcl-step:hover {
+  border-color: var(--border-color, #2a2a35);
+}
+body.dark-mode .wcl-step-check {
+  border-color: #444;
+  color: var(--text-secondary, #a0a4ac);
+}
+
+@media (max-width: 600px) {
+  .wcl-container { padding: 14px; }
+  .wcl-header { gap: 8px; }
+}
+
+
+@media (max-width: 640px) {
+  /* Mobile: tabs become content-sized pills so labels never get
+     crushed by equal-width ``flex: 1 1 0%`` distribution (the old
+     behavior squeezed icon + label + count into ~50px pills, making
+     labels overflow into each other on narrow phones). The bar now
+     scrolls horizontally with snap (``overflow-x: auto`` on the bar,
+     ``scroll-snap-align: start`` on each pill) and the right-edge
+     fade (``.mwen-section-tabs-wrap.is-overflowing::after``) tells
+     users there's more to swipe. ``min-height: 44px`` keeps tap
+     targets comfortable; padding stays generous so the pill reads
+     as a button, not a cramped chip. */
+  .mwen-section-tabs-wrap {
+    margin: 12px 10px 10px;
+  }
+
+  .mwen-section-tab {
+    flex: 0 0 auto;
+    min-width: 0;
+    padding: 10px 14px;
+    font-size: 0.76rem;
+    gap: 6px;
+  }
+
+  .mwen-section-tab i {
+    font-size: 0.8rem;
+  }
+
+  .mwen-section-tab-label {
+    max-width: 150px;
+  }
+}
+
+@media (max-width: 400px) {
+  /* Ultra-narrow (<400px): tighten the pill chrome slightly so 5 tabs
+     still read comfortably, but keep labels intact — content-sized
+     pills (flex: 0 0 auto from the ≤640px block) mean the bar scrolls
+     instead of squashing text. No font-size collapse below 0.7rem:
+     tiny text is unreadable, and the scroll cue replaces the need to
+     force everything onto one screenful. */
+  .mwen-section-tab {
+    padding: 9px 12px;
+    font-size: 0.72rem;
+    gap: 5px;
+  }
+
+  .mwen-section-tab i {
+    font-size: 0.76rem;
+  }
+
+  .mwen-section-tab-label {
+    max-width: 120px;
+  }
+
+  .mwen-section-tab-count {
+    padding: 1px 6px;
+    font-size: 0.6rem;
+    min-width: 17px;
+  }
+
+  .mwen-hero {
+    padding: 16px 12px 4px;
+  }
+
+  .mwen-hero-profile {
+    padding: 14px 14px 12px;
+    gap: 12px;
+  }
+
+  .mwen-hero-avatar {
+    width: 48px;
+    height: 48px;
+    font-size: 1.15rem;
+  }
+
+  .mwen-hero-title {
+    font-size: 1.05rem;
+  }
+
+  .mwen-nav-grid {
+    padding: 4px 8px;
+  }
+
+  .mwen-analytics-card {
+    padding: 12px 14px;
+  }
+
+  .mwen-section-tabs-wrap {
+    margin: 12px 8px 10px;
+  }
+
+  .mwen-section-tabs {
+    padding: 3px;
+  }
+
+  .mwen-section {
+    padding: 0 8px;
+  }
+
+  /* Responsive override: both avatar and cover shrink together to
+     48px (was previously 42/48 — making them 48/48 removes the
+     height mismatch on small screens for the same reason as the
+     desktop normalization). */
+  .mwen-row-avatar,
+  .mwen-row-cover,
+  .mwen-row-avatar-orphan {
+    width: 48px;
+    height: 48px;
+  }
+
+  .mwen-row-cta {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .mwen-empty-icon-wrap {
+    width: 60px;
+    height: 60px;
+  }
+
+  .mwen-empty i {
+    font-size: 1.6rem;
+  }
+
+  .mwen-empty {
+    padding: 40px 16px 32px;
+  }
+
+  .mwen-skel-row {
+    height: 60px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CreatorApply Dark Mode (Uses scoped CSS variables)
+   ═══════════════════════════════════════════════════════════════════════ */
+.dark-mode .creator-apply-sheet {
+  --ca-bg: var(--bg-app-dark, #16121a);
+  --ca-surface: var(--bg-elevated-dark, #1f1a25);
+  --ca-border: var(--border-soft-dark, #2a242e);
+  --ca-text: var(--text-primary-dark, #f5f5f5);
+  --ca-text-sec: var(--text-secondary-dark, #a8a8a8);
+  --ca-text-muted: var(--text-secondary-dark, #888);
+  background: var(--ca-bg);
+  color: var(--ca-text);
+}
+.dark-mode .creator-apply-header {
+  background: var(--ca-surface);
+  border-bottom-color: var(--ca-border);
+}
+.dark-mode .creator-apply-header .icon-btn {
+  color: var(--ca-text-sec);
+}
+.dark-mode .creator-apply-header .icon-btn:hover,
+.dark-mode .creator-apply-header .icon-btn:focus-visible {
+  background: rgba(216, 27, 96, 0.15);
+  color: var(--ca-pink);
+}
+
+/* Forms */
+.dark-mode .ca-field .field-input,
+.dark-mode .ca-field .field-textarea,
+.dark-mode .ca-step-content .field-input {
+  background: var(--ca-surface);
+  border-color: var(--border-dark, #3a323c);
+  color: var(--ca-text);
+}
+.dark-mode .ca-field .field-input:focus,
+.dark-mode .ca-field .field-textarea:focus {
+  background: rgba(31, 26, 37, 0.9);
+}
+.dark-mode .ca-field .field-input::placeholder,
+.dark-mode .ca-field .field-textarea::placeholder {
+  color: var(--ca-text-muted);
+  opacity: 0.5;
+}
+.dark-mode select.ca-field .field-input,
+.dark-mode .ca-field select.field-input {
+  background-color: var(--ca-surface) !important;
+  color: var(--ca-text);
+}
+.dark-mode select.ca-field .field-input option,
+.dark-mode .ca-field select.field-input option {
+  background: var(--ca-surface);
+  color: var(--ca-text);
+}
+
+/* Step nav */
+.dark-mode .ca-step-nav {
+  border-top-color: var(--ca-border);
+  background: color-mix(in srgb, var(--ca-bg) 92%, transparent);
+}
+
+/* Terms */
+.dark-mode .ca-terms-item {
+  background: var(--ca-surface);
+  border-color: var(--ca-border);
+}
+.dark-mode .ca-terms-item:hover {
+  background: rgba(216, 27, 96, 0.06);
+  border-color: rgba(216, 27, 96, 0.3);
+}
+
+/* Error */
+.dark-mode .ca-error-banner {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+.dark-mode .ca-field-error {
+  color: #fca5a5;
+}
+.dark-mode .creator-apply-sheet .ca-field input.is-invalid,
+.dark-mode .creator-apply-sheet .ca-field select.is-invalid,
+.dark-mode .creator-apply-sheet .ca-field textarea.is-invalid {
+  background: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Step connector */
+.dark-mode .ca-step + .ca-step::before {
+  background: var(--ca-border);
+}
+.dark-mode .ca-step-done + .ca-step::before {
+  background: var(--ca-green);
+}
+
+/* Reduced motion override */
+@media (prefers-reduced-motion: reduce) {
+  .dark-mode .creator-apply-sheet { animation: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CreatorApply — Responsive polish v2
+   Safe-area insets (notch / gesture bar), tight-phone column stacking,
+   sticky-nav touch targets, and long-content word wrapping. Kept at the
+   end of the sheet scope so these refinements win over the base rules.
+   ═══════════════════════════════════════════════════════════════════════ */
+.creator-apply-content {
+  /* Sticky nav clearance + phone gesture bar (safe-area) */
+  padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px));
+}
+.creator-apply-header {
+  padding-top: calc(var(--ca-space-sm) + env(safe-area-inset-top, 0px));
+}
+.creator-apply-header h2 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ca-step-nav {
+  padding-bottom: calc(var(--ca-space-md) + env(safe-area-inset-bottom, 0px));
+}
+/* Long unbroken URLs/emails must wrap instead of pushing the sheet wide */
+.ca-review-value {
+  max-width: 100%;
+}
+
+/* Wide-enough for two side-by-side fields */
+@media (max-width: 560px) {
+  .ca-field-row { grid-template-columns: 1fr; }
+  .ca-submit-summary { flex-wrap: wrap; }
+}
+
+/* Small phones — full-width buttons in the sticky nav + tighter steps */
+@media (max-width: 480px) {
+  .ca-step-nav { gap: var(--ca-space-sm); }
+  .ca-step-nav .btn-primary,
+  .ca-step-nav .btn-secondary {
+    flex: 1;
+    padding: 12px 14px;
+    min-width: 0;
+  }
+  .ca-step { min-width: 44px; }
+  .ca-step-dot { width: 30px; height: 30px; font-size: 0.7rem; }
+}
+
+/* Dashboard stat tiles — never cram 3 across on a phone */
+@media (max-width: 600px) {
+  .creator-apply-content {
+    padding-bottom: calc(124px + env(safe-area-inset-bottom, 0px));
+  }
+  .ca-dash-stats { grid-template-columns: 1fr 1fr; }
+  .ca-dash-stats .ca-dash-stat:nth-child(3) { grid-column: 1 / -1; }
+}

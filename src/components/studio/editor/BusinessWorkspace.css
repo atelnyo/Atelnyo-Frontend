@@ -1,0 +1,325 @@
+/* BusinessWorkspace.css — Student Business Workspace */
+
+.business-workspace {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ─── Header ─────────────────────────────────────────────────────── */
+.bws-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.bws-header h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 8px;
+}
+
+.bws-subtitle {
+  color: #666;
+  font-size: 16px;
+  margin: 0 0 20px;
+}
+
+.bws-progress-bar {
+  position: relative;
+  height: 24px;
+  background: #e8e8e8;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 0 auto 8px;
+  max-width: 400px;
+}
+
+.bws-progress-fill {
+  height: 100%;
+  background: linear-gradient(135deg, #4caf50, #66bb6a);
+  border-radius: 12px;
+  transition: width 0.5s ease;
+}
+
+.bws-progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+  font-weight: 700;
+  color: #333;
+}
+
+.bws-progress-label {
+  font-size: 13px;
+  color: #888;
+  margin: 0;
+}
+
+/* ─── Challenges ─────────────────────────────────────────────────── */
+.bws-challenges {
+  margin-bottom: 32px;
+}
+
+.bws-challenges h3 {
+  font-size: 20px;
+  margin: 0 0 16px;
+}
+
+.bws-challenge-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.bws-challenge-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.bws-challenge-btn:hover {
+  border-color: #4caf50;
+  background: #f0fff0;
+  transform: translateY(-2px);
+}
+
+.bws-challenge-icon {
+  font-size: 28px;
+}
+
+/* ─── Sections Grid ──────────────────────────────────────────────── */
+.bws-sections {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 32px;
+}
+
+.bws-section-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 8px;
+  border: 2px solid #e8e8e8;
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  font-size: 13px;
+  color: #555;
+}
+
+.bws-section-card:hover {
+  border-color: #4caf50;
+  background: #f8fff8;
+}
+
+.bws-section-card.active {
+  border-color: #4caf50;
+  background: #e8f5e9;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+}
+
+.bws-section-card.has-data {
+  border-color: #90caf9;
+  background: #e3f2fd;
+}
+
+.bws-section-card.completed {
+  border-color: #4caf50;
+  background: #e8f5e9;
+}
+
+.bws-section-icon {
+  font-size: 24px;
+}
+
+.bws-section-label {
+  font-weight: 600;
+  font-size: 12px;
+  text-align: center;
+}
+
+.bws-section-check {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 14px;
+}
+
+/* ─── Editor ─────────────────────────────────────────────────────── */
+.bws-editor {
+  background: #f8f9fa;
+  border: 2px solid #4caf50;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 32px;
+  animation: bwsSlideIn 0.3s ease;
+}
+
+@keyframes bwsSlideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.bws-editor-header {
+  margin-bottom: 16px;
+}
+
+.bws-editor-header h3 {
+  font-size: 20px;
+  margin: 0 0 4px;
+  color: #1a1a2e;
+}
+
+.bws-editor-desc {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.bws-editor-input {
+  width: 100%;
+  min-height: 180px;
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 15px;
+  line-height: 1.6;
+  resize: vertical;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.bws-editor-input:focus {
+  outline: none;
+  border-color: #4caf50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.bws-editor-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.bws-save-btn {
+  padding: 10px 24px;
+  background: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.bws-save-btn:hover {
+  background: #388e3c;
+}
+
+.bws-save-btn:disabled {
+  background: #aaa;
+  cursor: not-allowed;
+}
+
+.bws-close-btn {
+  padding: 10px 16px;
+  background: transparent;
+  color: #666;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.bws-close-btn:hover {
+  background: #f5f5f5;
+  color: #333;
+}
+
+/* ─── Tips ───────────────────────────────────────────────────────── */
+.bws-tips {
+  background: #fff3e0;
+  border: 1px solid #ffe0b2;
+  border-radius: 10px;
+  padding: 16px 20px;
+}
+
+.bws-tips h4 {
+  font-size: 16px;
+  margin: 0 0 8px;
+  color: #e65100;
+}
+
+.bws-tips ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.bws-tips li {
+  font-size: 13px;
+  color: #bf360c;
+  margin-bottom: 4px;
+}
+
+/* ─── Loading ────────────────────────────────────────────────────── */
+.bws-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.bws-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e8e8e8;
+  border-top-color: #4caf50;
+  border-radius: 50%;
+  animation: bwsSpin 0.8s linear infinite;
+}
+
+@keyframes bwsSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Mobile ─────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .business-workspace {
+    padding: 16px;
+  }
+
+  .bws-sections {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px;
+  }
+
+  .bws-challenge-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bws-editor {
+    padding: 16px;
+  }
+}
