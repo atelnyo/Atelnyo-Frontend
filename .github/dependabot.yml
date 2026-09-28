@@ -1,0 +1,50 @@
+# Dependabot configuration — Atelnyo Frontend
+#
+# Two layers of automated dependency management:
+#   1. SECURITY updates — Dependabot opens PRs for dependencies with known
+#      vulnerabilities as soon as they're flagged (enabled via repo settings:
+#      Settings → Code security → Dependabot security updates).
+#   2. VERSION updates (this file) — weekly maintenance PRs keeping deps fresh.
+#      Minor + patch updates are grouped into one PR to reduce noise; major
+#      updates (e.g. React 18 → 19, Vite 5 → 6) get their own PRs so they can
+#      be reviewed and tested individually.
+
+version: 2
+updates:
+  # npm dependencies (package.json / package-lock.json at repo root)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    commit-message:
+      prefix: "deps"
+    labels:
+      - "dependencies"
+
+  # GitHub Actions used in .github/workflows/ci.yml
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 5
+    groups:
+      actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "ci"
+    labels:
+      - "dependencies"
+      - "ci"
