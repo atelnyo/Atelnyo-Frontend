@@ -4,7 +4,7 @@
 
 The frontend (client-side) portion of the [Atelnyo](https://atelnyo.site) platform — a bilingual (Haitian Creole / English) learning and creator ecosystem. This repository contains the React single-page application only; the Atelnyo backend is private and not part of this repository.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 ## What's inside
 
@@ -112,6 +112,8 @@ The Playwright specs assume a running Vite dev server on `127.0.0.1:3000` and a 
 
 ## Contributing
 
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a Pull Request.
+
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feat/my-feature`
 3. Commit your changes: `git commit -m "feat: add my feature"`
@@ -129,6 +131,14 @@ Please run `npm run lint` and `npm test` before opening a PR.
 
 Atelnyo is a full-stack platform; this repository is only the client side. The backend is private and not required to build or lint this codebase — only to exercise API-backed features during development. Nothing in this repository grants privileged access to the backend, and we ask that you don't attempt to bypass its authentication or rate limits.
 
+## Security
+
+Found a security issue? Please do **not** open a public issue — see [SECURITY.md](SECURITY.md) for how to report it privately.
+
 ## License
 
-Copyright © 2026 Atelnyo. Released under the [MIT License](LICENSE). Third-party dependencies are governed by their own licenses.
+Copyright © 2026 Atelnyo. This project is licensed under the [GNU General Public License v3.0](LICENSE) (GPL-3.0-or-later).
+
+This is a copyleft license: anyone who copies, modifies, or distributes this code (or a work based on it) must release it under the same GPL-3.0 license, keep the copyright notice, and make the corresponding source code available. This prevents the frontend from being taken into proprietary products.
+
+Third-party dependencies are governed by their own licenses. Unless a separate exception is stated, shipping this frontend as part of a combined work (for example, an app bundle that includes it) makes the whole work subject to GPL-3.0.

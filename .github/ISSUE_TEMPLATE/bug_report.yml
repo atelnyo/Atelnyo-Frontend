@@ -1,0 +1,60 @@
+name: 🐛 Bug Report
+description: Report something that doesn't work in the Atelnyo frontend
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out the details below.
+        **Security vulnerabilities should NOT be reported here** — see [SECURITY.md](../../SECURITY.md).
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug description
+      description: A clear, concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen instead?
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots / recordings
+      description: If applicable, add screenshots or a screen recording.
+    validations:
+      required: false
+  - type: input
+    id: url
+    attributes:
+      label: Page / route
+      description: Which page or route does this happen on?
+      placeholder: e.g. /explore, /studio/courses
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser, OS, and whether it happens on the live site or a local dev build.
+      placeholder: e.g. Chrome 140 / Ubuntu 24.04 / local dev
+    validations:
+      required: true
+  - type: textarea
+    id: console
+    attributes:
+      label: Console output
+      description: Any errors from the browser console (DevTools → Console).
+      render: shell
