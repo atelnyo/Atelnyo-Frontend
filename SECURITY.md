@@ -12,7 +12,9 @@ Instead, use GitHub's **private vulnerability reporting** for this repository:
 
 > **Security** tab → **Report a vulnerability**
 
-This keeps the details confidential until a fix is ready. If private reporting is unavailable for some reason, contact the maintainers directly by email at **devroseacademy@gmail.com** with `[SECURITY]` in the subject.
+This keeps the details confidential until a fix is ready.
+
+If GitHub reporting is unavailable — or the issue is urgent — reach the maintainers directly on **WhatsApp: [+1 (849) 502-5014](https://wa.me/18495025014)**. Start your message with `[SECURITY]` and a one-line description so it gets triaged fast.
 
 ## What to include
 
