@@ -1,5 +1,7 @@
 # Atelnyo Frontend
 
+> **Atelnyo** is an international platform where creators teach online courses, share music, sell products, and grow their digital presence.
+
 The frontend (client-side) portion of the [Atelnyo](https://atelnyo.site) platform — a bilingual (Haitian Creole / English) learning and creator ecosystem. This repository contains the React single-page application only; the Atelnyo backend is private and not part of this repository.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -129,4 +131,4 @@ Atelnyo is a full-stack platform; this repository is only the client side. The b
 
 ## License
 
-Released under the [MIT License](LICENSE). Third-party dependencies are governed by their own licenses.
+Copyright © 2026 Atelnyo. Released under the [MIT License](LICENSE). Third-party dependencies are governed by their own licenses.
