@@ -1,0 +1,768 @@
+/**
+ * src/components/HelpPage.css
+ *
+ * Help Center styles. All colors reference the design-system custom
+ * properties used across the app (--pink-primary, --surface-card, ...) with
+ * the same light-theme fallbacks as the previous inline styles, so the page
+ * keeps working in themes that define them and in themes that don't.
+ *
+ * Breakpoints follow the project convention: 768px (tablet/mobile) and
+ * 480px (small phones).
+ */
+
+/* ── Shell ──────────────────────────────────────────────────────────────── */
+
+.help-shell {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 1.25rem 4rem;
+}
+
+/* ── Hero ───────────────────────────────────────────────────────────────── */
+
+.help-hero {
+  background: linear-gradient(135deg, var(--color-primary, #d81b60), var(--pr-color-rose-300, #f06292));
+  color: #fff;
+  padding: clamp(2.25rem, 6vw, 3.25rem) clamp(1rem, 4vw, 2.5rem) clamp(2rem, 5vw, 2.5rem);
+  text-align: center;
+}
+
+.help-hero-title {
+  font-size: clamp(1.45rem, 1.1rem + 2.2vw, 2rem);
+  font-weight: 700;
+  margin: 0 0 6px;
+  line-height: 1.25;
+}
+
+.help-hero-title .fas {
+  margin-right: 8px;
+}
+
+.help-hero-sub {
+  margin: 0;
+  opacity: 0.9;
+  font-size: clamp(0.88rem, 0.82rem + 0.4vw, 1rem);
+  max-width: 40rem;
+  margin-inline: auto;
+}
+
+/* ── Search ─────────────────────────────────────────────────────────────── */
+
+.help-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.7rem 1rem;
+  border-radius: 14px;
+  border: 1px solid var(--border-color);
+  background: var(--surface-card, #fff);
+  margin: -24px auto 0;
+  max-width: 520px;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.help-search:focus-within {
+  border-color: var(--pink-primary, #d81b60);
+  box-shadow: 0 4px 16px rgba(216, 27, 96, 0.14);
+}
+
+.help-search-icon {
+  color: var(--text-secondary, #888);
+  flex-shrink: 0;
+}
+
+.help-search-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 4px 0;
+}
+
+.help-search-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.help-search-clear {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.help-search-clear:hover {
+  color: var(--pink-primary, #d81b60);
+}
+
+/* ── On this page (TOC) ─────────────────────────────────────────────────── */
+
+.help-toc {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--surface-page, var(--bg-page, #fff));
+  padding: 0.7rem 0 0.6rem;
+  border-bottom: 1px solid var(--border-color-subtle, rgba(0, 0, 0, 0.04));
+}
+
+.help-toc-toggle {
+  display: none; /* mobile only, shown in @media */
+  width: 100%;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 4px;
+  min-height: 44px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.help-toc-toggle .fas.fa-anchor {
+  color: var(--text-tertiary);
+}
+
+.help-toc-toggle .help-toc-current {
+  flex: 1;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--pink-primary, #d81b60);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.help-toc-toggle .fas.fa-chevron-down {
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+  transition: transform 0.2s ease;
+}
+
+.help-toc-toggle[aria-expanded='true'] .fas.fa-chevron-down {
+  transform: rotate(180deg);
+}
+
+.help-toc-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.help-toc-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.help-toc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 50px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  border: 1px solid var(--border-color);
+  background: var(--surface-card, #fff);
+  color: var(--text-secondary);
+  cursor: pointer;
+  text-decoration: none;
+  font-family: inherit;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.help-toc-chip:hover {
+  border-color: var(--pink-primary, #d81b60);
+  color: var(--pink-primary, #d81b60);
+}
+
+.help-toc-chip.active {
+  background: var(--pink-primary, #d81b60);
+  border-color: var(--pink-primary, #d81b60);
+  color: #fff;
+}
+
+/* ── Sections ───────────────────────────────────────────────────────────── */
+
+.help-section {
+  scroll-margin-top: 132px; /* clears the sticky TOC when jumping to anchors */
+  margin-top: 2.4rem;
+}
+
+.help-section-head {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.help-section-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--pink-light, rgba(216, 27, 96, 0.08));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--pink-primary, #d81b60);
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.help-section-title {
+  font-size: clamp(1.1rem, 1rem + 0.6vw, 1.3rem);
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.help-section-desc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 3px 0 0;
+}
+
+.help-para {
+  font-size: 0.92rem;
+  line-height: 1.75;
+  color: var(--text-secondary);
+  margin: 0 0 10px;
+}
+
+/* Guide cards */
+
+.help-guide {
+  border: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
+  border-radius: 12px;
+  background: var(--surface-card, #fff);
+  padding: 12px 14px;
+  margin: 10px 0;
+}
+
+.help-guide-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 8px;
+}
+
+.help-guide-title .fas {
+  color: var(--pink-primary, #d81b60);
+  font-size: 0.7rem;
+  flex-shrink: 0;
+}
+
+.help-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.help-step {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  padding: 4px 0;
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.help-step-num {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--pink-light, rgba(216, 27, 96, 0.08));
+  color: var(--pink-primary, #d81b60);
+  font-size: 0.68rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Common questions (per-section accordion reuses .help-faq-* styles) */
+
+.help-mini-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-tertiary);
+  margin: 14px 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Quick-link chips */
+
+.help-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: var(--surface-card, #fff);
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 500;
+  font-family: inherit;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  min-height: 40px;
+}
+
+.help-chip:hover,
+.help-chip:focus-visible {
+  border-color: var(--pink-primary, #d81b60);
+  color: var(--pink-primary, #d81b60);
+}
+
+.help-chip .fas {
+  color: var(--pink-primary, #d81b60);
+}
+
+.help-link-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* ── Search-term highlight ──────────────────────────────────────────────── */
+
+/* Light surfaces: brand-pink tint. Dark mode (body.dark-mode): soft amber. */
+.help-faq-item mark,
+.help-faq-answer mark {
+  background: var(--pink-light, rgba(216, 27, 96, 0.14));
+  color: inherit;
+  border-radius: 3px;
+  padding: 0 2px;
+  margin: 0 -1px;
+}
+
+body.dark-mode .help-faq-item mark,
+body.dark-mode .help-faq-answer mark {
+  background: rgba(245, 158, 11, 0.28);
+  color: #fde68a;
+}
+
+/* ── FAQ ────────────────────────────────────────────────────────────────── */
+
+.help-faq-title-bar {
+  margin-bottom: 12px;
+}
+
+.help-faq-item {
+  border-radius: 10px;
+  border: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
+  background: var(--surface-card, #fff);
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.help-faq-item.open {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.help-faq-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px;
+  min-height: 48px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-family: inherit;
+  line-height: 1.4;
+}
+
+.help-faq-question {
+  flex: 1;
+}
+
+.help-faq-chevron {
+  font-size: 0.65rem;
+  color: var(--text-tertiary);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.help-faq-chevron.open {
+  transform: rotate(180deg);
+}
+
+.help-faq-answer {
+  padding: 0 14px 14px;
+  border-top: 1px solid var(--border-color-subtle, rgba(0, 0, 0, 0.04));
+}
+
+.help-faq-answer p {
+  margin: 12px 0 0;
+  font-size: 0.86rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+}
+
+/* ── Contact CTA ────────────────────────────────────────────────────────── */
+
+.help-contact {
+  text-align: center;
+  padding: clamp(1.5rem, 4vw, 2.25rem) 1rem;
+  border-radius: 14px;
+  border: 1px solid var(--border-color);
+  background: var(--surface-card, #fff);
+}
+
+.help-contact-title {
+  font-size: clamp(1rem, 0.92rem + 0.5vw, 1.15rem);
+  font-weight: 700;
+  margin: 0 0 6px;
+  color: var(--text-primary);
+}
+
+.help-contact-desc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.help-contact-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 28px;
+  min-height: 46px;
+  border-radius: 50px;
+  background: var(--pink-primary, #d81b60);
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  font-size: 0.92rem;
+  font-family: inherit;
+  margin-top: 14px;
+  transition: filter 0.15s ease, transform 0.15s ease;
+}
+
+.help-contact-btn:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.help-contact-alt {
+  font-size: 0.82rem;
+  color: var(--text-tertiary);
+  margin: 12px 0 0;
+}
+
+.help-contact-alt a {
+  color: var(--pink-primary, #d81b60);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.help-contact-alt a:hover {
+  text-decoration: underline;
+}
+
+/* ── Popular searches row ─────────────────────────────────────────────── */
+
+.help-popular {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 10px auto 0;
+  max-width: 520px;
+  justify-content: center;
+}
+
+.help-popular-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-tertiary);
+}
+
+.help-popular-label .fas {
+  color: var(--pink-primary, #d81b60);
+  font-size: 0.7rem;
+}
+
+.help-popular-chip {
+  font-size: 0.76rem;
+  padding: 6px 12px;
+  min-height: 0;
+  border-radius: 50px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── All topics index grid ─────────────────────────────────────────────── */
+
+.help-topics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px;
+}
+
+.help-topic-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  min-height: 48px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: var(--surface-card, #fff);
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.help-topic-card .fas {
+  color: var(--pink-primary, #d81b60);
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.help-topic-card:hover,
+.help-topic-card:focus-visible {
+  border-color: var(--pink-primary, #d81b60);
+  color: var(--pink-primary, #d81b60);
+  transform: translateY(-1px);
+}
+
+/* ── Related pages ──────────────────────────────────────────────────────── */
+
+.help-related-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* ── Back to top ────────────────────────────────────────────────────────── */
+
+.help-top-btn {
+  position: fixed;
+  right: 18px;
+  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  z-index: 40;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: var(--pink-primary, #d81b60);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+}
+
+.help-top-btn.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* ── Empty / loading states ─────────────────────────────────────────────── */
+
+.help-empty {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 2rem 0;
+  font-size: 0.9rem;
+}
+
+.help-empty .fas {
+  margin-right: 6px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE — tablet & mobile (project breakpoint: 768px)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .help-shell {
+    padding: 0 1rem 3.5rem;
+  }
+
+  /* Collapse the always-visible chip row into a compact toggle + drawer.
+     13 wrapped chips would eat half the viewport on a phone. */
+  .help-toc {
+    padding: 0;
+  }
+
+  .help-toc-toggle {
+    display: flex;
+  }
+
+  .help-toc-label {
+    display: none;
+  }
+
+  .help-toc-row {
+    display: none;
+    flex-direction: column;
+    gap: 2px;
+    max-height: min(60vh, 420px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding-bottom: 8px;
+  }
+
+  .help-toc.open .help-toc-row {
+    display: flex;
+  }
+
+  .help-toc-chip {
+    border-radius: 10px;
+    border-color: transparent;
+    background: transparent;
+    justify-content: flex-start;
+    min-height: 44px; /* touch target */
+    padding: 8px 12px;
+  }
+
+  .help-toc-chip.active {
+    background: var(--pink-light, rgba(216, 27, 96, 0.08));
+    color: var(--pink-primary, #d81b60);
+    border-color: transparent;
+  }
+
+  /* Anchor jumps need less clearance now that the TOC is one line */
+  .help-section {
+    scroll-margin-top: 64px;
+    margin-top: 2rem;
+  }
+
+  .help-search {
+    margin-top: -22px;
+    padding: 0.55rem 0.85rem;
+  }
+
+  .help-guide {
+    padding: 11px 12px;
+  }
+
+  .help-faq-btn {
+    padding: 13px 12px;
+  }
+
+  .help-faq-answer {
+    padding: 0 12px 12px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .help-popular {
+    justify-content: flex-start; /* left-align chips when they wrap */
+  }
+  .help-topics-grid {
+    grid-template-columns: 1fr; /* single column on small phones */
+  }
+  .help-hero-title .fas {
+    margin-right: 6px;
+  }
+
+  .help-link-row {
+    gap: 6px;
+  }
+
+  .help-chip {
+    flex: 1 1 auto;        /* chips fill the row instead of squeezing */
+    justify-content: center;
+  }
+
+  .help-related-grid {
+    gap: 6px;
+  }
+
+  .help-related-grid .help-chip {
+    flex: 1 1 calc(50% - 6px); /* two per row */
+    justify-content: flex-start;
+  }
+}
+
+/* ── Reduced motion ─────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .help-toc-chip,
+  .help-chip,
+  .help-contact-btn,
+  .help-top-btn,
+  .help-faq-chevron,
+  .help-toc-toggle .fas.fa-chevron-down {
+    transition: none;
+  }
+
+  .help-contact-btn:hover {
+    transform: none;
+  }
+}

@@ -1,0 +1,7 @@
+# Cloudflare Workers static-assets _redirects (Netlify-style syntax).
+# Only relative-path 301/302 rules are used here — Workers rejects
+# proxy (200) rules and absolute-target proxy rewrites.
+# NOTE: /sitemap.xml is handled by worker.js (proxies to backend)
+# and should NOT have a redirect rule here — the old 301 to
+# api.atelnyo.site/sitemap.xml caused an infinite redirect loop
+# because WhiteNoise redirected /sitemap.xml → /sitemap.xml.

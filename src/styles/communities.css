@@ -1,0 +1,801 @@
+/*
+ * src/styles/communities.css — Communities feature styles.
+ *
+ * Covers both community surfaces:
+ *   1. CreateCommunityModal (Explore + Creator Studio entry points)
+ *   2. CommunitiesSection in Creator Studio (founded / joined /
+ *      pending join-request moderation lists)
+ *
+ * Built entirely on the design tokens in tokens.css (semantic layer:
+ * --surface-*, --text-*, --border-*, --radius-*, --shadow-*) so light,
+ * dark (body.dark-mode) and every theme mode come for free. No
+ * hardcoded colors.
+ *
+ * Class prefix: ``cm-`` (community) to avoid collisions.
+ */
+@import './tokens.css';
+
+/* ═══════════════════════════════════════════════════════════════════
+   1. CREATE COMMUNITY MODAL
+   ═══════════════════════════════════════════════════════════════════ */
+
+.cm-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--surface-overlay, rgba(2, 6, 23, 0.7));
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1200;
+  animation: cm-fade-in 0.2s ease;
+}
+
+.cm-modal {
+  width: 100%;
+  max-width: 500px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  max-height: 88vh;
+  overflow-y: auto;
+  box-shadow: var(--modal-shadow, var(--shadow-4xl));
+  animation: cm-rise-in 0.25s ease;
+}
+
+.cm-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.cm-modal-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cm-modal-title i {
+  color: var(--color-primary);
+  font-size: 1rem;
+}
+
+.cm-modal-close {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: var(--radius-md);
+  display: grid;
+  place-items: center;
+  min-width: 36px;
+  min-height: 36px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.cm-modal-close:hover {
+  background: var(--surface-highlight);
+  color: var(--text-primary);
+}
+
+.cm-modal-hint {
+  margin: 0 0 20px;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+/* ─── Form ─────────────────────────────────────────────────────────── */
+
+.cm-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cm-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0.01em;
+}
+
+.cm-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 14px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: var(--surface-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.cm-input::placeholder { color: var(--text-tertiary); }
+
+.cm-input:focus {
+  border-color: var(--color-primary);
+  background: var(--surface-input-focus);
+  box-shadow: var(--shadow-input-focus);
+}
+
+textarea.cm-input { resize: vertical; min-height: 88px; }
+
+select.cm-input {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23999' d='M1.4 0 6 4.6 10.6 0 12 1.4l-6 6-6-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 38px;
+  cursor: pointer;
+}
+
+/* Join-mode segmented control — 3 choices, one tap each. */
+.cm-segmented {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.cm-segment {
+  padding: 10px 8px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  font-family: inherit;
+  text-align: center;
+  color: var(--text-secondary);
+  background: var(--surface-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-height: 44px; /* touch target */
+}
+
+.cm-segment:hover {
+  border-color: var(--border-color-strong, var(--border-color));
+  color: var(--text-primary);
+}
+
+.cm-segment.cm-segment-active {
+  color: var(--color-primary);
+  background: var(--surface-selected, rgba(216, 27, 96, 0.12));
+  border-color: var(--color-primary);
+}
+
+.cm-segment i {
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.cm-mode-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  color: var(--text-tertiary);
+}
+
+.cm-mode-hint i { color: var(--color-primary); }
+
+.cm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.cm-btn {
+  padding: 11px 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  border: 1px solid transparent;
+  min-height: 44px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.cm-btn:disabled { opacity: 0.6; cursor: wait; transform: none; }
+
+.cm-btn-primary {
+  background: linear-gradient(135deg, var(--color-primary), var(--pr-color-rose-700, #a01346));
+  color: var(--text-on-primary, #fff);
+  box-shadow: var(--shadow-primary);
+}
+
+.cm-btn-primary:hover:not(:disabled) {
+  box-shadow: var(--shadow-primary-lg);
+  transform: translateY(-1px);
+}
+
+.cm-btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border-color: var(--border-color);
+}
+
+.cm-btn-ghost:hover:not(:disabled) {
+  background: var(--surface-highlight);
+  color: var(--text-primary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   2. STUDIO — COMMUNITIES SECTION
+   ═══════════════════════════════════════════════════════════════════ */
+
+.cm-section { display: flex; flex-direction: column; gap: 20px; }
+
+.cm-group-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cm-group-title i { color: var(--color-primary); font-size: 0.85rem; }
+
+.cm-count {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--surface-highlight);
+  border-radius: 999px;
+  padding: 2px 9px;
+}
+
+.cm-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ─── Community card ──────────────────────────────────────────────── */
+
+.cm-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.cm-card:hover {
+  transform: translateY(-1px);
+  border-color: var(--border-color-strong, var(--border-color));
+  box-shadow: var(--shadow-2xl);
+}
+
+.cm-avatar {
+  position: relative;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  display: grid;
+  place-items: center;
+  font-size: 1.05rem;
+  color: var(--color-primary);
+  background: var(--surface-selected, rgba(216, 27, 96, 0.12));
+  overflow: hidden;
+}
+
+.cm-avatar img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cm-avatar-pending {
+  color: #d97706;
+  background: rgba(245, 158, 11, 0.14);
+}
+
+.cm-card-body {
+  flex: 1;
+  min-width: 0; /* allow the meta line to ellipsis */
+}
+
+.cm-card-name {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cm-card-meta {
+  margin-top: 3px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+}
+
+.cm-card-desc {
+  margin-top: 5px;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cm-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--surface-selected, rgba(216, 27, 96, 0.12));
+  color: var(--color-primary);
+  text-transform: uppercase;
+}
+
+/* ─── Actions ─────────────────────────────────────────────────────── */
+
+.cm-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.cm-icon-btn {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cm-icon-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--border-color-strong, var(--border-color));
+  background: var(--surface-highlight);
+  transform: translateY(-1px);
+}
+
+.cm-icon-btn-approve {
+  color: #059669;
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+.cm-icon-btn-approve:hover {
+  color: #059669;
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.cm-icon-btn-reject {
+  color: #dc2626;
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.22);
+}
+
+.cm-icon-btn-reject:hover {
+  color: #dc2626;
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* Found CTA (header + empty state reuse the modal's primary button). */
+.cm-found-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   3. ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════ */
+
+@keyframes cm-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes cm-rise-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cm-overlay,
+  .cm-modal,
+  .cm-card,
+  .cm-icon-btn,
+  .cm-btn,
+  .cm-segment {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   4. MOBILE
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 576px) {
+  .cm-overlay { padding: 12px; align-items: flex-end; }
+
+  /* Sheet-style modal on phones — thumbs reach everything. */
+  .cm-modal {
+    max-width: 100%;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    max-height: 92vh;
+    padding: 20px 16px calc(20px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .cm-actions {
+    flex-direction: column-reverse;
+  }
+
+  .cm-actions .cm-btn { width: 100%; }
+
+  .cm-segmented { grid-template-columns: 1fr; }
+
+  .cm-card { padding: 12px; gap: 12px; }
+
+  .cm-avatar { width: 42px; height: 42px; }
+
+  .cm-card-desc { display: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   5. COMMUNITY DETAIL PAGE (/sheet/community/:slug)
+   ═══════════════════════════════════════════════════════════════════
+   The base layout lives in index.css (``.community-detail``, ``c-*``
+   classes). That block references ~20 custom properties that were
+   never defined anywhere (--text-sm, --font-weight-bold, --radius-5xl,
+   --sp-9xl, --color-success-light, …), so those declarations silently
+   fall back to browser defaults — dull badges, wrong radii, cramped
+   spacing. Rather than redefining generic-sounding names globally
+   (risk of shifting unrelated pages), we FIX them on the community
+   scope and restyle the surface with real tokens here.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.community-detail {
+  /* ── Missing-variable shims, scoped to this page ──
+     Mapped to their intended tokens.css equivalents. */
+  --text-xs: var(--type-size-xs);
+  --text-sm: var(--type-size-sm);
+  --text-base: var(--type-size-base);
+  --text-md: var(--type-size-md);
+  --text-normal: var(--type-size-base);
+  --text-xl: var(--type-size-xl);
+  --text-2xl: var(--type-size-2xl);
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --line-relaxed: 1.6;
+  --sp-6xl: 32px;
+  --sp-9xl: 64px;
+  --radius-5xl: var(--radius-2xl);
+  --radius-7xl: var(--radius-full);
+  --radius-8xl: var(--radius-full);
+  --color-white: var(--white);
+  --color-gray-500: var(--text-tertiary);
+  --color-gray-600: var(--text-secondary);
+  --color-gray-700: var(--text-secondary);
+  --color-purple: var(--color-accent-violet);
+  --color-success-light: var(--state-success-dark);
+
+  /* ── Page shell ── */
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ── Banner: taller hero, brand gradient fallback, depth ── */
+.community-detail .c-banner {
+  height: 190px;
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-2xl);
+}
+
+.community-detail .c-banner-overlay {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.05) 0%,
+    rgba(0, 0, 0, 0.25) 55%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+}
+
+.community-detail .c-banner-content {
+  bottom: var(--sp-4xl);
+  left: var(--sp-4xl);
+  right: var(--sp-4xl);
+  align-items: flex-end;
+  gap: var(--sp-3xl);
+}
+
+.community-detail .c-banner-avatar {
+  width: 76px;
+  height: 76px;
+  border-radius: var(--radius-2xl);
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  box-shadow: var(--shadow-2xl);
+  font-size: 1.7rem;
+}
+
+.community-detail .c-banner-name {
+  font-size: var(--type-size-2xl);
+  letter-spacing: -0.01em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+}
+
+.community-detail .c-banner-meta {
+  font-size: var(--type-size-sm);
+  opacity: 0.92;
+  margin-top: 4px;
+}
+
+/* ── Join / leave / request-sent buttons ── */
+.community-detail .c-banner-btn {
+  padding: 11px 26px;
+  border-radius: var(--radius-full);
+  font-size: var(--type-size-sm);
+  font-weight: var(--font-weight-bold);
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.community-detail .c-banner-btn:hover:not(:disabled) { transform: translateY(-1px); }
+.community-detail .c-banner-btn:disabled { opacity: 0.65; cursor: wait; }
+
+.community-detail .c-banner-btn--join {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  color: var(--text-on-primary, #fff);
+  box-shadow: var(--shadow-primary);
+}
+
+.community-detail .c-banner-btn--join:hover:not(:disabled) {
+  box-shadow: var(--shadow-primary-lg);
+}
+
+.community-detail .c-banner-btn--leave {
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #fff;
+}
+
+.community-detail .c-banner-btn--leave:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.community-detail .c-banner-btn--pending {
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #fff;
+  cursor: default;
+}
+
+/* ── Description ── */
+.community-detail .c-desc {
+  font-size: var(--type-size-base);
+  margin: 0;
+  padding: 0 var(--sp-2xl);
+}
+
+/* ── Tabs: pill-style segmented tabs ── */
+.community-detail .c-tabs {
+  gap: 6px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+  margin-bottom: 0;
+}
+
+.community-detail .c-tab {
+  padding: 9px 18px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  font-size: var(--type-size-sm);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: 0;
+  min-height: 40px;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.community-detail .c-tab:hover {
+  color: var(--color-primary);
+  background: var(--surface-highlight);
+}
+
+.community-detail .c-tab--active {
+  color: var(--color-primary);
+  background: var(--surface-selected, rgba(216, 27, 96, 0.12));
+  border-bottom-color: transparent;
+}
+
+/* ── Row cards: lift on hover, token borders ── */
+.community-detail .c-row-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 12px 16px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.community-detail .c-row-card:hover {
+  transform: translateY(-1px);
+  border-color: var(--border-color-strong);
+  box-shadow: var(--shadow-xl);
+}
+
+.community-detail .c-title { color: var(--text-primary); }
+.community-detail .c-subtitle { color: var(--text-secondary); }
+
+/* ── Date badge (events tab) ── */
+.community-detail .c-date-badge {
+  background: var(--surface-selected, rgba(216, 27, 96, 0.12));
+  color: var(--color-primary);
+  border-radius: var(--radius-md);
+}
+
+/* ── Free / paid price badges — token colors, readable in dark ── */
+.community-detail .c-badge-price--free {
+  background: color-mix(in srgb, var(--state-success) 14%, transparent);
+  color: var(--state-success-dark);
+}
+
+.community-detail .c-badge-price--paid {
+  background: var(--surface-selected, rgba(216, 27, 96, 0.12));
+  color: var(--color-primary);
+}
+
+/* ── Member avatar + role badges — token colors (dark-mode aware) ── */
+.community-detail .c-member-avatar {
+  background: var(--surface-selected, rgba(216, 27, 96, 0.12));
+  color: var(--color-primary);
+  font-weight: var(--font-weight-bold);
+}
+
+.community-detail .c-role-badge--owner {
+  color: var(--color-primary);
+  background: var(--surface-selected, rgba(216, 27, 96, 0.12));
+}
+
+.community-detail .c-role-badge--admin {
+  color: var(--color-accent-violet);
+  background: color-mix(in srgb, var(--color-accent-violet) 14%, transparent);
+}
+
+.community-detail .c-role-badge--member {
+  color: var(--text-secondary);
+  background: var(--surface-highlight);
+}
+
+/* Announcement cards: pin accent + card polish */
+.community-detail .c-ann-card--pinned {
+  border-color: color-mix(in srgb, var(--color-primary) 35%, transparent);
+  background: linear-gradient(
+    135deg,
+    var(--surface-selected, rgba(216, 27, 96, 0.12)),
+    var(--surface-card) 55%
+  );
+}
+
+.community-detail .c-ann-pin-icon { color: var(--color-primary); }
+.community-detail .c-ann-author { color: var(--text-tertiary); }
+
+/* File cards: align with row cards */
+.community-detail .c-file-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+}
+
+.community-detail .c-file-card:hover {
+  border-color: var(--border-color-strong);
+  box-shadow: var(--shadow-xl);
+}
+
+.community-detail .c-file-icon { color: var(--color-primary); }
+
+/* Featured badge on linked courses */
+.community-detail .c-featured-badge {
+  color: var(--color-accent-gold);
+  background: color-mix(in srgb, var(--color-accent-gold) 14%, transparent);
+}
+
+/* Empty / loading / error states: soft icon chip instead of bare icon */
+.community-detail .c-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: var(--sp-6xl) 24px;
+  color: var(--text-secondary);
+}
+
+.community-detail .c-state-icon {
+  color: var(--text-tertiary);
+  font-size: 2rem;
+}
+
+.community-detail .c-state-icon--lg { font-size: 3rem; }
+
+.community-detail .c-state .c-state-spinner { color: var(--color-primary); }
+
+@media (prefers-reduced-motion: reduce) {
+  .community-detail .c-row-card,
+  .community-detail .c-banner-btn,
+  .community-detail .c-tab {
+    transition: none;
+  }
+  .community-detail .c-row-card:hover { transform: none; }
+}
+
+@media (max-width: 576px) {
+  .community-detail { padding: 12px 12px 100px; gap: 14px; }
+
+  .community-detail .c-banner { height: 160px; }
+
+  .community-detail .c-banner-content {
+    left: var(--sp-3xl);
+    right: var(--sp-3xl);
+    bottom: var(--sp-3xl);
+  }
+
+  .community-detail .c-banner-avatar { width: 58px; height: 58px; font-size: 1.3rem; }
+
+  .community-detail .c-banner-name { font-size: var(--type-size-xl); }
+
+  .community-detail .c-desc { padding: 0; }
+
+  /* Tabs stay scrollable; keep pills compact. */
+  .community-detail .c-tab { padding: 8px 14px; }
+}

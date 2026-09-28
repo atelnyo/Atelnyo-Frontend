@@ -1,0 +1,553 @@
+/* ════════════════════════════════════════════════════════════════════════
+   src/styles/header.css — Header component styles
+   Uses Theme Engine CSS variables for dark/light mode support.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Header base ─────────────────────────────────────────────── */
+.app-header {
+  /* ⚠️ WARNING — header height sync: sticky surfaces below this header
+     (e.g. .explore-search-wrap) stick at var(--layout-header-height,
+     tokens.css = 69px). If you change min-height/padding/border here,
+     update that token too or the search bar will gap/overlap on scroll. */
+  background: var(--header-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 10px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  border-bottom: 1px solid var(--border-color);
+  gap: 10px;
+  min-height: 52px;
+  transition: background-color 0.3s ease,
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
+}
+
+.app-header__brand {
+  margin: 0;
+  color: var(--pink-primary);
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  flex-grow: 1;
+  justify-content: center;
+  text-align: center;
+  min-width: 0;
+}
+
+.app-header__brand span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 400px) {
+  .app-header__brand span {
+    display: none;
+  }
+  /* Keeps the legacy behavior: the brand icon grows on tiny phones so
+     the brand stays a strong visual anchor without the text label. */
+  .app-header__brand i {
+    font-size: 1.5rem;
+  }
+}
+
+/* ─── Header buttons ──────────────────────────────────────────── */
+.header-btn {
+  background: var(--pink-light);
+  color: var(--pink-primary);
+  border: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.header-btn:hover {
+  transform: scale(1.05);
+  filter: brightness(0.95);
+}
+
+.header-btn:active {
+  transform: scale(0.95);
+}
+
+body.dark-mode .header-btn {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--pink-primary);
+}
+
+body.dark-mode .header-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Creator shortcut — subtle crown */
+.header-creator-btn i {
+  color: #f59e0b;
+}
+
+/* Admin shortcut — subtle shield */
+.header-admin-btn i {
+  color: #6366f1;
+}
+
+/* ─── Profile button ──────────────────────────────────────────── */
+.header-profile-wrapper {
+  position: relative;
+}
+
+.header-profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--pink-light);
+  border: none;
+  border-radius: 999px;
+  padding: 4px 10px 4px 4px;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  min-width: 0;
+}
+
+.header-profile-btn:hover {
+  background: rgba(216, 27, 96, 0.15);
+}
+
+body.dark-mode .header-profile-btn {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+body.dark-mode .header-profile-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.header-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--pink-primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.header-avatar-guest {
+  background: var(--text-secondary, #888);
+  font-size: 0.9rem;
+}
+
+.header-avatar-lg {
+  width: 42px;
+  height: 42px;
+  font-size: 1.1rem;
+}
+
+.header-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.header-profile-wrapper .header-avatar:has(.header-avatar-img) {
+  background: none;
+}
+
+.header-username {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80px;
+}
+
+body.dark-mode .header-username {
+  color: #e0e0e0;
+}
+
+.header-chevron {
+  font-size: 0.6rem;
+  color: var(--text-secondary, #888);
+  flex-shrink: 0;
+}
+
+/* ─── Language switcher ───────────────────────────────────────── */
+.header-lang-wrapper {
+  position: relative;
+}
+
+.header-lang-btn i {
+  font-size: 0.95rem;
+}
+
+/* ─── Dropdowns ────────────────────────────────────────────── */
+.header-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 200px;
+  max-width: calc(100vw - 16px);
+  background: var(--card-bg, #fff);
+  border: 1px solid var(--border-color, rgba(216, 27, 96, 0.12));
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  z-index: 1100;
+  overflow: hidden;
+  animation: header-dropdown-in 0.15s ease-out;
+}
+.header-profile-dropdown {
+  min-width: 240px;
+  padding: 4px 0;
+}
+body.dark-mode .header-dropdown {
+  background: #1e1b2e;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+@keyframes header-dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.header-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-main, #222);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.12s ease;
+  font-family: inherit;
+  text-align: left;
+  overflow: hidden;
+}
+.header-dropdown-item span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.header-dropdown-item:hover {
+  background: rgba(216, 27, 96, 0.06);
+}
+
+.header-dropdown-item.active {
+  color: var(--pink-primary);
+  font-weight: 600;
+}
+
+.header-dropdown-item i {
+  width: 18px;
+  text-align: center;
+  color: var(--text-secondary, #888);
+  flex-shrink: 0;
+}
+
+.header-dropdown-item.active i {
+  color: var(--pink-primary);
+}
+
+.header-dropdown-item-danger {
+  color: #e74c3c;
+}
+
+.header-dropdown-item-danger i {
+  color: #e74c3c;
+}
+
+.header-dropdown-item-danger:hover {
+  background: rgba(231, 76, 60, 0.06);
+}
+
+.header-dropdown-divider {
+  height: 1px;
+  background: var(--border-color, rgba(216, 27, 96, 0.08));
+  margin: 4px 0;
+}
+
+.header-dropdown-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+}
+
+.header-dropdown-user-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.header-dropdown-user-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-main, #222);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header-dropdown-user-email {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #888);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header-lang-dropdown {
+  min-width: 140px;
+}
+
+.header-lang-label {
+  flex: 1;
+}
+
+.header-lang-code {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-secondary, #888);
+  background: rgba(0, 0, 0, 0.04);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+body.dark-mode .header-lang-code {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ─── SearchBar (legacy commerce tab) ─────────────────────────── */
+.dvr-searchbar {
+  margin: 12px 0;
+}
+
+.dvr-searchbar__input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.dvr-searchbar__icon {
+  position: absolute;
+  left: 14px;
+  color: var(--text-secondary, #888);
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+
+.dvr-searchbar__input {
+  width: 100%;
+  padding: 10px 40px 10px 38px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border-color, rgba(216, 27, 96, 0.12));
+  background: var(--input-bg, #fff);
+  color: var(--text-primary, #222);
+  font-size: 0.95rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.dvr-searchbar__input:focus {
+  border-color: var(--pink-primary, #d81b60);
+  box-shadow: 0 0 0 3px rgba(216, 27, 96, 0.1);
+}
+
+.dvr-searchbar__input::placeholder {
+  color: var(--text-secondary, #888);
+}
+
+body.dark-mode .dvr-searchbar__input {
+  background: var(--card-bg, #252525);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dvr-searchbar__kbd {
+  position: absolute;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  background: rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-secondary, #888);
+  font-family: inherit;
+  pointer-events: none;
+}
+
+body.dark-mode .dvr-searchbar__kbd {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* ─── UI polish — brand, avatar, buttons (theme-aware) ─────────────── */
+.app-header__brand {
+  position: relative;
+  transition: opacity 0.2s ease;
+}
+.app-header__brand i {
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease;
+  filter: drop-shadow(0 2px 6px rgba(216, 27, 96, 0.25));
+}
+.app-header__brand:hover i {
+  transform: rotate(-8deg) scale(1.12);
+}
+
+.header-btn {
+  will-change: transform;
+}
+.header-btn:focus-visible {
+  outline: 2px solid var(--pink-primary, #d81b60);
+  outline-offset: 2px;
+}
+
+.header-profile-btn {
+  position: relative;
+  will-change: transform;
+}
+.header-profile-btn:active {
+  transform: scale(0.96);
+}
+.header-profile-btn:focus-visible {
+  outline: 2px solid var(--pink-primary, #d81b60);
+  outline-offset: 2px;
+}
+
+/* Avatar — soft ring + subtle lift on hover (photo or initial) */
+.header-profile-btn .header-avatar {
+  transition: box-shadow 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.header-profile-btn:hover .header-avatar {
+  transform: scale(1.06);
+  box-shadow: 0 0 0 3px var(--surface-card, #fff),
+              0 0 0 6px rgba(216, 27, 96, 0.18);
+}
+body.dark-mode .header-profile-btn:hover .header-avatar {
+  box-shadow: 0 0 0 3px var(--surface-card, #1e1e1e),
+              0 0 0 6px rgba(216, 27, 96, 0.3);
+}
+
+/* Dropdowns — slightly taller, springy entrance */
+.header-dropdown {
+  animation: header-dropdown-in 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.header-dropdown-item {
+  position: relative;
+}
+.header-dropdown-item:active {
+  transform: scale(0.985);
+}
+
+/* ─── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 500px) {
+  .header-username {
+    display: none;
+  }
+  .header-profile-btn {
+    padding: 4px;
+  }
+  .header-btn {
+    /* Mobile touch targets should be BIGGER, not smaller — 40px stays
+       above the ~40-44px guideline while keeping a 320px screen
+       (brand + search + actions) from overflowing. */
+    width: 40px;
+    height: 40px;
+    font-size: 0.95rem;
+  }
+  .app-header {
+    padding: 8px 10px;
+    gap: 6px;
+  }
+  .app-header__actions {
+    gap: 4px;
+  }
+  .header-dropdown {
+    right: -10px;
+    min-width: 180px;
+  }
+}
+
+/* ─── Very small phones (≤380px) — a full logged-in header (settings +
+   brand + creator + admin + search + bell + theme + lang + avatar)
+   overflows 320px screens. Trim the least-used actions and shrink the
+   round buttons to 36px (still ≥ 40px is impossible at this width with
+   8 items; 36px + spacing keeps every shortcut reachable without a
+   horizontal scroll). The language picker stays reachable via Settings. */
+@media (max-width: 380px) {
+  .header-lang-wrapper {
+    display: none;
+  }
+  /* `.app-header .header-btn` (0,2,0) — must beat the later, equal-
+     specificity `.icon-btn` rule in index.css (which pins 40px). */
+  .app-header .header-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 0.88rem;
+  }
+  .app-header__actions {
+    gap: 3px;
+  }
+  .header-profile-btn {
+    padding: 3px;
+  }
+  .header-profile-btn .header-avatar {
+    width: 30px;
+    height: 30px;
+    font-size: 0.8rem;
+  }
+  .app-header__brand {
+    font-size: 1.05rem;
+  }
+}

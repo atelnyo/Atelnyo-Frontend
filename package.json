@@ -1,0 +1,60 @@
+{
+  "name": "atelnyo-frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "license": "MIT",
+  "author": "Atelnyo <devroseacademy@gmail.com>",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "test:e2e:debug": "playwright test --debug",
+    "test": "vitest run",
+    "audit:seo": "node scripts/audit-seo.mjs",
+    "test:watch": "vitest",
+    "check:translations": "node scripts/check-translations.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@sentry/react": "^8.55.2",
+    "@stripe/react-stripe-js": "^6.7.0",
+    "@stripe/stripe-js": "^9.9.0",
+    "axios": "^1.6.0",
+    "firebase": "^12.15.0",
+    "framer-motion": "^12.42.2",
+    "freebuff": "^0.0.117",
+    "packages": "^0.0.8",
+    "playwright": "^1.62.0",
+    "qrcode": "^1.5.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-helmet-async": "^2.0.5",
+    "react-player": "^3.4.0",
+    "react-router-dom": "^6.18.0",
+    "zustand": "^4.5.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.0",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.4",
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15",
+    "@vitejs/plugin-react": "^4.2.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.3",
+    "jsdom": "^30.0.1",
+    "vite": "^5.0.0",
+    "vitest": "^4.1.10"
+  },
+  "allowScripts": {
+    "esbuild@0.21.5": true
+  }
+}

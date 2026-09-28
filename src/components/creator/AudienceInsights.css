@@ -1,0 +1,300 @@
+/**
+ * src/components/creator/AudienceInsights.css
+ *
+ * Styles for Audience Insights component
+ */
+
+/* ─── Container ─────────────────────────────────────────────────── */
+.ai-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.ai-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.ai-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--text-primary, #1f2937);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ai-header h2 i {
+  color: #d81b60;
+}
+
+/* ─── Period Selector ───────────────────────────────────────────── */
+.ai-period-selector {
+  display: flex;
+  gap: 4px;
+  background: #f3f4f6;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.ai-period-selector button {
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ai-period-selector button.ai-active {
+  background: white;
+  color: #d81b60;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* ─── Loading / Error ───────────────────────────────────────────── */
+.ai-loading,
+.ai-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.ai-loading i {
+  font-size: 2rem;
+  color: #d81b60;
+  margin-bottom: 12px;
+  animation: ai-spin 1s linear infinite;
+}
+
+@keyframes ai-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.ai-error i {
+  font-size: 2rem;
+  color: #ef4444;
+  margin-bottom: 12px;
+}
+
+.ai-error button {
+  margin-top: 12px;
+  padding: 8px 16px;
+  background: #d81b60;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* ─── Metrics ───────────────────────────────────────────────────── */
+.ai-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.ai-metric-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.ai-metric-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary, #1f2937);
+}
+
+.ai-metric-label {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.ai-metric-change {
+  font-size: 0.8rem;
+  margin-top: 8px;
+}
+
+.ai-metric-change.ai-positive {
+  color: #10b981;
+}
+
+.ai-metric-change.ai-negative {
+  color: #ef4444;
+}
+
+/* ─── Audience Card ─────────────────────────────────────────────── */
+.ai-audience-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.ai-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.ai-card-header i {
+  color: #d81b60;
+}
+
+.ai-card-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-primary, #1f2937);
+}
+
+.ai-card-content {
+  padding: 20px;
+}
+
+/* ─── Grid Layout ───────────────────────────────────────────────── */
+.ai-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 800px) {
+  .ai-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Demographics ──────────────────────────────────────────────── */
+.ai-demographics {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ai-demo-bar {
+  display: flex;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #f3f4f6;
+}
+
+.ai-demo-segment {
+  transition: width 0.3s ease;
+}
+
+.ai-demo-segment:hover {
+  opacity: 0.8;
+}
+
+.ai-demo-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.ai-demo-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+}
+
+.ai-demo-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.ai-demo-name {
+  color: #4b5563;
+}
+
+.ai-demo-count {
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+/* ─── Heatmap ───────────────────────────────────────────────────── */
+.ai-heatmap {
+  overflow-x: auto;
+}
+
+.ai-heatmap-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ai-heatmap-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ai-heatmap-day {
+  width: 30px;
+  font-size: 0.7rem;
+  color: #9ca3af;
+  text-align: right;
+}
+
+.ai-heatmap-cell {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  transition: transform 0.1s;
+}
+
+.ai-heatmap-cell:hover {
+  transform: scale(1.2);
+}
+
+.ai-heatmap-legend {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 0.7rem;
+  color: #9ca3af;
+}
+
+.ai-heatmap-scale {
+  display: flex;
+  gap: 2px;
+}
+
+.ai-heatmap-scale-cell {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+/* ─── Growth Chart ──────────────────────────────────────────────── */
+.ai-growth-chart {
+  width: 100%;
+  height: 150px;
+}

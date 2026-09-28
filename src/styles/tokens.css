@@ -1,0 +1,1282 @@
+/**
+ * src/styles/tokens.css — Atelnyo Design Tokens v2.0
+ *
+ * ═══════════════════════════════════════════════════════════════════════
+ *  ENTERPRISE THEME ENGINE — Single source of truth for all visual properties
+ * ═══════════════════════════════════════════════════════════════════════
+ *
+ * TOKEN HIERARCHY:
+ *   Layer 1: PRIMITIVES — raw atomic values (--pr-color-*, --pr-size-*, --pr-font-*)
+ *   Layer 2: SEMANTIC   — purpose-driven aliases (--color-*, --surface-*, --text-*)
+ *   Layer 3: COMPONENT  — component-specific tokens (--btn-*, --card-*, --input-*)
+ *   Layer 4: CATEGORY   — role/status badges (--badge-*, --state-*)
+ *   Layer 5: THEME MODE — mode overrides (AMOLED, Glass, Cyber, Minimal, Professional)
+ *
+ * Never hardcode a color, size, shadow, or z-index in any component.
+ * Always use a token from THIS file.
+ *
+ * Light mode  → tokens defined on :root
+ * Dark mode   → body.dark-mode overrides semantic + component layers
+ * Theme modes → body.theme-{name} overrides above dark-mode
+ */
+
+:root {
+  /* ═══════════════════════════════════════════════════════════════════════
+     LAYER 1 — PRIMITIVE TOKENS (raw atomic values)
+     ═══════════════════════════════════════════════════════════════════════ */
+
+  /* ─── Primitive: Brand Colors ─────────────────────────────────── */
+  --pr-color-rose-50:  #fce4ec;
+  --pr-color-rose-100: #f8bbd0;
+  --pr-color-rose-200: #f48fb1;
+  --pr-color-rose-300: #f06292;
+  --pr-color-rose-400: #ec407a;
+  --pr-color-rose-500: #d81b60;
+  --pr-color-rose-600: #c2185b;
+  --pr-color-rose-700: #a01346;
+  --pr-color-rose-800: #880e4f;
+  --pr-color-rose-900: #6a0d3d;
+
+  /* ─── Primitive: Neutral Grays ─────────────────────────────────── */
+  --pr-color-white:    #ffffff;
+  --pr-color-black:    #000000;
+  --pr-color-gray-50:  #fafafa;
+  --pr-color-gray-100: #f5f5f5;
+  --pr-color-gray-200: #eeeeee;
+  --pr-color-gray-300: #e0e0e0;
+  --pr-color-gray-400: #bdbdbd;
+  --pr-color-gray-500: #999999;
+  --pr-color-gray-600: #888888;
+  --pr-color-gray-700: #666666;
+  --pr-color-gray-800: #444444;
+  --pr-color-gray-900: #333333;
+
+  /* ─── Primitive: Semantic Colors ───────────────────────────────── */
+  --pr-color-emerald-50:  #ecfdf5;
+  --pr-color-emerald-500: #10b981;
+  --pr-color-emerald-600: #059669;
+  --pr-color-red-50:      #fef2f2;
+  --pr-color-red-500:     #ef4444;
+  --pr-color-red-600:     #dc2626;
+  --pr-color-amber-50:    #fffbeb;
+  --pr-color-amber-400:   #fbbf24;
+  --pr-color-amber-500:   #f59e0b;
+  --pr-color-amber-600:   #d97706;
+  --pr-color-sky-50:      #f0f9ff;
+  --pr-color-sky-400:     #38bdf8;
+  --pr-color-sky-500:     #0ea5e9;
+  --pr-color-sky-600:     #0284c7;
+  --pr-color-violet-50:   #f5f3ff;
+  --pr-color-violet-400:  #a78bfa;
+  --pr-color-violet-500:  #8b5cf6;
+  --pr-color-violet-600:  #7c3aed;
+  --pr-color-indigo-400:  #818cf8;
+  --pr-color-indigo-500:  #6366f1;
+  --pr-color-purple-500:  #6c5ce7;
+  --pr-color-cyan-500:    #00e7ff;
+  --pr-color-blue-500:    #0084ff;
+  --pr-color-teal-500:    #14b8a6;
+  --pr-color-pink-500:    #e91e63;
+  --pr-color-orange-400:  #fb923c;
+  --pr-color-orange-500:  #f97316;
+  --pr-color-lime-500:    #84cc16;
+
+  /* ─── Primitive: Spacing (4px base unit) ───────────────────────── */
+  --pr-size-0:   0;
+  --pr-size-px:  1px;
+  --pr-size-0_5: 2px;
+  --pr-size-1:   4px;
+  --pr-size-1_5: 6px;
+  --pr-size-2:   8px;
+  --pr-size-2_5: 10px;
+  --pr-size-3:   12px;
+  --pr-size-3_5: 14px;
+  --pr-size-4:   16px;
+  --pr-size-5:   20px;
+  --pr-size-6:   24px;
+  --pr-size-7:   28px;
+  --pr-size-8:   32px;
+  --pr-size-9:   36px;
+  --pr-size-10:  40px;
+  --pr-size-11:  44px;
+  --pr-size-12:  48px;
+  --pr-size-14:  56px;
+  --pr-size-16:  64px;
+  --pr-size-20:  80px;
+  --pr-size-24:  96px;
+  --pr-size-28:  112px;
+  --pr-size-32:  128px;
+  --pr-size-40:  160px;
+  --pr-size-50:  200px;
+
+  /* ─── Primitive: Font Sizes ────────────────────────────────────── */
+  --pr-font-2xs: 0.625rem;
+  --pr-font-xs:  0.72rem;
+  --pr-font-sm:  0.8rem;
+  --pr-font-base: 0.875rem;
+  --pr-font-md:  0.95rem;
+  --pr-font-lg:  1.05rem;
+  --pr-font-xl:  1.15rem;
+  --pr-font-2xl: 1.25rem;
+  --pr-font-3xl: 1.5rem;
+  --pr-font-4xl: 1.75rem;
+  --pr-font-5xl: 2rem;
+  --pr-font-6xl: 2.5rem;
+  --pr-font-7xl: 3rem;
+
+  /* ─── Primitive: Font Weights ──────────────────────────────────── */
+  --pr-weight-normal:    400;
+  --pr-weight-medium:    500;
+  --pr-weight-semibold:  600;
+  --pr-weight-bold:      700;
+  --pr-weight-extrabold: 800;
+
+  /* ─── Primitive: Line Heights ──────────────────────────────────── */
+  --pr-leading-tight:   1.25;
+  --pr-leading-normal:  1.4;
+  --pr-leading-relaxed: 1.6;
+
+  /* ─── Primitive: Letter Spacing ────────────────────────────────── */
+  --pr-tracking-tight:   -0.02em;
+  --pr-tracking-normal:  0;
+  --pr-tracking-wide:    0.04em;
+  --pr-tracking-upper:   1px;
+
+  /* ─── Primitive: Font Families ─────────────────────────────────── */
+  --pr-font-sans: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --pr-font-mono: 'JetBrains Mono', 'Courier New', Courier, monospace;
+
+  /* ─── Primitive: Radius ────────────────────────────────────────── */
+  --pr-radius-none:  0;
+  --pr-radius-xs:    2px;
+  --pr-radius-sm:    4px;
+  --pr-radius-md:    8px;
+  --pr-radius-lg:    12px;
+  --pr-radius-xl:    16px;
+  --pr-radius-2xl:   20px;
+  --pr-radius-3xl:   24px;
+  --pr-radius-full:  9999px;
+  --pr-radius-circle: 50%;
+
+  /* ─── Primitive: Border Width ──────────────────────────────────── */
+  --pr-border-0: 0;
+  --pr-border-1: 1px;
+  --pr-border-2: 2px;
+  --pr-border-3: 3px;
+
+  /* ─── Primitive: Duration ──────────────────────────────────────── */
+  --pr-duration-instant: 0.05s;
+  --pr-duration-fast:    0.12s;
+  --pr-duration-normal:  0.2s;
+  --pr-duration-medium:  0.3s;
+  --pr-duration-slow:    0.5s;
+  --pr-duration-xslow:   0.8s;
+
+  /* ─── Primitive: Easing ────────────────────────────────────────── */
+  --pr-ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --pr-ease-out:     cubic-bezier(0, 0, 0.2, 1);
+  --pr-ease-in:      cubic-bezier(0.4, 0, 1, 1);
+  --pr-ease-spring:  cubic-bezier(0.16, 1, 0.3, 1);
+  --pr-ease-bounce:  cubic-bezier(0.34, 1.56, 0.64, 1);
+
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     LAYER 2 — SEMANTIC TOKENS (purpose-driven)
+     ═══════════════════════════════════════════════════════════════════════ */
+
+  /* ─── Semantic: Brand ──────────────────────────────────────────── */
+  --color-primary:         var(--pr-color-rose-500);
+  --color-primary-light:   var(--pr-color-rose-50);
+  --color-primary-dark:    var(--pr-color-rose-700);
+  --color-primary-gradient: linear-gradient(135deg, var(--pr-color-rose-500), var(--pr-color-rose-300));
+
+  /* ─── Semantic: State ──────────────────────────────────────────── */
+  --state-success:           var(--pr-color-emerald-500);
+  --state-success-light:     var(--pr-color-emerald-50);
+  --state-success-dark:      var(--pr-color-emerald-600);
+  --state-error:             var(--pr-color-red-500);
+  --state-error-light:       var(--pr-color-red-50);
+  --state-error-dark:        var(--pr-color-red-600);
+  --state-warning:           var(--pr-color-amber-500);
+  --state-warning-light:     var(--pr-color-amber-50);
+  --state-warning-dark:      var(--pr-color-amber-600);
+  --state-info:              var(--pr-color-sky-400);
+  --state-info-light:        var(--pr-color-sky-50);
+  --state-info-dark:         var(--pr-color-sky-500);
+
+  /* ─── Semantic: Accent ─────────────────────────────────────────── */
+  --color-accent-gold:       var(--pr-color-amber-400);
+  --color-accent-violet:     var(--pr-color-violet-400);
+  --color-accent-indigo:     var(--pr-color-indigo-400);
+  --color-accent-cyan:       var(--pr-color-cyan-500);
+  --color-accent-blue:       var(--pr-color-blue-500);
+  --color-accent-teal:       var(--pr-color-teal-500);
+  --color-accent-pink:       var(--pr-color-pink-500);
+  --color-accent-orange:     var(--pr-color-orange-400);
+  --color-accent-lime:       var(--pr-color-lime-500);
+
+  /* ─── Semantic: Surfaces ───────────────────────────────────────── */
+  --surface-page:           var(--pr-color-rose-50);
+  --surface-card:           var(--pr-color-white);
+  --surface-card-alt:       var(--pr-color-gray-50);
+  --surface-header:         rgba(255, 255, 255, 0.8);
+  --surface-glass:          rgba(255, 255, 255, 0.9);
+  --surface-input:          var(--pr-color-rose-50);
+  --surface-input-focus:    var(--pr-color-white);
+  --surface-overlay:        rgba(0, 0, 0, 0.55);
+  --surface-overlay-heavy:  rgba(0, 0, 0, 0.7);
+  --surface-overlay-light:  rgba(0, 0, 0, 0.05);
+  --surface-highlight:      rgba(216, 27, 96, 0.05);
+  --surface-highlight-md:   rgba(216, 27, 96, 0.1);
+  --surface-selected:       rgba(216, 27, 96, 0.08);
+
+  /* ─── Semantic: Text ───────────────────────────────────────────── */
+  --text-primary:       var(--pr-color-gray-900);
+  --text-secondary:     var(--pr-color-gray-600);
+  --text-tertiary:      var(--pr-color-gray-400);
+  --text-inverse:       var(--pr-color-white);
+  --text-on-primary:    var(--pr-color-white);
+  --text-link:          var(--pr-color-rose-500);
+  --text-link-hover:    var(--pr-color-rose-600);
+
+  /* ─── Semantic: Border ─────────────────────────────────────────── */
+  --border-color:       rgba(216, 27, 96, 0.1);
+  --border-color-strong: rgba(216, 27, 96, 0.25);
+  --border-color-subtle: rgba(216, 27, 96, 0.06);
+
+  /* ─── Semantic: Shadow Colors ──────────────────────────────────── */
+  --shadow-color-sm:  rgba(0, 0, 0, 0.04);
+  --shadow-color-md:  rgba(0, 0, 0, 0.06);
+  --shadow-color-lg:  rgba(0, 0, 0, 0.12);
+  --shadow-color-xl:  rgba(0, 0, 0, 0.2);
+  --shadow-color-2xl: rgba(0, 0, 0, 0.3);
+
+  /* ─── Semantic: Opacity ────────────────────────────────────────── */
+  --opacity-disabled:     0.5;
+  --opacity-hover:        0.08;
+  --opacity-pressed:      0.12;
+  --opacity-focus-ring:   0.15;
+  --opacity-glass:        0.8;
+  --opacity-glass-heavy:  0.9;
+
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     LAYER 3 — COMPONENT TOKENS
+     ═══════════════════════════════════════════════════════════════════════ */
+
+  /* ─── Button ───────────────────────────────────────────────────── */
+  --btn-primary-bg:             var(--color-primary);
+  --btn-primary-text:           var(--text-on-primary);
+  --btn-primary-hover-bg:       var(--pr-color-rose-600);
+  --btn-primary-pressed-bg:     var(--pr-color-rose-700);
+  --btn-primary-disabled-bg:    var(--pr-color-rose-200);
+  --btn-primary-shadow:         0 2px 8px rgba(216, 27, 96, 0.3);
+
+  --btn-secondary-bg:           transparent;
+  --btn-secondary-text:         var(--color-primary);
+  --btn-secondary-border:       var(--pr-border-2) solid var(--color-primary);
+  --btn-secondary-hover-bg:     var(--surface-highlight);
+
+  --btn-ghost-bg:               transparent;
+  --btn-ghost-text:             var(--text-secondary);
+  --btn-ghost-hover-bg:         var(--surface-highlight);
+
+  --btn-icon-bg:                var(--color-primary-light);
+  --btn-icon-text:              var(--color-primary);
+  --btn-icon-hover-scale:       1.05;
+  --btn-icon-active-scale:      0.95;
+  --btn-icon-size:              40px;
+
+  --btn-radius:                 var(--pr-radius-md);
+  --btn-radius-pill:            var(--pr-radius-full);
+  --btn-radius-icon:            var(--pr-radius-circle);
+
+  --btn-font-weight:            var(--pr-weight-semibold);
+  --btn-padding-y:              var(--pr-size-3);
+  --btn-padding-x:              var(--pr-size-6);
+  --btn-transition:             all var(--pr-duration-fast) var(--pr-ease-default);
+
+  /* ─── Card ─────────────────────────────────────────────────────── */
+  --card-bg:              var(--surface-card);
+  --card-bg-hover:        var(--pr-color-white);
+  --card-border:          var(--pr-border-1) solid var(--border-color);
+  --card-radius:          var(--pr-radius-xl);
+  --card-radius-sm:       var(--pr-radius-lg);
+  --card-shadow:          0 4px 15px var(--shadow-color-md);
+  --card-shadow-hover:    0 8px 25px var(--shadow-color-lg);
+  --card-padding:         var(--pr-size-5);
+  --card-gap:             var(--pr-size-4);
+  --card-transition:      all var(--pr-duration-medium) var(--pr-ease-default);
+  --card-hover-lift:      -4px;
+
+  /* ─── Input ────────────────────────────────────────────────────── */
+  --input-bg:               var(--surface-input);
+  --input-bg-focus:         var(--surface-input-focus);
+  --input-text:             var(--text-primary);
+  --input-placeholder:      var(--text-tertiary);
+  --input-border:           var(--pr-border-2) solid var(--color-primary-light);
+  --input-border-focus:     var(--pr-border-2) solid var(--color-primary);
+  --input-radius:           var(--pr-radius-full);
+  --input-radius-md:        var(--pr-radius-md);
+  --input-padding-y:        var(--pr-size-3);
+  --input-padding-x:        var(--pr-size-4);
+  --input-height:           44px;
+  --input-focus-ring:       0 0 0 4px rgba(216, 27, 96, var(--opacity-focus-ring));
+  --input-transition:       border-color var(--pr-duration-fast) var(--pr-ease-default),
+                            box-shadow var(--pr-duration-fast) var(--pr-ease-default);
+
+  /* ─── Badge ────────────────────────────────────────────────────── */
+  --badge-radius:        var(--pr-radius-full);
+  --badge-padding-y:     var(--pr-size-1);
+  --badge-padding-x:     var(--pr-size-3);
+  --badge-font-size:     var(--pr-font-xs);
+  --badge-font-weight:   var(--pr-weight-bold);
+
+  /* ─── Modal / Dialog ───────────────────────────────────────────── */
+  --modal-bg:            var(--surface-card);
+  --modal-backdrop:      rgba(0, 0, 0, 0.7);
+  --modal-backdrop-blur: blur(5px);
+  --modal-radius:        var(--pr-radius-2xl);
+  --modal-padding:       var(--pr-size-8);
+  --modal-shadow:        0 20px 60px var(--shadow-color-2xl);
+  --modal-max-width:     440px;
+  --modal-z:             5000;
+
+  /* ─── Sheet / Bottom Sheet ─────────────────────────────────────── */
+  --sheet-bg:            var(--surface-card);
+  --sheet-radius:        var(--pr-radius-2xl) var(--pr-radius-2xl) 0 0;
+  --sheet-shadow:        0 -4px 20px var(--shadow-color-lg);
+  --sheet-z:             2000;
+
+  /* ─── Navigation ───────────────────────────────────────────────── */
+  --nav-header-bg:       var(--surface-header);
+  --nav-header-blur:     blur(10px);
+  --nav-header-height:   56px;
+  --nav-header-z:        1000;
+  --nav-header-border:   var(--pr-border-1) solid var(--border-color);
+  --nav-header-shadow:   0 2px 10px var(--shadow-color-sm);
+
+  --nav-bottom-bg:       var(--surface-card);
+  --nav-bottom-height:   60px;
+  --nav-bottom-z:        2500;
+  --nav-bottom-shadow:   0 -2px 10px var(--shadow-color-sm);
+
+  --nav-sidebar-width:   260px;
+  --nav-sidebar-bg:      var(--surface-card);
+  --nav-sidebar-z:       1500;
+
+  /* ─── Table ────────────────────────────────────────────────────── */
+  --table-header-bg:     var(--surface-card-alt);
+  --table-row-hover-bg:  var(--surface-highlight);
+  --table-border:        var(--pr-border-1) solid var(--border-color-subtle);
+  --table-padding-y:     var(--pr-size-3);
+  --table-padding-x:     var(--pr-size-4);
+
+  /* ─── Tooltip ──────────────────────────────────────────────────── */
+  --tooltip-bg:          var(--pr-color-gray-900);
+  --tooltip-text:        var(--text-inverse);
+  --tooltip-radius:      var(--pr-radius-sm);
+  --tooltip-padding:     var(--pr-size-1_5) var(--pr-size-3);
+
+  /* ─── Skeleton ─────────────────────────────────────────────────── */
+  --skeleton-from:       var(--pr-color-gray-200);
+  --skeleton-to:         var(--pr-color-gray-300);
+  --skeleton-speed:      1.5s;
+
+  /* ─── Avatar ───────────────────────────────────────────────────── */
+  --avatar-radius:       var(--pr-radius-circle);
+  --avatar-size-sm:      32px;
+  --avatar-size-md:      40px;
+  --avatar-size-lg:      56px;
+  --avatar-size-xl:      80px;
+
+  /* ─── Divider ──────────────────────────────────────────────────── */
+  --divider-color:       var(--border-color-subtle);
+  --divider-width:       var(--pr-border-1);
+
+  /* ─── Scrollbar ────────────────────────────────────────────────── */
+  --scrollbar-track:     transparent;
+  --scrollbar-thumb:     var(--pr-color-gray-300);
+  --scrollbar-thumb-hover: var(--pr-color-gray-400);
+  --scrollbar-width:     6px;
+
+  /* ─── Toast / Notification (UI polish) ────────────────────────── */
+  --toast-bg:            var(--surface-card);
+  --toast-text:          var(--text-primary);
+  --toast-radius:        var(--pr-radius-xl);
+  --toast-shadow:        0 12px 32px var(--shadow-color-xl);
+  --toast-lifetime:      4000ms;
+
+  /* ─── Bottom Nav active indicator ─────────────────────────────── */
+  --nav-active-bg:       var(--color-primary-bg);
+  --nav-active-shadow:   0 2px 10px rgba(216, 27, 96, 0.18);
+
+  /* ─── Skeleton shimmer (unified gradient) ─────────────────────── */
+  /* NOTE: references the gray PRIMITIVES directly (not the
+     --skeleton-* aliases, which are re-defined as cyclic
+     self-references in the legacy-alias block below and therefore
+     resolve to invalid in light mode). The primitives are re-mapped
+     by body.dark-mode, so the shimmer adapts to the active theme. */
+  --shimmer-from: var(--pr-color-gray-200);
+  --shimmer-mid:  var(--pr-color-gray-300);
+  --shimmer-bg:   linear-gradient(
+    90deg,
+    var(--shimmer-from) 0%,
+    var(--shimmer-mid) 25%,
+    var(--shimmer-from) 50%,
+    var(--shimmer-mid) 75%,
+    var(--shimmer-from) 100%
+  );
+  --shimmer-size: 200% 100%;
+  --shimmer-animation: shimmer 1.6s ease-in-out infinite;
+
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     LAYER 4 — CATEGORY / ROLE / STATUS TOKENS
+     ═══════════════════════════════════════════════════════════════════════ */
+
+  /* ─── Role Badges ──────────────────────────────────────────────── */
+  --badge-premium-bg:      var(--pr-color-amber-500);
+  --badge-premium-text:    var(--pr-color-white);
+  --badge-verified-bg:     var(--state-success);
+  --badge-verified-text:   var(--pr-color-white);
+  --badge-creator-bg:      var(--color-primary);
+  --badge-creator-text:    var(--pr-color-white);
+  --badge-enterprise-bg:   var(--pr-color-violet-500);
+  --badge-enterprise-text: var(--pr-color-white);
+  --badge-partner-bg:      var(--pr-color-indigo-500);
+  --badge-partner-text:    var(--pr-color-white);
+  --badge-admin-bg:        var(--pr-color-gray-800);
+  --badge-admin-text:      var(--pr-color-white);
+  --badge-featured-bg:     var(--pr-color-amber-400);
+  --badge-featured-text:   var(--pr-color-gray-900);
+
+  /* ─── Status Colors ────────────────────────────────────────────── */
+  /* ─── Status (bridged to state tokens) ────────────────────────── */
+  /* These alias the Layer 2 semantic state tokens for component-level
+     usage. Components that need a status badge use var(--status-*);
+     the underlying value comes from the semantic state tokens so
+     theme modes automatically propagate. */
+  --status-pending-bg:       var(--state-warning-light);
+  --status-pending-text:     var(--state-warning-dark);
+  --status-pending-dot:      var(--state-warning);
+  --status-active-bg:        var(--state-success-light);
+  --status-active-text:      var(--state-success-dark);
+  --status-active-dot:       var(--state-success);
+  --status-error-bg:         var(--state-error-light);
+  --status-error-text:       var(--state-error-dark);
+  --status-error-dot:        var(--state-error);
+  --status-info-bg:          var(--state-info-light);
+  --status-info-text:        var(--state-info-dark);
+  --status-info-dot:         var(--state-info);
+  --status-neutral-bg:       var(--pr-color-gray-100);
+  --status-neutral-text:     var(--pr-color-gray-600);
+  --status-neutral-dot:      var(--pr-color-gray-400);
+
+  /* ─── Severity Levels (bridged) ───────────────────────────────── */
+  --severity-low-bg:         var(--state-success-light);
+  --severity-low-text:       var(--state-success-dark);
+  --severity-medium-bg:      var(--state-warning-light);
+  --severity-medium-text:    var(--state-warning-dark);
+  --severity-high-bg:        var(--state-error-light);
+  --severity-high-text:      var(--state-error-dark);
+  --severity-critical-bg:    var(--state-error);
+  --severity-critical-text:  var(--text-inverse);
+
+  /* ─── Background-tint variants (rgba for badges, tags, icons) ─── */
+  --color-primary-bg:         rgba(216, 27, 96, 0.08);
+  --state-info-bg:           rgba(56, 189, 248, 0.1);
+  --state-neutral-bg:        rgba(148, 163, 184, 0.1);
+  --pr-color-violet-500-bg:  rgba(139, 92, 246, 0.1);
+  --pr-color-orange-500-bg:  rgba(249, 115, 22, 0.1);
+  --pr-color-amber-900-bg:   rgba(124, 45, 18, 0.1);
+  --pr-color-yellow-400-bg:  rgba(250, 204, 21, 0.1);
+
+  /* ─── Transaction Type Colors (configurable by theme) ─────────── */
+  --tx-payment:       var(--state-success);
+  --tx-withdrawal:    var(--state-error);
+  --tx-deposit:       var(--state-info);
+  --tx-tip-sent:      var(--pr-color-orange-500);
+  --tx-tip-received:  var(--state-success);
+  --tx-refund:        var(--state-warning);
+  --tx-commission:    var(--pr-color-violet-500);
+  --tx-referral:      var(--color-primary);
+
+  /* ─── Creator Tier Colors ──────────────────────────────────────── */
+  --tier-bronze:   #cd7f32;
+  --tier-silver:   #a0a4ac;
+  --tier-gold:     var(--pr-color-amber-400);
+  --tier-platinum: var(--pr-color-sky-400);
+  --tier-diamond:  var(--pr-color-violet-400);
+
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     LAYER 4b — SEMANTIC SHADOWS
+     ═══════════════════════════════════════════════════════════════════════ */
+  --shadow-none:          none;
+  --shadow-xs:            0 1px 2px var(--shadow-color-sm);
+  --shadow-sm:            0 1px 8px var(--shadow-color-sm);
+  --shadow-md:            0 2px 5px var(--shadow-color-sm);
+  --shadow-lg:            0 2px 10px var(--shadow-color-sm);
+  --shadow-xl:            0 4px 15px var(--shadow-color-md);
+  --shadow-2xl:           0 8px 25px var(--shadow-color-lg);
+  --shadow-3xl:           0 12px 40px var(--shadow-color-xl);
+  --shadow-4xl:           0 20px 60px var(--shadow-color-2xl);
+  --shadow-floating:      0 4px 15px var(--shadow-color-xl);
+  --shadow-input-focus:   0 0 0 4px rgba(216, 27, 96, 0.1);
+  --shadow-primary:       0 4px 12px rgba(216, 27, 96, 0.25);
+  --shadow-primary-lg:    0 8px 32px rgba(233, 30, 99, 0.35);
+
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     LAYER 4c — TYPOGRAPHY TOKENS
+     ═══════════════════════════════════════════════════════════════════════ */
+  --type-font-family:        var(--pr-font-sans);
+  --type-font-mono:          var(--pr-font-mono);
+  --type-size-xs:            var(--pr-font-xs);
+  --type-size-sm:            var(--pr-font-sm);
+  --type-size-base:          var(--pr-font-base);
+  --type-size-md:            var(--pr-font-md);
+  --type-size-lg:            var(--pr-font-lg);
+  --type-size-xl:            var(--pr-font-xl);
+  --type-size-2xl:           var(--pr-font-2xl);
+  --type-size-3xl:           var(--pr-font-3xl);
+  --type-size-4xl:           var(--pr-font-4xl);
+  --type-size-5xl:           var(--pr-font-5xl);
+  --type-size-6xl:           var(--pr-font-6xl);
+  --type-weight-normal:      var(--pr-weight-normal);
+  --type-weight-medium:      var(--pr-weight-medium);
+  --type-weight-semibold:    var(--pr-weight-semibold);
+  --type-weight-bold:        var(--pr-weight-bold);
+  --type-leading-tight:      var(--pr-leading-tight);
+  --type-leading-normal:     var(--pr-leading-normal);
+  --type-leading-relaxed:    var(--pr-leading-relaxed);
+  --type-tracking-tight:     var(--pr-tracking-tight);
+  --type-tracking-wide:      var(--pr-tracking-wide);
+  --type-tracking-upper:     var(--pr-tracking-upper);
+
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     LAYER 4d — SPACING TOKENS (aliases)
+     ═══════════════════════════════════════════════════════════════════════ */
+  --spacing-xxs:  var(--pr-size-0_5);
+  --spacing-xs:   var(--pr-size-1);
+  --spacing-sm:   var(--pr-size-1_5);
+  --spacing-md:   var(--pr-size-2);
+  --spacing-lg:   var(--pr-size-2_5);
+  --spacing-xl:   var(--pr-size-3);
+  --spacing-2xl:  var(--pr-size-3_5);
+  --spacing-3xl:  var(--pr-size-4);
+  --spacing-4xl:  var(--pr-size-5);
+  --spacing-5xl:  var(--pr-size-6);
+  --spacing-6xl:  var(--pr-size-8);
+  --spacing-7xl:  var(--pr-size-10);
+  --spacing-8xl:  var(--pr-size-12);
+
+  --sp-xxs: var(--pr-size-0_5);
+  --sp-xs:  var(--pr-size-1);
+  --sp-sm:  var(--pr-size-1_5);
+  --sp-md:  var(--pr-size-2);
+  --sp-lg:  var(--pr-size-2_5);
+  --sp-xl:  var(--pr-size-3);
+  --sp-2xl: var(--pr-size-3_5);
+  --sp-3xl: var(--pr-size-4);
+  --sp-4xl: var(--pr-size-5);
+  --sp-5xl: var(--pr-size-6);
+
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     LAYER 4e — RADIUS TOKENS
+     ═══════════════════════════════════════════════════════════════════════ */
+  --radius-none:  var(--pr-radius-none);
+  --radius-xs:    var(--pr-radius-xs);
+  --radius-sm:    var(--pr-radius-sm);
+  --radius-md:    var(--pr-radius-md);
+  --radius-lg:    var(--pr-radius-lg);
+  --radius-xl:    var(--pr-radius-xl);
+  --radius-2xl:   var(--pr-radius-2xl);
+  --radius-3xl:   var(--pr-radius-3xl);
+  --radius-full:  var(--pr-radius-full);
+  --radius-circle: var(--pr-radius-circle);
+
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     LAYER 4f — TRANSITION TOKENS
+     ═══════════════════════════════════════════════════════════════════════ */
+  --transition-fast:      all var(--pr-duration-fast) var(--pr-ease-default);
+  --transition-normal:    all var(--pr-duration-normal) var(--pr-ease-default);
+  --transition-medium:    all var(--pr-duration-medium) var(--pr-ease-default);
+  --transition-slow:      all var(--pr-duration-slow) var(--pr-ease-default);
+  --transition-spring:    all var(--pr-duration-medium) var(--pr-ease-spring);
+  --transition-bounce:    all var(--pr-duration-medium) var(--pr-ease-bounce);
+  --transition-color:     background-color var(--pr-duration-medium) var(--pr-ease-default),
+                          color var(--pr-duration-medium) var(--pr-ease-default),
+                          border-color var(--pr-duration-medium) var(--pr-ease-default);
+  --transition-transform: transform var(--pr-duration-fast) var(--pr-ease-default);
+  --transition-opacity:   opacity var(--pr-duration-normal) var(--pr-ease-default);
+
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     LAYER 4g — Z-INDEX SCALE
+     ═══════════════════════════════════════════════════════════════════════ */
+  --z-negative:   -2;
+  --z-background: -1;
+  --z-default:     1;
+  --z-sticky:     25;
+  --z-header:   1000;
+  --z-sidebar:  1500;
+  --z-chatbot:  2600;
+  --z-sheet:    2000;
+  --z-settings: 2000;
+  --z-nav:      2500;
+  --z-wizard:   3000;
+  --z-overlay:  4000;
+  --z-modal:    5000;
+  --z-fullscreen: 5000;
+  --z-search:   6000;
+  --z-toasts:   9999;
+  --z-consent:  10000;
+  --z-banner:   10500;
+  --z-pull-indicator: 20000;
+
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     LAYER 4h — LAYOUT TOKENS
+     ═══════════════════════════════════════════════════════════════════════ */
+  --layout-max-width:         1000px;
+  --layout-container-padding: var(--pr-size-5);
+  --layout-bottom-nav-height: 60px;
+  --layout-header-height:     69px;  /* .app-header live height (min-height 52 + padding 10×2 + border) — sticky surfaces below it must use this */
+  --layout-sidebar-width:     260px;
+
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     LAYER 4i — ICON TOKENS
+     ═══════════════════════════════════════════════════════════════════════ */
+  --icon-size-sm:  14px;
+  --icon-size-md:  18px;
+  --icon-size-lg:  24px;
+  --icon-size-xl:  32px;
+  --icon-color-default: var(--text-secondary);
+  --icon-color-primary: var(--color-primary);
+  --icon-color-success: var(--state-success);
+  --icon-color-error:   var(--state-error);
+  --icon-color-warning: var(--state-warning);
+
+
+  /* ─────────────────────────────────────────────────────────────────────
+     LAYER 1b — LEGACY ALIASES (backward compatibility)
+     These map old variable names to new canonical tokens so existing
+     CSS in index.css, header.css, studio.css, admin-*.css, etc.
+     continues to work without modification.
+     ───────────────────────────────────────────────────────────────────── */
+  --pink-bg:        var(--surface-page);
+  --pink-primary:   var(--color-primary);
+  --pink-light:     var(--color-primary-light);
+  --text-main:      var(--text-primary);
+  --header-bg:      var(--nav-header-bg);
+  --card-bg:        var(--surface-card);
+  --white:          var(--pr-color-white);
+  --terminal-bg:    #1e1e1e;   /* intentionally static — terminal chrome */
+  --meet-blue:      #0078ff;   /* intentionally static — Google Meet brand */
+  /* T092 — text color on top of --pink-primary / --color-primary (used
+     by CMS buttons and the DynamicPage error CTA) + generic dark
+     overlay for banner image dimming. */
+  --on-primary:     #ffffff;
+  --overlay-color:  rgba(0, 0, 0, 0.4);
+
+  --border-color:   var(--border-color);
+  --border-light:   var(--color-primary-light);
+  --border-input:   var(--color-primary-light);
+
+  --skeleton-from:  var(--skeleton-from);
+  --skeleton-to:    var(--skeleton-to);
+
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     LAYER 1c — COMPONENT-SPECIFIC LEGACY (used by individual CSS files)
+     ═══════════════════════════════════════════════════════════════════════ */
+  --dash-pink:      var(--color-primary);
+  --admin-pink:     var(--color-primary);
+  --studio-pink:    var(--color-primary);
+  --cp-primary:     var(--color-primary);
+  --cp-primary-light: var(--color-primary-light);
+  --cp-bg:          var(--surface-page);
+  --cp-surface:     var(--surface-card);
+  --cp-text:        var(--text-primary);
+  --bg-main:        var(--surface-page);
+  --bg-card:        var(--surface-card);
+  --bg-secondary:   var(--surface-card-alt);
+  --bg-input:       var(--surface-input);
+  --bg-highlight:   var(--surface-highlight);
+  --bg-highlight-medium: var(--surface-highlight-md);
+  --text-color:     var(--text-primary);
+  --text-secondary: var(--text-secondary);
+  --color-amber:    var(--pr-color-amber-500);
+  --color-error:    var(--state-error);
+  --color-gold:     var(--pr-color-amber-400);
+  --color-dark:     var(--pr-color-gray-900);
+  --color-dot-red:  #ff5f56;   /* intentionally static — terminal UI chrome */
+  --color-dot-yellow: #ffbd2e;
+  --color-dot-green: #27c93f;
+  --color-dir:      #3498db;
+  --color-exec:     #2ecc71;
+  --color-error-text: #e74c3c;
+  --color-cmd:      #f39c12;
+  --color-whatsapp: #25D366;
+  --shadow-card:    var(--shadow-xl);
+  --shadow-card-hover: var(--shadow-2xl);
+  --shadow-modal:   var(--shadow-4xl);
+  --shadow-nav:     var(--nav-bottom-shadow);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LAYER 5 — THEME MODES
+   Each mode overrides semantic + component layers. Modes are additive:
+   body.dark-mode handles dark, body.theme-amoled adds OLED-specific.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── DARK MODE (base dark override) ─────────────────────────────── */
+body.dark-mode {
+  /* Match .container background so the body doesn't show as a
+     black/empty strip below the card (especially below the footer). */
+  background-color: var(--white);
+
+  /* Primitives */
+  --pr-color-white:    #1e1e1e;
+  --pr-color-gray-50:  #1a1a1a;
+  --pr-color-gray-100: #222222;
+  --pr-color-gray-200: #2a2a2a;
+  --pr-color-gray-300: #333333;
+  --pr-color-gray-400: #555555;
+  --pr-color-gray-500: #777777;
+  --pr-color-gray-600: #a0a4ac;
+  --pr-color-gray-700: #b0b4bc;
+  --pr-color-gray-800: #c0c4cc;
+  --pr-color-gray-900: #e0e0e0;
+
+  /* Surfaces */
+  --surface-page:           #121212;
+  --surface-card:           #252525;
+  --surface-card-alt:       #1e1e1e;
+  --surface-header:         rgba(30, 30, 30, 0.85);
+  --surface-glass:          rgba(30, 30, 30, 0.92);
+  --surface-input:          #2d2d2d;
+  --surface-input-focus:    #333333;
+  --surface-overlay:        rgba(0, 0, 0, 0.8);
+  --surface-overlay-heavy:  rgba(0, 0, 0, 0.9);
+  --surface-overlay-light:  rgba(255, 255, 255, 0.05);
+  --surface-highlight:      rgba(255, 255, 255, 0.06);
+  --surface-highlight-md:   rgba(255, 255, 255, 0.08);
+  --surface-selected:       rgba(216, 27, 96, 0.12);
+
+  /* Text */
+  --text-primary:       #e0e0e0;
+  --text-secondary:     #a0a4ac;
+  --text-tertiary:      #666666;
+  --text-inverse:       #121212;
+  --text-on-primary:    #ffffff;
+  --text-link:          var(--color-primary);
+  --text-link-hover:    var(--pr-color-rose-300);
+
+  /* Borders */
+  --border-color:        rgba(255, 255, 255, 0.08);
+  --border-color-strong: rgba(255, 255, 255, 0.14);
+  --border-color-subtle: rgba(255, 255, 255, 0.05);
+
+  /* Shadows — darker, stronger in dark mode */
+  --shadow-color-sm:  rgba(0, 0, 0, 0.3);
+  --shadow-color-md:  rgba(0, 0, 0, 0.4);
+  --shadow-color-lg:  rgba(0, 0, 0, 0.5);
+  --shadow-color-xl:  rgba(0, 0, 0, 0.6);
+  --shadow-color-2xl: rgba(0, 0, 0, 0.7);
+
+  /* Skeleton */
+  --skeleton-from: #2a2a35;
+  --skeleton-to:   #3a3a48;
+
+  /* Scrollbar */
+  --scrollbar-thumb:       #444;
+  --scrollbar-thumb-hover: #555;
+
+  /* Status — same hues, dark backgrounds */
+  --status-pending-bg:    rgba(245, 158, 11, 0.12);
+  --status-pending-text:  #fbbf24;
+  --status-active-bg:     rgba(16, 185, 129, 0.12);
+  --status-active-text:   #34d399;
+  --status-error-bg:      rgba(239, 68, 68, 0.12);
+  --status-error-text:    #f87171;
+  --status-info-bg:       rgba(56, 189, 248, 0.12);
+  --status-info-text:     #7dd3fc;
+  --status-neutral-bg:    rgba(255, 255, 255, 0.06);
+  --status-neutral-text:  #a0a4ac;
+
+  /* Component overrides */
+  --nav-header-bg:      rgba(30, 30, 30, 0.85);
+  --nav-header-border:  var(--pr-border-1) solid var(--border-color);
+  --input-bg:           var(--surface-input);
+  --btn-ghost-hover-bg: var(--surface-highlight);
+
+  /* Legacy aliases */
+  --pink-bg:     var(--surface-page);
+  --pink-primary: var(--color-primary);
+  --pink-light:  #2d2d2d;
+  --text-main:   var(--text-primary);
+  --header-bg:   var(--nav-header-bg);
+  --card-bg:     var(--surface-card);
+  --white:       var(--pr-color-white);
+  --terminal-bg: var(--pr-color-gray-900);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-light: #2d2d2d;
+  --border-input: #2d2d2d;
+  --skeleton-from: #2a2a35;
+  --skeleton-to:   #3a3a48;
+  --on-primary:   #ffffff;
+  --overlay-color: rgba(0, 0, 0, 0.5);
+}
+
+/* ─── AMOLED MODE — true black for OLED screens ──────────────────── */
+body.theme-amoled,
+body.dark-mode.theme-amoled {
+  --surface-page:  #000000;
+  --surface-card:  #0a0a0a;
+  --surface-card-alt: #050505;
+  --surface-header: rgba(0, 0, 0, 0.9);
+  --surface-input: #111111;
+  --skeleton-from: #111111;
+  --skeleton-to:   #1a1a1a;
+  --scrollbar-thumb: #222;
+  --card-bg:       #0a0a0a;
+  --white:         #0a0a0a;
+  --bg-main:       #000000;
+}
+
+/* ─── GLASS MODE — frosted-glass aesthetic ───────────────────────── */
+body.theme-glass {
+  --surface-header: rgba(255, 255, 255, 0.7);
+  --surface-card:   rgba(255, 255, 255, 0.85);
+  --card-shadow:    0 8px 32px rgba(0, 0, 0, 0.08);
+  --card-border:    var(--pr-border-1) solid rgba(255, 255, 255, 0.6);
+}
+
+body.dark-mode.theme-glass {
+  --surface-header: rgba(20, 20, 20, 0.75);
+  --surface-card:   rgba(40, 40, 40, 0.8);
+  --surface-input:  rgba(50, 50, 50, 0.6);
+  --card-border:    var(--pr-border-1) solid rgba(255, 255, 255, 0.08);
+  --card-bg:        rgba(40, 40, 40, 0.8);
+}
+
+/* ─── CYBER MODE — neon accents on dark ──────────────────────────── */
+body.theme-cyber {
+  --color-primary:        #00ff88;
+  --color-primary-light:  rgba(0, 255, 136, 0.1);
+  --color-primary-dark:   #00cc6a;
+  --color-primary-gradient: linear-gradient(135deg, #00ff88, #00ccff);
+  --surface-page:         #08090f;
+  --surface-card:         #11131f;
+  --surface-input:        #141729;
+  --border-color:         rgba(0, 255, 136, 0.15);
+  --text-primary:         #e0e8ff;
+  --text-secondary:       #8890b0;
+  --state-info:           #00ccff;
+  --pink-primary:         #00ff88;
+  --pink-light:           rgba(0, 255, 136, 0.1);
+  --dash-pink:            #00ff88;
+  --admin-pink:           #00ff88;
+  --studio-pink:          #00ff88;
+}
+
+/* ─── MINIMAL MODE — ultra-clean with subtle grays ───────────────── */
+body.theme-minimal {
+  --color-primary:        #333333;
+  --color-primary-light:  #f0f0f0;
+  --color-primary-dark:   #111111;
+  --color-primary-gradient: linear-gradient(135deg, #333, #666);
+  --surface-page:         #ffffff;
+  --surface-card:         #fafafa;
+  --border-color:         #e5e5e5;
+  --border-color-strong:  #cccccc;
+  --shadow-color-sm:      rgba(0,0,0,0.03);
+  --shadow-color-md:      rgba(0,0,0,0.05);
+  --pink-primary:         #333333;
+  --pink-light:           #f0f0f0;
+  --dash-pink:            #333333;
+  --admin-pink:           #333333;
+  --studio-pink:          #333333;
+}
+
+body.dark-mode.theme-minimal {
+  --color-primary:        #aaaaaa;
+  --color-primary-light:  #222222;
+  --color-primary-dark:   #cccccc;
+  --surface-page:         #111111;
+  --surface-card:         #1a1a1a;
+  --border-color:         #2a2a2a;
+  --text-primary:         #dddddd;
+  --pink-primary:         #aaaaaa;
+}
+
+/* ─── PROFESSIONAL MODE — corporate blue tones ───────────────────── */
+body.theme-professional {
+  --color-primary:        #1a56db;
+  --color-primary-light:  #ebf0ff;
+  --color-primary-dark:   #1344af;
+  --color-primary-gradient: linear-gradient(135deg, #1a56db, #3b82f6);
+  --surface-page:         #f8fafc;
+  --state-success:        #059669;
+  --state-info:           #1a56db;
+  --pink-primary:         #1a56db;
+  --pink-light:           #ebf0ff;
+  --pink-bg:              #f8fafc;
+  --dash-pink:            #1a56db;
+  --admin-pink:           #1a56db;
+  --studio-pink:          #1a56db;
+}
+
+body.dark-mode.theme-professional {
+  --color-primary:        #3b82f6;
+  --color-primary-light:  #1e293b;
+  --surface-page:         #0f172a;
+  --surface-card:         #1e293b;
+  --text-primary:         #e2e8f0;
+  --pink-primary:         #3b82f6;
+  --pink-light:           #1e293b;
+}
+
+/* ─── ENTERPRISE MODE — premium dark with gold accents ───────────── */
+body.theme-enterprise {
+  --color-primary:        #c8a84e;
+  --color-primary-light:  rgba(200, 168, 78, 0.1);
+  --color-primary-dark:   #a88a3e;
+  --color-primary-gradient: linear-gradient(135deg, #c8a84e, #e2c87f);
+  --surface-page:         #0d0d12;
+  --surface-card:         #1a1a24;
+  --surface-input:        #222230;
+  --border-color:         rgba(200, 168, 78, 0.12);
+  --text-primary:         #e8e4f0;
+  --text-secondary:       #9a96a8;
+  --state-warning:        #c8a84e;
+  --pink-primary:         #c8a84e;
+  --pink-light:           rgba(200, 168, 78, 0.1);
+  --dash-pink:            #c8a84e;
+  --admin-pink:           #c8a84e;
+  --studio-pink:          #c8a84e;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CREATOR STUDIO THEME — Professional Blue/Indigo (scoped)
+   The studio shell carries data-creator-studio, and every surface it
+   renders (sidebar, header, content, forms, modals) is a descendant of
+   it — so remapping the semantic tokens on that scope re-skins the whole
+   workspace from rose to a strong corporate blue/indigo without touching
+   the rest of the app. Includes the legacy --pink-* aliases so older
+   components (MediaProvider, Analytics charts, LevelsBadges) follow the
+   new hue too.
+   ═══════════════════════════════════════════════════════════════════════════ */
+[data-creator-studio] {
+  /* Brand — strong professional blue → indigo */
+  --color-primary:         var(--pr-color-blue-500);
+  --color-primary-light:   #eef2ff;
+  --color-primary-dark:    #1d4ed8;
+  --color-primary-gradient: linear-gradient(135deg, var(--pr-color-blue-500), var(--pr-color-indigo-500));
+
+  /* Surfaces — soft blue page, white cards, blue-tinted inputs */
+  --surface-bg:            #e8eefc;
+  --surface-page:          #e8eefc;
+  --surface-card:          #ffffff;
+  --surface-card-alt:      #f4f7ff;
+  --surface-header:        rgba(232, 238, 252, 0.88);
+  --surface-glass:         rgba(244, 247, 255, 0.92);
+  --surface-input:         #e8eefc;
+  --surface-input-focus:   #ffffff;
+  --surface-overlay:       rgba(15, 23, 42, 0.55);
+  --surface-overlay-heavy: rgba(15, 23, 42, 0.7);
+  --surface-overlay-light: rgba(59, 130, 246, 0.05);
+  --surface-highlight:     rgba(59, 130, 246, 0.05);
+  --surface-highlight-md:  rgba(59, 130, 246, 0.1);
+  --surface-selected:      rgba(59, 130, 246, 0.08);
+
+  /* Text links */
+  --text-link:             var(--color-primary);
+  --text-link-hover:       var(--color-primary-dark);
+
+  /* Indirection aliases — the global bg-* and input-* tokens point at
+     the rose-50 surface; pin them to the blue surfaces inside the
+     studio so forms can NEVER fall back to a pink background through
+     a var() indirection (inputs, highlights, raised chips). */
+  --bg-input:             #e8eefc;
+  --input-bg:             #e8eefc;
+  --input-bg-focus:       #ffffff;
+  --bg-highlight:         rgba(59, 130, 246, 0.05);
+  --bg-highlight-medium:  rgba(59, 130, 246, 0.1);
+  --bg-raised:            #f4f7ff;
+
+  /* Borders — blue-tinted instead of rose */
+  --border-color:          rgba(59, 130, 246, 0.12);
+  --border-color-strong:   rgba(59, 130, 246, 0.28);
+  --border-color-subtle:   rgba(59, 130, 246, 0.06);
+
+  /* Legacy aliases — old components follow the new hue */
+  --pink-bg:               var(--surface-page);
+  --pink-primary:          var(--color-primary);
+  --pink-light:            var(--color-primary-light);
+  --dash-pink:             var(--color-primary);
+  --admin-pink:            var(--color-primary);
+  --studio-pink:           var(--color-primary);
+  --cp-primary:            var(--color-primary);
+  --cp-primary-light:      var(--color-primary-light);
+  --border-light:          var(--color-primary-light);
+  --border-input:          var(--color-primary-light);
+  --on-primary:            #ffffff;
+
+  /* Buttons — the global .btn-primary tokens point at rose-600/700 and
+     a rose shadow, which leaks a pink hover onto every form action in
+     the studio. Remap them to the blue/indigo identity so hover/
+     pressed/disabled/shadow all stay in the workspace hue. */
+  --btn-primary-bg:             var(--color-primary);
+  --btn-primary-text:           #ffffff;
+  --btn-primary-hover-bg:       var(--pr-color-indigo-500);
+  --btn-primary-pressed-bg:     #4f46e5;
+  --btn-primary-disabled-bg:    rgba(99, 102, 241, 0.35);
+  --btn-primary-shadow:         0 2px 10px rgba(0, 132, 255, 0.28);
+  --btn-secondary-border:       var(--pr-border-2) solid var(--color-primary);
+  --btn-secondary-text:         var(--color-primary);
+
+  /* Shadows — the focus ring on inputs and the primary glow were
+     hardcoded to a rose rgba; remap to blue so focusing a form field
+     never throws a pink ring. */
+  --shadow-input-focus:         0 0 0 4px rgba(0, 132, 255, 0.1);
+  --shadow-primary:             0 4px 12px rgba(0, 132, 255, 0.22);
+  --shadow-primary-lg:          0 8px 32px rgba(79, 70, 229, 0.3);
+}
+
+/* Studio in dark mode — keep the blue identity on dark surfaces */
+body.dark-mode [data-creator-studio] {
+  --color-primary:         #3b82f6;
+  --color-primary-light:   #1e293b;
+  --color-primary-dark:    #60a5fa;
+  --color-primary-gradient: linear-gradient(135deg, #3b82f6, #818cf8);
+  --surface-bg:            #0f172a;
+  --surface-page:          #0f172a;
+  --surface-card:          #1e293b;
+  --surface-card-alt:      #172033;
+  --surface-input:         #1e293b;
+  --surface-input-focus:   #283548;
+  --surface-highlight:     rgba(59, 130, 246, 0.12);
+  --surface-highlight-md:  rgba(59, 130, 246, 0.18);
+  --surface-selected:      rgba(59, 130, 246, 0.16);
+  /* Indirection aliases — same pinning as the light scope, on dark */
+  --bg-input:             #1e293b;
+  --input-bg:             #1e293b;
+  --input-bg-focus:       #283548;
+  --bg-highlight:         rgba(59, 130, 246, 0.12);
+  --bg-highlight-medium:  rgba(59, 130, 246, 0.18);
+  --bg-raised:            #172033;
+
+  --border-color:          rgba(148, 163, 184, 0.14);
+  --border-color-strong:   rgba(148, 163, 184, 0.24);
+  --border-color-subtle:   rgba(148, 163, 184, 0.08);
+  --pink-bg:               var(--surface-page);
+  --pink-primary:          var(--color-primary);
+  --pink-light:            var(--color-primary-light);
+  --dash-pink:             var(--color-primary);
+  --admin-pink:            var(--color-primary);
+  --studio-pink:           var(--color-primary);
+
+  /* Buttons — same blue/indigo remap as the light studio scope */
+  --btn-primary-bg:             var(--color-primary);
+  --btn-primary-text:           #ffffff;
+  --btn-primary-hover-bg:       #60a5fa;
+  --btn-primary-pressed-bg:     #3b82f6;
+  --btn-primary-disabled-bg:    rgba(96, 165, 250, 0.35);
+  --btn-primary-shadow:         0 2px 10px rgba(59, 130, 246, 0.35);
+  --btn-secondary-border:       var(--pr-border-2) solid var(--color-primary);
+  --btn-secondary-text:         var(--color-primary);
+
+  --shadow-input-focus:         0 0 0 4px rgba(59, 130, 246, 0.16);
+  --shadow-primary:             0 4px 12px rgba(59, 130, 246, 0.3);
+  --shadow-primary-lg:          0 8px 32px rgba(129, 140, 248, 0.32);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ANIMATION KEYFRAMES
+   ═══════════════════════════════════════════════════════════════════════════ */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes zoomIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes slideInUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+@keyframes skeleton-loading {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   REDUCED MOTION — respect user preference
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --pr-duration-instant: 0s;
+    --pr-duration-fast:    0s;
+    --pr-duration-normal:  0s;
+    --pr-duration-medium:  0s;
+    --pr-duration-slow:    0s;
+    --pr-duration-xslow:   0s;
+  }
+
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LAYER 4j — ACCESSIBILITY TOKENS (Phase 10)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ─── Focus Indicators ──────────────────────────────────────── */
+  --a11y-focus-ring-width: 2px;
+  --a11y-focus-ring-offset:    2px;
+  --a11y-focus-ring-color:     var(--color-primary, #d81b60);
+  --a11y-focus-ring-color-dark: var(--pr-color-rose-300, #f06292);
+  --a11y-focus-ring:           var(--a11y-focus-ring-width) solid var(--a11y-focus-ring-color);
+  --a11y-focus-ring-visible:   var(--a11y-focus-ring-width) solid var(--a11y-focus-ring-color);
+  --a11y-focus-ring-shadow:    0 0 0 var(--a11y-focus-ring-offset) var(--surface-card, #fff);
+
+  /* ─── Touch Target ──────────────────────────────────────────── */
+  --a11y-touch-target-min:     44px;
+
+  /* ─── Contrast Helpers ──────────────────────────────────────── */
+  --a11y-text-on-primary-bg:  var(--text-on-primary, #fff);
+  --a11y-error-icon-color:    var(--state-error, #ef4444);
+  --a11y-success-icon-color:  var(--state-success, #10b981);
+  --a11y-warning-icon-color:  var(--state-warning, #f59e0b);
+
+  /* ─── Screen Reader Only (visually hidden, accessible) ─────── */
+  --a11y-sr-only-position:    absolute;
+  --a11y-sr-only-width:       1px;
+  --a11y-sr-only-height:      1px;
+  --a11y-sr-only-padding:     0;
+  --a11y-sr-only-margin:      -1px;
+  --a11y-sr-only-overflow:    hidden;
+  --a11y-sr-only-clip:        rect(0,0,0,0);
+  --a11y-sr-only-white-space: nowrap;
+  --a11y-sr-only-border:      0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GLOBAL BASE STYLES
+   ═══════════════════════════════════════════════════════════════════════════ */
+html {
+  font-size: 16px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--type-font-family);
+  background-color: var(--surface-page);
+  margin: 0;
+  padding: 0;
+  color: var(--text-primary);
+  transition: var(--transition-color);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-width);
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: var(--pr-radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Selection */
+::selection {
+  background: var(--color-primary);
+  color: var(--text-on-primary);
+}
+
+/* Focus ring for accessibility */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--pr-radius-xs);
+}
+
+/* Skip to content link (WCAG 2.4.1) — visually hidden until keyboard focus */
+.skip-to-content {
+  position: absolute;
+  top: -100%;
+  left: var(--pr-size-4);
+  z-index: var(--z-banner);
+  padding: var(--pr-size-3) var(--pr-size-6);
+  background: var(--color-primary);
+  color: var(--text-on-primary);
+  font-weight: var(--pr-weight-semibold);
+  font-size: var(--pr-font-base);
+  border-radius: 0 0 var(--pr-radius-md) var(--pr-radius-md);
+  text-decoration: none;
+  box-shadow: var(--shadow-lg);
+  transition: top var(--pr-duration-fast) var(--pr-ease-out);
+}
+.skip-to-content:focus {
+  top: 0;
+  outline: 2px solid var(--pr-color-white);
+  outline-offset: 2px;
+}

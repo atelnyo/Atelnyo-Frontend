@@ -1,0 +1,186 @@
+<!doctype html>
+<!-- offline.html — Atelnyo offline fallback page
+     Served by the service worker when the user navigates while offline.
+     This page is self-contained (no external CSS or JS) so it renders
+     correctly even without any cached assets. -->
+<html lang="ht">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Offline — Atelnyo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 100%);
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+    }
+    .offline-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(216, 27, 96, 0.2);
+      border-radius: 20px;
+      padding: 48px 32px;
+      max-width: 420px;
+      width: 100%;
+    }
+    .offline-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+      display: block;
+    }
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #d81b60, #e91e63);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    p {
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    .offline-btn {
+      display: inline-block;
+      padding: 12px 28px;
+      background: #d81b60;
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .offline-btn:hover { background: #e91e63; }
+    .saved-courses {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      text-align: left;
+    }
+    .saved-courses h2 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .saved-course-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      font-size: 0.88rem;
+    }
+    .course-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #4caf50;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="offline-card">
+    <span class="offline-icon">📡</span>
+    <h1>Ou pa konekte a entènèt</h1>
+    <p>
+      Sanble ou pèdi koneksyon entènèt ou. Pa enkyete w — kou ou te kòmanse yo disponib pou li offline.
+      Klike anba a pou eseye ankò.
+    </p>
+    <button class="offline-btn" onclick="window.location.reload()">
+      🔄 Eseye Ankò
+    </button>
+
+    <div class="saved-courses" id="saved-courses">
+      <h2>📚 Kou ki disponib offline</h2>
+      <div id="course-list">
+        <div class="saved-course-item">
+          <span class="course-dot"></span>
+          <span>Chaje kou offline yo...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Try to show any cached course pages.
+    // Reads the SW CACHE_VERSION via postMessage so offline.html never
+    // falls out of sync with sw.js — no hardcoded version string needed.
+    (async function() {
+      try {
+        // 1. Ask the active SW for its cache version.
+        const cacheVersion = await new Promise((resolve) => {
+          const onMsg = (event) => {
+            if (event.data?.version) {
+              navigator.serviceWorker.removeEventListener('message', onMsg);
+              resolve(event.data.version);
+            }
+          };
+          navigator.serviceWorker.addEventListener('message', onMsg);
+          navigator.serviceWorker.controller?.postMessage({ type: 'GET_VERSION' });
+          // Timeout — fall back to the newest existing atelnyo-app-* cache
+          // (or the sw.js default if none is found). Handles the window
+          // where the SW isn't reachable yet (first install, post-update).
+          // Legacy devrose-app-* caches are also accepted as a fallback so
+          // sessions mid-migration still resolve before activate purges them.
+          setTimeout(async () => {
+            navigator.serviceWorker.removeEventListener('message', onMsg);
+            try {
+              const allKeys = await caches.keys();
+              const appCaches = allKeys
+                .filter(k => k.startsWith('atelnyo-app-') || k.startsWith('devrose-app-'))
+                .sort()
+                .reverse();
+              resolve(appCaches.length > 0 ? appCaches[0].replace(/^(atelnyo|devrose)-app-/, '') : 'v7');
+            } catch (_) {
+              resolve('v7'); // same default as sw.js
+            }
+          }, 500);
+        });
+
+        const cacheName = `atelnyo-app-${cacheVersion}`;
+        const cache = await caches.open(cacheName);
+        const keys = await cache.keys();
+        const courseUrls = keys
+          .filter(r => r.url.includes('/course/') || r.url.includes('/sheet/'))
+          .map(r => {
+            try { return new URL(r.url).pathname; } catch (_) { return ''; }
+          })
+          .filter(Boolean);
+
+        const list = document.getElementById('course-list');
+        if (courseUrls.length > 0) {
+          list.innerHTML = courseUrls.slice(0, 5).map(url =>
+            '<div class="saved-course-item">' +
+            '<span class="course-dot"></span>' +
+            '<span>' + url.replace('/sheet/', '').replace(/\//g, ' › ') + '</span>' +
+            '</div>'
+          ).join('');
+        } else {
+          list.innerHTML = '<div class="saved-course-item"><span class="course-dot" style="background:#ff9800"></span><span>Ou poko telechaje okenn kou. Konekte a entènèt epi vizite yon kou pou li vin disponib offline.</span></div>';
+        }
+      } catch (_) {
+        document.getElementById('course-list').innerHTML =
+          '<div class="saved-course-item"><span class="course-dot" style="background:#f44336"></span><span>Pa ka chaje kou offline yo.</span></div>';
+      }
+    })();
+  </script>
+</body>
+</html>

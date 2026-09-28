@@ -1,0 +1,581 @@
+/**
+ * src/components/community/ModerationDashboard.css
+ *
+ * Styles for Moderation Dashboard
+ */
+
+/* ─── Container ─────────────────────────────────────────────────── */
+.mod-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.mod-header {
+  margin-bottom: 24px;
+}
+
+.mod-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--text-primary, #1f2937);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mod-header h2 i {
+  color: #ef4444;
+}
+
+/* ─── Stats Grid ────────────────────────────────────────────────── */
+.mod-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.mod-stats-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s;
+}
+
+.mod-stats-card:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.mod-stats-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 1rem;
+}
+
+.mod-stats-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary, #1f2937);
+}
+
+.mod-stats-label {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+/* ─── Tabs ──────────────────────────────────────────────────────── */
+.mod-tabs {
+  display: flex;
+  gap: 4px;
+  background: #f3f4f6;
+  padding: 4px;
+  border-radius: 10px;
+  margin-bottom: 24px;
+}
+
+.mod-tabs button {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #6b7280;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.mod-tabs button.mod-tab-active {
+  background: white;
+  color: #ef4444;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* ─── Content ───────────────────────────────────────────────────── */
+.mod-content {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  min-height: 400px;
+}
+
+.mod-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  color: #6b7280;
+}
+
+.mod-loading i {
+  font-size: 2rem;
+  color: #ef4444;
+  margin-bottom: 12px;
+  animation: mod-spin 1s linear infinite;
+}
+
+@keyframes mod-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.mod-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  color: #9ca3af;
+}
+
+.mod-empty i {
+  font-size: 2rem;
+  margin-bottom: 12px;
+}
+
+/* ─── Queue Item ────────────────────────────────────────────────── */
+.mod-queue-item {
+  padding: 16px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.mod-queue-item:last-child {
+  border-bottom: none;
+}
+
+.mod-queue-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.mod-queue-type {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.mod-queue-status {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.mod-queue-content {
+  margin-bottom: 12px;
+}
+
+.mod-queue-author {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.mod-queue-text {
+  font-size: 0.95rem;
+  color: var(--text-primary, #1f2937);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.mod-queue-reason {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #fef3c7;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #92400e;
+}
+
+.mod-queue-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin-bottom: 12px;
+}
+
+.mod-queue-meta span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mod-queue-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ─── User Item ─────────────────────────────────────────────────── */
+.mod-user-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.mod-user-item:last-child {
+  border-bottom: none;
+}
+
+.mod-user-item.mod-user-banned {
+  background: #fef2f2;
+}
+
+.mod-user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: white;
+  flex-shrink: 0;
+}
+
+.mod-user-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.mod-user-info {
+  flex: 1;
+}
+
+.mod-user-name {
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+}
+
+.mod-user-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.mod-user-warnings {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: #f59e0b;
+  margin-top: 4px;
+}
+
+.mod-user-actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* ─── Report Item ───────────────────────────────────────────────── */
+.mod-report-item {
+  padding: 16px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.mod-report-item:last-child {
+  border-bottom: none;
+}
+
+.mod-report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.mod-report-type {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.mod-report-status {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.mod-report-content {
+  margin-bottom: 12px;
+}
+
+.mod-report-reporter,
+.mod-report-target {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-bottom: 6px;
+}
+
+.mod-report-reason {
+  font-size: 0.9rem;
+  color: var(--text-primary, #1f2937);
+  margin: 8px 0 0 0;
+  padding: 8px 12px;
+  background: #f9fafb;
+  border-radius: 6px;
+}
+
+.mod-report-meta {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin-bottom: 12px;
+}
+
+.mod-report-meta span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mod-report-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ─── Log Item ──────────────────────────────────────────────────── */
+.mod-log-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.mod-log-item:last-child {
+  border-bottom: none;
+}
+
+.mod-log-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  border-radius: 8px;
+}
+
+.mod-log-content {
+  flex: 1;
+  font-size: 0.9rem;
+}
+
+.mod-log-moderator {
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+}
+
+.mod-log-action {
+  color: #6b7280;
+  margin: 0 4px;
+}
+
+.mod-log-target {
+  color: #9ca3af;
+}
+
+.mod-log-time {
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+/* ─── Auto-Mod Settings ─────────────────────────────────────────── */
+.mod-automod {
+  padding: 24px;
+}
+
+.mod-automod h3 {
+  margin: 0 0 20px 0;
+  font-size: 1.1rem;
+  color: var(--text-primary, #1f2937);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mod-automod h3 i {
+  color: #8b5cf6;
+}
+
+.mod-automod-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.mod-setting {
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.mod-setting label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.mod-setting input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.mod-setting input[type="number"] {
+  width: 80px;
+  padding: 6px 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  margin-left: 8px;
+}
+
+.mod-setting-desc {
+  margin: 8px 0 0 0;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+/* ─── Buttons ───────────────────────────────────────────────────── */
+.mod-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mod-btn-approve {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.mod-btn-approve:hover {
+  background: #bbf7d0;
+}
+
+.mod-btn-reject {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.mod-btn-reject:hover {
+  background: #fecaca;
+}
+
+.mod-btn-flag {
+  background: #f3e8ff;
+  color: #7c3aed;
+}
+
+.mod-btn-flag:hover {
+  background: #e9d5ff;
+}
+
+.mod-btn-ban {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.mod-btn-ban:hover {
+  background: #fecaca;
+}
+
+.mod-btn-mute {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.mod-btn-mute:hover {
+  background: #e5e7eb;
+}
+
+.mod-btn-warn {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.mod-btn-warn:hover {
+  background: #fde68a;
+}
+
+.mod-btn-unban {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.mod-btn-unban:hover {
+  background: #bbf7d0;
+}
+
+.mod-btn-resolve {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.mod-btn-resolve:hover {
+  background: #bbf7d0;
+}
+
+.mod-btn-dismiss {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.mod-btn-dismiss:hover {
+  background: #e5e7eb;
+}
+
+.mod-btn-save {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  padding: 10px 20px;
+}
+
+.mod-btn-save:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}

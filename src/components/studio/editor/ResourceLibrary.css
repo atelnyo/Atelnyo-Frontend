@@ -1,0 +1,60 @@
+/* ResourceLibrary.css */
+
+.resource-library { padding: 16px; }
+.rl-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.rl-header h3 { margin: 0; font-size: 18px; }
+.rl-add-btn {
+  padding: 6px 14px; background: #4caf50; color: #fff; border: none;
+  border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;
+}
+.rl-add-btn:hover { background: #388e3c; }
+
+.rl-add-form {
+  display: flex; flex-direction: column; gap: 8px; padding: 16px;
+  background: #f5f5f5; border-radius: 8px; margin-bottom: 16px;
+}
+.rl-add-form input, .rl-add-form select {
+  padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;
+}
+.rl-save-btn {
+  padding: 10px; background: #2196f3; color: #fff; border: none;
+  border-radius: 6px; cursor: pointer; font-weight: 600;
+}
+
+.rl-filters {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px;
+}
+.rl-filter-btn {
+  padding: 4px 10px; border: 1px solid #ddd; border-radius: 12px;
+  background: #fff; cursor: pointer; font-size: 12px;
+}
+.rl-filter-btn.active { background: #4caf50; color: #fff; border-color: #4caf50; }
+
+.rl-loading, .rl-empty {
+  text-align: center; padding: 32px; color: #888;
+}
+.rl-empty p { margin: 4px 0; font-size: 14px; }
+
+.rl-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;
+}
+.rl-card {
+  border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px;
+  background: #fff; transition: box-shadow 0.2s;
+}
+.rl-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.rl-card-type { font-size: 11px; color: #888; margin-bottom: 4px; }
+.rl-card-title { font-size: 14px; margin: 0 0 4px; font-weight: 600; }
+.rl-card-desc { font-size: 12px; color: #666; margin: 0 0 8px; }
+.rl-card-meta { font-size: 11px; color: #999; margin-bottom: 8px; }
+.rl-card-meta span { margin-right: 8px; }
+.rl-card-actions { display: flex; gap: 6px; }
+.rl-insert-btn {
+  padding: 4px 10px; background: #4caf50; color: #fff; border: none;
+  border-radius: 4px; cursor: pointer; font-size: 12px;
+}
+.rl-link-btn, .rl-delete-btn {
+  padding: 4px 8px; background: #f5f5f5; border: 1px solid #ddd;
+  border-radius: 4px; cursor: pointer; font-size: 12px; text-decoration: none;
+}
+.rl-delete-btn:hover { background: #ffebee; border-color: #f44336; }

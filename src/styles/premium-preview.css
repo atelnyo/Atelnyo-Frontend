@@ -1,0 +1,503 @@
+/**
+ * src/styles/premium-preview.css — Premium Preview Modal Styles
+ *
+ * Dark mode: body.dark-mode overrides via CSS variables.
+ * Responsive: mobile, tablet, desktop.
+ * Animation: fade-in + scale-up on mount.
+ *
+ * Uses tokens.css variables for consistency.
+ */
+
+/* ─── Overlay ─────────────────────────────────────────────────── */
+.pp-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.pp-overlay--visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ─── Content ─────────────────────────────────────────────────── */
+.pp-content {
+  background: var(--bg-card, #ffffff);
+  border-radius: 20px;
+  max-width: 720px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 32px 28px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  transform: scale(0.92) translateY(20px);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pp-content--visible {
+  transform: scale(1) translateY(0);
+}
+
+/* Scrollbar styling */
+.pp-content::-webkit-scrollbar { width: 6px; }
+.pp-content::-webkit-scrollbar-track { background: transparent; }
+.pp-content::-webkit-scrollbar-thumb {
+  background: var(--text-secondary, #888);
+  border-radius: 3px;
+}
+
+/* ─── Close button ────────────────────────────────────────────── */
+.pp-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--bg-highlight-medium, rgba(0,0,0,0.05));
+  color: var(--text-secondary, #888);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+}
+
+.pp-close-btn:hover {
+  background: var(--color-error, #e74c3c);
+  color: #fff;
+  transform: rotate(90deg);
+}
+
+.pp-close-btn:focus-visible {
+  outline: 2px solid var(--color-primary, #d81b60);
+  outline-offset: 2px;
+}
+
+/* ─── Header ──────────────────────────────────────────────────── */
+.pp-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.pp-header-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  margin: 0 auto 16px;
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
+}
+
+.pp-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-primary, #333);
+  margin: 0 0 8px;
+  letter-spacing: -0.02em;
+}
+
+.pp-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-secondary, #888);
+  margin: 0;
+  line-height: 1.5;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* ─── Section ─────────────────────────────────────────────────── */
+.pp-section {
+  margin-bottom: 32px;
+}
+
+.pp-section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary, #333);
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pp-section-title i {
+  color: var(--color-primary, #d81b60);
+  font-size: 0.85rem;
+}
+
+/* ─── Features Grid ───────────────────────────────────────────── */
+.pp-features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.pp-feature-card {
+  background: var(--bg-highlight, rgba(216, 27, 96, 0.04));
+  border: 1px solid var(--border-color, rgba(216, 27, 96, 0.1));
+  border-radius: 14px;
+  padding: 16px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.pp-feature-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.pp-feature-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.pp-feature-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary, #333);
+  margin: 0 0 6px;
+}
+
+.pp-feature-desc {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #888);
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* ─── Plans Grid ──────────────────────────────────────────────── */
+.pp-plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.pp-plan-card {
+  background: var(--bg-highlight, rgba(216, 27, 96, 0.04));
+  border: 1.5px solid var(--border-color, rgba(216, 27, 96, 0.1));
+  border-radius: 14px;
+  padding: 20px 14px;
+  text-align: center;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.pp-plan-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: var(--color-primary, #d81b60);
+}
+
+.pp-plan-card:focus-visible {
+  outline: 2px solid var(--color-primary, #d81b60);
+  outline-offset: 2px;
+}
+
+.pp-plan-card--selected {
+  border-color: var(--color-primary, #d81b60);
+  background: var(--bg-highlight-medium, rgba(216, 27, 96, 0.08));
+  box-shadow: 0 0 0 2px var(--color-primary, #d81b60);
+}
+
+.pp-plan-card--popular {
+  border-color: #f59e0b;
+}
+
+.pp-plan-card--popular.pp-plan-card--selected {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px #f59e0b;
+}
+
+.pp-plan-badge {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pp-plan-badge i {
+  font-size: 0.55rem;
+}
+
+.pp-plan-icon {
+  font-size: 24px;
+  color: var(--color-primary, #d81b60);
+  margin-bottom: 8px;
+}
+
+.pp-plan-card--popular .pp-plan-icon {
+  color: #f59e0b;
+}
+
+.pp-plan-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-primary, #333);
+  margin: 0 0 8px;
+}
+
+.pp-plan-price {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 2px;
+  margin-bottom: 6px;
+}
+
+.pp-plan-amount {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text-primary, #333);
+  line-height: 1;
+}
+
+.pp-plan-period {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #888);
+}
+
+.pp-plan-savings {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-top: 4px;
+}
+
+.pp-plan-savings i {
+  font-size: 0.55rem;
+}
+
+/* ─── CTA Section ─────────────────────────────────────────────── */
+.pp-cta-section {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(251, 191, 36, 0.04));
+  border: 1.5px dashed var(--color-primary, #d81b60);
+  border-radius: 16px;
+  padding: 28px 24px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.pp-cta-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 14px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pp-cta-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary, #333);
+  margin: 0 0 8px;
+}
+
+.pp-cta-text {
+  font-size: 0.82rem;
+  color: var(--text-secondary, #888);
+  line-height: 1.5;
+  margin: 0 auto 16px;
+  max-width: 440px;
+}
+
+.pp-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, var(--color-primary, #d81b60), #ff5e8a);
+  color: #fff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+}
+
+.pp-cta-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(216, 27, 96, 0.3);
+}
+
+.pp-cta-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+  background: linear-gradient(135deg, #10b981, #34d399);
+}
+
+.pp-cta-btn:focus-visible {
+  outline: 2px solid var(--color-primary, #d81b60);
+  outline-offset: 2px;
+}
+
+/* ─── Footer ──────────────────────────────────────────────────── */
+.pp-footer {
+  text-align: center;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-color, rgba(216, 27, 96, 0.1));
+}
+
+.pp-footer p {
+  font-size: 0.72rem;
+  color: var(--text-secondary, #888);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.pp-footer i {
+  color: #10b981;
+}
+
+/* ─── Dark Mode Overrides ─────────────────────────────────────── */
+body.dark-mode .pp-content {
+  background: var(--surface-card, #252525);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .pp-close-btn {
+  background: rgba(255, 255, 255, 0.06);
+  color: #a0a4ac;
+}
+
+body.dark-mode .pp-close-btn:hover {
+  background: var(--color-error, #e74c3c);
+  color: #fff;
+}
+
+body.dark-mode .pp-feature-card {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark-mode .pp-feature-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .pp-plan-card {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark-mode .pp-plan-card--selected {
+  background: rgba(216, 27, 96, 0.15);
+  border-color: var(--color-primary, #d81b60);
+}
+
+body.dark-mode .pp-plan-card--popular.pp-plan-card--selected {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: #f59e0b;
+}
+
+body.dark-mode .pp-cta-section {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(251, 191, 36, 0.06));
+}
+
+body.dark-mode .pp-footer {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ─── Responsive ────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .pp-content {
+    padding: 24px 18px;
+    max-height: 85vh;
+    border-radius: 16px;
+  }
+
+  .pp-features-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .pp-plans-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .pp-header-icon {
+    width: 52px;
+    height: 52px;
+    font-size: 22px;
+  }
+
+  .pp-title {
+    font-size: 1.3rem;
+  }
+
+  .pp-feature-card {
+    padding: 12px;
+  }
+
+  .pp-plan-card {
+    padding: 16px 10px;
+  }
+}
+
+@media (max-width: 400px) {
+  .pp-features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pp-plans-grid {
+    grid-template-columns: 1fr;
+  }
+}

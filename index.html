@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- interactive-widget=resizes-content: Android Chrome (108+) shrinks the
+         LAYOUT viewport when the keyboard opens (like iOS), so fixed overlays
+         (auth modal) re-center above the keyboard instead of rubber-banding.
+         viewport-fit=cover: honor safe-area insets on notched devices. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
+    <title>Atelnyo — Learn, Create, Share | Online Courses, Music, Products</title>
+
+    <!-- ─── PWA Meta Tags ───────────────────────────────────────────── -->
+    <meta name="theme-color" content="#0a0a1a" />
+    <meta name="application-name" content="Atelnyo" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Atelnyo" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <link rel="manifest" href="/manifest.json" />
+    <!-- Favicon: SVG for modern browsers, ICO for Googlebot + legacy, PNG fallback -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" href="/icon-192.svg" type="image/svg+xml" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <!-- Safari requires a PNG for apple-touch-icon (SVG is ignored) —
+         /icon-192.png is the canonical raster icon from manifest.json. -->
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <!-- Apple splash screens (iOS PWA) — prevents white flash on launch -->
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)" href="/icon-512.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)" href="/icon-512.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" href="/icon-512.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" href="/icon-512.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" href="/icon-512.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" href="/icon-512.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" href="/icon-512.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" href="/icon-512.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)" href="/icon-512.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)" href="/icon-512.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2)" href="/icon-512.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 810px) and (device-height: 1080px) and (-webkit-device-pixel-ratio: 2)" href="/icon-512.png" />
+    
+    <!-- Fonts: self-hosted (see src/styles/fonts.css) -->
+    
+    <!-- Open Graph / Social Media -->
+    <meta name="description" content="Atelnyo is an international platform where creators teach online courses, share music, sell products, and grow their digital presence. Join 50+ creators and start learning today." />
+    <meta name="keywords" content="Atelnyo, online courses, Haiti, Haitian Creole, Linux, Python, React, Django, Haitian music, Haitian talent, remote work, creative marketplace, online learning, creator economy" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta name="author" content="Atelnyo" />
+    <meta name="copyright" content="© 2026 Atelnyo. All rights reserved." />
+    <meta name="application-name" content="Atelnyo" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="rating" content="general" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="language" content="Haitian Creole, English, French, Spanish" />
+    <!-- Canonical + hreflang + og:locale/og:url are NOT hardcoded here:
+         react-helmet-async cannot remove initial-HTML tags, so any static
+         value would stay FIRST in <head> and contradict the per-page tags
+         the app emits (e.g. a root canonical on /fr-CA/about, en_US on the
+         Kreyòl page). App.jsx's global <Helmet> emits the full 36-combo
+         language-COUNTRY alternates + x-default + a current-URL canonical
+         and og:url on EVERY route; SEOHead adds page-specific meta. -->
+    <link rel="preconnect" href="https://api.atelnyo.site">
+    <link rel="dns-prefetch" href="https://api.atelnyo.site">
+
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" id="og-title" content="Atelnyo — Learn, Create, Share">
+    <meta property="og:description" id="og-desc" content="Atelnyo is an international platform where creators teach courses, share music, sell products, and grow their digital presence.">
+    <meta property="og:image" content="https://atelnyo.site/og-banner-en.svg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="Atelnyo">
+    <meta property="og:alternate" content="Atelnyo">
+    <meta property="fb:app_id" content="934278055774246">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@Atelnyo">
+    <meta name="twitter:creator" content="@Atelnyo">
+    <meta name="twitter:title" content="Atelnyo — Learn, Create, Share">
+    <meta name="twitter:description" content="Atelnyo is an international platform where creators teach courses, share music, sell products, and grow their digital presence.">
+    <meta name="twitter:image" content="https://atelnyo.site/og-banner-en.svg">
+    <meta name="twitter:image:alt" content="Atelnyo — Learn, Create, Share">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "EducationalOrganization",
+      "name": "Atelnyo",
+      "alternateName": [],
+      "url": "https://atelnyo.site",
+      "logo": "https://atelnyo.site/og-banner-en.svg",
+      "description": "Atelnyo is an international platform for online courses, music, products, creator profiles, and digital commerce.",
+      "foundingDate": "2024",
+      "address": { "@type": "PostalAddress", "addressCountry": "HT" },
+      "sameAs": [
+        "https://github.com/Atelnyo",
+        "https://twitter.com/Atelnyo",
+        "https://facebook.com/Atelnyo",
+        "https://linkedin.com/company/atelnyo",
+        "https://youtube.com/@Atelnyo",
+        "https://instagram.com/atelnyo"
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer support",
+        "email": "support@atelnyo.site",
+        "availableLanguage": ["English", "Haitian Creole", "French", "Spanish"]
+      },
+      "keywords": ["Atelnyo", "online learning", "Haitian creators", "creator economy"]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Atelnyo",
+      "alternateName": "Atelnyo",
+      "url": "https://atelnyo.site",
+      "description": "Atelnyo is an international platform for online courses, music, products, creator profiles, and digital commerce.",
+      "inLanguage": ["en-US", "ht-HT", "fr-HT", "es-US"],
+      "publisher": {
+        "@type": "EducationalOrganization",
+        "name": "Atelnyo",
+        "alternateName": "Atelnyo",
+        "url": "https://atelnyo.site",
+        "logo": "https://atelnyo.site/og-banner-en.svg"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://atelnyo.site/explore?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- ─── Dev-mode SW unregister (synchronous, before any module) ──────────
+         Phase 56.1 — Defensive fix for the recurring
+         "Cannot read properties of null (reading 'useState')" crash on
+         lazy-loaded routes (CreatorAnalytics, AdminDashboard, etc.) in
+         GitHub Codespaces. The previous post-render unregister in
+         main.jsx fired too late — the SW intercepted the first lazy
+         chunk fetch with a cache-first hit, serving a stale chunk
+         bundled against a now-invalid React reference. This inline
+         script runs DURING HTML PARSING, before any module scripts
+         (including main.jsx) execute, so the SW is gone before
+         React even tries to mount.
+
+         The registration script in <body> below checks
+         ``window.__atelnyo_isDev`` and skips re-registration in dev,
+         so the SW can't immediately undo this unregister. The
+         CACHE_VERSION in public/sw.js was bumped to ``v3`` in the
+         same change so existing sessions stuck on the cached
+         ``v2`` HTML purge cleanly on the first hard reload.
+
+         Zero prod risk: ``isDev`` is only true for localhost,
+         127.0.0.1, *.github.dev, and *.gitpod.io hostnames — none
+         of         which match the production domain (atelnyo.site),
+         so the prod SW registration runs normally. -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        var isDev = (
+          location.hostname === 'localhost' ||
+          location.hostname === '127.0.0.1' ||
+          location.hostname === '0.0.0.0' ||
+          location.hostname === '::1' ||
+          location.hostname.includes('.github.dev') ||
+          location.hostname.includes('.gitpod.io') ||
+          location.hostname.includes('.cloudshell.dev')
+        );
+        if (isDev) {
+          // Synchronous getRegistrations() (returns a Promise) +
+          // best-effort unregister. The async tick is acceptable
+          // because the <body> registration script below ALSO skips
+          // in dev — so even if the unregister race loses, no NEW
+          // SW will take control. Worst case: one hard reload
+          // needed for the very first cached visit.
+          navigator.serviceWorker.getRegistrations()
+            .then(function (regs) { regs.forEach(function (r) { r.unregister(); }); })
+            .catch(function () { /* silans — SW API pa disponib */ });
+        }
+        // Only set the flag when isDev=true; the <body> registration
+        // script's ``if (window.__atelnyo_isDev) return;`` check
+        // naturally evaluates ``undefined`` as falsy in prod, so
+        // the prod registration runs as before. Cleaner than
+        // polluting the global with ``window.__atelnyo_isDev = false``
+        // on every production page load.
+        if (isDev) window.__atelnyo_isDev = true;
+      }
+    </script>
+    <!-- ─── Android-native PWA root styles (inline, before React boot) ────
+         Disables pull-to-refresh, text-selection, and touch-callout
+         so the app feels like a native Android surface rather than a
+         browser tab. These rules are reinforced by pwa-upgrade.css
+         when body.pwa-installed is present. -->
+    <style>
+      html {
+        overscroll-behavior-y: none;
+        -webkit-text-size-adjust: 100%;
+      }
+      body {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        touch-action: manipulation;
+        overscroll-behavior: none;
+      }
+      a, button, [role="button"] {
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ─── Atelnyo storage migration (runs before ANY module) ────────
+         One-time controlled migration of the legacy ``devrose_*``
+         localStorage keys to the new ``atelnyo_*`` prefix. Idempotent:
+         a key is copied only when the new key is absent, and the old
+         key is left in place (never destroyed) so nothing is lost.
+         Runs inline during HTML parsing so every module (ThemeContext,
+         storage backends, settings) reads the new keys from the first
+         render. ``devrose-handles`` (IndexedDB) and ``devrose-salt-v1``
+         (crypto salt) are intentionally NOT migrated. -->
+    <script>
+      (function() {
+        try {
+          if (!window.localStorage) return;
+          var keys = [];
+          for (var i = 0; i < window.localStorage.length; i++) {
+            var k = window.localStorage.key(i);
+            if (k && k.indexOf('devrose_') === 0) keys.push(k);
+          }
+          for (var j = 0; j < keys.length; j++) {
+            var oldK = keys[j];
+            var newK = 'atelnyo_' + oldK.slice(8);
+            if (window.localStorage.getItem(newK) === null) {
+              window.localStorage.setItem(newK, window.localStorage.getItem(oldK));
+            }
+          }
+        } catch (e) { /* storage unavailable — ignore */ }
+      })();
+    </script>
+    <!-- ─── Dark mode pre-JS detection ───
+         Applies body.dark-mode BEFORE the first CSS paint when the OS
+         prefers dark, so users never see a white flash on dark devices.
+         ThemeContext.jsx refines this (adds theme-amoled, etc.) on mount. -->
+    <script>
+      (function() {
+        try {
+          // Atelnyo migration: read the new key first, fall back to the
+          // legacy devrose_* key so existing theme prefs survive the
+          // brand transition (boot migration in main.jsx copies them).
+          var stored = localStorage.getItem('atelnyo_theme_mode') || localStorage.getItem('devrose_theme_mode');
+          if (!stored || stored === 'system') {
+            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+              document.body.classList.add('dark-mode');
+            }
+          } else if (stored === 'dark' || stored === 'amoled' || stored === 'cyber' || stored === 'enterprise') {
+            document.body.classList.add('dark-mode');
+          }
+        } catch(e) {}
+      })();
+    </script>
+    <!-- ─── /@username → /creator/username redirect ────────────────
+         REMOVED 2026-07-30: This script caused a hard page reload
+         (white/black flash) when users clicked items inside the
+         Creator Public Profile. Both /@:username and /creator/:username
+         routes are already handled by React Router (App.jsx) and
+         render the same <CreatorPublicProfile> component — no redirect
+         needed. See git history for the original CDN/Netlify rationale
+         if @-in-URL issues resurface. -->
+    <!-- Skip to content link — visible only on keyboard focus (WCAG 2.4.1) -->
+    <a href="#main-content" class="skip-to-content">Skip to content</a>
+
+    <!-- Ambient Background Elements -->
+    <div class="ambient-bg-fx">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+      <div class="blob blob-3"></div>
+    </div>
+    <div class="cyber-particles">
+      <div class="cyber-grid"></div>
+    </div>
+    <canvas id="matrix-canvas"></canvas>
+
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+
+    <!-- ─── PWA Service Worker Registration ─────────────────────────── -->
+    <!-- Registered inline (not in main.jsx) so the SW starts controlling
+         the page before React boots. "load" event ensures the browser
+         isn't blocked parsing the <script type="module"> above.
+
+         Phase 56.1 — Skip registration when the inline dev-mode guard
+         in <head> set ``window.__atelnyo_isDev = true``. Otherwise the
+         SW would re-register itself on load, undoing the unregister
+         and reintroducing the cache-first stale-chunk crash. -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          // Dev-mode: the <head> unregister already wiped any stale SW;
+          // re-registering here would bring the stale-cache problem
+          // right back. Production keeps the existing flow.
+          if (window.__atelnyo_isDev) return;
+          navigator.serviceWorker.register('/sw.js', { scope: '/' })
+            .then(function(reg) {
+              // If a worker was already waiting from a previous visit,
+              // fire the update event immediately so the banner surfaces
+              // on the current page load (not just on fresh updates).
+              if (reg.waiting) {
+                window.dispatchEvent(new CustomEvent('atelnyo:sw:update', {
+                  detail: { waitingWorker: reg.waiting }
+                }));
+              }
+              // Listen for future updates
+              reg.addEventListener('updatefound', function() {
+                var newWorker = reg.installing;
+                if (!newWorker) return;
+                newWorker.addEventListener('statechange', function() {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    // Dispatch custom event so InstallPrompt.jsx can surface
+                    // an "Update available — refresh" toast with a SKIP_WAITING
+                    // button. The event carries the waiting worker so the
+                    // React listener can call postMessage({type:'SKIP_WAITING'})
+                    // and then reload.
+                    window.dispatchEvent(new CustomEvent('atelnyo:sw:update', {
+                      detail: { waitingWorker: newWorker }
+                    }));
+                  }
+                });
+              });
+            })
+            .catch(function(err) {
+              console.warn('[PWA] SW registration failed:', err.message);
+            });
+        });
+      }
+    </script>
+  </body>
+</html>

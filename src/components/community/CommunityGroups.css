@@ -1,0 +1,424 @@
+/**
+ * src/components/community/CommunityGroups.css
+ *
+ * Styles for Community Groups component
+ */
+
+/* ─── Container ─────────────────────────────────────────────────── */
+.group-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.group-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--text-primary, #1f2937);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.group-header h2 i {
+  color: #10b981;
+}
+
+/* ─── Buttons ───────────────────────────────────────────────────── */
+.group-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.group-btn-primary {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.group-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.group-btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.group-btn-secondary:hover {
+  background: #e5e7eb;
+}
+
+.group-btn-chat {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: white;
+}
+
+.group-btn-chat:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+/* ─── Chat Section ──────────────────────────────────────────────── */
+.group-chat-section {
+  margin-bottom: 24px;
+  height: 500px;
+}
+
+.group-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+.group-back-btn:hover {
+  color: #10b981;
+}
+
+/* ─── Group Grid ────────────────────────────────────────────────── */
+.group-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+/* ─── Group Card ────────────────────────────────────────────────── */
+.group-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.group-card:hover {
+  border-color: #10b981;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.group-card-cover {
+  height: 120px;
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  overflow: hidden;
+}
+
+.group-card-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.group-card-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: #059669;
+  opacity: 0.5;
+}
+
+.group-card-content {
+  padding: 16px;
+}
+
+.group-card-name {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  color: var(--text-primary, #1f2937);
+}
+
+.group-card-description {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+}
+
+.group-card-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin-bottom: 12px;
+}
+
+.group-card-meta span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.group-card-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.group-member-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: #10b981;
+  font-weight: 600;
+}
+
+/* ─── Group Form ────────────────────────────────────────────────── */
+.group-form {
+  background: white;
+  border: 2px solid #10b981;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.group-form h3 {
+  margin: 0 0 20px 0;
+  font-size: 1.1rem;
+  color: var(--text-primary, #1f2937);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.group-form h3 i {
+  color: #10b981;
+}
+
+.group-form-group {
+  margin-bottom: 16px;
+}
+
+.group-form-group label {
+  display: block;
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+
+.group-form-group input,
+.group-form-group textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.group-form-group input:focus,
+.group-form-group textarea:focus {
+  outline: none;
+  border-color: #10b981;
+}
+
+.group-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.group-checkbox input {
+  width: auto;
+}
+
+.group-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+/* ─── Group Detail ──────────────────────────────────────────────── */
+.group-detail {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.group-detail-header {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.group-detail-cover {
+  width: 200px;
+  height: 150px;
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+}
+
+.group-detail-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.group-detail-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  color: #059669;
+  opacity: 0.5;
+}
+
+.group-detail-info {
+  flex: 1;
+}
+
+.group-detail-info h2 {
+  margin: 0 0 8px 0;
+  font-size: 1.5rem;
+  color: var(--text-primary, #1f2937);
+}
+
+.group-detail-info p {
+  margin: 0 0 12px 0;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.group-detail-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 0.9rem;
+  color: #9ca3af;
+}
+
+.group-detail-meta span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.group-detail-actions {
+  margin-bottom: 24px;
+}
+
+/* ─── Group Post Form ───────────────────────────────────────────── */
+.group-post-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 12px;
+}
+
+.group-post-form textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  resize: vertical;
+}
+
+.group-post-form textarea:focus {
+  outline: none;
+  border-color: #10b981;
+}
+
+.group-post-form .group-btn {
+  align-self: flex-end;
+}
+
+/* ─── Group Posts ───────────────────────────────────────────────── */
+.group-posts-section {
+  margin-top: 24px;
+}
+
+.group-posts-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 1.1rem;
+  color: var(--text-primary, #1f2937);
+}
+
+.group-posts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.group-post {
+  padding: 16px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.group-post-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.group-post-author {
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+}
+
+.group-post-time {
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.group-post-content {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #4b5563;
+}
+
+/* ─── Loading / Empty ───────────────────────────────────────────── */
+.group-loading,
+.group-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.group-loading i,
+.group-empty i {
+  font-size: 2rem;
+  margin-bottom: 12px;
+  color: #10b981;
+}
+
+.group-empty p {
+  margin: 0 0 16px 0;
+}
