@@ -24,16 +24,16 @@ jobs:
   syntax-lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           # Node 20+: wrangler 4 (Deploy Worker) and current Vite tooling
           # require >=20. Node 18 hit EOL 2025-04 and broke wrangler deploys.
           node-version: 20
 
       - name: Cache node_modules
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: node_modules
           key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
@@ -50,16 +50,16 @@ jobs:
   closure-leak:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           # Node 20+: wrangler 4 (Deploy Worker) and current Vite tooling
           # require >=20. Node 18 hit EOL 2025-04 and broke wrangler deploys.
           node-version: 20
 
       - name: Cache node_modules
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: node_modules
           key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
