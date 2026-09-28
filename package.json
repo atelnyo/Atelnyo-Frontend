@@ -27,7 +27,7 @@
     "@stripe/stripe-js": "^9.9.0",
     "axios": "^1.6.0",
     "firebase": "^12.15.0",
-    "framer-motion": "^12.42.2",
+    "framer-motion": "^13.4.3",
     "freebuff": "^0.0.117",
     "packages": "^0.0.8",
     "playwright": "^1.62.0",
