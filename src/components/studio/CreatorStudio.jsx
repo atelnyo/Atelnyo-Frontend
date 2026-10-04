@@ -36,6 +36,7 @@ import { getUserIdentity } from '../../utils/userIdentity';
 import continuityManager from '../../pwa/continuity/ContinuityManager';
 import styles from './CreatorStudio.module.css';
 import MediaProviderSection from './MediaProviderSection';
+import TikTokConnect from './TikTokConnect'; // TikTok OAuth card — TIKTOK_INTEGRATION_PLAN.md Faz A.6
 import MediaLibrary from './MediaLibrary';
 import MediaHub from './MediaHub';
 import MyMediaDashboard from './MyMediaDashboard';
@@ -182,7 +183,10 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
       ? fromUrl
       : 'dashboard';
   });
-  const [activeMediaTab, setActiveMediaTab] = useState('hub');
+  const [activeMediaTab, setActiveMediaTab] = useState(() => {
+    const fromUrl = searchParams.get('mediaTab');
+    return ['hub', 'provider', 'library', 'tiktok'].includes(fromUrl) ? fromUrl : 'hub';
+  });
   const [mobileSidebar, setMobileSidebar] = useState(false);
   // Continuity — persist the workspace slice (media sub-tab) whenever
   // it changes, so a relaunch restores the exact media surface.
@@ -442,6 +446,14 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
               <i className="fas fa-photo-video" aria-hidden="true" />
               {t.studio_media_library || 'Media Library'}
             </button>
+            <button
+              type="button"
+              className={`${styles.mediaTabBtn} ${activeMediaTab === 'tiktok' ? styles.mediaTabBtnActive : ''}`}
+              onClick={() => setActiveMediaTab('tiktok')}
+            >
+              <i className="fab fa-tiktok" aria-hidden="true" />
+              {t.studio_media_tiktok || 'TikTok'}
+            </button>
           </div>
           {activeMediaTab === 'hub' ? (
             <MediaHub
@@ -453,6 +465,8 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
             />
           ) : activeMediaTab === 'provider' ? (
             <MediaProviderSection lang={lang} showToast={showToast} />
+          ) : activeMediaTab === 'tiktok' ? (
+            <TikTokConnect lang={lang} showToast={showToast} />
           ) : (
             <MediaLibrary lang={lang} showToast={showToast} user={user} />
           )}

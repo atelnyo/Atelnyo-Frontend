@@ -29,7 +29,7 @@ export default function LeftNavRail({ activeTab, onChange, lang, items }) {
             aria-label={lang === 'ht' ? item.labelHt : item.label}
             title={lang === 'ht' ? item.labelHt : item.label}
           >
-            <i className={`fas ${item.icon}`} aria-hidden="true" />
+            <i className={item.icon.startsWith('fab ') ? item.icon : `fas ${item.icon}`} aria-hidden="true" />
             <span className="csp-rail-tooltip">
               {lang === 'ht' ? item.labelHt : item.label}
             </span>

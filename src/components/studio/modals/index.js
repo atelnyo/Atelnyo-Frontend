@@ -26,3 +26,4 @@ export { default as AvatarEditModal } from './AvatarEditModal';
 export { default as DepositModal } from './DepositModal';
 export { default as RefundModal } from './RefundModal';
 export { default as PasswordChangeModal } from './PasswordChangeModal';
+export { default as TikTokPublishModal } from './TikTokPublishModal';

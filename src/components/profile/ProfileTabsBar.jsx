@@ -79,7 +79,7 @@ export default function TabsBar({ activeTab, onChange, lang, badges, items }) {
               });
             }}
           >
-            <i className={`fas ${tab.icon}`} aria-hidden="true" />{' '}
+            <i className={tab.icon.startsWith('fab ') ? tab.icon : `fas ${tab.icon}`} aria-hidden="true" />{' '}
             {lang === 'ht' ? tab.labelHt : tab.label}
             {badges?.[tab.id] != null && badges[tab.id] > 0 && (
               <span className="csp-tab-badge">{badges[tab.id]}</span>

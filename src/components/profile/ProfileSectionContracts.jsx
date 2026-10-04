@@ -75,8 +75,9 @@ export function QuickLinksCard({ socialLinks, websiteUrl }) {
       links.push({ icon: `fa-${platform}`, label: platform, url: href });
     });
   }
-  // Default social icons mapping
-  const iconMap = { youtube: 'fa-youtube', github: 'fa-github', linkedin: 'fa-linkedin', twitter: 'fa-twitter', instagram: 'fa-instagram', facebook: 'fa-facebook', discord: 'fa-discord', telegram: 'fa-telegram' };
+  // Default social icons mapping (tiktok: C.6 — set by the OAuth connect
+  // flow's A.7 social_links sync, rendered here for the first time).
+  const iconMap = { youtube: 'fa-youtube', github: 'fa-github', linkedin: 'fa-linkedin', twitter: 'fa-twitter', instagram: 'fa-instagram', facebook: 'fa-facebook', discord: 'fa-discord', telegram: 'fa-telegram', tiktok: 'fa-tiktok' };
   if (links.length === 0) return null;
   return (
     <ProfileM3Section icon="fa-link" title="Quick Links" configId="quicklinks">

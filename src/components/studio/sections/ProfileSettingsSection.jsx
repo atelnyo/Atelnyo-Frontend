@@ -26,15 +26,40 @@ const ALL_SECTIONS = [
   { id: 'courses',   icon: 'fa-graduation-cap', label: 'Courses',  labelHt: 'Kou' },
   { id: 'products',  icon: 'fa-cube',      label: 'Products',  labelHt: 'Pwodwi' },
   { id: 'portfolio', icon: 'fa-briefcase', label: 'Portfolio', labelHt: 'Pòtfolyo' },
+  { id: 'tiktok',    icon: 'fab fa-tiktok', label: 'TikTok',    labelHt: 'TikTok' },
   { id: 'reviews',   icon: 'fa-star',      label: 'Reviews',   labelHt: 'Revi' },
   { id: 'about',     icon: 'fa-user',      label: 'About',     labelHt: 'Sou nou' },
 ];
 
 const DEFAULT_SECTION_CONFIG = {
   section_order: ALL_SECTIONS.map(s => s.id),
-  section_visibility: Object.fromEntries(ALL_SECTIONS.map(s => [s.id, true])),
+  section_visibility: Object.fromEntries(
+    ALL_SECTIONS.map(s => [s.id, s.id !== 'tiktok']),
+  ),
 };
 
+function mergeSavedConfig(saved) {
+  const source = saved && typeof saved === 'object' ? saved : {};
+  const savedOrder = Array.isArray(source.section_order)
+    ? [...new Set(source.section_order.filter(
+      id => ALL_SECTIONS.some(section => section.id === id),
+    ))]
+    : [];
+  const sectionOrder = [
+    ...savedOrder,
+    ...DEFAULT_SECTION_CONFIG.section_order.filter(id => !savedOrder.includes(id)),
+  ];
+  const savedVisibility = source.section_visibility && typeof source.section_visibility === 'object'
+    ? source.section_visibility
+    : {};
+  return {
+    section_order: sectionOrder,
+    section_visibility: {
+      ...DEFAULT_SECTION_CONFIG.section_visibility,
+      ...savedVisibility,
+    },
+  };
+}
 export default function ProfileSettingsSection({ lang, showToast, user }) {
   const isHt = lang === 'ht';
   const identity = getUserIdentity(user);
@@ -69,11 +94,13 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
       const profile = profileRes.status === 'fulfilled' ? profileRes.value.data : null;
       const health = healthRes.status === 'fulfilled' ? healthRes.value.data : null;
 
-      // Load section config
-      const config = profile?.section_config || DEFAULT_SECTION_CONFIG;
-      setSectionOrder(Array.isArray(config.section_order) ? config.section_order : DEFAULT_SECTION_CONFIG.section_order);
-      setSectionVisibility(config.section_visibility || DEFAULT_SECTION_CONFIG.section_visibility);
-      setSavedConfig(config);
+      // Load section config — merged so sections added after the creator
+      // first saved (e.g. tiktok) still appear; the merged baseline is what
+      // hasChanges compares against, so no phantom "unsaved changes".
+      const merged = mergeSavedConfig(profile?.section_config || null);
+      setSectionOrder(merged.section_order);
+      setSectionVisibility(merged.section_visibility);
+      setSavedConfig(merged);
 
       // Load featured pins
       const pins = health?.featured_pins || {};
@@ -329,7 +356,7 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
                   <i className="fas fa-grip-vertical" aria-hidden="true" />
                 </span>
                 <span className={styles.listIcon}>
-                  <i className={`fas ${section.icon}`} />
+                  <i className={section.icon} />
                 </span>
                 <div className={styles.listBody}>
                   <div className={styles.listTitle}>
@@ -395,7 +422,7 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
               onClick={() => toggleVisibility(section.id)}
             >
               <span className={styles.listIcon}>
-                <i className={`fas ${section.icon}`} />
+                <i className={section.icon} />
               </span>
               <div className={styles.listBody}>
                 <div className={styles.listTitle}>

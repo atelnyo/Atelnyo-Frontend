@@ -439,6 +439,44 @@ const PAGE = {
         ],
       },
       {
+        id: 'tiktok',
+        icon: 'fa-share-nodes',
+        title: 'TikTok Integration',
+        desc: 'Connect your TikTok account and publish your Atelnyo videos straight to TikTok from Creator Studio.',
+        paragraphs: [
+          'Creators can link one TikTok account to Atelnyo. Once connected, videos from your media engine can be posted directly to TikTok without leaving the studio — the progress, the status, and the final TikTok link all come back into the same Media → TikTok tab.',
+          'Until TikTok approves the platform audit, posts are published privately (only you can see them on TikTok). Public posting unlocks automatically once the audit passes.',
+        ],
+        guides: [
+          {
+            title: 'Connect your TikTok account',
+            steps: [
+              'Open Creator Studio → Media → TikTok.',
+              'Press "Connect your TikTok account" — a TikTok consent window opens.',
+              'Approve the permissions; the window closes and your account appears on the card.',
+              'Your TikTok link is added to your public profile automatically; disconnecting removes it.',
+            ],
+          },
+          {
+            title: 'Publish a video',
+            steps: [
+              'In the same TikTok tab, press "New TikTok post".',
+              'Pick a video from your media library — captions and hashtags can be auto-generated with the AI button.',
+              'Choose who can see the post, then confirm.',
+              'TikTok processes the video; the status badge updates until the post is live with its TikTok link.',
+            ],
+          },
+        ],
+        links: [
+          { label: 'Creator Studio', path: '/sheet/studio?section=media&mediaTab=tiktok', icon: 'fa-palette' },
+        ],
+        questions: [
+          { q: 'Can I connect more than one TikTok account?', a: "One TikTok account per Atelnyo creator for now — disconnect and reconnect to switch accounts." },
+          { q: 'Why is my TikTok post private?', a: "Until TikTok finishes the platform audit, all API posts go out privately (only you). Once the audit passes, public posting unlocks." },
+          { q: 'Can I delete or edit a TikTok post from Atelnyo?', a: "No — TikTok\'s API does not allow editing or deleting published posts. Manage them in the TikTok app itself." },
+        ],
+      },
+      {
         id: 'community',
         icon: 'fa-people-group',
         title: 'Community & Trust',
@@ -941,6 +979,44 @@ const PAGE = {
           { q: 'Kijan mwen jere paramèt konfidansyalite mwen?', a: "Paramèt → Konfidansyalite: notifikasyon, vizibilite, ak preferans done nan yon sèl plas." },
           { q: 'Kijan mwen efase kont mwen?', a: "Paramèt → Efase kont; efase a definitif apre peryòd konfimasyon an, epi kontni piblik ou retire avè l." },
           { q: 'Kijan mwen aktive otantifikasyon de-faktè?', a: "Paramèt → Sekirite → aktive otantifikasyon de-faktè; pa jam pataje kòd ou — ekip Atelnyo pa jam ap mande pou yo." },
+        ],
+      },
+      {
+        id: 'tiktok',
+        icon: 'fa-share-nodes',
+        title: 'Entegrasyon TikTok',
+        desc: 'Konekte kont TikTok ou epi pibliye videyo Atelnyo ou yo dirèkteman sou TikTok depi Creator Studio a.',
+        paragraphs: [
+          'Kreyatè yo ka lyen yon sèl kont TikTok ak Atelnyo. Yon fwa konekte, videyo ki nan medya ou yo ka ale dirèkteman sou TikTok san ou pa kite studio a — pwogresyon, estati a, ak lyen TikTok final la tounen nan menm tab Medya → TikTok la.',
+          'Jiskaske TikTok apwouve audit platfòm nan, pòs yo sòti prive (se oumenm ki ka wè yo sou TikTok). Piblikasyon piblik la vin disponib otomatikman lè audit la pase.',
+        ],
+        guides: [
+          {
+            title: 'Konekte kont TikTok ou',
+            steps: [
+              'Ouvri Creator Studio → Medya → TikTok.',
+              'Peze "Konekte kont TikTok ou" — yon fenèt konsantman TikTok ap louvri.',
+              'Apwouve pèmisyon yo; fenèt la ap fèmen epi kont ou a ap parèt sou kat la.',
+              'Lyen TikTok ou a vin ajoute sou profil piblik ou otomatikman; dekoneksyon an retire l.',
+            ],
+          },
+          {
+            title: 'Pibliye yon videyo',
+            steps: [
+              'Nan menm tab TikTok la, peze "Nouvo pòs TikTok".',
+              'Chwazi yon videyo nan librairi medya ou — kaptyen ak hashtag ka jenere ak bouton AI a.',
+              'Chwazi kiyès ka wè pòs la, apre sa konfime.',
+              'TikTok ap trete videyo a; badje estati a ap mete ajou jiskaske pòs la vin an liy ak lyen TikTok li.',
+            ],
+          },
+        ],
+        links: [
+          { label: 'Creator Studio', path: '/sheet/studio?section=media&mediaTab=tiktok', icon: 'fa-palette' },
+        ],
+        questions: [
+          { q: 'Èske m ka konekte plizyè kont TikTok?', a: "Yon sèl kont TikTok pa kreyatè Atelnyo kounye a — dekonekte epi rekonekte pou chanje kont." },
+          { q: 'Poukisa pòs TikTok mwen an prive?', a: "Jiskaske TikTok fini audit platfòm nan, tout pòs API sòti prive (se oumenm). Lè audit la pase, piblikasyon piblik la ap louvri." },
+          { q: 'Èske m ka efase oswa modifye yon pòs TikTok depi Atelnyo?', a: "Non — API TikTok la pa pèmèt modifye oswa efase pòs ki deja pibliye. Jere yo nan app TikTok la menm." },
         ],
       },
       {
@@ -1449,6 +1525,44 @@ const PAGE = {
         ],
       },
       {
+        id: 'tiktok',
+        icon: 'fa-share-nodes',
+        title: "Intégration TikTok",
+        desc: "Connectez votre compte TikTok et publiez vos vidéos Atelnyo directement sur TikTok depuis le Creator Studio.",
+        paragraphs: [
+          "Les créateurs peuvent lier un seul compte TikTok à Atelnyo. Une fois connecté, les vidéos de votre moteur média peuvent être publiées directement sur TikTok sans quitter le studio — progression, statut et lien TikTok final reviennent dans le même onglet Médias → TikTok.",
+          "Jusqu'à ce que TikTok approuve l'audit de la plateforme, les publications sortent en privé (vous seul les voyez sur TikTok). La publication publique se débloque automatiquement une fois l'audit validé.",
+        ],
+        guides: [
+          {
+            title: "Connecter votre compte TikTok",
+            steps: [
+              "Ouvrez Creator Studio → Médias → TikTok.",
+              "Appuyez sur « Connecter votre compte TikTok » — une fenêtre de consentement TikTok s'ouvre.",
+              "Approuvez les permissions ; la fenêtre se ferme et votre compte apparaît sur la carte.",
+              "Votre lien TikTok est ajouté automatiquement à votre profil public ; la déconnexion le retire.",
+            ],
+          },
+          {
+            title: "Publier une vidéo",
+            steps: [
+              "Dans le même onglet TikTok, appuyez sur « Nouveau post TikTok ».",
+              "Choisissez une vidéo dans votre bibliothèque média — la légende et les hashtags peuvent être générés par le bouton IA.",
+              "Choisissez qui peut voir la publication, puis confirmez.",
+              "TikTok traite la vidéo ; le badge de statut se met à jour jusqu'à la mise en ligne avec son lien TikTok.",
+            ],
+          },
+        ],
+        links: [
+          { label: 'Creator Studio', path: '/sheet/studio?section=media&mediaTab=tiktok', icon: 'fa-palette' },
+        ],
+        questions: [
+          { q: "Puis-je connecter plusieurs comptes TikTok ?", a: "Un seul compte TikTok par créateur Atelnyo pour l'instant — déconnectez puis reconnectez pour changer de compte." },
+          { q: "Pourquoi mon post TikTok est-il privé ?", a: "Jusqu'à ce que TikTok termine l'audit de la plateforme, toutes les publications API sortent en privé (vous seul). Une fois l'audit validé, la publication publique se débloque." },
+          { q: "Puis-je supprimer ou modifier un post TikTok depuis Atelnyo ?", a: "Non — l'API TikTok ne permet pas de modifier ou supprimer des posts publiés. Gérez-les dans l'application TikTok elle-même." },
+        ],
+      },
+      {
         id: 'community',
         icon: 'fa-people-group',
         title: 'Communauté & Confiance',
@@ -1952,6 +2066,44 @@ const PAGE = {
           { q: '¿Cómo gestiono mi privacidad?', a: "Configuración → Privacidad: notificaciones, visibilidad y preferencias de datos en un solo lugar." },
           { q: '¿Cómo elimino mi cuenta?', a: "Configuración → Eliminar cuenta; la eliminación es definitiva tras el período de confirmación, y tu contenido público desaparece con ella." },
           { q: '¿Cómo activo la autenticación de dos factores?', a: "Configuración → Seguridad → activa la 2FA; nunca compartas tus códigos — el equipo de Atelnyo jamás los pedirá." },
+        ],
+      },
+      {
+        id: 'tiktok',
+        icon: 'fa-share-nodes',
+        title: 'Integración TikTok',
+        desc: 'Conecta tu cuenta de TikTok y publica tus videos de Atelnyo directamente en TikTok desde el Creator Studio.',
+        paragraphs: [
+          'Los creadores pueden vincular una sola cuenta de TikTok a Atelnyo. Una vez conectada, los videos de tu motor de medios pueden publicarse directamente en TikTok sin salir del estudio: el progreso, el estado y el enlace final de TikTok vuelven a la misma pestaña Medios → TikTok.',
+          'Hasta que TikTok apruebe la auditoría de la plataforma, las publicaciones salen en privado (solo tú las ves en TikTok). La publicación pública se desbloquea automáticamente cuando se aprueba la auditoría.',
+        ],
+        guides: [
+          {
+            title: 'Conectar tu cuenta de TikTok',
+            steps: [
+              'Abre Creator Studio → Medios → TikTok.',
+              'Pulsa «Conectar tu cuenta de TikTok»: se abre una ventana de consentimiento de TikTok.',
+              'Aprueba los permisos; la ventana se cierra y tu cuenta aparece en la tarjeta.',
+              'Tu enlace de TikTok se añade automáticamente a tu perfil público; al desconectar, se elimina.',
+            ],
+          },
+          {
+            title: 'Publicar un video',
+            steps: [
+              'En la misma pestaña de TikTok, pulsa «Nuevo post de TikTok».',
+              'Elige un video de tu biblioteca de medios: el botón de IA puede generar el título y los hashtags.',
+              'Elige quién puede ver la publicación y confirma.',
+              'TikTok procesa el video; la insignia de estado se actualiza hasta que se publique con su enlace de TikTok.',
+            ],
+          },
+        ],
+        links: [
+          { label: 'Creator Studio', path: '/sheet/studio?section=media&mediaTab=tiktok', icon: 'fa-palette' },
+        ],
+        questions: [
+          { q: '¿Puedo conectar más de una cuenta de TikTok?', a: 'Por ahora, una cuenta de TikTok por creador de Atelnyo: desconecta y vuelve a conectar para cambiar de cuenta.' },
+          { q: '¿Por qué mi post de TikTok es privado?', a: 'Hasta que TikTok complete la auditoría de la plataforma, todas las publicaciones por API salen en privado (solo tú). Cuando la auditoría se apruebe, la publicación pública se desbloquea.' },
+          { q: '¿Puedo eliminar o editar un post de TikTok desde Atelnyo?', a: 'No: la API de TikTok no permite editar ni eliminar publicaciones ya publicadas. Gestiónalas en la propia aplicación de TikTok.' },
         ],
       },
       {

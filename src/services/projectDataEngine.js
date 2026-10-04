@@ -175,7 +175,7 @@ function buildProjectContext(data) {
 
   // Talents
   if (data.talents?.total > 0) {
-    lines.push(`\nTALENTS (${data.talents.total} total):`);
+    lines.push(`\nTALENT SHOWCASES (${data.talents.total} total):`);
     for (const t of data.talents.top) {
       lines.push(`  - ${clip(t.name, 40)} (${t.category || 'general'})`);
     }
@@ -183,7 +183,7 @@ function buildProjectContext(data) {
 
   // Jobs
   if (data.jobs?.total > 0) {
-    lines.push(`\nJOBS (${data.jobs.total} total):`);
+    lines.push(`\nJOB LISTINGS (${data.jobs.total} total):`);
     for (const j of data.jobs.top) {
       lines.push(`  - "${clip(j.title, 48)}" at ${clip(j.company || 'Various', 30)}`);
     }
@@ -191,7 +191,7 @@ function buildProjectContext(data) {
 
   // Products
   if (data.products?.total > 0) {
-    lines.push(`\nPRODUCTS (${data.products.total} total):`);
+    lines.push(`\nMARKETPLACE PRODUCTS (${data.products.total} total):`);
     for (const p of data.products.top) {
       const price = p.price ? `$${p.price}` : 'Free';
       lines.push(`  - "${clip(p.title, 48)}" — ${price}`);

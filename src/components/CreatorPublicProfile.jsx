@@ -91,6 +91,7 @@ import PicksTab from './profile/ProfilePicksTab';
 import CoursesTab from './profile/ProfileCoursesTab';
 import ProductsTab from './profile/ProfileProductsTab';
 import PortfolioTab from './profile/ProfilePortfolioTab';
+import TikTokTab from './profile/ProfileTikTokTab'; // C.6 — TikTok showcase (opt-in)
 import ReviewsTab from './profile/ProfileReviewsTab';
 import AboutTab from './profile/ProfileAboutTab';
 
@@ -259,6 +260,7 @@ export default function CreatorPublicProfile({
   const [viewerIsAffiliate, setViewerIsAffiliate] = useState(false);
   const [campaigns, setCampaigns] = useState([]);
   const [tabLoading, setTabLoading] = useState(false);
+  const [tiktokPosts, setTiktokPosts] = useState(null); // C.6 showcase cache
   const [dashLoading, setDashLoading] = useState(false);
 
   // Owner detection
@@ -555,7 +557,7 @@ export default function CreatorPublicProfile({
           })
           .catch(() => {});
       }
-    } else if (['picks', 'courses', 'products', 'portfolio', 'reviews'].includes(tab)) {
+    } else if (['picks', 'courses', 'products', 'portfolio', 'reviews', 'tiktok'].includes(tab)) {
       // Single tab fetches. Use a larger page so the public profile actually
       // surfaces the creator's catalog (the API caps each endpoint at 20 by
       // default; ?limit=100 lets the full catalog load per tab). Picks stays
@@ -571,6 +573,7 @@ export default function CreatorPublicProfile({
         products: () => creatorProfileService.products(username, { limit: 100 }),
         portfolio: () => creatorProfileService.portfolio(username, { limit: 100 }),
         reviews: () => creatorProfileService.reviews(username, { limit: 100 }),
+        tiktok: () => cachedGet(`creator-profiles/${username}/tiktok-posts/`, undefined, { ttl: 60_000 }),
       })[tab];
       if (fetcher) {
         fetcher()
@@ -582,6 +585,7 @@ export default function CreatorPublicProfile({
             else if (tab === 'products') setProducts(data);
             else if (tab === 'portfolio') setPortfolio(data);
             else if (tab === 'reviews') setReviews(data);
+            else if (tab === 'tiktok') setTiktokPosts(Array.isArray(data?.posts) ? data.posts : []);
             else if (tab === 'picks') {
               setPicks({
                 talents: Array.isArray(data?.talents) ? data.talents : [],
@@ -891,6 +895,8 @@ export default function CreatorPublicProfile({
         return <ProductsTab products={products} loading={tabLoading} lang={lang} onItemClick={handleOpenItem} />;
       case 'portfolio':
         return <PortfolioTab portfolio={portfolio} loading={tabLoading} lang={lang} onItemClick={handleOpenItem} />;
+      case 'tiktok':
+        return <TikTokTab posts={tiktokPosts || []} loading={tabLoading} lang={lang} />;
       case 'reviews':
         return <ReviewsTab reviews={reviews} loading={tabLoading} lang={lang} />;
       case 'about':
