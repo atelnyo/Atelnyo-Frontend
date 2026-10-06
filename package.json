@@ -25,7 +25,7 @@
     "@sentry/react": "^8.55.2",
     "@stripe/react-stripe-js": "^6.7.0",
     "@stripe/stripe-js": "^9.9.0",
-    "axios": "^1.6.0",
+    "axios": "^1.20.0",
     "firebase": "^12.15.0",
     "framer-motion": "^12.42.2",
     "freebuff": "^0.0.117",
