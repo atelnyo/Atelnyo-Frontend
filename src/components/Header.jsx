@@ -35,7 +35,6 @@ const Header = ({
   darkMode,
   onOpenSearch,
   onBellClick,
-  isNotifOpen,
   unreadNotifCount = 0,
   bellSwing = false,
   user,
@@ -167,7 +166,7 @@ const Header = ({
         )}
 
         {/* Search */}
-        {typeof onOpenSearch === 'function' && (
+        ((typeof onOpenSearch === 'function') && (
           <button
             className="icon-btn header-btn"
             onClick={onOpenSearch}
@@ -178,15 +177,14 @@ const Header = ({
           </button>
         )}
 
-        {/* Notification bell */}
-        {typeof onBellClick === 'function' && (
+        {/* Notification bell — opens the full-screen notification center */
+        ((typeof onBellClick === 'function') && (
           <button
-            className={`icon-btn header-btn notif-bell-btn${isNotifOpen ? ' is-open' : ''}${unreadNotifCount > 0 ? ' has-unread' : ''}${bellSwing ? ' is-swinging' : ''}`}
+            className={`icon-btn header-btn notif-bell-btn${unreadNotifCount > 0 ? ' has-unread' : ''}${bellSwing ? ' is-swinging' : ''}`}
             onClick={onBellClick}
             title={t2(lang, { ht: 'Notifikasyon', fr: 'Notifications', es: 'Notificaciones', en: 'Notifications' })}
             aria-label={lang === 'ht' ? `${unreadNotifCount} notifikasyon nouvo` : lang === 'fr' ? `${unreadNotifCount} nouvelles notifications` : lang === 'es' ? `${unreadNotifCount} notificaciones nuevas` : `${unreadNotifCount} new notifications`}
             aria-haspopup="true"
-            aria-expanded={isNotifOpen}
           >
             <i className="fas fa-bell" aria-hidden="true" />
             {unreadNotifCount > 0 && (
@@ -197,7 +195,7 @@ const Header = ({
               </span>
             )}
           </button>
-        )}
+        ))}
 
         {/* Theme toggle */}
         <button className="icon-btn header-btn" onClick={toggleTheme} title={t.toggle_theme} aria-label={t.toggle_theme}>

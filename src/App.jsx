@@ -984,7 +984,6 @@ function App() {
   // Legal & Fact Policies — consent banner and violation notice
   const [showViolationNotice, setShowViolationNotice] = useState(false);
   // ─── Notification bell state ──────────────────────────────────────
-  const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
   // Triggers a one-shot bell swing animation when a new notification
   // arrives (count increased). Reset after the animation duration.
@@ -1127,18 +1126,7 @@ function App() {
     return () => disconnectNotificationSocket();
   }, [user]);
 
-  // Esc closes the notification dropdown (paired with the
-  // click-outside backdrop in the dropdown's JSX).
-  useEffect(() => {
-    if (!isNotifOpen) { return undefined; }
-    const onKey = (e) => {
-      if (e.key === 'Escape') { setIsNotifOpen(false); }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [isNotifOpen]);
-
-  // Declared before the proposal handlers below (their useCallback deps
+// Declared before the proposal handlers below (their useCallback deps
   // reference showToast — a const referenced in a deps array before its
   // declaration trips react-hooks/exhaustive-deps).
   const showToast = (message, icon = 'info-circle') => {
@@ -1644,17 +1632,18 @@ function App() {
     setMarket(country);
   }, [lang, market]);
   // ── Notification bell ────────────────────────────────────────────
-  // Click: an ANONYMOUS user goes to /sheet/auth (same behavior as
-  // NotificationsPage's own guard) — the bell must never silently
-  // toggle an empty dropdown. Logged-in users toggle the dropdown.
+  // Click: the bell navigates to the full-screen notification center
+  // (/sheet/notifications) so the user always lands on a dedicated
+  // screen that lists their messages/notifications. Anonymous users
+  // are still asked to log in first (same as NotificationsPage's guard).
   const handleBellClick = useCallback(() => {
     if (!user) {
-      setIsNotifOpen(false);
       requireLogin(navigateRR, rrLocation, SHEETS.AUTH);
       return;
     }
-    setIsNotifOpen((o) => !o);
-  }, [user, navigateRR, rrLocation]);
+    // Open the full-screen notification center instead of a dropdown.
+    startTransition(() => navigateRR(SHEETS.NOTIFICATIONS));
+  }, [user, navigateRR]);
   // ─── Affiliate attribution: capture #aff_token=<JWT> eagerly ───────
   // The /go/<code> redirect lands the visitor with the attribution JWT in
   // the URL fragment. The fragment is dropped on the FIRST SPA navigation
@@ -2289,86 +2278,18 @@ function App() {
         onLogout={handleLogout}
         onLangChange={handleLangChange}
         onBellClick={handleBellClick}
-        isNotifOpen={isNotifOpen}
         unreadNotifCount={unreadNotifCount}
         bellSwing={bellSwing}
       />
 
       {/* ─── Notification dropdown (bell) ─────────────────────────── */}
-      {isNotifOpen && user && (
-        <>
-        {/* Click-outside veil — closes the dropdown on any outside
-            tap/click (and swallows the event so it cannot fall
-            through to a control beneath). Esc also closes (keydown
-            effect below). */}
-        <div
-          className="notif-dropdown-backdrop"
-          aria-hidden="true"
-          onClick={() => setIsNotifOpen(false)}
-        />
-        <div className="notif-dropdown" role="dialog" aria-label={t2(lang, { ht: 'Notifikasyon', en: 'Notifications' })}>
-          <div className="notif-dropdown__header">
-            <h3>
-              <i className="fas fa-bell" aria-hidden="true" />
-              {t2(lang, { ht: 'Notifikasyon', en: 'Notifications' })}
-            </h3>
-            <button
-              type="button"
-              className="notif-dropdown__close"
-              onClick={() => setIsNotifOpen(false)}
-              aria-label={t2(lang, { ht: 'Fèmen', en: 'Close' })}
-            >
-              <i className="fas fa-times" />
-            </button>
-          </div>
-          <div className="notif-dropdown__body">
-            <ActivityTimeline
-              lang={lang}
-              userId={user?.id}
-              t={t}
-              refreshToken={notifRefreshToken}
-              onMarkRead={handleNotifRead}
-              onNavigate={navigateRR}
-              onAcceptProposal={handleAcceptProposal}
-              onRejectProposal={handleRejectProposal}
-              onAcceptRequest={handleAcceptRequest}
-              onRejectRequest={handleRejectRequest}
-            />
-          </div>
-          <div className="notif-dropdown__footer">
-            <button
-              type="button"
-              className="notif-dropdown__mark-all"
-              onClick={() => {
-                // Explicit action — the badge is only cleared when the
-                // user actually asks for it (never on open/close).
-                activityFeedService.markAllRead().catch(() => {});
-                setUnreadNotifCount(0);
-                notifCountRef.current = 0;
-                // Re-fetch the open list so the unread highlights clear
-                // immediately (ActivityTimeline re-runs on refreshToken).
-                setNotifRefreshToken((n) => n + 1);
-              }}
-            >
-              <i className="fas fa-check-double" aria-hidden="true" /> {t2(lang, { ht: 'Make tout li li', en: 'Mark all read' })}
-            </button>
-            <button
-              type="button"
-              className="notif-dropdown__see-all"
-              onClick={() => {
-                // Navigation only — the full page owns read-state. It
-                // shows the unread items + a "Mark all read" toolbar,
-                // so opening it must NOT wipe the badge.
-                setIsNotifOpen(false);
-                navigateRR(SHEETS.NOTIFICATIONS);
-              }}
-            >
-              <i className="fas fa-arrow-right" aria-hidden="true" /> {t2(lang, { ht: 'Wè tout notifikasyon yo', en: 'See all notifications' })}
-            </button>
-          </div>
-        </div>
-        </>
-      )}
+      {/* NOTE: The bell no longer toggles a dropdown — it navigates to
+          the full-screen notification center (/sheet/notifications).
+          The dropdown markup below is intentionally removed to avoid
+          dead state (isNotifOpen) and unused handlers. The bell badge
+          still shows the unread count (unreadNotifCount) and
+          notifRefreshToken drives ActivityTimeline re-fetches on the
+          full page. */}
 
       <div className="container" role="presentation">
         <main id="a11y-main-content" tabIndex="-1" aria-label={getA11yString(lang, 'contentLandmark')}>
