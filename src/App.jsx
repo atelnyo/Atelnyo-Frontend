@@ -1642,7 +1642,11 @@ function App() {
       return;
     }
     // Open the full-screen notification center instead of a dropdown.
-    startTransition(() => navigateRR(SHEETS.NOTIFICATIONS));
+    // Guard: navigateRR must be a function (useSafeNavigate may return
+    // a no-op when useNavigate() throws — ensure it is invocable).
+    if (typeof navigateRR === 'function') {
+      startTransition(() => navigateRR(SHEETS.NOTIFICATIONS));
+    }
   }, [user, navigateRR]);
   // ─── Affiliate attribution: capture #aff_token=<JWT> eagerly ───────
   // The /go/<code> redirect lands the visitor with the attribution JWT in

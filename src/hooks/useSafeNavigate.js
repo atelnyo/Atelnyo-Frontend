@@ -27,7 +27,16 @@ import { useNavigate } from 'react-router-dom';
 export function useSafeNavigate() {
   try {
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useNavigate();
+    const navigate = useNavigate();
+    // Guard: if useNavigate() returned undefined (not a function),
+    // treat it as unavailable — do NOT return undefined, return a
+    // no-op that is itself a function so callers can always invoke it.
+    if (typeof navigate !== 'function') {
+      const noop = (_url, _opts) => undefined;
+      noop.safe = true;
+      return noop;
+    }
+    return navigate;
   } catch (e) {
     // Cloud Shell proxy / stale service worker cache corrupted
     // React's dispatcher for the pre-bundled react-router-dom.
