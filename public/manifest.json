@@ -23,7 +23,7 @@
   "prefer_related_applications": false,
   "share_target": {
     "action": "/",
-    "method": "GET",
+    "method": "POST",
     "params": {
       "title": "name",
       "text": "description",
@@ -34,14 +34,29 @@
     {
       "name": "Image files",
       "accept": {
-        "image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"]
-      }
+        "image/*": [
+          ".png",
+          ".jpg",
+          ".jpeg",
+          ".gif",
+          ".webp",
+          ".svg"
+        ]
+      },
+      "action": "https://atelnyo.site/share"
     },
     {
       "name": "Audio files",
       "accept": {
-        "audio/*": [".mp3", ".wav", ".ogg", ".webm", ".m4a"]
-      }
+        "audio/*": [
+          ".mp3",
+          ".wav",
+          ".ogg",
+          ".webm",
+          ".m4a"
+        ]
+      },
+      "action": "https://atelnyo.site/share"
     }
   ],
   "icons": [
