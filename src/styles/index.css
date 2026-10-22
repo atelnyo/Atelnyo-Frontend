@@ -383,9 +383,9 @@ body.dark-mode .notif-dropdown .act-feed-event--unread:hover {
 .notif-dropdown .act-feed-event-dot {
     width: 32px;
     height: 32px;
-    border-radius: 50%;
-    background: var(--color-primary-bg, rgba(216, 27, 96, 0.08));
-    color: var(--color-primary);
+    border-radius: 14px;
+    background: var(--chip-bg, var(--color-primary-bg, rgba(216, 27, 96, 0.08)));
+    color: var(--chip-fg, var(--color-primary));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -622,49 +622,56 @@ body.dark-mode .notif-dropdown__see-all:hover {
 .notifications-page .act-feed-event {
     display: flex;
     align-items: flex-start;
+    box-sizing: border-box; /* content-box + border/padding clipped the card's right edge */
     gap: 12px;
-    padding: 10px 10px;
+    padding: 12px 14px;
     position: relative;
-    border-radius: 12px;
-    transition: background 0.15s ease, transform 0.15s ease;
+    border-radius: 14px;
+    transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
     cursor: pointer;
-    background: transparent;
-    border: none;
+    background: var(--surface-card, #ffffff);
+    border: 1px solid var(--border-color-subtle, rgba(0, 0, 0, 0.06));
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
     width: 100%;
     text-align: left;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
 }
 .notifications-page .act-feed-event:hover {
-    background: rgba(0, 0, 0, 0.03);
-    transform: translateX(2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+}
+body.dark-mode .notifications-page .act-feed-event {
+    background: var(--surface-card, #1e1e28);
+    border-color: rgba(255, 255, 255, 0.07);
 }
 body.dark-mode .notifications-page .act-feed-event:hover {
-    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
 }
 .notifications-page .act-feed-event:active {
-    transform: scale(0.985);
+    transform: scale(0.99);
 }
 .notifications-page .act-feed-event--unread {
-    background: var(--unread-bg, rgba(216, 27, 96, 0.04));
-    margin: 2px 0;
-    border-radius: 12px;
+    background: var(--unread-bg, rgba(216, 27, 96, 0.05));
+    border-color: rgba(216, 27, 96, 0.22);
+    box-shadow: 0 1px 6px rgba(216, 27, 96, 0.1);
 }
 .notifications-page .act-feed-event--unread:hover {
-    background: var(--unread-bg-hover, rgba(216, 27, 96, 0.07));
+    background: var(--unread-bg-hover, rgba(216, 27, 96, 0.08));
 }
 body.dark-mode .notifications-page .act-feed-event--unread {
-    background: rgba(216, 27, 96, 0.08);
+    background: rgba(216, 27, 96, 0.09);
+    border-color: rgba(244, 81, 142, 0.25);
 }
 body.dark-mode .notifications-page .act-feed-event--unread:hover {
     background: rgba(216, 27, 96, 0.12);
 }
 .notifications-page .act-feed-event-dot {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: var(--color-primary-bg, rgba(216, 27, 96, 0.08));
-    color: var(--color-primary);
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: var(--chip-bg, var(--color-primary-bg, rgba(216, 27, 96, 0.08)));
+    color: var(--chip-fg, var(--color-primary));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -783,6 +790,47 @@ body.dark-mode .notifications-page .notif-proposal-btn--reject {
     color: #f87171;
 }
 
+/* ─── Activity accent families + unread dot (shared) ──
+   Each row gets an .ac-* class (from ActivityTimeline's TYPE_ACCENTS)
+   that sets --chip-bg/--chip-fg; the icon chip in EVERY surface
+   (header dropdown + full page) consumes the vars. Dark mode only
+   needs to re-set the vars once, here — no per-surface duplication. */
+.ac-brand    { --chip-bg: rgba(216, 27, 96, 0.10);  --chip-fg: #d81b60; }
+.ac-work     { --chip-bg: rgba(37, 99, 235, 0.10);  --chip-fg: #2563eb; }
+.ac-money    { --chip-bg: rgba(5, 150, 105, 0.10);  --chip-fg: #059669; }
+.ac-learn    { --chip-bg: rgba(124, 58, 237, 0.10); --chip-fg: #7c3aed; }
+.ac-social   { --chip-bg: rgba(219, 39, 119, 0.10); --chip-fg: #db2777; }
+.ac-community { --chip-bg: rgba(13, 148, 136, 0.10); --chip-fg: #0d9488; }
+.ac-create   { --chip-bg: rgba(217, 119, 6, 0.10);  --chip-fg: #d97706; }
+.ac-account  { --chip-bg: rgba(71, 85, 105, 0.10);  --chip-fg: #475569; }
+.ac-danger   { --chip-bg: rgba(220, 38, 38, 0.10);  --chip-fg: #dc2626; }
+body.dark-mode .ac-brand    { --chip-bg: rgba(244, 81, 142, 0.18);  --chip-fg: #f472b6; }
+body.dark-mode .ac-work     { --chip-bg: rgba(59, 130, 246, 0.18);  --chip-fg: #60a5fa; }
+body.dark-mode .ac-money    { --chip-bg: rgba(16, 185, 129, 0.18);  --chip-fg: #34d399; }
+body.dark-mode .ac-learn    { --chip-bg: rgba(139, 92, 246, 0.18);  --chip-fg: #a78bfa; }
+body.dark-mode .ac-social   { --chip-bg: rgba(236, 72, 153, 0.18);  --chip-fg: #f472b6; }
+body.dark-mode .ac-community { --chip-bg: rgba(20, 184, 166, 0.18); --chip-fg: #2dd4bf; }
+body.dark-mode .ac-create   { --chip-bg: rgba(245, 158, 11, 0.18);  --chip-fg: #fbbf24; }
+body.dark-mode .ac-account  { --chip-bg: rgba(148, 163, 184, 0.18); --chip-fg: #cbd5e1; }
+body.dark-mode .ac-danger   { --chip-bg: rgba(239, 68, 68, 0.18);   --chip-fg: #f87171; }
+
+/* Unread marker — rose dot in the top-right corner of the row. */
+.act-feed-event--unread .act-feed-unread-dot {
+    position: absolute;
+    top: 11px;
+    right: 12px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-primary, #d81b60);
+    box-shadow: 0 0 0 3px rgba(216, 27, 96, 0.14);
+}
+/* Keep the timestamp clear of the dot + its 3px halo in both surfaces. */
+.notif-dropdown .act-feed-event--unread .act-feed-event-header,
+.notifications-page .act-feed-event--unread .act-feed-event-header {
+    padding-right: 28px;
+}
+
 /* ─── Shared ActivityTimeline states (dropdown + full page) ──
    These classes come from ActivityTimeline.jsx and have no other
    stylesheet — they are defined here once, globally. */
@@ -832,8 +880,16 @@ body.dark-mode .notifications-page .notif-proposal-btn--reject {
     text-align: center;
 }
 .act-feed-empty i {
-    font-size: 2rem;
-    opacity: 0.6;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background: var(--chip-bg, rgba(216, 27, 96, 0.08));
+    color: var(--chip-fg, var(--color-primary, #d81b60));
+    opacity: 1;
 }
 .act-feed-empty h3 {
     margin: 0;
@@ -857,6 +913,86 @@ body.dark-mode .notifications-page .notif-proposal-btn--reject {
     align-items: center;
     gap: 8px;
     font-size: 0.85rem;
+}
+
+/* ─── Filter tabs (full page) ── */
+.act-feed-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 2px 2px 10px;
+}
+.act-feed-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border-color-subtle, rgba(0, 0, 0, 0.08));
+    background: var(--surface-card, #ffffff);
+    color: var(--text-secondary, #64707d);
+    font-size: 0.8rem;
+    font-weight: 650;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.act-feed-tab:hover {
+    border-color: rgba(216, 27, 96, 0.35);
+    color: var(--color-primary, #d81b60);
+}
+.act-feed-tab.is-active {
+    background: var(--color-primary, #d81b60);
+    border-color: var(--color-primary, #d81b60);
+    color: #fff;
+}
+.act-feed-tab-badge {
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.62rem;
+    font-weight: 800;
+    background: rgba(0, 0, 0, 0.08);
+    color: inherit;
+    font-variant-numeric: tabular-nums;
+}
+.act-feed-tab-badge.is-brand {
+    background: rgba(216, 27, 96, 0.12);
+    color: #d81b60;
+}
+.act-feed-tab.is-active .act-feed-tab-badge {
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff;
+}
+
+/* Filtered-tab empty state — the "all caught up" moment */
+.act-feed-filter-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 48px 16px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+.act-feed-filter-empty i {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    background: var(--chip-bg, rgba(216, 27, 96, 0.08));
+    color: var(--chip-fg, var(--color-primary, #d81b60));
+}
+.act-feed-filter-empty p {
+    margin: 0;
+    font-size: 0.88rem;
 }
 
 /* ─── Notifications full page ── */
@@ -908,7 +1044,11 @@ body.dark-mode .notifications-page__back:hover {
 .notifications-page__body {
     flex: 1;
     overflow-y: auto;
-    padding: 12px;
+    box-sizing: border-box;
+    padding: 12px 14px 40px;
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
 }
 .notifications-page__loading,
 .notifications-page__error {

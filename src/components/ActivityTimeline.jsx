@@ -90,6 +90,45 @@ const EVENT_META = {
   default:                { icon: 'fa-bell',            label_ht: 'Aktivite',                label_en: 'Activity' },
 };
 
+/* Per-type accent families — drive the icon-chip colors via CSS vars
+   (.ac-* classes define --chip-bg/--chip-fg in the stylesheet). Semantic
+   grouping: work=blue, money=green, learning=red, social=bprd... */
+const TYPE_ACCENTS = {
+  // Work / jobs / contracts / orders — blue
+  job_posted: 'work', proposal_sent: 'work', proposal_submitted: 'work',
+  contract_started: 'work', milestone_completed: 'work', milestone_approved: 'work',
+  order_placed: 'work', order_received: 'work', order_paid: 'work',
+  order_status_updated: 'work', order_refunded: 'work', order_cancelled: 'work',
+  order_reviewed: 'work', inquiry_received: 'work', inquiry_replied: 'work',
+  seller_activated: 'work', seller_deactivated: 'work',
+  seller_suspended: 'danger', seller_unsuspended: 'work',
+  // Money — green
+  revenue_earned: 'money', payout_requested: 'money', tip_received: 'money', tip_sent: 'money',
+  // Learning — purple
+  course_enrolled: 'learn', course_completed: 'learn',
+  credential_verified: 'learn', endorsement_received: 'learn',
+  // Social / profile — pink
+  new_follower: 'social', new_subscriber: 'social', subscription_renewed: 'social',
+  profile_message: 'social', message_received: 'social', message_sent: 'social',
+  profile_hire_request: 'social', profile_collab_request: 'social',
+  profile_service_booking: 'social', profile_request_accepted: 'social',
+  profile_request_rejected: 'social',
+  // Community — teal (moderation notices red)
+  community_joined: 'community', event_created: 'community',
+  community_member_banned: 'danger', community_member_unbanned: 'community',
+  community_member_muted: 'community', community_member_unmuted: 'community',
+  // Creative — amber
+  project_published: 'create', new_content: 'create', product_listed: 'create',
+  announcement_posted: 'create', live_room_joined: 'create',
+  // Account — slate
+  profile_updated: 'account', affiliate_approved: 'account', affiliate_rejected: 'account',
+  story_created: 'create',
+};
+
+function getEventAccent(eventType) {
+  return TYPE_ACCENTS[eventType] || 'brand';
+}
+
 const NOTIFICATION_ROUTES = {
   job_posted:             (d) => d?.job_id ? `/sheet/explore/job?id=${d.job_id}` : null,
   proposal_submitted:     (d) => d?.job_id ? `/sheet/explore/job?id=${d.job_id}` : null,
@@ -251,6 +290,7 @@ const PROFILE_REQUEST_TYPES = [
 
 function EventRow({ event, lang, t, onMarkRead, onNavigate, onAcceptProposal, onRejectProposal, onAcceptRequest, onRejectRequest }) {
   const meta = getEventMeta(event.event_type, lang);
+  const accent = getEventAccent(event.event_type);
   const data = event.data || {};
   const actor = event.actor;
   const actorInitial = actor?.username?.charAt(0)?.toUpperCase() || '?';
@@ -284,7 +324,7 @@ function EventRow({ event, lang, t, onMarkRead, onNavigate, onAcceptProposal, on
     <div
       role="button"
       tabIndex={0}
-      className={`act-feed-event${event.read ? '' : ' act-feed-event--unread'}`}
+      className={`act-feed-event ac-${accent}${event.read ? '' : ' act-feed-event--unread'}`}
       onClick={() => {
         onMarkRead?.(event.id);
         // Pending decisions stay in place (the buttons act on the row);
@@ -303,6 +343,7 @@ function EventRow({ event, lang, t, onMarkRead, onNavigate, onAcceptProposal, on
         }
       }}
     >
+      {!event.read && <span className="act-feed-unread-dot" aria-hidden="true" />}
       <div className="act-feed-event-dot">
         <i className={`fas ${meta.icon}`} aria-hidden="true" />
       </div>
@@ -377,6 +418,9 @@ export function ActivityTimeline({ lang = 'ht', userId, t, onMarkRead, onMarkAll
   const [error, setError] = useState(null);
   // Bumped by the error-state Retry button to re-run the initial load.
   const [retryKey, setRetryKey] = useState(0);
+  // Filter tab — page surface only (showMarkAllRead). The header
+  // dropdown always shows all events.
+  const [filter, setFilter] = useState('all');
   const sentinelRef = useRef(null);
 
   const markEventRead = useCallback(async (eventId) => {
@@ -454,16 +498,31 @@ export function ActivityTimeline({ lang = 'ht', userId, t, onMarkRead, onMarkAll
     return () => observer.disconnect();
   }, [loadMore]);
 
+  // Pending decisions (proposals + profile invitations) for the
+  // "Aksyon" tab.
+  const isActionable = useCallback((e) => (
+    (PROFILE_REQUEST_TYPES.includes(e.event_type)
+      || e.event_type === 'proposal_submitted'
+      || e.event_type === 'proposal_sent')
+    && e.status !== 'accepted' && e.status !== 'rejected'
+  ), []);
+
+  const filtered = React.useMemo(() => {
+    if (!showMarkAllRead || filter === 'all') return events;
+    if (filter === 'unread') return events.filter((e) => !e.read);
+    return events.filter(isActionable);
+  }, [events, filter, showMarkAllRead, isActionable]);
+
   // Group events by date
   const groups = React.useMemo(() => {
     const map = {};
-    for (const e of events) {
+    for (const e of filtered) {
       const grp = getDateGroup(e.created_at);
       if (!map[grp]) map[grp] = [];
       map[grp].push(e);
     }
     return map;
-  }, [events]);
+  }, [filtered]);
 
   const groupOrder = ['today', 'yesterday', 'week', 'earlier'];
 
@@ -493,12 +552,40 @@ export function ActivityTimeline({ lang = 'ht', userId, t, onMarkRead, onMarkAll
   }
 
   const unreadCount = events.filter((e) => !e.read).length;
+  const pendingCount = events.filter(isActionable).length;
 
   return (
     <div className="act-feed">
-      {/* Phase 58 — Mark-all-read toolbar (opt-in via showMarkAllRead,
-          used by the full-screen NotificationsPage). Hidden while the
-          user has nothing unread so the header stays uncluttered. */}
+      {/* Phase 58 — Filter tabs (page surface only). Unread/Actions show
+          a badge only when non-zero. */}
+      {showMarkAllRead && (
+        <div className="act-feed-tabs" role="tablist">
+          {[
+            ['all', lang === 'ht' ? 'Tout' : 'All'],
+            ['unread', lang === 'ht' ? 'Nouvo' : 'Unread'],
+            ['requests', lang === 'ht' ? 'Aksyon' : 'Actions'],
+          ].map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              role="tab"
+              aria-selected={filter === key}
+              className={`act-feed-tab${filter === key ? ' is-active' : ''}`}
+              onClick={() => setFilter(key)}
+            >
+              {label}
+              {key === 'unread' && unreadCount > 0 && (
+                <span className="act-feed-tab-badge is-brand">{unreadCount}</span>
+              )}
+              {key === 'requests' && pendingCount > 0 && (
+                <span className="act-feed-tab-badge">{pendingCount}</span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+      {/* Mark-all-read toolbar. Hidden while the user has nothing unread
+          so the header stays uncluttered. */}
       {showMarkAllRead && unreadCount > 0 && (
         <div className="notif-page-toolbar">
           <span className="notif-page-unread-count">
@@ -510,7 +597,7 @@ export function ActivityTimeline({ lang = 'ht', userId, t, onMarkRead, onMarkAll
             className="notif-page-mark-all"
             onClick={markAllRead}
           >
-            <i className="fas fa-check-double" aria-hidden="true" /> {lang === 'ht' ? 'Make tout li li' : 'Mark all read'}
+            <i className="fas fa-check-double" aria-hidden="true" /> {lang === 'ht' ? 'Make tout nouvo yo' : 'Mark all read'}
           </button>
         </div>
       )}
@@ -529,6 +616,18 @@ export function ActivityTimeline({ lang = 'ht', userId, t, onMarkRead, onMarkAll
           </div>
         );
       })}
+
+      {/* Filtered tab is empty — all caught up message (page surface). */}
+      {showMarkAllRead && filtered.length === 0 && filter !== 'all' && (
+        <div className="act-feed-filter-empty" role="status">
+          <i className={`fas ${filter === 'unread' ? 'fa-mug-hot' : 'fa-list-check'}`} aria-hidden="true" />
+          <p>
+            {filter === 'unread'
+              ? (lang === 'ht' ? 'Pa gen notifikasyon nouvo — ou li tout! ☕' : 'No unread notifications — all caught up!')
+              : (lang === 'ht' ? 'Pa gen demann k ap tann repons.' : 'No pending requests.')}
+          </p>
+        </div>
+      )}
 
       {/* Sentinel for infinite scroll */}
       {hasMore && (
