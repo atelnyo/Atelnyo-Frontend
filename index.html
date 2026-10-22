@@ -342,41 +342,5 @@
       }
     </script>
 
-    <!-- ─── ⚠️ TEMP deploy-test banner (remove after deploy confirmed) ───
-         Fixed pill « Hello world » + hash CSS ki anviwònman an sèvi.
-         Si w wè li, se nouvo build lan ki live.                                  -->
-    <script>
-      (function () {
-        try {
-          var boot = function () {
-            var link = document.querySelector('link[rel="stylesheet"][href*="/assets/index-"]');
-            var m = link ? link.href.match(/index-([A-Za-z0-9_-]+)\.css/) : null;
-            var b = document.createElement('div');
-            b.id = 'deploy-test-banner';
-            b.style.cssText = 'position:fixed;left:12px;bottom:12px;z-index:2147483000;'
-              + 'background:#d81b60;color:#fff;padding:10px 14px;border-radius:12px;'
-              + 'font: 600 13px/1.4 system-ui, sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.3);'
-              + 'display:flex;gap:10px;align-items:center;max-width:80vw';
-            var span = document.createElement('span');
-            span.textContent = '🚀 Hello world — nouvo build live (css: ' + ((m && m[1]) || 'NONE') + ')';
-            var x = document.createElement('button');
-            x.textContent = '✕';
-            x.setAttribute('aria-label', 'Fèmen bandi tès la');
-            x.style.cssText = 'background:rgba(255,255,255,.25);border:0;color:#fff;width:22px;height:22px;'
-              + 'border-radius:50%;cursor:pointer;font:700 12px/1 system-ui';
-            x.onclick = function () { b.remove(); };
-            b.appendChild(span);
-            b.appendChild(x);
-            document.body.appendChild(b);
-          };
-          if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', boot);
-          } else {
-            boot();
-          }
-        } catch (e) { /* preferew pajan nan chajman paj la */ }
-      })();
-    </script>
-    <!-- ─── /deploy-test banner ─────────────────────────────────────────── -->
   </body>
 </html>
