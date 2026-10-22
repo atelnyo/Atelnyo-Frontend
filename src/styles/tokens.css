@@ -217,6 +217,14 @@
 
   /* ─── Semantic: Surfaces ───────────────────────────────────────── */
   --surface-page:           var(--pr-color-rose-50);
+  /* Alias used across feature styles (.notifications-page, sheet
+     overlays, chunk-error…). Defined ONCE via --surface-page so every
+     mode block below (dark, amoled, cyber…) propagates through —
+     before this alias, all callers silently fell back to hardcoded
+     hex values, which made full-screen surfaces (e.g. the
+     notifications page) a different black (#0f0f1a) than the app
+     body (#121212) in dark mode. */
+  --bg-page:                var(--surface-page);
   --surface-card:           var(--pr-color-white);
   --surface-card-alt:       var(--pr-color-gray-50);
   --surface-header:         rgba(255, 255, 255, 0.8);
@@ -820,6 +828,7 @@ body.dark-mode {
 
   /* Legacy aliases */
   --pink-bg:     var(--surface-page);
+  --bg-page:     var(--surface-page);
   --pink-primary: var(--color-primary);
   --pink-light:  #2d2d2d;
   --text-main:   var(--text-primary);
@@ -840,6 +849,7 @@ body.dark-mode {
 body.theme-amoled,
 body.dark-mode.theme-amoled {
   --surface-page:  #000000;
+  --bg-page:       var(--surface-page);
   --surface-card:  #0a0a0a;
   --surface-card-alt: #050505;
   --surface-header: rgba(0, 0, 0, 0.9);
@@ -875,6 +885,7 @@ body.theme-cyber {
   --color-primary-dark:   #00cc6a;
   --color-primary-gradient: linear-gradient(135deg, #00ff88, #00ccff);
   --surface-page:         #08090f;
+  --bg-page:              var(--surface-page);
   --surface-card:         #11131f;
   --surface-input:        #141729;
   --border-color:         rgba(0, 255, 136, 0.15);
@@ -895,6 +906,7 @@ body.theme-minimal {
   --color-primary-dark:   #111111;
   --color-primary-gradient: linear-gradient(135deg, #333, #666);
   --surface-page:         #ffffff;
+  --bg-page:              var(--surface-page);
   --surface-card:         #fafafa;
   --border-color:         #e5e5e5;
   --border-color-strong:  #cccccc;
@@ -912,6 +924,7 @@ body.dark-mode.theme-minimal {
   --color-primary-light:  #222222;
   --color-primary-dark:   #cccccc;
   --surface-page:         #111111;
+  --bg-page:              var(--surface-page);
   --surface-card:         #1a1a1a;
   --border-color:         #2a2a2a;
   --text-primary:         #dddddd;
@@ -925,6 +938,7 @@ body.theme-professional {
   --color-primary-dark:   #1344af;
   --color-primary-gradient: linear-gradient(135deg, #1a56db, #3b82f6);
   --surface-page:         #f8fafc;
+  --bg-page:              var(--surface-page);
   --state-success:        #059669;
   --state-info:           #1a56db;
   --pink-primary:         #1a56db;
@@ -939,6 +953,7 @@ body.dark-mode.theme-professional {
   --color-primary:        #3b82f6;
   --color-primary-light:  #1e293b;
   --surface-page:         #0f172a;
+  --bg-page:              var(--surface-page);
   --surface-card:         #1e293b;
   --text-primary:         #e2e8f0;
   --pink-primary:         #3b82f6;
@@ -952,6 +967,7 @@ body.theme-enterprise {
   --color-primary-dark:   #a88a3e;
   --color-primary-gradient: linear-gradient(135deg, #c8a84e, #e2c87f);
   --surface-page:         #0d0d12;
+  --bg-page:              var(--surface-page);
   --surface-card:         #1a1a24;
   --surface-input:        #222230;
   --border-color:         rgba(200, 168, 78, 0.12);
@@ -985,6 +1001,7 @@ body.theme-enterprise {
   /* Surfaces — soft blue page, white cards, blue-tinted inputs */
   --surface-bg:            #e8eefc;
   --surface-page:          #e8eefc;
+  --bg-page:               var(--surface-page);
   --surface-card:          #ffffff;
   --surface-card-alt:      #f4f7ff;
   --surface-header:        rgba(232, 238, 252, 0.88);
@@ -1060,6 +1077,7 @@ body.dark-mode [data-creator-studio] {
   --color-primary-gradient: linear-gradient(135deg, #3b82f6, #818cf8);
   --surface-bg:            #0f172a;
   --surface-page:          #0f172a;
+  --bg-page:               var(--surface-page);
   --surface-card:          #1e293b;
   --surface-card-alt:      #172033;
   --surface-input:         #1e293b;
