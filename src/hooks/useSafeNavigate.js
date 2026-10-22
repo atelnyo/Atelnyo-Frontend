@@ -17,12 +17,21 @@
  *   const navigate = useSafeNavigate();
  *   // navigate(url) or navigate(-1) — safe even in Cloud Shell
  */
+import { startTransition } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 /**
  * Returns a safe navigate function. If useNavigate() throws (Cloud
  * Shell stale-SW cache), returns a no-op that silently fails instead
  * of crashing the component.
+ *
+ * Every successful navigation is wrapped in React.startTransition:
+ * most routes are React.lazy chunks, and a navigation that triggers a
+ * chunk load from a synchronous click handler (discrete input) makes
+ * React throw minified error #426 — "A component suspended while
+ * responding to synchronous input... updates that suspend should be
+ * wrapped with startTransition". Centralizing the wrap here protects
+ * every useSafeNavigate() call site at once.
  */
 export function useSafeNavigate() {
   try {
@@ -36,7 +45,7 @@ export function useSafeNavigate() {
       noop.safe = true;
       return noop;
     }
-    return navigate;
+    return (url, opts) => startTransition(() => navigate(url, opts));
   } catch (e) {
     // Cloud Shell proxy / stale service worker cache corrupted
     // React's dispatcher for the pre-bundled react-router-dom.

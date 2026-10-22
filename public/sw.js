@@ -100,6 +100,13 @@ self.addEventListener('fetch', (event) => {
           return fetch(request).then((response) => {
             if (response.ok) cache.put(request, response.clone());
             return response;
+          }).catch(() => {
+            // Backend host unreachable / request failed (e.g. broken or
+            // dead content-hosting URLs). Hand back a 504 instead of a
+            // rejected promise — respondWith must never reject or the
+            // page logs a raw "Failed to fetch" error.
+            console.warn('[sw] static fetch failed:', request.url);
+            return new Response('', { status: 504, statusText: 'Network error' });
           });
         })
       )
@@ -143,7 +150,12 @@ self.addEventListener('fetch', (event) => {
               cache.put(cacheKey, response.clone());
             }
             return response;
-          }).catch(() => cache.match(cacheKey));
+          }).catch(() => cache.match(cacheKey).then((m) =>
+            // Miss even on the fallback — yield a 504 response instead
+            // of undefined (respondWith(undefined) surfaces as a
+            // "Failed to fetch" error in the page console).
+            m || new Response('', { status: 504, statusText: 'Network error' })
+          ));
         });
       })
     );

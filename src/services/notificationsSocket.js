@@ -123,6 +123,18 @@ function open(token) {
     clearTimeout(reconnectTimer);
     reconnectTimer = null;
   }
+  // A handshake still in CONNECTING is usable — closing it pre-emptively
+  // makes the browser log "WebSocket is closed before the connection is
+  // established" (happens when the auth effect re-runs with the same
+  // token while the first handshake is under way). Re-attach handlers
+  // under the new generation instead of closing.
+  if (socket && socket.readyState === WebSocket.CONNECTING && token === lastToken) {
+    socket.onopen = () => { if (myGen === generation) handleOpen(); };
+    socket.onclose = (ev) => { if (myGen === generation) handleClose(ev.code); };
+    socket.onerror = () => { /* onclose follows; keep it simple */ };
+    socket.onmessage = handleMessage;
+    return;
+  }
   if (socket) {
     try { socket.close(); } catch (_) {}
     socket = null;
