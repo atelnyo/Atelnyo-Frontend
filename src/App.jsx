@@ -1280,7 +1280,11 @@ function App() {
           // sound is best-effort
         }
       }).then(() => {
-        if (userData?.is_staff || userData?.is_superuser) {
+        // Dev/debug only (the backend endpoint is documented as such):
+        // firing it in production spams the console with a 404 on
+        // deployments where /api/push/send-test/ isn't routed yet, and
+        // sends a real "✅ Konekte!" push on every app load for staff.
+        if (import.meta.env.DEV && (userData?.is_staff || userData?.is_superuser)) {
           sendTestPush().then((result) => {
             if (result?.sent > 0) {
               showToast('📳 Tès push reyisi! ' + result.sent + ' aparèy reyisi.', 'check-circle');

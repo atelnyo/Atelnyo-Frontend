@@ -15,6 +15,12 @@ import {
 
 export default function useGoogleAuth({ lang, onLoginSuccess, showToast, isLoading }) {
   const googleRef = useRef(null);
+  // Keeps the LATEST credential handler alive: initialize() runs only
+  // once (GSI warns "called multiple times" otherwise — the effect
+  // re-runs when isLoading/handler identity change), so every real
+  // credential event is routed through this ref instead of a stale
+  // closure captured at first initialize.
+  const handlerRef = useRef(null);
   const [googleClientId, setGoogleClientId] = useState(() => getGoogleClientId());
   const [pendingGoogle, setPendingGoogle] = useState(() => readPendingGoogle());
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -75,16 +81,29 @@ export default function useGoogleAuth({ lang, onLoginSuccess, showToast, isLoadi
   useEffect(() => {
     if (!googleClientId || typeof window === 'undefined') return undefined;
     let cancelled = false;
+    handlerRef.current = handleGoogleCredential;
 
     const render = () => {
       if (cancelled || !window.google?.accounts?.id || !googleRef.current) return;
       try {
-        window.google.accounts.id.initialize({
-          client_id: googleClientId,
-          callback: (resp) => { handleGoogleCredential(resp); },
-          auto_select: true,
-          itp_supported: true,
-        });
+        // Initialize only the FIRST time per client id — calling
+        // initialize() on every effect run makes GSI log "initialize()
+        // is called multiple times. This could cause unexpected
+        // behavior and only the last initialized instance will be
+        // used" (seen in production console).
+        if (window.__atelnyoGsiClientId !== googleClientId) {
+          window.google.accounts.id.initialize({
+            client_id: googleClientId,
+            callback: (resp) => { handlerRef.current?.(resp); },
+            auto_select: true,
+            itp_supported: true,
+            // Opt in to FedCM (Chrome's new identity platform API) so
+            // the One-Tap prompt keeps working once Google makes FedCM
+            // mandatory; silences the GSI_LOGGER FedCM migration warning.
+            use_fedcm_for_prompt: true,
+          });
+          window.__atelnyoGsiClientId = googleClientId;
+        }
         const avail = googleRef.current?.clientWidth || 280;
         window.google.accounts.id.renderButton(googleRef.current, {
           theme: isDarkTheme() ? 'filled_black' : 'outline',
