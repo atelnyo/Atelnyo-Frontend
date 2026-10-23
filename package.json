@@ -54,7 +54,13 @@
     "vite": "^5.0.0",
     "vitest": "^4.1.10"
   },
+  "overrides": {
+    "vitest": {
+      "vite": "^7.0.0"
+    }
+  },
   "allowScripts": {
-    "esbuild@0.21.5": true
+    "esbuild@0.21.5": true,
+    "esbuild@0.28.2": true
   }
 }
