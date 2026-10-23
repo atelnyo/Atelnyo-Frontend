@@ -150,6 +150,18 @@ export default function PolicyPageView({ slug, lang = 'en', showToast }) {
     setLoading(true);
     setError(null);
 
+    // Loading watchdog — the Legal API (or the CMS fallback) must never
+    // leave this page spinning forever. 12s is enough for a normal
+    // response (axios's own ceiling is 45s for cold starts); past that we
+    // surface the standard "not available yet" error state, which already
+    // has a retry path (View All Policies / Go Back).
+    const watchdog = setTimeout(() => {
+      if (cancelled) return;
+      cancelled = true; // ignore late responses entirely
+      setError('Request timed out');
+      setLoading(false);
+    }, 12_000);
+
     const fetchPolicy = async () => {
       // 1) Try preferred language first
       let legalData = await legalService.getPolicy(slug, lang).catch(() => null);
@@ -187,10 +199,11 @@ export default function PolicyPageView({ slug, lang = 'en', showToast }) {
         setError(err?.response?.data?.error || err?.message || 'Failed to load policy');
       })
       .finally(() => {
+        clearTimeout(watchdog);
         if (!cancelled) setLoading(false);
       });
 
-    return () => { cancelled = true; };
+    return () => { cancelled = true; clearTimeout(watchdog); };
   }, [slug]);
 
   // ─── Loading state ──────────────────────────────────────────
@@ -205,7 +218,7 @@ export default function PolicyPageView({ slug, lang = 'en', showToast }) {
 
   // ─── Error state ────────────────────────────────────────────
   if (error) {
-    const isNetworkError = error?.includes('Network Error') || error?.includes('Failed to fetch');
+    const isNetworkError = error?.includes('Network Error') || error?.includes('Failed to fetch') || error?.includes('timed out');
     const isNotFound = error?.includes('not found') || error?.includes('404');
     const msg = (() => {
       if (isNetworkError) {

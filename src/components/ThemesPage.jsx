@@ -234,31 +234,52 @@ const ThemesPage = ({ lang = 'ht', translations, showToast }) => {
     async function loadThemes() {
       setLoading(true);
       setError(false);
+      setDetails({});
+      // Watchdog — the theme list API must never leave this page spinning
+      // forever (the axios client's own ceiling is 45s, far too long for
+      // this page). Past 12s we show the retry-able error state and ignore
+      // any late response.
+      const watchdog = setTimeout(() => {
+        if (cancelled) return;
+        cancelled = true;
+        setError(true);
+        setLoading(false);
+      }, 12_000);
       try {
         const res = await themeService.list();
         if (cancelled) { return; }
         const data = res?.data;
         const items = Array.isArray(data) ? data : (data?.results ?? []);
         setThemes(items);
+        // The list itself is enough to render the cards (with the
+        // per-category fallback accent) — don't hold the spinner hostage
+        // to the N detail requests below.
+        setLoading(false);
 
-        // Fetch details in parallel so each card can render its real
-        // token-based preview (list payload stays lightweight).
-        const settled = await Promise.allSettled(
+        // Fetch details in the background so each card upgrades to its
+        // real token-based preview when they arrive (list payload stays
+        // lightweight). A slow/failing detail call can no longer stall
+        // the page.
+        // The per-run ``cancelled`` flag keeps a retry from being
+        // clobbered by a previous run's late response.
+        Promise.allSettled(
           items.map((th) => themeService.getBySlug(th.slug)),
-        );
-        if (cancelled) { return; }
-        const detailMap = {};
-        settled.forEach((outcome, i) => {
-          if (outcome.status === 'fulfilled') {
-            const d = outcome.value?.data ?? outcome.value;
-            if (d?.slug) detailMap[d.slug] = d;
-            else if (items[i]?.slug) detailMap[items[i].slug] = d;
-          }
+        ).then((settled) => {
+          if (cancelled) return;
+          const detailMap = {};
+          settled.forEach((outcome, i) => {
+            if (outcome.status === 'fulfilled') {
+              const d = outcome.value?.data ?? outcome.value;
+              if (d?.slug) detailMap[d.slug] = d;
+              else if (items[i]?.slug) detailMap[items[i].slug] = d;
+            }
+          });
+          setDetails(detailMap);
         });
-        setDetails(detailMap);
       } catch {
-        if (!cancelled) { setError(true); }
+        if (!cancelled) { setError(true); setLoading(false); }
       } finally {
+        clearTimeout(watchdog);
         if (!cancelled) { setLoading(false); }
       }
     }

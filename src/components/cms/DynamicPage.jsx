@@ -31,6 +31,13 @@ const styles = {
   },
 };
 
+// Loading watchdog — a slow/hung API response must never leave the page
+// spinning forever. The axios client's own timeout is 45s (Render cold
+// starts), far too long for a public info page to sit on a spinner, so
+// these pages race their own shorter deadline and show a retry-able
+// error instead.
+const PAGE_FETCH_TIMEOUT_MS = 12_000;
+
 export default function DynamicPage({ slug, lang = 'ht', showToast }) {
   const [pageData, setPageData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -45,6 +52,14 @@ export default function DynamicPage({ slug, lang = 'ht', showToast }) {
     setLoading(true);
     setError(null);
     setPageData(null);
+
+    // Watchdog: force the error state if the API hasn't answered in time.
+    const watchdog = setTimeout(() => {
+      if (cancelled) return;
+      cancelled = true; // ignore the late response entirely
+      setError('The server is taking too long to respond. Please try again in a moment.');
+      setLoading(false);
+    }, PAGE_FETCH_TIMEOUT_MS);
 
     api.get(`/pages/${slug}/render/`)
       .then((res) => {
@@ -63,10 +78,11 @@ export default function DynamicPage({ slug, lang = 'ht', showToast }) {
         }
       })
       .finally(() => {
+        clearTimeout(watchdog);
         if (!cancelled) setLoading(false);
       });
 
-    return () => { cancelled = true; };
+    return () => { cancelled = true; clearTimeout(watchdog); };
   }, [slug]);
 
   // ─── Early returns (safe — hooks are all above) ──────────────
