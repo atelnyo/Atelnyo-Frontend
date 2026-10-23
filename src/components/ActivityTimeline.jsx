@@ -173,6 +173,12 @@ const NOTIFICATION_ROUTES = {
   message_received:       () => '/sheet/messages',
   // An accepted invitation opens the auto-created thread.
   profile_request_accepted: () => '/sheet/messages',
+  profile_request_rejected: () => null,
+  // Decided invitations (post-click state): an accepted one now has
+  // the DM thread; a rejected one is a status-only notice.
+  profile_hire_request:    (d, event) => (event?.status === 'accepted' ? '/sheet/messages' : null),
+  profile_collab_request:  (d, event) => (event?.status === 'accepted' ? '/sheet/messages' : null),
+  profile_service_booking: (d, event) => (event?.status === 'accepted' ? '/sheet/messages' : null),
   // A new follower/subscriber → their profile; a publish by a followed
   // creator → the exact content (reuses the inner route for the type).
   new_follower:           (d) => (d?.follower_username ? `/c/${d.follower_username}` : null),
@@ -208,13 +214,48 @@ function getEventRoute(event) {
   const builder = NOTIFICATION_ROUTES[event?.event_type];
   if (!builder) return null;
   try {
-    return builder(event?.data || {});
+    return builder(event?.data || {}, event);
   } catch {
     return null;
   }
 }
 
-export { getEventRoute, NOTIFICATION_ROUTES };
+// ─── Dead-link notices ─────────────────────────────────────────────
+// Event types with no sensible destination still get VISIBLE feedback
+// on click — an explanatory toast instead of a silent dead row. Types
+// with a route but missing data ids (e.g. job_posted without job_id)
+// fall through to the generic message.
+const NOTIFICATION_NOTICES = {
+  community_member_banned: {
+    ht: 'Ou te ban nan kominote sa a — ou pa gen aksè pou w vizite li.',
+    en: 'You were banned from this community — you can no longer visit it.',
+  },
+  profile_request_rejected: {
+    ht: 'Demann sa a te rejte — pa gen konvèsasyon ki louvri.',
+    en: 'This request was rejected — no conversation was opened.',
+  },
+};
+
+function getEventNotice(typeOrEvent, lang) {
+  const isEvent = typeof typeOrEvent !== 'string';
+  const type = isEvent ? typeOrEvent?.event_type : typeOrEvent;
+  const status = isEvent ? typeOrEvent?.status : undefined;
+  // A rejected hire/collab/booking row explains itself more concretely
+  // than the generic "no linked page" message.
+  const noticeType = (status === 'rejected'
+    && (type === 'profile_hire_request' || type === 'profile_collab_request'
+      || type === 'profile_service_booking'))
+    ? 'profile_request_rejected'
+    : type;
+  return (
+    NOTIFICATION_NOTICES[noticeType]?.[lang === 'ht' ? 'ht' : 'en']
+    || (lang === 'ht'
+      ? 'Pa gen paj ki lyen ak notifikasyon sa a.'
+      : 'No page is linked to this notification.')
+  );
+}
+
+export { getEventRoute, getEventNotice, NOTIFICATION_ROUTES };
 
 function getEventMeta(eventType, lang) {
   const meta = EVENT_META[eventType] || EVENT_META.default;
@@ -305,7 +346,7 @@ const PROFILE_REQUEST_TYPES = [
   'profile_service_booking',
 ];
 
-function EventRow({ event, lang, t, onMarkRead, onNavigate, onAcceptProposal, onRejectProposal, onAcceptRequest, onRejectRequest }) {
+function EventRow({ event, lang, t, onMarkRead, onNavigate, onShowNotice, onAcceptProposal, onRejectProposal, onAcceptRequest, onRejectRequest }) {
   const meta = getEventMeta(event.event_type, lang);
   const accent = getEventAccent(event.event_type);
   const data = event.data || {};
@@ -348,7 +389,9 @@ function EventRow({ event, lang, t, onMarkRead, onNavigate, onAcceptProposal, on
         // everything else navigates like normal.
         if (!showDecisionActions) {
           const route = getEventRoute(event);
-          if (route) onNavigate?.(route);
+          if (route && onNavigate) onNavigate(route);
+          // Dead link → visible feedback (bilingual notice toast).
+          else onShowNotice?.(getEventNotice(event, lang));
         }
       }}
       onKeyDown={(e) => {
@@ -438,6 +481,16 @@ export function ActivityTimeline({ lang = 'ht', userId, t, onMarkRead, onMarkAll
   // Filter tab — page surface only (showMarkAllRead). The header
   // dropdown always shows all events.
   const [filter, setFilter] = useState('all');
+  // Dead-link notice toast (self-contained so both surfaces + the
+  // Mwen.jsx usage — which passes no onNavigate — behave the same).
+  const [notice, setNotice] = useState(null);
+  const noticeTimerRef = useRef(null);
+  const showNotice = useCallback((message) => {
+    setNotice({ id: Date.now(), message });
+    clearTimeout(noticeTimerRef.current);
+    noticeTimerRef.current = setTimeout(() => setNotice(null), 4000);
+  }, []);
+  useEffect(() => () => clearTimeout(noticeTimerRef.current), []);
   const sentinelRef = useRef(null);
 
   const markEventRead = useCallback(async (eventId) => {
@@ -628,7 +681,7 @@ export function ActivityTimeline({ lang = 'ht', userId, t, onMarkRead, onMarkAll
               {lang === 'ht' ? dateLabel.ht : dateLabel.en}
             </div>
             {items.map((e) => (
-              <EventRow key={e.id} event={e} lang={lang} t={t} onMarkRead={markEventRead} onNavigate={onNavigate} onAcceptProposal={onAcceptProposal} onRejectProposal={onRejectProposal} onAcceptRequest={onAcceptRequest} onRejectRequest={onRejectRequest} />
+              <EventRow key={e.id} event={e} lang={lang} t={t} onMarkRead={markEventRead} onNavigate={onNavigate} onShowNotice={showNotice} onAcceptProposal={onAcceptProposal} onRejectProposal={onRejectProposal} onAcceptRequest={onAcceptRequest} onRejectRequest={onRejectRequest} />
             ))}
           </div>
         );
@@ -655,6 +708,21 @@ export function ActivityTimeline({ lang = 'ht', userId, t, onMarkRead, onMarkAll
               <span>{t?.activity_feed_loading_more || (lang === 'ht' ? 'Ap chaje...' : 'Loading...')}</span>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Dead-link notice — bottom-center chip so it stays clear of the
+          dropdown (top-right) and the page header. */}
+      {notice && (
+        <div className="notif-toast" role="status" style={{
+          position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
+          zIndex: 10001, background: 'var(--bg-card, #fff)', borderRadius: 12,
+          padding: '10px 18px', boxShadow: '0 4px 20px rgba(0,0,0,0.18)',
+          display: 'flex', alignItems: 'center', gap: 10, maxWidth: 'calc(100vw - 32px)',
+          fontSize: '0.88rem', animation: 'slideInRight 0.3s ease',
+        }}>
+          <i className="fas fa-circle-info" style={{ color: 'var(--pink-primary, #d81b60)', flexShrink: 0 }} aria-hidden="true" />
+          <span>{notice.message}</span>
         </div>
       )}
     </div>
