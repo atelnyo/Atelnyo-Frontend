@@ -1726,9 +1726,22 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
         <div className="settings-section-title">{t.language_section}</div>
         <div className="settings-section">
           {languages.map(l => (
-            <div key={l.id} onClick={() => onLangChange(l.id)} className="settings-item">
-              <div className="settings-item-icon">
-                <i className={`fas ${l.icon} settings-lang-icon`} />
+            <div
+              key={l.id}
+              onClick={() => onLangChange(l.id)}
+              className="settings-item"
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onLangChange(l.id); } }}
+              aria-pressed={lang === l.id}
+            >
+              {/* icon box holds ONLY the icon — the label must be a
+                  sibling (settings-item-left) or the fixed 36×36 box
+                  squeezes/overlaps the text (the деformed rows bug). */}
+              <div className="settings-item-left">
+                <div className="settings-item-icon">
+                  <i className={`fas ${l.icon}`} />
+                </div>
                 <span className="settings-item-label">{l.label}</span>
               </div>
               {lang === l.id && <i className="fas fa-check settings-lang-check" />}
@@ -1754,8 +1767,10 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onMarketChange(m.code); } }}
               aria-pressed={market === m.code}
             >
-              <div className="settings-item-icon">
-                <span className="settings-lang-icon" aria-hidden="true">{m.flag}</span>
+              <div className="settings-item-left">
+                <div className="settings-item-icon" aria-hidden="true">
+                  <span className="settings-market-flag">{m.flag}</span>
+                </div>
                 <span className="settings-item-label">
                   {m.name} <span className="settings-market-code">({m.code})</span>
                 </span>

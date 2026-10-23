@@ -1654,6 +1654,13 @@ body.dark-mode .settings-item-icon {
 .settings-lang-icon {
   font-size: 1.5rem;
 }
+/* Flag emoji inside the market icon pill — sized to fit the 36px
+   box; emoji fonts render it natively on Android/iOS/macOS while
+   the pill keeps a stable shape on Windows (no emoji font). */
+.settings-market-flag {
+  font-size: 1.05rem;
+  line-height: 1;
+}
 .settings-lang-check {
   color: var(--pink-primary);
   font-size: 1rem;
