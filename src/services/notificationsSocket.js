@@ -23,6 +23,8 @@
  *     carries is authoritative, and the poll stays as reconciliation.
  */
 
+import { API_URL } from './api';
+
 const DEFAULT_RECONNECT_MS = 2000;
 const MAX_RECONNECT_MS = 15000;
 
@@ -40,16 +42,26 @@ let lastToken = null;
  *   1. `VITE_WS_BASE_URL` — explicit override (production).
  *   2. `VITE_API_BASE_URL` — swap http(s) for ws(s) and drop the
  *      `/api/` suffix, e.g. `https://api.x.com/api/` → `wss://api.x.com/ws/notifications/`.
- *   3. Same-origin `/ws/notifications/` — the Vite dev proxy
- *      (vite.config.js `/ws`) forwards this to Daphne.
+ *   3. The deployed api client's base (services/api.js `API_URL`,
+ *      which itself falls back to the hardcoded production API origin
+ *      https://api.atelnyo.site/api/) → wss://api.atelnyo.site/ws/notifications/.
+ *      Without this, a prod build with no VITE_API_BASE_URL set used
+ *      to fall through to the SAME-ORIGIN ws — a static frontend host
+ *      that can never accept a WebSocket upgrade — so notifications
+ *      silently stayed offline and only the 30s HTTP poll worked.
+ *   4. Same-origin `/ws/notifications/` — local dev path: the
+ *      relative `/api/` base means the Vite proxy (vite.config.js
+ *      `/ws`) forwards this to Daphne.
  */
 function buildWsUrl() {
   const explicit = import.meta.env.VITE_WS_BASE_URL;
   if (explicit) {
     return explicit.replace(/\/$/, '') + '/ws/notifications/';
   }
-  const apiBase = import.meta.env.VITE_API_BASE_URL;
-  if (apiBase) {
+  // Env base and the deployed client base — first absolute http(s)
+  // candidate wins (converted to ws(s) with the /api/ suffix dropped).
+  for (const apiBase of [import.meta.env.VITE_API_BASE_URL, API_URL]) {
+    if (!apiBase || !/^https?:\/\//.test(apiBase)) continue;
     const cleaned = apiBase.replace(/\/+$/, '');
     const rest = cleaned.replace(/^https?:\/\//, '');
     const origin = rest.includes('/') ? rest.slice(0, rest.indexOf('/')) : rest;

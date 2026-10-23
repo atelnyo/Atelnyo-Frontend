@@ -3146,7 +3146,13 @@ function App() {
             MessagesSection component the Studio uses. */}
         <Route path={SHEETS.MESSAGES} element={
           <AuthGate user={user}>
-            <MessagesPage lang={lang} t={t} showToast={showToast} />
+            {/* Padded page shell — MessagesSection inherits Studio's
+                layout padding inside the Studio, but in the standalone
+                /sheet/messages route it sits on bare <main>, hugging the
+                top-left corner (cramped "template" on mobile). */}
+            <div className="messages-page-shell">
+              <MessagesPage lang={lang} t={t} showToast={showToast} />
+            </div>
           </AuthGate>
         } />
         {/* Phase 58 — Notifications center. Requires auth. */}
