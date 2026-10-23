@@ -166,7 +166,7 @@ const Header = ({
         )}
 
         {/* Search */}
-        ((typeof onOpenSearch === 'function') && (
+        {(typeof onOpenSearch === 'function') && (
           <button
             className="icon-btn header-btn"
             onClick={onOpenSearch}
@@ -177,8 +177,8 @@ const Header = ({
           </button>
         )}
 
-        {/* Notification bell — opens the full-screen notification center */
-        ((typeof onBellClick === 'function') && (
+        {/* Notification bell — opens the full-screen notification center */}
+        {((typeof onBellClick === 'function') && (
           <button
             className={`icon-btn header-btn notif-bell-btn${unreadNotifCount > 0 ? ' has-unread' : ''}${bellSwing ? ' is-swinging' : ''}`}
             onClick={onBellClick}
