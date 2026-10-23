@@ -137,6 +137,23 @@ const NOTIFICATION_ROUTES = {
   course_enrolled:        (d) => d?.course_id ? `/sheet/course/${d.course_id}` : null,
   course_completed:       (d) => d?.course_id ? `/sheet/course/${d.course_id}` : null,
   community_joined:       (d) => d?.community_slug ? `/sheet/community/${d.community_slug}` : null,
+  contract_started:       () => '/sheet/studio?section=contracts',
+  milestone_completed:    () => '/sheet/studio?section=contracts',
+  milestone_approved:     () => '/sheet/studio?section=contracts',
+  // Credentials & endorsements surface on the creator's public profile.
+  endorsement_received:   () => '/sheet/studio?section=public_profile',
+  credential_verified:    () => '/sheet/studio?section=public_profile',
+  // Wallet events land in the wallet sheet.
+  revenue_earned:         () => '/sheet/wallet',
+  payout_requested:       () => '/sheet/wallet',
+  // The user's own story/message actions still have a sensible target.
+  story_created:          () => '/sheet/explore',
+  message_sent:           () => '/sheet/messages',
+  product_listed:         () => '/sheet/studio?section=products',
+  announcement_posted:    (d) => d?.community_slug ? `/sheet/community/${d.community_slug}` : '/sheet/explore',
+  ticket_purchased:       (d) => d?.community_slug ? `/sheet/community/${d.community_slug}` : '/sheet/explore',
+  live_room_joined:       (d) => d?.community_slug ? `/sheet/community/${d.community_slug}` : '/sheet/explore',
+  profile_updated:        () => '/sheet/studio?section=profile_settings',
   // Moderation notices deep-link to the community, but banned members
   // cannot view it — the backend blocks the fetch and the UI shows the
   // generic error, so only the unbanned/unmuted variants link through.
