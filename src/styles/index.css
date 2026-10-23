@@ -1619,11 +1619,15 @@ body.dark-mode .settings-item-icon {
 }
 
 .settings-item-column {
+  /* Column variant (Theme Color): the row padding other items
+     get via .settings-item is missing here — without it the
+     icon+label sit flush on the panel's clipped edge. */
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 0;
   flex: 1;
+  padding: 16px 20px;
 }
 
 /* ─── Advanced / Toggle sections ───────────────────────────────── */
@@ -2012,10 +2016,19 @@ body.dark-mode .settings-countdown-block {
   gap: 10px;
   padding: 16px 20px;
 }
+/* Inside the padded .settings-item-column the grid must align under
+   the label (icon 36px + 14px gap), not double-inset it. */
+.settings-item-column .settings-theme-colors {
+  padding: 8px 0 4px;
+}
 
 /* ─── Font select & range ──────────────────────────────────────── */
 .settings-font-select {
-  width: 100%;
+  /* Inside a flex .settings-item row the 100% width would
+     collide with the icon+label and collapse it to 0 — pin the
+     control to a bounded size (left part flex-grows instead). */
+  width: min(180px, 55%);
+  flex: 0 0 auto;
   padding: 10px 14px;
   border: 1px solid var(--border-color-subtle);
   border-radius: 10px;
@@ -2036,7 +2049,8 @@ body.dark-mode .settings-font-select {
   color: var(--text-main);
 }
 .settings-font-range {
-  width: 100%;
+  width: min(180px, 55%);
+  flex: 0 0 auto;
   accent-color: var(--pink-primary);
 }
 

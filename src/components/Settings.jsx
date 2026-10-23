@@ -1535,8 +1535,10 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
         <div className="settings-section-title">{t.appearance_section}</div>
         <div className="settings-section">
           <div className="settings-item-reset">
-            <div className="settings-item-icon">
-              <i className="fas fa-undo settings-reset-icon" />
+            <div className="settings-item-left">
+              <div className="settings-item-icon">
+                <i className="fas fa-undo settings-reset-icon" />
+              </div>
               <div className="settings-item-desc">
                 <span className="settings-item-label settings-item-label--bold">{t2(lang, { ht: 'Reyajiste tout aparans', en: 'Reset all appearance' })}</span>
                 <span className="settings-item-label-sm">
@@ -1557,8 +1559,10 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
             </button>
           </div>
           <div className="settings-item" onClick={toggleTheme}>
-            <div className="settings-item-icon">
-              <i className={`fas ${darkMode ? 'fa-sun' : 'fa-moon'} settings-icon-badge`} />
+            <div className="settings-item-left">
+              <div className="settings-item-icon">
+                <i className={`fas ${darkMode ? 'fa-sun' : 'fa-moon'} settings-icon-badge`} />
+              </div>
               <span className="settings-item-label">{t.dark_mode}</span>
             </div>
             <label className="switch" onClick={(e) => e.stopPropagation()}>
@@ -1568,8 +1572,10 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
           </div>
 
           <div className="settings-item-column">
-            <div className="settings-item-icon">
-              <i className="fas fa-palette settings-icon-badge" />
+            <div className="settings-item-left">
+              <div className="settings-item-icon">
+                <i className="fas fa-palette settings-icon-badge" />
+              </div>
               <span className="settings-item-label">{t2(lang, { ht: 'Koulè tèm nan', en: 'Theme Color' })}</span>
             </div>
             <div className="settings-theme-colors">
@@ -1592,8 +1598,10 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
           </div>
 
           <div className="settings-item">
-            <div className="settings-item-icon">
-              <i className="fas fa-font settings-icon-badge" />
+            <div className="settings-item-left">
+              <div className="settings-item-icon">
+                <i className="fas fa-font settings-icon-badge" />
+              </div>
               <span className="settings-item-label">{t2(lang, { ht: 'Kalite Tèks', en: 'Font Family' })}</span>
             </div>
             <select
@@ -1609,8 +1617,10 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
           </div>
 
           <div className="settings-item" style={{ borderBottom: showAdvancedAppearance ? '1px solid var(--pink-light)' : 'none' }}>
-            <div className="settings-item-icon">
-              <i className="fas fa-text-height settings-icon-badge" />
+            <div className="settings-item-left">
+              <div className="settings-item-icon">
+                <i className="fas fa-text-height settings-icon-badge" />
+              </div>
               <span className="settings-item-label">{t.text_size}</span>
             </div>
             <input
@@ -1630,8 +1640,10 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
               window.playSynthSound?.('click');
             }}
           >
-            <div className="settings-item-icon">
-              <i className="fas fa-magic" />
+            <div className="settings-item-left">
+              <div className="settings-item-icon">
+                <i className="fas fa-magic" />
+              </div>
               <span className="settings-advanced-toggle-label">
                 {t2(lang, { ht: 'Opsyon Vizyèl & Sonò', en: 'Sonic & Visual FX' })}
               </span>
@@ -1642,8 +1654,10 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
           {showAdvancedAppearance && (
             <div className="settings-advanced-section">
               <div className="settings-item">
-                <div className="settings-item-icon">
-                  <i className="fas fa-wind settings-icon-badge" />
+                <div className="settings-item-left">
+                  <div className="settings-item-icon">
+                    <i className="fas fa-wind settings-icon-badge" />
+                  </div>
                   <span className="settings-item-label">{t2(lang, { ht: 'Ambyans Paj la', en: 'Ambient FX Backdrop' })}</span>
                 </div>
                 <select
@@ -1662,8 +1676,10 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
               </div>
 
               <div className="settings-item" onClick={(e) => { if (e.target.closest('label.switch, input[type="checkbox"]')) {return;} toggleSonicUi(!sonicUi); }}>
-                <div className="settings-item-icon">
-                  <i className="fas fa-volume-up settings-icon-badge" />
+                <div className="settings-item-left">
+                  <div className="settings-item-icon">
+                    <i className="fas fa-volume-up settings-icon-badge" />
+                  </div>
                   <span className="settings-item-label">{t2(lang, { ht: 'Feedback Sonò', en: 'Sonic UI Sounds' })}</span>
                 </div>
                 <label className="switch">
@@ -1673,8 +1689,10 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
               </div>
 
               <div className="settings-item" onClick={(e) => { if (e.target.closest('label.switch, input[type="checkbox"]')) {return;} toggleCyberCursor(!cyberCursor); }}>
-                <div className="settings-item-icon">
-                  <i className="fas fa-mouse-pointer settings-icon-badge" />
+                <div className="settings-item-left">
+                  <div className="settings-item-icon">
+                    <i className="fas fa-mouse-pointer settings-icon-badge" />
+                  </div>
                   <span className="settings-item-label">{t2(lang, { ht: 'Kèso Espesyal', en: 'Cyber Cursor Trail' })}</span>
                 </div>
                 <label className="switch">
@@ -1684,8 +1702,10 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
               </div>
 
               <div className="settings-item">
-                <div className="settings-item-icon">
-                  <i className="fas fa-cubes settings-icon-badge" />
+                <div className="settings-item-left">
+                  <div className="settings-item-icon">
+                    <i className="fas fa-cubes settings-icon-badge" />
+                  </div>
                   <span className="settings-item-label">{t2(lang, { ht: 'Stil Kat Sit la', en: 'Card Design Style' })}</span>
                 </div>
                 <select
@@ -1835,8 +1855,10 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
                 handleToggleNotif(item.key, !notifPrefs[item.key]);
               }}
             >
-              <div className="settings-item-icon">
-                <i className={`fas ${item.icon} settings-icon-badge`} />
+              <div className="settings-item-left">
+                <div className="settings-item-icon">
+                  <i className={`fas ${item.icon} settings-icon-badge`} />
+                </div>
                 <span className="settings-item-label">{item.label}</span>
               </div>
               <label className="switch">
@@ -1927,8 +1949,10 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
               onClick={() => navigate(`/legal/${link.slug}`)}
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate(`/legal/${link.slug}`); }}
             >
-              <div className="settings-item-icon">
-                <i className={`fas ${link.icon} settings-icon-badge`} />
+              <div className="settings-item-left">
+                <div className="settings-item-icon">
+                  <i className={`fas ${link.icon} settings-icon-badge`} />
+                </div>
                 <span className="settings-item-label">{link.label}</span>
               </div>
               <i className="fas fa-chevron-right settings-chevron" style={{ fontSize: '0.7rem', color: 'var(--text-tertiary, #94a3b8)' }} />
@@ -1971,8 +1995,10 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
               }}
               data-testid={`sheet-nav-${link.path.replace(/\/sheet\//g, '').replace(/\//g, '-')}`}
             >
-              <div className="settings-item-icon">
-                <i className={`fas ${link.icon} settings-icon-badge`} />
+              <div className="settings-item-left">
+                <div className="settings-item-icon">
+                  <i className={`fas ${link.icon} settings-icon-badge`} />
+                </div>
                 <div className="settings-item-desc">
                   <span className="settings-item-label">{link.label}</span>
                   <span className="settings-item-label-sm">{link.hint}</span>
@@ -2010,8 +2036,10 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
               togglePlanKreyatif(!planKreyatif);
             }}
           >
-            <div className="settings-item-icon">
-              <i className="fas fa-paint-brush settings-icon-badge" />
+            <div className="settings-item-left">
+              <div className="settings-item-icon">
+                <i className="fas fa-paint-brush settings-icon-badge" />
+              </div>
               <div className="settings-item-desc">
                 <span className="settings-item-label">{t.settings_plan_kreyatif_label}</span>
                 <span className="settings-item-label-sm">{t.settings_plan_kreyatif_hint}</span>
@@ -2043,8 +2071,10 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
               onClick={() => setAssistantOpen(true)}
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setAssistantOpen(true); } }}
             >
-              <div className="settings-item-icon">
-                <i className="fas fa-wand-magic-sparkles settings-icon-badge" />
+              <div className="settings-item-left">
+                <div className="settings-item-icon">
+                  <i className="fas fa-wand-magic-sparkles settings-icon-badge" />
+                </div>
                 <div className="settings-item-desc">
                   <span className="settings-item-label">{t.plan_kreator_assistant_label}</span>
                   <span className="settings-item-label-sm">{t.plan_kreator_assistant_hint}</span>
@@ -2082,8 +2112,10 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
                 onClick={openCreatorApplySheet}
                 data-testid="creator-apply-launcher-btn"
               >
-                <div className="settings-item-icon">
-                  <i className="fas fa-chalkboard-teacher settings-icon-badge" />
+                <div className="settings-item-left">
+                  <div className="settings-item-icon">
+                    <i className="fas fa-chalkboard-teacher settings-icon-badge" />
+                  </div>
                   <span className="settings-item-label">
                     {t.settings_creator_apply_cta || (t2(lang, { ht: 'Aplike pou vin kreyatè', en: 'Apply to be a creator' }))}
                   </span>
@@ -2161,8 +2193,10 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
                 onClick={openSpotlightModal}
                 data-testid="spotlight-apply-btn"
               >
-                <div className="settings-item-icon">
-                  <i className="fas fa-lightbulb settings-icon-badge" />
+                <div className="settings-item-left">
+                  <div className="settings-item-icon">
+                    <i className="fas fa-lightbulb settings-icon-badge" />
+                  </div>
                   <span className="settings-item-label">
                     {spotlightMyApp?.status === 'info_requested'
                       ? (t.settings_spotlight_view_thread || (t2(lang, { ht: 'Gade mesaj admin', en: 'View admin message' })))

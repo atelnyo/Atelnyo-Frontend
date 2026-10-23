@@ -104,8 +104,10 @@ export default function LocationSettings({ lang = 'en', user, showToast, onProfi
       <div className="settings-section">
         {!user ? (
           <div className="settings-item">
-            <div className="settings-item-icon">
-              <i className="fas fa-user-lock" aria-hidden="true" />
+            <div className="settings-item-left">
+              <div className="settings-item-icon">
+                <i className="fas fa-user-lock" aria-hidden="true" />
+              </div>
               <span className="settings-item-label">
                 {isHt ? 'Konekte pou wè ak jere lokalizasyon kont ou.' : 'Sign in to view and manage your account location.'}
               </span>

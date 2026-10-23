@@ -1233,6 +1233,10 @@ body.dark-mode .ripple__wave {
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+  /* Inset the health pill off the sew-panel edge — the
+     settings-section clips with a rounded corner and the pill
+     flush at (0,0) gets its top-left corner cut off. */
+  padding: 8px 14px 4px;
 }
 
 .stg-pill {
