@@ -14328,8 +14328,12 @@ body.dark-mode .related-spotlight-card:hover {
 }
 @media (max-width: 768px) {
   .pd-columns {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 20px;
+  }
+  .pd-columns > * {
+    min-width: 0;
+    max-width: 100%;
   }
 }
 
