@@ -27,6 +27,8 @@ const toText = (value) => {
   return (el.textContent || '').replace(/\s+/g, ' ').trim();
 };
 
+const SHORT_DESC_LIMIT = 220;
+
 const Stars = ({ value }) => {
   const rounded = Math.round(Number(value) || 0);
   return (
@@ -48,6 +50,7 @@ export default function StoreProductPage() {
   // { productId, id } of the saved favorite for the product on screen.
   const [favorite, setFavorite] = useState(null);
   const [favBusy, setFavBusy] = useState(false);
+  const [descOpen, setDescOpen] = useState(false);
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
 
@@ -129,6 +132,10 @@ export default function StoreProductPage() {
   const description = toText(p.description);
   const isSaved = !!user && favorite?.productId === p.id;
   const highlights = Array.isArray(p.highlights) ? p.highlights.filter(Boolean) : [];
+  const descTooLong = description.length > SHORT_DESC_LIMIT;
+  const shortDesc = descTooLong
+    ? `${description.slice(0, SHORT_DESC_LIMIT).replace(/\s+\S*$/, '')}…`
+    : description;
 
   const onAdd = () => {
     const items = addToCart(loadCart(), {
@@ -188,7 +195,21 @@ export default function StoreProductPage() {
           <span>{reviewCount > 0 ? `${reviewCount} ${reviewCount === 1 ? 'review' : 'reviews'}` : 'No reviews yet'}</span>
         </div>
 
-        {description && <p className="store-product__desc">{description}</p>}
+        {description && (
+          <div className="store-product__desc">
+            <p>{descOpen || !descTooLong ? description : shortDesc}</p>
+            {descTooLong && (
+              <button
+                type="button"
+                className="store-product__more"
+                aria-expanded={descOpen}
+                onClick={() => setDescOpen((o) => !o)}
+              >
+                {descOpen ? 'Show less' : 'Show more'}
+              </button>
+            )}
+          </div>
+        )}
 
         <div className="store-product__pricebox">
           <p className="store-product__price">{money(price, currency)}</p>
