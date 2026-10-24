@@ -107,7 +107,7 @@
 
 /* Product detail (Store-only). Estimates from the visual spec; refine by screenshot. */
 .store-product__info { min-width: 0; }
-.store-product__title { font-size: 2rem; font-weight: 700; margin: 0 0 8px; line-height: 1.2; color: #fff; }
+.store-product__title { font-size: 2rem; font-weight: 700; margin: 0 0 8px; line-height: 1.2; color: var(--store-navy); overflow-wrap: anywhere; }
 .store-product__rule { display: block; width: 72px; height: 3px; background: var(--store-navy); margin-bottom: 14px; }
 .store-product__rating { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--store-muted); margin-bottom: 14px; }
 .store-stars { color: #cfd4dd; letter-spacing: 1px; }
@@ -116,7 +116,8 @@
 .store-product__pricebox { display: flex; align-items: baseline; gap: 10px; margin-bottom: 18px; }
 .store-product__pricebox .store-product__price { font-size: 2rem; font-weight: 700; color: var(--store-navy); margin: 0; }
 .store-product__compare { color: var(--store-muted); margin: 0; }
-.store-product__buy { display: flex; align-items: stretch; gap: 10px; margin-bottom: 8px; }
+.store-product__buy { display: flex; flex-wrap: wrap; align-items: stretch; gap: 10px; margin-bottom: 8px; }
+.store-product__buy .store-buy { flex: 1 1 160px; justify-content: center; }
 .store-buy {
   display: inline-flex; align-items: center; gap: 8px; height: 48px; padding: 0 22px;
   border: 0; border-radius: 4px; background: #4a6f8f; color: #fff; font: inherit;

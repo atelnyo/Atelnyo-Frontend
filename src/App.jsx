@@ -1728,6 +1728,8 @@ function App() {
   // full-viewport. The Creator Public Profile (/creator/:username) is NOT
   // under /sheet/, so without this gate the main chrome would stay visible
   // underneath the profile — a broken double render.
+  // /store has its own header, footer and navigation, so the global chrome is hidden there.
+  const isStoreRoute = effectivePathname === '/store' || effectivePathname.startsWith('/store/');
   const isSheetRoute = effectivePathname.startsWith('/sheet/') || effectivePathname.startsWith('/creator/') || effectivePathname.startsWith('/portfolio/') || effectivePathname.startsWith('/marketplace/') || effectivePathname.match(/^\/c\//) || effectivePathname.match(/^\/(@|%40)/i) || effectivePathname.startsWith('/legal/') || effectivePathname === '/themes' || effectivePathname === '/faq' || effectivePathname === '/help' || effectivePathname === '/about' || effectivePathname === '/trust' || effectivePathname === '/contact' || effectivePathname === '/accessibility' || effectivePathname === '/status' || effectivePathname === '/developers' || effectivePathname === '/verify' || effectivePathname.startsWith('/affiliate') || effectivePathname.startsWith('/page/') || effectivePathname.startsWith('/company/') || effectivePathname === '/business' || effectivePathname.startsWith('/business/') || effectivePathname === SHEETS.LOGIN || effectivePathname === SHEETS.SIGNUP || isContentRoutePath(effectivePathname) || effectivePathname === '/explore' || effectivePathname.startsWith('/explore/');
 
   // ─── Sheet isolation ────────────────────────────────────────────────
@@ -2282,12 +2284,12 @@ function App() {
       <ScrollManager />
 
       {/* ─── Connection status banner (offline / slow / sync) ────── */}
-      <ConnectionBanner lang={lang} />
+      {!isStoreRoute && <ConnectionBanner lang={lang} />}
 
       {/* ─── Continuity: session-restored banner (relaunch) ──────── */}
-      <RestoreBanner lang={lang} />
+      {!isStoreRoute && <RestoreBanner lang={lang} />}
 
-      <Header
+      {!isStoreRoute && <Header
         lang={lang}
         translations={translations}
         toggleTheme={toggleTheme}
@@ -2299,7 +2301,7 @@ function App() {
         onBellClick={handleBellClick}
         unreadNotifCount={unreadNotifCount}
         bellSwing={bellSwing}
-      />
+      />}
 
       {/* ─── Notification dropdown (bell) ─────────────────────────── */}
       {/* NOTE: The bell no longer toggles a dropdown — it navigates to
@@ -2310,7 +2312,7 @@ function App() {
           notifRefreshToken drives ActivityTimeline re-fetches on the
           full page. */}
 
-      <div className="container" role="presentation">
+      {!isStoreRoute && <div className="container" role="presentation">
         <main id="a11y-main-content" tabIndex="-1" aria-label={getA11yString(lang, 'contentLandmark')}>
           {/* Skip the chrome-rendered Explore when the URL is under /sheet/* —
               the sheet-routed <Explore> already covers /sheet/explore, and
@@ -2357,7 +2359,7 @@ function App() {
         </main>
 
         <Footer lang={lang} translations={translations} />
-      </div>
+      </div>}
 
       {/* Cookie Consent Banner — GDPR/CCPA compliant consent management */}
       <Suspense fallback={null}>
@@ -2453,7 +2455,7 @@ function App() {
           <Settings isOpen={isSettingsOpen} ...> overlay is still rendered
           alongside this; /sheet/settings is a separate URL-driven deep-link
           to the same component. */}
-      <BottomNavBar
+      {!isStoreRoute && <BottomNavBar
         activeTab={navActiveTab}
         setActiveTab={setActiveTab}
         lang={lang}
@@ -2471,7 +2473,7 @@ function App() {
           }
           setActiveTab(tabId);
         }}
-      />
+      />}
 
       {/* ═══ Policy Consent Banner — shows when user needs to accept updated policies ═══ */}
       {user && (
