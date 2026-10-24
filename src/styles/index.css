@@ -9782,7 +9782,7 @@ body.dark-mode .explore-card-image-wrap {
 }
 
 .explore-card-course  { width: 240px; min-width: 200px; }
-.explore-card-product { width: 240px; min-width: 200px; }
+.explore-card-product { width: 240px; min-width: 200px; height: auto; max-height: none; }
 .explore-card-music   { width: 190px; min-width: 170px; }
 
 @media (max-width: 480px) {
