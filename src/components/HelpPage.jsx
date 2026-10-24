@@ -196,8 +196,8 @@ const PAGE = {
             steps: [
               'Open Explore and filter by Products, or follow a product link shared by a creator.',
               'Review the description, the files included, and buyer reviews.',
-              'Check out with your preferred payment method — you get an email receipt.',
-              'Downloads and services you purchased stay available from your library.',
+              'Check out with your preferred payment method — you get an email receipt with your download link inside.',
+              'Digital files stay available from “My Orders” (Kòmand mwen): each purchase includes 5 downloads per product, and its link stays valid for 48 hours until the purchase is refunded or suspended.',
             ],
           },
           {

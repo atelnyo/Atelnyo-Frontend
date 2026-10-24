@@ -42,6 +42,7 @@ import StudioPropertiesPanel, {
 } from './StudioPropertiesPanel';
 import { ImageUrlField, HelpTip, HELP_COPY } from '../modals/shared';
 import ProductVariantsPanel from './ProductVariantsPanel';
+import PrintifyImportPanel from './PrintifyImportPanel';
 import styles from './editor.module.css';
 
 export default function ProductEditor({ onClose, onSuccess, lang = 'ht', showToast, user, item, kind = 'digital' }) {
@@ -60,6 +61,7 @@ export default function ProductEditor({ onClose, onSuccess, lang = 'ht', showToa
     price: item?.price ?? '',
     category: item?.category || '',
     image_url: item?.image_url || '',
+    gallery: Array.isArray(item?.gallery) ? item.gallery : [],
     kind: productKind,
     is_active: item?.is_active ?? true,
     hashtags: hashtagsToInput(item?.tags),
@@ -313,9 +315,14 @@ export default function ProductEditor({ onClose, onSuccess, lang = 'ht', showToa
         </div>
       </header>
       <div className={`${styles.canvas} ${styles.mediaCanvas}`}>
-        <div className={styles.mediaPreview}>
+        <div className={styles.mediaPreview} style={{ width: '100%' }}>
           {form.image_url ? (
-            <img src={form.image_url} alt={isHt ? 'Foto pwodwi' : 'Product photo'} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+            <img
+              src={form.image_url}
+              alt={isHt ? 'Foto pwodwi' : 'Product photo'}
+              style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'cover' }}
+              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            />
           ) : (
             <div className={styles.mediaPreviewPlaceholder}>
               <i className="fas fa-box-open" aria-hidden="true" />
@@ -327,6 +334,21 @@ export default function ProductEditor({ onClose, onSuccess, lang = 'ht', showToa
             {kindBadge} · {isLive ? (isHt ? 'Pibliye' : 'Published') : (isHt ? 'Bouyon' : 'Draft')}
           </span>
         </div>
+        {form.gallery.length > 1 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }} aria-label={isHt ? 'Galri foto' : 'Photo gallery'}>
+            {form.gallery.map((src) => (
+              <button
+                key={src}
+                type="button"
+                onClick={() => handleChange('image_url', src)}
+                style={{ width: 80, height: 80, padding: 0, border: src === form.image_url ? '2px solid currentColor' : '1px solid transparent', borderRadius: 6, overflow: 'hidden', cursor: 'pointer', background: 'none' }}
+                aria-label={isHt ? 'Chwazi foto sa a kòm prensipal' : 'Set as main photo'}
+              >
+                <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              </button>
+            ))}
+          </div>
+        )}
 
         <input
           className={styles.canvasTitle}
@@ -430,25 +452,28 @@ export default function ProductEditor({ onClose, onSuccess, lang = 'ht', showToa
       {form.kind === 'digital' && (
         <PropertyGroup icon="fa-file-arrow-down" label="Delivery" labelHt="Livrezon" lang={lang}>
           <PropField
-            label="Download URL"
-            labelHt="URL Telechajman"
+            label="Download resource"
+            labelHt="Resous Telechajman"
             lang={lang}
             error={errors.download_url}
             hint={isHt
-              ? 'Fichye oswa lyen achtè a resevwa apre acha (PDF, ZIP, imaj, videyo...).'
-              : 'The file or link the buyer receives after purchase (PDF, ZIP, image, video…).'}
+              ? 'Fichye oswa lyen achtè a resevwa apre acha (PDF, ZIP, EPUB, imaj, videyo…).'
+              : 'The file or link the buyer receives after purchase (PDF, ZIP, EPUB, image, video…).'}
           >
-            <PropInput
-              type="url"
+            <MediaUploadButton
               value={form.download_url}
-              onChange={(e) => handleChange('download_url', e.target.value)}
+              onChange={(v) => handleChange('download_url', v)}
+              kind="file"
+              label={isHt ? 'Fichye oswa lyen' : 'File or link'}
               placeholder="https://example.com/file.zip"
+              isPremium={isPremium}
+              lang={lang}
             />
           </PropField>
           <p className={styles.propsHint}>
             {isHt
-              ? 'Sou paj piblik la, si resous lan la, achtè a jwenn li dirèkteman; sinon li kontakte w (Checkout la jere pa platfòm nan).'
-              : 'On the public page, if the resource is set the buyer gets it directly; otherwise they contact you (checkout is handled by the platform).'}
+              ? 'Achtè yo pa resevwa lyen an dirèkteman — yo resevwa yon lyen SIYE ki ekspire nan 48 èdtan, ak yon limite 5 téléchajman pa acha. Lyen an parèt nan resi email la, nan paj "Kòmand mwen" epi sou paj pwodwi a apre acha. PA pibliye yon lyen ki gen dwa kité moun pa acha a telechaje.'
+              : 'Buyers never receive the raw link — they get a SIGNED link that expires in 48 hours, with a 5-download limit per purchase. It appears in the receipt email, on the "My orders" page, and on the product page after purchase. Don\'t list a link you would not hand a single paying buyer.'}
           </p>
         </PropertyGroup>
       )}
@@ -475,6 +500,12 @@ export default function ProductEditor({ onClose, onSuccess, lang = 'ht', showToa
               ? 'Paj piblik la montre stock la — "0" parèt kòm pa gen stock. Acha a mande adrès livrezon nan checkout la.'
               : 'The public page shows stock — "0" renders as out of stock. Checkout requires a shipping address.'}
           </p>
+        </PropertyGroup>
+      )}
+
+      {form.kind === 'physical' && (
+        <PropertyGroup icon="fa-print" label="Printify" labelHt="Printify" lang={lang}>
+          <PrintifyImportPanel isHt={isHt} showToast={showToast} />
         </PropertyGroup>
       )}
 

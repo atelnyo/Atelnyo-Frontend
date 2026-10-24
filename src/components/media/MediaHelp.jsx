@@ -132,7 +132,7 @@ export default function MediaHelp({ context = 'library', lang = 'ht', className 
                 <li>{isHt ? 'Kontakte sipò si pwoblèm nan pèsiste' : 'Contact support if the issue persists'}</li>
               </ul>
               <a
-                href="/docs/media"
+                href="/help/troubleshooting"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-secondary"

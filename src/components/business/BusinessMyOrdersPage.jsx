@@ -17,6 +17,13 @@
  *   POST /api/business/orders/<id>/cancel/     — cancel (new + unpaid)
  *   POST /api/business/orders/<id>/pay/        — pay from Wallet
  *
+ * DIGITAL DELIVERY — connects the Marketplace to this surface: the
+ * buyer's marketplace orders (GET /api/marketplace/orders/) expose
+ * ``items[].download_url`` server-side ONLY for provider-confirmed
+ * (paid/fulfilled/completed) digital lines — see OrderItemSerializer.
+ * The "My digital products" section renders those as direct download
+ * buttons; the link is also emailed in the payment receipt.
+ *
  * Entry points: the "Kòmand mwen" quick-nav card in Mwen (tab Mwen)
  * and the "Wè kòmand mwen yo" link in the public page's order modal.
  */
@@ -25,7 +32,7 @@ import { useNavigate } from 'react-router-dom';
 import { SHEETS } from '../../routes/sheets';
 import { historyBack } from '../../utils/history';
 import { translations } from '../../data/translations';
-import { businessOrderService } from '../../services/api';
+import { businessOrderService, marketplaceService } from '../../services/api';
 import '../../styles/business.css';
 
 const STATUS_FLOW_LABEL = {
@@ -59,6 +66,10 @@ export default function BusinessMyOrdersPage({ lang = 'ht', showToast }) {
   const isHt = lang === 'ht';
 
   const [orders, setOrders] = useState(null);
+  // Marketplace digital purchases — items[].download_url only arrives
+  // populated for PAID orders (server-side gate). Empty string = not
+  // yours / not paid yet / not digital.
+  const [mpOrders, setMpOrders] = useState(null);
   const [busyId, setBusyId] = useState(null);
   // Phase 6b — review modal state.
   const [reviewOrder, setReviewOrder] = useState(null);
@@ -77,12 +88,24 @@ export default function BusinessMyOrdersPage({ lang = 'ht', showToast }) {
     }
   };
 
+  const loadMpOrders = async () => {
+    setMpOrders(null);
+    try {
+      const res = await marketplaceService.myOrders();
+      const data = Array.isArray(res?.data) ? res.data : (res?.data?.results || []);
+      setMpOrders(Array.isArray(data) ? data : []);
+    } catch {
+      setMpOrders([]);
+    }
+  };
+
   useEffect(() => {
     // load() resets the loading shape synchronously on entry — the
     // same intentional pattern as the rest of the codebase (see
     // CheckoutModal.jsx / Mwen.jsx).
     // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
+    loadMpOrders();
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
@@ -140,6 +163,21 @@ export default function BusinessMyOrdersPage({ lang = 'ht', showToast }) {
     } finally {
       setBusyId(null);
     }
+  };
+
+  // ─── Digital marketplace downloads (connected to Mwen card) ──
+  // Flatten paid marketplace orders → digital items with a real
+  // server-gated download URL (OrderItemSerializer). Empty string on
+  // any line means: not paid yet / not a digital product.
+  const digitalItems = (mpOrders || []).flatMap((o) => (
+    (Array.isArray(o?.items) ? o.items : [])
+      .filter((it) => it?.download_url)
+      .map((it) => ({ ...it, order_id: o.id, order_status: o.status }))
+  ));
+
+  const openDownload = (item) => {
+    if (!item?.download_url) return;
+    window.open(item.download_url, '_blank', 'noopener,noreferrer');
   };
 
   const openShop = (order) => {
@@ -223,6 +261,61 @@ export default function BusinessMyOrdersPage({ lang = 'ht', showToast }) {
           {t?.business_public_back || (isHt ? 'Retounen' : 'Back')}
         </button>
       </div>
+
+      {/* ─── My digital products — marketplace downloads ────────── */}
+      <section data-testid="mwen-digital-downloads">
+        {mpOrders === null ? (
+          <div className="biz-hub-loading">
+            <i className="fas fa-spinner fa-pulse fa-lg" aria-hidden="true" />
+          </div>
+        ) : digitalItems.length === 0 ? (
+          <div className="biz-hub-empty" style={{ padding: '14px 0' }}>
+            <i className="fas fa-file-arrow-down" aria-hidden="true" />
+            <h3>{isHt ? 'Ou poko gen pwodwi dijital' : 'No digital products yet'}</h3>
+            <p>{isHt
+              ? 'Achte yon pwodwi dijital sou Marketplace a — li parèt isit la epi li ale nan email ou tou, dirèkteman apre peman an.'
+              : 'Buy a digital product on the Marketplace — it appears here (and in your receipt email) right after payment.'}</p>
+          </div>
+        ) : (
+          <div className="biz-orders-list" style={{ maxWidth: 720, margin: '0 auto', marginBottom: 24 }}>
+            <h3 style={{ margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <i className="fas fa-file-arrow-down" aria-hidden="true" />
+              {isHt ? 'Pwodwi dijital mwen' : 'My digital products'}
+            </h3>
+            {digitalItems.map((item) => (
+              <div className="biz-order-card" key={`${item.order_id}-${item.id}`} data-testid="mwen-digital-item">
+                <div className="biz-order-main">
+                  <span className="biz-order-name">{item.product_title}</span>
+                  <p className="biz-order-meta">
+                    <i className="fas fa-receipt" aria-hidden="true" />{' '}
+                    Lòd #{item.order_id}{' · '}<strong>{money(item.unit_price, lang)}</strong>
+                    {' · '}
+                    <span className="biz-status-pill" style={{ background: '#34d3991f', color: '#34d399', border: '1px solid #34d39955' }}>
+                      {isHt ? 'Peye' : 'Paid'}
+                    </span>
+                  </p>
+                </div>
+                <div className="biz-order-actions">
+                  <button
+                    type="button"
+                    className="biz-btn biz-btn-primary biz-btn-sm"
+                    onClick={() => openDownload(item)}
+                    data-testid="mwen-digital-download"
+                  >
+                    <i className="fas fa-download" aria-hidden="true" />
+                    {isHt ? 'Telechaje' : 'Download'}
+                  </button>
+                </div>
+              </div>
+            ))}
+            <p style={{ opacity: 0.7, fontSize: '0.8rem', margin: '6px 4px 0' }}>
+              <i className="fas fa-shield-halved" aria-hidden="true" />{' '}
+              {isHt ? 'Lyen yo siye epi yo ekspire nan 48 èdtan —mentaire pou ou pale wè resi email la tou. Gen 5 téléchajman pa pwodwi achte.'
+                : 'Links are signed and expire after 48 hours — the receipt email carries them too. 5 downloads per purchased product.'}
+            </p>
+          </div>
+        )}
+      </section>
 
       {orders === null ? (
         <div className="biz-hub-loading">

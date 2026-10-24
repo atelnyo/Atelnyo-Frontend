@@ -25,8 +25,8 @@ const KINDS = [
     icon: 'fa-file-arrow-down',
     title: { en: 'Digital product', ht: 'Pwodwi dijital' },
     desc: {
-      en: 'A downloadable file, resource, or access — delivered instantly after purchase.',
-      ht: 'Yon fichye, resous, oswa aksè ki telechaje — livre imedyatman apre acha.',
+      en: 'A downloadable file, resource, or access — delivered by a secure expiring link (email + My Orders), 5 downloads per purchase.',
+      ht: 'Yon fichye, resous, oswa aksè ki telechaje — livri avèk yon lyen sekirize ki ekspire (email + Kòmand mwen), 5 téléchajman pa acha.',
     },
   },
   {

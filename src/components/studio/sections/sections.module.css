@@ -700,22 +700,35 @@
    SETTINGS GRID
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* The grid never overflows its container: minmax(min(230px, 100%), 1fr)
+   means a card can always shrink to the full column width, even at 320px
+   viewports (no horizontal scroll / layout jump = "stable"). */
 .settingsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(230px, 100%), 1fr));
   gap: var(--sp-xl);
   margin-top: var(--sp-md);
 }
 
+/* One card = ONE control (a <button>). The whole surface is clickable,
+   so there are no nested interactive elements to fight for focus. */
 .settingsCard {
   background: var(--surface-card);
   border-radius: var(--radius-2xl);
-  padding: var(--sp-5xl);
+  padding: var(--sp-4xl);
   border: var(--border-w-sm) solid var(--border-color);
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: var(--sp-md);
-  transition: all var(--transition-fast);
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  /* No transform on hover — translation shifts cause the "unstable" feel;
+     a border + shadow highlight is enough and never reflows the grid. */
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
 }
 
 .settingsCard:hover {
@@ -723,24 +736,172 @@
   box-shadow: var(--shadow-sm);
 }
 
-.settingsCard i {
-  font-size: var(--text-3xl);
+.settingsCard:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.settingsCard:active {
+  background: var(--surface-card-alt);
+}
+
+.settingsCardIcon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-lg);
+  background: var(--color-primary-light);
+  flex-shrink: 0;
+}
+
+.settingsCardIcon i {
+  font-size: 1.15rem;
   color: var(--color-primary);
 }
 
-.settingsCard h4 {
-  margin: 0;
+.settingsCardBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-xs);
+  flex: 1;
+  min-width: 0;
+}
+
+.settingsCardTitle {
+  display: block;
   font-size: var(--text-md);
   font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
 }
 
-.settingsCard p {
-  margin: 0;
+.settingsCardDesc {
+  display: block;
   font-size: var(--text-sm);
   color: var(--text-secondary);
   line-height: var(--line-relaxed);
-  flex: 1;
+  overflow-wrap: break-word;
+}
+
+.settingsCardEdit {
+  align-self: flex-start;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  padding: 6px 14px;
+  border-radius: 999px;
+}
+
+.settingsCardChevron {
+  display: none;
+  align-self: center;
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+/* KYC status badge (Verification card) — dot + label, token-driven
+   and dark-mode aware (tokens define dark overrides for --status-*). */
+.settingsStatusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-semibold);
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.settingsStatusBadge::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.settingsStatusApproved {
+  background: var(--status-active-bg);
+  color: var(--status-active-text);
+}
+
+.settingsStatusPending {
+  background: var(--status-pending-bg);
+  color: var(--status-pending-text);
+}
+
+.settingsStatusRejected {
+  background: var(--status-error-bg);
+  color: var(--status-error-text);
+}
+
+.settingsStatusNeutral {
+  background: var(--status-neutral-bg);
+  color: var(--status-neutral-text);
+}
+
+/* ── Phones (≤640px): the grid becomes one column and each card flips
+   to a compact horizontal row (icon | text | chevron) — tap targets
+   stay ≥44px and long descriptions can't stretch the layout. */
+@media (max-width: 640px) {
+  .settingsGrid {
+    grid-template-columns: 1fr;
+    gap: var(--sp-md);
+  }
+
+  .settingsCard {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--sp-md);
+    padding: var(--sp-lg);
+    min-height: 44px;
+  }
+
+  .settingsCardIcon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .settingsCardBody {
+    gap: 2px;
+  }
+
+  .settingsCardEdit {
+    display: none;
+  }
+
+  .settingsCardChevron {
+    display: block;
+  }
+}
+
+/* ── Very small phones (≤380px): tighten further so nothing clips. */
+@media (max-width: 380px) {
+  .settingsCard {
+    gap: var(--sp-sm);
+    padding: var(--sp-md);
+  }
+
+  .settingsCardIcon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .settingsCardIcon i {
+    font-size: 0.95rem;
+  }
+
+  .settingsStatusBadge {
+    padding: 3px 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settingsCard {
+    transition: none;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

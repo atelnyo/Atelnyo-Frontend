@@ -100,6 +100,8 @@ const KIND_ACCEPT = {
   video: 'video/mp4,video/webm,video/quicktime',
   audio: 'audio/mpeg,audio/wav,audio/ogg,audio/mp4',
   document: 'application/pdf,.doc,.docx,.xls,.xlsx',
+  // Digital-delivery kind — anything a buyer would download.
+  file: '.zip,.rar,.7z,.tar,.gz,application/pdf,.pdf,.epub,.ppt,.pptx,.doc,.docx,.xls,.xlsx,image/jpeg,image/png,image/webp,image/gif,audio/*,video/*',
 };
 
 const KIND_ICONS = {
@@ -107,6 +109,7 @@ const KIND_ICONS = {
   video: 'fa-video',
   audio: 'fa-music',
   document: 'fa-file-alt',
+  file: 'fa-file-arrow-down',
 };
 
 const KIND_LABELS = {
@@ -114,6 +117,7 @@ const KIND_LABELS = {
   video: { ht: 'Videyo', en: 'Video' },
   audio: { ht: 'Odyo', en: 'Audio' },
   document: { ht: 'Dokiman', en: 'Document' },
+  file: { ht: 'Fichye téléchajman', en: 'Download file' },
 };
 
 export default function MediaUploadButton({

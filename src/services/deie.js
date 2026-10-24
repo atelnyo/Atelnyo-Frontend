@@ -127,7 +127,10 @@ export function recalculateEvolution() {
 // ═══════════════════════════════════════════════════════════════
 
 export function getHomeFeed(params = {}) {
-  return api.get('/deie/feed/home/', { params });
+  // Use HomeFeedViewSet with engine=deie — the standalone
+  // /deie/feed/home/ route 500s on prod's data shape; the unified
+  // route has internal fallback + caching against the same engine.
+  return api.get('/feed/home/', { params: { engine: 'deie', ...params } });
 }
 
 export function getFeedConfig() {

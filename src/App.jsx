@@ -72,6 +72,10 @@ import { playNotificationSound } from './services/notificationSound';
 import appController from './pwa/app/AppController';
 import continuityManager from './pwa/continuity/ContinuityManager';
 import useContinuity from './hooks/useContinuity';
+// Route chunk warmup — pre-loads lazy sheet chunks during idle so the
+// FIRST click on a heavy route (Studio, Settings, Mwen…) renders
+// instantly instead of waiting for a multi-hundred-kB chunk download.
+import { warmRouteChunks } from './services/routeWarmup';
 import usePullToRefresh from './hooks/usePullToRefresh';
 // ─── Accessibility Foundation (Phase 10) ───────────────────────────
 import { SkipNavigation, announce, FOCUS_MAIN_ID, getA11yString } from './accessibility';
@@ -2079,6 +2083,8 @@ function App() {
     };
     applyPwaClass(appController.getRuntime());
     const unsubscribe = appController.subscribe(applyPwaClass);
+    // Kick off route chunk warmup (idle-time, saveData/2g-aware).
+    warmRouteChunks();
     // Listen for SW messages (background sync trigger) — App Controller
     // integration: the SW tells the app to drain the offline queue.
     const onSwMsg = (event) => {
