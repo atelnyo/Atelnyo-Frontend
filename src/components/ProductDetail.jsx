@@ -445,12 +445,10 @@ export default function ProductDetail({ lang = 'ht', product: propProduct, onBac
                     <i className="fas fa-images" aria-hidden="true" />
                     {t2(lang, { ht: 'Galri', en: 'Gallery' })}
                   </h2>
-                  <img src={product.gallery[0]} alt={product.title}
-                    style={{ display: 'block', width: '100%', height: 'auto', borderRadius: 12, marginBottom: 8 }} />
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                    {product.gallery.slice(1).map((src) => (
-                      <img key={src} src={src} alt={product.title} loading="lazy"
-                        style={{ height: 'clamp(50px, 10vw, 100px)', width: 'auto', aspectRatio: '1', objectFit: 'cover', borderRadius: 8 }} />
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12 }}>
+                    {product.gallery.map((src, i) => (
+                      <img key={`${i}-${src}`} src={src} alt={`${product.title} ${i + 1}`} loading="lazy"
+                        style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 10, display: 'block' }} />
                     ))}
                   </div>
                 </section>
