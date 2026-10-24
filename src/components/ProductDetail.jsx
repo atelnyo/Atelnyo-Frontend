@@ -53,6 +53,28 @@ function formatCurrency(amount, currency = 'USD', lang) {
   } catch (_) { return `$${num.toFixed(2)}`; }
 }
 
+/* Long descriptions start collapsed; the buyer can expand them. */
+const DESCRIPTION_COLLAPSE_CHARS = 420;
+
+function ExpandableDescription({ text, lang }) {
+  const [expanded, setExpanded] = useState(false);
+  const isLong = text.length > DESCRIPTION_COLLAPSE_CHARS;
+  const shown = !isLong || expanded ? text : `${text.slice(0, DESCRIPTION_COLLAPSE_CHARS).trimEnd()}…`;
+  return (
+    <>
+      <p className="pd-text" style={{ whiteSpace: 'pre-wrap' }}>{shown}</p>
+      {isLong && (
+        <button type="button" onClick={() => setExpanded((v) => !v)} aria-expanded={expanded}
+          style={{ marginTop: 8, background: 'none', border: 'none', padding: 0, color: 'var(--pd-primary)', fontWeight: 600, cursor: 'pointer' }}>
+          {expanded
+            ? t2(lang, { ht: 'Wè mwens', en: 'Show less' })
+            : t2(lang, { ht: 'Wè plis', en: 'Show more' })}
+        </button>
+      )}
+    </>
+  );
+}
+
 function categoryAccent(cat) {
   switch ((cat || '').toLowerCase()) {
     case 'book':     return { bg: 'rgba(167,139,250,0.15)', color: '#a78bfa', icon: 'fa-book' };
@@ -409,7 +431,10 @@ export default function ProductDetail({ lang = 'ht', product: propProduct, onBac
                     <i className="fas fa-align-left" aria-hidden="true" />
                     {t2(lang, { ht: 'Deskripsyon', en: 'Description' })}
                   </h2>
-                  <p className="pd-text" style={{ whiteSpace: 'pre-wrap' }}>{product.description}</p>
+                  <ExpandableDescription
+                    text={product.description}
+                    lang={lang}
+                  />
                 </section>
               )}
 
