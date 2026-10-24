@@ -2,19 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { storeService } from './storeService';
 import SEOHead from '../components/shared/SEOHead';
+import ProductCard from './ProductCard';
 
-const money = (value, currency = 'USD') => {
-  const n = Number(value);
-  if (!Number.isFinite(n)) {
-    return '';
-  }
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(n);
-};
+const SORT_OPTIONS = [
+  { value: '', label: 'Default' },
+  { value: '-created_at', label: 'Newest' },
+  { value: 'price', label: 'Price: low to high' },
+  { value: '-price', label: 'Price: high to low' },
+];
 
 export default function StoreListPage() {
   const { categorySlug = '' } = useParams();
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const q = (params.get('q') || '').trim();
+  const ordering = SORT_OPTIONS.some((o) => o.value === params.get('ordering')) ? params.get('ordering') : '';
+  const parsedPage = Number.parseInt(params.get('page') || '1', 10);
+  const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
 
   const [categories, setCategories] = useState([]);
   useEffect(() => {
@@ -67,8 +70,8 @@ export default function StoreListPage() {
   const catId = catStatus === 'found' ? category.id : null;
 
   // Products are keyed by their inputs so a stale result is never shown.
-  const requestKey = `${q}|${catStatus}|${catId ?? ''}`;
-  const [products, setProducts] = useState({ key: '', status: 'loading', items: [] });
+  const requestKey = `${q}|${catStatus}|${catId ?? ''}|${ordering}|${page}`;
+  const [products, setProducts] = useState({ key: '', status: 'loading', items: [], count: null, hasNext: false });
 
   useEffect(() => {
     if (catStatus === 'loading' || catStatus === 'missing') {
@@ -82,6 +85,12 @@ export default function StoreListPage() {
     if (catStatus === 'found') {
       query.category_id = catId;
     }
+    if (ordering) {
+      query.ordering = ordering;
+    }
+    if (page > 1) {
+      query.page = page;
+    }
     storeService
       .listProducts(Object.keys(query).length ? query : undefined)
       .then(({ data }) => {
@@ -89,17 +98,35 @@ export default function StoreListPage() {
           return;
         }
         const items = Array.isArray(data) ? data : data?.results || [];
-        setProducts({ key: requestKey, status: items.length ? 'ready' : 'empty', items });
+        setProducts({
+          key: requestKey,
+          status: items.length ? 'ready' : 'empty',
+          items,
+          count: typeof data?.count === 'number' ? data.count : null,
+          hasNext: Boolean(data?.next),
+        });
       })
       .catch(() => {
         if (!cancelled) {
-          setProducts({ key: requestKey, status: 'error', items: [] });
+          setProducts({ key: requestKey, status: 'error', items: [], count: null, hasNext: false });
         }
       });
     return () => {
       cancelled = true;
     };
-  }, [q, catStatus, catId, requestKey]);
+  }, [q, catStatus, catId, ordering, page, requestKey]);
+
+  const updateParams = (changes) => {
+    const next = new URLSearchParams(params);
+    Object.entries(changes).forEach(([key, value]) => {
+      if (value === '' || value == null) {
+        next.delete(key);
+      } else {
+        next.set(key, String(value));
+      }
+    });
+    setParams(next);
+  };
 
   if (catStatus === 'missing') {
     return (
@@ -115,7 +142,7 @@ export default function StoreListPage() {
     ? categorySlug.replace(/-/g, ' ')
     : q ? `Results for "${q}"` : 'Atelnyo Store';
 
-  const current = products.key === requestKey ? products : { status: 'loading', items: [] };
+  const current = products.key === requestKey ? products : { status: 'loading', items: [], count: null, hasNext: false };
 
   return (
     <section className="store-listing" aria-labelledby="store-listing-title">
@@ -147,6 +174,20 @@ export default function StoreListPage() {
         </nav>
       )}
 
+      <div className="store-toolbar">
+        {current.count != null && (
+          <p className="store-toolbar__count" aria-live="polite">{current.count} products</p>
+        )}
+        <label className="store-toolbar__sort">
+          <span>Sort by</span>
+          <select value={ordering} onChange={(e) => updateParams({ ordering: e.target.value, page: '' })}>
+            {SORT_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+        </label>
+      </div>
+
       {current.status === 'loading' && <p className="store-state" role="status">Loading products…</p>}
       {current.status === 'error' && (
         <p className="store-state store-state--error" role="alert">
@@ -158,19 +199,21 @@ export default function StoreListPage() {
       {current.status === 'ready' && (
         <ul className="store-grid">
           {current.items.map((p) => (
-            <li key={p.id} className="store-card">
-              <Link to={`/store/products/${encodeURIComponent(p.slug || p.id)}`} className="store-card__link">
-                {p.image_url ? (
-                  <img className="store-card__img" src={p.image_url} alt={p.title || ''} loading="lazy" />
-                ) : (
-                  <div className="store-card__img store-card__img--empty" aria-hidden="true" />
-                )}
-                <h2 className="store-card__title">{p.title}</h2>
-              </Link>
-              <p className="store-card__price">{money(p.price, p.currency || 'USD')}</p>
-            </li>
+            <ProductCard key={p.id} product={p} />
           ))}
         </ul>
+      )}
+
+      {current.status === 'ready' && (page > 1 || current.hasNext) && (
+        <nav className="store-pager" aria-label="Pagination">
+          <button type="button" className="store-btn store-btn--ghost" disabled={page <= 1} onClick={() => updateParams({ page: page - 1 === 1 ? '' : page - 1 })}>
+            Previous
+          </button>
+          <span>Page {page}</span>
+          <button type="button" className="store-btn store-btn--ghost" disabled={!current.hasNext} onClick={() => updateParams({ page: page + 1 })}>
+            Next
+          </button>
+        </nav>
       )}
     </section>
   );

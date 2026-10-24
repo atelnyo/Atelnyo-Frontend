@@ -43,6 +43,11 @@
 .store-categories { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 20px; }
 .store-categories a { padding: 6px 14px; border: 1px solid currentColor; border-radius: 999px; font-size: 0.85rem; text-decoration: none; color: inherit; }
 .store-categories a.is-active { background: var(--store-navy); border-color: var(--store-navy); color: #fff; }
+.store-toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin: 0 0 16px; }
+.store-toolbar__count { margin: 0; font-size: 0.9rem; }
+.store-toolbar__sort { display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; }
+.store-toolbar__sort select { padding: 6px 10px; border: 1px solid #cfd6e0; border-radius: 4px; background: #fff; font: inherit; }
+.store-pager { display: flex; justify-content: center; align-items: center; gap: 16px; margin: 24px 0; }
 .store-state { color: var(--store-muted); }
 .store-state--error { color: var(--store-danger); }
 
