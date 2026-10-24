@@ -56,8 +56,28 @@ function formatCurrency(amount, currency = 'USD', lang) {
 /* Long descriptions start collapsed; the buyer can expand them. */
 const DESCRIPTION_COLLAPSE_CHARS = 420;
 
-function ExpandableDescription({ text, lang }) {
+/* Printify descriptions arrive as HTML (<p>, <br/>, <ul>…). Turn them into
+   plain text with real line breaks. Parsed with DOMParser (no scripts run)
+   and rendered by React as text, so no raw HTML is injected. */
+export function descriptionToText(input) {
+  if (!input || typeof input !== 'string') return '';
+  if (!/[<&]/.test(input)) return input;
+  const withBreaks = input
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/(p|div|li|h[1-6])>/gi, '\n')
+    .replace(/<li[^>]*>/gi, '- ');
+  const doc = new DOMParser().parseFromString(withBreaks, 'text/html');
+  return (doc.body.textContent || '')
+    .split('\n')
+    .map((line) => line.trim())
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+function ExpandableDescription({ text: rawText, lang }) {
   const [expanded, setExpanded] = useState(false);
+  const text = descriptionToText(rawText);
   const isLong = text.length > DESCRIPTION_COLLAPSE_CHARS;
   const shown = !isLong || expanded ? text : `${text.slice(0, DESCRIPTION_COLLAPSE_CHARS).trimEnd()}…`;
   return (
