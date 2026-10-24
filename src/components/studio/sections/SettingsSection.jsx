@@ -16,6 +16,7 @@
 import React, { useEffect, useState } from 'react';
 import { SectionHeader } from '../shared';
 import { walletService } from '../../../services/api';
+import PrintifyConnectionCard from './PrintifyConnectionCard';
 import styles from './sections.module.css';
 
 // KYC status → badge label + variant class (lang-aware).
@@ -61,6 +62,7 @@ function SettingCard({ icon, title, desc, onOpen, statusBadge, editLabel }) {
 export default function SettingsSection({
   lang,
   t,
+  showToast,
   setShowProfileModal,
   setShowPasswordModal,
   setShowBrandingModal,
@@ -134,6 +136,7 @@ export default function SettingsSection({
           editLabel={editLabel}
         />
       </div>
+      <PrintifyConnectionCard isHt={isHt} showToast={showToast} />
     </div>
   );
 }

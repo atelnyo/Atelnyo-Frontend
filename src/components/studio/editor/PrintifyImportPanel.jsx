@@ -10,63 +10,47 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { marketplaceService } from '../../../services/api';
 import styles from './editor.module.css';
 
+const tr = (isHt, en, ht) => (isHt ? ht : en);
+
 export default function PrintifyImportPanel({ isHt, showToast }) {
   const [conn, setConn] = useState(null);
-  const [token, setToken] = useState('');
+  const [connError, setConnError] = useState('');
   const [busy, setBusy] = useState(false);
   const [items, setItems] = useState(null);
   const [selected, setSelected] = useState([]);
   const [error, setError] = useState('');
 
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => tr(isHt, en, ht);
 
-  const loadConnection = useCallback(async () => {
-    try {
-      const res = await marketplaceService.printifyConnection();
-      setConn(res.data);
-    } catch (e) {
-      setConn({ connected: false });
+  const fetchConnection = useCallback(() => marketplaceService.printifyConnection()
+    .then((res) => ({ ok: true, data: res.data }))
+    .catch((err) => ({
+      ok: false,
+      message: err?.response?.data?.detail
+        || tr(isHt, 'Could not check your Printify connection.', 'Pa t kapab verifye koneksyon Printify ou an.'),
+    })), [isHt]);
+
+  const applyResult = (result) => {
+    if (result.ok) {
+      setConnError('');
+      setConn(result.data);
+    } else {
+      setConnError(result.message);
     }
-  }, []);
+  };
 
-  useEffect(() => { loadConnection(); }, [loadConnection]);
+  useEffect(() => {
+    let cancelled = false;
+    fetchConnection().then((result) => { if (!cancelled) applyResult(result); });
+    return () => { cancelled = true; };
+  }, [fetchConnection]);
+
+  const retry = () => { fetchConnection().then(applyResult); };
 
   const fail = (err, fallback) => {
     const msg = err?.response?.data?.detail || fallback;
     setError(msg);
     showToast?.(msg, 'circle-exclamation');
-  };
-
-  const handleConnect = async () => {
-    if (!token.trim()) {
-      setError(t('Paste your Printify API token.', 'Kole token API Printify ou a.'));
-      return;
-    }
-    setBusy(true);
-    setError('');
-    try {
-      const res = await marketplaceService.printifyConnect(token.trim());
-      setConn(res.data);
-      setToken('');
-    } catch (err) {
-      fail(err, t('Could not connect to Printify.', 'Pa t kapab konekte ak Printify.'));
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const handleDisconnect = async () => {
-    setBusy(true);
-    try {
-      await marketplaceService.printifyDisconnect();
-      setConn({ connected: false });
-      setItems(null);
-      setSelected([]);
-    } catch (err) {
-      fail(err, t('Could not disconnect.', 'Pa t kapab dekonekte.'));
-    } finally {
-      setBusy(false);
-    }
   };
 
   const handleLoadProducts = async () => {
@@ -106,30 +90,27 @@ export default function PrintifyImportPanel({ isHt, showToast }) {
     }
   };
 
+  if (connError) {
+    return (
+      <div>
+        <p role="alert">{connError}</p>
+        <button type="button" onClick={retry}>
+          {t('Try again', 'Eseye ankò')}
+        </button>
+      </div>
+    );
+  }
+
   if (conn === null) return null;
 
   if (!conn.connected) {
     return (
-      <div>
-        <p className={styles.propsHint}>
-          {t(
-            'Paste your Printify personal API token. It is stored only for your account and never shown again.',
-            'Kole token API pèsonèl Printify ou a. Yo sere li sèlman pou kont ou, epi yo pa janm montre l ankò.',
-          )}
-        </p>
-        <input
-          type="password"
-          value={token}
-          onChange={(e) => setToken(e.target.value)}
-          placeholder={t('Printify API token', 'Token API Printify')}
-          autoComplete="off"
-          aria-label={t('Printify API token', 'Token API Printify')}
-        />
-        <button type="button" className="btn-primary" onClick={handleConnect} disabled={busy}>
-          {t('Connect Printify', 'Konekte Printify')}
-        </button>
-        {error && <p role="alert">{error}</p>}
-      </div>
+      <p className={styles.propsHint}>
+        {t(
+          'No Printify shop connected. Connect it once in Creator Settings → Printify.',
+          'Pa gen magazen Printify konekte. Konekte l yon sèl fwa nan Paramèt Kreyatè → Printify.',
+        )}
+      </p>
     );
   }
 
@@ -140,9 +121,6 @@ export default function PrintifyImportPanel({ isHt, showToast }) {
       </p>
       <button type="button" onClick={handleLoadProducts} disabled={busy}>
         {t('Load Printify products', 'Chaje pwodwi Printify yo')}
-      </button>{' '}
-      <button type="button" onClick={handleDisconnect} disabled={busy}>
-        {t('Disconnect', 'Dekonekte')}
       </button>
 
       {items && items.length === 0 && (
