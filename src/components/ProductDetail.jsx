@@ -160,6 +160,7 @@ export default function ProductDetail({ lang = 'ht', product: propProduct, onBac
   // Variants (real backend model): the selected variant's price/stock
   // apply at checkout when one is chosen.
   const [selectedVariant, setSelectedVariant] = useState(null);
+  const [quantity, setQuantity] = useState(1);
   const [product, setProduct] = useState(propProduct || null);
   const variants = Array.isArray(propProduct?.variants)
     ? propProduct.variants
@@ -415,6 +416,9 @@ export default function ProductDetail({ lang = 'ht', product: propProduct, onBac
           <div className="pd-body">
             <div className="pd-body-inner">
 
+              <div className="pd-columns">
+              <ProductGallery product={product} lang={lang} />
+              <div>
               {/* ─── Price Card ─────────────────────────────────────── */}
               <PriceCard
                 product={product}
@@ -423,7 +427,12 @@ export default function ProductDetail({ lang = 'ht', product: propProduct, onBac
                 onOpenCheckout={onOpenCheckout}
                 selectedVariant={selectedVariant}
                 onSelectVariant={setSelectedVariant}
+                quantity={quantity}
+                onQuantityChange={setQuantity}
               />
+
+              {/* ─── Highlights / Technical details (tabs) ───────── */}
+              <ProductTabs product={product} lang={lang} />
 
               {/* ─── Seller Card ────────────────────────────────────── */}
               <SellerCard product={product} lang={lang} />
@@ -450,6 +459,9 @@ export default function ProductDetail({ lang = 'ht', product: propProduct, onBac
                   />
                 </section>
               )}
+
+              </div>
+              </div>
 
               {/* ─── Gallery (Printify imports) ─────────────────────── */}
               {Array.isArray(product.gallery) && product.gallery.length > 1 && (
@@ -637,7 +649,7 @@ function HeroContent({ product, t, lang }) {
 /* ══════════════════════════════════════════════════════════════════
    PRICE CARD — quick price + buy CTA
    ══════════════════════════════════════════════════════════════════ */
-function PriceCard({ product, t, lang, onOpenCheckout, selectedVariant, onSelectVariant }) {
+function PriceCard({ product, t, lang, onOpenCheckout, selectedVariant, onSelectVariant, quantity = 1, onQuantityChange }) {
   const variants = Array.isArray(product?.variants) ? product.variants : [];
   const outOfStock = selectedVariant
     ? selectedVariant.stock === 0
@@ -646,7 +658,7 @@ function PriceCard({ product, t, lang, onOpenCheckout, selectedVariant, onSelect
     const price = selectedVariant && selectedVariant.price != null
       ? Number(selectedVariant.price)
       : Number(product?.price) || 0;
-    const meta = { product_id: product.id, title: product.title };
+    const meta = { product_id: product.id, title: product.title, quantity };
     if (selectedVariant) {
       meta.variant_id = selectedVariant.id;
       meta.variant_name = selectedVariant.name;
@@ -699,6 +711,11 @@ function PriceCard({ product, t, lang, onOpenCheckout, selectedVariant, onSelect
               product.currency,
               lang,
             )}
+            {product.compare_at_price != null && (
+              <s className="pd-price-compare">
+                {formatCurrency(product.compare_at_price, product.currency, lang)}
+              </s>
+            )}
           </span>
           {(selectedVariant ? selectedVariant.stock != null : product.stock != null) && (
             <span style={{
@@ -712,6 +729,13 @@ function PriceCard({ product, t, lang, onOpenCheckout, selectedVariant, onSelect
             </span>
           )}
         </div>
+        {product.kind !== 'digital' && (
+          <div className="pd-qty" role="group" aria-label={t2(lang, { ht: 'Kantite', en: 'Quantity' })}>
+            <button type="button" onClick={() => onQuantityChange?.(Math.max(1, quantity - 1))} disabled={quantity <= 1} aria-label="-">-</button>
+            <span aria-live="polite">{quantity}</span>
+            <button type="button" onClick={() => onQuantityChange?.(quantity + 1)} aria-label="+">+</button>
+          </div>
+        )}
         <button type="button" className="pd-cta-btn" onClick={handleBuy} disabled={outOfStock}>
           <i className={product.kind === 'digital' && product.download_url ? 'fas fa-download' : 'fas fa-shopping-cart'} />
           {product.kind === 'digital' && product.download_url
@@ -720,6 +744,66 @@ function PriceCard({ product, t, lang, onOpenCheckout, selectedVariant, onSelect
         </button>
       </div>
     </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   GALLERY — main image + clickable thumbnails
+   ════════════════════════════════════════════════════════════════════════ */
+function ProductGallery({ product, lang }) {
+  const images = [product.image_url, ...(Array.isArray(product.gallery) ? product.gallery : [])]
+    .filter((src, i, arr) => src && arr.indexOf(src) === i);
+  const [active, setActive] = useState(0);
+  if (images.length === 0) return null;
+  const current = images[Math.min(active, images.length - 1)];
+  return (
+    <div>
+      <div className="pd-gallery-main">
+        <img src={current} alt={product.title} />
+      </div>
+      {images.length > 1 && (
+        <div className="pd-gallery-thumbs" role="list" aria-label={t2(lang, { ht: 'Miniyati', en: 'Thumbnails' })}>
+          {images.map((src, i) => (
+            <button key={`${i}-${src}`} type="button" role="listitem"
+              className={`pd-gallery-thumb${i === active ? ' pd-gallery-thumb--active' : ''}`}
+              onClick={() => setActive(i)} aria-label={`${product.title} ${i + 1}`}
+              aria-current={i === active ? 'true' : undefined}>
+              <img src={src} alt="" loading="lazy" />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   PRODUCT TABS — highlights and technical details (creator-editable)
+   ══════════════════════════════════════════════════════════════════ */
+function ProductTabs({ product, lang }) {
+  const [tab, setTab] = useState('highlights');
+  const highlights = Array.isArray(product.highlights) ? product.highlights : [];
+  const details = Array.isArray(product.technical_details) ? product.technical_details : [];
+  if (highlights.length === 0 && details.length === 0) return null;
+  const items = tab === 'highlights' ? highlights : details;
+  return (
+    <section className="pd-section">
+      <div className="pd-tabs" role="tablist">
+        <button type="button" role="tab" aria-selected={tab === 'highlights'}
+          className={tab === 'highlights' ? 'pd-tab pd-tab--active' : 'pd-tab'}
+          onClick={() => setTab('highlights')}>
+          {t2(lang, { ht: 'Pwen fò', en: 'Highlights' })}
+        </button>
+        <button type="button" role="tab" aria-selected={tab === 'technical'}
+          className={tab === 'technical' ? 'pd-tab pd-tab--active' : 'pd-tab'}
+          onClick={() => setTab('technical')}>
+          {t2(lang, { ht: 'Detay teknik', en: 'Technical Details' })}
+        </button>
+      </div>
+      <ul className="pd-text" style={{ paddingLeft: 18 }}>
+        {items.map((item, i) => <li key={i}>{item}</li>)}
+      </ul>
+    </section>
   );
 }
 

@@ -45,6 +45,10 @@ import ProductVariantsPanel from './ProductVariantsPanel';
 import PrintifyImportPanel from './PrintifyImportPanel';
 import styles from './editor.module.css';
 
+// Split a textarea into a clean list: one entry per non-empty line.
+const linesToList = (text) =>
+  text.split('\n').map((line) => line.trim()).filter(Boolean);
+
 export default function ProductEditor({ onClose, onSuccess, onImported, lang = 'ht', showToast, user, item, kind = 'digital' }) {
   const isEdit = Boolean(item);
   const navigate = useSafeNavigate();
@@ -70,6 +74,11 @@ export default function ProductEditor({ onClose, onSuccess, onImported, lang = '
     //   physical → inventory (blank = unlimited)
     download_url: item?.download_url || '',
     stock: item?.stock ?? '',
+    // Storefront details: old price shown struck-through; highlights and
+    // technical details are edited one entry per line.
+    compare_at_price: item?.compare_at_price ?? '',
+    highlights: Array.isArray(item?.highlights) ? item.highlights.join('\n') : '',
+    technical_details: Array.isArray(item?.technical_details) ? item.technical_details.join('\n') : '',
   });
   // ─── Variants (real backend: ProductVariant model) ────────────────
   // Managed through the variant endpoint once the product exists;
@@ -167,6 +176,9 @@ export default function ProductEditor({ onClose, onSuccess, onImported, lang = '
       // keep the previous value on PUT.
       download_url: form.kind === 'digital' ? form.download_url.trim() : '',
       stock: form.kind === 'physical' ? (form.stock === '' ? null : Number(form.stock)) : undefined,
+      compare_at_price: form.compare_at_price === '' ? null : Number(form.compare_at_price),
+      highlights: linesToList(form.highlights),
+      technical_details: linesToList(form.technical_details),
     };
     try {
       let saved;
@@ -263,6 +275,9 @@ export default function ProductEditor({ onClose, onSuccess, onImported, lang = '
       title: form.title.trim() || (isHt ? 'Pwodwi Sans Tit' : 'Untitled product'),
       description: form.description.trim(),
       price: Number(form.price) || 0,
+      compare_at_price: form.compare_at_price === '' ? null : Number(form.compare_at_price),
+      highlights: linesToList(form.highlights),
+      technical_details: linesToList(form.technical_details),
       currency: 'USD',
       kind: form.kind || 'digital',
       image_url: form.image_url.trim(),
@@ -436,7 +451,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, lang = '
         <ProductVariantsPanel
           lang={lang}
           variants={variants}
-          canEdit={Boolean(savedIdRef.current)}
+          canEdit={hasSaved}
           onAdd={addVariant}
           onUpdate={updateVariant}
           onRemove={removeVariant}
@@ -465,6 +480,50 @@ export default function ProductEditor({ onClose, onSuccess, onImported, lang = '
             value={form.price}
             onChange={(e) => handleChange('price', e.target.value)}
             placeholder="9.99"
+          />
+        </PropField>
+        <PropField
+          label="Old price ($)"
+          labelHt="Ansyen pri ($)"
+          lang={lang}
+          hint={isHt ? 'Opsyonèl — parèt barre a kote pri a.' : 'Optional — shown struck-through next to the price.'}
+        >
+          <PropInput
+            type="number"
+            min="0"
+            step="0.50"
+            value={form.compare_at_price}
+            onChange={(e) => handleChange('compare_at_price', e.target.value)}
+            placeholder="49.99"
+          />
+        </PropField>
+      </PropertyGroup>
+
+      <PropertyGroup icon="fa-list-check" label="Storefront details" labelHt="Detay Boutik" lang={lang}>
+        <PropField
+          label="Highlights"
+          labelHt="Pwen fò"
+          lang={lang}
+          hint={isHt ? 'Yon liy pou chak pwen.' : 'One line per highlight.'}
+        >
+          <PropTextarea
+            value={form.highlights}
+            onChange={(e) => handleChange('highlights', e.target.value)}
+            rows={4}
+            maxLength={2000}
+          />
+        </PropField>
+        <PropField
+          label="Technical details"
+          labelHt="Detay teknik"
+          lang={lang}
+          hint={isHt ? 'Yon liy pou chak detay.' : 'One line per detail.'}
+        >
+          <PropTextarea
+            value={form.technical_details}
+            onChange={(e) => handleChange('technical_details', e.target.value)}
+            rows={4}
+            maxLength={2000}
           />
         </PropField>
       </PropertyGroup>
