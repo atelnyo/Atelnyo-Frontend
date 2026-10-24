@@ -103,6 +103,15 @@ export default function ProductEditor({ onClose, onSuccess, onImported, lang = '
     markDirty();
   }, [errors, markDirty]);
 
+  // Reorder the Printify gallery; the first image is the one shown large on the product page.
+  const moveGalleryItem = useCallback((index, delta) => {
+    const next = [...form.gallery];
+    const target = index + delta;
+    if (target < 0 || target >= next.length) return;
+    [next[index], next[target]] = [next[target], next[index]];
+    handleChange('gallery', next);
+  }, [form.gallery, handleChange]);
+
   // ─── Validation (mirrors ProductFormModal) ───────────────────────────
   const validate = useCallback(() => {
     const errs = {};
@@ -150,6 +159,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, lang = '
       price: Number(form.price),
       category: form.category || undefined,
       image_url: form.image_url.trim() || undefined,
+      gallery: form.gallery,
       kind: form.kind || 'digital',
       is_active: publish ?? form.is_active,
       // Kind-specific fields (backend accepts these on any kind).
@@ -336,16 +346,27 @@ export default function ProductEditor({ onClose, onSuccess, onImported, lang = '
         </div>
         {form.gallery.length > 1 && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }} aria-label={isHt ? 'Galri foto' : 'Photo gallery'}>
-            {form.gallery.map((src) => (
-              <button
-                key={src}
-                type="button"
-                onClick={() => handleChange('image_url', src)}
-                style={{ width: 80, height: 80, padding: 0, border: src === form.image_url ? '2px solid currentColor' : '1px solid transparent', borderRadius: 6, overflow: 'hidden', cursor: 'pointer', background: 'none' }}
-                aria-label={isHt ? 'Chwazi foto sa a kòm prensipal' : 'Set as main photo'}
-              >
-                <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-              </button>
+            {form.gallery.map((src, i) => (
+              <div key={src} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                <button
+                  type="button"
+                  onClick={() => handleChange('image_url', src)}
+                  style={{ width: 80, height: 80, padding: 0, border: src === form.image_url ? '2px solid currentColor' : '1px solid transparent', borderRadius: 6, overflow: 'hidden', cursor: 'pointer', background: 'none' }}
+                  aria-label={isHt ? 'Chwazi foto sa a kòm prensipal' : 'Set as main photo'}
+                >
+                  <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                </button>
+                <div style={{ display: 'flex', gap: 4 }}>
+                  <button type="button" onClick={() => moveGalleryItem(i, -1)} disabled={i === 0}
+                    aria-label={isHt ? 'Mete foto sa anvan' : 'Move photo earlier'}>
+                    <i className="fas fa-chevron-left" aria-hidden="true" />
+                  </button>
+                  <button type="button" onClick={() => moveGalleryItem(i, 1)} disabled={i === form.gallery.length - 1}
+                    aria-label={isHt ? 'Mete foto sa apre' : 'Move photo later'}>
+                    <i className="fas fa-chevron-right" aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         )}
