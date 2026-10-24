@@ -26,6 +26,7 @@ import { buildContentUrl, buildContentShareUrl, isLegacyContentUrl } from '../ut
 import { historyBack } from '../utils/history';
 import { ogImageForLang } from './profile/profileConstants';
 import { t2 } from '../utils/i18n';
+import { sanitizeProductDescription } from '../utils/sanitize';
 
 /* ─── Constants ────────────────────────────────────────────────── */
 const OG_IMAGE_FALLBACK = 'https://atelnyo.site/og-banner-en.svg';
@@ -53,36 +54,28 @@ function formatCurrency(amount, currency = 'USD', lang) {
   } catch (_) { return `$${num.toFixed(2)}`; }
 }
 
-/* Long descriptions start collapsed; the buyer can expand them. */
-const DESCRIPTION_COLLAPSE_CHARS = 420;
+/* Long descriptions start collapsed (max height); the buyer can expand them. */
+const DESCRIPTION_COLLAPSED_MAX_HEIGHT = 170;
 
-/* Printify descriptions arrive as HTML (<p>, <br/>, <ul>…). Turn them into
-   plain text with real line breaks. Parsed with DOMParser (no scripts run)
-   and rendered by React as text, so no raw HTML is injected. */
-export function descriptionToText(input) {
-  if (!input || typeof input !== 'string') return '';
-  if (!/[<&]/.test(input)) return input;
-  const withBreaks = input
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/(p|div|li|h[1-6])>/gi, '\n')
-    .replace(/<li[^>]*>/gi, '- ');
-  const doc = new DOMParser().parseFromString(withBreaks, 'text/html');
-  return (doc.body.textContent || '')
-    .split('\n')
-    .map((line) => line.trim())
-    .join('\n')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
-}
-
-function ExpandableDescription({ text: rawText, lang }) {
+/* Printify descriptions are HTML. They are sanitized with an allow-list
+   (DOMPurify) before being rendered, so their formatting is kept. */
+function ExpandableDescription({ text: rawHtml, lang }) {
   const [expanded, setExpanded] = useState(false);
-  const text = descriptionToText(rawText);
-  const isLong = text.length > DESCRIPTION_COLLAPSE_CHARS;
-  const shown = !isLong || expanded ? text : `${text.slice(0, DESCRIPTION_COLLAPSE_CHARS).trimEnd()}…`;
+  const [isLong, setIsLong] = useState(false);
+  const ref = useRef(null);
+  const html = sanitizeProductDescription(rawHtml);
+  useEffect(() => {
+    if (ref.current) setIsLong(ref.current.scrollHeight > DESCRIPTION_COLLAPSED_MAX_HEIGHT + 8);
+  }, [html]);
+  const collapsed = isLong && !expanded;
   return (
     <>
-      <p className="pd-text" style={{ whiteSpace: 'pre-wrap' }}>{shown}</p>
+      <div
+        ref={ref}
+        className="pd-text pd-description-html"
+        style={{ maxHeight: collapsed ? DESCRIPTION_COLLAPSED_MAX_HEIGHT : 'none', overflow: 'hidden' }}
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
       {isLong && (
         <button type="button" onClick={() => setExpanded((v) => !v)} aria-expanded={expanded}
           style={{ marginTop: 8, background: 'none', border: 'none', padding: 0, color: 'var(--pd-primary)', fontWeight: 600, cursor: 'pointer' }}>

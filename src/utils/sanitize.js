@@ -97,6 +97,35 @@ export function isExternalUrl(url) {
   }
 }
 
+import DOMPurify from 'dompurify';
+
+/* Product descriptions come from Printify as HTML. Keep the formatting tags
+   Printify uses (paragraphs, line breaks, lists, emphasis, headings, simple
+   tables, links) and drop everything else, including scripts, styles, images
+   and event handlers. */
+const PRODUCT_DESCRIPTION_TAGS = [
+  'p', 'br', 'div', 'span', 'hr',
+  'ul', 'ol', 'li',
+  'strong', 'b', 'em', 'i', 'u', 's',
+  'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+  'table', 'thead', 'tbody', 'tr', 'td', 'th',
+  'a',
+];
+const PRODUCT_DESCRIPTION_ATTRS = ['href', 'title', 'colspan', 'rowspan'];
+
+/**
+ * Sanitize a product description that may contain HTML. Returns an HTML
+ * string that is safe to pass to dangerouslySetInnerHTML.
+ */
+export function sanitizeProductDescription(html) {
+  if (!html || typeof html !== 'string') return '';
+  return DOMPurify.sanitize(html.slice(0, 100000), {
+    ALLOWED_TAGS: PRODUCT_DESCRIPTION_TAGS,
+    ALLOWED_ATTR: PRODUCT_DESCRIPTION_ATTRS,
+    ALLOW_DATA_ATTR: false,
+  });
+}
+
 const RICH_TEXT_DANGEROUS_TAGS = /<\s*\/?\s*(?:script|object|embed|applet|form|input|textarea|select|button|iframe|style|meta|link|base)\b[^>]*>/gi;
 const RICH_TEXT_EVENT_HANDLERS = /\s+on[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|\S+)/gi;
 const RICH_TEXT_JS_URLS = /((?:href|src|action|formaction|poster|background)\s*=\s*)(["'])\s*javascript\s*:/gi;

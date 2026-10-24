@@ -4,6 +4,7 @@ import {
   sanitizeAltText,
   sanitizeUrl,
   sanitizeRichText,
+  sanitizeProductDescription,
   sanitizeFilename,
   escapeHtml,
   stripTags,
@@ -83,6 +84,18 @@ describe('sanitizeUrl', () => {
   it('returns empty for empty input', () => {
     expect(sanitizeUrl('')).toBe('');
     expect(sanitizeUrl(null)).toBe('');
+  });
+});
+
+describe('sanitizeProductDescription', () => {
+  it('keeps Printify formatting tags and drops dangerous content', () => {
+    const out = sanitizeProductDescription(
+      '<p>Hi <strong>bold</strong></p><br/><ul><li>one</li></ul><img src=x onerror=alert(1)><script>alert(2)</script><a href="javascript:alert(3)" onclick="x()">l</a><a href="https://e.com">ok</a>',
+    );
+    expect(out).toContain('<strong>bold</strong>');
+    expect(out).toContain('<ul><li>one</li></ul>');
+    expect(out).toContain('<a href="https://e.com">ok</a>');
+    expect(out).not.toMatch(/script|onerror|onclick|javascript:|<img/i);
   });
 });
 
