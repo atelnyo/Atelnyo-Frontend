@@ -33,7 +33,7 @@ import { getUserIdentity } from '../../utils/userIdentity';
 // Continuity — the Studio is the WORKSPACE slice of the continuity
 // state; it reports which section/media tab the user is on via the
 // manager's façade (never appStateStore directly).
-import continuityManager from '../../pwa/continuity/ContinuityManager';
+
 import styles from './CreatorStudio.module.css';
 import MediaProviderSection from './MediaProviderSection';
 import TikTokConnect from './TikTokConnect'; // TikTok OAuth card — TIKTOK_INTEGRATION_PLAN.md Faz A.6
@@ -153,6 +153,23 @@ const SIDEBAR_CATEGORIES = [
 // Flat list (deep-links, lookups) — category order preserved.
 const SIDEBAR_SECTIONS = SIDEBAR_CATEGORIES.flatMap((cat) => cat.items);
 
+// Last studio section + media sub-tab, kept in localStorage so a refresh
+// (or a return visit without ?section=) reopens the same place.
+const STUDIO_NAV_KEY = 'studio_nav';
+function readStudioNav() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(STUDIO_NAV_KEY) || 'null');
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+function writeStudioNav(nav) {
+  try {
+    localStorage.setItem(STUDIO_NAV_KEY, JSON.stringify(nav));
+  } catch { /* storage unavailable — URL still holds the state */ }
+}
+
 // ─── ═══════════════════════════════════════════════════════════════════════
 // SECTION COMPONENTS
 // ═══════════════════════════════════════════════════════════════════════════
@@ -176,23 +193,38 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
   // Deep-link support: /sheet/studio?section=public_profile (used by the
   // "Edit profile" button on the public page and the Profile Settings CTA
   // in the editor) opens the studio on the requested section.
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeSection, setActiveSection] = useState(() => {
     const fromUrl = searchParams.get('section');
-    return fromUrl && SIDEBAR_SECTIONS.some((s) => s.id === fromUrl)
-      ? fromUrl
+    if (fromUrl) {
+      return SIDEBAR_SECTIONS.some((s) => s.id === fromUrl) ? fromUrl : 'dashboard';
+    }
+    const saved = readStudioNav();
+    return saved.section && SIDEBAR_SECTIONS.some((s) => s.id === saved.section)
+      ? saved.section
       : 'dashboard';
   });
   const [activeMediaTab, setActiveMediaTab] = useState(() => {
     const fromUrl = searchParams.get('mediaTab');
-    return ['hub', 'provider', 'library', 'tiktok'].includes(fromUrl) ? fromUrl : 'hub';
+    if (fromUrl) {
+      return ['hub', 'provider', 'library', 'tiktok'].includes(fromUrl) ? fromUrl : 'hub';
+    }
+    const saved = readStudioNav();
+    return ['hub', 'provider', 'library', 'tiktok'].includes(saved.mediaTab) ? saved.mediaTab : 'hub';
   });
   const [mobileSidebar, setMobileSidebar] = useState(false);
-  // Continuity — persist the workspace slice (media sub-tab) whenever
-  // it changes, so a relaunch restores the exact media surface.
+  // Keep the open section (and media sub-tab) in the URL, so a page refresh
+  // reopens the same place. Existing ?section= links keep working.
   useEffect(() => {
-    continuityManager.saveWorkspaceState({ mediaTab: activeMediaTab }).catch(() => {});
-  }, [activeMediaTab]);
+    const next = new URLSearchParams(searchParams);
+    next.set('section', activeSection);
+    if (activeSection === 'media') next.set('mediaTab', activeMediaTab);
+    else next.delete('mediaTab');
+    if (next.toString() !== searchParams.toString()) {
+      setSearchParams(next, { replace: true });
+    }
+    writeStudioNav({ section: activeSection, mediaTab: activeMediaTab });
+  }, [activeSection, activeMediaTab, searchParams, setSearchParams]);
   // Modal state — one per section type (replaces placeholder toasts)
   // Course creation never starts with a form: a delivery-type chooser
   // (Teach on Atelnyo / Teach elsewhere) opens first, then the editor.
@@ -205,7 +237,11 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
   const [showProductTypeModal, setShowProductTypeModal] = useState(false);
   const [productKindChoice, setProductKindChoice] = useState('digital');
   const [showProductModal, setShowProductModal] = useState(false);
-  const [productsVersion, setProductsVersion] = useState(0);
+  // Bumped after every successful create/edit so the open section remounts
+  // and refetches its list (the section is already open, so switching to
+  // it alone does not reload anything).
+  const [sectionVersion, setSectionVersion] = useState(0);
+  const bumpSection = useCallback(() => setSectionVersion((v) => v + 1), []);
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -242,10 +278,6 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
     }
     setActiveSection(sectionId);
     setMobileSidebar(false);
-    // Continuity — persist the workspace slice (studio section) so a
-    // relaunch can put the user back on this tab. Fire-and-forget;
-    // the restore point is a nicety, never a gate.
-    continuityManager.saveWorkspaceState({ section: sectionId }).catch(() => {});
   }, [navigate]);
 
   // ─── Edit handler — open modal pre-filled with item data ───────
@@ -406,14 +438,14 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
         />
       );
       case 'company':    return <CompanySection lang={lang} t={t} showToast={showToast} />;
-      case 'courses':   return <CoursesSection lang={lang} t={t} showToast={showToast} setShowCourseModal={handleCreateCourse} onEdit={(item) => handleEdit(item, 'course')} />;
-      case 'talent':    return <TalentSection lang={lang} t={t} showToast={showToast} setShowTalentModal={setShowTalentModal} onEdit={(item) => handleEdit(item, 'talent')} />;
-      case 'jobs':      return <JobsSection lang={lang} t={t} showToast={showToast} setShowJobModal={setShowJobModal} onEdit={(item) => handleEdit(item, 'job')} />;
-      case 'events':    return <EventsSection lang={lang} t={t} showToast={showToast} setShowEventModal={setShowEventModal} onEdit={(item) => handleEdit(item, 'event')} user={user} />;
+      case 'courses':   return <CoursesSection key={sectionVersion} lang={lang} t={t} showToast={showToast} setShowCourseModal={handleCreateCourse} onEdit={(item) => handleEdit(item, 'course')} />;
+      case 'talent':    return <TalentSection key={sectionVersion} lang={lang} t={t} showToast={showToast} setShowTalentModal={setShowTalentModal} onEdit={(item) => handleEdit(item, 'talent')} />;
+      case 'jobs':      return <JobsSection key={sectionVersion} lang={lang} t={t} showToast={showToast} setShowJobModal={setShowJobModal} onEdit={(item) => handleEdit(item, 'job')} />;
+      case 'events':    return <EventsSection key={sectionVersion} lang={lang} t={t} showToast={showToast} setShowEventModal={setShowEventModal} onEdit={(item) => handleEdit(item, 'event')} user={user} />;
       case 'communities': return <CommunitiesSection lang={lang} t={t} showToast={showToast} user={user} />;
       case 'proposals': return <ProposalsSection lang={lang} t={t} showToast={showToast} />;
       case 'contracts': return <ContractsSection lang={lang} t={t} showToast={showToast} user={user} />;
-      case 'music':     return <MusicSection lang={lang} t={t} showToast={showToast} setShowMusicModal={setShowMusicModal} onEdit={(item) => handleEdit(item, 'music')} />;
+      case 'music':     return <MusicSection key={sectionVersion} lang={lang} t={t} showToast={showToast} setShowMusicModal={setShowMusicModal} onEdit={(item) => handleEdit(item, 'music')} />;
       case 'media':     return (
         <div className={styles.mediaView}>
           <MyMediaDashboard
@@ -473,8 +505,8 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
           )}
         </div>
       );
-      case 'products':  return <ProductsSection key={productsVersion} lang={lang} t={t} showToast={showToast} setShowProductModal={handleCreateProduct} onEdit={(item) => handleEdit(item, 'product')} />;
-      case 'portfolio': return <PortfolioSection lang={lang} t={t} showToast={showToast} setShowProjectModal={setShowProjectModal} onEdit={(item) => handleEdit(item, 'portfolio')} />;
+      case 'products':  return <ProductsSection key={sectionVersion} lang={lang} t={t} showToast={showToast} setShowProductModal={handleCreateProduct} onEdit={(item) => handleEdit(item, 'product')} />;
+      case 'portfolio': return <PortfolioSection key={sectionVersion} lang={lang} t={t} showToast={showToast} setShowProjectModal={setShowProjectModal} onEdit={(item) => handleEdit(item, 'portfolio')} />;
       case 'analytics': return <AnalyticsSection lang={lang} t={t} showToast={showToast} />;
       case 'orders':    return <OrdersSection lang={lang} t={t} />;
       case 'wallet':    return <WalletSection lang={lang} t={t} showToast={showToast} setShowWithdrawModal={setShowWithdrawModal} user={user} />;
@@ -653,7 +685,7 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
             showToast={showToast}
             user={user}
             onClose={() => { setShowCourseModal(false); handleCloseEdit(); }}
-            onSuccess={() => { setShowCourseModal(false); handleCloseEdit(); setActiveSection('courses'); }}
+            onSuccess={() => { setShowCourseModal(false); handleCloseEdit(); setActiveSection('courses'); bumpSection(); }}
             item={editingType === 'course' ? editingItem : null}
             deliveryType={courseTypeChoice}
           />
@@ -671,7 +703,7 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
             showToast={showToast}
             user={user}
             onClose={() => { setShowMusicModal(false); handleCloseEdit(); }}
-            onSuccess={() => { setShowMusicModal(false); handleCloseEdit(); setActiveSection('music'); }}
+            onSuccess={() => { setShowMusicModal(false); handleCloseEdit(); setActiveSection('music'); bumpSection(); }}
             item={editingType === 'music' ? editingItem : null}
           />
         )}
@@ -681,8 +713,8 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
             showToast={showToast}
             user={user}
             onClose={() => { setShowProductModal(false); handleCloseEdit(); }}
-            onSuccess={() => { setShowProductModal(false); handleCloseEdit(); setActiveSection('products'); }}
-            onImported={() => setProductsVersion((v) => v + 1)}
+            onSuccess={() => { setShowProductModal(false); handleCloseEdit(); setActiveSection('products'); bumpSection(); }}
+            onImported={bumpSection}
             item={editingType === 'product' ? editingItem : null}
             kind={productKindChoice}
           />
@@ -699,7 +731,7 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
             lang={lang}
             showToast={showToast}
             onClose={() => { setShowProjectModal(false); handleCloseEdit(); }}
-            onSuccess={() => { setShowProjectModal(false); handleCloseEdit(); setActiveSection('portfolio'); }}
+            onSuccess={() => { setShowProjectModal(false); handleCloseEdit(); setActiveSection('portfolio'); bumpSection(); }}
             item={editingType === 'portfolio' ? editingItem : null}
           />
         )}
@@ -776,7 +808,7 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
             lang={lang}
             showToast={showToast}
             onClose={() => { setShowTalentModal(false); handleCloseEdit(); }}
-            onSuccess={() => { setShowTalentModal(false); handleCloseEdit(); setActiveSection('talent'); }}
+            onSuccess={() => { setShowTalentModal(false); handleCloseEdit(); setActiveSection('talent'); bumpSection(); }}
             talent={editingType === 'talent' ? editingItem : null}
           />
         )}
@@ -785,7 +817,7 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
             lang={lang}
             showToast={showToast}
             onClose={() => { setShowJobModal(false); handleCloseEdit(); }}
-            onSuccess={() => { setShowJobModal(false); handleCloseEdit(); setActiveSection('jobs'); }}
+            onSuccess={() => { setShowJobModal(false); handleCloseEdit(); setActiveSection('jobs'); bumpSection(); }}
             job={editingType === 'job' ? editingItem : null}
           />
         )}
@@ -794,7 +826,7 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
             lang={lang}
             showToast={showToast}
             onClose={() => { setShowEventModal(false); handleCloseEdit(); }}
-            onSuccess={() => { setShowEventModal(false); handleCloseEdit(); setActiveSection('events'); }}
+            onSuccess={() => { setShowEventModal(false); handleCloseEdit(); setActiveSection('events'); bumpSection(); }}
             event={editingType === 'event' ? editingItem : null}
           />
         )}

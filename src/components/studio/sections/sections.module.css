@@ -16,6 +16,66 @@
   max-width: 800px;
 }
 
+.printifyCard {
+  background: var(--surface-card);
+  border-radius: var(--radius-2xl);
+  border: var(--border-w-sm) solid var(--border-color);
+  padding: var(--sp-4xl);
+  margin-top: var(--sp-4xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-lg);
+}
+
+.printifyCard .sectionSubtitle {
+  margin: 0;
+}
+
+.printifyText {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.printifyRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-md);
+}
+
+.printifyRow .formInput {
+  flex: 1 1 260px;
+  width: auto;
+}
+
+.printifyError {
+  margin: 0;
+  color: var(--color-danger, #d32f2f);
+  font-size: var(--text-sm);
+}
+
+.secondaryBtn {
+  padding: var(--sp-md) var(--sp-2xl);
+  border: var(--border-w-sm) solid var(--border-color);
+  border-radius: var(--radius-xl);
+  background: var(--surface-card-alt);
+  color: var(--text-primary);
+  font: inherit;
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.secondaryBtn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+}
+
+.secondaryBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .sectionHeader {
   display: flex;
   align-items: center;

@@ -85,21 +85,21 @@ export default function PrintifyConnectionCard({ isHt, showToast }) {
   if (loadError) {
     body = (
       <>
-        <p role="alert">{loadError}</p>
-        <button type="button" onClick={retry} disabled={busy}>
+        <p role="alert" className={styles.printifyError}>{loadError}</p>
+        <button type="button" className={styles.secondaryBtn} onClick={retry} disabled={busy}>
           {tr(isHt, 'Try again', 'Eseye ankò')}
         </button>
       </>
     );
   } else if (conn === null) {
-    body = <p>{tr(isHt, 'Loading…', 'Chajman…')}</p>;
+    body = <p className={styles.printifyText}>{tr(isHt, 'Loading…', 'Chajman…')}</p>;
   } else if (conn.connected) {
     body = (
       <>
-        <p>
+        <p className={styles.printifyText}>
           {tr(isHt, 'Connected to shop', 'Konekte ak magazen')}: <strong>{conn.shop_title || conn.shop_id}</strong>
         </p>
-        <button type="button" onClick={handleDisconnect} disabled={busy}>
+        <button type="button" className={styles.secondaryBtn} onClick={handleDisconnect} disabled={busy}>
           {tr(isHt, 'Disconnect', 'Dekonekte')}
         </button>
       </>
@@ -107,33 +107,36 @@ export default function PrintifyConnectionCard({ isHt, showToast }) {
   } else {
     body = (
       <>
-        <p>
+        <p className={styles.printifyText}>
           {tr(
             isHt,
             'Paste your Printify personal API token once. It is stored only for your account and never shown again.',
             'Kole token API pèsonèl Printify ou a yon sèl fwa. Yo sere li sèlman pou kont ou, epi yo pa janm montre l ankò.',
           )}
         </p>
-        <input
-          type="password"
-          value={token}
-          onChange={(e) => setToken(e.target.value)}
-          placeholder={tr(isHt, 'Printify API token', 'Token API Printify')}
-          autoComplete="off"
-          aria-label={tr(isHt, 'Printify API token', 'Token API Printify')}
-        />
-        <button type="button" className="btn-primary" onClick={handleConnect} disabled={busy}>
-          {tr(isHt, 'Connect Printify', 'Konekte Printify')}
-        </button>
+        <div className={styles.printifyRow}>
+          <input
+            className={styles.formInput}
+            type="password"
+            value={token}
+            onChange={(e) => setToken(e.target.value)}
+            placeholder={tr(isHt, 'Printify API token', 'Token API Printify')}
+            autoComplete="off"
+            aria-label={tr(isHt, 'Printify API token', 'Token API Printify')}
+          />
+          <button type="button" className="btn-primary" onClick={handleConnect} disabled={busy}>
+            {tr(isHt, 'Connect Printify', 'Konekte Printify')}
+          </button>
+        </div>
       </>
     );
   }
 
   return (
-    <section className={styles.section} aria-labelledby="printify-connection-title">
+    <section className={styles.printifyCard} aria-labelledby="printify-connection-title">
       <h3 id="printify-connection-title" className={styles.sectionSubtitle}>Printify</h3>
       {body}
-      {error && <p role="alert">{error}</p>}
+      {error && <p role="alert" className={styles.printifyError}>{error}</p>}
     </section>
   );
 }
