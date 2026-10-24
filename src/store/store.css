@@ -40,6 +40,10 @@
 
 .store-main { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
 .store-title { font-size: 1.5rem; margin: 0 0 16px; }
+.store-categories { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 20px; }
+.store-categories a { padding: 6px 14px; border: 1px solid currentColor; border-radius: 999px; font-size: 0.85rem; text-decoration: none; color: inherit; }
+.store-categories a.is-active { background: currentColor; }
+.store-categories a.is-active { color: var(--store-bg, #fff); }
 .store-state { color: var(--store-muted); }
 .store-state--error { color: var(--store-danger); }
 

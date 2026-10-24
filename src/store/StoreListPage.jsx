@@ -16,6 +16,21 @@ export default function StoreListPage() {
   const [params] = useSearchParams();
   const q = (params.get('q') || '').trim();
 
+  const [categories, setCategories] = useState([]);
+  useEffect(() => {
+    let cancelled = false;
+    storeService.listCategories()
+      .then(({ data }) => {
+        if (!cancelled) {
+          setCategories(Array.isArray(data) ? data : data?.results || []);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   // Category page: resolve the slug to a real category id. Results are keyed
   // by slug so a stale result for a previous slug is ignored (treated as loading).
   const [category, setCategory] = useState({ slug: '', status: 'none', id: null });
@@ -113,6 +128,24 @@ export default function StoreListPage() {
       <h1 id="store-listing-title" className="store-title">
         {heading}
       </h1>
+
+      {categories.length > 0 && (
+        <nav className="store-categories" aria-label="Categories">
+          <Link to="/store" className={!categorySlug ? 'is-active' : ''} aria-current={!categorySlug ? 'page' : undefined}>
+            All
+          </Link>
+          {categories.map((c) => (
+            <Link
+              key={c.id}
+              to={`/store/categories/${encodeURIComponent(c.slug)}`}
+              className={c.slug === categorySlug ? 'is-active' : ''}
+              aria-current={c.slug === categorySlug ? 'page' : undefined}
+            >
+              {c.name || c.slug}
+            </Link>
+          ))}
+        </nav>
+      )}
 
       {current.status === 'loading' && <p className="store-state" role="status">Loading products…</p>}
       {current.status === 'error' && (

@@ -55,4 +55,17 @@ describe('StoreListPage', () => {
     expect(await screen.findByText('Logo Kit')).toBeTruthy();
     expect(listProducts).toHaveBeenCalledWith({ category_id: 7 });
   });
+
+  it('shows a category bar that links to each category', async () => {
+    listCategories.mockResolvedValue({
+      data: [{ id: 7, slug: 'design', name: 'Design' }, { id: 8, slug: 'music', name: 'Music' }],
+    });
+    listProducts.mockResolvedValue({ data: [] });
+
+    renderAt('/store');
+
+    const nav = await screen.findByRole('navigation', { name: 'Categories' });
+    expect(nav.querySelector('a[href="/store/categories/design"]').textContent).toBe('Design');
+    expect(nav.querySelector('a[href="/store/categories/music"]')).toBeTruthy();
+  });
 });
