@@ -55,6 +55,20 @@ async function mockApi(page: Page) {
   );
 }
 
+test('buy button is visible in the first screen at 360px', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 740 });
+  await mockApi(page);
+  await page.goto('/marketplace/201', { waitUntil: 'domcontentloaded' });
+  const bar = page.locator('.pd-price-card--sticky');
+  await expect(bar).toBeAttached({ timeout: 20_000 });
+  await page.evaluate(() => window.scrollBy(0, 600));
+  await page.waitForTimeout(300);
+  const box = await bar.locator('.pd-cta-btn').boundingBox();
+  expect(box, 'sticky buy button box').not.toBeNull();
+  expect(box!.y).toBeGreaterThanOrEqual(0);
+  expect(box!.y + box!.height).toBeLessThanOrEqual(740);
+});
+
 for (const vp of VIEWPORTS) {
   test(`product detail has no horizontal overflow at ${vp.name}`, async ({ page }) => {
     await page.setViewportSize({ width: vp.width, height: vp.height });

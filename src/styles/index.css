@@ -14335,6 +14335,44 @@ body.dark-mode .related-spotlight-card:hover {
     min-width: 0;
     max-width: 100%;
   }
+  .pd-gallery-main {
+    aspect-ratio: auto;
+    height: auto;
+    max-height: 55vh;
+    background: #fff;
+  }
+  .pd-gallery-main img {
+    max-height: 55vh;
+    object-fit: contain;
+  }
+  .pd-gallery-thumbs {
+    margin-top: 8px;
+  }
+  .pd-gallery-thumb {
+    flex: 0 0 60px;
+    height: 60px;
+  }
+  .pd-page {
+    /* A transform left by pdFadeIn would make the fixed buy bar position
+       relative to the page instead of the screen. */
+    animation: none;
+  }
+  .pd-body-inner {
+    padding-bottom: 130px;
+  }
+  .pd-price-card--sticky {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    z-index: 50;
+    margin: 0;
+    padding: 12px;
+    border-radius: 0;
+    background: var(--pd-surface);
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  }
 }
 
 /* Old price struck through next to the current price */
