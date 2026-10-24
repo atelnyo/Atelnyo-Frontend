@@ -163,3 +163,13 @@
 .store-thumbs li { flex: 0 0 auto; }
 .store-thumbs__btn { background: #fff; border-radius: 2px; border: 2px solid transparent; }
 .store-thumbs__btn.is-active { border-color: #d62828; }
+
+.store-footer {
+  margin-top: 32px; padding: 20px 16px; border-top: 1px solid var(--store-border);
+  background: #fff; color: var(--store-muted); font-size: 14px;
+  display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; align-items: center;
+}
+.store-footer nav { display: flex; flex-wrap: wrap; gap: 12px 20px; }
+.store-footer a { color: var(--store-navy); text-decoration: none; }
+.store-footer a:hover { text-decoration: underline; }
+.store-footer p { margin: 0; }

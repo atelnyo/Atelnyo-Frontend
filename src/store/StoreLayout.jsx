@@ -77,6 +77,14 @@ export default function StoreLayout() {
       <main className="store-main">
         <Outlet />
       </main>
+      <footer className="store-footer">
+        <nav aria-label="Store footer">
+          <Link to="/store">All products</Link>
+          <Link to="/store/cart">Cart</Link>
+          <Link to={user ? '/account' : '/login'}>{user ? 'Account' : 'Sign in'}</Link>
+        </nav>
+        <p>© {new Date().getFullYear()} Atelnyo Store</p>
+      </footer>
     </div>
   );
 }
