@@ -2362,9 +2362,9 @@ function App() {
       </div>}
 
       {/* Cookie Consent Banner — GDPR/CCPA compliant consent management */}
-      <Suspense fallback={null}>
+      {!isStoreRoute && <Suspense fallback={null}>
         <CookieConsent lang={lang} />
-      </Suspense>
+      </Suspense>}
 
       <Suspense fallback={null}>
         <Settings 
@@ -2426,9 +2426,9 @@ function App() {
         />
       </Suspense>
 
-      <Suspense fallback={null}>
+      {!isStoreRoute && <Suspense fallback={null}>
         <Chatbot lang={lang} translations={translations} />
-      </Suspense>
+      </Suspense>}
 
       {/* Cloud Shell proxy-safe: only mount when open so useNavigate()
           isn't called during the dangerous startup window when Cloud
