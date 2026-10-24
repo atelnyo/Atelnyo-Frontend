@@ -45,7 +45,7 @@ import ProductVariantsPanel from './ProductVariantsPanel';
 import PrintifyImportPanel from './PrintifyImportPanel';
 import styles from './editor.module.css';
 
-export default function ProductEditor({ onClose, onSuccess, lang = 'ht', showToast, user, item, kind = 'digital' }) {
+export default function ProductEditor({ onClose, onSuccess, onImported, lang = 'ht', showToast, user, item, kind = 'digital' }) {
   const isEdit = Boolean(item);
   const navigate = useSafeNavigate();
   const isHt = lang === 'ht';
@@ -505,7 +505,7 @@ export default function ProductEditor({ onClose, onSuccess, lang = 'ht', showToa
 
       {form.kind === 'physical' && (
         <PropertyGroup icon="fa-print" label="Printify" labelHt="Printify" lang={lang}>
-          <PrintifyImportPanel isHt={isHt} showToast={showToast} />
+          <PrintifyImportPanel isHt={isHt} showToast={showToast} onImported={onImported} />
         </PropertyGroup>
       )}
 

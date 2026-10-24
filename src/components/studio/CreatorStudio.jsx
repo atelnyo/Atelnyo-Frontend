@@ -205,6 +205,7 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
   const [showProductTypeModal, setShowProductTypeModal] = useState(false);
   const [productKindChoice, setProductKindChoice] = useState('digital');
   const [showProductModal, setShowProductModal] = useState(false);
+  const [productsVersion, setProductsVersion] = useState(0);
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -472,7 +473,7 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
           )}
         </div>
       );
-      case 'products':  return <ProductsSection lang={lang} t={t} showToast={showToast} setShowProductModal={handleCreateProduct} onEdit={(item) => handleEdit(item, 'product')} />;
+      case 'products':  return <ProductsSection key={productsVersion} lang={lang} t={t} showToast={showToast} setShowProductModal={handleCreateProduct} onEdit={(item) => handleEdit(item, 'product')} />;
       case 'portfolio': return <PortfolioSection lang={lang} t={t} showToast={showToast} setShowProjectModal={setShowProjectModal} onEdit={(item) => handleEdit(item, 'portfolio')} />;
       case 'analytics': return <AnalyticsSection lang={lang} t={t} showToast={showToast} />;
       case 'orders':    return <OrdersSection lang={lang} t={t} />;
@@ -681,6 +682,7 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
             user={user}
             onClose={() => { setShowProductModal(false); handleCloseEdit(); }}
             onSuccess={() => { setShowProductModal(false); handleCloseEdit(); setActiveSection('products'); }}
+            onImported={() => setProductsVersion((v) => v + 1)}
             item={editingType === 'product' ? editingItem : null}
             kind={productKindChoice}
           />

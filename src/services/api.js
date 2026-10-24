@@ -1270,7 +1270,10 @@ export const marketplaceService = {
     api.put('marketplace/printify/connection/', { api_token: apiToken, ...(shopId ? { shop_id: shopId } : {}) }),
   printifyDisconnect: () => api.delete('marketplace/printify/connection/'),
   printifyProducts: () => api.get('marketplace/printify/products/'),
-  printifyImport: (ids) => api.post('marketplace/printify/import/', { printify_product_ids: ids }),
+  printifyImport: (ids, fields) => api.post('marketplace/printify/import/', {
+    printify_product_ids: ids,
+    ...(fields ? { fields } : {}),
+  }),
 };
 
 // ─── Checkout + Payments (Phase 32 + PayPal PRIMARY) ─────────────────────

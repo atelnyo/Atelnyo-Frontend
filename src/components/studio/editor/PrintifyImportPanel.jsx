@@ -12,13 +12,24 @@ import styles from './editor.module.css';
 
 const tr = (isHt, en, ht) => (isHt ? ht : en);
 
-export default function PrintifyImportPanel({ isHt, showToast }) {
+const IMPORT_FIELD_OPTIONS = [
+  { key: 'description', en: 'Description', ht: 'Deskripsyon' },
+  { key: 'images', en: 'Images & gallery', ht: 'Imaj ak galri' },
+  { key: 'stock', en: 'Stock', ht: 'Stock' },
+  { key: 'tags', en: 'Tags', ht: 'Tags' },
+  { key: 'shipping', en: 'Shipping info', ht: 'Enfòmasyon livrezon' },
+];
+const ALL_IMPORT_FIELDS = IMPORT_FIELD_OPTIONS.map((o) => o.key);
+
+export default function PrintifyImportPanel({ isHt, showToast, onImported }) {
   const [conn, setConn] = useState(null);
   const [connError, setConnError] = useState('');
   const [busy, setBusy] = useState(false);
   const [items, setItems] = useState(null);
   const [selected, setSelected] = useState([]);
   const [error, setError] = useState('');
+  const [fields, setFields] = useState(ALL_IMPORT_FIELDS);
+  const [imported, setImported] = useState([]);
 
   const t = (en, ht) => tr(isHt, en, ht);
 
@@ -76,12 +87,14 @@ export default function PrintifyImportPanel({ isHt, showToast }) {
     setBusy(true);
     setError('');
     try {
-      const res = await marketplaceService.printifyImport(selected);
-      const count = res.data?.imported?.length || 0;
+      const res = await marketplaceService.printifyImport(selected, fields);
+      const list = res.data?.imported || [];
       showToast?.(
-        t(`${count} product(s) imported as drafts.`, `${count} pwodwi enpòte kòm bouyon.`),
+        t(`${list.length} product(s) imported as drafts.`, `${list.length} pwodwi enpòte kòm bouyon.`),
         'check-circle',
       );
+      setImported(list);
+      onImported?.(list);
       await handleLoadProducts();
     } catch (err) {
       fail(err, t('Import failed.', 'Enpòtasyon an echwe.'));
@@ -119,6 +132,21 @@ export default function PrintifyImportPanel({ isHt, showToast }) {
       <p className={styles.propsHint}>
         {t('Connected to shop', 'Konekte ak magazen')}: <strong>{conn.shop_title || conn.shop_id}</strong>
       </p>
+      <fieldset style={{ border: 'none', padding: 0, margin: '8px 0' }}>
+        <legend className={styles.propsHint}>{t('Import these fields', 'Enpòte chan sa yo')}</legend>
+        <p className={styles.propsHint}>{t('Title and price are always imported.', 'Tit ak pri a toujou enpòte.')}</p>
+        {IMPORT_FIELD_OPTIONS.map((o) => (
+          <label key={o.key} style={{ display: 'block', marginBottom: 4 }}>
+            <input
+              type="checkbox"
+              checked={fields.includes(o.key)}
+              onChange={() => setFields((prev) => (prev.includes(o.key) ? prev.filter((k) => k !== o.key) : [...prev, o.key]))}
+              disabled={busy}
+            />{' '}{t(o.en, o.ht)}
+          </label>
+        ))}
+      </fieldset>
+
       <button type="button" onClick={handleLoadProducts} disabled={busy}>
         {t('Load Printify products', 'Chaje pwodwi Printify yo')}
       </button>
@@ -161,6 +189,12 @@ export default function PrintifyImportPanel({ isHt, showToast }) {
         <button type="button" className="btn-primary" onClick={handleImport} disabled={busy || selected.length === 0}>
           {t(`Import selected (${selected.length})`, `Enpòte chwazi yo (${selected.length})`)}
         </button>
+      )}
+      {imported.length > 0 && (
+        <p className={styles.propsHint}>
+          {t('Imported as drafts:', 'Enpòte kòm bouyon:')}{' '}
+          {imported.map((p) => p.title).join(', ')}
+        </p>
       )}
       {error && <p role="alert">{error}</p>}
     </div>
