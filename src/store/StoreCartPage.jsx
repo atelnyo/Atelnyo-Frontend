@@ -141,12 +141,19 @@ export default function StoreCartPage() {
       <SEOHead title="Cart" url="/store/cart" noindex />
       <h1 className="store-title">Cart</h1>
       <ul className="store-cart">
-        {items.map((line) => (
+        {items.map((line) => {
+          const detail = details[line.productId];
+          const unit = Number(detail?.price);
+          const lineTotal = Number.isFinite(unit) ? unit * line.quantity : null;
+          return (
           <li key={`${line.productId}-${line.variantId ?? 'base'}`} className="store-cart__line">
-            {details[line.productId]?.image_url && (
-              <img className="store-cart__img" src={details[line.productId].image_url} alt="" />
+            {detail?.image_url && (
+              <img className="store-cart__img" src={detail.image_url} alt="" />
             )}
-            <span>{details[line.productId]?.title || `Product #${line.productId}`}</span>
+            <span className="store-cart__title">{detail?.title || 'Loading product…'}</span>
+            <span className="store-cart__price">
+              {lineTotal == null ? '' : new Intl.NumberFormat('en-US', { style: 'currency', currency: detail.currency || 'USD' }).format(lineTotal)}
+            </span>
             <label className="store-sr-only" htmlFor={`qty-${line.productId}-${line.variantId ?? 'base'}`}>
               Quantity
             </label>
@@ -162,7 +169,8 @@ export default function StoreCartPage() {
               Remove
             </button>
           </li>
-        ))}
+          );
+        })}
       </ul>
       <p className="store-state">Totals are calculated by the server at checkout.</p>
       <button type="button" className="store-btn" onClick={onCheckout} disabled={status === 'submitting'}>
