@@ -395,7 +395,7 @@ export function TalentSheet({ lang = 'ht', showToast, user, contentId }) {
               onClick={handleViewProfile}
               style={{
                 ...S.flexRow, gap: 8, width: '100%', justifyContent: 'center', cursor: 'pointer',
-                padding: '12px 16px', borderRadius: 12, border: 'none',
+                padding: '12px 16px', borderRadius: 12, border: 'none', marginBottom: 16,
                 background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
                 color: '#fff', fontWeight: 700, fontSize: '0.9rem',
                 fontFamily: 'inherit', transition: 'transform 0.2s ease, box-shadow 0.2s ease',
