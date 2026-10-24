@@ -128,6 +128,11 @@ const CreatorPublicProfile = lazy(() => import('./components/CreatorPublicProfil
 const SearchResultsPage = lazy(() => import('./components/SearchResultsPage'));
 const ProfileItemDetail = lazy(() => import('./components/ProfileItemDetail'));
 const ProductDetail      = lazy(() => import('./components/ProductDetail'));
+const StoreLayout        = lazy(() => import('./store/StoreLayout'));
+const StoreNotFound      = lazy(() => import('./store/StoreLayout').then((m) => ({ default: m.StoreNotFound })));
+const StoreListPage      = lazy(() => import('./store/StoreListPage'));
+const StoreProductPage   = lazy(() => import('./store/StoreProductPage'));
+const StoreCartPage      = lazy(() => import('./store/StoreCartPage'));
 const PortfolioDetail    = lazy(() => import('./components/PortfolioDetail'));
 const PolicyPageView = lazy(() => import('./components/legal/PolicyPageView'));
 const LegalIndexPage = lazy(() => import('./components/legal/LegalIndexPage'));
@@ -3410,6 +3415,15 @@ function App() {
             user={user}
           />
         } />
+        {/* /store — isolated Store namespace (static routes; must stay above /:key/:type). */}
+        <Route path="/store" element={<StoreLayout />}>
+          <Route index element={<StoreListPage />} />
+          <Route path="search" element={<StoreListPage />} />
+          <Route path="categories/:categorySlug" element={<StoreListPage />} />
+          <Route path="products/:slug" element={<StoreProductPage />} />
+          <Route path="cart" element={<StoreCartPage />} />
+          <Route path="*" element={<StoreNotFound />} />
+        </Route>
         <Route path="/portfolio/:id" element={
           <PortfolioDetail lang={lang} showToast={showToast} user={user} />
         } />

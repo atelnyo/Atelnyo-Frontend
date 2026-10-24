@@ -69,7 +69,7 @@ const LANG_FALLBACK = {
 let _paypalScriptPromise = null;
 let _paypalScriptIntent = null;
 
-function loadPayPalScript(clientId, isSandbox, intent = 'capture') {
+export function loadPayPalScript(clientId, isSandbox, intent = 'capture') {
   if (window.paypal && window.paypal.Buttons && _paypalScriptIntent === intent) {
     return Promise.resolve(window.paypal);
   }
