@@ -413,6 +413,44 @@ export default function ProductDetail({ lang = 'ht', product: propProduct, onBac
                 </section>
               )}
 
+              {/* ─── Gallery (Printify imports) ─────────────────────── */}
+              {Array.isArray(product.gallery) && product.gallery.length > 1 && (
+                <section className="pd-section">
+                  <h2 className="pd-section-title">
+                    <i className="fas fa-images" aria-hidden="true" />
+                    {t2(lang, { ht: 'Galri', en: 'Gallery' })}
+                  </h2>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {product.gallery.map((src) => (
+                      <img key={src} src={src} alt={product.title} loading="lazy"
+                        style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 8 }} />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* ─── Shipping (Printify imports) ────────────────────── */}
+              {product.shipping_info && product.shipping_info.profiles && product.shipping_info.profiles.length > 0 && (
+                <section className="pd-section">
+                  <h2 className="pd-section-title">
+                    <i className="fas fa-truck" aria-hidden="true" />
+                    {t2(lang, { ht: 'Livrezon', en: 'Shipping' })}
+                  </h2>
+                  <ul className="pd-text" style={{ paddingLeft: 18 }}>
+                    {product.shipping_info.profiles.map((p, i) => (
+                      <li key={i}>
+                        {(p.countries && p.countries.length > 0)
+                          ? p.countries.join(', ')
+                          : t2(lang, { ht: 'Tout peyi', en: 'All countries' })}
+                        {p.first_item && p.first_item.cost != null
+                          ? ` — ${formatCurrency(Number(p.first_item.cost) / 100, product.currency, lang)}`
+                          : ''}
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+
               {/* ─── Stats ──────────────────────────────────────────── */}
               <section className="pd-section">
                 <h2 className="pd-section-title">
