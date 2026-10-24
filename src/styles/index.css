@@ -14366,6 +14366,9 @@ body.dark-mode .related-spotlight-card:hover {
     right: 0;
     bottom: 0;
     top: auto;
+    width: 100%;
+    min-height: 20px;
+    box-sizing: border-box;
     z-index: 50;
     margin: 0;
     padding: 12px;

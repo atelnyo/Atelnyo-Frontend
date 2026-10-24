@@ -670,7 +670,7 @@ function PriceCard({ product, t, lang, onOpenCheckout, selectedVariant, onSelect
     }
   };
   return (
-    <div className="pd-price-card pd-price-card--sticky" style={{ marginBottom: 20 }}>
+    <div className="pd-price-card pd-price-card--sticky">
       {variants.length > 0 && (
         <div className="pd-variants">
           <span className="pd-variants-label">

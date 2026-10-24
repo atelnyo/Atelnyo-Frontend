@@ -67,6 +67,13 @@ test('buy button is visible in the first screen at 360px', async ({ page }) => {
   expect(box, 'sticky buy button box').not.toBeNull();
   expect(box!.y).toBeGreaterThanOrEqual(0);
   expect(box!.y + box!.height).toBeLessThanOrEqual(740);
+
+  // The bar spans the full width and is at least 20px tall.
+  const barBox = await bar.boundingBox();
+  expect(barBox, 'sticky buy bar box').not.toBeNull();
+  expect(barBox!.width).toBeGreaterThanOrEqual(359);
+  expect(barBox!.height).toBeGreaterThanOrEqual(20);
+  expect(barBox!.y + barBox!.height).toBeCloseTo(740, 0);
 });
 
 for (const vp of VIEWPORTS) {
