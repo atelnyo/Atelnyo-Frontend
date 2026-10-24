@@ -14278,6 +14278,11 @@ body.dark-mode .related-spotlight-card:hover {
   transform: translateY(0);
 }
 
+/* Desktop: the Buy button lives in the price card; the bar is phone-only. */
+.pd-buy-bar {
+  display: none;
+}
+
 /* Template layout: grey page, two columns on desktop, one on mobile */
 .pd-page {
   background: #e9e9ec;
@@ -14360,7 +14365,13 @@ body.dark-mode .related-spotlight-card:hover {
   .pd-body-inner {
     padding-bottom: 130px;
   }
-  .pd-price-card--sticky {
+  /* On phones the Buy button alone is pinned to the bottom of the screen;
+     the in-card copy is hidden so there is only one button. */
+  .pd-price-card .pd-cta-btn {
+    display: none;
+  }
+  .pd-buy-bar {
+    display: block;
     position: fixed;
     left: 0;
     right: 0;
@@ -14372,9 +14383,14 @@ body.dark-mode .related-spotlight-card:hover {
     z-index: 50;
     margin: 0;
     padding: 12px;
-    border-radius: 0;
     background: var(--pd-surface);
     box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  }
+  .pd-buy-bar .pd-cta-btn {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    box-sizing: border-box;
   }
 }
 

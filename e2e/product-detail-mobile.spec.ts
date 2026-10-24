@@ -59,7 +59,7 @@ test('buy button is visible in the first screen at 360px', async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 740 });
   await mockApi(page);
   await page.goto('/marketplace/201', { waitUntil: 'domcontentloaded' });
-  const bar = page.locator('.pd-price-card--sticky');
+  const bar = page.locator('.pd-buy-bar');
   await expect(bar).toBeAttached({ timeout: 20_000 });
   await page.evaluate(() => window.scrollBy(0, 600));
   await page.waitForTimeout(300);
@@ -74,6 +74,20 @@ test('buy button is visible in the first screen at 360px', async ({ page }) => {
   expect(barBox!.width).toBeGreaterThanOrEqual(359);
   expect(barBox!.height).toBeGreaterThanOrEqual(20);
   expect(barBox!.y + barBox!.height).toBeCloseTo(740, 0);
+});
+
+test('quantity + updates the total price in the price card', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 740 });
+  await mockApi(page);
+  await page.goto('/marketplace/201', { waitUntil: 'domcontentloaded' });
+  const card = page.locator('.pd-price-card', { has: page.locator('.pd-qty') }).first();
+  await expect(card).toBeVisible({ timeout: 20_000 });
+  const amount = card.locator('.pd-price-amount');
+  const before = await amount.textContent();
+  await card.getByRole('button', { name: '+' }).click();
+  await expect(card.locator('.pd-qty span')).toHaveText('2');
+  await expect(amount).not.toHaveText(before ?? '');
+  await expect(amount).toContainText('2 ×');
 });
 
 for (const vp of VIEWPORTS) {

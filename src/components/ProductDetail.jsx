@@ -669,8 +669,12 @@ function PriceCard({ product, t, lang, onOpenCheckout, selectedVariant, onSelect
       window.open(product.download_url, '_blank', 'noopener,noreferrer');
     }
   };
+  const unitPrice = selectedVariant && selectedVariant.price != null
+    ? Number(selectedVariant.price)
+    : Number(product.price) || 0;
   return (
-    <div className="pd-price-card pd-price-card--sticky">
+    <div>
+    <div className="pd-price-card">
       {variants.length > 0 && (
         <div className="pd-variants">
           <span className="pd-variants-label">
@@ -706,10 +710,11 @@ function PriceCard({ product, t, lang, onOpenCheckout, selectedVariant, onSelect
             {t2(lang, { ht: 'Prix', en: 'Price' })}
           </span>
           <span className="pd-price-amount">
-            {formatCurrency(
-              selectedVariant && selectedVariant.price != null ? selectedVariant.price : product.price,
-              product.currency,
-              lang,
+            {formatCurrency(unitPrice * quantity, product.currency, lang)}
+            {quantity > 1 && (
+              <span className="pd-price-label" style={{ marginLeft: 8 }}>
+                {quantity} × {formatCurrency(unitPrice, product.currency, lang)}
+              </span>
             )}
             {product.compare_at_price != null && (
               <s className="pd-price-compare">
@@ -743,6 +748,15 @@ function PriceCard({ product, t, lang, onOpenCheckout, selectedVariant, onSelect
             : (t2(lang, { ht: 'Achte', en: 'Buy' }))}
         </button>
       </div>
+    </div>
+    <div className="pd-buy-bar">
+      <button type="button" className="pd-cta-btn" onClick={handleBuy} disabled={outOfStock}>
+        <i className={product.kind === 'digital' && product.download_url ? 'fas fa-download' : 'fas fa-shopping-cart'} />
+        {product.kind === 'digital' && product.download_url
+          ? (t2(lang, { ht: 'Telechaje', en: 'Download' }))
+          : (t2(lang, { ht: 'Achte', en: 'Buy' }))}
+      </button>
+    </div>
     </div>
   );
 }
