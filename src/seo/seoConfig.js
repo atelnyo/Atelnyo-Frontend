@@ -163,6 +163,97 @@ const SEO_ROUTES = {
     ogType: 'website',
     indexable: true,
   },
+  // Public pages routed in App.jsx that were missing from the registry.
+  // Without these, the noindex fallback would wrongly de-index them.
+  '/faq': {
+    title: 'FAQ',
+    description: 'Answers to common questions about Atelnyo courses, music, marketplace, and account features.', 
+    robots: 'index,follow',
+    ogType: 'website',
+    indexable: true,
+    breadcrumbs: [{ label: 'Home', url: '/' }],
+  },
+  '/affiliate': {
+    title: 'Affiliate Program',
+    description: 'Earn by promoting courses, music and products on Atelnyo.',
+    robots: 'index,follow',
+    ogType: 'website',
+    indexable: true,
+    breadcrumbs: [{ label: 'Home', url: '/' }],
+  },
+  '/verify': {
+    title: 'Verify a Certificate',
+    description: 'Check the authenticity of an Atelnyo certificate.',
+    robots: 'index,follow',
+    ogType: 'website',
+    indexable: true,
+    breadcrumbs: [{ label: 'Home', url: '/' }],
+  },
+  '/creator/': {
+    title: 'Creator',
+    description: DESCRIPTIONS.creator,
+    robots: 'index,follow',
+    ogType: 'profile',
+    schemaType: 'ProfilePage',
+    indexable: true,
+    breadcrumbs: [
+      { label: 'Home', url: '/' },
+      { label: 'Creators', url: '/explore' },
+    ],
+  },
+  '/portfolio/': {
+    title: 'Portfolio',
+    description: 'View creator portfolios on Atelnyo.', 
+    robots: 'index,follow',
+    ogType: 'website',
+    indexable: true,
+    breadcrumbs: [{ label: 'Home', url: '/' }],
+  },
+  '/store': {
+    title: 'Store',
+    description: 'Shop products from creators on the Atelnyo store.',
+    robots: 'index,follow',
+    ogType: 'website',
+    indexable: true,
+    breadcrumbs: [{ label: 'Home', url: '/' }],
+  },
+  '/privacy': {
+    title: 'Privacy Policy',
+    description: 'Read how Atelnyo collects, uses, and protects your personal data.',
+    robots: 'index,follow',
+    ogType: 'website',
+    indexable: true,
+    breadcrumbs: [{ label: 'Home', url: '/' }],
+  },
+  '/terms': {
+    title: 'Terms of Service',
+    description: 'Read the Atelnyo Terms of Service.',
+    robots: 'index,follow',
+    ogType: 'website',
+    indexable: true,
+    breadcrumbs: [{ label: 'Home', url: '/' }],
+  },
+  '/help/': {
+    title: 'Help',
+    description: 'Atelnyo Help Center: guides and answers for courses, wallet, marketplace, and account features.',
+    robots: 'index,follow',
+    ogType: 'website',
+    indexable: true,
+    breadcrumbs: [{ label: 'Home', url: '/' }, { label: 'Help', url: '/help' }],
+  },
+  // Canonical product detail URL: /marketplace/<slug>
+  '/marketplace/': {
+    title: 'Product',
+    description: DESCRIPTIONS.product,
+    robots: 'index,follow',
+    ogType: 'product',
+    schemaType: 'Product',
+    indexable: true,
+    breadcrumbs: [
+      { label: 'Home', url: '/' },
+      { label: 'Products', url: '/products' },
+    ],
+  },
 
   // ─── Music / Talent / Job sheets ───────────────────────────────────
   '/sheet/explore/music': {
@@ -398,17 +489,28 @@ export function matchSEOConfig(pathname) {
     return { route: SEO_ROUTES[pathname], matchedPath: pathname };
   }
 
-  // Longest-prefix match (more specific routes win)
+  // Content detail URLs: /<slug>/by/<user>/product and /<slug>/by/<user>/course
+  if (/^\/[^/]+\/by\/[^/]+\/product\/?$/.test(pathname)) {
+    return { route: SEO_ROUTES['/marketplace/'], matchedPath: pathname };
+  }
+  if (/^\/[^/]+\/by\/[^/]+\/course\/?$/.test(pathname)) {
+    return { route: SEO_ROUTES['/courses/'], matchedPath: pathname };
+  }
+
+  // Only explicit prefixes ending in '/' match here. Bare '/' must not act
+  // as a catch-all, otherwise every unknown URL inherits the home page's
+  // description and index directive.
   let bestMatch = null;
   let bestLen = 0;
   for (const [pattern, config] of Object.entries(SEO_ROUTES)) {
+    if (pattern === '/' || !pattern.endsWith('/')) continue;
     if (pathname.startsWith(pattern) && pattern.length > bestLen) {
       bestMatch = config;
       bestLen = pattern.length;
     }
   }
-
-  return bestMatch ? { route: bestMatch, matchedPath: pathname } : null;
+  if (bestMatch) return { route: bestMatch, matchedPath: pathname };
+  return null;
 }
 
 /**
