@@ -1,0 +1,41 @@
+# ──────────────────────────────────────────────────────────────────────
+# wrangler.toml — Cloudflare Worker config for Atelnyo
+# ──────────────────────────────────────────────────────────────────────
+
+name = "atelnyo"
+main = "worker.js"
+compatibility_date = "2025-08-01"
+account_id = "0372ad63379afca8a773d66b82ffac95"
+
+# Build the SPA before deploying. dist/ is gitignored, so an auto-deploy
+# from GitHub would otherwise upload an EMPTY assets directory — which
+# makes every SPA route 404 (and, on the custom domain, 522).
+[build]
+command = "npm install && npm run build"
+
+# Static assets (SPA)
+[assets]
+directory = "../dist"
+not_found_handling = "single-page-application"
+# Without this binding env.ASSETS is undefined inside worker.js, so the
+# SPA fallback branch can't fetch index.html and every deep link (/about,
+# /explore, /login, ...) returns a plain 404 to non-bot visitors.
+binding = "ASSETS"
+# Route /sitemap.xml through the Worker BEFORE the asset handler —
+# public/sitemap.xml (23 static URLs) would otherwise shadow the worker's
+# proxy to the backend's DYNAMIC sitemap (help topics, courses, music,
+# profiles, ...) that robots.txt advertises. The worker proxies it to
+# api.atelnyo.site/sitemap.xml which merges everything.
+#
+# /api/* MUST also run worker-first. Without it, the asset handler
+# intercepts every /api/* request BEFORE the Worker's fetch() handler:
+# GET /api/search/ returned the SPA index.html (200 text/html) and POST
+# /api/ai/chat got a 405 from the asset handler — so the chatbot could
+# never reach /api/ai/chat in worker.js (and /api/* proxying to the
+# Django backend was dead too). "!/assets/*" keeps hashed JS/CSS/images
+# served directly (never worker-first) so page loads stay fast.
+run_worker_first = ["/sitemap.xml", "/api/*", "!/assets/*"]
+
+# Workers AI binding (FREE — no API key needed)
+[ai]
+binding = "AI"
