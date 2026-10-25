@@ -367,7 +367,7 @@ export default function StoreProductPage() {
             </form>
           ) : (
             <p>
-              <Link to={`/store/login?next=${encodeURIComponent(`/store/products/${p.slug || p.id}`)}`}>Sign in</Link> to review this product after you have purchased it.
+              <Link to={`/store/login?next=${encodeURIComponent(`/store/products/${p.slug || p.id}`)}`}>Sign in</Link> to review this product.
             </p>
           )}
         </section>

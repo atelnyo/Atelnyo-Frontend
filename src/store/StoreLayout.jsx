@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useNavigate, useSearchParams } from 'react-router-dom';
 import { cartCount, loadCart } from './cart';
 import { useAuthStore } from './useAuthStore';
@@ -10,7 +10,27 @@ export default function StoreLayout() {
   const [query, setQuery] = useState(params.get('q') || '');
   const [count, setCount] = useState(() => cartCount(loadCart()));
   const [menuOpen, setMenuOpen] = useState(false);
+  const navRef = useRef(null);
   const user = useAuthStore((s) => s.user);
+
+  // Close the mobile menu on a click outside it or on Escape.
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const onPointer = (e) => {
+      if (navRef.current && !navRef.current.contains(e.target)) setMenuOpen(false);
+    };
+    const onKey = (e) => {
+      if (e.key === 'Escape') setMenuOpen(false);
+    };
+    document.addEventListener('mousedown', onPointer);
+    document.addEventListener('touchstart', onPointer);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onPointer);
+      document.removeEventListener('touchstart', onPointer);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [menuOpen]);
 
   useEffect(() => {
     const refresh = () => setCount(cartCount(loadCart()));
@@ -43,7 +63,7 @@ export default function StoreLayout() {
             placeholder="Search products"
           />
         </form>
-        <nav className="store-header__nav" aria-label="Store">
+        <nav className="store-header__nav" aria-label="Store" ref={navRef}>
           <button
             type="button"
             className="store-btn store-btn--ghost store-header__toggle"
@@ -86,6 +106,9 @@ export default function StoreLayout() {
           <Link to="/store">All products</Link>
           <Link to="/store/cart">Cart</Link>
           <Link to="/store/favorites">Favorites</Link>
+          <Link to="/contact">Contact</Link>
+          <Link to="/legal/terms-of-service">Terms</Link>
+          <Link to="/legal/privacy-policy">Privacy</Link>
           <Link to={user ? '/account' : '/store/login'}>{user ? 'Account' : 'Sign in'}</Link>
         </nav>
         <p>© {new Date().getFullYear()} Atelnyo Store</p>
