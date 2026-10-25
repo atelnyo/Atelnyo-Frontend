@@ -186,7 +186,13 @@ export default function StoreCartPage() {
       </ul>
       <p className="store-state">Totals are calculated by the server at checkout.</p>
       <button type="button" className="store-btn store-cart__checkout" onClick={onCheckout} disabled={status === 'submitting'}>
-        {status === 'submitting' ? 'Starting checkout…' : 'Checkout'}
+        {status === 'submitting' ? (
+          <span className="store-cart__busy" role="status" aria-label="Starting checkout">
+            Starting checkout<span className="store-cart__dots" aria-hidden="true"><i /><i /><i /></span>
+          </span>
+        ) : (
+          'Checkout'
+        )}
       </button>
       {paypalOrderId && <div ref={buttonsRef} className="store-paypal" />}
       {message && (
