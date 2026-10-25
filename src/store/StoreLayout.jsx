@@ -55,6 +55,7 @@ export default function StoreLayout() {
           </button>
           <ul id="store-menu" className={`store-header__menu${menuOpen ? ' is-open' : ''}`}>
             <li><Link to="/store" onClick={() => setMenuOpen(false)}>All products</Link></li>
+            <li><Link to="/store/favorites" onClick={() => setMenuOpen(false)}>Favorites</Link></li>
             <li>
               <Link to={user ? '/account' : '/store/login'} onClick={() => setMenuOpen(false)}>
                 {user ? 'Account' : 'Sign in'}
@@ -83,6 +84,7 @@ export default function StoreLayout() {
         <nav aria-label="Store footer">
           <Link to="/store">All products</Link>
           <Link to="/store/cart">Cart</Link>
+          <Link to="/store/favorites">Favorites</Link>
           <Link to={user ? '/account' : '/store/login'}>{user ? 'Account' : 'Sign in'}</Link>
         </nav>
         <p>© {new Date().getFullYear()} Atelnyo Store</p>

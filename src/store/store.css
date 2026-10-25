@@ -109,6 +109,15 @@
   font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; padding: 3px 8px; border-radius: 4px;
 }
 .store-card__badge--muted { left: auto; right: 10px; background: #6b7280; }
+.store-card__fav {
+  position: absolute; top: 8px; right: 8px; z-index: 1; width: 32px; height: 32px; padding: 0;
+  border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.9); color: #0f2040;
+  font-size: 1.1rem; line-height: 1; cursor: pointer;
+}
+.store-card__fav.is-saved { color: #d62828; }
+.store-card__fav:disabled { opacity: 0.5; cursor: not-allowed; }
+.store-favorites { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.store-favorites a { color: var(--store-navy); }
 .store-card__category { margin: 10px 12px 0; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #6b7280; }
 .store-card__title { font-size: 1rem; margin: 4px 12px 4px; }
 .store-card__rating { margin: 0 12px 6px; font-size: 0.85rem; color: #6b7280; }

@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { addToCart, loadCart, saveCart } from './cart';
+import { storeService } from './storeService';
+import { useAuthStore } from './useAuthStore';
 
 const NEW_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -38,14 +40,32 @@ export default function ProductCard({ product: p }) {
   const outOfStock = p.stock === 0;
   const newBadge = isNew(p.created_at);
   const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
+  const [favoriteId, setFavoriteId] = useState(null);
+  const [favBusy, setFavBusy] = useState(false);
   const images = [p.image_url, ...(Array.isArray(p.gallery) ? p.gallery : [])].filter(Boolean);
   const [imgIdx, setImgIdx] = useState(0);
   const [hovered, setHovered] = useState(false);
   const [spun, setSpun] = useState(false);
+  const cardRef = useRef(null);
+  const [visible, setVisible] = useState(false);
+
+  // Track whether the card is actually on screen, so rotation only runs when a visitor can see it.
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return undefined;
+    if (typeof IntersectionObserver === 'undefined') {
+      setVisible(true);
+      return undefined;
+    }
+    const io = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), { threshold: 0.5 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   // Auto-rotate the gallery twice like an ad strip, then stop on the first image.
   useEffect(() => {
-    if (hovered || spun || images.length < 2) return undefined;
+    if (!visible || hovered || spun || images.length < 2) return undefined;
     if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
       return undefined;
     }
@@ -60,7 +80,7 @@ export default function ProductCard({ product: p }) {
       }
     }, 800);
     return () => clearInterval(timer);
-  }, [hovered, spun, images.length]);
+  }, [visible, hovered, spun, images.length]);
 
   // Hovering across the image moves through the gallery, like a product strip.
   const onMediaMove = (e) => {
@@ -86,6 +106,44 @@ export default function ProductCard({ product: p }) {
     addOne();
   };
 
+  useEffect(() => {
+    if (!user || !p.id) return undefined;
+    let cancelled = false;
+    storeService
+      .listFavorites({ product: p.id })
+      .then(({ data }) => {
+        if (cancelled) return;
+        const rows = Array.isArray(data) ? data : data?.results || [];
+        setFavoriteId(rows[0]?.id ?? null);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [user, p.id]);
+
+  const onToggleFavorite = async (e) => {
+    e.preventDefault();
+    if (!user) {
+      navigate(`/store/login?next=${encodeURIComponent(href)}`);
+      return;
+    }
+    setFavBusy(true);
+    try {
+      if (favoriteId) {
+        await storeService.removeFavorite(favoriteId);
+        setFavoriteId(null);
+      } else {
+        const { data } = await storeService.addFavorite(p.id);
+        setFavoriteId(data?.id ?? null);
+      }
+    } catch {
+      // Leave the saved state unchanged; the user can retry.
+    } finally {
+      setFavBusy(false);
+    }
+  };
+
   const onBuyNow = (e) => {
     e.preventDefault();
     addOne();
@@ -93,7 +151,7 @@ export default function ProductCard({ product: p }) {
   };
 
   return (
-    <li className="store-card">
+    <li className="store-card" ref={cardRef}>
       <Link to={href} className="store-card__link">
         <div className="store-card__media" onMouseEnter={onMediaEnter} onMouseMove={onMediaMove} onMouseLeave={onMediaLeave}>
           {images.length > 0 ? (
@@ -117,6 +175,17 @@ export default function ProductCard({ product: p }) {
             </span>
           )}
           {newBadge && <span className="store-card__badge">NEW</span>}
+          <button
+            type="button"
+            className={`store-card__fav${favoriteId ? ' is-saved' : ''}`}
+            aria-pressed={Boolean(favoriteId)}
+            aria-label={favoriteId ? 'Remove from favorites' : 'Save to favorites'}
+            title={favoriteId ? 'Remove from favorites' : 'Save to favorites'}
+            onClick={onToggleFavorite}
+            disabled={favBusy}
+          >
+            {favoriteId ? '♥' : '♡'}
+          </button>
           {outOfStock && <span className="store-card__badge store-card__badge--muted">Out of stock</span>}
         </div>
         {p.category && <p className="store-card__category">{p.category}</p>}

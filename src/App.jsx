@@ -134,6 +134,7 @@ const StoreNotFound      = lazy(() => import('./store/StoreLayout').then((m) => 
 const StoreListPage      = lazy(() => import('./store/StoreListPage'));
 const StoreProductPage   = lazy(() => import('./store/StoreProductPage'));
 const StoreCartPage      = lazy(() => import('./store/StoreCartPage'));
+const StoreFavoritesPage = lazy(() => import('./store/StoreFavoritesPage'));
 const PortfolioDetail    = lazy(() => import('./components/PortfolioDetail'));
 const PolicyPageView = lazy(() => import('./components/legal/PolicyPageView'));
 const LegalIndexPage = lazy(() => import('./components/legal/LegalIndexPage'));
@@ -3435,6 +3436,7 @@ function App() {
           <Route path="categories/:categorySlug" element={<StoreListPage />} />
           <Route path="products/:slug" element={<StoreProductPage />} />
           <Route path="cart" element={<StoreCartPage />} />
+          <Route path="favorites" element={<StoreFavoritesPage />} />
           <Route path="*" element={<StoreNotFound />} />
         </Route>
         <Route path="/portfolio/:id" element={
