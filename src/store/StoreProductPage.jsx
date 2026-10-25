@@ -195,22 +195,6 @@ export default function StoreProductPage() {
           <span>{reviewCount > 0 ? `${reviewCount} ${reviewCount === 1 ? 'review' : 'reviews'}` : 'No reviews yet'}</span>
         </div>
 
-        {description && (
-          <div className="store-product__desc">
-            <p>{descOpen || !descTooLong ? description : shortDesc}</p>
-            {descTooLong && (
-              <button
-                type="button"
-                className="store-product__more"
-                aria-expanded={descOpen}
-                onClick={() => setDescOpen((o) => !o)}
-              >
-                {descOpen ? 'Show less' : 'Show more'}
-              </button>
-            )}
-          </div>
-        )}
-
         <div className="store-product__pricebox">
           <p className="store-product__price">{money(price, currency)}</p>
           {showCompare && (
@@ -282,6 +266,22 @@ export default function StoreProductPage() {
               ))}
             </ul>
           </section>
+        )}
+
+        {description && (
+          <div className="store-product__desc">
+            <p>{descOpen || !descTooLong ? description : shortDesc}</p>
+            {descTooLong && (
+              <button
+                type="button"
+                className="store-product__more"
+                aria-expanded={descOpen}
+                onClick={() => setDescOpen((o) => !o)}
+              >
+                {descOpen ? 'Show less' : 'Show more'}
+              </button>
+            )}
+          </div>
         )}
       </div>
 

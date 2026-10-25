@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { addToCart, loadCart, saveCart } from './cart';
 
 const NEW_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
@@ -37,12 +37,23 @@ export default function ProductCard({ product: p }) {
   const hasVariants = Array.isArray(p.variants) && p.variants.length > 0;
   const outOfStock = p.stock === 0;
   const newBadge = isNew(p.created_at);
+  const navigate = useNavigate();
 
-  const onQuickAdd = (e) => {
-    e.preventDefault();
+  const addOne = () => {
     const items = addToCart(loadCart(), { productId: p.id, quantity: 1 });
     saveCart(items);
     window.dispatchEvent(new Event('store-cart-changed'));
+  };
+
+  const onQuickAdd = (e) => {
+    e.preventDefault();
+    addOne();
+  };
+
+  const onBuyNow = (e) => {
+    e.preventDefault();
+    addOne();
+    navigate('/store/cart');
   };
 
   return (
@@ -76,14 +87,21 @@ export default function ProductCard({ product: p }) {
       {hasVariants ? (
         <Link to={href} className="store-card__add">Choose options</Link>
       ) : (
-        <button
-          type="button"
-          className="store-card__add"
-          onClick={onQuickAdd}
-          disabled={outOfStock}
-        >
-          {outOfStock ? 'Unavailable' : 'Add to cart'}
-        </button>
+        <div className="store-card__actions">
+          <button
+            type="button"
+            className="store-card__add"
+            onClick={onQuickAdd}
+            disabled={outOfStock}
+          >
+            {outOfStock ? 'Unavailable' : 'Add to cart'}
+          </button>
+          {!outOfStock && (
+            <button type="button" className="store-card__add store-card__add--buy" onClick={onBuyNow}>
+              Buy now
+            </button>
+          )}
+        </div>
       )}
     </li>
   );
