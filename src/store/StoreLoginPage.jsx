@@ -3,6 +3,8 @@ import { Helmet } from 'react-helmet-async';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from './useAuthStore';
 import { safeNextPath } from '../utils/safeNextPath';
+import { applyTokenPair } from '../services/api';
+import useGoogleAuth from '../components/auth/useGoogleAuth';
 
 export default function StoreLoginPage() {
   const user = useAuthStore((s) => s.user);
@@ -14,6 +16,19 @@ export default function StoreLoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+
+  // Google sign-in reuses the platform hook. On success the session is stored
+  // the same way as the password login, then the store lets the user through.
+  const onGoogleSuccess = (signedInUser, payload) => {
+    applyTokenPair({ access: payload?.access, refresh: payload?.refresh, user: signedInUser });
+    useAuthStore.getState().setUser(signedInUser);
+    navigate(next, { replace: true });
+  };
+  const { googleRef, googleLoading } = useGoogleAuth({
+    lang: 'en',
+    onLoginSuccess: onGoogleSuccess,
+    isLoading: busy,
+  });
 
   if (user) {
     return <Navigate to={next} replace />;
@@ -43,12 +58,15 @@ export default function StoreLoginPage() {
   };
 
   return (
-    <section className="store-auth__card">
+    <div className="store-root store-auth">
       <Helmet>
         <title>Sign in · Atelnyo Store</title>
         <meta name="robots" content="noindex" />
       </Helmet>
+      <section className="store-auth__card">
       <h1 className="store-title">Sign in</h1>
+      <div ref={googleRef} className="store-auth__google" aria-busy={googleLoading} />
+      <p className="store-auth__or">or</p>
       <form className="store-auth__form" onSubmit={onSubmit} noValidate>
         <label>
           <span>Email or username</span>
@@ -73,6 +91,7 @@ export default function StoreLoginPage() {
           {busy ? 'Signing in…' : 'Sign in'}
         </button>
       </form>
-    </section>
+      </section>
+    </div>
   );
 }

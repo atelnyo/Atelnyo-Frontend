@@ -5,13 +5,26 @@
  */
 import api from '../services/api';
 
+function guestHeaders(guestToken) {
+  return guestToken ? { headers: { 'X-Guest-Order-Token': guestToken } } : undefined;
+}
+
 export const storeService = {
   listProducts: (params) => api.get('marketplace/products/', { params }),
   listCategories: () => api.get('categories/', { params: { scope: 'product' } }),
   getProduct: (slugOrId) => api.get(`marketplace/products/${encodeURIComponent(slugOrId)}/`),
-  createOrder: (items) => api.post('marketplace/orders/', { items, hold_payment: true }),
-  checkoutOrder: (orderId, provider = 'paypal') =>
-    api.post('checkout/order/', { order_id: orderId, provider }),
+  // Guests pass { email, name }; signed-in buyers pass nothing.
+  createOrder: (items, guest) =>
+    api.post('marketplace/orders/', {
+      items,
+      hold_payment: true,
+      ...(guest ? { guest_email: guest.email, guest_name: guest.name } : {}),
+    }),
+  // guestToken is the one-time token returned when a guest creates the order.
+  checkoutOrder: (orderId, provider = 'paypal', guestToken) =>
+    api.post('checkout/order/', { order_id: orderId, provider }, guestHeaders(guestToken)),
+  claimOrder: (orderId, guestToken, password) =>
+    api.post('marketplace/orders/claim/', { order_id: orderId, guest_token: guestToken, password }),
   listFavorites: (params) => api.get('marketplace/favorites/', { params }),
   addFavorite: (productId) => api.post('marketplace/favorites/', { product: productId }),
   removeFavorite: (favoriteId) => api.delete(`marketplace/favorites/${favoriteId}/`),

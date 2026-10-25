@@ -134,6 +134,7 @@ const StoreNotFound      = lazy(() => import('./store/StoreLayout').then((m) => 
 const StoreListPage      = lazy(() => import('./store/StoreListPage'));
 const StoreProductPage   = lazy(() => import('./store/StoreProductPage'));
 const StoreCartPage      = lazy(() => import('./store/StoreCartPage'));
+const StoreClaimPage     = lazy(() => import('./store/StoreClaimPage'));
 const StoreFavoritesPage = lazy(() => import('./store/StoreFavoritesPage'));
 const StoreAccountPage = lazy(() => import('./store/StoreAccountPage'));
 const StoreLoginPage = lazy(() => import('./store/StoreLoginPage'));
@@ -3431,13 +3432,14 @@ function App() {
         <Route path="/account" element={<StoreLayout />}>
           <Route index element={<StoreAccountPage />} />
         </Route>
+        <Route path="/store/login" element={<StoreLoginPage />} />
         <Route path="/store" element={<StoreLayout />}>
-          <Route path="login" element={<StoreLoginPage />} />
           <Route index element={<StoreListPage />} />
           <Route path="search" element={<StoreListPage />} />
           <Route path="categories/:categorySlug" element={<StoreListPage />} />
           <Route path="products/:slug" element={<StoreProductPage />} />
           <Route path="cart" element={<StoreCartPage />} />
+          <Route path="claim" element={<StoreClaimPage />} />
           <Route path="favorites" element={<StoreFavoritesPage />} />
           <Route path="*" element={<StoreNotFound />} />
         </Route>

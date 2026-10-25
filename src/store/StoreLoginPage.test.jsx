@@ -6,13 +6,31 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 
 const loginMock = vi.fn();
+const setUserMock = vi.fn();
+const applyTokenPairMock = vi.fn();
+let googleSuccess = null;
 
 vi.mock('./useAuthStore', () => {
-  const state = { user: null, login: (...args) => loginMock(...args) };
+  const state = {
+    user: null,
+    login: (...args) => loginMock(...args),
+    setUser: (...args) => setUserMock(...args),
+  };
   const useAuthStore = (selector) => selector(state);
   useAuthStore.setState = () => {};
   return { useAuthStore: Object.assign(useAuthStore, { getState: () => state }) };
 });
+
+vi.mock('../services/api', () => ({
+  applyTokenPair: (...args) => applyTokenPairMock(...args),
+}));
+
+vi.mock('../components/auth/useGoogleAuth', () => ({
+  default: (opts) => {
+    googleSuccess = opts.onLoginSuccess;
+    return { googleRef: { current: null }, googleLoading: false };
+  },
+}));
 
 import StoreLoginPage from './StoreLoginPage';
 
@@ -39,6 +57,15 @@ describe('StoreLoginPage', () => {
     expect(screen.getByRole('heading', { name: 'Sign in' })).toBeTruthy();
     expect(screen.getByLabelText('Email or username')).toBeTruthy();
     expect(screen.getByLabelText('Password')).toBeTruthy();
+  });
+
+  it('stores the Google session and returns to the store on Google success', async () => {
+    renderAt();
+    expect(googleSuccess).toBeTypeOf('function');
+    googleSuccess({ id: 7, username: 'amy' }, { access: 'a1', refresh: 'r1', user: { id: 7 } });
+    expect(applyTokenPairMock).toHaveBeenCalledWith({ access: 'a1', refresh: 'r1', user: { id: 7, username: 'amy' } });
+    expect(setUserMock).toHaveBeenCalledWith({ id: 7, username: 'amy' });
+    expect(await screen.findByText('STORE HOME')).toBeTruthy();
   });
 
   it('asks for both fields before submitting', () => {

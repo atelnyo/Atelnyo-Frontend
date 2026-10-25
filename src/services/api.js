@@ -1315,11 +1315,13 @@ export const checkoutService = {
     api.post('checkout/event/', { event_id: eventId, provider }),
 
   // Capture an approved PayPal order (webhook-first confirmation).
-  capturePaypal: (transactionId, paypalOrderId) =>
-    api.post('checkout/paypal/capture/', {
-      transaction_id: transactionId,
-      paypal_order_id: paypalOrderId,
-    }),
+  // guestToken is sent only for guest orders (X-Guest-Order-Token).
+  capturePaypal: (transactionId, paypalOrderId, guestToken) =>
+    api.post(
+      'checkout/paypal/capture/',
+      { transaction_id: transactionId, paypal_order_id: paypalOrderId },
+      guestToken ? { headers: { 'X-Guest-Order-Token': guestToken } } : undefined,
+    ),
 
   // Refund a PayPal transaction (full or partial). Buyer or staff only.
   refundPaypal: (transactionId, amount) =>

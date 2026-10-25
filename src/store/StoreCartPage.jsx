@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { storeService } from './storeService';
+import { useAuthStore } from './useAuthStore';
 import { loadCart, saveCart, setQuantity, removeFromCart } from './cart';
 import SEOHead from '../components/shared/SEOHead';
 import { loadPayPalScript } from '../components/CheckoutModal';
@@ -33,6 +34,12 @@ export default function StoreCartPage() {
   const [orderId, setOrderId] = useState(null);
   const [txnId, setTxnId] = useState(null);
   const [paypalOrderId, setPaypalOrderId] = useState(null);
+  // Guest token is kept in memory only: shown once by the server, never stored.
+  const [guestToken, setGuestToken] = useState(null);
+  const [guestEmail, setGuestEmail] = useState('');
+  const [guestName, setGuestName] = useState('');
+  const [loginLink, setLoginLink] = useState(null);
+  const user = useAuthStore((s) => s.user);
   const buttonsRef = useRef(null);
 
   const update = (next) => {
@@ -61,7 +68,7 @@ export default function StoreCartPage() {
           onApprove: async (data) => {
             setStatus('submitting');
             try {
-              await checkoutService.capturePaypal(txnId, data.orderID || paypalOrderId);
+              await checkoutService.capturePaypal(txnId, data.orderID || paypalOrderId, guestToken);
               update([]);
               setPaypalOrderId(null);
               setMessage(`Payment received for order #${orderId}.`);
@@ -86,7 +93,7 @@ export default function StoreCartPage() {
     return () => {
       cancelled = true;
     };
-  }, [paypalOrderId, txnId, orderId]);
+  }, [paypalOrderId, txnId, orderId, guestToken]);
 
   const onQty = (line, quantity) =>
     update(setQuantity(items, { ...line, quantity }));
@@ -94,19 +101,41 @@ export default function StoreCartPage() {
 
   const onCheckout = async () => {
     if (!items.length) return;
+    const guest = !user;
+    if (guest && (!guestEmail.trim() || !guestEmail.includes('@'))) {
+      setMessage('Enter a valid email to check out.');
+      setStatus('error');
+      return;
+    }
     setStatus('submitting');
     setMessage('');
+    setLoginLink(null);
     try {
       // Only ids and quantities are sent; the backend prices and validates them.
-      const orderRes = await storeService.createOrder(
+      let orderRes;
+      try {
+        orderRes = await storeService.createOrder(
         items.map((it) => ({
           product_id: it.productId,
           variant_id: it.variantId,
           quantity: it.quantity,
         })),
-      );
+        guest ? { email: guestEmail.trim(), name: guestName.trim() } : null,
+        );
+      } catch (err) {
+        if (err?.response?.data?.code === 'account_exists') {
+          const next = encodeURIComponent('/store/cart');
+          setMessage('An account already uses this email. Sign in to check out with it.');
+          setLoginLink(`/store/login?next=${next}`);
+          setStatus('error');
+          return;
+        }
+        throw err;
+      }
       const orderId = orderRes?.data?.id;
-      const payRes = await storeService.checkoutOrder(orderId, 'paypal');
+      const token = orderRes?.data?.guest_token || null;
+      setGuestToken(token);
+      const payRes = await storeService.checkoutOrder(orderId, 'paypal', token);
       const pay = payRes?.data || {};
       if (!pay.paypal_order_id) {
         setMessage('Payment is not available right now.');
@@ -185,6 +214,29 @@ export default function StoreCartPage() {
         })}
       </ul>
       <p className="store-state">Totals are calculated by the server at checkout.</p>
+      {!user && (
+        <div className="store-guest">
+          <label>
+            Email (receipt and order access)
+            <input
+              type="email"
+              autoComplete="email"
+              required
+              value={guestEmail}
+              onChange={(e) => setGuestEmail(e.target.value)}
+            />
+          </label>
+          <label>
+            Name (optional)
+            <input
+              type="text"
+              autoComplete="name"
+              value={guestName}
+              onChange={(e) => setGuestName(e.target.value)}
+            />
+          </label>
+        </div>
+      )}
       <button type="button" className="store-btn store-cart__checkout" onClick={onCheckout} disabled={status === 'submitting'}>
         {status === 'submitting' ? (
           <span className="store-cart__busy" role="status" aria-label="Starting checkout">
@@ -198,6 +250,7 @@ export default function StoreCartPage() {
       {message && (
         <p role={status === 'error' ? 'alert' : 'status'} className={status === 'error' ? 'store-state store-state--error' : 'store-state'}>
           {message}
+          {loginLink && <> <Link to={loginLink}>Sign in</Link></>}
         </p>
       )}
     </section>

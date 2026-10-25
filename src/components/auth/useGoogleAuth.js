@@ -55,7 +55,7 @@ export default function useGoogleAuth({ lang, onLoginSuccess, showToast, isLoadi
       clearPendingGoogle();
       setPendingGoogle(null);
       if (showToast) showToast(lang === 'ht' ? 'Koneksyon siksè!' : 'Login successful!', 'check-circle');
-      onLoginSuccess(data.user);
+      onLoginSuccess(data.user, data);
       return { success: true, user: data.user };
     } catch (err) {
       const msg = err?.response?.data?.error || err?.response?.data?.detail

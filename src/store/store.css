@@ -69,9 +69,17 @@
 .store-state { color: var(--store-muted); }
 .store-state--error { color: var(--store-danger); }
 
+.store-auth { display: flex; align-items: flex-start; justify-content: center; min-height: 100vh; padding: 24px 16px; }
 .store-auth__card, .store-account {
-  max-width: 420px; margin: 24px auto; padding: 24px;
+  width: 100%; max-width: 420px; margin: 24px auto; padding: 24px;
   background: #fff; border: 1px solid var(--store-border); border-radius: 12px;
+}
+.store-auth__card { margin: 0; }
+.store-auth__google { display: flex; justify-content: center; min-height: 44px; margin-bottom: 16px; }
+.store-auth__or { margin: 0 0 16px; text-align: center; color: var(--store-muted); font-size: 0.85rem; }
+@media (max-width: 480px) {
+  .store-auth { padding: 12px; }
+  .store-auth__card, .store-account { padding: 18px; }
 }
 .store-auth__form { display: grid; gap: 16px; }
 .store-auth__form label { display: grid; gap: 6px; font-weight: 600; }
