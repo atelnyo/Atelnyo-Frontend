@@ -1738,7 +1738,7 @@ function App() {
   // under /sheet/, so without this gate the main chrome would stay visible
   // underneath the profile — a broken double render.
   // /store has its own header, footer and navigation, so the global chrome is hidden there.
-  const isStoreRoute = effectivePathname === '/store' || effectivePathname.startsWith('/store/');
+  const isStoreRoute = effectivePathname === '/store' || effectivePathname.startsWith('/store/') || effectivePathname === '/account' || effectivePathname === '/store/login';
   const isSheetRoute = effectivePathname.startsWith('/sheet/') || effectivePathname.startsWith('/creator/') || effectivePathname.startsWith('/portfolio/') || effectivePathname.startsWith('/marketplace/') || effectivePathname.match(/^\/c\//) || effectivePathname.match(/^\/(@|%40)/i) || effectivePathname.startsWith('/legal/') || effectivePathname === '/themes' || effectivePathname === '/faq' || effectivePathname === '/help' || effectivePathname === '/about' || effectivePathname === '/trust' || effectivePathname === '/contact' || effectivePathname === '/accessibility' || effectivePathname === '/status' || effectivePathname === '/developers' || effectivePathname === '/verify' || effectivePathname.startsWith('/affiliate') || effectivePathname.startsWith('/page/') || effectivePathname.startsWith('/company/') || effectivePathname === '/business' || effectivePathname.startsWith('/business/') || effectivePathname === SHEETS.LOGIN || effectivePathname === SHEETS.SIGNUP || isContentRoutePath(effectivePathname) || effectivePathname === '/explore' || effectivePathname.startsWith('/explore/');
 
   // ─── Sheet isolation ────────────────────────────────────────────────
@@ -3427,11 +3427,12 @@ function App() {
           />
         } />
         {/* /store — isolated Store namespace (static routes; must stay above /:key/:type). */}
-        {/* Account page: outside StoreLayout, since it is not a store page. */}
-        <Route path="/account" element={<StoreAccountPage />} />
-        {/* Store sign-in has its own store-styled form, outside StoreLayout. */}
-        <Route path="/store/login" element={<StoreLoginPage />} />
+        {/* Account page uses the store template (header, search, cart, footer). */}
+        <Route path="/account" element={<StoreLayout />}>
+          <Route index element={<StoreAccountPage />} />
+        </Route>
         <Route path="/store" element={<StoreLayout />}>
+          <Route path="login" element={<StoreLoginPage />} />
           <Route index element={<StoreListPage />} />
           <Route path="search" element={<StoreListPage />} />
           <Route path="categories/:categorySlug" element={<StoreListPage />} />

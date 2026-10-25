@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from './useAuthStore';
 import { safeNextPath } from '../utils/safeNextPath';
 
@@ -43,43 +43,36 @@ export default function StoreLoginPage() {
   };
 
   return (
-    <div className="store-root store-auth">
+    <section className="store-auth__card">
       <Helmet>
         <title>Sign in · Atelnyo Store</title>
         <meta name="robots" content="noindex" />
       </Helmet>
-      <header className="store-header">
-        <Link to="/store" className="store-header__brand">Atelnyo Store</Link>
-      </header>
-      <main className="store-main">
-        <section className="store-auth__card">
-          <h1 className="store-title">Sign in</h1>
-          <form className="store-auth__form" onSubmit={onSubmit} noValidate>
-            <label>
-              <span>Email or username</span>
-              <input
-                type="text"
-                autoComplete="username"
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
-              />
-            </label>
-            <label>
-              <span>Password</span>
-              <input
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </label>
-            {error && <p className="store-auth__error" role="alert">{error}</p>}
-            <button type="submit" className="store-btn" disabled={busy}>
-              {busy ? 'Signing in…' : 'Sign in'}
-            </button>
-          </form>
-        </section>
-      </main>
-    </div>
+      <h1 className="store-title">Sign in</h1>
+      <form className="store-auth__form" onSubmit={onSubmit} noValidate>
+        <label>
+          <span>Email or username</span>
+          <input
+            type="text"
+            autoComplete="username"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+          />
+        </label>
+        <label>
+          <span>Password</span>
+          <input
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </label>
+        {error && <p className="store-auth__error" role="alert">{error}</p>}
+        <button type="submit" className="store-btn" disabled={busy}>
+          {busy ? 'Signing in…' : 'Sign in'}
+        </button>
+      </form>
+    </section>
   );
 }

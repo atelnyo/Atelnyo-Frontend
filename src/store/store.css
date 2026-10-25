@@ -69,6 +69,20 @@
 .store-state { color: var(--store-muted); }
 .store-state--error { color: var(--store-danger); }
 
+.store-auth__card, .store-account {
+  max-width: 420px; margin: 24px auto; padding: 24px;
+  background: #fff; border: 1px solid var(--store-border); border-radius: 12px;
+}
+.store-auth__form { display: grid; gap: 16px; }
+.store-auth__form label { display: grid; gap: 6px; font-weight: 600; }
+.store-auth__form input {
+  height: 44px; padding: 0 12px; border: 1px solid var(--store-border); border-radius: 8px; font: inherit;
+}
+.store-auth__error { color: var(--store-danger); margin: 0; }
+.store-account dl { display: grid; grid-template-columns: max-content 1fr; gap: 8px 16px; margin: 0 0 20px; }
+.store-account dt { color: var(--store-muted); }
+.store-account dd { margin: 0; }
+
 .store-btn {
   padding: 10px 18px; border: 0; border-radius: 8px; cursor: pointer;
   background: var(--store-navy); color: #fff; font: inherit; font-weight: 600;
