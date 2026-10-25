@@ -136,6 +136,7 @@ const StoreProductPage   = lazy(() => import('./store/StoreProductPage'));
 const StoreCartPage      = lazy(() => import('./store/StoreCartPage'));
 const StoreFavoritesPage = lazy(() => import('./store/StoreFavoritesPage'));
 const StoreAccountPage = lazy(() => import('./store/StoreAccountPage'));
+const StoreLoginPage = lazy(() => import('./store/StoreLoginPage'));
 const PortfolioDetail    = lazy(() => import('./components/PortfolioDetail'));
 const PolicyPageView = lazy(() => import('./components/legal/PolicyPageView'));
 const LegalIndexPage = lazy(() => import('./components/legal/LegalIndexPage'));
@@ -1737,7 +1738,7 @@ function App() {
   // under /sheet/, so without this gate the main chrome would stay visible
   // underneath the profile — a broken double render.
   // /store has its own header, footer and navigation, so the global chrome is hidden there.
-  const isStoreRoute = (effectivePathname === '/store' || effectivePathname.startsWith('/store/')) && effectivePathname !== '/store/login';
+  const isStoreRoute = effectivePathname === '/store' || effectivePathname.startsWith('/store/');
   const isSheetRoute = effectivePathname.startsWith('/sheet/') || effectivePathname.startsWith('/creator/') || effectivePathname.startsWith('/portfolio/') || effectivePathname.startsWith('/marketplace/') || effectivePathname.match(/^\/c\//) || effectivePathname.match(/^\/(@|%40)/i) || effectivePathname.startsWith('/legal/') || effectivePathname === '/themes' || effectivePathname === '/faq' || effectivePathname === '/help' || effectivePathname === '/about' || effectivePathname === '/trust' || effectivePathname === '/contact' || effectivePathname === '/accessibility' || effectivePathname === '/status' || effectivePathname === '/developers' || effectivePathname === '/verify' || effectivePathname.startsWith('/affiliate') || effectivePathname.startsWith('/page/') || effectivePathname.startsWith('/company/') || effectivePathname === '/business' || effectivePathname.startsWith('/business/') || effectivePathname === SHEETS.LOGIN || effectivePathname === SHEETS.SIGNUP || isContentRoutePath(effectivePathname) || effectivePathname === '/explore' || effectivePathname.startsWith('/explore/');
 
   // ─── Sheet isolation ────────────────────────────────────────────────
@@ -3428,16 +3429,8 @@ function App() {
         {/* /store — isolated Store namespace (static routes; must stay above /:key/:type). */}
         {/* Account page: outside StoreLayout, since it is not a store page. */}
         <Route path="/account" element={<StoreAccountPage />} />
-        {/* Store sign-in renders outside StoreLayout so it uses the same page chrome as the main login. */}
-        <Route path="/store/login" element={
-          <AuthRoute
-            user={user}
-            mode="login"
-            lang={lang}
-            onLoginSuccess={handleLoginSuccess}
-            showToast={showToast}
-          />
-        } />
+        {/* Store sign-in has its own store-styled form, outside StoreLayout. */}
+        <Route path="/store/login" element={<StoreLoginPage />} />
         <Route path="/store" element={<StoreLayout />}>
           <Route index element={<StoreListPage />} />
           <Route path="search" element={<StoreListPage />} />
