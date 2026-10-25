@@ -220,6 +220,18 @@
 .store-product__notice { font-size: 0.9rem; color: var(--store-danger); margin: 0 0 12px; }
 .store-product__notice.is-ok { color: #1e7a3c; }
 .store-product__highlights { margin-top: 24px; }
+.store-review { margin-top: 32px; max-width: 480px; }
+.store-review h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--store-muted); margin: 0 0 8px; }
+.store-review form { display: grid; gap: 8px; }
+.store-review__rating { border: 0; padding: 0; margin: 0; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.store-review__rating legend { font-size: 0.9rem; margin-right: 8px; }
+.store-review__star { position: relative; cursor: pointer; font-size: 1.4rem; color: #e0a800; }
+.store-review__star input { position: absolute; opacity: 0; pointer-events: none; }
+.store-review__star:focus-within { outline: 2px solid var(--store-navy); outline-offset: 2px; }
+.store-review__sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.store-review textarea { padding: 8px 10px; border: 1px solid var(--store-border); border-radius: 8px; font: inherit; resize: vertical; }
+.store-review input[type="text"] { padding: 8px 10px; border: 1px solid var(--store-border); border-radius: 8px; font: inherit; }
+.store-review .store-field { max-width: none; margin: 0; }
 .store-product__highlights h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--store-muted); margin: 0 0 8px; }
 .store-product__highlights ul { margin: 0; padding-left: 18px; font-size: 0.9rem; line-height: 1.7; color: var(--store-navy); }
 .store-product__media { min-width: 0; }

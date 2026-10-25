@@ -15,6 +15,7 @@ export const storeService = {
   listFavorites: (params) => api.get('marketplace/favorites/', { params }),
   addFavorite: (productId) => api.post('marketplace/favorites/', { product: productId }),
   removeFavorite: (favoriteId) => api.delete(`marketplace/favorites/${favoriteId}/`),
+  createReview: (payload) => api.post('marketplace/reviews/', payload),
 };
 
 export default storeService;

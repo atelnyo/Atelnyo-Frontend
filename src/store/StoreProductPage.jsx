@@ -51,6 +51,9 @@ export default function StoreProductPage() {
   const [favorite, setFavorite] = useState(null);
   const [favBusy, setFavBusy] = useState(false);
   const [descOpen, setDescOpen] = useState(false);
+  const [review, setReview] = useState({ rating: 0, title: '', body: '' });
+  const [reviewBusy, setReviewBusy] = useState(false);
+  const [reviewNotice, setReviewNotice] = useState({ kind: '', text: '' });
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
 
@@ -176,6 +179,38 @@ export default function StoreProductPage() {
     }
   };
 
+  const onSubmitReview = async (e) => {
+    e.preventDefault();
+    if (!user) {
+      navigate(`/store/login?next=${encodeURIComponent(`/store/products/${p.slug || p.id}`)}`);
+      return;
+    }
+    if (review.rating < 1) {
+      setReviewNotice({ kind: 'error', text: 'Choose a rating from 1 to 5.' });
+      return;
+    }
+    setReviewBusy(true);
+    setReviewNotice({ kind: '', text: '' });
+    try {
+      await storeService.createReview({
+        product: p.id,
+        rating: review.rating,
+        title: review.title.trim(),
+        body: review.body.trim(),
+      });
+      setReview({ rating: 0, title: '', body: '' });
+      setReviewNotice({ kind: 'ok', text: 'Thanks for your review.' });
+    } catch (err) {
+      const detail = err?.response?.data?.detail;
+      setReviewNotice({
+        kind: 'error',
+        text: detail || 'Could not submit your review. Try again.',
+      });
+    } finally {
+      setReviewBusy(false);
+    }
+  };
+
   return (
     <article className="store-product">
       <SEOHead
@@ -283,6 +318,59 @@ export default function StoreProductPage() {
             )}
           </div>
         )}
+
+        <section className="store-review" aria-labelledby="store-review-title">
+          <h2 id="store-review-title">Write a review</h2>
+          {user ? (
+            <form onSubmit={onSubmitReview}>
+              <fieldset className="store-review__rating">
+                <legend>Your rating</legend>
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <label key={n} className="store-review__star">
+                    <input
+                      type="radio"
+                      name="rating"
+                      value={n}
+                      checked={review.rating === n}
+                      onChange={() => setReview((r) => ({ ...r, rating: n }))}
+                    />
+                    <span aria-hidden="true">{n <= review.rating ? '★' : '☆'}</span>
+                    <span className="store-review__sr">{n} {n === 1 ? 'star' : 'stars'}</span>
+                  </label>
+                ))}
+              </fieldset>
+              <label className="store-field">
+                <span>Title (optional)</span>
+                <input
+                  type="text"
+                  maxLength={200}
+                  value={review.title}
+                  onChange={(e) => setReview((r) => ({ ...r, title: e.target.value }))}
+                />
+              </label>
+              <label className="store-field">
+                <span>Review (optional)</span>
+                <textarea
+                  rows={4}
+                  value={review.body}
+                  onChange={(e) => setReview((r) => ({ ...r, body: e.target.value }))}
+                />
+              </label>
+              <button type="submit" className="store-buy" disabled={reviewBusy}>
+                {reviewBusy ? 'Submitting…' : 'Submit review'}
+              </button>
+              {reviewNotice.text && (
+                <p role="status" className={`store-product__notice${reviewNotice.kind === 'ok' ? ' is-ok' : ''}`}>
+                  {reviewNotice.text}
+                </p>
+              )}
+            </form>
+          ) : (
+            <p>
+              <Link to={`/store/login?next=${encodeURIComponent(`/store/products/${p.slug || p.id}`)}`}>Sign in</Link> to review this product after you have purchased it.
+            </p>
+          )}
+        </section>
       </div>
 
       <div className="store-product__media">
