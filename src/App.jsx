@@ -135,6 +135,7 @@ const StoreListPage      = lazy(() => import('./store/StoreListPage'));
 const StoreProductPage   = lazy(() => import('./store/StoreProductPage'));
 const StoreCartPage      = lazy(() => import('./store/StoreCartPage'));
 const StoreFavoritesPage = lazy(() => import('./store/StoreFavoritesPage'));
+const StoreAccountPage = lazy(() => import('./store/StoreAccountPage'));
 const PortfolioDetail    = lazy(() => import('./components/PortfolioDetail'));
 const PolicyPageView = lazy(() => import('./components/legal/PolicyPageView'));
 const LegalIndexPage = lazy(() => import('./components/legal/LegalIndexPage'));
@@ -3425,6 +3426,8 @@ function App() {
           />
         } />
         {/* /store — isolated Store namespace (static routes; must stay above /:key/:type). */}
+        {/* Account page: outside StoreLayout, since it is not a store page. */}
+        <Route path="/account" element={<StoreAccountPage />} />
         {/* Store sign-in renders outside StoreLayout so it uses the same page chrome as the main login. */}
         <Route path="/store/login" element={
           <AuthRoute
