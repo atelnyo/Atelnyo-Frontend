@@ -152,7 +152,7 @@ export default function StoreListPage() {
         url={categorySlug ? `/store/categories/${categorySlug}` : q ? '/store/search' : '/store'}
         noindex={Boolean(q)}
       />
-      <h1 id="store-listing-title" className="store-title">
+      <h1 id="store-listing-title" className={categorySlug || q ? 'store-title' : 'store-listing__title'}>
         {heading}
       </h1>
 

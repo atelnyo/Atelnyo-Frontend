@@ -40,13 +40,17 @@
 
 .store-main { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
 .store-title { font-size: 1.5rem; margin: 0 0 16px; }
-.store-categories { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 20px; }
-.store-categories a { padding: 6px 14px; border: 1px solid currentColor; border-radius: 999px; font-size: 0.85rem; text-decoration: none; color: inherit; }
+/* Home page title: visually hidden on desktop (header brand shows instead), visible on phones (header brand hidden). */
+.store-listing__title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.store-categories { display: flex; flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; gap: 8px; margin: 0 0 20px; padding-bottom: 4px; }
+.store-categories a { flex: 0 0 auto; padding: 6px 14px; border: 1px solid currentColor; border-radius: 999px; font-size: 0.85rem; text-decoration: none; color: inherit; }
 .store-categories a.is-active { background: var(--store-navy); border-color: var(--store-navy); color: #fff; }
 .store-toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin: 0 0 16px; }
 .store-toolbar__count { margin: 0; font-size: 0.9rem; }
 .store-toolbar__sort { display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; }
-.store-toolbar__sort select { padding: 6px 10px; border: 1px solid #cfd6e0; border-radius: 4px; background: #fff; font: inherit; }
+.store-toolbar__sort select { min-width: 160px; height: 36px; padding: 6px 10px; border: 1px solid #cfd6e0; border-radius: 4px; background: #fff; color: #1b2a4a; font: inherit; -webkit-appearance: menulist; appearance: auto; }
+.store-toolbar__sort select option { background: #fff; color: #1b2a4a; }
+.store-toolbar__sort span { color: #1b2a4a; }
 .store-pager { display: flex; justify-content: center; align-items: center; gap: 16px; margin: 24px 0; }
 .store-state { color: var(--store-muted); }
 .store-state--error { color: var(--store-danger); }
@@ -108,6 +112,10 @@
 .store-header__menu { display: flex; gap: 12px; list-style: none; margin: 0; padding: 0; }
 .store-header__menu a { color: inherit; text-decoration: none; }
 @media (max-width: 640px) {
+  .store-header { flex-wrap: nowrap; gap: 8px; padding: 12px 16px; }
+  .store-header__brand { display: none; }
+  .store-listing__title { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal; font-size: 1.5rem; margin: 0 0 16px; }
+  .store-header__search { flex: 1 1 auto; }
   .store-header__toggle { display: inline-flex; }
   .store-header__menu { display: none; position: absolute; right: 0; top: 100%; flex-direction: column; background: #fff; padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 8px; min-width: 160px; }
   .store-header__menu.is-open { display: flex; }
