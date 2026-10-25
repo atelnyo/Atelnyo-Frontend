@@ -3420,6 +3420,15 @@ function App() {
         {/* /store — isolated Store namespace (static routes; must stay above /:key/:type). */}
         <Route path="/store" element={<StoreLayout />}>
           <Route index element={<StoreListPage />} />
+          <Route path="login" element={
+            <AuthRoute
+              user={user}
+              mode="login"
+              lang={lang}
+              onLoginSuccess={handleLoginSuccess}
+              showToast={showToast}
+            />
+          } />
           <Route path="search" element={<StoreListPage />} />
           <Route path="categories/:categorySlug" element={<StoreListPage />} />
           <Route path="products/:slug" element={<StoreProductPage />} />

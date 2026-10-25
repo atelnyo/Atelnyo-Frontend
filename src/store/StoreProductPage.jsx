@@ -155,7 +155,7 @@ export default function StoreProductPage() {
 
   const onToggleFavorite = async () => {
     if (!user) {
-      navigate('/login', { state: { from: `/store/products/${p.slug || p.id}` } });
+      navigate('/store/login', { state: { from: `/store/products/${p.slug || p.id}` } });
       return;
     }
     setFavBusy(true);

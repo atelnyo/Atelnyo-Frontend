@@ -52,7 +52,7 @@ const renderPage = () =>
         <Routes>
           <Route path="/store/products/:slug" element={<StoreProductPage />} />
           <Route path="/store/cart" element={<p>CART PAGE</p>} />
-          <Route path="/login" element={<p>LOGIN PAGE</p>} />
+          <Route path="/store/login" element={<p>LOGIN PAGE</p>} />
         </Routes>
       </MemoryRouter>
     </HelmetProvider>,
