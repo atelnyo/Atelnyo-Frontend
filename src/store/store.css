@@ -193,9 +193,16 @@
 .store-footer p { margin: 0; }
 
 .store-cart { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 12px; }
-.store-cart__line { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto auto auto; align-items: center; gap: 12px; background: #fff; border-radius: 8px; padding: 12px; }
+.store-cart__line { display: grid; grid-template-columns: 72px minmax(0, 1fr); align-items: start; gap: 14px 16px; background: #fff; border-radius: 12px; padding: 16px; }
+.store-cart__info { min-width: 0; display: grid; gap: 6px; }
+.store-cart__actions { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.store-cart__qty { display: inline-flex; align-items: center; height: 40px; border: 1px solid var(--store-border); border-radius: 8px; background: #fff; overflow: hidden; }
+.store-cart__qty button { width: 40px; height: 100%; border: 0; background: transparent; color: var(--store-navy); font-size: 1.1rem; cursor: pointer; }
+.store-cart__qty button:disabled { color: #aab1bf; cursor: not-allowed; }
+.store-cart__qty span { min-width: 36px; text-align: center; font-weight: 600; color: var(--store-navy); }
+.store-cart__remove { background: #fff; color: var(--store-navy); border: 1px solid var(--store-border); border-radius: 8px; padding: 8px 14px; font: inherit; font-size: 0.9rem; cursor: pointer; }
+.store-cart__checkout { display: block; width: 100%; min-height: 52px; font-size: 1rem; margin-top: 8px; background: #0f2040; }
 .store-cart__img { width: 56px; height: 56px; object-fit: cover; border-radius: 6px; }
 .store-cart__title { font-weight: 600; overflow-wrap: anywhere; }
 .store-cart__price { font-weight: 700; white-space: nowrap; }
-.store-cart__line input { width: 72px; padding: 6px 8px; border: 1px solid var(--store-border); border-radius: 6px; font: inherit; }
-@media (max-width: 520px) { .store-cart__line { grid-template-columns: 48px minmax(0, 1fr); } .store-cart__price, .store-cart__line input, .store-cart__line .store-btn { justify-self: start; } }
+@media (max-width: 520px) { .store-cart__line { grid-template-columns: 56px minmax(0, 1fr); padding: 14px; } }

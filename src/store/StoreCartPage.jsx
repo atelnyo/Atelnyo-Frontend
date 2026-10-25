@@ -150,30 +150,42 @@ export default function StoreCartPage() {
             {detail?.image_url && (
               <img className="store-cart__img" src={detail.image_url} alt="" />
             )}
-            <span className="store-cart__title">{detail?.title || 'Loading product…'}</span>
-            <span className="store-cart__price">
-              {lineTotal == null ? '' : new Intl.NumberFormat('en-US', { style: 'currency', currency: detail.currency || 'USD' }).format(lineTotal)}
-            </span>
-            <label className="store-sr-only" htmlFor={`qty-${line.productId}-${line.variantId ?? 'base'}`}>
-              Quantity
-            </label>
-            <input
-              id={`qty-${line.productId}-${line.variantId ?? 'base'}`}
-              type="number"
-              min={1}
-              max={99}
-              value={line.quantity}
-              onChange={(e) => onQty(line, Number(e.target.value) || 1)}
-            />
-            <button type="button" className="store-btn store-btn--ghost" onClick={() => onRemove(line)}>
+            <div className="store-cart__info">
+              <span className="store-cart__title">{detail?.title || 'Loading product…'}</span>
+              <span className="store-cart__price">
+                {lineTotal == null ? '' : new Intl.NumberFormat('en-US', { style: 'currency', currency: detail.currency || 'USD' }).format(lineTotal)}
+              </span>
+            </div>
+            <div className="store-cart__actions">
+            <div className="store-cart__qty" role="group" aria-label="Quantity">
+              <button
+                type="button"
+                aria-label="Decrease quantity"
+                disabled={line.quantity <= 1}
+                onClick={() => onQty(line, Math.max(1, line.quantity - 1))}
+              >
+                −
+              </button>
+              <span aria-live="polite">{line.quantity}</span>
+              <button
+                type="button"
+                aria-label="Increase quantity"
+                disabled={line.quantity >= 99}
+                onClick={() => onQty(line, Math.min(99, line.quantity + 1))}
+              >
+                +
+              </button>
+            </div>
+            <button type="button" className="store-cart__remove" onClick={() => onRemove(line)}>
               Remove
             </button>
+            </div>
           </li>
           );
         })}
       </ul>
       <p className="store-state">Totals are calculated by the server at checkout.</p>
-      <button type="button" className="store-btn" onClick={onCheckout} disabled={status === 'submitting'}>
+      <button type="button" className="store-btn store-cart__checkout" onClick={onCheckout} disabled={status === 'submitting'}>
         {status === 'submitting' ? 'Starting checkout…' : 'Checkout'}
       </button>
       {paypalOrderId && <div ref={buttonsRef} className="store-paypal" />}
