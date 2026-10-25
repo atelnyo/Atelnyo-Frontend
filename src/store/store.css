@@ -99,6 +99,7 @@
 
 @media (max-width: 720px) {
   .store-product { grid-template-columns: 1fr; }
+  .store-product__media { order: -1; }
 }
 
 /* Header navigation (Store-scoped) */
