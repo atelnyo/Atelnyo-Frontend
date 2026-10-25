@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { addToCart, loadCart, saveCart } from './cart';
 
@@ -40,6 +40,27 @@ export default function ProductCard({ product: p }) {
   const navigate = useNavigate();
   const images = [p.image_url, ...(Array.isArray(p.gallery) ? p.gallery : [])].filter(Boolean);
   const [imgIdx, setImgIdx] = useState(0);
+  const [hovered, setHovered] = useState(false);
+  const [spun, setSpun] = useState(false);
+
+  // Auto-rotate the gallery twice like an ad strip, then stop on the first image.
+  useEffect(() => {
+    if (hovered || spun || images.length < 2) return undefined;
+    if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      return undefined;
+    }
+    let ticks = 0;
+    const max = images.length * 2;
+    const timer = setInterval(() => {
+      ticks += 1;
+      setImgIdx((i) => (i + 1) % images.length);
+      if (ticks >= max) {
+        clearInterval(timer);
+        setSpun(true);
+      }
+    }, 800);
+    return () => clearInterval(timer);
+  }, [hovered, spun, images.length]);
 
   // Hovering across the image moves through the gallery, like a product strip.
   const onMediaMove = (e) => {
@@ -48,7 +69,11 @@ export default function ProductCard({ product: p }) {
     const pos = Math.floor(((e.clientX - r.left) / r.width) * images.length);
     setImgIdx(Math.min(images.length - 1, Math.max(0, pos)));
   };
-  const onMediaLeave = () => setImgIdx(0);
+  const onMediaEnter = () => setHovered(true);
+  const onMediaLeave = () => {
+    setHovered(false);
+    setImgIdx(0);
+  };
 
   const addOne = () => {
     const items = addToCart(loadCart(), { productId: p.id, quantity: 1 });
@@ -70,7 +95,7 @@ export default function ProductCard({ product: p }) {
   return (
     <li className="store-card">
       <Link to={href} className="store-card__link">
-        <div className="store-card__media" onMouseMove={onMediaMove} onMouseLeave={onMediaLeave}>
+        <div className="store-card__media" onMouseEnter={onMediaEnter} onMouseMove={onMediaMove} onMouseLeave={onMediaLeave}>
           {images.length > 0 ? (
             images.map((src, i) => (
               <img
