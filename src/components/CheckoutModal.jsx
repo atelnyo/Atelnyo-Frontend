@@ -322,6 +322,14 @@ export default function CheckoutModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
+  // showToast is not memoized by the parent, so keep the latest one in a ref.
+  // Reading it from the ref keeps the PayPal effect below from re-running on
+  // every parent render (its cleanup wipes the PayPal container).
+  const showToastRef = useRef(showToast);
+  useEffect(() => {
+    showToastRef.current = showToast;
+  }, [showToast]);
+
   // ── PayPal buttons render (after server payment created) ──────────────
   useEffect(() => {
     if (!isOpen || phase !== PHASES.ready || provider !== 'paypal' || !paypal || !payment) {
@@ -361,7 +369,7 @@ export default function CheckoutModal({
           // unrelated order in this session is never mis-attributed.
           clearAffiliateAttributionToken();
           setPhase(PHASES.success);
-          showToast?.(t('success'), 'check-circle');
+          showToastRef.current?.(t('success'), 'check-circle');
           onSuccess?.();
         } catch (err) {
           setPhase(PHASES.failed);
@@ -385,7 +393,7 @@ export default function CheckoutModal({
     return () => {
       try { container.innerHTML = ''; } catch (_) {}
     };
-  }, [isOpen, phase, provider, paypal, payment, showToast, t]);
+  }, [isOpen, phase, provider, paypal, payment, t]);
 
   // ── Stripe secondary: load Elements + create card form ────────────────
   useEffect(() => {

@@ -128,6 +128,12 @@ export default function DepositModal({ onClose, onSuccess, lang, showToast }) {
     }
   }, [amount, limits, isHt, t]);
 
+  // showToast is not memoized by the parent, so keep the latest one in a ref.
+  const showToastRef = useRef(showToast);
+  useEffect(() => {
+    showToastRef.current = showToast;
+  }, [showToast]);
+
   // ── Render PayPal buttons once the order exists ────────────────────
   useEffect(() => {
     if (phase !== 'ready' || !paypal || !depositRef?.paypal_order_id) return;
@@ -146,7 +152,7 @@ export default function DepositModal({ onClose, onSuccess, lang, showToast }) {
         try {
           const capture = await walletTopupService.capture(depositRef.paypal_order_id);
           setPhase('success');
-          showToast?.(
+          showToastRef.current?.(
             t('✅ Wallet funded successfully!', '✅ Bous ou fin ranpli avèk siksè!'),
             'check-circle',
           );
@@ -171,7 +177,7 @@ export default function DepositModal({ onClose, onSuccess, lang, showToast }) {
       setErrorMsg(t('PayPal is not available right now.', 'PayPal poko disponib kounye a.'));
     });
     return () => { try { container.innerHTML = ''; } catch (_) {} };
-  }, [phase, paypal, depositRef, showToast, onSuccess, t]);
+  }, [phase, paypal, depositRef, onSuccess, t]);
 
   const paypalUnavailable = ppConfig && !ppConfig.configured;
 
