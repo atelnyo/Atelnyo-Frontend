@@ -27,7 +27,8 @@ import useSafeNavigate from './hooks/useSafeNavigate';
 import ScrollManager from './hooks/ScrollManager';
 import useAnchorScroll from './hooks/useAnchorScroll';
 import userActivity from './services/userActivity';
-import { Routes, Route, useLocation, useNavigate, useParams, Navigate } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate, useParams, useSearchParams, Navigate } from 'react-router-dom';
+import { safeNextPath } from './utils/safeNextPath';
 import { useTheme } from './context/ThemeContext';
 import Header from './components/Header';
 import SearchBar from './components/SearchBar';
@@ -450,15 +451,16 @@ function CatchAllRoute({ lang, showToast, currentUserId, onOpenCheckout, user, o
 function AuthRoute({ user, mode, lang, onLoginSuccess, showToast }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  // Destination: router state first (AuthGate bounce), then ?next= (shareable
+  // links such as /store/login?next=...). Both are validated as in-app paths.
+  const from = safeNextPath(location.state?.from) || safeNextPath(searchParams.get('next'));
   if (user) {
     // A signed-in user has no business on the auth form. If they were
     // bounced here by AuthGate while the session was still hydrating
     // (page reload of a gated route), send them BACK to where they
-    // were going instead of dumping them on the homepage. Only trust
-    // the ``from`` state when it is a real, non-auth destination.
-    const from = location.state?.from;
-    const isAuthPath = from && (from.startsWith('/login') || from.startsWith('/signup') || from.startsWith('/sheet/auth'));
-    if (from && !isAuthPath) {
+    // were going instead of dumping them on the homepage.
+    if (from) {
       navigate(from, { replace: true });
       return null;
     }
