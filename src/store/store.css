@@ -76,7 +76,20 @@
 }
 .store-card__link { color: inherit; text-decoration: none; display: block; }
 .store-card__img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block; background: var(--store-surface); }
-.store-card__media { position: relative; }
+.store-card__media { position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: var(--store-surface); }
+.store-card__media .store-card__img {
+  position: absolute; inset: 0; opacity: 0; transition: opacity 0.35s ease, transform 0.5s ease;
+}
+.store-card__media .store-card__img.is-active { opacity: 1; }
+.store-card__media:hover .store-card__img.is-active { transform: scale(1.04); }
+.store-card__dots {
+  position: absolute; left: 0; right: 0; bottom: 8px; display: flex; justify-content: center; gap: 5px; pointer-events: none;
+}
+.store-card__dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255, 255, 255, 0.6); box-shadow: 0 0 0 1px rgba(15, 32, 64, 0.25); transition: background 0.2s; }
+.store-card__dot.is-active { background: #fff; }
+@media (prefers-reduced-motion: reduce) {
+  .store-card__media .store-card__img, .store-card__media:hover .store-card__img.is-active { transition: none; transform: none; }
+}
 .store-card__badge {
   position: absolute; top: 10px; left: 10px; background: #0f2040; color: #fff;
   font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; padding: 3px 8px; border-radius: 4px;

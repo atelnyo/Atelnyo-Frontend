@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { addToCart, loadCart, saveCart } from './cart';
 
@@ -38,6 +38,17 @@ export default function ProductCard({ product: p }) {
   const outOfStock = p.stock === 0;
   const newBadge = isNew(p.created_at);
   const navigate = useNavigate();
+  const images = [p.image_url, ...(Array.isArray(p.gallery) ? p.gallery : [])].filter(Boolean);
+  const [imgIdx, setImgIdx] = useState(0);
+
+  // Hovering across the image moves through the gallery, like a product strip.
+  const onMediaMove = (e) => {
+    if (images.length < 2) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    const pos = Math.floor(((e.clientX - r.left) / r.width) * images.length);
+    setImgIdx(Math.min(images.length - 1, Math.max(0, pos)));
+  };
+  const onMediaLeave = () => setImgIdx(0);
 
   const addOne = () => {
     const items = addToCart(loadCart(), { productId: p.id, quantity: 1 });
@@ -59,11 +70,26 @@ export default function ProductCard({ product: p }) {
   return (
     <li className="store-card">
       <Link to={href} className="store-card__link">
-        <div className="store-card__media">
-          {p.image_url ? (
-            <img className="store-card__img" src={p.image_url} alt={p.title || ''} loading="lazy" />
+        <div className="store-card__media" onMouseMove={onMediaMove} onMouseLeave={onMediaLeave}>
+          {images.length > 0 ? (
+            images.map((src, i) => (
+              <img
+                key={src}
+                className={`store-card__img${i === imgIdx ? ' is-active' : ''}`}
+                src={src}
+                alt={i === 0 ? p.title || '' : ''}
+                loading="lazy"
+              />
+            ))
           ) : (
-            <div className="store-card__img store-card__img--empty" aria-hidden="true" />
+            <div className="store-card__img store-card__img--empty is-active" aria-hidden="true" />
+          )}
+          {images.length > 1 && (
+            <span className="store-card__dots" aria-hidden="true">
+              {images.map((src, i) => (
+                <span key={src} className={`store-card__dot${i === imgIdx ? ' is-active' : ''}`} />
+              ))}
+            </span>
           )}
           {newBadge && <span className="store-card__badge">NEW</span>}
           {outOfStock && <span className="store-card__badge store-card__badge--muted">Out of stock</span>}
