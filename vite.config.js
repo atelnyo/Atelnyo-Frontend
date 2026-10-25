@@ -21,6 +21,10 @@ export default defineConfig({
     exclude: ['node_modules', 'e2e'],
   },
   base: '/',
+  // SSR build: bundle react-helmet-async so its ESM named exports resolve in Node.
+  ssr: {
+    noExternal: ['react-helmet-async'],
+  },
   server: {
     host: '0.0.0.0',
     port: 3000,
