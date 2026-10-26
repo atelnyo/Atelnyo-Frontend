@@ -76,6 +76,54 @@ function req(path, ua) {
   return new Request(`https://atelnyo.site${path}`, { headers: { 'User-Agent': ua } });
 }
 
+const GOOGLEBOT_UA = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)';
+
+// Backend SSR responses (shape matches backend/ssr/views.py::_ssr_html).
+const SSR_FIXTURES = {
+  '/api/ssr/about/': { title: 'About Atelnyo — Learn, Create, Share', desc: 'About the Atelnyo platform for creators.' },
+  '/api/ssr/creator/Atelnyo/': { title: 'Atelnyo Academy — Platfòm Kreyatè Ayisyen | Haitian Creator Platform', desc: 'Atelnyo Academy creator profile.' },
+  '/api/ssr/legal/terms-of-service/': { title: 'Terms of Service | Atelnyo', desc: 'Terms of service for using Atelnyo.' },
+};
+
+function ssrHtml({ title, desc }) {
+  return `<!DOCTYPE html><html><head><title>${title}</title><meta name="description" content="${desc}"></head><body></body></html>`;
+}
+
+describe('worker SSR routes for Googlebot', () => {
+  let fetchMock;
+  beforeEach(() => {
+    fetchMock = vi.fn(async (input) => {
+      const url = new URL(String(input));
+      const fixture = SSR_FIXTURES[url.pathname];
+      if (!fixture) return new Response('not found', { status: 404 });
+      return new Response(ssrHtml(fixture), {
+        status: 200,
+        headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it.each([
+    ['/about', 'About Atelnyo — Learn, Create, Share', 'About the Atelnyo platform for creators.'],
+    ['/c/Atelnyo', 'Atelnyo Academy — Platfòm Kreyatè Ayisyen | Haitian Creator Platform', 'Atelnyo Academy creator profile.'],
+    ['/legal/terms-of-service', 'Terms of Service | Atelnyo', 'Terms of service for using Atelnyo.'],
+  ])('serves the backend SSR title and description for %s', async (path, title, desc) => {
+    const env = makeEnv();
+    const resp = await worker.fetch(req(path, GOOGLEBOT_UA), env, {});
+    expect(resp.status).toBe(200);
+    const body = await resp.text();
+    expect(body).toContain(`<title>${title}</title>`);
+    expect(body).toContain(`<meta name="description" content="${desc}">`);
+    // Must not fall back to the generic brand shell.
+    expect(body).not.toContain('Brand description');
+    expect(env.ASSETS.fetch).not.toHaveBeenCalled();
+  });
+});
+
 describe('worker bot shell meta for static pages', () => {
   let env;
   beforeEach(() => {
