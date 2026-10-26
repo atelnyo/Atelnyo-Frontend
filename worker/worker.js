@@ -550,6 +550,11 @@ export default {
     const atRedirect = _handleLegacyAtRedirect(path);
     if (atRedirect) return atRedirect;
 
+    // Internal build artifact, never a page: answer 404 instead of the SPA shell.
+    if (path === '/_worker.js' || path.startsWith('/_worker')) {
+      return new Response('Not Found', { status: 404 });
+    }
+
     // ── SPA Fallback (serves index.html for client-side routes) ──
     // Static files (js, css, images) go to assets; everything else
     // returns index.html so React Router handles the route.
