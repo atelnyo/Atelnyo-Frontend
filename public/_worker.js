@@ -40,13 +40,13 @@ const SECURITY_HEADERS = {
   // Content Security Policy
   'Content-Security-Policy': [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://connect.facebook.net https://cdnjs.cloudflare.com https://www.google-analytics.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://connect.facebook.net https://cdnjs.cloudflare.com https://www.google-analytics.com https://www.paypal.com",
     "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com",
     "font-src 'self' https://cdnjs.cloudflare.com data:",
     "img-src 'self' data: blob: https: http:",
     "media-src 'self' blob: https: http:",
-    "connect-src 'self' https://api.atelnyo.site https://atelnyo.atelnyo.workers.dev https://www.google-analytics.com https://firebasestorage.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com wss://api.atelnyo.site ws://127.0.0.1:8000 https://*.sentry.io",
-    "frame-src 'self' https://www.youtube.com https://player.vimeo.com https://js.stripe.com",
+    "connect-src 'self' https://api.atelnyo.site https://atelnyo.atelnyo.workers.dev https://www.google-analytics.com https://firebasestorage.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com wss://api.atelnyo.site ws://127.0.0.1:8000 https://*.sentry.io https://www.paypal.com https://www.sandbox.paypal.com",
+    "frame-src 'self' https://www.youtube.com https://player.vimeo.com https://js.stripe.com https://www.paypal.com https://www.sandbox.paypal.com",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
