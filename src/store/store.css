@@ -404,3 +404,4 @@
 }
 .store-cart-empty__icon { font-size: 3rem; line-height: 1; }
 .store-cart-empty__cta { margin-top: 8px; }
+.store-cart-empty__cta:focus-visible { outline: none; }
