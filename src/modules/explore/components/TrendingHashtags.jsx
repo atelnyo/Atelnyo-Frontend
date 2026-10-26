@@ -19,7 +19,7 @@ import './TrendingHashtags.css';
 // The rail is public + short-lived, so a 5-min snapshot (mirroring the
 // explore + feed caches) lets a revisit render it with ZERO requests.
 const TRENDING_CACHE_KEY = 'atelnyo_trending_cache';
-const TRENDING_CACHE_TTL_MS = 5 * 60 * 1000;
+const TRENDING_CACHE_TTL_MS = 30 * 60 * 1000;
 
 function readTrendingCache() {
   try {
@@ -51,9 +51,11 @@ export default function TrendingHashtags({ lang = 'ht', limit = 8, onSearch }) {
     const cached = readTrendingCache();
     return cached.isFresh && cached.tags ? cached.tags.slice(0, limit) : [];
   });
+  // A stale snapshot still paints (stale-while-revalidate); only a
+  // missing snapshot waits for the network.
   const [ready, setReady] = useState(() => {
     const cached = readTrendingCache();
-    return Boolean(cached.isFresh);
+    return Boolean(cached.isFresh || cached.tags);
   });
 
   useEffect(() => {
@@ -62,16 +64,16 @@ export default function TrendingHashtags({ lang = 'ht', limit = 8, onSearch }) {
     // Re-checked per run — StrictMode's dev double-mount sees the same
     // snapshot and skips both times; an expired cache falls through to
     // the fetch.
+    // Paint the snapshot right away, then always refresh in the background.
     const cached = readTrendingCache();
-    if (cached.isFresh) {
+    if (cached.tags) {
       /* eslint-disable react-hooks/set-state-in-effect */
-      setTags(cached.tags ? cached.tags.slice(0, limit) : []);
+      setTags(cached.tags.slice(0, limit));
       setReady(true);
       /* eslint-enable react-hooks/set-state-in-effect */
-      return;
     }
     let cancelled = false;
-    setReady(false);
+    if (!cached.tags) setReady(false);
     searchService
       .trendingHashtags({ hours: 24, limit })
       .then((r) => {

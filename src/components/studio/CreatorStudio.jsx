@@ -686,6 +686,7 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
             user={user}
             onClose={() => { setShowCourseModal(false); handleCloseEdit(); }}
             onSuccess={() => { setShowCourseModal(false); handleCloseEdit(); setActiveSection('courses'); bumpSection(); }}
+            onSaved={bumpSection}
             item={editingType === 'course' ? editingItem : null}
             deliveryType={courseTypeChoice}
           />
@@ -704,6 +705,7 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
             user={user}
             onClose={() => { setShowMusicModal(false); handleCloseEdit(); }}
             onSuccess={() => { setShowMusicModal(false); handleCloseEdit(); setActiveSection('music'); bumpSection(); }}
+            onSaved={bumpSection}
             item={editingType === 'music' ? editingItem : null}
           />
         )}
@@ -715,6 +717,7 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
             onClose={() => { setShowProductModal(false); handleCloseEdit(); }}
             onSuccess={() => { setShowProductModal(false); handleCloseEdit(); setActiveSection('products'); bumpSection(); }}
             onImported={bumpSection}
+            onSaved={bumpSection}
             item={editingType === 'product' ? editingItem : null}
             kind={productKindChoice}
           />

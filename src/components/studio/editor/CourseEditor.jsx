@@ -81,7 +81,7 @@ function normalizeSyllabus(raw) {
   ));
 }
 
-export default function CourseEditor({ onClose, onSuccess, lang = 'ht', showToast, user, item, deliveryType = 'online' }) {
+export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'ht', showToast, user, item, deliveryType = 'online' }) {
   const isEdit = Boolean(item);
   const isHt = lang === 'ht';
   const isPremium = !!(user?.premium?.is_premium);
@@ -475,6 +475,7 @@ export default function CourseEditor({ onClose, onSuccess, lang = 'ht', showToas
       setDirty(false);
       setSaveState('saved');
       setSaveError('');
+      onSaved?.();
       return true;
     } catch (err) {
       const detail = err?.response?.data?.detail
@@ -486,7 +487,7 @@ export default function CourseEditor({ onClose, onSuccess, lang = 'ht', showToas
       showToast?.(detail, 'circle-exclamation');
       return false;
     }
-  }, [form, validate, isHt, showToast]);
+  }, [form, validate, isHt, showToast, onSaved]);
 
   // ─── Debounced autosave — only after the course exists ──────────────
   useEffect(() => {

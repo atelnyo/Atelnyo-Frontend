@@ -66,7 +66,7 @@ function probeAudioDuration(url) {
   });
 }
 
-export default function MusicEditor({ onClose, onSuccess, lang = 'ht', showToast, user, item }) {
+export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'ht', showToast, user, item }) {
   const isPremium = !!(user?.premium?.is_premium);
   const isEdit = Boolean(item);
   const navigate = useSafeNavigate();
@@ -193,6 +193,7 @@ export default function MusicEditor({ onClose, onSuccess, lang = 'ht', showToast
       dirtyRef.current = false;
       setDirty(false);
       setSaveState('saved');
+      onSaved?.();
       return true;
     } catch (err) {
       const detail = err?.response?.data?.detail
@@ -205,7 +206,7 @@ export default function MusicEditor({ onClose, onSuccess, lang = 'ht', showToast
       showToast?.(detail, 'circle-exclamation');
       return false;
     }
-  }, [form, validate, isHt, showToast]);
+  }, [form, validate, isHt, showToast, onSaved]);
 
   // ─── Debounced autosave after the track exists ───────────────────────
   useEffect(() => {

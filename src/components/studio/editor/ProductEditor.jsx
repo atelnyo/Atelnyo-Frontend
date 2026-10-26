@@ -49,7 +49,7 @@ import styles from './editor.module.css';
 const linesToList = (text) =>
   text.split('\n').map((line) => line.trim()).filter(Boolean);
 
-export default function ProductEditor({ onClose, onSuccess, onImported, lang = 'ht', showToast, user, item, kind = 'digital' }) {
+export default function ProductEditor({ onClose, onSuccess, onImported, onSaved, lang = 'ht', showToast, user, item, kind = 'digital' }) {
   const isEdit = Boolean(item);
   const navigate = useSafeNavigate();
   const isHt = lang === 'ht';
@@ -196,6 +196,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, lang = '
       dirtyRef.current = false;
       setDirty(false);
       setSaveState('saved');
+      onSaved?.();
       return true;
     } catch (err) {
       const detail = err?.response?.data?.detail || err?.response?.data?.title?.[0]
@@ -205,7 +206,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, lang = '
       showToast?.(detail, 'circle-exclamation');
       return false;
     }
-  }, [form, validate, isHt, showToast]);
+  }, [form, validate, isHt, showToast, onSaved]);
 
   // ─── Debounced autosave after the product exists ─────────────────────
   useEffect(() => {

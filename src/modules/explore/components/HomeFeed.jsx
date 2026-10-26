@@ -37,7 +37,7 @@ import {
 // the gate miss, so the refetch carries the key and the backend
 // personalizes the feed.
 const FEED_CACHE_KEY = 'atelnyo_feed_cache';
-const FEED_CACHE_TTL_MS = 5 * 60 * 1000;
+const FEED_CACHE_TTL_MS = 30 * 60 * 1000;
 
 function readFeedCache() {
   try {
@@ -252,29 +252,30 @@ export default function HomeFeed({
     // (refreshSignal bump → real refetch) and the retry button works
     // (reloadKey bump → real refetch). Re-checked per run — StrictMode's
     // dev double-mount sees the same fresh cache and skips both times.
-    if (!user && refreshSignal === 0 && reloadKey === 0) {
-      const cached = readFeedCache();
-      if (
-        cached.isFresh
-        && cached.engine === (useDEIE ? 'deie' : 'home')
-        && cached.anonKey === (getAnonKey() || null)
-        && cached.sections && cached.sections.length > 0
-      ) {
-        /* eslint-disable react-hooks/set-state-in-effect */
-        setSections(cached.sections);
-        setLoading(false);
-        setError(null);
-        setEntered(true);
-        /* eslint-enable react-hooks/set-state-in-effect */
-        return;
-      }
-    }
 
-    // Async fetch: synchronous first-statement setState resets the
-    // skeleton before the network request — same intentional pattern
-    // as CheckoutModal.jsx / DepositModal.jsx.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLoading(true);
+    // Stale-while-revalidate (anonymous only): a snapshot older than the
+    // TTL still paints immediately, then the request below refreshes it
+    // in the background without showing the skeleton again.
+    const staleCache = !user && refreshSignal === 0 && reloadKey === 0 ? readFeedCache() : null;
+    const canPaintStale = Boolean(
+      staleCache
+      && staleCache.engine === (useDEIE ? 'deie' : 'home')
+      && staleCache.anonKey === (getAnonKey() || null)
+      && staleCache.sections && staleCache.sections.length > 0,
+    );
+    if (canPaintStale) {
+      /* eslint-disable react-hooks/set-state-in-effect */
+      setSections(staleCache.sections);
+      setLoading(false);
+      setEntered(true);
+      /* eslint-enable react-hooks/set-state-in-effect */
+    } else {
+      // Async fetch: synchronous first-statement setState resets the
+      // skeleton before the network request — same intentional pattern
+      // as CheckoutModal.jsx / DepositModal.jsx.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLoading(true);
+    }
     setError(null);
 
     feedService.home(6, useDEIE ? 'deie' : 'home')

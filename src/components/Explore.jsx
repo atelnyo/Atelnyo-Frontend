@@ -1013,11 +1013,6 @@ export function Explore({
     // the network call and release the spinner. Login/logout mid-session
     // falls through — the mount-time user no longer matches, so the new
     // identity fetches its own personalized data.
-    if (cacheFreshAtMountRef.current && mountUserIdRef.current === (user?.id || null)) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLoadingRecommended(false);
-      return;
-    }
     let cancelled = false;
     // Async fetch: the synchronous first-statement setState is the same
     // intentional pattern the rest of the codebase uses (see
@@ -1128,13 +1123,6 @@ export function Explore({
       return;
     }
 
-    // Second-visit zero-request gate (fresh-at-mount cache, any user):
-    // the restore effect already painted every section from localStorage,
-    // so skip the 9 parallel catalog fetches — chip views render
-    // client-side from the restored data. The search branch ABOVE is
-    // exempt (the ranked endpoint must always run). Login/logout
-    // mid-session falls through (mount-time user mismatch).
-    if (cacheFreshAtMountRef.current && mountUserIdRef.current === (user?.id || null)) return;
 
     api.get('courses/', {
       params: {
@@ -1382,12 +1370,6 @@ export function Explore({
   // sets. Failures are silent — cards simply render without a badge.
   const saveCountsSigRef = useRef({});
   useEffect(() => {
-    // Second-visit zero-request gate (fresh-at-mount cache, any user):
-    // the restored badges (_saveCounts) already cover the restored items,
-    // so skip the counts fetch. On the FIRST visit the ref is false (no
-    // cache at mount) so badges load normally regardless of when the
-    // cache gets written.
-    if (cacheFreshAtMountRef.current && mountUserIdRef.current === (user?.id || null)) return;
     const sections = {
       music: apiMusic,
       talent: apiTalents,

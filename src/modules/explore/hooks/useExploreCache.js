@@ -18,7 +18,7 @@
 
 const ANON_CACHE_KEY = 'atelnyo_explore_cache_anon';
 const SEARCH_STATE_KEY = 'atelnyo_explore_search_state';
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minit
+const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minit
 
 // The cache is scoped PER USER (key includes the user id) so one
 // visitor's data never bleeds into another's — an anonymous guest and a
