@@ -20,7 +20,7 @@ import { Helmet } from 'react-helmet-async';
 import { parseLocaleCountry } from '../../utils/localeUrl';
 
 const SITE_NAME = 'Atelnyo';
-const DEFAULT_IMAGE = 'https://atelnyo.site/og-banner-en.svg';
+const DEFAULT_IMAGE = 'https://atelnyo.site/og-banner-en.png';
 const DEFAULT_DESCRIPTION = 'Atelnyo is an international platform where creators teach online courses, share music, sell products, and grow their digital presence.';
 const BASE_URL = 'https://atelnyo.site';
 

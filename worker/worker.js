@@ -112,6 +112,8 @@ const SSR_MAP = [
   { re: /^\/([^/?#]+)\/by\/[^/?#]+\/product\/?$/, api: (m) => `/api/ssr/product/${m[1]}/` },
   // Canonical product URL: /marketplace/<slug>
   { re: /^\/marketplace\/([^/?#]+)\/?$/, api: (m) => `/api/ssr/product/${m[1]}/` },
+  // Store product URL: /store/products/<slug>
+  { re: /^\/store\/products\/([^/?#]+)\/?$/, api: (m) => `/api/ssr/product/${m[1]}/` },
 ];
 
 // ─── BOT SHELL META (non-SSR pages) ───────────────────────────────
@@ -122,6 +124,11 @@ const PAGE_META = {
   '/faq': { title: 'FAQ', desc: 'Answers to common questions about Atelnyo.' },
   '/affiliate': { title: 'Affiliate Program', desc: 'Earn by promoting courses, music and products on Atelnyo.' },
   '/verify': { title: 'Verify a Certificate', desc: 'Check the authenticity of an Atelnyo certificate.' },
+  '/affiliate/discover': { title: 'Discover Affiliate Offers', desc: 'Find affiliate offers from creators on Atelnyo.' },
+  '/status': { title: 'Platform Status', desc: 'Check the current status of Atelnyo services, API availability, and system health.' },
+  '/developers': { title: 'Developers', desc: 'Atelnyo developer documentation, API reference, integration guides, and open-source resources.' },
+  '/themes': { title: 'Themes', desc: 'Browse available themes on Atelnyo.' },
+  '/store': { title: 'Store', desc: 'Shop products from creators on the Atelnyo store.' },
 };
 
 async function _rewriteBotShell(request, env, path, origin) {
