@@ -157,10 +157,12 @@ export default function StoreCartPage() {
 
   if (!items.length) {
     return (
-      <section className="store-state">
+      <section className="store-cart-empty" role="status">
         <SEOHead title="Cart" url="/store/cart" noindex />
+        <div className="store-cart-empty__icon" aria-hidden="true">🛒</div>
         <h1 className="store-title">Your cart is empty</h1>
-        <p><Link to="/store">Continue shopping</Link></p>
+        <p className="store-state">Looks like you haven't added anything yet.</p>
+        <Link to="/store" className="store-btn store-cart-empty__cta">Continue shopping</Link>
       </section>
     );
   }

@@ -393,3 +393,14 @@
 .store-product--skeleton .store-skeleton-block--short { width: 70%; }
 .store-product--skeleton .store-skeleton-block--price { height: 32px; width: 120px; margin: 18px 0; }
 .store-product--skeleton .store-skeleton-block--btn { height: 44px; width: 160px; }
+
+.store-cart-empty {
+  text-align: center;
+  padding: 48px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.store-cart-empty__icon { font-size: 3rem; line-height: 1; }
+.store-cart-empty__cta { margin-top: 8px; }
