@@ -188,7 +188,20 @@ export default function StoreListPage() {
         </label>
       </div>
 
-      {current.status === 'loading' && <p className="store-state" role="status">Loading products…</p>}
+      {current.status === 'loading' && (
+        <ul className="store-skeleton-grid" aria-label="Loading products" role="status">
+          {Array.from({ length: 8 }).map((_, idx) => (
+            <li key={idx} className="store-skeleton-card" aria-hidden="true">
+              <div className="store-skeleton-card__media" />
+              <div className="store-skeleton-card__body">
+                <div className="store-skeleton-card__line store-skeleton-card__line--category" />
+                <div className="store-skeleton-card__line store-skeleton-card__line--title" />
+                <div className="store-skeleton-card__line store-skeleton-card__line--price" />
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
       {current.status === 'error' && (
         <p className="store-state store-state--error" role="alert">
           Products could not be loaded. Please try again later.
