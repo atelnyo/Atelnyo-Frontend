@@ -104,7 +104,19 @@ export default function StoreProductPage() {
   }, [user, loadedId]);
 
   if (state.status === 'loading') {
-    return <p className="store-state" role="status">Loading product…</p>;
+    return (
+      <section className="store-product store-product--skeleton" aria-busy="true" aria-live="polite">
+        <div className="store-product__media store-skeleton-block store-skeleton-block--media" />
+        <div className="store-product__info">
+          <div className="store-skeleton-block store-skeleton-block--title" />
+          <div className="store-skeleton-block store-skeleton-block--rule" />
+          <div className="store-skeleton-block store-skeleton-block--line" />
+          <div className="store-skeleton-block store-skeleton-block--line store-skeleton-block--short" />
+          <div className="store-skeleton-block store-skeleton-block--price" />
+          <div className="store-skeleton-block store-skeleton-block--btn" />
+        </div>
+      </section>
+    );
   }
   if (state.status === 'notfound') {
     return (

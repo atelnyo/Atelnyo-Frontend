@@ -379,3 +379,17 @@
 .store-guest input {
   padding: 10px 12px; border: 1px solid var(--store-border); border-radius: 8px; font: inherit; font-weight: 400;
 }
+
+.store-product--skeleton .store-skeleton-block {
+  background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+  background-size: 200% 100%;
+  animation: store-skeleton-shimmer 1.4s ease-in-out infinite;
+  border-radius: 6px;
+}
+.store-product--skeleton .store-skeleton-block--media { aspect-ratio: 1 / 1; min-height: 280px; }
+.store-product--skeleton .store-skeleton-block--title { height: 28px; width: 60%; margin-bottom: 12px; }
+.store-product--skeleton .store-skeleton-block--rule { height: 3px; width: 72px; margin-bottom: 14px; }
+.store-product--skeleton .store-skeleton-block--line { height: 14px; width: 100%; margin-bottom: 8px; }
+.store-product--skeleton .store-skeleton-block--short { width: 70%; }
+.store-product--skeleton .store-skeleton-block--price { height: 32px; width: 120px; margin: 18px 0; }
+.store-product--skeleton .store-skeleton-block--btn { height: 44px; width: 160px; }
