@@ -313,3 +313,8 @@
 .store-cart__title { font-weight: 600; overflow-wrap: anywhere; }
 .store-cart__price { font-weight: 700; white-space: nowrap; }
 @media (max-width: 520px) { .store-cart__line { grid-template-columns: 56px minmax(0, 1fr); padding: 14px; } }
+.store-guest { display: grid; gap: 12px; margin: 16px 0; background: #fff; border-radius: 12px; padding: 16px; }
+.store-guest label { display: grid; gap: 6px; font-weight: 600; color: var(--store-navy); }
+.store-guest input {
+  padding: 10px 12px; border: 1px solid var(--store-border); border-radius: 8px; font: inherit; font-weight: 400;
+}
