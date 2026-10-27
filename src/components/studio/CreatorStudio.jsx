@@ -64,6 +64,7 @@ import MusicEditor from './editor/MusicEditor';
 import ProductEditor from './editor/ProductEditor';
 import ProductTypeModal from './editor/ProductTypeModal';
 import { classNames } from './shared';
+import LoadingFallback from '../shared/LoadingFallback';
 import {
   DashboardSection,
   CoursesSection,
@@ -662,11 +663,10 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
           aria-label={activeSection}
         >
           <div className={styles.mainInner} key={activeSection}>
-            <React.Suspense fallback={
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 0' }}>
-                <i className="fas fa-spinner fa-pulse fa-2x" style={{ color: '#6366f1' }} />
-              </div>
-            }>
+            {/* Section components are code-split (company, intelligence,
+                public profile…). The fallback keeps a deadline so a slow or
+                hung chunk shows an explanation + reload, not a bare spinner. */}
+            <React.Suspense fallback={<LoadingFallback lang={lang} />}>
               {renderSection()}
             </React.Suspense>
           </div>

@@ -99,9 +99,13 @@ export default function StoreCartPage() {
           // The buttons are on screen now — the status quo ante is back.
           setStatus('idle');
         });
-      } catch {
+      } catch (err) {
         if (!cancelled) {
-          setMessage('PayPal is unavailable right now.');
+          // A deadline miss is not the same failure as a blocked SDK: say
+          // which one happened so the shopper knows what to try next.
+          setMessage(err?.code === 'timeout'
+            ? 'PayPal took too long to load. Check your connection and press Checkout again.'
+            : 'PayPal is unavailable right now.');
           setStatus('error');
         }
       }

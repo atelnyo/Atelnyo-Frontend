@@ -69,7 +69,15 @@ const LANG_FALLBACK = {
 let _paypalScriptPromise = null;
 let _paypalScriptIntent = null;
 
-export function loadPayPalScript(clientId, isSandbox, intent = 'capture') {
+// A request that is accepted by the network but never answered (captive
+// portal, dropped mobile connection, blocked host) never fires onload OR
+// onerror — the checkout surface would keep saying "Loading secure payment
+// options…" forever with no way out. After this deadline the load is
+// abandoned, the cached promise is released so the next attempt injects a
+// fresh script, and the caller shows its error state (with a working retry).
+export const PAYPAL_SDK_TIMEOUT_MS = 15000;
+
+export function loadPayPalScript(clientId, isSandbox, intent = 'capture', timeoutMs = PAYPAL_SDK_TIMEOUT_MS) {
   if (window.paypal && window.paypal.Buttons && _paypalScriptIntent === intent) {
     return Promise.resolve(window.paypal);
   }
@@ -83,13 +91,27 @@ export function loadPayPalScript(clientId, isSandbox, intent = 'capture') {
   const base = isSandbox ? 'https://www.sandbox.paypal.com' : 'https://www.paypal.com';
   _paypalScriptPromise = new Promise((resolve, reject) => {
     const script = document.createElement('script');
+    let settled = false;
+    const fail = (message, code) => {
+      if (settled) { return; }
+      settled = true;
+      clearTimeout(timer);
+      _paypalScriptPromise = null;
+      script.remove?.();
+      const err = new Error(message);
+      err.code = code;
+      reject(err);
+    };
+    const timer = setTimeout(() => fail('PayPal SDK timed out', 'timeout'), timeoutMs);
     script.src = `${base}/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=USD&intent=${intent}`;
     script.async = true;
-    script.onload = () => resolve(window.paypal);
-    script.onerror = () => {
-      _paypalScriptPromise = null;
-      reject(new Error('PayPal SDK failed to load'));
+    script.onload = () => {
+      if (settled) { return; }
+      settled = true;
+      clearTimeout(timer);
+      resolve(window.paypal);
     };
+    script.onerror = () => fail('PayPal SDK failed to load', 'load');
     document.body.appendChild(script);
   });
   return _paypalScriptPromise;

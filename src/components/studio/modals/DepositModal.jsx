@@ -18,31 +18,13 @@
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { paymentConfigService, walletTopupService } from '../../../services/api';
+// Canonical SDK loader (single injected script, deadline included) — this
+// module used to keep its own copy, which never gave up on a request that
+// was accepted but never answered: the modal stayed on an empty PayPal slot
+// with no message and no way to retry.
+import { loadPayPalScript } from '../../CheckoutModal';
 import { StudioModal, FormField, LoadingOverlay } from './shared';
 import styles from './modals.module.css';
-
-// ─── PayPal SDK loader (injected once, capture intent) ─────────────────
-let _paypalScriptPromise = null;
-
-function loadPayPalScript(clientId, isSandbox) {
-  if (window.paypal && window.paypal.Buttons) {
-    return Promise.resolve(window.paypal);
-  }
-  if (_paypalScriptPromise) return _paypalScriptPromise;
-  const base = isSandbox ? 'https://www.sandbox.paypal.com' : 'https://www.paypal.com';
-  _paypalScriptPromise = new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = `${base}/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=USD&intent=capture`;
-    script.async = true;
-    script.onload = () => resolve(window.paypal);
-    script.onerror = () => {
-      _paypalScriptPromise = null;
-      reject(new Error('PayPal SDK failed to load'));
-    };
-    document.body.appendChild(script);
-  });
-  return _paypalScriptPromise;
-}
 
 // Fallback limits when the config endpoint hasn't loaded yet (they are
 // admin-configurable server-side via /api/admin/platform-config/).
@@ -80,8 +62,10 @@ export default function DepositModal({ onClose, onSuccess, lang, showToast }) {
     try {
       const pp = await loadPayPalScript(config.data.client_id, config.data.sandbox);
       setPaypal(pp);
-    } catch (_) {
-      setErrorMsg(t('PayPal is not available right now.', 'PayPal poko disponib kounye a.'));
+    } catch (err) {
+      setErrorMsg(err?.code === 'timeout'
+        ? t('PayPal took too long to load. Check your connection and try again.', 'PayPal pran twòp tan pou chaje. Verifye koneksyon w epi eseye ankò.')
+        : t('PayPal is not available right now.', 'PayPal poko disponib kounye a.'));
       setPhase('failed');
     }
   }, [isHt]);

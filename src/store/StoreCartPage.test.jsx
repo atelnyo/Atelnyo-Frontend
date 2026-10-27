@@ -131,4 +131,21 @@ describe('StoreCartPage checkout preparation', () => {
     expect(screen.queryByText('Loading secure payment options…')).toBeNull();
     expect(screen.getByRole('button', { name: 'Checkout' }).disabled).toBe(false);
   });
+
+  it('names a timed-out SDK load and lets the shopper try again', async () => {
+    const timeout = new Error('PayPal SDK timed out');
+    timeout.code = 'timeout';
+    loadPayPalScript.mockRejectedValue(timeout);
+
+    renderCart();
+    await startCheckout();
+
+    // "PayPal is unavailable" would be wrong — the deadline is what expired,
+    // and the fix is a retry, not giving up on PayPal.
+    await waitFor(() => {
+      expect(screen.getByRole('alert').textContent).toMatch(/took too long/);
+    });
+    expect(screen.queryByText('Loading secure payment options…')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Checkout' }).disabled).toBe(false);
+  });
 });

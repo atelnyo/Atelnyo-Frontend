@@ -193,6 +193,7 @@ import { TIMEZONE_TO_COUNTRY } from './services/location/timezoneService';
 // webmcp.js (116KB) is lazy-loaded — only needed for AI agent tools
 import LocaleProvider from './context/LocaleContext';
 import useLocalePath from './hooks/useLocalePath';
+import LoadingFallback from './components/shared/LoadingFallback';
 
 // ─── Chunk Load Error Boundary ───────────────────────────────────
 // Catches "Failed to fetch dynamically imported module" errors that
@@ -2604,23 +2605,12 @@ function App() {
       {/* ═══ Sheet Routes — every /sheet/* path renders a dedicated overlay ═══ */}
       {/* <ChunkLoadErrorBoundary> catches "Failed to fetch dynamically
            imported module" errors when a deployment changes chunk hashes.
-           <Suspense> shows a spinner while lazy-loaded components load. */}
+           <Suspense> waits for lazy-loaded components; its fallback carries a
+           deadline (<LoadingFallback>) so a request that never resolves shows
+           an explanation + reload instead of an endless spinner. */}
       <ChunkLoadErrorBoundary>
       <Suspense fallback={
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 9999,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 16,
-          background: 'var(--surface-page, var(--bg-page, #ffdae9))',
-        }}>
-          <i className="fas fa-spinner fa-pulse fa-2x" style={{ color: 'var(--color-primary, var(--pink-primary, #d81b60))' }} />
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #64748b)' }}>Loading…</span>
-        </div>
+        <LoadingFallback fullPage lang={lang} color="var(--color-primary, var(--pink-primary, #d81b60))" />
       }>
       <Routes location={effectiveLocation}>
         {/* Public catalog page — /explore (and localized /ht-HT/explore)
