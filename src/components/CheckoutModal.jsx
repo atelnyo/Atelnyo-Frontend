@@ -182,20 +182,26 @@ export default function CheckoutModal({
 
   // ── Boot: fetch safe config ───────────────────────────────────────────
   const bootPaypal = useCallback(async () => {
-    const config = await paymentConfigService.config();
-    setPpConfig(config?.data || null);
-    if (!config?.data?.configured || !config?.data?.client_id) {
-      return false;
-    }
     try {
+      const config = await paymentConfigService.config();
+      setPpConfig(config?.data || null);
+      if (!config?.data?.configured || !config?.data?.client_id) {
+        setErrorMsg(config?.data?.error || t('paypal_unavailable'));
+        return false;
+      }
       // Escrow orders are created with intent=AUTHORIZE server-side, so
       // the SDK must load with intent=authorize to match.
       const sdkIntent = type === 'escrow' ? 'authorize' : 'capture';
-      const pp = await loadPayPalScript(config.data.client_id, config.data.sandbox, sdkIntent);
-      setPaypal(pp);
-      return true;
+      try {
+        const pp = await loadPayPalScript(config.data.client_id, config.data.sandbox, sdkIntent);
+        setPaypal(pp);
+        return true;
+      } catch (err) {
+        setErrorMsg(err?.message || t('paypal_unavailable'));
+        return false;
+      }
     } catch (err) {
-      setErrorMsg(t('paypal_unavailable'));
+      setErrorMsg(err?.response?.data?.error || err?.message || t('paypal_unavailable'));
       return false;
     }
   }, [t, type]);
@@ -257,12 +263,40 @@ export default function CheckoutModal({
         const affToken = getAffiliateAttributionToken();
         resp = await checkoutService.createOrder(orderId, activeProvider, affToken);
       }
-      setPayment(resp.data);
+      const data = resp?.data;
+      if (!data) {
+        setPhase(PHASES.failed);
+        setErrorMsg(t('failed'));
+        return null;
+      }
+      // Validate required fields depending on provider/type
+      if (activeProvider === 'paypal') {
+        if (type === 'premium') {
+          if (!data.subscription_id && !data.approve_url) {
+            setPhase(PHASES.failed);
+            setErrorMsg(data?.error || t('failed'));
+            return null;
+          }
+        } else {
+          if (!data.paypal_order_id && !data.approve_url) {
+            setPhase(PHASES.failed);
+            setErrorMsg(data?.error || t('failed'));
+            return null;
+          }
+        }
+      } else if (activeProvider === 'stripe') {
+        if (!data.client_secret) {
+          setPhase(PHASES.failed);
+          setErrorMsg(data?.error || t('failed'));
+          return null;
+        }
+      }
+      setPayment(data);
       setPhase(PHASES.ready);
-      return resp.data;
+      return data;
     } catch (err) {
       setPhase(PHASES.failed);
-      setErrorMsg(err?.response?.data?.error || t('failed'));
+      setErrorMsg(err?.response?.data?.error || err?.response?.data?.detail || err?.message || t('failed'));
       return null;
     }
   }, [type, provider, plan, meta, user, t, onClose, onAuthRequired]);
@@ -310,14 +344,21 @@ export default function CheckoutModal({
   useEffect(() => {
     if (isOpen) {
       processingRef.current = false;
-      // bootPaypal/createPayment are async and set state after awaiting the
-      // network; the synchronous-first-statement setState inside them is the
-      // same intentional pattern the rest of the codebase uses (see App.jsx),
-      // so the set-state-in-effect rule is suppressed on these two lines.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      bootPaypal();
-       
-      createPaymentRef.current();
+      (async () => {
+        // Load config and SDK before creating payment
+        if (provider === 'paypal') {
+          const ok = await bootPaypal();
+          if (!ok && ppConfig && ppConfig.configured === false) {
+            // If explicitly not configured, still allow trying to create? But SDK might not load
+            // Show error if config says not configured
+            setPhase(PHASES.failed);
+            setErrorMsg(ppConfig?.error || t('paypal_unavailable'));
+            return;
+          }
+        }
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        await createPaymentRef.current();
+      })();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
@@ -379,7 +420,10 @@ export default function CheckoutModal({
         }
       },
       onCancel: () => setPhase(PHASES.cancelled),
-      onError: () => setPhase(PHASES.failed),
+      onError: (err) => {
+        setPhase(PHASES.failed);
+        setErrorMsg(err?.message || t('paypal_unavailable'));
+      },
     });
     buttons.render(container).then(() => {
       // Mark rendered only AFTER success so a failed render can retry.
@@ -464,6 +508,14 @@ export default function CheckoutModal({
     setPayment(null);
     setErrorMsg('');
     setPhase(PHASES.creating);
+    if (next === 'paypal') {
+      const ok = await bootPaypal();
+      if (!ok && ppConfig && ppConfig.configured === false) {
+        setPhase(PHASES.failed);
+        setErrorMsg(ppConfig?.error || t('paypal_unavailable'));
+        return;
+      }
+    }
     await createPayment(next);
   };
 
@@ -588,7 +640,17 @@ export default function CheckoutModal({
             <div className="checkout-state checkout-cancelled">
               <i className="fas fa-times-circle" />
               <p>{t('cancelled')}</p>
-              <button type="button" className="btn-secondary" onClick={() => setPhase(PHASES.ready)}>
+              <button type="button" className="btn-secondary" onClick={() => {
+                setErrorMsg('');
+                setPayment(null);
+                setPhase(PHASES.creating);
+                (async () => {
+                  if (provider === 'paypal') {
+                    await bootPaypal();
+                  }
+                  await createPayment(provider);
+                })();
+              }}>
                 {t('try_again')}
               </button>
             </div>
@@ -598,7 +660,22 @@ export default function CheckoutModal({
             <div className="checkout-state checkout-error">
               <i className="fas fa-exclamation-circle" />
               <p>{errorMsg || t('failed')}</p>
-              <button type="button" className="btn-secondary" onClick={() => setPhase(PHASES.ready)}>
+              <button type="button" className="btn-secondary" onClick={() => {
+                setErrorMsg('');
+                setPayment(null);
+                setPhase(PHASES.creating);
+                (async () => {
+                  if (provider === 'paypal') {
+                    const ok = await bootPaypal();
+                    if (!ok && ppConfig && ppConfig.configured === false) {
+                      setPhase(PHASES.failed);
+                      setErrorMsg(ppConfig?.error || t('paypal_unavailable'));
+                      return;
+                    }
+                  }
+                  await createPayment(provider);
+                })();
+              }}>
                 {t('try_again')}
               </button>
             </div>
