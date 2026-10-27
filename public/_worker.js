@@ -38,16 +38,26 @@ const SECURITY_HEADERS = {
   // XSS protection (legacy but still useful for older browsers)
   'X-XSS-Protection': '1; mode=block',
   // Content Security Policy
+  //
+  // PayPal hosts are listed as ``*.paypal.com`` / ``*.paypalobjects.com``
+  // rather than the individual www./sandbox. hosts: PayPal's documented CSP
+  // requires those wildcards for script-src, script-src-elem, connect-src,
+  // frame-src, img-src and style-src, and the SDK really does use them — the
+  // loader pulls FraudNet from ``https://c.paypal.com/da/r/fb.js`` and talks
+  // to www.paypal.com over XHR while an order is being approved. A missing
+  // entry here (or in the index.html meta tag, which is enforced in ADDITION
+  // to this header) breaks the PayPal buttons with nothing but a browser
+  // console violation — no server-side error at all.
   'Content-Security-Policy': [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://connect.facebook.net https://cdnjs.cloudflare.com https://www.google-analytics.com https://www.paypal.com https://www.paypalobjects.com https://static.cloudflareinsights.com",
-    "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://connect.facebook.net https://cdnjs.cloudflare.com https://www.google-analytics.com https://www.paypal.com https://www.paypalobjects.com https://static.cloudflareinsights.com",
-    "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://connect.facebook.net https://cdnjs.cloudflare.com https://www.google-analytics.com https://*.paypal.com https://*.paypalobjects.com https://static.cloudflareinsights.com",
+    "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://connect.facebook.net https://cdnjs.cloudflare.com https://www.google-analytics.com https://*.paypal.com https://*.paypalobjects.com https://static.cloudflareinsights.com",
+    "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://*.paypal.com https://*.paypalobjects.com",
     "font-src 'self' https://cdnjs.cloudflare.com data:",
     "img-src 'self' data: blob: https: http:",
     "media-src 'self' blob: https: http:",
-    "connect-src 'self' https://api.atelnyo.site https://atelnyo.atelnyo.workers.dev https://www.google-analytics.com https://firebasestorage.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com wss://api.atelnyo.site ws://127.0.0.1:8000 https://*.sentry.io https://www.paypal.com https://www.paypalobjects.com https://www.sandbox.paypal.com https://static.cloudflareinsights.com",
-    "frame-src 'self' https://www.youtube.com https://player.vimeo.com https://js.stripe.com https://www.paypal.com https://www.paypalobjects.com https://www.sandbox.paypal.com",
+    "connect-src 'self' https://api.atelnyo.site https://atelnyo.atelnyo.workers.dev https://www.google-analytics.com https://firebasestorage.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com wss://api.atelnyo.site ws://127.0.0.1:8000 https://*.sentry.io https://*.paypal.com https://*.paypalobjects.com https://static.cloudflareinsights.com",
+    "frame-src 'self' https://www.youtube.com https://player.vimeo.com https://js.stripe.com https://*.paypal.com https://*.paypalobjects.com",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
