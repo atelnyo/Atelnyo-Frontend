@@ -29,7 +29,9 @@ export default function StoreCartPage() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items]);
-  const [status, setStatus] = useState('idle'); // idle | submitting | error
+  // idle | submitting (creating the order) | preparing (waiting for the
+  // PayPal buttons) | capturing (buyer approved, settlement in flight) | error
+  const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
   const [orderId, setOrderId] = useState(null);
   const [txnId, setTxnId] = useState(null);
@@ -41,6 +43,15 @@ export default function StoreCartPage() {
   const [loginLink, setLoginLink] = useState(null);
   const user = useAuthStore((s) => s.user);
   const buttonsRef = useRef(null);
+
+  // One label per in-flight step so the Checkout button always says what is
+  // happening instead of flickering back to "Checkout" while the payment
+  // surface below it is still being prepared.
+  const busyLabel = {
+    submitting: 'Starting checkout',
+    preparing: 'Preparing payment',
+    capturing: 'Confirming payment',
+  }[status] || '';
 
   const update = (next) => {
     setItems(next);
@@ -66,7 +77,8 @@ export default function StoreCartPage() {
         pp.Buttons({
           createOrder: () => paypalOrderId,
           onApprove: async (data) => {
-            setStatus('submitting');
+            // Settlement takes a round-trip; say so instead of looking idle.
+            setStatus('capturing');
             try {
               await checkoutService.capturePaypal(txnId, data.orderID || paypalOrderId, guestToken);
               update([]);
@@ -82,7 +94,11 @@ export default function StoreCartPage() {
             setMessage('PayPal is unavailable right now.');
             setStatus('error');
           },
-        }).render(buttonsRef.current);
+        }).render(buttonsRef.current).then(() => {
+          if (cancelled) return;
+          // The buttons are on screen now — the status quo ante is back.
+          setStatus('idle');
+        });
       } catch {
         if (!cancelled) {
           setMessage('PayPal is unavailable right now.');
@@ -146,7 +162,11 @@ export default function StoreCartPage() {
       setTxnId(pay.transaction_id);
       setPaypalOrderId(pay.paypal_order_id);
       setMessage('');
-      setStatus('idle');
+      // Stay in "preparing" until the buttons have actually rendered: the
+      // config fetch + PayPal SDK download + render used to happen against
+      // an empty area under the button, which reads as "checkout is broken"
+      // (especially on a slow connection). The placeholder below covers it.
+      setStatus('preparing');
     } catch (err) {
       const detail =
         err?.response?.data?.detail || err?.response?.data?.error || 'Checkout could not be started.';
@@ -239,15 +259,26 @@ export default function StoreCartPage() {
           </label>
         </div>
       )}
-      <button type="button" className="store-btn store-cart__checkout" onClick={onCheckout} disabled={status === 'submitting'}>
-        {status === 'submitting' ? (
-          <span className="store-cart__busy" role="status" aria-label="Starting checkout">
-            Starting checkout<span className="store-cart__dots" aria-hidden="true"><i /><i /><i /></span>
+      <button
+        type="button"
+        className="store-btn store-cart__checkout"
+        onClick={onCheckout}
+        disabled={Boolean(busyLabel)}
+      >
+        {busyLabel ? (
+          <span className="store-cart__busy" role="status" aria-label={busyLabel}>
+            {busyLabel}<span className="store-cart__dots" aria-hidden="true"><i /><i /><i /></span>
           </span>
         ) : (
           'Checkout'
         )}
       </button>
+      {paypalOrderId && status === 'preparing' && (
+        <div className="store-paypal-loading" role="status" aria-live="polite">
+          <span className="store-paypal-loading__button" aria-hidden="true" />
+          <p>Loading secure payment options…</p>
+        </div>
+      )}
       {paypalOrderId && <div ref={buttonsRef} className="store-paypal" />}
       {message && (
         <p role={status === 'error' ? 'alert' : 'status'} className={status === 'error' ? 'store-state store-state--error' : 'store-state'}>
