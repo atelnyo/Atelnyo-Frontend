@@ -29,8 +29,6 @@
     "dompurify": "^3.4.17",
     "firebase": "^12.15.0",
     "framer-motion": "^12.42.2",
-    "freebuff": "^0.0.117",
-    "packages": "^0.0.8",
     "playwright": "^1.62.0",
     "qrcode": "^1.5.4",
     "react": "^18.2.0",
