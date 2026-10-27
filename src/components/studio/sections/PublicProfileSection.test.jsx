@@ -131,4 +131,15 @@ describe('PublicProfileSection editor', () => {
     expect(await screen.findByText('Kreye Pwofil Piblik')).toBeInTheDocument();
     expect(screen.getByText('Pwofil poko kreye')).toBeInTheDocument();
   });
+
+  it('lets a Premium account upload its account photo without creator access', async () => {
+    creatorProfileService.get.mockRejectedValue({ response: { status: 403 } });
+
+    renderEditor({
+      user: { id: 2, premium: { is_premium: true }, avatar_url: '' },
+    });
+
+    expect(await screen.findByRole('button', { name: /Telechaje foto pwofil/ })).toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: /Istwa/ })).not.toBeInTheDocument();
+  });
 });

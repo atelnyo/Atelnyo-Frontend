@@ -358,6 +358,47 @@ export default function PublicProfileSection({ lang, showToast, user }) {
 
   // ─── Empty / Error states ──────────────────────────────────────────
   if (!profile) {
+    if (user?.premium?.is_premium) {
+      return (
+        <div className={styles.section}>
+          <SectionHeader
+            icon="fa-user-circle"
+            title={isHt ? 'Foto pwofil Premium' : 'Premium profile photo'}
+            lang={lang}
+            help={{
+              ht: 'Kont Premium yo ka mete foto kont yo isit la. Sa pa aktive yon pwofil kreyatè ni lòt zouti kreyatè.',
+              en: 'Premium accounts can upload their account photo here. This does not activate a creator profile or other creator tools.',
+            }}
+          />
+          {(form.avatar_url || user.avatar_url) && (
+            <img
+              src={form.avatar_url || user.avatar_url}
+              alt={isHt ? 'Foto pwofil' : 'Profile photo'}
+              style={{ width: 112, height: 112, borderRadius: '50%', objectFit: 'cover', marginBottom: 16 }}
+            />
+          )}
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={handleAvatarUpload}
+          />
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={() => avatarInputRef.current?.click()}
+            disabled={uploadingAvatar}
+          >
+            <i className={`fas ${uploadingAvatar ? 'fa-spinner fa-spin' : 'fa-cloud-upload-alt'}`} aria-hidden="true" />{' '}
+            {uploadingAvatar
+              ? (isHt ? 'Ap telechaje...' : 'Uploading...')
+              : (isHt ? 'Telechaje foto pwofil' : 'Upload profile photo')}
+          </button>
+        </div>
+      );
+    }
+
     if (fetchError === 'not_creator') {
       return (
         <div className={styles.section}>
