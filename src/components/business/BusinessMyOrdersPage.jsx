@@ -174,6 +174,9 @@ export default function BusinessMyOrdersPage({ lang = 'ht', showToast }) {
       .filter((it) => it?.download_url)
       .map((it) => ({ ...it, order_id: o.id, order_status: o.status }))
   ));
+  const printifyOrders = (mpOrders || []).filter((order) => (
+    Array.isArray(order?.printify_fulfillment) && order.printify_fulfillment.length > 0
+  ));
 
   const openDownload = (item) => {
     if (!item?.download_url) return;
@@ -264,6 +267,40 @@ export default function BusinessMyOrdersPage({ lang = 'ht', showToast }) {
 
       {/* ─── My digital products — marketplace downloads ────────── */}
       <section data-testid="mwen-digital-downloads">
+        {printifyOrders.length > 0 && (
+          <div className="biz-orders-list" style={{ maxWidth: 720, margin: '0 auto 24px' }} data-testid="mwen-printify-orders">
+            <h3 style={{ margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <i className="fas fa-box" aria-hidden="true" />
+              {isHt ? 'Kòmand fizik mwen yo' : 'My physical orders'}
+            </h3>
+            {printifyOrders.map((order) => (
+              <div className="biz-order-card" key={`printify-${order.id}`} data-testid="mwen-printify-order">
+                <div className="biz-order-main">
+                  <span className="biz-order-name">{(order.items || []).map((item) => item.product_title).filter(Boolean).join(', ')}</span>
+                  <p className="biz-order-meta">
+                    <i className="fas fa-receipt" aria-hidden="true" />{' '}
+                    {isHt ? 'Kòmand' : 'Order'} #{order.id}{' · '}
+                    {order.printify_fulfillment.map((fulfillment) => (
+                      <span key={`${order.id}-${fulfillment.status || 'unknown'}-${(fulfillment.shipments || []).map((shipment) => shipment.number || shipment.url || 'shipment').join(',')}`}>
+                        {fulfillment.status || (isHt ? 'Ap tann mizajou' : 'Awaiting update')}
+                        {fulfillment.shipments?.map((shipment) => (
+                          <span key={`${shipment.number || shipment.url || shipment.carrier || 'shipment'}`}>
+                            {' · '}{shipment.carrier || (isHt ? 'Transpò' : 'Carrier')}{' '}
+                            {shipment.url?.startsWith('https://') ? (
+                              <a href={shipment.url} target="_blank" rel="noreferrer">
+                                {shipment.number || (isHt ? 'Swiv livrezon' : 'Track shipment')}
+                              </a>
+                            ) : (shipment.number || '')}
+                          </span>
+                        ))}
+                      </span>
+                    ))}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
         {mpOrders === null ? (
           <div className="biz-hub-loading">
             <i className="fas fa-spinner fa-pulse fa-lg" aria-hidden="true" />

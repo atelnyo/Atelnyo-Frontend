@@ -254,7 +254,9 @@ export default function StoreProductPage() {
             <span>Variant</span>
             <select value={variantId ?? ''} onChange={(e) => setVariantId(Number(e.target.value))}>
               {variants.map((v) => (
-                <option key={v.id} value={v.id}>{v.name}</option>
+                <option key={v.id} value={v.id}>
+                  {[v.color, v.size].filter(Boolean).join(' / ') || v.name}
+                </option>
               ))}
             </select>
           </label>

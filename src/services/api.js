@@ -1315,6 +1315,7 @@ export const marketplaceService = {
       ...(holdPayment ? { hold_payment: true } : {}),
     }),
   myOrders: () => api.get('marketplace/orders/'),
+  orderProfit: (id) => api.get(`marketplace/orders/${id}/profit/`),
   getSEO: (id) => api.get(`intelligence/product/${id}/seo/`),
   getCI: (id) => api.get(`intelligence/product/${id}/`),
   // Printify (pull-only) — seller connects their own token and imports products.
@@ -1322,6 +1323,7 @@ export const marketplaceService = {
   printifyConnect: (apiToken, shopId) =>
     api.put('marketplace/printify/connection/', { api_token: apiToken, ...(shopId ? { shop_id: shopId } : {}) }),
   printifyDisconnect: () => api.delete('marketplace/printify/connection/'),
+  printifySetupWebhooks: () => api.post('marketplace/printify/webhooks/setup/'),
   printifyProducts: () => api.get('marketplace/printify/products/'),
   printifyImport: (ids, fields) => api.post('marketplace/printify/import/', {
     printify_product_ids: ids,

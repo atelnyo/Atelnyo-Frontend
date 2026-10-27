@@ -149,6 +149,27 @@ export default function OrdersSection({ lang, t }) {
                                     <p className={styles.orderDetailAddr}>{o.buyer_note}</p>
                                   </>
                                 )}
+                                {Array.isArray(o.printify_fulfillment) && o.printify_fulfillment.length > 0 && (
+                                  <>
+                                    <span className={styles.orderDetailLabel}>{isHt ? 'Fulfillment Printify' : 'Printify fulfillment'}</span>
+                                    {o.printify_fulfillment.map((fulfillment) => (
+                                      <div key={`${fulfillment.submission_status || 'customer'}-${fulfillment.status || 'pending'}-${(fulfillment.shipments || []).map((shipment) => shipment.number || shipment.url || 'shipment').join(',')}`}>
+                                        <p className={styles.orderDetailAddr}>
+                                          {fulfillment.status || fulfillment.submission_status || (isHt ? 'Ap tann mizajou' : 'Awaiting update')}
+                                        </p>
+                                        {fulfillment.issue && <p className={styles.orderDetailAddr} role="alert">{fulfillment.issue}</p>}
+                                        {(fulfillment.shipments || []).map((shipment) => (
+                                          <p className={styles.orderDetailAddr} key={shipment.number || shipment.url || shipment.carrier}>
+                                            {shipment.carrier || (isHt ? 'Transpò' : 'Carrier')}{' '}
+                                            {shipment.url?.startsWith('https://')
+                                              ? <a href={shipment.url} target="_blank" rel="noreferrer">{shipment.number || (isHt ? 'Swiv' : 'Track')}</a>
+                                              : shipment.number}
+                                          </p>
+                                        ))}
+                                      </div>
+                                    ))}
+                                  </>
+                                )}
                               </div>
                             </div>
                           </div>

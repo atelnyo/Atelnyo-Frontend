@@ -40,9 +40,18 @@ export default function StoreCartPage() {
   const [guestToken, setGuestToken] = useState(null);
   const [guestEmail, setGuestEmail] = useState('');
   const [guestName, setGuestName] = useState('');
+  const [shippingAddress, setShippingAddress] = useState({
+    first_name: '', last_name: '', email: '', phone: '', country: 'US',
+    region: '', address1: '', address2: '', city: '', zip: '',
+  });
+  const [shippingQuote, setShippingQuote] = useState(null);
+  const [shippingMethod, setShippingMethod] = useState('');
+  const [shippingBusy, setShippingBusy] = useState(false);
+  const [orderTotal, setOrderTotal] = useState(null);
   const [loginLink, setLoginLink] = useState(null);
   const user = useAuthStore((s) => s.user);
   const buttonsRef = useRef(null);
+  const requiresShipping = items.some((line) => details[line.productId]?.kind === 'physical');
 
   // One label per in-flight step so the Checkout button always says what is
   // happening instead of flickering back to "Checkout" while the payment
@@ -56,6 +65,9 @@ export default function StoreCartPage() {
   const update = (next) => {
     setItems(next);
     saveCart(next);
+    setShippingQuote(null);
+    setShippingMethod('');
+    setOrderTotal(null);
     window.dispatchEvent(new Event('store-cart-changed'));
   };
 
@@ -119,8 +131,52 @@ export default function StoreCartPage() {
     update(setQuantity(items, { ...line, quantity }));
   const onRemove = (line) => update(removeFromCart(items, line));
 
+  const onShippingAddressChange = (event) => {
+    const { name, value } = event.target;
+    setShippingAddress((current) => ({ ...current, [name]: value }));
+    setShippingQuote(null);
+    setShippingMethod('');
+    setOrderTotal(null);
+  };
+
+  const onQuoteShipping = async () => {
+    setShippingBusy(true);
+    setMessage('');
+    setShippingQuote(null);
+    setShippingMethod('');
+    try {
+      const response = await storeService.quoteShipping(
+        items.map((line) => ({
+          product_id: line.productId,
+          variant_id: line.variantId,
+          quantity: line.quantity,
+        })),
+        { ...shippingAddress, email: shippingAddress.email || user?.email || guestEmail },
+      );
+      const quote = response?.data || {};
+      setShippingQuote(quote);
+      if (quote.status !== 'ELIGIBLE') {
+        setMessage(quote.warnings?.join(' ') || 'Shipping could not be verified for this address.');
+      }
+    } catch (err) {
+      setMessage(err?.response?.data?.detail || 'Shipping could not be checked. Try again.');
+    } finally {
+      setShippingBusy(false);
+    }
+  };
+
   const onCheckout = async () => {
     if (!items.length) return;
+    if (requiresShipping && (!shippingQuote || shippingQuote.status !== 'ELIGIBLE')) {
+      setMessage('Enter your shipping address and check shipping before checkout.');
+      setStatus('error');
+      return;
+    }
+    if (shippingQuote?.shipping_methods?.length && !shippingMethod) {
+      setMessage('Choose an available shipping method before checkout.');
+      setStatus('error');
+      return;
+    }
     const guest = !user;
     if (guest && (!guestEmail.trim() || !guestEmail.includes('@'))) {
       setMessage('Enter a valid email to check out.');
@@ -130,6 +186,7 @@ export default function StoreCartPage() {
     setStatus('submitting');
     setMessage('');
     setLoginLink(null);
+    setOrderTotal(null);
     try {
       // Only ids and quantities are sent; the backend prices and validates them.
       let orderRes;
@@ -141,6 +198,11 @@ export default function StoreCartPage() {
           quantity: it.quantity,
         })),
         guest ? { email: guestEmail.trim(), name: guestName.trim() } : null,
+        requiresShipping ? {
+          ...shippingAddress,
+          email: shippingAddress.email || user?.email || guestEmail.trim(),
+        } : null,
+        shippingMethod || null,
         );
       } catch (err) {
         if (err?.response?.data?.code === 'account_exists') {
@@ -153,6 +215,7 @@ export default function StoreCartPage() {
         throw err;
       }
       const orderId = orderRes?.data?.id;
+      setOrderTotal(orderRes?.data?.total ?? null);
       const token = orderRes?.data?.guest_token || null;
       setGuestToken(token);
       const payRes = await storeService.checkoutOrder(orderId, 'paypal', token);
@@ -198,7 +261,8 @@ export default function StoreCartPage() {
       <ul className="store-cart">
         {items.map((line) => {
           const detail = details[line.productId];
-          const unit = Number(detail?.price);
+          const variant = detail?.variants?.find((entry) => entry.id === line.variantId);
+          const unit = Number(variant?.price ?? detail?.price);
           const lineTotal = Number.isFinite(unit) ? unit * line.quantity : null;
           return (
           <li key={`${line.productId}-${line.variantId ?? 'base'}`} className="store-cart__line">
@@ -249,7 +313,7 @@ export default function StoreCartPage() {
               autoComplete="email"
               required
               value={guestEmail}
-              onChange={(e) => setGuestEmail(e.target.value)}
+              onChange={(e) => { setGuestEmail(e.target.value); setShippingQuote(null); setShippingMethod(''); }}
             />
           </label>
           <label>
@@ -262,6 +326,75 @@ export default function StoreCartPage() {
             />
           </label>
         </div>
+      )}
+      {requiresShipping && (
+        <fieldset className="store-shipping-address" disabled={shippingBusy || Boolean(busyLabel)}>
+          <legend>Shipping address</legend>
+          <div className="store-shipping-address__grid">
+            {[
+              ['first_name', 'First name'], ['last_name', 'Last name'],
+              ['email', 'Email'], ['phone', 'Phone (optional)'],
+              ['address1', 'Address'], ['address2', 'Apartment, suite (optional)'],
+              ['city', 'City'], ['region', 'State / region'], ['zip', 'Postal code'],
+            ].map(([name, label]) => (
+              <label key={name}>
+                {label}
+                <input
+                  name={name}
+                  type={name === 'email' ? 'email' : 'text'}
+                  autoComplete={name === 'address1' ? 'address-line1' : name === 'zip' ? 'postal-code' : name}
+                  value={shippingAddress[name]}
+                  onChange={onShippingAddressChange}
+                  required={!label.includes('optional')}
+                />
+              </label>
+            ))}
+            <label>
+              Country
+              <input name="country" autoComplete="country" maxLength={2} value={shippingAddress.country}
+                onChange={onShippingAddressChange} required />
+            </label>
+          </div>
+          <button type="button" className="store-btn" onClick={onQuoteShipping} disabled={shippingBusy}>
+            {shippingBusy ? 'Checking shipping…' : 'Check shipping options'}
+          </button>
+          {shippingQuote?.status === 'ELIGIBLE' && shippingQuote.shipping_methods?.length > 0 && (
+            <div role="group" aria-label="Shipping method">
+              {shippingQuote.shipping_methods.map((method) => (
+                <label key={method.id}>
+                  <input type="radio" name="shipping_method" value={method.id}
+                    checked={shippingMethod === method.id}
+                    onChange={() => { setShippingMethod(method.id); setMessage(''); }} />
+                  {method.name} · {new Intl.NumberFormat('en-US', { style: 'currency', currency: method.currency || 'USD' }).format(Number(method.price))}
+                </label>
+              ))}
+            </div>
+          )}
+          {shippingQuote?.status === 'ELIGIBLE' && shippingQuote.shipping_methods?.length > 0 && shippingMethod && (
+            <p className="store-state" role="status">
+              Shipping: {new Intl.NumberFormat('en-US', { style: 'currency', currency: shippingQuote.currency || 'USD' }).format(Number(shippingQuote.shipping_methods.find((method) => method.id === shippingMethod)?.price || 0))}
+            </p>
+          )}
+        </fieldset>
+      )}
+      {shippingQuote?.status === 'ELIGIBLE' && shippingQuote.shipping_methods?.length > 0 && shippingMethod && (() => {
+        const subtotal = items.reduce((sum, line) => {
+          const detail = details[line.productId];
+          const variant = detail?.variants?.find((entry) => entry.id === line.variantId);
+          const price = Number(variant?.price ?? detail?.price);
+          return sum + (Number.isFinite(price) ? price * line.quantity : 0);
+        }, 0);
+        const method = shippingQuote.shipping_methods.find((entry) => entry.id === shippingMethod);
+        return method && (
+          <p className="store-state" role="status">
+            Estimated total: {new Intl.NumberFormat('en-US', { style: 'currency', currency: method.currency || 'USD' }).format(subtotal + Number(method.price))}
+          </p>
+        );
+      })()}
+      {orderTotal !== null && (
+        <p className="store-state" role="status">
+          Order total including verified shipping: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(orderTotal))}
+        </p>
       )}
       <button
         type="button"

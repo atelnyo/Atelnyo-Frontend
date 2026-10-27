@@ -30,6 +30,7 @@ const KEY_LABELS = {
   paypal_mode:          { en: 'PayPal Mode',                 ht: 'PayPal Mode' },
   stripe_secret_key:    { en: 'Stripe Secret Key',           ht: 'Stripe Kle Sekrè' },
   stripe_webhook_secret:{ en: 'Stripe Webhook Secret',       ht: 'Stripe Webhook Sekrè' },
+  printify_shipping_policy: { en: 'Printify destination policy (JSON)', ht: 'Règle destinasyon Printify (JSON)' },
   // Notifications
   firebase_server_key:        { en: 'Firebase Server Key',   ht: 'Firebase Kle Sèvè' },
   firebase_credentials_json:  { en: 'Firebase Service Account JSON', ht: 'Firebase JSON Kont Sèvis' },
@@ -71,7 +72,7 @@ const KEY_LABELS = {
 
 // Keys that render as a multi-line <textarea> instead of a single-line
 // input (long raw HTML/script snippets).
-const MULTILINE_KEYS = new Set(['custom_head_html']);
+const MULTILINE_KEYS = new Set(['custom_head_html', 'printify_shipping_policy']);
 
 // ─── Grouped sections shown in the panel ──────────────────────────────
 const CONFIG_GROUPS = [
@@ -84,6 +85,13 @@ const CONFIG_GROUPS = [
       'paypal_client_id', 'paypal_client_secret', 'paypal_webhook_id', 'paypal_mode',
       'stripe_secret_key', 'stripe_webhook_secret',
     ],
+  },
+  {
+    key: 'printify',
+    icon: 'fa-truck-fast',
+    title: { en: 'Printify Store', ht: 'Boutik Printify' },
+    desc: { en: 'Country codes must be explicitly enabled; live product and address quotes are still required at checkout.', ht: 'Ou dwe aktive kòd peyi yo klèman; quote pwodwi ak adrès an dirèk toujou obligatwa nan checkout.' },
+    keys: ['printify_shipping_policy'],
   },
   {
     key: 'notifications',
@@ -151,6 +159,7 @@ export default function AdminPlatformConfig({ lang = 'ht', showToast }) {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState({}); // key -> draft value
+  const [policyCountryDraft, setPolicyCountryDraft] = useState('');
   const [revealed, setRevealed] = useState({}); // key -> show raw input
   const [savingKey, setSavingKey] = useState(null);
   const [testingKey, setTestingKey] = useState(null);
@@ -338,6 +347,32 @@ export default function AdminPlatformConfig({ lang = 'ht', showToast }) {
     }
   }, [descDraft, showToast, t]);
 
+  const updatePrintifyPolicy = (row, country, active) => {
+    let policy;
+    try {
+      policy = JSON.parse(editing[row.key] ?? row.value ?? '{}');
+    } catch {
+      showToast?.(t('Fix the JSON policy before changing a country.', 'Korije JSON règle a anvan ou chanje yon peyi.'), 'circle-exclamation');
+      return;
+    }
+    if (!policy || Array.isArray(policy) || typeof policy !== 'object') {
+      showToast?.(t('Shipping policy must be a country-code object.', 'Règle livrezon an dwe yon objè kòd peyi.'), 'circle-exclamation');
+      return;
+    }
+    policy[country] = { ...(policy[country] || {}), active };
+    setEditing((previous) => ({ ...previous, [row.key]: JSON.stringify(policy, null, 2) }));
+  };
+
+  const addPolicyCountry = (row) => {
+    const country = policyCountryDraft.trim().toUpperCase();
+    if (!/^[A-Z]{2}$/.test(country)) {
+      showToast?.(t('Enter a two-letter country code.', 'Antre kòd peyi ki gen de lèt la.'), 'circle-exclamation');
+      return;
+    }
+    updatePrintifyPolicy(row, country, false);
+    setPolicyCountryDraft('');
+  };
+
   const renderRow = (row) => {
     const label = KEY_LABELS[row.key];
     const isBool = row.value_type === 'bool';
@@ -423,16 +458,64 @@ export default function AdminPlatformConfig({ lang = 'ht', showToast }) {
               <span>{draft === 'true' ? (isHt ? 'Aktive' : 'Enabled') : (isHt ? 'Fèmen' : 'Disabled')}</span>
             </label>
           ) : MULTILINE_KEYS.has(row.key) ? (
-            <textarea
-              className="ad-cfg-input ad-cfg-textarea"
-              rows={6}
-              value={draft}
-              onChange={(e) => setEditing((prev) => ({ ...prev, [row.key]: e.target.value }))}
-              aria-label={label ? (isHt ? label.ht : label.en) : row.key}
-              autoComplete="off"
-              spellCheck={false}
-              placeholder={t('Paste HTML / <script> snippets here…', 'Kole HTML / <script> snippets isit la…')}
-            />
+            <>
+              <textarea
+                className="ad-cfg-input ad-cfg-textarea"
+                rows={6}
+                value={draft}
+                onChange={(e) => setEditing((prev) => ({ ...prev, [row.key]: e.target.value }))}
+                aria-label={label ? (isHt ? label.ht : label.en) : row.key}
+                autoComplete="off"
+                spellCheck={false}
+                placeholder={row.key === 'printify_shipping_policy'
+                  ? '{ "US": { "active": true, "verified_at": null } }'
+                  : t('Paste HTML / <script> snippets here…', 'Kole HTML / <script> snippets isit la…')}
+              />
+              {row.key === 'printify_shipping_policy' && (() => {
+                let policy = {};
+                try {
+                  const parsed = JSON.parse(draft || '{}');
+                  if (parsed && !Array.isArray(parsed) && typeof parsed === 'object') {
+                    policy = parsed;
+                  }
+                } catch { /* The editable JSON error is preserved for correction. */ }
+                return (
+                  <div className="ad-cfg-printify-policy" aria-label={t('Shipping country policy', 'Règle peyi livrezon')}>
+                    <p>{t('Countries absent from this list stay disabled. An enabled country still needs a current product and address quote at checkout.', 'Peyi ki pa nan lis la rete fèmen. Yon peyi aktif toujou bezwen quote pwodwi ak adrès aktyèl nan checkout.')}</p>
+                    {Object.keys(policy).sort().map((country) => {
+                      const entry = policy[country] || {};
+                      const lastQuote = entry.last_quote_at || entry.verified_at;
+                      return (
+                        <label key={country} className="ad-cfg-bool">
+                          <input
+                            type="checkbox"
+                            checked={entry.active === true}
+                            onChange={(event) => updatePrintifyPolicy(row, country, event.target.checked)}
+                            aria-label={`${country} ${t('shipping enabled', 'livrezon aktive')}`}
+                          />
+                          <span>{country}: {lastQuote
+                            ? `${t('Last successful live quote', 'Dènye quote an dirèk ki reyisi')}: ${lastQuote}`
+                            : t('No successful quote recorded yet', 'Pa gen quote ki reyisi anrejistre ankò')}</span>
+                        </label>
+                      );
+                    })}
+                    <div className="ad-cfg-add-grid">
+                      <input
+                        className="ad-cfg-input"
+                        value={policyCountryDraft}
+                        onChange={(event) => setPolicyCountryDraft(event.target.value)}
+                        maxLength={2}
+                        placeholder={t('Country code, e.g. CA', 'Kòd peyi, pa egzanp CA')}
+                        aria-label={t('Add country code', 'Ajoute kòd peyi')}
+                      />
+                      <button type="button" className="ad-dash-panel-action-btn" onClick={() => addPolicyCountry(row)}>
+                        {t('Add disabled country', 'Ajoute peyi fèmen')}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()}
+            </>
           ) : (
             <>
               <input

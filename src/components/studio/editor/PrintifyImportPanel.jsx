@@ -15,6 +15,7 @@ const tr = (isHt, en, ht) => (isHt ? ht : en);
 const IMPORT_FIELD_OPTIONS = [
   { key: 'description', en: 'Description', ht: 'Deskripsyon' },
   { key: 'images', en: 'Images & gallery', ht: 'Imaj ak galri' },
+  { key: 'variants', en: 'Variants (sizes & colors)', ht: 'Variant (gwosè ak koulè)' },
   { key: 'stock', en: 'Stock', ht: 'Stock' },
   { key: 'tags', en: 'Tags', ht: 'Tags' },
   { key: 'shipping', en: 'Shipping info', ht: 'Enfòmasyon livrezon' },
@@ -30,6 +31,8 @@ export default function PrintifyImportPanel({ isHt, showToast, onImported }) {
   const [error, setError] = useState('');
   const [fields, setFields] = useState(ALL_IMPORT_FIELDS);
   const [imported, setImported] = useState([]);
+  const [webhookBusy, setWebhookBusy] = useState(false);
+  const [webhookResult, setWebhookResult] = useState(null);
 
   const t = (en, ht) => tr(isHt, en, ht);
 
@@ -75,6 +78,20 @@ export default function PrintifyImportPanel({ isHt, showToast, onImported }) {
       fail(err, t('Could not load Printify products.', 'Pa t kapab chaje pwodwi Printify yo.'));
     } finally {
       setBusy(false);
+    }
+  };
+
+  const handleSetupWebhooks = async () => {
+    setWebhookBusy(true);
+    setError('');
+    try {
+      const res = await marketplaceService.printifySetupWebhooks();
+      setWebhookResult(res.data);
+      showToast?.(t('Order status and tracking hooks are configured.', 'Webhook estati kòmand ak swivi yo konfigire.'), 'check-circle');
+    } catch (err) {
+      fail(err, t('Could not configure Printify tracking.', 'Pa t kapab konfigire swivi Printify.'));
+    } finally {
+      setWebhookBusy(false);
     }
   };
 
@@ -132,6 +149,17 @@ export default function PrintifyImportPanel({ isHt, showToast, onImported }) {
       <p className={styles.propsHint}>
         {t('Connected to shop', 'Konekte ak magazen')}: <strong>{conn.shop_title || conn.shop_id}</strong>
       </p>
+      <p className={styles.propsHint}>
+        {t('Before setup, configure PRINTIFY_WEBHOOK_SECRET on the server and use the same secret in Printify webhook settings.', 'Anvan konfigirasyon, mete PRINTIFY_WEBHOOK_SECRET sou sèvè a epi itilize menm sekrè a nan paramèt webhook Printify.')}
+      </p>
+      <button type="button" onClick={handleSetupWebhooks} disabled={busy || webhookBusy}>
+        {webhookBusy ? t('Configuring tracking…', 'Ap konfigire swivi…') : t('Configure order tracking', 'Konfigire swivi kòmand')}
+      </button>
+      {webhookResult?.configured && (
+        <p className={styles.propsHint} role="status">
+          {t('Tracking hooks configured for this shop.', 'Webhook swivi yo konfigire pou magazen sa a.')}
+        </p>
+      )}
       <fieldset style={{ border: 'none', padding: 0, margin: '8px 0' }}>
         <legend className={styles.propsHint}>{t('Import these fields', 'Enpòte chan sa yo')}</legend>
         <p className={styles.propsHint}>{t('Title and price are always imported.', 'Tit ak pri a toujou enpòte.')}</p>

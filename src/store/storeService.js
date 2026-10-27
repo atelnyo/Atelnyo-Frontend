@@ -14,12 +14,15 @@ export const storeService = {
   listCategories: () => api.get('categories/', { params: { scope: 'product' } }),
   getProduct: (slugOrId) => api.get(`marketplace/products/${encodeURIComponent(slugOrId)}/`),
   // Guests pass { email, name }; signed-in buyers pass nothing.
-  createOrder: (items, guest) =>
+  createOrder: (items, guest, shippingAddress, shippingMethod) =>
     api.post('marketplace/orders/', {
       items,
       hold_payment: true,
       ...(guest ? { guest_email: guest.email, guest_name: guest.name } : {}),
+      ...(shippingAddress ? { shipping_address: shippingAddress } : {}),
+      ...(shippingMethod ? { shipping_method: shippingMethod } : {}),
     }),
+  quoteShipping: (items, address) => api.post('marketplace/printify/shipping-quote/', { items, address }),
   // guestToken is the one-time token returned when a guest creates the order.
   checkoutOrder: (orderId, provider = 'paypal', guestToken) =>
     api.post('checkout/order/', { order_id: orderId, provider }, guestHeaders(guestToken)),
