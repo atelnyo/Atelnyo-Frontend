@@ -1093,21 +1093,74 @@ export const recentService = {
 
 // ─── Recommendations (Phase 22 + 37) ────────────────────────────────────
 export const recommendedService = {
-  music: (limit = 6) => api.get('explore/recommended/music/', { params: { limit } }),
-  talents: (limit = 4) => api.get('explore/recommended/talents/', { params: { limit } }),
-  courses: (limit = 4) => api.get('explore/recommended/courses/', { params: { limit } }),
-  events: (limit = 6) => api.get('explore/recommended/events/', { params: { limit } }),
-  communities: (limit = 4) => api.get('explore/recommended/communities/', { params: { limit } }),
-  jobs: (limit = 4) => api.get('explore/recommended/jobs/', { params: { limit } }),
-  products: (limit = 4) => api.get('explore/recommended/products/', { params: { limit } }),
+  music: (limit = 6) => {
+    const params = { limit };
+    if (!pickAuthHeader()) {
+      const anonKey = getAnonKey();
+      if (anonKey) params.anon_key = anonKey;
+    }
+    return api.get('explore/recommended/music/', { params });
+  },
+  talents: (limit = 4) => {
+    const params = { limit };
+    if (!pickAuthHeader()) {
+      const anonKey = getAnonKey();
+      if (anonKey) params.anon_key = anonKey;
+    }
+    return api.get('explore/recommended/talents/', { params });
+  },
+  courses: (limit = 4) => {
+    const params = { limit };
+    if (!pickAuthHeader()) {
+      const anonKey = getAnonKey();
+      if (anonKey) params.anon_key = anonKey;
+    }
+    return api.get('explore/recommended/courses/', { params });
+  },
+  events: (limit = 6) => {
+    const params = { limit };
+    if (!pickAuthHeader()) {
+      const anonKey = getAnonKey();
+      if (anonKey) params.anon_key = anonKey;
+    }
+    return api.get('explore/recommended/events/', { params });
+  },
+  communities: (limit = 4) => {
+    const params = { limit };
+    if (!pickAuthHeader()) {
+      const anonKey = getAnonKey();
+      if (anonKey) params.anon_key = anonKey;
+    }
+    return api.get('explore/recommended/communities/', { params });
+  },
+  jobs: (limit = 4) => {
+    const params = { limit };
+    if (!pickAuthHeader()) {
+      const anonKey = getAnonKey();
+      if (anonKey) params.anon_key = anonKey;
+    }
+    return api.get('explore/recommended/jobs/', { params });
+  },
+  products: (limit = 4) => {
+    const params = { limit };
+    if (!pickAuthHeader()) {
+      const anonKey = getAnonKey();
+      if (anonKey) params.anon_key = anonKey;
+    }
+    return api.get('explore/recommended/products/', { params });
+  },
   // Roadmap Faz 3 — merged rail: 1 request instead of 7 parallel calls.
   // Returns { results: [{ item_type, ...item, _score }], count } sorted
   // by composite_score DESC. ``quota`` is an optional per-type weight
   // override (e.g. 'music:0.2,talent:0.15') the FE can use to rebalance.
-  all: (limit = 30, quota) =>
-    api.get('explore/recommended/all/', {
-      params: { limit, ...(quota ? { quota } : {}) },
-    }),
+  all: (limit = 30, quota) => {
+    const params = { limit, ...(quota ? { quota } : {}) };
+    if (!pickAuthHeader()) {
+      const anonKey = getAnonKey();
+      if (anonKey) params.anon_key = anonKey;
+    }
+    return api.get('explore/recommended/all/', { params });
+  },
 };
 
 // ─── Anonymous session key (anonymous-recommendation engine) ────────────
