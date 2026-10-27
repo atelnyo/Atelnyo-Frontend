@@ -871,6 +871,48 @@
   max-width: 100%;
 }
 
+.csp-dashboard-state {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: clamp(28px, 6vw, 56px) 20px;
+  margin-bottom: 14px;
+  text-align: center;
+  color: var(--csp-text-secondary);
+  background: var(--csp-surface-alt);
+  border: 1px solid var(--csp-border-card);
+  border-radius: var(--csp-radius-lg);
+}
+.csp-dashboard-state__icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 4px;
+  color: var(--csp-primary);
+  background: var(--csp-primary-100);
+  border-radius: 50%;
+}
+.csp-dashboard-state h2,
+.csp-dashboard-state__label {
+  margin: 0;
+  color: var(--csp-text);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+.csp-dashboard-state p {
+  max-width: 34rem;
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+.csp-dashboard .csp-dashboard-state__label {
+  padding: 8px 16px 0;
+  color: var(--csp-text-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
    M3 SURFACE CONTAINER CARD
    ═══════════════════════════════════════════════════════════════════════ */

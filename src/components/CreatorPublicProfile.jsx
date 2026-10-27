@@ -399,8 +399,8 @@ export default function CreatorPublicProfile({
         // Products also feed the sidebar FeaturedProductCard on every tab
         // (same tab-independence rationale as campaigns/affiliate), so
         // fetch them here instead of the dashboard-only branch.
-        // Using cachedGet with 60s TTL — creator products don't change often.
-        cachedGet(`creator-profiles/${username}/products/`, undefined, { ttl: 60_000 })
+        // Short cache keeps newly published creator products visible quickly.
+        cachedGet(`creator-profiles/${username}/products/`, undefined, { ttl: 10_000 })
           .then(r => r?.data || []).catch(() => []),
         cachedGet(`creator-profiles/${username}/campaigns/`, undefined, { ttl: 60_000 })
           .then(r => r?.data || []).catch(() => []),
@@ -471,11 +471,11 @@ export default function CreatorPublicProfile({
         if (!cancelled) setDashLoading(true);
       });
       Promise.allSettled([
-        cachedGet(`creator-profiles/${username}/courses/`, undefined, { ttl: 60_000 })
+        cachedGet(`creator-profiles/${username}/courses/`, undefined, { ttl: 10_000 })
           .then(r => r?.data || []).catch(() => []),
-        cachedGet(`creator-profiles/${username}/portfolio/`, undefined, { ttl: 60_000 })
+        cachedGet(`creator-profiles/${username}/portfolio/`, undefined, { ttl: 10_000 })
           .then(r => r?.data || []).catch(() => []),
-        cachedGet(`creator-profiles/${username}/reviews/`, undefined, { ttl: 60_000 })
+        cachedGet(`creator-profiles/${username}/reviews/`, undefined, { ttl: 10_000 })
           .then(r => r?.data || []).catch(() => []),
         // Creator's published jobs — real data from /creator-profiles/<slug>/jobs/
         creatorProfileService.jobs(username).then(r => r?.data || []).catch(() => []),
@@ -885,6 +885,7 @@ export default function CreatorPublicProfile({
             tipLeaders={tipLeaders}
             onItemClick={handleOpenItem}
             onViewAll={handleTabChange}
+            loading={dashLoading}
           />
         );
       case 'picks':
@@ -907,6 +908,7 @@ export default function CreatorPublicProfile({
           jobs={jobs} picks={picks} achievements={achievements} reviews={reviews}
           communities={communities} events={events} affiliateOffers={affiliateOffers}
           campaigns={campaigns} tipLeaders={tipLeaders}
+          loading={dashLoading}
           onItemClick={handleOpenItem} onViewAll={handleTabChange} />;
     }
   };

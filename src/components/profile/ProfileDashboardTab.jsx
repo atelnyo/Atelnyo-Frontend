@@ -29,6 +29,7 @@
 import React from 'react';
 import { fmtCount, fmtDate, isNewItem } from './profileUtils';
 import ProfileCatalogCard from './ProfileCatalogCard';
+import { SkeletonSection } from './ProfileSkeleton';
 
 /* ─── Dashboard section renderers map ──────────────────────────────
  * Each key matches a section id from DASHBOARD_INTERNAL_ORDER.
@@ -435,6 +436,7 @@ export default function DashboardTab({
   picks, achievements, reviews,
   communities, events, affiliateOffers, campaigns,
   tipLeaders,
+  loading = false,
   onItemClick, onViewAll,
 }) {
   const ctx = {
@@ -444,6 +446,43 @@ export default function DashboardTab({
     tipLeaders,
     lang, profile, t, onItemClick, onViewAll,
   };
+
+  const hasContent = Boolean(
+    tipLeaders?.length || activities?.length || courses?.length || products?.length ||
+    portfolio?.length || jobs?.length || picks?.music?.length || picks?.talents?.length ||
+    achievements?.length || reviews?.length || communities?.length || events?.length ||
+    affiliateOffers?.length || campaigns?.length
+  );
+
+  if (loading) {
+    return (
+      <div className="csp-dashboard" role="status" aria-busy="true"
+        aria-label={lang === 'ht' ? 'Ap chaje piblikasyon yo' : 'Loading published content'}>
+        <p className="csp-dashboard-state__label">
+          {lang === 'ht' ? 'Ap chaje afich yo…' : lang === 'es' ? 'Cargando publicaciones…' : 'Loading posts…'}
+        </p>
+        <SkeletonSection />
+      </div>
+    );
+  }
+
+  if (!hasContent) {
+    return (
+      <div className="csp-dashboard-state" role="status">
+        <span className="csp-dashboard-state__icon" aria-hidden="true">
+          <i className="fas fa-layer-group" />
+        </span>
+        <h2>{lang === 'ht' ? 'Poko gen afich piblik' : lang === 'es' ? 'Aún no hay publicaciones' : 'No public posts yet'}</h2>
+        <p>
+          {lang === 'ht'
+            ? 'Kontni kreyatè sa a ap parèt la lè li pibliye.'
+            : lang === 'es'
+              ? 'El contenido aparecerá aquí cuando el creador publique algo.'
+              : 'The creator’s public content will appear here when it is published.'}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="csp-dashboard">
