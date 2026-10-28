@@ -52,9 +52,9 @@ export default function StoreLayout() {
   return (
     <div className="store-root">
       <Helmet>
-        <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
-        <link rel="shortcut icon" type="image/png" href="/icon-192.png" />
-        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/icon-store.png" />
+        <link rel="shortcut icon" type="image/png" href="/icon-store.png" />
+        <link rel="apple-touch-icon" href="/icon-store.png" />
       </Helmet>
       <header className="store-header">
         <Link to="/store" className="store-header__brand" aria-label="Atelnyo Store - Home">

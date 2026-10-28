@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#16213e"/>
+    </linearGradient>
+    <linearGradient id="bag" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f0a500"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <linearGradient id="handle" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Transparent background -->
+  <rect width="192" height="192" fill="none"/>
+  
+  <!-- Shopping bag -->
+  <g transform="translate(48, 40)">
+    <!-- Bag body -->
+    <path d="M 20 30 L 28 110 Q 28 115 33 115 L 63 115 Q 68 115 68 110 L 76 30 Z" 
+          fill="url(#bag)" stroke="#92400e" stroke-width="3"/>
+    
+    <!-- Bag top fold -->
+    <path d="M 20 30 L 76 30 L 72 38 L 24 38 Z" 
+          fill="url(#bag)" stroke="#92400e" stroke-width="3"/>
+    
+    <!-- Handle -->
+    <path d="M 35 30 Q 35 15 48 15 Q 61 15 61 30" 
+          fill="none" stroke="url(#handle)" stroke-width="10" stroke-linecap="round"/>
+    
+    <!-- Bag details -->
+    <ellipse cx="38" cy="55" rx="3" ry="4" fill="#92400e" opacity="0.3"/>
+    <ellipse cx="58" cy="55" rx="3" ry="4" fill="#92400e" opacity="0.3"/>
+  </g>
+  
+  <!-- Small dot accent -->
+  <circle cx="140" cy="60" r="6" fill="#f59e0b" opacity="0.8"/>
+</svg>
