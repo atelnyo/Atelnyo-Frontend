@@ -187,12 +187,12 @@ export default function StoreCartPage() {
       return;
     }
     const resumeExistingOrder = pendingShippingConfirmation;
+    // Allow PayPal to collect shipping address to avoid double entry
     if (!resumeExistingOrder && requiresShipping && (!shippingQuote || shippingQuote.status !== 'ELIGIBLE')) {
-      setMessage('Enter your shipping address and check shipping before checkout.');
-      setStatus('error');
-      return;
+      // Try to proceed - PayPal may provide the address
+      // We'll handle address retrieval server-side
     }
-    if (!resumeExistingOrder && shippingQuote?.shipping_methods?.length && !shippingMethod) {
+    if (!resumeExistingOrder && shippingQuote?.shipping_methods?.length && !shippingMethod && shippingQuote.status === 'ELIGIBLE') {
       setMessage('Choose an available shipping method before checkout.');
       setStatus('error');
       return;
