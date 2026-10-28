@@ -239,7 +239,32 @@
 .store-product__desc { line-height: 1.5; }
 .store-field { display: grid; gap: 6px; margin: 12px 0; max-width: 240px; }
 .store-field input, .store-field select {
-  padding: 8px 10px; border: 1px solid var(--store-border); border-radius: 8px; font: inherit;
+  padding: 10px 44px 10px 14px; border: 1px solid var(--store-border); border-radius: 8px; font: inherit;
+  background: #fff; color: var(--store-navy);
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 12px center;
+  background-repeat: no-repeat;
+  background-size: 1.25rem 1.25rem;
+  min-height: 44px;
+  width: 100%;
+  line-height: 1.4;
+}
+.store-field select:hover {
+  border-color: #b8bec9;
+}
+.store-field select:focus {
+  outline: 2px solid var(--store-navy);
+  outline-offset: 2px;
+  border-color: var(--store-navy);
+}
+.store-field select option {
+  padding: 10px 14px;
+  background: #fff;
+  color: var(--store-navy);
+  font-size: 0.95rem;
 }
 
 @media (max-width: 720px) {
