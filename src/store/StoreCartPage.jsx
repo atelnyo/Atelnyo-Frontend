@@ -35,6 +35,7 @@ export default function StoreCartPage() {
   const [message, setMessage] = useState('');
   const [orderId, setOrderId] = useState(null);
   const [txnId, setTxnId] = useState(null);
+  const [pendingShippingConfirmation, setPendingShippingConfirmation] = useState(false);
   const [paypalOrderId, setPaypalOrderId] = useState(null);
   // Guest token is kept in memory only: shown once by the server, never stored.
   const [guestToken, setGuestToken] = useState(null);
@@ -49,6 +50,8 @@ export default function StoreCartPage() {
   const [shippingBusy, setShippingBusy] = useState(false);
   const [orderTotal, setOrderTotal] = useState(null);
   const [loginLink, setLoginLink] = useState(null);
+  const [providerShippingConfirmation, setProviderShippingConfirmation] = useState(null);
+  const [confirmProviderShipping, setConfirmProviderShipping] = useState(false);
   const user = useAuthStore((s) => s.user);
   const buttonsRef = useRef(null);
   const requiresShipping = items.some((line) => details[line.productId]?.kind === 'physical');
@@ -92,13 +95,21 @@ export default function StoreCartPage() {
             // Settlement takes a round-trip; say so instead of looking idle.
             setStatus('capturing');
             try {
-              await checkoutService.capturePaypal(txnId, data.orderID || paypalOrderId, guestToken);
+              await checkoutService.capturePaypal(
+                txnId, data.orderID || paypalOrderId, guestToken, confirmProviderShipping,
+              );
               update([]);
               setPaypalOrderId(null);
               setMessage(`Payment received for order #${orderId}.`);
               setStatus('idle');
             } catch (err) {
-              setMessage(String(err?.response?.data?.error || 'Payment could not be confirmed.'));
+              const body = err?.response?.data || {};
+              if (body.code === 'shipping_confirmation_required' && body.shipping_address) {
+                setProviderShippingConfirmation(body.shipping_address);
+                setPendingShippingConfirmation(true);
+                setConfirmProviderShipping(false);
+              }
+              setMessage(String(body.error || 'Payment could not be confirmed.'));
               setStatus('error');
             }
           },
@@ -137,11 +148,15 @@ export default function StoreCartPage() {
     setShippingQuote(null);
     setShippingMethod('');
     setOrderTotal(null);
+    setProviderShippingConfirmation(null);
+    setConfirmProviderShipping(false);
   };
 
   const onQuoteShipping = async () => {
     setShippingBusy(true);
     setMessage('');
+    setProviderShippingConfirmation(null);
+    setConfirmProviderShipping(false);
     setShippingQuote(null);
     setShippingMethod('');
     try {
@@ -165,14 +180,19 @@ export default function StoreCartPage() {
     }
   };
 
-  const onCheckout = async () => {
+  const onCheckout = async (resumeExistingPayment = false) => {
     if (!items.length) return;
-    if (requiresShipping && (!shippingQuote || shippingQuote.status !== 'ELIGIBLE')) {
+    if (pendingShippingConfirmation && (!providerShippingConfirmation || !confirmProviderShipping)) {
+      setMessage('Review and confirm the final payment-provider delivery address to continue.');
+      return;
+    }
+    const resumeExistingOrder = pendingShippingConfirmation;
+    if (!resumeExistingOrder && requiresShipping && (!shippingQuote || shippingQuote.status !== 'ELIGIBLE')) {
       setMessage('Enter your shipping address and check shipping before checkout.');
       setStatus('error');
       return;
     }
-    if (shippingQuote?.shipping_methods?.length && !shippingMethod) {
+    if (!resumeExistingOrder && shippingQuote?.shipping_methods?.length && !shippingMethod) {
       setMessage('Choose an available shipping method before checkout.');
       setStatus('error');
       return;
@@ -185,13 +205,18 @@ export default function StoreCartPage() {
     }
     setStatus('submitting');
     setMessage('');
+    if (!pendingShippingConfirmation) {
+      setProviderShippingConfirmation(null);
+      setConfirmProviderShipping(false);
+    }
     setLoginLink(null);
     setOrderTotal(null);
     try {
-      // Only ids and quantities are sent; the backend prices and validates them.
-      let orderRes;
+      // Only create another order for a new checkout. A shipping confirmation
+      // resumes the same provider order; it never creates or charges twice.
+      let orderRes = { data: { id: orderId, total: orderTotal, guest_token: guestToken } };
       try {
-        orderRes = await storeService.createOrder(
+        if (!resumeExistingOrder) orderRes = await storeService.createOrder(
         items.map((it) => ({
           product_id: it.productId,
           variant_id: it.variantId,
@@ -214,20 +239,25 @@ export default function StoreCartPage() {
         }
         throw err;
       }
-      const orderId = orderRes?.data?.id;
-      setOrderTotal(orderRes?.data?.total ?? null);
-      const token = orderRes?.data?.guest_token || null;
+      const resolvedOrderId = orderRes?.data?.id || orderId;
+      setOrderTotal(orderRes?.data?.total ?? orderTotal);
+      const token = orderRes?.data?.guest_token || guestToken || null;
       setGuestToken(token);
-      const payRes = await storeService.checkoutOrder(orderId, 'paypal', token);
+      const payRes = await storeService.checkoutOrder(
+        resolvedOrderId, 'paypal', token, resumeExistingPayment,
+      );
       const pay = payRes?.data || {};
       if (!pay.paypal_order_id) {
         setMessage('Payment is not available right now.');
         setStatus('error');
         return;
       }
-      setOrderId(orderId);
+      setOrderId(resolvedOrderId);
       setTxnId(pay.transaction_id);
       setPaypalOrderId(pay.paypal_order_id);
+      setPendingShippingConfirmation(false);
+      setProviderShippingConfirmation(null);
+      setConfirmProviderShipping(false);
       setMessage('');
       // Stay in "preparing" until the buttons have actually rendered: the
       // config fetch + PayPal SDK download + render used to happen against
@@ -391,6 +421,37 @@ export default function StoreCartPage() {
           </p>
         );
       })()}
+      {providerShippingConfirmation && (
+        <fieldset className="store-shipping-address" aria-label="Confirm payment provider shipping address">
+          <legend>Confirm the final delivery address</legend>
+          <address>
+            {[providerShippingConfirmation.first_name, providerShippingConfirmation.last_name].filter(Boolean).join(' ')}<br />
+            {providerShippingConfirmation.address1}<br />
+            {providerShippingConfirmation.address2 && <>{providerShippingConfirmation.address2}<br /></>}
+            {[providerShippingConfirmation.city, providerShippingConfirmation.region, providerShippingConfirmation.zip].filter(Boolean).join(', ')}<br />
+            {providerShippingConfirmation.country}
+          </address>
+          <label>
+            <input
+              type="checkbox"
+              checked={confirmProviderShipping}
+              onChange={(event) => setConfirmProviderShipping(event.target.checked)}
+            />
+            I confirm this is the delivery address. Billing details are not used for shipping.
+          </label>
+          <button
+            type="button"
+            className="store-btn"
+            disabled={!confirmProviderShipping || Boolean(busyLabel)}
+            onClick={() => {
+              onCheckout(true);
+            }}
+          >
+            Confirm address and continue
+          </button>
+          <p className="store-state">We will resume the same PayPal payment. The payment will not be captured unless the final destination remains eligible at the quoted shipping cost.</p>
+        </fieldset>
+      )}
       {orderTotal !== null && (
         <p className="store-state" role="status">
           Order total including verified shipping: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(orderTotal))}

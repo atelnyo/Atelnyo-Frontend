@@ -24,8 +24,12 @@ export const storeService = {
     }),
   quoteShipping: (items, address) => api.post('marketplace/printify/shipping-quote/', { items, address }),
   // guestToken is the one-time token returned when a guest creates the order.
-  checkoutOrder: (orderId, provider = 'paypal', guestToken) =>
-    api.post('checkout/order/', { order_id: orderId, provider }, guestHeaders(guestToken)),
+  checkoutOrder: (orderId, provider = 'paypal', guestToken, pendingShippingConfirmation = false) =>
+    api.post('checkout/order/', {
+      order_id: orderId,
+      provider,
+      ...(pendingShippingConfirmation ? { pending_shipping_confirmation: true } : {}),
+    }, guestHeaders(guestToken)),
   claimOrder: (orderId, guestToken, password) =>
     api.post('marketplace/orders/claim/', { order_id: orderId, guest_token: guestToken, password }),
   listFavorites: (params) => api.get('marketplace/favorites/', { params }),

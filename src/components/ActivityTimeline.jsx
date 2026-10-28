@@ -78,6 +78,7 @@ const EVENT_META = {
   order_paid:             { icon: 'fa-wallet',          label_ht: 'Kòmand peye',             label_en: 'Order paid' },
   order_refunded:         { icon: 'fa-rotate-left',     label_ht: 'Kòmand rembouse',         label_en: 'Order refunded' },
   order_status_updated:   { icon: 'fa-arrows-rotate',   label_ht: 'Estati kòmand ajou',      label_en: 'Order status updated' },
+  printify_order_update:  { icon: 'fa-truck-fast',      label_ht: 'Mizajou livrezon',         label_en: 'Shipment update' },
   order_cancelled:        { icon: 'fa-xmark',           label_ht: 'Kòmand anile',            label_en: 'Order cancelled' },
   order_reviewed:         { icon: 'fa-star',            label_ht: 'Nouvo revizyon',           label_en: 'New review' },
   inquiry_received:       { icon: 'fa-envelope',        label_ht: 'Nouvo demann',            label_en: 'New inquiry' },
@@ -98,7 +99,7 @@ const TYPE_ACCENTS = {
   job_posted: 'work', proposal_sent: 'work', proposal_submitted: 'work',
   contract_started: 'work', milestone_completed: 'work', milestone_approved: 'work',
   order_placed: 'work', order_received: 'work', order_paid: 'work',
-  order_status_updated: 'work', order_refunded: 'work', order_cancelled: 'work',
+  order_status_updated: 'work', printify_order_update: 'work', order_refunded: 'work', order_cancelled: 'work',
   order_reviewed: 'work', inquiry_received: 'work', inquiry_replied: 'work',
   seller_activated: 'work', seller_deactivated: 'work',
   seller_suspended: 'danger', seller_unsuspended: 'work',
@@ -197,6 +198,7 @@ const NOTIFICATION_ROUTES = {
   order_paid:             (d) => (d?.business_slug ? `/business/${d.business_slug}/workspace` : null),
   order_cancelled:        (d) => (d?.business_slug ? `/business/${d.business_slug}/workspace` : null),
   order_status_updated:   () => '/business/orders/mine',
+  printify_order_update:  () => '/business/orders/mine',
   order_refunded:         () => '/business/orders/mine',
   // A review is addressed to the OWNER — open their workspace.
   order_reviewed:         (d) => (d?.business_slug ? `/business/${d.business_slug}/workspace` : null),
@@ -363,6 +365,7 @@ function EventRow({ event, lang, t, onMarkRead, onNavigate, onShowNotice, onAcce
   else if (data.project_title) description = data.project_title;
   else if (data.idea) description = data.idea;
   else if (data.service_name) description = data.service_name;
+  else if (event.event_type === 'printify_order_update') description = data.title || data.notification_body || '';
   else if (data.title) description = data.title;
   else if (data.follower_username) description = `@${data.follower_username}`;
   else if (data.amount && data.subscriber_username) description = `${data.subscriber_username} · $${data.amount}`;

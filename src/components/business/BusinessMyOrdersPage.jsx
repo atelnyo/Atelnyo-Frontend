@@ -282,7 +282,14 @@ export default function BusinessMyOrdersPage({ lang = 'ht', showToast }) {
                     {isHt ? 'Kòmand' : 'Order'} #{order.id}{' · '}
                     {order.printify_fulfillment.map((fulfillment) => (
                       <span key={`${order.id}-${fulfillment.status || 'unknown'}-${(fulfillment.shipments || []).map((shipment) => shipment.number || shipment.url || 'shipment').join(',')}`}>
-                        {fulfillment.status || (isHt ? 'Ap tann mizajou' : 'Awaiting update')}
+                        {({
+                          pending: isHt ? 'Ap tann' : 'Pending',
+                          'on-hold': isHt ? 'An atant' : 'On hold',
+                          'in-production': isHt ? 'An pwodiksyon' : 'In production',
+                          'partially-fulfilled': isHt ? 'Kèk atik voye' : 'Partially shipped',
+                          fulfilled: isHt ? 'Voye' : 'Shipped',
+                          canceled: isHt ? 'Anile' : 'Cancelled',
+                        })[fulfillment.status] || fulfillment.status || (isHt ? 'Ap tann mizajou' : 'Awaiting update')}
                         {fulfillment.shipments?.map((shipment) => (
                           <span key={`${shipment.number || shipment.url || shipment.carrier || 'shipment'}`}>
                             {' · '}{shipment.carrier || (isHt ? 'Transpò' : 'Carrier')}{' '}
@@ -291,6 +298,9 @@ export default function BusinessMyOrdersPage({ lang = 'ht', showToast }) {
                                 {shipment.number || (isHt ? 'Swiv livrezon' : 'Track shipment')}
                               </a>
                             ) : (shipment.number || '')}
+                            {shipment.delivered_at && (
+                              <span>{' · '}{isHt ? 'Livre' : 'Delivered'}</span>
+                            )}
                           </span>
                         ))}
                       </span>

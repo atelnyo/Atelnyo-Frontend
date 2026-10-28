@@ -1371,10 +1371,14 @@ export const checkoutService = {
 
   // Capture an approved PayPal order (webhook-first confirmation).
   // guestToken is sent only for guest orders (X-Guest-Order-Token).
-  capturePaypal: (transactionId, paypalOrderId, guestToken) =>
+  capturePaypal: (transactionId, paypalOrderId, guestToken, confirmShippingAddress = false) =>
     api.post(
       'checkout/paypal/capture/',
-      { transaction_id: transactionId, paypal_order_id: paypalOrderId },
+      {
+        transaction_id: transactionId,
+        paypal_order_id: paypalOrderId,
+        ...(confirmShippingAddress ? { confirm_shipping_address: true } : {}),
+      },
       guestToken ? { headers: { 'X-Guest-Order-Token': guestToken } } : undefined,
     ),
 

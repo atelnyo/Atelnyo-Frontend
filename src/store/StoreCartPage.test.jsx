@@ -16,15 +16,20 @@ import { MemoryRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 
 const getProduct = vi.fn();
+const createOrder = vi.fn();
+const capturePaypal = vi.fn();
 const checkoutOrder = vi.fn();
+const quoteShipping = vi.fn();
 const config = vi.fn();
 const loadPayPalScript = vi.fn();
+let paypalCallbacks;
 let renderButtons; // what paypal.Buttons().render() returns for this test
 
 vi.mock('./storeService', () => ({
   storeService: {
     getProduct: (...args) => getProduct(...args),
-    createOrder: vi.fn(),
+    createOrder: (...args) => createOrder(...args),
+    quoteShipping: (...args) => quoteShipping(...args),
     checkoutOrder: (...args) => checkoutOrder(...args),
     claimOrder: vi.fn(),
   },
@@ -36,7 +41,7 @@ vi.mock('./useAuthStore', () => ({
 
 vi.mock('../services/api', () => ({
   paymentConfigService: { config: (...args) => config(...args) },
-  checkoutService: { capturePaypal: vi.fn() },
+  checkoutService: { capturePaypal: (...args) => capturePaypal(...args) },
 }));
 
 // The SDK loader lives in CheckoutModal; stub the module so the modal itself
@@ -73,6 +78,11 @@ describe('StoreCartPage checkout preparation', () => {
     vi.clearAllMocks();
     localStorage.clear();
     saveCart([{ productId: 5, variantId: null, quantity: 1 }]);
+    createOrder.mockResolvedValue({ data: { id: 15, total: '25.00', guest_token: 'guest-token' } });
+    capturePaypal.mockResolvedValue({ data: { status: 'succeeded' } });
+    quoteShipping.mockResolvedValue({ data: {
+      status: 'ELIGIBLE', shipping_methods: [{ id: 'standard', name: 'Standard', price: '5.00', currency: 'USD' }],
+    } });
     getProduct.mockResolvedValue({ data: { title: 'Poster', price: '20.00', currency: 'USD' } });
     checkoutOrder.mockResolvedValue({
       data: { paypal_order_id: 'PP-1', transaction_id: 9, amount: '20.00' },
@@ -84,7 +94,7 @@ describe('StoreCartPage checkout preparation', () => {
     const pending = deferred();
     renderButtons = () => pending.promise;
     loadPayPalScript.mockResolvedValue({
-      Buttons: () => ({ render: renderButtons }),
+      Buttons: (callbacks) => { paypalCallbacks = callbacks; return { render: renderButtons }; },
     });
 
     const { container } = renderCart();
@@ -106,7 +116,7 @@ describe('StoreCartPage checkout preparation', () => {
   it('drops the placeholder and re-enables Checkout once the buttons are on screen', async () => {
     renderButtons = () => Promise.resolve();
     loadPayPalScript.mockResolvedValue({
-      Buttons: () => ({ render: renderButtons }),
+      Buttons: (callbacks) => { paypalCallbacks = callbacks; return { render: renderButtons }; },
     });
 
     renderCart();
@@ -130,6 +140,60 @@ describe('StoreCartPage checkout preparation', () => {
     });
     expect(screen.queryByText('Loading secure payment options…')).toBeNull();
     expect(screen.getByRole('button', { name: 'Checkout' }).disabled).toBe(false);
+  });
+
+  it('requires an explicit confirmation before accepting a different PayPal delivery address', async () => {
+    getProduct.mockResolvedValue({ data: { title: 'Print', price: '20.00', kind: 'physical' } });
+    createOrder.mockResolvedValue({ data: {
+      id: 15, total: '25.00', guest_token: 'guest-token',
+    } });
+    quoteShipping.mockResolvedValue({ data: {
+      status: 'ELIGIBLE',
+      shipping_methods: [{ id: 'standard', name: 'Standard', price: '5.00', currency: 'USD' }],
+    } });
+    renderButtons = () => Promise.resolve();
+    loadPayPalScript.mockResolvedValue({
+      Buttons: (callbacks) => { paypalCallbacks = callbacks; return { render: renderButtons }; },
+    });
+    checkoutOrder.mockResolvedValue({ data: { paypal_order_id: 'PP-1', transaction_id: 9 } });
+    capturePaypal.mockRejectedValueOnce({ response: { data: {
+      code: 'shipping_confirmation_required',
+      error: 'Confirm the final shipping address shown by the payment provider.',
+      shipping_address: {
+        first_name: 'Ada', last_name: 'Lovelace', address1: '2 New St', address2: '',
+        city: 'Oakland', region: 'CA', zip: '94612', country: 'US',
+      },
+    } } });
+
+    renderCart();
+    await waitFor(() => expect(screen.getByText('Print')).toBeTruthy());
+    fireEvent.change(screen.getByLabelText('First name'), { target: { value: 'Ada' } });
+    fireEvent.change(screen.getByLabelText('Last name'), { target: { value: 'Lovelace' } });
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'ada@example.test' } });
+    fireEvent.change(screen.getByLabelText('Address'), { target: { value: '1 Main St' } });
+    fireEvent.change(screen.getByLabelText('City'), { target: { value: 'Oakland' } });
+    fireEvent.change(screen.getByLabelText('State / region'), { target: { value: 'CA' } });
+    fireEvent.change(screen.getByLabelText('Postal code'), { target: { value: '94612' } });
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Check shipping options' })).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: 'Check shipping options' }));
+    await waitFor(() => expect(screen.getByRole('radio', { name: /Standard/ })).toBeTruthy());
+    fireEvent.click(screen.getByRole('radio', { name: /Standard/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Checkout' }));
+    await waitFor(() => expect(checkoutOrder).toHaveBeenCalled());
+    await waitFor(() => expect(paypalCallbacks).toBeTruthy());
+
+    await paypalCallbacks.onApprove({ orderID: 'PP-1' });
+    await waitFor(() => expect(screen.getByText('Confirm the final delivery address')).toBeTruthy());
+    expect(capturePaypal).toHaveBeenCalledWith(9, 'PP-1', 'guest-token', false);
+    expect(screen.getByLabelText('Confirm payment provider shipping address')
+      .querySelector('address').textContent).toContain('2 New St');
+
+    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm address and continue' }));
+    await waitFor(() => expect(checkoutOrder).toHaveBeenCalledTimes(2));
+    expect(createOrder).toHaveBeenCalledTimes(1);
+    await paypalCallbacks.onApprove({ orderID: 'PP-1' });
+    await waitFor(() => expect(capturePaypal).toHaveBeenLastCalledWith(9, 'PP-1', 'guest-token', false));
   });
 
   it('names a timed-out SDK load and lets the shopper try again', async () => {
