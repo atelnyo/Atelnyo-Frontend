@@ -162,6 +162,7 @@ export default function StoreListPage() {
         title={seoTitle}
         description={seoDesc}
         url={categorySlug ? `/store/categories/${categorySlug}` : q ? '/store/search' : '/store'}
+        image="https://atelnyo.site/icon-store.png"
         noindex={Boolean(q)}
       />
       <h1 id="store-listing-title" className={categorySlug || q ? 'store-title' : 'store-listing__title'}>
