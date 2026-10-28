@@ -223,11 +223,12 @@ export default function StoreProductPage() {
     }
   };
 
+  const productDesc = description.length > 155 ? description.slice(0, 152) + '...' : description;
   return (
     <article className="store-product">
       <SEOHead
-        title={p.title}
-        description={description}
+        title={`${p.title} | Atelnyo Store`}
+        description={productDesc || `Buy ${p.title} on Atelnyo Store. Digital products from creators.`}
         image={p.image_url || undefined}
         url={`/store/products/${p.slug || p.id}`}
         type="product"

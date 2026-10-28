@@ -140,15 +140,27 @@ export default function StoreListPage() {
 
   const heading = categorySlug && catStatus === 'found'
     ? categorySlug.replace(/-/g, ' ')
-    : q ? `Results for "${q}"` : 'Atelnyo Store';
+    : q ? `Results for "${q}"` : 'Atelnyo Store - Shop Digital Products & Creator Goods';
 
   const current = products.key === requestKey ? products : { status: 'loading', items: [], count: null, hasNext: false };
+
+  const seoTitle = categorySlug && catStatus === 'found'
+    ? `${categorySlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} | Atelnyo Store`
+    : q
+    ? `Search: ${q} | Atelnyo Store`
+    : 'Atelnyo Store - Buy Digital Products, Courses & Creator Goods Online';
+
+  const seoDesc = categorySlug && catStatus === 'found'
+    ? `Shop ${categorySlug.replace(/-/g, ' ')} products from creators on Atelnyo Store. Buy digital downloads, courses, and more.`
+    : q
+    ? `Search results for "${q}" on Atelnyo Store. Discover digital products and creator goods.`
+    : 'Shop the Atelnyo Store for digital products, online courses, music, and creator goods. Secure checkout with instant access to digital downloads.';
 
   return (
     <section className="store-listing" aria-labelledby="store-listing-title">
       <SEOHead
-        title={heading}
-        description="Shop digital and creator products on the Atelnyo Store."
+        title={seoTitle}
+        description={seoDesc}
         url={categorySlug ? `/store/categories/${categorySlug}` : q ? '/store/search' : '/store'}
         noindex={Boolean(q)}
       />

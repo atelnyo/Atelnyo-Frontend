@@ -51,7 +51,10 @@ export default function StoreLayout() {
   return (
     <div className="store-root">
       <header className="store-header">
-        <Link to="/store" className="store-header__brand">Atelnyo Store</Link>
+        <Link to="/store" className="store-header__brand" aria-label="Atelnyo Store - Home">
+          <span style={{ fontWeight: 800, letterSpacing: '0.02em' }}>ATELNYO</span>
+          <span style={{ marginLeft: '6px', fontWeight: 600, opacity: 0.9 }}>STORE</span>
+        </Link>
         <form className="store-header__search" role="search" onSubmit={onSearch}>
           <label className="store-sr-only" htmlFor="store-search-input">Search products</label>
           <span className="store-header__search-icon" aria-hidden="true">⌕</span>
