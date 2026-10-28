@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useNavigate, useSearchParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { cartCount, loadCart } from './cart';
 import { useAuthStore } from './useAuthStore';
 import './store.css';
@@ -50,13 +51,15 @@ export default function StoreLayout() {
 
   return (
     <div className="store-root">
+      <Helmet>
+        <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+        <link rel="shortcut icon" type="image/png" href="/icon-192.png" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
+      </Helmet>
       <header className="store-header">
-        <Link to="/store" className="store-header__brand" aria-label="Atelnyo Store - Home" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <img src="/icon-192.png" alt="" aria-hidden="true" style={{ width: '32px', height: '32px', borderRadius: '6px' }} />
-          <div style={{ display: 'flex', flexDirection: 'column', lineHeight: '1' }}>
-            <span style={{ fontWeight: 800, letterSpacing: '0.02em', fontSize: '0.9rem' }}>ATELNYO</span>
-            <span style={{ fontWeight: 600, opacity: 0.9, fontSize: '0.75rem', marginTop: '2px' }}>STORE</span>
-          </div>
+        <Link to="/store" className="store-header__brand" aria-label="Atelnyo Store - Home">
+          <span style={{ fontWeight: 800, letterSpacing: '0.02em' }}>ATELNYO</span>
+          <span style={{ marginLeft: '6px', fontWeight: 600, opacity: 0.9 }}>STORE</span>
         </Link>
         <form className="store-header__search" role="search" onSubmit={onSearch}>
           <label className="store-sr-only" htmlFor="store-search-input">Search products</label>
