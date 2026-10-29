@@ -56,8 +56,8 @@ export default function StoreCartPage() {
   const buttonsRef = useRef(null);
   const requiresShipping = items.some((line) => details[line.productId]?.kind === 'physical');
   const hasPrintifyItems = items.some((line) => details[line.productId]?.printify_product_id);
-  // Let PayPal collect shipping for physical/Printify orders (backend supports it).
-  const needsShippingForm = false;
+  // Require shipping details upfront for physical items so shipping cost is calculated.
+  const needsShippingForm = requiresShipping;
 
   // One label per in-flight step so the Checkout button always says what is
   // happening instead of flickering back to "Checkout" while the payment
@@ -229,11 +229,11 @@ export default function StoreCartPage() {
           quantity: it.quantity,
         })),
         guest ? { email: guestEmail.trim(), name: guestName.trim() } : null,
-        needsShippingForm ? {
+        requiresShipping ? {
           ...shippingAddress,
           email: shippingAddress.email || user?.email || guestEmail.trim(),
         } : null,
-        needsShippingForm ? (shippingMethod || null) : null,
+        requiresShipping ? (shippingMethod || null) : null,
         );
       } catch (err) {
         if (err?.response?.data?.code === 'account_exists') {
@@ -416,9 +416,7 @@ export default function StoreCartPage() {
           )}
         </fieldset>
       )}
-      {requiresShipping && !needsShippingForm && (
-        <p className="store-state">PayPal will collect your shipping address at checkout.</p>
-      )}
+
       {shippingQuote?.status === 'ELIGIBLE' && shippingQuote.shipping_methods?.length > 0 && shippingMethod && (() => {
         const subtotal = items.reduce((sum, line) => {
           const detail = details[line.productId];
