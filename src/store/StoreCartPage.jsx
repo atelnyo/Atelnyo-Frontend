@@ -188,14 +188,17 @@ export default function StoreCartPage() {
     }
     const resumeExistingOrder = pendingShippingConfirmation;
     // Allow PayPal to collect shipping address to avoid double entry
-    if (!resumeExistingOrder && requiresShipping && (!shippingQuote || shippingQuote.status !== 'ELIGIBLE')) {
-      // Try to proceed - PayPal may provide the address
-      // We'll handle address retrieval server-side
-    }
-    if (!resumeExistingOrder && shippingQuote?.shipping_methods?.length && !shippingMethod && shippingQuote.status === 'ELIGIBLE') {
-      setMessage('Choose an available shipping method before checkout.');
-      setStatus('error');
-      return;
+    if (!resumeExistingOrder && requiresShipping) {
+      if (shippingQuote && shippingQuote.status !== 'ELIGIBLE') {
+        setMessage(shippingQuote.warnings?.join(' ') || 'Shipping is not available for this address. Check shipping options or update your address.');
+        setStatus('error');
+        return;
+      }
+      if (shippingQuote?.status === 'ELIGIBLE' && shippingQuote.shipping_methods?.length && !shippingMethod) {
+        setMessage('Choose an available shipping method before checkout.');
+        setStatus('error');
+        return;
+      }
     }
     const guest = !user;
     if (guest && (!guestEmail.trim() || !guestEmail.includes('@'))) {
@@ -301,6 +304,9 @@ export default function StoreCartPage() {
             )}
             <div className="store-cart__info">
               <span className="store-cart__title">{detail?.title || 'Loading product…'}</span>
+              {variant && (variant.name || variant.size || variant.color) && (
+                <span className="store-cart__variant">{[variant.color, variant.size].filter(Boolean).join(' / ') || variant.name}</span>
+              )}
               <span className="store-cart__price">
                 {lineTotal == null ? '' : new Intl.NumberFormat('en-US', { style: 'currency', currency: detail.currency || 'USD' }).format(lineTotal)}
               </span>
