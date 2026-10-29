@@ -52,6 +52,8 @@ export default function StoreCartPage() {
   const [loginLink, setLoginLink] = useState(null);
   const [providerShippingConfirmation, setProviderShippingConfirmation] = useState(null);
   const [confirmProviderShipping, setConfirmProviderShipping] = useState(false);
+  const [showShippingForm, setShowShippingForm] = useState(false);
+  const [shippingFormAnimating, setShippingFormAnimating] = useState(false);
   const user = useAuthStore((s) => s.user);
   const buttonsRef = useRef(null);
   const requiresShipping = items.some((line) => details[line.productId]?.kind === 'physical');
@@ -297,6 +299,23 @@ export default function StoreCartPage() {
 
   return (
     <section>
+      <style>{`
+        @keyframes slideDown {
+          from {
+            max-height: 0;
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            max-height: 2000px;
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .store-shipping-address--animate {
+          animation: slideDown 0.4s ease-out;
+        }
+      `}</style>
       <SEOHead title="Cart" url="/store/cart" noindex />
       <h1 className="store-title">Cart</h1>
       <ul className="store-cart">
@@ -357,7 +376,7 @@ export default function StoreCartPage() {
               autoComplete="email"
               required
               value={guestEmail}
-              onChange={(e) => { setGuestEmail(e.target.value); setShippingQuote(null); setShippingMethod(''); }}
+              onChange={(e) => { setGuestEmail(e.target.value); setShippingQuote(null); setShippingMethod(''); setShowShippingForm(false); }}
             />
           </label>
           <label>
@@ -371,8 +390,27 @@ export default function StoreCartPage() {
           </label>
         </div>
       )}
-      {needsShippingForm && (
-        <fieldset className="store-shipping-address" disabled={shippingBusy || Boolean(busyLabel)}>
+      {needsShippingForm && !showShippingForm && (
+        <button
+          type="button"
+          className="store-btn"
+          style={{ marginTop: '1rem', width: '100%' }}
+          disabled={(!user && (!guestEmail.trim() || !guestEmail.includes('@'))) || shippingBusy}
+          onClick={() => {
+            setShippingFormAnimating(true);
+            setShowShippingForm(true);
+            setTimeout(() => setShippingFormAnimating(false), 400);
+          }}
+        >
+          Continue to shipping address
+        </button>
+      )}
+      {needsShippingForm && showShippingForm && (
+        <fieldset
+          className={`store-shipping-address ${shippingFormAnimating ? 'store-shipping-address--animate' : ''}`}
+          disabled={shippingBusy || Boolean(busyLabel)}
+          style={{ animation: shippingFormAnimating ? 'slideDown 0.4s ease-out' : 'none', overflow: 'hidden' }}
+        >
           <legend>Shipping address</legend>
           <div className="store-shipping-address__grid">
             {[
