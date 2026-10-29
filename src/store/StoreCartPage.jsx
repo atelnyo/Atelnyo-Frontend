@@ -190,14 +190,19 @@ export default function StoreCartPage() {
       return;
     }
     const resumeExistingOrder = pendingShippingConfirmation;
-    // Allow PayPal to collect shipping address to avoid double entry
+    // Require shipping quote and method for physical items
     if (!resumeExistingOrder && needsShippingForm) {
-      if (shippingQuote && shippingQuote.status !== 'ELIGIBLE') {
+      if (!shippingQuote) {
+        setMessage('Check shipping options for your address before checkout.');
+        setStatus('error');
+        return;
+      }
+      if (shippingQuote.status !== 'ELIGIBLE') {
         setMessage(shippingQuote.warnings?.join(' ') || 'Shipping is not available for this address. Check shipping options or update your address.');
         setStatus('error');
         return;
       }
-      if (shippingQuote?.status === 'ELIGIBLE' && shippingQuote.shipping_methods?.length && !shippingMethod) {
+      if (shippingQuote.shipping_methods?.length && !shippingMethod) {
         setMessage('Choose an available shipping method before checkout.');
         setStatus('error');
         return;
