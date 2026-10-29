@@ -424,7 +424,7 @@ export default function StoreCartPage() {
                 <input
                   name={name}
                   type={name === 'email' ? 'email' : 'text'}
-                  autoComplete={name === 'address1' ? 'address-line1' : name === 'zip' ? 'postal-code' : name}
+                  autoComplete={name === 'address1' ? 'address-line1' : name === 'zip' ? 'postal-code' : name === 'region' ? 'address-level1' : name === 'city' ? 'address-level2' : name}
                   value={shippingAddress[name]}
                   onChange={onShippingAddressChange}
                   required={!label.includes('optional')}
@@ -433,8 +433,33 @@ export default function StoreCartPage() {
             ))}
             <label>
               Country
-              <input name="country" autoComplete="country" maxLength={2} value={shippingAddress.country}
-                onChange={onShippingAddressChange} required />
+              <select name="country" autoComplete="country" value={shippingAddress.country}
+                onChange={onShippingAddressChange} required style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--store-border, #ddd)' }}>
+                <option value="US">United States (US)</option>
+                <option value="CA">Canada (CA)</option>
+                <option value="GB">United Kingdom (GB)</option>
+                <option value="MX">Mexico (MX)</option>
+                <option value="AU">Australia (AU)</option>
+                <option value="FR">France (FR)</option>
+                <option value="DE">Germany (DE)</option>
+                <option value="IT">Italy (IT)</option>
+                <option value="ES">Spain (ES)</option>
+                <option value="NL">Netherlands (NL)</option>
+                <option value="BE">Belgium (BE)</option>
+                <option value="SE">Sweden (SE)</option>
+                <option value="NO">Norway (NO)</option>
+                <option value="DK">Denmark (DK)</option>
+                <option value="CH">Switzerland (CH)</option>
+                <option value="AT">Austria (AT)</option>
+                <option value="IE">Ireland (IE)</option>
+                <option value="NZ">New Zealand (NZ)</option>
+                <option value="JP">Japan (JP)</option>
+                <option value="KR">South Korea (KR)</option>
+                <option value="SG">Singapore (SG)</option>
+                <option value="BR">Brazil (BR)</option>
+                <option value="HT">Haiti (HT)</option>
+                <option value="DO">Dominican Republic (DO)</option>
+              </select>
             </label>
           </div>
           <button type="button" className="store-btn" onClick={onQuoteShipping} disabled={shippingBusy}>
