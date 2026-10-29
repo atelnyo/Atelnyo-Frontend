@@ -132,7 +132,7 @@ const SSR_MAP = [
 // the same brand title/description/og:image on every URL. For public
 // pages without an SSR endpoint, rewrite those tags per route.
 const PAGE_META = {
-  '/faq': { title: 'FAQ', desc: 'Answers to common questions about Atelnyo.' },
+  '/faq': { title: 'FAQ', desc: 'Answers to common questions about Atelnyo courses, music, marketplace, and account features.' },
   '/affiliate': { title: 'Affiliate Program', desc: 'Earn by promoting courses, music and products on Atelnyo.' },
   '/verify': { title: 'Verify a Certificate', desc: 'Check the authenticity of an Atelnyo certificate.' },
   '/affiliate/discover': { title: 'Discover Affiliate Offers', desc: 'Find affiliate offers from creators on Atelnyo.' },
@@ -140,6 +140,17 @@ const PAGE_META = {
   '/developers': { title: 'Developers', desc: 'Atelnyo developer documentation, API reference, integration guides, and open-source resources.' },
   '/themes': { title: 'Themes', desc: 'Browse available themes on Atelnyo.' },
   '/store': { title: 'Store', desc: 'Shop products from creators on the Atelnyo store.', image: 'https://atelnyo.site/icon-store.png', favicon: '/icon-store.png' },
+  '/courses': { title: 'Courses', desc: 'Browse all courses on Atelnyo — programming, design, business, language, and more.' },
+  '/products': { title: 'Products', desc: 'Discover products on Atelnyo.' },
+  '/marketplace': { title: 'Marketplace', desc: 'Discover digital products and goods from creators on Atelnyo.' },
+  '/legal': { title: 'Legal', desc: 'Legal information for Atelnyo users.' },
+  '/sheet/explore': { title: 'Explore', desc: 'Discover online courses, music, talent, and products from creators on Atelnyo.' },
+  '/sheet/explore/music': { title: 'Music', desc: 'Listen to music on Atelnyo — discover talented artists and their tracks.' },
+  '/sheet/explore/talent': { title: 'Talent', desc: 'Discover talented creators on Atelnyo — find the right person for your project.' },
+  '/sheet/explore/job': { title: 'Jobs', desc: 'Find remote jobs on Atelnyo — connect with opportunities from verified creators.' },
+  '/sheet/community': { title: 'Community', desc: 'Join a community on Atelnyo — connect with like-minded creators.' },
+  '/academy': { title: 'Language Academy', desc: 'Atelnyo Language Academy — published official language programs (Creole, French, Spanish, English) with structured curricula for every level.' },
+  '/sheet/academy': { title: 'Language Academy', desc: 'Atelnyo Language Academy — published official language programs (Creole, French, Spanish, Spanish, English) with structured curricula for every level.' },
 };
 
 async function _rewriteBotShell(request, env, path, origin) {
