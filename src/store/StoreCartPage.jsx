@@ -367,7 +367,7 @@ export default function StoreCartPage() {
         })}
       </ul>
       <p className="store-state">Totals are calculated by the server at checkout.</p>
-      {!user && (
+      {!user && !showShippingForm && (
         <div className="store-guest">
           <label>
             Email (receipt and order access)
@@ -377,6 +377,16 @@ export default function StoreCartPage() {
               required
               value={guestEmail}
               onChange={(e) => { setGuestEmail(e.target.value); setShippingQuote(null); setShippingMethod(''); setShowShippingForm(false); }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  if (needsShippingForm && guestEmail.trim() && guestEmail.includes('@') && !shippingBusy) {
+                    setShippingFormAnimating(true);
+                    setShowShippingForm(true);
+                    setTimeout(() => setShippingFormAnimating(false), 400);
+                  }
+                }
+              }}
             />
           </label>
           <label>
@@ -388,6 +398,25 @@ export default function StoreCartPage() {
               onChange={(e) => setGuestName(e.target.value)}
             />
           </label>
+        </div>
+      )}
+      {!user && showShippingForm && (
+        <div className="store-guest" style={{ opacity: 0.7 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <strong>Contact</strong>
+              <div style={{ fontSize: '0.875rem', color: 'var(--store-muted)' }}>{guestEmail}</div>
+              {guestName && <div style={{ fontSize: '0.875rem', color: 'var(--store-muted)' }}>{guestName}</div>}
+            </div>
+            <button
+              type="button"
+              className="store-btn--ghost"
+              style={{ padding: '6px 12px', fontSize: '0.875rem' }}
+              onClick={() => setShowShippingForm(false)}
+            >
+              Edit
+            </button>
+          </div>
         </div>
       )}
       {needsShippingForm && !showShippingForm && (
@@ -406,35 +435,45 @@ export default function StoreCartPage() {
         </button>
       )}
       {needsShippingForm && showShippingForm && (
-        <fieldset
+        <div
           className={`store-shipping-address ${shippingFormAnimating ? 'store-shipping-address--animate' : ''}`}
-          disabled={shippingBusy || Boolean(busyLabel)}
           style={{ animation: shippingFormAnimating ? 'slideDown 0.4s ease-out' : 'none', overflow: 'hidden' }}
         >
-          <legend>Shipping address</legend>
+          <div className="store-shipping-address__header">
+            <h3 className="store-shipping-address__title">Shipping Information</h3>
+            <p className="store-shipping-address__subtitle">Enter your delivery details to calculate shipping costs</p>
+          </div>
           <div className="store-shipping-address__grid">
             {[
               ['first_name', 'First name'], ['last_name', 'Last name'],
-              ['email', 'Email'], ['phone', 'Phone (optional)'],
-              ['address1', 'Address'], ['address2', 'Apartment, suite (optional)'],
-              ['city', 'City'], ['region', 'State / region'], ['zip', 'Postal code'],
+              ['email', 'Email'], ['phone', 'Phone number'],
+              ['address1', 'Address line 1'], ['address2', 'Apartment, suite, etc. (optional)'],
+              ['city', 'City'], ['region', 'State / Province / Region'], ['zip', 'Postal / ZIP code'],
             ].map(([name, label]) => (
-              <label key={name}>
-                {label}
+              <label key={name} className="store-shipping-address__field">
+                <span className="store-shipping-address__label">{label}</span>
                 <input
                   name={name}
-                  type={name === 'email' ? 'email' : 'text'}
-                  autoComplete={name === 'address1' ? 'address-line1' : name === 'zip' ? 'postal-code' : name === 'region' ? 'address-level1' : name === 'city' ? 'address-level2' : name}
+                  type={name === 'email' ? 'email' : name === 'phone' ? 'tel' : 'text'}
+                  autoComplete={name === 'address1' ? 'address-line1' : name === 'address2' ? 'address-line2' : name === 'zip' ? 'postal-code' : name === 'region' ? 'address-level1' : name === 'city' ? 'address-level2' : name === 'email' ? 'email' : name === 'first_name' ? 'given-name' : name === 'last_name' ? 'family-name' : name === 'phone' ? 'tel' : name}
                   value={shippingAddress[name]}
                   onChange={onShippingAddressChange}
                   required={!label.includes('optional')}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && name === 'phone') {
+                      e.preventDefault();
+                      if (!shippingBusy && shippingAddress.first_name && shippingAddress.last_name && shippingAddress.address1 && shippingAddress.city && shippingAddress.region && shippingAddress.zip) {
+                        onQuoteShipping();
+                      }
+                    }
+                  }}
                 />
               </label>
             ))}
-            <label>
-              Country
+            <label className="store-shipping-address__field store-shipping-address__field--full">
+              <span className="store-shipping-address__label">Country</span>
               <select name="country" autoComplete="country" value={shippingAddress.country}
-                onChange={onShippingAddressChange} required style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--store-border, #ddd)' }}>
+                onChange={onShippingAddressChange} required>
                 <option value="US">United States (US)</option>
                 <option value="CA">Canada (CA)</option>
                 <option value="GB">United Kingdom (GB)</option>
@@ -462,27 +501,31 @@ export default function StoreCartPage() {
               </select>
             </label>
           </div>
-          <button type="button" className="store-btn" onClick={onQuoteShipping} disabled={shippingBusy}>
-            {shippingBusy ? 'Checking shipping…' : 'Check shipping options'}
+          <button type="button" className="store-btn store-shipping-address__submit" onClick={onQuoteShipping} disabled={shippingBusy}>
+            {shippingBusy ? 'Checking shipping…' : 'Calculate shipping options'}
           </button>
           {shippingQuote?.status === 'ELIGIBLE' && shippingQuote.shipping_methods?.length > 0 && (
-            <div role="group" aria-label="Shipping method">
+            <div className="store-shipping-methods" role="group" aria-label="Shipping method">
+              <p className="store-shipping-methods__title">Select shipping method</p>
               {shippingQuote.shipping_methods.map((method) => (
-                <label key={method.id}>
+                <label key={method.id} className="store-shipping-methods__option">
                   <input type="radio" name="shipping_method" value={method.id}
                     checked={shippingMethod === method.id}
                     onChange={() => { setShippingMethod(method.id); setMessage(''); }} />
-                  {method.name} · {new Intl.NumberFormat('en-US', { style: 'currency', currency: method.currency || 'USD' }).format(Number(method.price))}
+                  <div className="store-shipping-methods__info">
+                    <span className="store-shipping-methods__name">{method.name}</span>
+                    <span className="store-shipping-methods__price">{new Intl.NumberFormat('en-US', { style: 'currency', currency: method.currency || 'USD' }).format(Number(method.price))}</span>
+                  </div>
                 </label>
               ))}
             </div>
           )}
           {shippingQuote?.status === 'ELIGIBLE' && shippingQuote.shipping_methods?.length > 0 && shippingMethod && (
-            <p className="store-state" role="status">
-              Shipping: {new Intl.NumberFormat('en-US', { style: 'currency', currency: shippingQuote.currency || 'USD' }).format(Number(shippingQuote.shipping_methods.find((method) => method.id === shippingMethod)?.price || 0))}
+            <p className="store-shipping-summary" role="status">
+              Shipping cost: {new Intl.NumberFormat('en-US', { style: 'currency', currency: shippingQuote.currency || 'USD' }).format(Number(shippingQuote.shipping_methods.find((method) => method.id === shippingMethod)?.price || 0))}
             </p>
           )}
-        </fieldset>
+        </div>
       )}
 
       {shippingQuote?.status === 'ELIGIBLE' && shippingQuote.shipping_methods?.length > 0 && shippingMethod && (() => {
