@@ -54,6 +54,7 @@ export default function StoreCartPage() {
   const [confirmProviderShipping, setConfirmProviderShipping] = useState(false);
   const [showShippingForm, setShowShippingForm] = useState(false);
   const [shippingFormAnimating, setShippingFormAnimating] = useState(false);
+  const [shippingFieldErrors, setShippingFieldErrors] = useState({});
   const user = useAuthStore((s) => s.user);
   const buttonsRef = useRef(null);
   const requiresShipping = items.some((line) => details[line.productId]?.kind === 'physical');
@@ -155,6 +156,16 @@ export default function StoreCartPage() {
     setOrderTotal(null);
     setProviderShippingConfirmation(null);
     setConfirmProviderShipping(false);
+    if (shippingFieldErrors[name]) {
+      setShippingFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
+    if (message && message.toLowerCase().includes('required')) {
+      setMessage('');
+    }
   };
 
   const onQuoteShipping = async () => {
@@ -175,18 +186,31 @@ export default function StoreCartPage() {
       ['region', 'State / Province / Region'],
       ['zip', 'Postal / ZIP code'],
     ];
-    const missing = requiredFields.filter(([key]) => {
+    const errors = {};
+    requiredFields.forEach(([key, label]) => {
       if (key === 'email') {
         const emailVal = shippingAddress.email || user?.email || guestEmail;
-        return !emailVal || !emailVal.trim() || !emailVal.includes('@');
+        if (!emailVal || !emailVal.trim() || !emailVal.includes('@')) {
+          errors[key] = true;
+        }
+      } else if (!shippingAddress[key] || !String(shippingAddress[key]).trim()) {
+        errors[key] = true;
       }
-      return !shippingAddress[key] || !String(shippingAddress[key]).trim();
     });
-    if (missing.length > 0) {
-      setMessage(`Please fill in the required fields: ${missing.map(([, label]) => label).join(', ')}`);
+    setShippingFieldErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      setMessage('Please complete all required shipping fields.');
       setShippingBusy(false);
+      // Scroll to shipping form
+      setTimeout(() => {
+        const el = document.querySelector('.store-shipping-address');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }, 50);
       return;
     }
+    setShippingFieldErrors({});
 
     try {
       const response = await storeService.quoteShipping(
@@ -455,6 +479,8 @@ export default function StoreCartPage() {
           onClick={() => {
             setShippingFormAnimating(true);
             setShowShippingForm(true);
+            setShippingFieldErrors({});
+            setMessage('');
             setTimeout(() => setShippingFormAnimating(false), 400);
           }}
         >
@@ -478,23 +504,23 @@ export default function StoreCartPage() {
               ['city', 'City'], ['region', 'State / Province / Region'], ['zip', 'Postal / ZIP code'],
             ].map(([name, label]) => (
               <label key={name} className="store-shipping-address__field">
-                <span className="store-shipping-address__label">{label}</span>
+                <span className="store-shipping-address__label">{label}{!label.includes('optional') && <span style={{ color: '#dc2626', marginLeft: '4px' }}>*</span>}</span>
                 <input
                   name={name}
                   type={name === 'email' ? 'email' : name === 'phone' ? 'tel' : 'text'}
                   autoComplete={name === 'address1' ? 'address-line1' : name === 'address2' ? 'address-line2' : name === 'zip' ? 'postal-code' : name === 'region' ? 'address-level1' : name === 'city' ? 'address-level2' : name === 'email' ? 'email' : name === 'first_name' ? 'given-name' : name === 'last_name' ? 'family-name' : name === 'phone' ? 'tel' : name}
-                  value={shippingAddress[name]}
+                  value={name === 'email' && shippingAddress.email === '' && !user ? guestEmail : shippingAddress[name] || (name === 'email' && user ? user.email || '' : shippingAddress[name])}
                   onChange={onShippingAddressChange}
                   required={!label.includes('optional')}
+                  style={shippingFieldErrors[name] ? { borderColor: '#dc2626', boxShadow: '0 0 0 3px rgba(220, 38, 38, 0.08)' } : {}}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && name === 'phone') {
                       e.preventDefault();
-                      if (!shippingBusy && shippingAddress.first_name && shippingAddress.last_name && shippingAddress.address1 && shippingAddress.city && shippingAddress.region && shippingAddress.zip) {
-                        onQuoteShipping();
-                      }
+                      onQuoteShipping();
                     }
                   }}
                 />
+                {shippingFieldErrors[name] && <span style={{ fontSize: '0.75rem', color: '#dc2626' }}>Required</span>}
               </label>
             ))}
             <label className="store-shipping-address__field store-shipping-address__field--full">
