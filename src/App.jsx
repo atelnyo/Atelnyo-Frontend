@@ -1741,7 +1741,7 @@ function App() {
   // underneath the profile — a broken double render.
   // /store has its own header, footer and navigation, so the global chrome is hidden there.
   const isStoreRoute = effectivePathname === '/store' || effectivePathname.startsWith('/store/') || effectivePathname === '/account' || effectivePathname === '/store/login';
-  const isSheetRoute = effectivePathname.startsWith('/sheet/') || effectivePathname.startsWith('/creator/') || effectivePathname.startsWith('/portfolio/') || effectivePathname.startsWith('/marketplace/') || effectivePathname.match(/^\/c\//) || effectivePathname.match(/^\/(@|%40)/i) || effectivePathname.startsWith('/legal/') || effectivePathname === '/themes' || effectivePathname === '/faq' || effectivePathname === '/help' || effectivePathname === '/about' || effectivePathname === '/trust' || effectivePathname === '/contact' || effectivePathname === '/accessibility' || effectivePathname === '/status' || effectivePathname === '/developers' || effectivePathname === '/verify' || effectivePathname.startsWith('/affiliate') || effectivePathname.startsWith('/page/') || effectivePathname.startsWith('/company/') || effectivePathname === '/business' || effectivePathname.startsWith('/business/') || effectivePathname === SHEETS.LOGIN || effectivePathname === SHEETS.SIGNUP || isContentRoutePath(effectivePathname) || effectivePathname === '/explore' || effectivePathname.startsWith('/explore/');
+  const isSheetRoute = effectivePathname === '/legal' || effectivePathname.startsWith('/sheet/') || effectivePathname.startsWith('/creator/') || effectivePathname.startsWith('/portfolio/') || effectivePathname.startsWith('/marketplace/') || effectivePathname.match(/^\/c\//) || effectivePathname.match(/^\/(@|%40)/i) || effectivePathname.startsWith('/legal/') || effectivePathname === '/themes' || effectivePathname === '/faq' || effectivePathname === '/help' || effectivePathname === '/about' || effectivePathname === '/trust' || effectivePathname === '/contact' || effectivePathname === '/accessibility' || effectivePathname === '/status' || effectivePathname === '/developers' || effectivePathname === '/verify' || effectivePathname.startsWith('/affiliate') || effectivePathname.startsWith('/page/') || effectivePathname.startsWith('/company/') || effectivePathname === '/business' || effectivePathname.startsWith('/business/') || effectivePathname === SHEETS.LOGIN || effectivePathname === SHEETS.SIGNUP || isContentRoutePath(effectivePathname) || effectivePathname === '/explore' || effectivePathname.startsWith('/explore/');
 
   // ─── Sheet isolation ────────────────────────────────────────────────
   // Phase 36.1 — toggles `body.sheet-open` whenever the URL is under
@@ -2194,8 +2194,10 @@ function App() {
   const brandMeta = {
     title: brandMetaLocalized[lang]?.title || brandMetaLocalized.en.title,
     ogTitle: 'Atelnyo — Explore Courses, Music, Talent & More',
-    ogImage: '/og-banner-en.svg',
-    desc: 'An international platform where creators teach online courses, share music, sell products, and grow their digital presence. Explore 50+ creators and start learning today.',
+    ogImage: isStoreRoute ? '/icon-store.png' : '/og-banner-en.svg',
+    desc: isStoreRoute
+      ? 'Shop products from creators on the Atelnyo store.'
+      : 'An international platform where creators teach online courses, share music, sell products, and grow their digital presence. Explore 50+ creators and start learning today.',
   };
   const ogImageUrl = brandMeta.ogImage
     ? new URL(brandMeta.ogImage, window.location.origin).href
@@ -3335,10 +3337,16 @@ function App() {
         } />
         {/* /legal — Legal index hub; /legal/:slug — policy detail */}
         <Route path="/legal" element={
-          <LegalIndexPage lang={lang} />
+          <>
+            <LegalIndexPage lang={lang} />
+            <Footer lang={lang} translations={translations} />
+          </>
         } />
         <Route path="/legal/:slug" element={
-          <PolicyPageRoute lang={lang} showToast={showToast} />
+          <>
+            <PolicyPageRoute lang={lang} showToast={showToast} />
+            <Footer lang={lang} translations={translations} />
+          </>
         } />
         {/* /faq — Public FAQ page (platform-wide, managed by admins) */}
         <Route path="/faq" element={

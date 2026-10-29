@@ -139,7 +139,7 @@ const PAGE_META = {
   '/status': { title: 'Platform Status', desc: 'Check the current status of Atelnyo services, API availability, and system health.' },
   '/developers': { title: 'Developers', desc: 'Atelnyo developer documentation, API reference, integration guides, and open-source resources.' },
   '/themes': { title: 'Themes', desc: 'Browse available themes on Atelnyo.' },
-  '/store': { title: 'Store', desc: 'Shop products from creators on the Atelnyo store.' },
+  '/store': { title: 'Store', desc: 'Shop products from creators on the Atelnyo store.', image: 'https://atelnyo.site/icon-store.png', favicon: '/icon-store.png' },
 };
 
 async function _rewriteBotShell(request, env, path, origin) {
@@ -155,6 +155,16 @@ async function _rewriteBotShell(request, env, path, origin) {
     .on('meta[name="description"], meta[name="twitter:description"], meta[property="og:description"]', { element(el) { el.setAttribute('content', meta.desc); } })
     .on('meta[property="og:title"], meta[name="twitter:title"]', { element(el) { el.setAttribute('content', title); } })
     .on('meta[property="og:url"]', { element(el) { el.setAttribute('content', url); } });
+  if (meta.image) {
+    rw
+      .on('meta[property="og:image"], meta[name="twitter:image"]', { element(el) { el.setAttribute('content', meta.image); } })
+      .on('meta[property="og:image:width"]', { element(el) { el.setAttribute('content', '512'); } })
+      .on('meta[property="og:image:height"]', { element(el) { el.setAttribute('content', '512'); } });
+  }
+  if (meta.favicon) {
+    rw
+      .on('link[rel="icon"], link[rel="shortcut icon"], link[rel="apple-touch-icon"]', { element(el) { el.setAttribute('href', meta.favicon); } });
+  }
   return new Response(rw.transform(resp).body, {
     status: 200,
     headers: _withSecurityHeaders({
