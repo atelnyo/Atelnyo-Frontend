@@ -164,6 +164,30 @@ export default function StoreCartPage() {
     setConfirmProviderShipping(false);
     setShippingQuote(null);
     setShippingMethod('');
+
+    const requiredFields = [
+      ['first_name', 'First name'],
+      ['last_name', 'Last name'],
+      ['email', 'Email'],
+      ['phone', 'Phone number'],
+      ['address1', 'Address line 1'],
+      ['city', 'City'],
+      ['region', 'State / Province / Region'],
+      ['zip', 'Postal / ZIP code'],
+    ];
+    const missing = requiredFields.filter(([key]) => {
+      if (key === 'email') {
+        const emailVal = shippingAddress.email || user?.email || guestEmail;
+        return !emailVal || !emailVal.trim() || !emailVal.includes('@');
+      }
+      return !shippingAddress[key] || !String(shippingAddress[key]).trim();
+    });
+    if (missing.length > 0) {
+      setMessage(`Please fill in the required fields: ${missing.map(([, label]) => label).join(', ')}`);
+      setShippingBusy(false);
+      return;
+    }
+
     try {
       const response = await storeService.quoteShipping(
         items.map((line) => ({
@@ -177,9 +201,12 @@ export default function StoreCartPage() {
       setShippingQuote(quote);
       if (quote.status !== 'ELIGIBLE') {
         setMessage(quote.warnings?.join(' ') || 'Shipping could not be verified for this address.');
+      } else {
+        setMessage('');
       }
     } catch (err) {
-      setMessage(err?.response?.data?.detail || 'Shipping could not be checked. Try again.');
+      const detail = err?.response?.data?.detail || err?.response?.data?.error || 'Shipping could not be checked. Try again.';
+      setMessage(String(detail));
     } finally {
       setShippingBusy(false);
     }
