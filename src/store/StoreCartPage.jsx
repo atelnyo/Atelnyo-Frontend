@@ -55,6 +55,8 @@ export default function StoreCartPage() {
   const user = useAuthStore((s) => s.user);
   const buttonsRef = useRef(null);
   const requiresShipping = items.some((line) => details[line.productId]?.kind === 'physical');
+  const hasPrintifyItems = items.some((line) => details[line.productId]?.printify_product_id);
+  const needsShippingForm = requiresShipping && !hasPrintifyItems;
 
   // One label per in-flight step so the Checkout button always says what is
   // happening instead of flickering back to "Checkout" while the payment
@@ -188,7 +190,7 @@ export default function StoreCartPage() {
     }
     const resumeExistingOrder = pendingShippingConfirmation;
     // Allow PayPal to collect shipping address to avoid double entry
-    if (!resumeExistingOrder && requiresShipping) {
+    if (!resumeExistingOrder && needsShippingForm) {
       if (shippingQuote && shippingQuote.status !== 'ELIGIBLE') {
         setMessage(shippingQuote.warnings?.join(' ') || 'Shipping is not available for this address. Check shipping options or update your address.');
         setStatus('error');
@@ -226,11 +228,11 @@ export default function StoreCartPage() {
           quantity: it.quantity,
         })),
         guest ? { email: guestEmail.trim(), name: guestName.trim() } : null,
-        requiresShipping ? {
+        (needsShippingForm || (requiresShipping && !hasPrintifyItems)) ? {
           ...shippingAddress,
           email: shippingAddress.email || user?.email || guestEmail.trim(),
         } : null,
-        shippingMethod || null,
+        (needsShippingForm || (requiresShipping && !hasPrintifyItems)) ? (shippingMethod || null) : null,
         );
       } catch (err) {
         if (err?.response?.data?.code === 'account_exists') {
@@ -363,7 +365,7 @@ export default function StoreCartPage() {
           </label>
         </div>
       )}
-      {requiresShipping && (
+      {needsShippingForm && (
         <fieldset className="store-shipping-address" disabled={shippingBusy || Boolean(busyLabel)}>
           <legend>Shipping address</legend>
           <div className="store-shipping-address__grid">
@@ -412,6 +414,9 @@ export default function StoreCartPage() {
             </p>
           )}
         </fieldset>
+      )}
+      {hasPrintifyItems && requiresShipping && !needsShippingForm && (
+        <p className="store-state">PayPal will collect your shipping address at checkout.</p>
       )}
       {shippingQuote?.status === 'ELIGIBLE' && shippingQuote.shipping_methods?.length > 0 && shippingMethod && (() => {
         const subtotal = items.reduce((sum, line) => {
