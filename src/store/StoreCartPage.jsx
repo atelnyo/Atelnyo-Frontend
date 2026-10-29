@@ -578,20 +578,29 @@ export default function StoreCartPage() {
           Order total including verified shipping: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(orderTotal))}
         </p>
       )}
-      <button
-        type="button"
-        className="store-btn store-cart__checkout"
-        onClick={onCheckout}
-        disabled={Boolean(busyLabel)}
-      >
-        {busyLabel ? (
-          <span className="store-cart__busy" role="status" aria-label={busyLabel}>
-            {busyLabel}<span className="store-cart__dots" aria-hidden="true"><i /><i /><i /></span>
-          </span>
-        ) : (
-          'Checkout'
-        )}
-      </button>
+      {(() => {
+        const shippingReady = !needsShippingForm || (shippingQuote?.status === 'ELIGIBLE' && shippingQuote.shipping_methods?.length > 0 && shippingMethod);
+        const guestReady = user || (guestEmail.trim() && guestEmail.includes('@'));
+        if (!shippingReady || !guestReady) {
+          return null;
+        }
+        return (
+          <button
+            type="button"
+            className="store-btn store-cart__checkout"
+            onClick={onCheckout}
+            disabled={Boolean(busyLabel)}
+          >
+            {busyLabel ? (
+              <span className="store-cart__busy" role="status" aria-label={busyLabel}>
+                {busyLabel}<span className="store-cart__dots" aria-hidden="true"><i /><i /><i /></span>
+              </span>
+            ) : (
+              'Proceed to Payment'
+            )}
+          </button>
+        );
+      })()}
       {paypalOrderId && status === 'preparing' && (
         <div className="store-paypal-loading" role="status" aria-live="polite">
           <span className="store-paypal-loading__button" aria-hidden="true" />
