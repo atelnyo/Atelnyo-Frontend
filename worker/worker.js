@@ -139,7 +139,7 @@ const PAGE_META = {
   '/status': { title: 'Platform Status', desc: 'Check the current status of Atelnyo services, API availability, and system health.' },
   '/developers': { title: 'Developers', desc: 'Atelnyo developer documentation, API reference, integration guides, and open-source resources.' },
   '/themes': { title: 'Themes', desc: 'Browse available themes on Atelnyo.' },
-  '/store': { title: 'Atelnyo Store', desc: 'Shop products from creators on Atelnyo Store.', image: 'https://atelnyo.site/atelnyo-store-og.png', imageWidth: '1200', imageHeight: '630', favicon: '/atelnyo-store-icon-32.png' },
+  '/store': { title: 'Atelnyo Store', desc: 'Shop products from creators on Atelnyo Store.', image: 'https://atelnyo.site/atelnyo-store-og.png?v=2', imageWidth: '1200', imageHeight: '630', favicon: '/atelnyo-store-icon-32.png' },
   '/courses': { title: 'Courses', desc: 'Browse all courses on Atelnyo — programming, design, business, language, and more.' },
   '/products': { title: 'Products', desc: 'Discover products on Atelnyo.' },
   '/marketplace': { title: 'Marketplace', desc: 'Discover digital products and goods from creators on Atelnyo.' },
