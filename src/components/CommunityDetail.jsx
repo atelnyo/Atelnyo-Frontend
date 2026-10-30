@@ -27,7 +27,7 @@
  */
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import SEOHead from './shared/SEOHead';
-import { useParams, NavLink, Outlet, useOutletContext } from 'react-router-dom';
+import { useParams, NavLink, Outlet, useOutletContext, useNavigate } from 'react-router-dom';
 import { communitiesService, communityEventsService } from '../services/api';
 import useVirtualScroll from '../hooks/useVirtualScroll';
 
@@ -725,6 +725,7 @@ export function CommunityCourses() {
 // ── Parent layout ───────────────────────────────────────────────────────
 
 export default function CommunityDetail({ lang = 'ht', t = {}, showToast, user }) {
+  const navigate = useNavigate();
   const { slug } = useParams();
   const [community, setCommunity] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -809,6 +810,19 @@ export default function CommunityDetail({ lang = 'ht', t = {}, showToast, user }
       showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Nou pa ka kite.' : 'Could not leave'), 'circle-exclamation');
     } finally {
       setJoining(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!window.confirm(lang === 'ht' ? 'Èske w sèten w vle efase kominote sa a? Aksyon sa a pa ka anile.' : 'Are you sure you want to delete this community? This action cannot be undone.')) {
+      return;
+    }
+    try {
+      await communitiesService.delete(slug);
+      showToast?.(lang === 'ht' ? 'Kominote a efase.' : 'Community deleted.', 'trash');
+      navigate('/creator/studio?section=communities');
+    } catch (err) {
+      showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase kominote a.' : 'Could not delete community'), 'circle-exclamation');
     }
   }
 
@@ -898,16 +912,41 @@ export default function CommunityDetail({ lang = 'ht', t = {}, showToast, user }
               {lang === 'ht' ? 'Demann voye' : 'Request sent'}
             </button>
           ) : isMember ? (
-            !isOwner && (
-              <button
-                type="button"
-                className="c-banner-btn c-banner-btn--leave"
-                onClick={handleLeave}
-                disabled={joining}
-              >
-                {joining ? <i className="fas fa-spinner fa-spin" /> : (lang === 'ht' ? 'Kite' : 'Leave')}
-              </button>
-            )
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {isOwner && (
+                <>
+                  <button
+                    type="button"
+                    className="c-banner-btn"
+                    onClick={() => navigate('/creator/studio?section=communities')}
+                    title={lang === 'ht' ? 'Paramèt kominote a' : 'Community settings'}
+                  >
+                    <i className="fas fa-cog" aria-hidden="true" />
+                    {lang === 'ht' ? 'Paramèt' : 'Settings'}
+                  </button>
+                  <button
+                    type="button"
+                    className="c-banner-btn"
+                    onClick={handleDelete}
+                    style={{ background: 'rgba(239,68,68,0.9)', border: '1px solid rgba(239,68,68,0.9)' }}
+                    title={lang === 'ht' ? 'Efase kominote a' : 'Delete community'}
+                  >
+                    <i className="fas fa-trash" aria-hidden="true" />
+                    {lang === 'ht' ? 'Efase' : 'Delete'}
+                  </button>
+                </>
+              )}
+              {!isOwner && (
+                <button
+                  type="button"
+                  className="c-banner-btn c-banner-btn--leave"
+                  onClick={handleLeave}
+                  disabled={joining}
+                >
+                  {joining ? <i className="fas fa-spinner fa-spin" /> : (lang === 'ht' ? 'Kite' : 'Leave')}
+                </button>
+              )}
+            </div>
           ) : (
             <button
               type="button"

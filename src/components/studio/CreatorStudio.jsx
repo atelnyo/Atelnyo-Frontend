@@ -65,6 +65,7 @@ import ProductEditor from './editor/ProductEditor';
 import TalentEditor from './editor/TalentEditor';
 import JobEditor from './editor/JobEditor';
 import EventEditor from './editor/EventEditor';
+import CommunityEditor from './editor/CommunityEditor';
 import ProductTypeModal from './editor/ProductTypeModal';
 import { classNames } from './shared';
 import LoadingFallback from '../shared/LoadingFallback';
@@ -256,6 +257,7 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
   const [showTalentModal, setShowTalentModal] = useState(false);
   const [showJobModal, setShowJobModal] = useState(false);
   const [showEventModal, setShowEventModal] = useState(false);
+  const [showCommunityEditor, setShowCommunityEditor] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   // Edit state — stores the item being edited + its type
   const [editingItem, setEditingItem] = useState(null);
@@ -840,6 +842,17 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
             onSuccess={() => { setShowEventModal(false); handleCloseEdit(); setActiveSection('events'); bumpSection(); }}
             onSaved={bumpSection}
             item={editingType === 'event' ? editingItem : null}
+          />
+        )}
+        {showCommunityEditor && (
+          <CommunityEditor
+            lang={lang}
+            showToast={showToast}
+            user={user}
+            onClose={() => { setShowCommunityEditor(false); handleCloseEdit(); }}
+            onSuccess={() => { setShowCommunityEditor(false); handleCloseEdit(); setActiveSection('communities'); bumpSection(); }}
+            onSaved={bumpSection}
+            item={editingType === 'community' ? editingItem : null}
           />
         )}
         </div>

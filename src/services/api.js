@@ -1211,6 +1211,8 @@ export const communitiesService = {
   // (403 {code:'no_creator_content'} when ineligible). Probe with
   // canCreate() first so the modal only opens for eligible users.
   create: (data) => api.post('communities/', data),
+  update: (slug, data) => api.patch(`communities/${encodeURIComponent(slug)}/`, data),
+  delete: (slug) => api.delete(`communities/${encodeURIComponent(slug)}/`),
   canCreate: () => api.get('communities/can_create/'),
   join: (slug) => api.post(`communities/${encodeURIComponent(slug)}/join/`),
   leave: (slug) => api.post(`communities/${encodeURIComponent(slug)}/leave/`),

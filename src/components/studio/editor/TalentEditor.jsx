@@ -26,6 +26,7 @@ export default function TalentEditor({ onClose, onSuccess, onSaved, lang = 'ht',
     contact_email: item?.contact_email || '',
     contact_url: item?.contact_url || '',
     is_active: item ? item.is_active !== false : true,
+    visibility: item?.visibility || 'public',
   });
   const [errors, setErrors] = useState({});
   const [saveState, setSaveState] = useState('idle');
@@ -73,6 +74,7 @@ export default function TalentEditor({ onClose, onSuccess, onSaved, lang = 'ht',
       contact_email: form.contact_email.trim() || undefined,
       contact_url: form.contact_url.trim() || undefined,
       is_active: publish ? true : Boolean(form.is_active),
+      visibility: form.visibility,
     };
     try {
       let res;
@@ -156,6 +158,27 @@ export default function TalentEditor({ onClose, onSuccess, onSaved, lang = 'ht',
           <PropField label={isHt ? 'Sit Web / URL' : 'Website / URL'}>
             <PropInput type="url" value={form.contact_url} onChange={(e) => handleChange('contact_url', e.target.value)} placeholder="https://..." />
           </PropField>
+        </div>
+      </div>
+
+      <div className={styles.formSection} style={{ marginTop: 24 }}>
+        <h3 className={styles.sectionTitle}><i className="fas fa-user-lock" /> {isHt ? 'Vizibilite' : 'Visibility'}</h3>
+        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: 12 }}>{isHt ? 'Ki moun ka wè sa a?' : 'Who can see this?'}</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <label style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: 12, border: '1px solid var(--border-color)', borderRadius: 8, cursor: 'pointer' }}>
+            <input type="radio" name="visibility" value="followers" checked={(form.visibility || 'public') === 'followers'} onChange={(e) => handleChange('visibility', e.target.value)} style={{ marginTop: 4 }} />
+            <div>
+              <div style={{ fontWeight: 600 }}>{isHt ? 'Swivè sèlman (gratis)' : 'Followers only (free)'}</div>
+              <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>{isHt ? 'Sèlman ou menm ak moun k ap swiv ou ka wè l.' : 'Only you and the people following you can see it.'}</div>
+            </div>
+          </label>
+          <label style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: 12, border: '1px solid var(--border-color)', borderRadius: 8, cursor: 'pointer' }}>
+            <input type="radio" name="visibility" value="subscribers" checked={(form.visibility || 'public') === 'subscribers'} onChange={(e) => handleChange('visibility', e.target.value)} style={{ marginTop: 4 }} />
+            <div>
+              <div style={{ fontWeight: 600 }}>{isHt ? 'Abonè peyan sèlman' : 'Subscribers only (paid)'}</div>
+              <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>{isHt ? 'Sèlman abonè peyan yo ka wè l — mete pri abònman nan Anviwònman Pwofil.' : 'Only paid subscribers can see it — set a subscription price in Profile Settings.'}</div>
+            </div>
+          </label>
         </div>
       </div>
     </div>

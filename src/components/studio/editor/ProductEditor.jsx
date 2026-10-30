@@ -68,6 +68,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
     gallery: Array.isArray(item?.gallery) ? item.gallery : [],
     kind: productKind,
     is_active: item?.is_active ?? true,
+    visibility: item?.visibility || 'public',
     hashtags: hashtagsToInput(item?.tags),
     // Kind-specific fields (backend-supported):
     //   digital → the resource customers receive
@@ -613,6 +614,32 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
             ? 'Yon pwodwi bouyon kache pou achtè yo. Pibliye l sèlman lè l pare.'
             : 'A draft product is hidden from buyers. Publish it only when it’s ready.'}
         </p>
+      </PropertyGroup>
+
+      <PropertyGroup icon="fa-user-lock" label="Visibility" labelHt="Vizibilite" lang={lang}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+            <input type="radio" name="prod-visibility" checked={(form.visibility || 'public') === 'public'} onChange={() => handleChange('visibility', 'public')} />
+            <div>
+              <div style={{ fontWeight: 600 }}>{isHt ? 'Piblik' : 'Public'}</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{isHt ? 'Tout moun ka wè l' : 'Everyone can see it'}</div>
+            </div>
+          </label>
+          <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+            <input type="radio" name="prod-visibility" checked={(form.visibility || 'public') === 'followers'} onChange={() => handleChange('visibility', 'followers')} />
+            <div>
+              <div style={{ fontWeight: 600 }}>{isHt ? 'Swivè sèlman (gratis)' : 'Followers only (free)'}</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{isHt ? 'Sèlman swivè yo' : 'Only followers'}</div>
+            </div>
+          </label>
+          <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+            <input type="radio" name="prod-visibility" checked={(form.visibility || 'public') === 'subscribers'} onChange={() => handleChange('visibility', 'subscribers')} />
+            <div>
+              <div style={{ fontWeight: 600 }}>{isHt ? 'Abonè peyan sèlman' : 'Subscribers only (paid)'}</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{isHt ? 'Sèlman abonè peyan' : 'Only paid subscribers'}</div>
+            </div>
+          </label>
+        </div>
       </PropertyGroup>
     </>
   );
