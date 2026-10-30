@@ -139,7 +139,7 @@ const PAGE_META = {
   '/status': { title: 'Platform Status', desc: 'Check the current status of Atelnyo services, API availability, and system health.' },
   '/developers': { title: 'Developers', desc: 'Atelnyo developer documentation, API reference, integration guides, and open-source resources.' },
   '/themes': { title: 'Themes', desc: 'Browse available themes on Atelnyo.' },
-  '/store': { title: 'Store', desc: 'Shop products from creators on the Atelnyo store.', image: 'https://atelnyo.site/icon-store.png', favicon: '/icon-store.png' },
+  '/store': { title: 'Atelnyo Store', desc: 'Shop products from creators on Atelnyo Store.', image: 'https://atelnyo.site/atelnyo-store-og.png', imageWidth: '1200', imageHeight: '630', favicon: '/atelnyo-store-icon-32.png' },
   '/courses': { title: 'Courses', desc: 'Browse all courses on Atelnyo — programming, design, business, language, and more.' },
   '/products': { title: 'Products', desc: 'Discover products on Atelnyo.' },
   '/marketplace': { title: 'Marketplace', desc: 'Discover digital products and goods from creators on Atelnyo.' },
@@ -169,8 +169,8 @@ async function _rewriteBotShell(request, env, path, origin) {
   if (meta.image) {
     rw
       .on('meta[property="og:image"], meta[name="twitter:image"]', { element(el) { el.setAttribute('content', meta.image); } })
-      .on('meta[property="og:image:width"]', { element(el) { el.setAttribute('content', '512'); } })
-      .on('meta[property="og:image:height"]', { element(el) { el.setAttribute('content', '512'); } });
+      .on('meta[property="og:image:width"]', { element(el) { el.setAttribute('content', meta.imageWidth || (key === '/store' ? '1200' : '512')); } })
+      .on('meta[property="og:image:height"]', { element(el) { el.setAttribute('content', meta.imageHeight || (key === '/store' ? '630' : '512')); } });
   }
   if (meta.favicon) {
     rw
