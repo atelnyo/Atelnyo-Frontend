@@ -62,6 +62,9 @@ import CourseEditor from './editor/CourseEditor';
 import CourseTypeModal from './editor/CourseTypeModal';
 import MusicEditor from './editor/MusicEditor';
 import ProductEditor from './editor/ProductEditor';
+import TalentEditor from './editor/TalentEditor';
+import JobEditor from './editor/JobEditor';
+import EventEditor from './editor/EventEditor';
 import ProductTypeModal from './editor/ProductTypeModal';
 import { classNames } from './shared';
 import LoadingFallback from '../shared/LoadingFallback';
@@ -272,9 +275,9 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
 
   // Must be declared BEFORE any conditional return (rules-of-hooks)
   const handleSectionChange = useCallback((sectionId) => {
-    // Special case: FAQ navigates to the /sheet/faq route
+    // Special case: FAQ navigates to the /faq route
     if (sectionId === 'faq') {
-      navigate('/sheet/faq');
+      navigate('/faq');
       return;
     }
     setActiveSection(sectionId);
@@ -807,30 +810,36 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
           />
         )}
         {showTalentModal && (
-          <TalentFormModal
+          <TalentEditor
             lang={lang}
             showToast={showToast}
+            user={user}
             onClose={() => { setShowTalentModal(false); handleCloseEdit(); }}
             onSuccess={() => { setShowTalentModal(false); handleCloseEdit(); setActiveSection('talent'); bumpSection(); }}
-            talent={editingType === 'talent' ? editingItem : null}
+            onSaved={bumpSection}
+            item={editingType === 'talent' ? editingItem : null}
           />
         )}
         {showJobModal && (
-          <JobFormModal
+          <JobEditor
             lang={lang}
             showToast={showToast}
+            user={user}
             onClose={() => { setShowJobModal(false); handleCloseEdit(); }}
             onSuccess={() => { setShowJobModal(false); handleCloseEdit(); setActiveSection('jobs'); bumpSection(); }}
-            job={editingType === 'job' ? editingItem : null}
+            onSaved={bumpSection}
+            item={editingType === 'job' ? editingItem : null}
           />
         )}
         {showEventModal && (
-          <EventFormModal
+          <EventEditor
             lang={lang}
             showToast={showToast}
+            user={user}
             onClose={() => { setShowEventModal(false); handleCloseEdit(); }}
             onSuccess={() => { setShowEventModal(false); handleCloseEdit(); setActiveSection('events'); bumpSection(); }}
-            event={editingType === 'event' ? editingItem : null}
+            onSaved={bumpSection}
+            item={editingType === 'event' ? editingItem : null}
           />
         )}
         </div>

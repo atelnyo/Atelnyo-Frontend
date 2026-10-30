@@ -539,6 +539,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'ht',
         setDirty(false);
         setSaveState('saved');
         setSaveError('');
+        onSaved?.();
         showToast?.(isHt ? '🚀 Kou pibliye! Vizitè yo ka wè l kounye a.' : '🚀 Course published! Visitors can see it now.', 'check-circle');
         return;
       }
