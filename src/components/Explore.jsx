@@ -1144,11 +1144,17 @@ export function Explore({
           // this, the courses chip always painted an empty grid while
           // the recommended rail + "Anyen pa jwenn" empty state
           // suggested the catalog had no data.
-          setCourses(Array.isArray(res?.data)
+          // Explore is a discovery surface: an unpublished draft must
+          // never render here. The list endpoint may include the
+          // viewer's OWN drafts (so the Studio editor can open them),
+          // but a draft card 404s for everyone else — drop it at the
+          // source instead of shipping a dead card.
+          const rows = Array.isArray(res?.data)
             ? res.data
             : Array.isArray(res?.data?.results)
               ? res.data.results
-              : []);
+              : [];
+          setCourses(rows.filter((c) => !c.status || c.status === 'published'));
           setLoadErrors((p) => ({ ...p, courses: null }));
         }
       })
@@ -1255,7 +1261,8 @@ export function Explore({
     portfolioService.list(q ? { q } : undefined).then((r) => {
         if (seqRef.current !== mySeq) return;
         const items = Array.isArray(r?.data) ? r.data : Array.isArray(r?.data?.results) ? r.data.results : [];
-        setApiPortfolio(items);
+        // Public rail: unpublished projects belong to the Studio only.
+        setApiPortfolio(items.filter((p) => p.is_published !== false));
         setLoadErrors((p) => ({ ...p, portfolio: null }));
     }).catch((err) => {
         if (seqRef.current === mySeq) {
@@ -1289,7 +1296,9 @@ export function Explore({
     eventsService.upcoming({ limit: 20 }).then((r) => {
         if (seqRef.current !== mySeq) return;
         const items = Array.isArray(r?.data) ? r.data : Array.isArray(r?.data?.results) ? r.data.results : [];
-        setApiEvents(items);
+        // Public rail: drafts (creator/moderator scope) and cancelled
+        // events never render here — only what a visitor can open.
+        setApiEvents(items.filter((e) => !e.status || e.status === 'published' || e.status === 'completed'));
         setLoadErrors((p) => ({ ...p, events: null }));
     }).catch((err) => {
         if (seqRef.current === mySeq) {
