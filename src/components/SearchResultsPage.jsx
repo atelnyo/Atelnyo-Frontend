@@ -23,6 +23,7 @@
  *   />
  */
 import React, { useState, useMemo, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import useSafeNavigate from '../hooks/useSafeNavigate';
 import api from '../services/api';
 
@@ -62,9 +63,19 @@ const SearchResultsPage = ({
   lang = 'en',
 }) => {
   const navigate = useSafeNavigate();
-  const [sortBy, setSortBy] = useState('relevance');
   const [showFilters, setShowFilters] = useState(false);
-  const [activeTypeFilter, setActiveTypeFilter] = useState(null);
+  // Sort + type live in the URL (``?sort=newest&type=course``) so they
+  // survive a reload, the Back button and link sharing — the same
+  // contract Explore uses for its ``?filter=`` state.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const sortBy = searchParams.get('sort') || 'relevance';
+  const activeTypeFilter = searchParams.get('type') || null;
+
+  const setParam = useCallback((key, value) => {
+    const next = new URLSearchParams(searchParams);
+    if (value) next.set(key, value); else next.delete(key);
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   const t = {
     results_for: lang === 'ht' ? 'Rezilta pou' : 'Results for',
@@ -77,6 +88,7 @@ const SearchResultsPage = ({
     results: lang === 'ht' ? 'rezilta' : 'results',
     view: lang === 'ht' ? 'Wè' : 'View',
     filters: lang === 'ht' ? 'Filtè' : 'Filters',
+    clear_filters: lang === 'ht' ? 'Retire filtè' : 'Clear filters',
     categories: lang === 'ht' ? 'Kategori' : 'Categories',
     all: lang === 'ht' ? 'Tout' : 'All',
     loading: lang === 'ht' ? 'Ap chaje...' : 'Loading...',
@@ -84,11 +96,12 @@ const SearchResultsPage = ({
     next: lang === 'ht' ? 'Apre' : 'Next',
   };
 
-  // Handle sort change
+  // Handle sort change — mirror it into the URL and notify the parent so
+  // a server-backed search can refetch in the same order.
   const handleSortChange = useCallback((value) => {
-    setSortBy(value);
+    setParam('sort', value === 'relevance' ? '' : value);
     if (onSortChange) onSortChange(value);
-  }, [onSortChange]);
+  }, [onSortChange, setParam]);
 
   // Handle result click (track analytics)
   const handleResultClick = useCallback((result, position) => {
@@ -107,11 +120,66 @@ const SearchResultsPage = ({
     }
   }, [navigate]);
 
+  const hasActiveFilters = Boolean(activeTypeFilter) || sortBy !== 'relevance';
+
+  const clearFilters = useCallback(() => {
+    const next = new URLSearchParams(searchParams);
+    next.delete('type');
+    next.delete('sort');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
+
   // Filter results by active type
   const filteredResults = useMemo(() => {
     if (!activeTypeFilter) return results;
     return results.filter(r => r.type === activeTypeFilter);
   }, [results, activeTypeFilter]);
+
+  // Apply the selected sort locally so the dropdown works even when the
+  // parent does not supply an ``onSortChange`` refetch (the /sheet/search
+  // route currently does not). Ordering degrades gracefully: a result
+  // missing the sort key sinks to the end instead of breaking the list.
+  const sortedResults = useMemo(() => {
+    const list = [...filteredResults];
+    const num = (v) => (v === null || v === undefined || Number.isNaN(Number(v)) ? null : Number(v));
+    const ts = (r) => {
+      const raw = r.created_at || r.published_at || r.date;
+      const parsed = raw ? Date.parse(raw) : NaN;
+      return Number.isNaN(parsed) ? null : parsed;
+    };
+    switch (sortBy) {
+      case 'alphabetical':
+        return list.sort((a, b) => String(a.title || '').localeCompare(String(b.title || '')));
+      case 'price_low':
+      case 'price_high': {
+        const dir = sortBy === 'price_low' ? 1 : -1;
+        return list.sort((a, b) => {
+          const pa = num(a.price);
+          const pb = num(b.price);
+          if (pa === null && pb === null) return 0;
+          if (pa === null) return 1;
+          if (pb === null) return -1;
+          return (pa - pb) * dir;
+        });
+      }
+      case 'rating':
+        return list.sort((a, b) => (num(b.rating) ?? -1) - (num(a.rating) ?? -1));
+      case 'newest':
+        return list.sort((a, b) => {
+          const ta = ts(a);
+          const tb = ts(b);
+          if (ta === null && tb === null) return 0;
+          if (ta === null) return 1;
+          if (tb === null) return -1;
+          return tb - ta;
+        });
+      case 'popular':
+        return list.sort((a, b) => (num(b.views ?? b.saves ?? b.popularity) ?? -1) - (num(a.views ?? a.saves ?? a.popularity) ?? -1));
+      case 'relevance':
+      default:
+        return list;
+    }
+  }, [filteredResults, sortBy]);
 
   // Group results by type for faceted view
   const groupedResults = useMemo(() => {
@@ -202,6 +270,7 @@ const SearchResultsPage = ({
           <button
             className="srp-filter-toggle"
             onClick={() => setShowFilters(!showFilters)}
+            aria-expanded={showFilters}
             type="button"
           >
             <i className="fas fa-filter" />
@@ -211,10 +280,10 @@ const SearchResultsPage = ({
       </div>
 
       {/* Facet Chips */}
-      <div className="srp-facets">
+      <div className={`srp-facets${showFilters ? ' srp-facets--expanded' : ''}`}>
         <button
           className={`srp-facet-chip ${!activeTypeFilter ? 'srp-facet-chip--active' : ''}`}
-          onClick={() => setActiveTypeFilter(null)}
+          onClick={() => setParam('type', '')}
           type="button"
         >
           {t.all} ({total})
@@ -226,7 +295,7 @@ const SearchResultsPage = ({
             <button
               key={type}
               className={`srp-facet-chip ${activeTypeFilter === type ? 'srp-facet-chip--active' : ''}`}
-              onClick={() => setActiveTypeFilter(activeTypeFilter === type ? null : type)}
+              onClick={() => setParam('type', activeTypeFilter === type ? '' : type)}
               type="button"
               style={activeTypeFilter === type ? { borderColor: mod.color, color: mod.color } : undefined}
             >
@@ -236,11 +305,21 @@ const SearchResultsPage = ({
             </button>
           );
         })}
+        {hasActiveFilters && (
+          <button
+            className="srp-clear-filters"
+            onClick={clearFilters}
+            type="button"
+          >
+            <i className="fas fa-rotate-left" aria-hidden="true" />
+            <span>{t.clear_filters}</span>
+          </button>
+        )}
       </div>
 
       {/* Results Grid */}
       <div className="srp-results-grid">
-        {filteredResults.map((result, idx) => {
+        {sortedResults.map((result, idx) => {
           const mod = MODULE_ICONS[result.type] || { icon: 'fa-search', color: '#999', label: result.type };
           return (
             <div

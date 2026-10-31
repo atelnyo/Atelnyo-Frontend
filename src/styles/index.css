@@ -9163,6 +9163,30 @@ body.fx-matrix main {
 }
 .explore-chip.active i { opacity: 1; }
 
+/* Active-filter summary bar — chip + scoped result count + reset. */
+.explore-filter-summary {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; flex-wrap: wrap;
+  padding: 2px 4px 12px;
+}
+.explore-filter-summary-text {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 0.78rem; font-weight: 600;
+  color: var(--text-secondary, #666);
+}
+.explore-filter-clear {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 10px; border-radius: 999px;
+  background: transparent;
+  border: 1px solid rgba(216, 27, 96, 0.28);
+  color: var(--pink-primary, #d81b60);
+  font-size: 0.72rem; font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s, border-color 0.2s;
+}
+.explore-filter-clear:hover { background: rgba(216, 27, 96, 0.08); border-color: var(--pink-primary, #d81b60); }
+
 /* Normalized category filter (backend migration 0096) — dropdown under
    the chips, driven by numeric category IDs. */
 .explore-cat-filter-wrap {

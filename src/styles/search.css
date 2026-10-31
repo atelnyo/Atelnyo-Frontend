@@ -548,6 +548,34 @@
   background: rgba(216, 27, 96, 0.12);
 }
 
+/* "Filters" toggle expands the facet row into a wrapped block on narrow
+   screens instead of leaving it as a single scrolling strip. */
+.srp-facets--expanded {
+  flex-wrap: wrap;
+  overflow: visible;
+}
+
+.srp-clear-filters {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs, 4px);
+  padding: var(--spacing-sm, 6px) var(--spacing-lg, 10px);
+  border-radius: var(--radius-pill, 9999px);
+  border: 1px dashed var(--color-primary, #d81b60);
+  background: transparent;
+  color: var(--color-primary, #d81b60);
+  font-family: var(--font-family, 'Poppins', sans-serif);
+  font-size: 0.72rem;
+  font-weight: var(--font-weight-medium, 500);
+  cursor: pointer;
+  white-space: nowrap;
+  touch-action: manipulation;
+}
+
+.srp-clear-filters:hover {
+  background: rgba(216, 27, 96, 0.08);
+}
+
 /* ── Results Grid ───────────────────────────────────────────────────── */
 
 .srp-results-grid {

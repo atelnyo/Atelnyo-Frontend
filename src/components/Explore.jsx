@@ -388,7 +388,7 @@ export function Explore({
     courses: 'course',
     music: 'music',
     communities: 'community',
-    products: 'product',
+    marketplace: 'product',
     portfolio: 'portfolio',
     spotlight: 'spotlight',
   };
@@ -1675,6 +1675,32 @@ export function Explore({
     (visibleSections.events?.length || 0) +
     (visibleSections.spotlight?.length || 0);
 
+  // Result count for the active chip only — the raw ``totalItems`` above
+  // double-counts on "Tout" (featured rails repeat full-list items), so
+  // the summary bar uses this scoped count instead.
+  const resultCount = useMemo(() => {
+    switch (filter) {
+      case 'all':
+        return filteredCourses.length + filteredMusic.length + filteredTalents.length
+          + filteredCommunities.length + filteredJobs.length + filteredPortfolio.length
+          + filteredMarketplace.length + filteredEvents.length + filteredSpotlight.length;
+      case 'featured':
+        return (visibleSections.featuredCourses?.length || 0)
+          + (visibleSections.featuredMusic?.length || 0)
+          + (visibleSections.featuredTalents?.length || 0);
+      case 'new':
+        return (visibleSections.newCourses?.length || 0)
+          + (visibleSections.newMusic?.length || 0)
+          + (visibleSections.newTalents?.length || 0);
+      default:
+        return totalItems;
+    }
+  }, [
+    filter, totalItems, visibleSections, filteredCourses, filteredMusic, filteredTalents,
+    filteredCommunities, filteredJobs, filteredPortfolio, filteredMarketplace, filteredEvents,
+    filteredSpotlight,
+  ]);
+
   const showEmpty =
     !loadingSections.courses &&
     !loadingSections.music &&
@@ -1918,6 +1944,27 @@ export function Explore({
           </button>
         ))}
       </div>
+
+      {/* Active-filter summary — tells the user what is narrowing the
+          list, how many items are left, and gives one-tap reset. */}
+      {(filter !== 'all' || search.trim() || catId) && (
+        <div className="explore-filter-summary" role="status">
+          <span className="explore-filter-summary-text">
+            <i className={`fas ${CHIPS.find((c) => c.id === filter)?.icon || 'fa-filter'}`} aria-hidden="true" />
+            {getChipLabel(CHIPS.find((c) => c.id === filter) || CHIPS[0], lang)}
+            {' · '}
+            {resultCount} {lang === 'ht' ? 'rezilta' : 'results'}
+          </span>
+          <button
+            type="button"
+            className="explore-filter-clear"
+            onClick={() => { setFilter('all'); setSearch(''); setCatId(''); }}
+          >
+            <i className="fas fa-rotate-left" aria-hidden="true" />
+            <span>{t.explore_clear_filters || (lang === 'ht' ? 'Retire filtè' : 'Clear filters')}</span>
+          </button>
+        </div>
+      )}
 
       {/* Normalized category filter (by ID) — shown on category-capable tabs */}
       {CATEGORY_SCOPE_BY_FILTER[filter] && catOptions.length > 0 && (
