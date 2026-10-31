@@ -200,8 +200,10 @@ export const SHEETS = Object.freeze({
   // Legacy /creator/:username redirects to /@:username via App.jsx.
   CREATOR_PROFILE: '/c/:username',
   CREATOR_PROFILE_LEGACY: '/creator/:username',
-  // Phase 55 — Search & Discovery Engine
-  SEARCH: '/sheet/search',
+  // Phase 55 — Search & Discovery Engine. Public, shareable URL:
+  // /search?q=lanmou. The legacy /sheet/search path is still routed
+  // (alias) so old links and bookmarks keep working.
+  SEARCH: '/search',
   // Phase 23 — Media Entity Page (full-page view of a single media).
   // Dynamic route with :id param. Navigate via
   // navigate(`/sheet/media/${media.id}`, { state: { media } }).

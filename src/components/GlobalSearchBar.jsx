@@ -80,6 +80,7 @@ const GlobalSearchBar = ({
   isOpen,
   onClose,
   onSearchResults,
+  onSubmitQuery, // navigate immediately with ?q= (no API wait on Enter)
   onNavigate,  // prop-injected to avoid useNavigate() crash in Cloud Shell
   lang = 'en',
   initialQuery = '',
@@ -196,6 +197,17 @@ const GlobalSearchBar = ({
     if (!searchQuery || searchQuery.length < 2) return;
     saveRecentSearch(searchQuery);
     setRecentSearches(getRecentSearches());
+    setShowDropdown(false);
+
+    // Navigate IMMEDIATELY with the query in the URL. The results page
+    // owns the request and paints its skeleton while it is in flight —
+    // waiting for /api/search/ here made Enter feel frozen on slow
+    // connections. The fetch fallback below only runs on surfaces that
+    // still pass onSearchResults without onSubmitQuery.
+    if (onSubmitQuery) {
+      onSubmitQuery(searchQuery);
+      return;
+    }
 
     const params = { q: searchQuery };
     if (activeTypes.length > 0) params.types = activeTypes.join(',');
@@ -203,10 +215,9 @@ const GlobalSearchBar = ({
     api.get('search/', { params })
       .then(res => {
         if (onSearchResults) onSearchResults(res.data);
-        setShowDropdown(false);
       })
       .catch(() => {});
-  }, [activeTypes, onSearchResults]);
+  }, [activeTypes, onSubmitQuery, onSearchResults]);
 
   // Handle suggestion click
   const handleSuggestionClick = useCallback((suggestion) => {

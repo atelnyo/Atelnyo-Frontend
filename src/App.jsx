@@ -495,6 +495,72 @@ function AuthRoute({ user, mode, lang, onLoginSuccess, showToast }) {
 }
 
 /**
+ * SearchRoute — URL-driven search results.
+ *
+ * The query lives in the URL (`/search?q=lanmou&page=2`) so a shared
+ * link, a reload or Back/Forward restores the same results. Navigation no
+ * longer waits for the search overlay's own fetch: this page mounts at
+ * once and paints SearchResultsPage's skeleton until /api/search/
+ * answers, so pressing Enter feels instant even on a slow connection.
+ */
+function SearchRoute({ lang }) {
+  const [params] = useSearchParams();
+  const navigate = useSafeNavigate();
+  const q = (params.get('q') || '').trim();
+  const page = Math.max(1, Number(params.get('page') || 1) || 1);
+  const key = `${q}|${page}`;
+  // Derived loading: the effect only ever calls setState from async
+  // callbacks, so no cascading synchronous render is triggered.
+  const [result, setResult] = useState({ key: '', data: null });
+  const loading = Boolean(q) && result.key !== key;
+
+  useEffect(() => {
+    if (!q) return undefined;
+    let cancelled = false;
+    const myKey = key;
+    api.get('search/', { params: { q, page } })
+      .then((res) => {
+        if (!cancelled) setResult({ key: myKey, data: res?.data || null });
+      })
+      .catch(() => {
+        if (!cancelled) setResult({ key: myKey, data: null });
+      });
+    return () => { cancelled = true; };
+  }, [key, q, page]);
+
+  const data = result.key === key ? result.data : null;
+  const results = data?.results || [];
+  // /api/search/ returns {results, query, types, total} without a facets
+  // map or pagination envelope. Derive the per-type facet counts from the
+  // results so the type chips actually render (otherwise only "All"
+  // shows and the filter row is useless).
+  const serverFacets = data?.facets && Object.keys(data.facets).length ? data.facets : null;
+  const facets = serverFacets || results.reduce((acc, item) => {
+    if (item?.type) acc[item.type] = (acc[item.type] || 0) + 1;
+    return acc;
+  }, {});
+  const total = data?.total ?? results.length;
+
+  return (
+    <SearchResultsPage
+      query={q}
+      results={results}
+      total={total}
+      facets={facets}
+      loading={loading}
+      currentPage={page}
+      totalPages={data?.total_pages || 1}
+      lang={lang}
+      onPageChange={(next) => {
+        const nextParams = new URLSearchParams(params);
+        nextParams.set('page', String(next));
+        navigate(`${SHEETS.SEARCH}?${nextParams.toString()}`);
+      }}
+    />
+  );
+}
+
+/**
  * CourseDetailRoute — fetches a course by id (pk or slug) and renders
  * the full CourseDetail page. Mounted at BOTH the canonical
  * ``/{id}@{user}/course`` deep-link (id passed as a prop) and the
@@ -2452,6 +2518,10 @@ function App() {
             isOpen={searchOpen}
             onClose={() => { setSearchOpen(false); setSearchResults(null); }}
             onSearchResults={(data) => { setSearchResults(data); setSearchOpen(false); navigateRR(SHEETS.SEARCH); }}
+            onSubmitQuery={(query) => {
+              setSearchOpen(false);
+              navigateRR(`${SHEETS.SEARCH}?q=${encodeURIComponent(query)}`);
+            }}
             onNavigate={handleNavigate}
             lang={lang}
           />
@@ -3394,17 +3464,11 @@ function App() {
           <ThemesPage lang={lang} translations={translations} showToast={showToast} />
         } />
         {/* Catch-all 404 — silences "No routes matched location …" warnings for any future deep-link or stale bookmark, and routes them to the existing NotFound component which already renders a back-to-root button. The explicit ``/`` route above guarantees this only fires for truly-unknown URLs (e.g. a stale /sheet/foo bookmark), not for the legitimate root URL. */}
-        <Route path={SHEETS.SEARCH} element={
-          <SearchResultsPage
-            query={searchResults?.query || ''}
-            results={searchResults?.results || []}
-            total={searchResults?.total || 0}
-            facets={searchResults?.facets || {}}
-            currentPage={searchResults?.page || 1}
-            totalPages={searchResults?.total_pages || 1}
-            lang={lang}
-          />
-        } />
+        {/* Search — URL-driven (?q=&page=) so the results are shareable
+            and the skeleton paints the moment Enter is pressed. */}
+        <Route path={SHEETS.SEARCH} element={<SearchRoute lang={lang} />} />
+        {/* Legacy alias — old /sheet/search links keep working. */}
+        <Route path="/sheet/search" element={<SearchRoute lang={lang} />} />
         {/* Profile detail routes — prevents 404 when clicking cards
             on the Creator Public Profile. Placeholder until dedicated
             pages are built. */}
