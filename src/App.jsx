@@ -127,6 +127,22 @@ const AdminMediaMonitor = lazy(() => import('./components/admin/AdminMediaMonito
 const SecurityDashboard = lazy(() => import('./components/admin/SecurityDashboard'));
 const CreatorPublicProfile = lazy(() => import('./components/CreatorPublicProfile'));
 const SearchResultsPage = lazy(() => import('./components/SearchResultsPage'));
+
+// Warm the /search route chunk ahead of the Enter key.
+//
+// Pressing Enter navigates through startTransition (see useSafeNavigate) to
+// a React.lazy route. If the chunk is not in memory yet, React keeps the
+// PREVIOUS screen mounted until the import resolves — the overlay already
+// closed urgently, so the app looks frozen for the network time of that
+// chunk (~1s on a cold cache). Clicking a suggestion goes to a page whose
+// chunk is usually already loaded, which is why the two paths felt so
+// different. Prefetching on idle (and again when the overlay opens) makes
+// the Enter commit synchronous, so the skeleton paints immediately.
+let searchPagePreload;
+function preloadSearchPage() {
+  if (!searchPagePreload) searchPagePreload = import('./components/SearchResultsPage');
+  return searchPagePreload;
+}
 const ProfileItemDetail = lazy(() => import('./components/ProfileItemDetail'));
 const ProductDetail      = lazy(() => import('./components/ProductDetail'));
 const StoreLayout        = lazy(() => import('./store/StoreLayout'));
@@ -1787,6 +1803,25 @@ function App() {
     startTransition(() => { navigateRR(url, opts); });
   }, [navigateRR]);
 
+  // Prefetch the /search route chunk: once on idle after first paint, and
+  // again the moment the search overlay opens (covers a cold cache where the
+  // idle callback has not run yet). This removes the lazy-import stall that
+  // made Enter look slower than clicking a suggestion.
+  useEffect(() => {
+    const warm = () => { preloadSearchPage().catch(() => {}); };
+    if (searchOpen) {
+      warm();
+      return undefined;
+    }
+    const hasIdle = typeof window !== 'undefined' && 'requestIdleCallback' in window;
+    if (hasIdle) {
+      const id = window.requestIdleCallback(warm, { timeout: 2000 });
+      return () => window.cancelIdleCallback?.(id);
+    }
+    const id = setTimeout(warm, 1200);
+    return () => clearTimeout(id);
+  }, [searchOpen]);
+
   // ─── Phase 59 — creator decides on a profile invitation ──────────
   // Accepting (hire / collab / book) opens the auto-created DM thread
   // so the creator can discuss details with the requester; rejecting
@@ -2563,6 +2598,9 @@ function App() {
             onClose={() => { setSearchOpen(false); setSearchResults(null); }}
             onSearchResults={(data) => { setSearchResults(data); setSearchOpen(false); navigateRR(SHEETS.SEARCH); }}
             onSubmitQuery={(query) => {
+              // Kick the chunk fetch before navigating so a cold Enter does
+              // not pay the import round-trip inside the transition.
+              preloadSearchPage().catch(() => {});
               setSearchOpen(false);
               navigateRR(`${SHEETS.SEARCH}?q=${encodeURIComponent(query)}`);
             }}
