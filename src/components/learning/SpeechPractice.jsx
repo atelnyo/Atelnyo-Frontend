@@ -24,9 +24,19 @@ import { speechSubmissionService } from '../../services/api';
 import SpeechRecorder from './SpeechRecorder';
 import styles from './learning.module.css';
 
+function resolveSpeechLang(block, lang) {
+  const raw = (block?.recognitionLang || block?.targetLang || '').trim();
+  if (raw) return { tag: raw, fallback: false };
+  if (lang === 'ht') return { tag: 'fr-FR', fallback: true };
+  if (lang === 'fr') return { tag: 'fr-FR', fallback: false };
+  if (lang === 'es') return { tag: 'es-ES', fallback: false };
+  return { tag: 'en-US', fallback: false };
+}
+
 export default function SpeechPractice({ block, lang = 'ht', courseId, moduleIndex, reportComplete }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
+  const speechLang = resolveSpeechLang(block, lang);
   const [recordingUrl, setRecordingUrl] = useState(null);
   const [feedback, setFeedback] = useState(null); // { transcript, confidence, matched, kind, analysis? }
   const [typed, setTyped] = useState('');
@@ -38,7 +48,7 @@ export default function SpeechPractice({ block, lang = 'ht', courseId, moduleInd
     startRecognition,
     finishRecognition,
     resetRecognition,
-  } = useSpeechRecognition(block.recognitionLang || 'en-US', {
+  } = useSpeechRecognition(speechLang.tag, {
     translateError: (err) => (err === 'not-allowed'
       ? t('Speech recognition was blocked.', 'Rekonesans vwa te bloke.')
       : t('Speech recognition could not read your recording.', 'Rekonesans vwa pa t kapab li anrejistreman w.') + ' ' + t('Try again.', 'Eseye ankò.')),
@@ -187,6 +197,15 @@ export default function SpeechPractice({ block, lang = 'ht', courseId, moduleInd
 
   return (
     <>
+      {speechLang.fallback && (
+        <p className={styles.practiceTranslation} role="note">
+          <i className="fas fa-circle-info" aria-hidden="true" />{' '}
+          {t(
+            'Voice recognition has no Haitian Creole model, so it listens in French.',
+            'Rekonesans vwa pa gen modèl kreyòl, kidonk li koute an fransè.',
+          )}
+        </p>
+      )}
       <div className={styles.practiceSpeak}>
         <SpeechRecorder
           lang={lang}

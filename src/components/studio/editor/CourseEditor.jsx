@@ -37,17 +37,21 @@
  *   • Lazy-load heavy panels (lesson-by-lesson content, learner
  *     analytics) via React.lazy when such endpoints exist.
  */
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import api, { courseService } from '../../../services/api';
-import { parseHashtags, hashtagsToInput } from '../../../utils/hashtags';
+import React, { useCallback, useMemo, useState } from 'react';
+import { courseService } from '../../../services/api';
 import MediaUploadButton from './MediaUploadButton';
 import './MediaUploadButton.css';
 import StudioEditorShell from './StudioEditorShell';
 import StudioPropertiesPanel, {
   PropertyGroup, PropField, PropInput, PropSelect,
 } from './StudioPropertiesPanel';
-import useAutosave from '../../../hooks/useAutosave';
 import SaveStatusIndicator from '../shared/SaveStatusIndicator';
+import { useCourseFormState } from './hooks/useCourseFormState';
+import { useCourseModules } from './hooks/useCourseModules';
+import { useCourseValidation } from './hooks/useCourseValidation';
+import { useCoursePersistence } from './hooks/useCoursePersistence';
+import { useCourseQuality } from './hooks/useCourseQuality';
+import { useCoursePublish } from './hooks/useCoursePublish';
 import DraftRecoveryBanner from '../shared/DraftRecoveryBanner';
 import BlockEditor from './BlockEditor';
 import QuizEditor from './QuizEditor';
@@ -63,24 +67,6 @@ import CompletionRulesEditor from './CompletionRulesEditor';
 import StudioAIChat from './StudioAIChat';
 import styles from './editor.module.css';
 
-function isModuleList(v) {
-  return Array.isArray(v);
-}
-
-/** Normalize the syllabus JSON to a stable [{title, description, blocks}] list.
- *  ``blocks`` (language-practice items) is preserved when present —
- *  existing courses without blocks keep working unchanged. */
-function normalizeSyllabus(raw) {
-  const arr = isModuleList(raw) ? raw : [];
-  return arr.map((m) => (
-    typeof m === 'string' ? { title: m, description: '', blocks: [] } : {
-      title: m?.title || '',
-      description: m?.description || '',
-      blocks: Array.isArray(m?.blocks) ? m.blocks : [],
-    }
-  ));
-}
-
 export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'ht', showToast, user, item, deliveryType = 'online' }) {
   const isEdit = Boolean(item);
   const isHt = lang === 'ht';
@@ -91,485 +77,64 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'ht',
   //              happens on another platform/location/institution.
   const isExternal = (item?.delivery_type || deliveryType) === 'external';
 
-  // ─── Form state (same fields + syllabus as the existing Course API) ──
-  const [form, setForm] = useState({
-    title: item?.title || '',
-    short_description: item?.short_description || '',
-    description: item?.description || '',
-    price: item?.price ?? '',
-    price_ltd: item?.price_ltd ?? '',
-    category: item?.category || '',
-    difficulty: item?.difficulty || 'beginner',
-    // Optional language-course metadata (backend: teaching_language /
-    // learner_language / learning_objective). Empty when unset.
-    teaching_language: item?.teaching_language || '',
-    learner_language: item?.learner_language || '',
-    learning_objective: item?.learning_objective || '',
-    // Extended course metadata (Phase 1 — Universal Course Studio)
-    objectives: Array.isArray(item?.objectives) ? item.objectives.join('\n') : '',
-    target_audience: item?.target_audience || '',
-    prerequisites: Array.isArray(item?.prerequisites) ? item.prerequisites.join('\n') : '',
-    estimated_duration: item?.estimated_duration || '',
-    image_url: item?.image_url || '',
-    video_url: item?.video_url || '',
-    completion_rules: Array.isArray(item?.completion_rules) ? item.completion_rules : [],
-    hashtags: hashtagsToInput(item?.tags),
-    modules: normalizeSyllabus(item?.syllabus),
-    // Delivery fields (backend: delivery_type / external_url / external_format)
-    delivery_type: item?.delivery_type || deliveryType || 'online',
-    external_url: item?.external_url || '',
-    external_format: item?.external_format || '',
-  });
+  // ─── State slices (extracted hooks — same behavior, testable units) ──
+  const {
+    form, setForm,
+    errors, setErrors,
+    handleChange,
+    markDirty, clearDirty,
+    dirty, setDirty, dirtyRef,
+    saveState, setSaveState,
+    saveError, setSaveError,
+    savedIdRef,
+    hasSaved, setHasSaved,
+    savedId, setSavedId,
+  } = useCourseFormState({ item, deliveryType });
   // Course status (Phase 1 — lifecycle)
   const [courseStatus, setCourseStatus] = useState(item?.status || 'draft');
-  // Quality report (Phase 1 — quality validation)
-  const [qualityReport, setQualityReport] = useState(null);
-  const [qualityLoading, setQualityLoading] = useState(false);
   // Curriculum mode (Phase 2 — Chapter/Lesson hierarchy)
   const [curriculumMode, setCurriculumMode] = useState(false);
   const [selectedLesson, setSelectedLesson] = useState(null);
+  // Quality report (Phase 1 — quality validation)
+  const { qualityReport, qualityLoading, fetchQuality } = useCourseQuality({ isEdit, savedId, savedIdRef });
 
-  const fetchQuality = useCallback(async () => {
-    if (!savedIdRef.current) return;
-    setQualityLoading(true);
-    try {
-      const res = await courseService.quality(savedIdRef.current);
-      setQualityReport(res?.data || null);
-    } catch {
-      // Best-effort — quality panel is informational
-    } finally {
-      setQualityLoading(false);
-    }
-  }, []);
-
-  // Fetch quality on mount if editing
-  useEffect(() => {
-    if (isEdit && savedIdRef.current) fetchQuality();
-  }, [isEdit, fetchQuality]);
-
-  // ─── Editor state ────────────────────────────────────────────────────
+  // ─── Editor navigation state ─────────────────────────────────────────
   const [selected, setSelected] = useState(null); // null = Overview
-  const [errors, setErrors] = useState({});
-  const [saveState, setSaveState] = useState('idle'); // idle|dirty|saving|saved|error
-  const [saveError, setSaveError] = useState('');
-  const savedIdRef = useRef(isEdit ? item.id : null);
-  const autoSaveTimer = useRef(null);
-  // ``hasSaved`` mirrors the ref as state so the save button label can
-  // switch from "Create" to "Save" without touching a ref during render.
-  const [hasSaved, setHasSaved] = useState(isEdit);
-  // ``savedId`` mirrors the ref for render-time reads (the react-compiler
-  // rule forbids touching a ref during render) — e.g. QuizEditor needs the
-  // course id once the course exists.
-  const [savedId, setSavedId] = useState(isEdit ? item.id : null);
-  // Re-check quality right after the FIRST save of a new course
-  // (savedId flips null → id only on create; updates keep the same id).
-  const prevSavedIdRef = useRef(savedId);
-  useEffect(() => {
-    if (savedId && savedId !== prevSavedIdRef.current) {
-      prevSavedIdRef.current = savedId;
-      fetchQuality();
-    }
-  }, [savedId, fetchQuality]);
-  // ``dirty`` drives the shell's unsaved-changes guard (state, so the
-  // UI re-renders); the ref mirrors it for effects/handlers only.
-  const [dirty, setDirty] = useState(false);
-  const dirtyRef = useRef(false);
 
-  const markDirty = useCallback(() => {
-    if (!dirtyRef.current) {
-      dirtyRef.current = true;
-      setDirty(true);
-      setSaveState('dirty');
-    }
-  }, []);
+  const {
+    handleModuleChange,
+    handleModuleBlocksChange,
+    addModule,
+    removeModule,
+    moveModule,
+    dragModuleRef,
+    dragOverModule, setDragOverModule,
+    dropModule,
+    copyFrom, setCopyFrom,
+    copyBlocksToModule,
+  } = useCourseModules({ form, setForm, selected, setSelected, markDirty });
 
-  const handleChange = useCallback((field, value) => {
-    setForm((f) => ({ ...f, [field]: value }));
-    if (errors[field]) setErrors((e) => ({ ...e, [field]: null }));
-    markDirty();
-  }, [errors, markDirty]);
+  // ─── Validation (mirrors the backend course rules + readiness) ───────
+  // Now with exercise-block checks (instructions / options / items) so a
+  // broken exercise is never published silently.
+  const { validate, readiness } = useCourseValidation({ form, isExternal, isHt });
 
-  const handleModuleChange = useCallback((index, field, value) => {
-    setForm((f) => {
-      const modules = f.modules.map((m, i) => (i === index ? { ...m, [field]: value } : m));
-      return { ...f, modules };
-    });
-    markDirty();
-  }, [markDirty]);
-
-  const handleModuleBlocksChange = useCallback((index, blocks) => {
-    setForm((f) => {
-      const modules = f.modules.map((m, i) => (i === index ? { ...m, blocks } : m));
-      return { ...f, modules };
-    });
-    markDirty();
-  }, [markDirty]);
-
-  const addModule = useCallback(() => {
-    setForm((f) => ({ ...f, modules: [...f.modules, { title: '', description: '' }] }));
-    setSelected(form.modules.length);
-    markDirty();
-  }, [form.modules.length, markDirty]);
-
-  const removeModule = useCallback((index) => {
-    setForm((f) => ({ ...f, modules: f.modules.filter((_, i) => i !== index) }));
-    setSelected((cur) => (cur === index ? null : (cur > index ? cur - 1 : cur)));
-    markDirty();
-  }, [markDirty]);
-
-  const moveModule = useCallback((index, dir) => {
-    setForm((f) => {
-      const modules = [...f.modules];
-      const target = index + dir;
-      if (target < 0 || target >= modules.length) return f;
-      [modules[index], modules[target]] = [modules[target], modules[index]];
-      return { ...f, modules };
-    });
-    setSelected((cur) => (cur === index ? index + dir : cur));
-    markDirty();
-  }, [markDirty]);
-
-  // ─── HTML5 drag-and-drop module reordering (chevrons stay) ─────────
-  const dragModuleRef = useRef(null);
-  const [dragOverModule, setDragOverModule] = useState(null);
-  const dropModule = useCallback((target) => {
-    const src = dragModuleRef.current;
-    dragModuleRef.current = null;
-    setDragOverModule(null);
-    if (src == null || src === target) return;
-    setForm((f) => {
-      const modules = [...f.modules];
-      const [moved] = modules.splice(src, 1);
-      modules.splice(target, 0, moved);
-      return { ...f, modules };
-    });
-    setSelected((cur) => {
-      if (cur == null) return cur;
-      if (cur === src) return target;
-      if (src < cur && target >= cur) return cur - 1;
-      if (src > cur && target <= cur) return cur + 1;
-      return cur;
-    });
-    markDirty();
-  }, [markDirty]);
-
-  // ─── Copy a module's blocks into another module (reuse structure,
-  //     fresh block ids) — the fastest way to build a variation. ─────
-  const [copyFrom, setCopyFrom] = useState(null);
-  const copyBlocksToModule = useCallback((target) => {
-    if (copyFrom == null || copyFrom === target) return;
-    const src = form.modules[copyFrom]?.blocks || [];
-    if (src.length === 0) return;
-    setForm((f) => ({
-      ...f,
-      modules: f.modules.map((m, i) => (i === target
-        ? { ...m, blocks: [...(m.blocks || []), ...src.map((b) => ({ ...b, id: `${b.type}-${Date.now()}-copy` }))] }
-        : m)),
-    }));
-    setCopyFrom(null);
-    markDirty();
-  }, [copyFrom, form.modules, markDirty]);
-
-  // ─── Validation (mirrors the existing course rules + readiness) ──────
-  const validate = useCallback(() => {
-    const errs = {};
-    if (!form.title.trim()) errs.title = isHt ? 'Tit oblije' : 'Title required';
-    if (!form.description.trim() || form.description.trim().length < 20) {
-      errs.description = isHt
-        ? 'Deskripsyon an dwe gen 20 karaktè minimòm'
-        : 'Description must be at least 20 characters';
-    }
-    if (form.price && isNaN(Number(form.price))) {
-      errs.price = isHt ? 'Pri a pa valab' : 'Invalid price';
-    }
-    // External courses must point learners somewhere — a valid destination
-    // URL is the one thing that makes an external course real.
-    if (isExternal && !form.external_url.trim()) {
-      errs.external_url = isHt
-        ? 'Ajoute yon URL ekstèn (kote elèv yo ale pou aprann)'
-        : 'Add an external URL (where students go to learn)';
-    } else if (isExternal && form.external_url.trim() && !/^https?:\/\//i.test(form.external_url.trim())) {
-      errs.external_url = isHt ? 'URL la dwe kòmanse ak http(s)://' : 'The URL must start with http(s)://';
-    }
-    return errs;
-  }, [form.title, form.description, form.price, form.external_url, isExternal, isHt]);
-
-  // Validate every language-practice block in the syllabus so a broken
-  // exercise is never published silently. Each block problem maps to the
-  // module that owns it (target: module index) so [Fix] can jump there.
-  const blockReadiness = useCallback((modules) => {
-    const items = [];
-    (Array.isArray(modules) ? modules : []).forEach((m, mi) => {
-      (Array.isArray(m?.blocks) ? m.blocks : []).forEach((b) => {
-        if (!b || typeof b !== 'object') return;
-        const type = b.type;
-        const label = b.title || b.targetText || type;
-        const inModule = isHt ? ` (Modil ${mi + 1})` : ` (Module ${mi + 1})`;
-        if (type === 'repeat' || type === 'pronunciation' || type === 'vocabulary' || type === 'speaking') {
-          if (!String(b.targetText || '').trim()) {
-            items.push({
-              message: isHt
-                ? `Egzèsis ${label} bezwen yon tèks sib.${inModule}`
-                : `${label} needs a target text.${inModule}`,
-              target: `module-${mi}`,
-            });
-          }
-        }
-        if (type === 'listening' && !String(b.referenceAudio || '').trim()) {
-          items.push({
-            message: isHt
-              ? `${label} bezwen odyo referans.${inModule}`
-              : `${label} needs reference audio.${inModule}`,
-            target: `module-${mi}`,
-          });
-        }
-        if (type === 'conversation') {
-          const steps = Array.isArray(b.steps) ? b.steps : [];
-          if (steps.length === 0 || steps.some((s) => !String(s?.prompt || '').trim())) {
-            items.push({
-              message: isHt
-                ? `${label} bezwen omwen yon etap ak yon fraz.${inModule}`
-                : `${label} needs at least one step with a prompt.${inModule}`,
-              target: `module-${mi}`,
-            });
-          }
-        }
-      });
-    });
-    return items;
-  }, [isHt]);
-
-  const readiness = useCallback(() => {
-    const items = [];
-    if (!form.title.trim()) items.push({ message: isHt ? 'Ajoute yon tit' : 'Add a title', target: 'overview' });
-    if (!form.description.trim() || form.description.trim().length < 20) {
-      items.push({ message: isHt ? 'Ekri deskripsyon an (20+ karaktè)' : 'Write the description (20+ characters)', target: 'overview' });
-    }
-    if (!form.image_url.trim()) items.push({ message: isHt ? 'Ajoute yon imaj kouvèti' : 'Add a cover image', target: 'props' });
-    if (isExternal && !form.external_url.trim()) {
-      items.push({ message: isHt ? 'Ajoute URL kou ekstèn lan' : 'Add the external course URL', target: 'props' });
-    }
-    return items.concat(blockReadiness(form.modules));
-  }, [form.title, form.description, form.image_url, form.external_url, isExternal, form.modules, blockReadiness, isHt]);
-
-  // ─── Autosave with draft protection (Phase 5) ──────────────────────
-  const autosave = useAutosave({
-    id: savedId,
-    data: form,
-    onSave: async (data) => {
-      const payload = {
-        title: data.title.trim(),
-        short_description: data.short_description.trim(),
-        description: data.description.trim(),
-        tags: parseHashtags(data.hashtags),
-        price: data.price ? Number(data.price) : 0,
-        price_ltd: data.price_ltd ? Number(data.price_ltd) : 0,
-        category: data.category || '',
-        difficulty: data.difficulty || 'beginner',
-        teaching_language: data.teaching_language.trim(),
-        learner_language: data.learner_language.trim(),
-        learning_objective: data.learning_objective.trim(),
-        objectives: data.objectives.trim() ? data.objectives.trim().split('\n').filter(Boolean) : [],
-        target_audience: data.target_audience.trim(),
-        prerequisites: data.prerequisites.trim() ? data.prerequisites.trim().split('\n').filter(Boolean) : [],
-        estimated_duration: data.estimated_duration.trim(),
-        image_url: data.image_url.trim() || undefined,
-        video_url: data.video_url.trim() || undefined,
-        delivery_type: isExternal ? 'external' : 'online',
-        external_url: isExternal ? data.external_url.trim() : '',
-        external_format: isExternal ? data.external_format.trim() : '',
-        syllabus: data.modules.length > 0
-          ? data.modules.map((m) => ({
-              title: m.title.trim(),
-              description: m.description.trim(),
-              blocks: Array.isArray(m.blocks) ? m.blocks : [],
-            }))
-          : [],
-      };
-      if (savedIdRef.current) {
-        await courseService.update(savedIdRef.current, payload);
-      } else {
-        const res = await api.post('courses/', payload);
-        if (res.data?.id) {
-          savedIdRef.current = res.data.id;
-          setSavedId(res.data.id);
-          setHasSaved(true);
-        }
-      }
-    },
-    debounceMs: 2500,
-    draftKey: 'atelnyo-course-draft',
+  // ─── Persistence: autosave + explicit save + draft recovery ──────────
+  // Payload built once in buildCoursePayload (no more dual builders).
+  const { autosave, doSave, handleSave, handleRecoverDraft } = useCoursePersistence({
+    form, setForm,
+    savedId, setSavedId, savedIdRef, setHasSaved,
+    dirtyRef, clearDirty, setDirty,
+    saveState, setSaveState, setSaveError,
+    setErrors,
+    validate, isExternal, isHt, showToast, onSaved,
   });
 
-  // ─── Draft recovery ───────────────────────────────────────────────
-  const handleRecoverDraft = useCallback(() => {
-    const draft = autosave.recoverDraft();
-    if (draft) {
-      setForm(draft);
-      showToast?.(isHt ? '📋 Bouyon恢复!' : '📋 Draft recovered!', 'check-circle');
-    }
-  }, [autosave, isHt, showToast]);
-
-  // ─── Save — one function for create + update (existing endpoints) ────
-  const doSave = useCallback(async () => {
-    const errs = validate();
-    if (Object.keys(errs).length > 0) {
-      setErrors(errs);
-      setSaveState('dirty');
-      setSaveError(isHt ? 'Gen jaden ki pa konplè — tcheke yo anvan w sove.' : 'Some fields are incomplete — check them before saving.');
-      return false;
-    }
-    setErrors({});
-    setSaveState('saving');
-    const payload = {
-      title: form.title.trim(),
-      short_description: form.short_description.trim(),
-      description: form.description.trim(),
-      tags: parseHashtags(form.hashtags),
-      price: form.price ? Number(form.price) : 0,
-      price_ltd: form.price_ltd ? Number(form.price_ltd) : 0,
-      category: form.category || '',
-      difficulty: form.difficulty || 'beginner',
-      // Optional language-course metadata — empty strings are fine.
-      teaching_language: form.teaching_language.trim(),
-      learner_language: form.learner_language.trim(),
-      learning_objective: form.learning_objective.trim(),
-      // Extended course metadata (Phase 1 — Universal Course Studio)
-      objectives: form.objectives.trim() ? form.objectives.trim().split('\n').filter(Boolean) : [],
-      target_audience: form.target_audience.trim(),
-      prerequisites: form.prerequisites.trim() ? form.prerequisites.trim().split('\n').filter(Boolean) : [],
-      estimated_duration: form.estimated_duration.trim(),
-      image_url: form.image_url.trim() || undefined,
-      video_url: form.video_url.trim() || undefined,
-      completion_rules: form.completion_rules,
-      // Delivery model — online vs external (backend choices).
-      delivery_type: isExternal ? 'external' : 'online',
-      external_url: isExternal ? form.external_url.trim() : '',
-      external_format: isExternal ? form.external_format.trim() : '',
-      // The existing syllabus JSON — the course's content structure
-      // (optional for external courses — Atelnyo is the organizer,
-      // not the host). ``blocks`` (language-practice items) ride along
-      // inside each module entry — additive, never stripped.
-      syllabus: form.modules.length > 0
-        ? form.modules.map((m) => ({
-            title: m.title.trim(),
-            description: m.description.trim(),
-            blocks: Array.isArray(m.blocks) ? m.blocks : [],
-          }))
-        : [],
-    };
-    try {
-      let saved;
-      if (savedIdRef.current) {
-        saved = await courseService.update(savedIdRef.current, payload);
-      } else {
-        const res = await api.post('courses/', payload);
-        saved = res.data;
-      }
-      if (saved?.id) {
-        savedIdRef.current = saved.id;
-        setSavedId(saved.id);
-      }
-      setHasSaved(true);
-      dirtyRef.current = false;
-      setDirty(false);
-      setSaveState('saved');
-      setSaveError('');
-      onSaved?.();
-      return true;
-    } catch (err) {
-      const detail = err?.response?.data?.detail
-        || err?.response?.data?.title?.[0]
-        || err?.message
-        || (isHt ? 'Pa t kapab sove kou a.' : 'Could not save the course.');
-      setSaveState('error');
-      setSaveError(detail);
-      showToast?.(detail, 'circle-exclamation');
-      return false;
-    }
-  }, [form, validate, isHt, showToast, onSaved]);
-
-  // ─── Debounced autosave — only after the course exists ──────────────
-  useEffect(() => {
-    if (!dirtyRef.current || saveState === 'saving') return undefined;
-    if (!savedIdRef.current) return undefined; // first save is explicit
-    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
-    autoSaveTimer.current = setTimeout(() => {
-      setSaveState('dirty');
-      doSave();
-    }, 2200);
-    return () => {
-      if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
-    };
-  }, [form, saveState, doSave]);
-
-  // ─── Cleanup ─────────────────────────────────────────────────────────
-  useEffect(() => () => {
-    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
-  }, []);
-
-  const handleSave = useCallback(() => { doSave(); }, [doSave]);
-
-  // ─── Publish (draft → published) ────────────────────────────────────
-  // Courses are created as DRAFT (Creator Studio §25) and publishing is
-  // the explicit, validated action — a course is only public after
-  // POST /courses/<id>/publish/ passes the server-side gate. If the
-  // course hasn't been saved yet (fresh editor), save it first, then
-  // publish. Gate failures (title/description/cover/external URL) are
-  // surfaced so the creator can fix them inline.
-  const [publishing, setPublishing] = useState(false);
-  const handlePublish = useCallback(async () => {
-    if (publishing) return;
-    setPublishing(true);
-    try {
-      // A brand-new course must exist before it can be published.
-      if (!savedIdRef.current) {
-        const ok = await doSave();
-        if (!ok || !savedIdRef.current) {
-          setSaveError(isHt
-            ? 'Sove kou a anvan w pibliye l — gen jaden ki pa konplè.'
-            : 'Save the course before publishing — some fields are incomplete.');
-          setSaveState('error');
-          return;
-        }
-      }
-      const res = await courseService.publish(savedIdRef.current);
-      if (res?.data?.status === 'published') {
-        dirtyRef.current = false;
-        setDirty(false);
-        setSaveState('saved');
-        setSaveError('');
-        onSaved?.();
-        showToast?.(isHt ? '🚀 Kou pibliye! Vizitè yo ka wè l kounye a.' : '🚀 Course published! Visitors can see it now.', 'check-circle');
-        return;
-      }
-    } catch (err) {
-      const gate = err?.response?.data?.errors;
-      if (gate) {
-        // Server-side publish gate (§51) — surface each missing item.
-        const map = {
-          title: isHt ? 'Ajoute yon tit' : 'Add a title',
-          description: isHt ? 'Deskripsyon an dwe gen 20+ karaktè' : 'Description must be 20+ characters',
-          image_url: isHt ? 'Ajoute yon imaj kouvèti' : 'Add a cover image',
-          external_url: isHt ? 'Ajoute URL kou ekstèn lan' : 'Add the external course URL',
-        };
-        const missing = Object.keys(gate).map((k) => map[k] || gate[k]).join(' · ');
-        setSaveError(isHt
-          ? `Kou a pa pibliye — ${missing}.`
-          : `Course not published — ${missing}.`);
-        setSaveState('error');
-        showToast?.(isHt ? `Kou a pa pibliye — ${missing}.` : `Course not published — ${missing}.`, 'circle-exclamation');
-      } else {
-        const detail = err?.response?.data?.detail || err?.message
-          || (isHt ? 'Pa t kapab pibliye kou a.' : 'Could not publish the course.');
-        setSaveError(detail);
-        setSaveState('error');
-        showToast?.(detail, 'circle-exclamation');
-      }
-    } finally {
-      setPublishing(false);
-    }
-  }, [publishing, doSave, isHt, showToast]);
+  // ─── Publish (draft → published, explicit + validated) ───────────────
+  const { handlePublish } = useCoursePublish({
+    savedIdRef, doSave, isHt, showToast,
+    setSaveState, setSaveError, clearDirty, setDirty, onSaved,
+  });
 
   // ─── Live "View as Learner" preview ─────────────────────────────────
   // Renders the CURRENT editor state (unsaved changes included) with
@@ -743,7 +308,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'ht',
         )}
 
         {/* FAQ tab — always available for saved courses */}
-        {savedIdRef.current && (
+        {savedId && (
           <button
             type="button"
             className={`${styles.structureItem} ${selected === 'faq' ? styles.structureItemActive : ''}`}
@@ -1343,7 +908,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'ht',
             {isHt ? 'Sove kou a pou wè rapò kalite a.' : 'Save the course to see the quality report.'}
           </p>
         )}
-        {savedIdRef.current && (
+        {savedId && (
           <button type="button" className={styles.propsBtn} onClick={fetchQuality}>
             <i className="fas fa-refresh" /> {isHt ? 'Rechaje' : 'Refresh'}
           </button>

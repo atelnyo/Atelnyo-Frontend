@@ -1124,7 +1124,167 @@
   .practiceBtn { min-height: 48px; }
 }
 
+/* ─── ExerciseBlock v2 (theme-aware, replaces inline styles) ─────── */
+.exercise {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  background: var(--surface-card);
+  padding: var(--sp-3xl);
+  margin: var(--sp-2xl) 0;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 280px;
+}
+
+.exerciseHead { margin-bottom: var(--sp-lg); }
+
+.exerciseTitle {
+  margin: 0 0 var(--sp-sm);
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+}
+
+.exerciseTitle i { color: var(--color-primary); }
+
+.exerciseInstructions {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  font-size: var(--text-sm);
+}
+
+.exerciseHint {
+  margin: var(--sp-sm) 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.exerciseTextarea,
+.exerciseInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  font-family: inherit;
+  background: var(--surface-card-alt);
+  color: var(--text-primary);
+  resize: vertical;
+}
+
+.exerciseTextarea:focus,
+.exerciseInput:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+  border-color: var(--color-primary);
+}
+
+.exerciseOptions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-sm);
+}
+
+.exerciseOption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  background: var(--surface-card);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.exerciseOption:hover { border-color: var(--color-primary); }
+
+.exerciseOptionSelected {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-primary);
+}
+
+.exerciseOption input { accent-color: var(--color-primary); width: 18px; height: 18px; }
+
+.exerciseSpeaking {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-md);
+  padding: var(--sp-lg);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card-alt);
+}
+
+.exerciseLangNote {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  display: flex;
+  gap: var(--sp-sm);
+  align-items: flex-start;
+  line-height: 1.5;
+}
+
+.exerciseFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-md);
+  margin-top: var(--sp-lg);
+  flex-wrap: wrap;
+}
+
+.exerciseSaveState { font-size: var(--text-xs); color: var(--text-secondary); }
+
+.exerciseActions { display: flex; gap: 10px; align-items: center; }
+
+.exerciseSubmit {
+  padding: 8px 20px;
+  min-height: 40px;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+}
+
+.exerciseSubmit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.exerciseRetry {
+  padding: 8px 16px;
+  min-height: 40px;
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.exerciseRetry:hover { border-color: var(--color-primary); }
+
 @media (max-width: 480px) {
+  .exercise { padding: var(--sp-xl); }
+  .exerciseSubmit, .exerciseRetry { min-height: 48px; }
   .audioPlayer { flex-direction: column; align-items: flex-start; }
   .audioPlayerControl { width: 100%; height: 28px; min-width: 0; }
   .audioPlayerCompact { width: 100%; height: 24px; }

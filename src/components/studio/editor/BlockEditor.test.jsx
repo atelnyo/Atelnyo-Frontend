@@ -276,4 +276,50 @@ describe('BlockEditor', () => {
       expect(screen.getByTestId('quiz-editor')).toBeInTheDocument();
     });
   });
+
+  describe('exercise block editor (answerType + speaking)', () => {
+    const EXERCISE = { id: 'ex1', type: 'exercise', title: 'My Exercise', instructions: 'Di bonjou', answerType: 'text' };
+
+    function editExercise(block) {
+      render(<BlockEditor blocks={[block]} onBlocksChange={vi.fn()} lang="ht" />);
+      fireEvent.click(screen.getByText(block.title));
+    }
+
+    it('renders answer-type picker with the speaking options', () => {
+      editExercise(EXERCISE);
+      const select = screen.getByLabelText(/Kalite repons/);
+      const values = Array.from(select.querySelectorAll('option')).map((o) => o.value);
+      expect(values).toEqual(expect.arrayContaining(['text', 'speaking', 'audio_record', 'multiple_choice', 'checklist']));
+    });
+
+    it('hides options/items fields for text answers', () => {
+      editExercise(EXERCISE);
+      expect(screen.queryByLabelText(/Opsyon/)).not.toBeInTheDocument();
+      expect(screen.queryByLabelText(/Eleman/)).not.toBeInTheDocument();
+      expect(screen.queryByLabelText(/rekonesans/i)).not.toBeInTheDocument();
+    });
+
+    it('shows recognition language only for speaking answers', () => {
+      editExercise({ ...EXERCISE, answerType: 'speaking' });
+      expect(screen.getByLabelText(/rekonesans/i)).toBeInTheDocument();
+      expect(screen.queryByLabelText(/Opsyon/)).not.toBeInTheDocument();
+    });
+
+    it('shows options textarea for multiple_choice', () => {
+      editExercise({ ...EXERCISE, answerType: 'multiple_choice', options: ['Wi', 'Non'] });
+      expect(screen.getByLabelText(/Opsyon/)).toBeInTheDocument();
+    });
+
+    it('converts textarea lines to arrays on save', () => {
+      const onBlocksChange = vi.fn();
+      render(<BlockEditor blocks={[{ ...EXERCISE, answerType: 'multiple_choice' }]} onBlocksChange={onBlocksChange} lang="ht" />);
+      fireEvent.click(screen.getByText('My Exercise'));
+      fireEvent.change(screen.getByLabelText(/Opsyon/), { target: { value: 'Wi\nNon' } });
+      // NOTE: BlockEditor's t() args are flipped (t('Sove','Save') → 'Save'
+      // even in ht), so match the real label, not the convention.
+      fireEvent.click(screen.getByText('Save'));
+      const saved = onBlocksChange.mock.calls[0][0][0];
+      expect(saved.options).toEqual(['Wi', 'Non']);
+    });
+  });
 });

@@ -86,6 +86,23 @@ const BLOCK_FIELDS = {
     { key: 'description', label: { en: 'Description', ht: 'Deskripsyon' }, type: 'textarea', rows: 4 },
     { key: 'deliverables', label: { en: 'Deliverables (one per line)', ht: 'Livrab (yon pa lin)' }, type: 'textarea', rows: 3 },
   ],
+  exercise: [
+    { key: 'title', label: { en: 'Title', ht: 'Tit' }, type: 'text' },
+    { key: 'instructions', label: { en: 'Instructions', ht: 'Enstriksyon' }, type: 'textarea', rows: 3 },
+    { key: 'answerType', label: { en: 'Answer type', ht: 'Kalite repons' }, type: 'select', options: [
+      { value: 'text', label: '✏️ Text (short) / Tèks kout' },
+      { value: 'long_text', label: '📝 Text (long) / Tèks long' },
+      { value: 'number', label: '🔢 Number / Nonb' },
+      { value: 'multiple_choice', label: '🔘 Multiple choice / Chwa miltip' },
+      { value: 'checklist', label: '☑️ Checklist / Tcheklis' },
+      { value: 'speaking', label: '🎙️ Speaking (voice) / Pale (vwa)' },
+      { value: 'audio_record', label: '🎤 Audio record / Anrejistre odyo' },
+    ]},
+    { key: 'options', label: { en: 'Options (one per line — for multiple choice)', ht: 'Opsyon (yon pa lin — pou chwa miltip)' }, type: 'textarea', rows: 4, showWhen: { key: 'answerType', is: 'multiple_choice' } },
+    { key: 'items', label: { en: 'Items (one per line — for checklist)', ht: 'Eleman (yon pa lin — pou tcheklis)' }, type: 'textarea', rows: 4, showWhen: { key: 'answerType', is: 'checklist' } },
+    { key: 'recognitionLang', label: { en: 'Recognition language (e.g. fr-FR, en-US)', ht: 'Lang rekonesans (eg. fr-FR, en-US)' }, type: 'text', showWhen: { key: 'answerType', in: ['speaking', 'audio_record'] } },
+    { key: 'hint', label: { en: 'Hint (optional)', ht: 'Endikasyon (opsyonèl)' }, type: 'text' },
+  ],
   // Language practice types — share the same fields as LanguagePracticeEditor
   repeat: [
     { key: 'title', label: { en: 'Title', ht: 'Tit' }, type: 'text' },
@@ -279,8 +296,26 @@ export default function BlockEditor({ blocks = [], onBlocksChange, lang = 'ht', 
     const draftData = { ...block };
     // Matching pairs + checklist items now use dedicated editors
     // (work directly with block.pairs / block.items) — no JSON needed.
+    // Exercise options/items: the learner renders arrays, but the editor
+    // uses a one-per-line textarea — normalize array → string for editing.
+    for (const k of ['options', 'items']) {
+      if (Array.isArray(draftData[k])) {
+        draftData[k] = draftData[k].map((v) => (typeof v === 'string' ? v : v?.text || v?.label || '')).join('\n');
+      }
+    }
     setDraft(draftData);
     setPreviewMode(false);
+  }, []);
+
+  // Conditional field visibility (e.g. exercise options only for
+  // multiple_choice, recognitionLang only for speaking/audio_record).
+  const isFieldVisible = useCallback((field, data) => {
+    const cond = field.showWhen;
+    if (!cond) return true;
+    const cur = data?.[cond.key];
+    if (cond.in) return cond.in.includes(cur);
+    if (cond.is !== undefined) return cur === cond.is;
+    return true;
   }, []);
 
   const handleSave = useCallback(() => {
@@ -289,10 +324,24 @@ export default function BlockEditor({ blocks = [], onBlocksChange, lang = 'ht', 
     // Clean up any stale JSON fields from old editors
     delete finalDraft.pairsJson;
     delete finalDraft.itemsJson;
+    // Exercise options/items: textarea string → learner array.
+    for (const k of ['options', 'items']) {
+      if (typeof finalDraft[k] === 'string') {
+        const lines = finalDraft[k].split('\n').map((s) => s.trim()).filter(Boolean);
+        if (lines.length > 0) { finalDraft[k] = lines; }
+        else { delete finalDraft[k]; }
+      }
+    }
+    // Drop conditional leftovers (e.g. options kept when answerType
+    // switched from multiple_choice to text).
+    const visFields = BLOCK_FIELDS[draft.type] || [];
+    for (const f of visFields) {
+      if (f.showWhen && !isFieldVisible(f, finalDraft)) { delete finalDraft[f.key]; }
+    }
     onBlocksChange(blocks.map((b) => (b.id === editingId ? { ...b, ...finalDraft } : b)));
     setEditingId(null);
     setDraft({});
-  }, [editingId, draft, blocks, onBlocksChange]);
+  }, [editingId, draft, blocks, onBlocksChange, isFieldVisible]);
 
   const handleCancel = useCallback(() => {
     setEditingId(null);
@@ -521,7 +570,7 @@ export default function BlockEditor({ blocks = [], onBlocksChange, lang = 'ht', 
                   moduleIndex={moduleIndex}
                 />
               ) : (
-                fields.map((field) => (
+                fields.filter((field) => isFieldVisible(field, draft)).map((field) => (
                   <label key={field.key} className={styles.blockField}>
                     <span className={styles.blockFieldLabel}>{field.label[lang] || field.label.en}</span>
                     {field.type === 'textarea' ? (

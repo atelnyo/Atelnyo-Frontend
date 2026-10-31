@@ -84,7 +84,7 @@ const CATEGORY_MAP = {
   reflection: 'interactive',
 };
 
-export default function BlockRenderer({
+function BlockRendererInner({
   block,
   lang = 'ht',
   index = 0,
@@ -97,7 +97,44 @@ export default function BlockRenderer({
   // §17 — Error recovery
   onRetry,
 }) {
-  if (!block || !block.type) {
+  const blockType = block?.type || null;
+  const hasBlock = Boolean(block && blockType);
+
+  // §51-52 — Check if this block type has a lazy-loaded version
+  const LazyComponent = blockType ? LAZY_BLOCK_COMPONENTS[blockType] : null;
+  const EagerComponent = blockType ? getBlockComponent(blockType) : null;
+  const Component = LazyComponent || EagerComponent;
+
+  // §15 — Determine layout width
+  const layout = layoutOverride || (blockType ? getBlockDefaultLayout(blockType) : 'content');
+  const widthClass = WIDTH_CLASSES[layout] || WIDTH_CLASSES.content;
+
+  // §14-16 — Determine block category for vertical rhythm
+  const category = (blockType && CATEGORY_MAP[blockType]) || 'interactive';
+
+  // §45 — Block analytics: track view + completion (metadata only, no student answers)
+  // Hooks stay unconditional (before early returns) so hook order never shifts.
+  const { trackView, trackComplete } = useBlockAnalytics({
+    blockId: block?.id,
+    blockType,
+    courseId,
+    moduleIndex,
+  });
+
+  useEffect(() => { if (hasBlock && Component) { trackView(); } }, [trackView, hasBlock, Component]);
+
+  // Wrap onComplete so block components can call reportComplete()
+  // without arguments — we automatically inject the moduleIndex and
+  // block.id that ModuleSession.handleComplete expects.
+  const wrappedComplete = useCallback((...args) => {
+    trackComplete();
+    const mi = args[0] != null ? args[0] : moduleIndex;
+    const bid = args[1] || block?.id;
+    const btype = args[2] || blockType;
+    if (typeof onComplete === 'function') { onComplete(mi, bid, btype); }
+  }, [onComplete, moduleIndex, block, blockType, trackComplete]);
+
+  if (!hasBlock) {
     return (
       <div className="ls-block-placement ls-block-placement--content">
         <div className="ls-block-width ls-block-width--content" style={{ padding: 12, color: 'var(--text-secondary)', fontStyle: 'italic', fontSize: '0.85rem' }}>
@@ -107,13 +144,8 @@ export default function BlockRenderer({
     );
   }
 
-  // §51-52 — Check if this block type has a lazy-loaded version
-  const LazyComponent = LAZY_BLOCK_COMPONENTS[block.type];
-  const EagerComponent = getBlockComponent(block.type);
-  const Component = LazyComponent || EagerComponent;
-
   if (!Component) {
-    const meta = getBlockMeta(block.type);
+    const meta = getBlockMeta(blockType);
     return (
       <div className="ls-block-placement ls-block-placement--content">
         <div className="ls-block-width ls-block-width--content" style={{
@@ -121,7 +153,7 @@ export default function BlockRenderer({
           textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.85rem',
         }}>
           <i className={`fas ${meta.icon}`} style={{ fontSize: '1.2rem', marginBottom: 8, display: 'block', opacity: 0.5 }} aria-hidden="true" />
-          <div>{meta.label[lang] || meta.label.en || block.type}</div>
+          <div>{meta.label[lang] || meta.label.en || blockType}</div>
           <div style={{ fontSize: '0.75rem', marginTop: 4, opacity: 0.7 }}>
             {lang === 'ht' ? 'Kalite bloc sa a poko disponib.' : 'This block type is not yet available.'}
           </div>
@@ -130,36 +162,11 @@ export default function BlockRenderer({
     );
   }
 
-  // §15 — Determine layout width
-  const layout = layoutOverride || getBlockDefaultLayout(block.type);
-  const widthClass = WIDTH_CLASSES[layout] || WIDTH_CLASSES.content;
-
-  // §14-16 — Determine block category for vertical rhythm
-  const category = CATEGORY_MAP[block.type] || 'interactive';
-
-  // §45 — Block analytics: track view + completion (metadata only, no student answers)
-  const { trackView, trackComplete } = useBlockAnalytics({
-    blockId: block?.id,
-    blockType: block?.type,
-    courseId,
-    moduleIndex,
-  });
-
-  useEffect(() => { trackView(); }, [trackView]);
-
-  // Wrap onComplete so block components can call reportComplete()
-  // without arguments — we automatically inject the moduleIndex and
-  // block.id that ModuleSession.handleComplete expects.
-  const wrappedComplete = useCallback((...args) => {
-    trackComplete();
-    const mi = args[0] != null ? args[0] : moduleIndex;
-    const bid = args[1] || block?.id;
-    const btype = args[2] || block?.type;
-    onComplete(mi, bid, btype);
-  }, [onComplete, moduleIndex, block, trackComplete]);
-
   return (
-    <div className={`ls-block-placement ls-block-placement--${category}`}>
+    <div
+      className={`ls-block-placement ls-block-placement--${category}`}
+      style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 320px' }}
+    >
       <div className={`ls-block-width ${widthClass}`}>
         {/* §17 — Error isolation: wrap each block in its own error boundary */}
         <BlockErrorBoundary
@@ -197,3 +204,8 @@ export default function BlockRenderer({
     </div>
   );
 }
+
+// Memo: a lesson often renders 10+ blocks; without memo every keystroke
+// in one ExerciseBlock textarea re-rendered all siblings. Props are
+// stable (block object identity + primitives) so shallow compare is safe.
+export default React.memo(BlockRendererInner);

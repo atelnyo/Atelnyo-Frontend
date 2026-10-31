@@ -353,7 +353,7 @@ export const BLOCK_TYPES = {
     offlineMode: OFFLINE_MODE.WRITABLE,
     description: { en: 'Interactive exercise with autosave', ht: 'Egzèsis interaktif ak autosave' },
     validation: { required: ['instructions'] },
-    defaults: { instructions: '', answerType: 'text', portfolioSection: '' },
+    defaults: { instructions: '', answerType: 'text', portfolioSection: '', recognitionLang: '', hint: '' },
   },
   checklist: {
     icon: 'fa-list-check', label: { en: 'Checklist', ht: 'Tcheklis' },
