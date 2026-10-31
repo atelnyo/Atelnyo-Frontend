@@ -161,7 +161,7 @@ const Header = ({
             title="Admin Dashboard"
             aria-label="Admin Dashboard"
           >
-            <i className="fas fa-shield-halved" aria-hidden="true" />
+            <i className="fas fa-shield-alt" aria-hidden="true" />
           </button>
         )}
 
@@ -312,7 +312,7 @@ const Header = ({
                     className="header-dropdown-item"
                     onClick={() => { setProfileOpen(false); startTransition(() => navigate(SHEETS.ADMIN_DASHBOARD)); }}
                   >
-                    <i className="fas fa-shield-halved" />
+                    <i className="fas fa-shield-alt" />
                     <span>Admin Dashboard</span>
                   </button>
                 )}

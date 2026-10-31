@@ -88,7 +88,7 @@ const BottomNavBar = ({
           aria-current={location.pathname.startsWith('/sheet/admin') ? 'page' : undefined}
           aria-label="Admin Panel"
         >
-          <i className="fas fa-shield-halved" aria-hidden="true" />
+          <i className="fas fa-shield-alt" aria-hidden="true" />
           <span>Admin</span>
         </button>
       )}
