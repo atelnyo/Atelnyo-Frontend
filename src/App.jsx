@@ -366,6 +366,23 @@ function CmsPageLegacyRedirect() {
 }
 
 /**
+ * LegacySearchRedirect — old ``/sheet/search?q=`` → canonical ``/search?q=``.
+ *
+ * ``replace`` keeps the old URL out of history (so Back returns to the page
+ * the visitor came from), and ``location.search`` preserves the query,
+ * page, sort and advanced filters — a shared legacy link lands on the same
+ * results instead of an empty search page.
+ */
+function LegacySearchRedirect() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  useEffect(() => {
+    navigate(`${SHEETS.SEARCH}${location.search}`, { replace: true });
+  }, [location.search, navigate]);
+  return null;
+}
+
+/**
  * LocaleSync — applies URL locale intent to app state (spec §30).
  *
  * Cold loads are covered by App's lazy useState initializers and
@@ -1820,6 +1837,15 @@ function App() {
   // underneath the profile — a broken double render.
   // /store has its own header, footer and navigation, so the global chrome is hidden there.
   const isStoreRoute = effectivePathname === '/store' || effectivePathname.startsWith('/store/') || effectivePathname === '/account' || effectivePathname === '/store/login';
+  // The <Routes> tree is mounted AFTER .container in the DOM, so any page it
+  // renders can never sit above the <Footer/> — the footer would paint ON TOP
+  // of the page content (plus an empty 1000px white card and 140px of
+  // container padding). The container therefore belongs ONLY to the two paths
+  // whose content really renders inside <main>: the root tab surface ('/') and
+  // the 404 page. Every other route owns its own surface and keeps just the
+  // global <Header> + BottomNav. This is the general rule — /search was only
+  // the most visible instance of it.
+  const rendersInContentContainer = effectivePathname === '/' || effectivePathname === '/404';
   const isSheetRoute = effectivePathname === '/legal' || effectivePathname.startsWith('/sheet/') || effectivePathname.startsWith('/creator/') || effectivePathname.startsWith('/portfolio/') || effectivePathname.startsWith('/marketplace/') || effectivePathname.match(/^\/c\//) || effectivePathname.match(/^\/(@|%40)/i) || effectivePathname.startsWith('/legal/') || effectivePathname === '/themes' || effectivePathname === '/faq' || effectivePathname === '/help' || effectivePathname === '/about' || effectivePathname === '/trust' || effectivePathname === '/contact' || effectivePathname === '/accessibility' || effectivePathname === '/status' || effectivePathname === '/developers' || effectivePathname === '/verify' || effectivePathname.startsWith('/affiliate') || effectivePathname.startsWith('/page/') || effectivePathname.startsWith('/company/') || effectivePathname === '/business' || effectivePathname.startsWith('/business/') || effectivePathname === SHEETS.LOGIN || effectivePathname === SHEETS.SIGNUP || isContentRoutePath(effectivePathname) || effectivePathname === '/explore' || effectivePathname.startsWith('/explore/');
 
   // ─── Sheet isolation ────────────────────────────────────────────────
@@ -2404,7 +2430,12 @@ function App() {
           notifRefreshToken drives ActivityTimeline re-fetches on the
           full page. */}
 
-      {!isStoreRoute && <div className="container" role="presentation">
+      {/* Chrome container (empty <main> + <Footer/>) — ONLY for the pages
+          that actually render inside <main> (home + 404). See
+          rendersInContentContainer above for why every other route skips
+          it: <Routes> mounts after this block, so the footer would appear
+          above the page. */}
+      {!isStoreRoute && rendersInContentContainer && <div className="container" role="presentation">
         <main id="a11y-main-content" tabIndex="-1" aria-label={getA11yString(lang, 'contentLandmark')}>
           {/* Skip the chrome-rendered Explore when the URL is under /sheet/* —
               the sheet-routed <Explore> already covers /sheet/explore, and
@@ -3480,8 +3511,10 @@ function App() {
         {/* Search — URL-driven (?q=&page=) so the results are shareable
             and the skeleton paints the moment Enter is pressed. */}
         <Route path={SHEETS.SEARCH} element={<SearchRoute lang={lang} />} />
-        {/* Legacy alias — old /sheet/search links keep working. */}
-        <Route path="/sheet/search" element={<SearchRoute lang={lang} />} />
+        {/* Legacy alias — old /sheet/search links keep working, but they
+            redirect to the canonical /search (same query string) so the
+            page renders with the global header and no footer. */}
+        <Route path="/sheet/search" element={<LegacySearchRedirect />} />
         {/* Profile detail routes — prevents 404 when clicking cards
             on the Creator Public Profile. Placeholder until dedicated
             pages are built. */}
