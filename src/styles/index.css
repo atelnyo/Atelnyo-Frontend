@@ -5917,6 +5917,20 @@ body.dark-mode .auth-card {
   margin: 0 0 4px;
 }
 
+/* The auth card title is an h1#auth-title (not h2) — without this it
+   falls back to the browser default (~2em) and dominates the card. */
+#auth-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-primary, #1f2937);
+  margin: 0 0 4px;
+  line-height: 1.25;
+}
+
+body.dark-mode #auth-title {
+  color: var(--text-primary, #f1f5f9);
+}
+
 body.dark-mode .auth-card h2 {
   color: var(--text-primary, #f1f5f9);
 }
@@ -6589,7 +6603,15 @@ body.dark-mode .auth-mode-link.is-active {
     margin: auto 0;
   }
   .auth-card {
-    padding: 22px 18px;
+    padding: 18px 16px 16px;
+  }
+  /* Title + subtitle: desktop sizes overwhelm a 360px card. */
+  #auth-title {
+    font-size: 1.1rem;
+  }
+  .auth-card > p {
+    font-size: 0.82rem;
+    margin-bottom: 12px;
   }
   .auth-aside {
     padding: 12px 16px;
@@ -6604,16 +6626,63 @@ body.dark-mode .auth-mode-link.is-active {
   .auth-btn {
     min-height: 48px;
   }
+  /* Tabs: one line, equal widths, never wrap. The nav must not wrap
+     (that pushed the 3rd tab onto its own row and broke the card) and
+     each link takes exactly 1/3 of the row. Long Creole labels
+     ("Modpas ou bliye?") shrink via smaller type + tighter padding;
+     ellipsis is a last-resort safety net, not the layout. */
+  .auth-mode-nav {
+    flex-wrap: nowrap;
+    gap: 2px;
+    margin-bottom: 14px;
+  }
   .auth-mode-link {
-    min-height: 44px;
-    /* Creole labels are long ("Modpas ou bliye?") — let them wrap
-       instead of overflowing the tab on ~320px screens. min-width:0
-       on the base rule is what actually ALLOWS the shrink; without
-       it the min-content width of the nowrap label wins. */
-    white-space: normal;
-    font-size: 0.76rem;
-    line-height: 1.25;
-    padding: 6px 6px;
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 40px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.68rem;
+    line-height: 1.2;
+    padding: 6px 4px;
+  }
+  /* Form rhythm: the global .form-group margin (20px) stacks with the
+     .auth-form flex gap (14px) — kill the margin, tighten the gap so
+     the signup page stops feeling endless. */
+  .auth-form {
+    gap: 10px;
+  }
+  .auth-form .form-group {
+    margin-bottom: 0;
+  }
+  /* Labels: the global .form-group label rule (0.9rem) beats .auth-label
+     on specificity — this restores the intended compact size on phones. */
+  .auth-form .form-group label.auth-label {
+    font-size: 0.74rem;
+    margin-bottom: 4px;
+  }
+  /* Inputs: less padding, capped height. font-size stays 16px — iOS
+     Safari auto-zooms on focus for anything smaller. */
+  .auth-form input.form-control {
+    padding: 10px 12px;
+    max-height: 48px;
+  }
+  /* Submit: keep the 48px touch target, trim the padding. */
+  .auth-btn {
+    padding: 10px 16px;
+  }
+  .auth-footer {
+    margin-top: 10px;
+  }
+  .auth-provider-rows {
+    margin: 10px 0 2px;
+  }
+  .auth-strength {
+    margin-top: 5px;
+  }
+  .auth-pw-checklist {
+    margin-top: 4px;
   }
   /* Google GSI button: let it span the card so it's easy to tap. */
   .auth-google-btn,
