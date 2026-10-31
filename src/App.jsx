@@ -509,7 +509,17 @@ function SearchRoute({ lang }) {
   const q = (params.get('q') || '').trim();
   const page = Math.max(1, Number(params.get('page') || 1) || 1);
   const sort = params.get('sort') || 'relevance';
-  const key = `${q}|${page}|${sort}`;
+  // Every non-reserved param is an advanced filter (?price=free&level=…).
+  // Serialise them into the effect key so a filter change refetches while
+  // staying lint-safe (the object identity changes each render).
+  const extraFilters = {};
+  params.forEach((value, k) => {
+    if (!['q', 'page', 'page_size', 'sort', 'type'].includes(k) && value) {
+      extraFilters[k] = value;
+    }
+  });
+  const filterKey = JSON.stringify(extraFilters);
+  const key = `${q}|${page}|${sort}|${filterKey}`;
   // Derived loading: the effect only ever calls setState from async
   // callbacks, so no cascading synchronous render is triggered.
   const [result, setResult] = useState({ key: '', data: null });
@@ -519,7 +529,9 @@ function SearchRoute({ lang }) {
     if (!q) return undefined;
     let cancelled = false;
     const myKey = key;
-    api.get('search/', { params: { q, page, page_size: 20, sort } })
+    api.get('search/', {
+      params: { q, page, page_size: 20, sort, ...JSON.parse(filterKey) },
+    })
       .then((res) => {
         if (!cancelled) setResult({ key: myKey, data: res?.data || null });
       })
@@ -527,7 +539,7 @@ function SearchRoute({ lang }) {
         if (!cancelled) setResult({ key: myKey, data: null });
       });
     return () => { cancelled = true; };
-  }, [key, q, page, sort]);
+  }, [key, q, page, sort, filterKey]);
 
   const data = result.key === key ? result.data : null;
   const results = data?.results || [];

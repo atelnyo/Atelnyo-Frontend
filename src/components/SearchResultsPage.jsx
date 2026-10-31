@@ -22,7 +22,7 @@
  *     lang="en"
  *   />
  */
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import useSafeNavigate from '../hooks/useSafeNavigate';
 import api from '../services/api';
@@ -49,6 +49,24 @@ const MODULE_ICONS = {
   event: { icon: 'fa-calendar-alt', color: 'var(--state-error, #e74c3c)', bg: 'var(--severity-high-bg, rgba(231,76,60,0.13))', label: 'Event' },
   user: { icon: 'fa-user', color: 'var(--text-secondary, #95a5a6)', bg: 'var(--state-neutral-bg, rgba(149,165,166,0.13))', label: 'Person' },
 };
+
+// Result type (singular, what a card carries) → module key (plural, what
+// /api/search/filters/ and ?types= use).
+const MODULE_FOR_TYPE = {
+  course: 'courses',
+  creator: 'creators',
+  music: 'music',
+  talent: 'talents',
+  community: 'communities',
+  job: 'jobs',
+  portfolio: 'portfolio',
+  product: 'products',
+  event: 'events',
+};
+
+// Query params owned by the page itself — everything else in the URL is
+// an advanced filter (?price=free&level=beginner) forwarded to the API.
+const RESERVED_PARAMS = new Set(['q', 'page', 'page_size', 'sort', 'type']);
 
 const SearchResultsPage = ({
   query,
@@ -89,6 +107,12 @@ const SearchResultsPage = ({
     view: lang === 'ht' ? 'Wè' : 'View',
     filters: lang === 'ht' ? 'Filtè' : 'Filters',
     clear_filters: lang === 'ht' ? 'Retire filtè' : 'Clear filters',
+    choose_type_hint: lang === 'ht'
+      ? 'Chwazi yon tip anwo a pou wè filtè avanse li.'
+      : 'Pick a type above to see its advanced filters.',
+    no_adv_filters: lang === 'ht'
+      ? 'Pa gen filtè avanse pou tip sa a.'
+      : 'No advanced filters for this type.',
     categories: lang === 'ht' ? 'Kategori' : 'Categories',
     all: lang === 'ht' ? 'Tout' : 'All',
     loading: lang === 'ht' ? 'Ap chaje...' : 'Loading...',
@@ -120,12 +144,45 @@ const SearchResultsPage = ({
     }
   }, [navigate]);
 
-  const hasActiveFilters = Boolean(activeTypeFilter) || sortBy !== 'relevance';
+  // ─── Advanced filters (backend MODULE_FILTERS catalogue) ──────────
+  // The vocabulary comes from /api/search/filters/ so price/level/kind
+  // can never drift from what the API actually filters on. Values live
+  // in the URL (like q/sort/type), so a shared link reproduces the exact
+  // filtered search and Back/Forward restores it.
+  const [filterSchema, setFilterSchema] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    api.get('search/filters/')
+      .then((res) => { if (alive) setFilterSchema(res?.data?.modules || {}); })
+      .catch(() => { if (alive) setFilterSchema({}); });
+    return () => { alive = false; };
+  }, []);
+
+  const activeFilters = useMemo(() => {
+    const out = {};
+    searchParams.forEach((value, key) => {
+      if (!RESERVED_PARAMS.has(key) && value) out[key] = value;
+    });
+    return out;
+  }, [searchParams]);
+
+  const activeModuleKey = activeTypeFilter ? MODULE_FOR_TYPE[activeTypeFilter] : null;
+  const moduleFilters = (filterSchema && activeModuleKey && filterSchema[activeModuleKey]) || {};
+
+  const hasActiveFilters = Boolean(activeTypeFilter) || sortBy !== 'relevance'
+    || Object.keys(activeFilters).length > 0;
 
   const clearFilters = useCallback(() => {
     const next = new URLSearchParams(searchParams);
-    next.delete('type');
-    next.delete('sort');
+    ['type', 'sort', 'page'].forEach((key) => next.delete(key));
+    Object.keys(activeFilters).forEach((key) => next.delete(key));
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams, activeFilters]);
+
+  const setFilterValue = useCallback((key, value) => {
+    const next = new URLSearchParams(searchParams);
+    if (value) next.set(key, value); else next.delete(key);
+    next.delete('page');
     setSearchParams(next, { replace: true });
   }, [searchParams, setSearchParams]);
 
@@ -316,6 +373,47 @@ const SearchResultsPage = ({
           </button>
         )}
       </div>
+
+      {/* Advanced filters — per-module vocabulary. Shown only once a
+          type chip is active so price/level/kind never mix across types. */}
+      {showFilters && (
+        <div className="srp-adv-filters" role="group" aria-label={t.filters}>
+          {!activeTypeFilter ? (
+            <p className="srp-adv-hint">{t.choose_type_hint}</p>
+          ) : Object.keys(moduleFilters).length === 0 ? (
+            <p className="srp-adv-hint">{t.no_adv_filters}</p>
+          ) : (
+            Object.entries(moduleFilters).map(([key, cfg]) => (
+              <label key={key} className="srp-adv-field">
+                <span>{key.replace(/_/g, ' ')}</span>
+                {cfg.type === 'choice' || cfg.type === 'boolean' ? (
+                  <select
+                    value={activeFilters[key] || ''}
+                    onChange={(e) => setFilterValue(key, e.target.value)}
+                  >
+                    <option value="">{t.all}</option>
+                    {(cfg.type === 'boolean' ? ['true', 'false'] : (cfg.choices || [])).map((choice) => (
+                      <option key={choice} value={choice}>{choice}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type={cfg.type === 'number' ? 'number' : 'text'}
+                    defaultValue={activeFilters[key] || ''}
+                    onBlur={(e) => setFilterValue(key, e.target.value.trim())}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        setFilterValue(key, e.currentTarget.value.trim());
+                      }
+                    }}
+                  />
+                )}
+              </label>
+            ))
+          )}
+        </div>
+      )}
 
       {/* Results Grid */}
       <div className="srp-results-grid">
