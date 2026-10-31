@@ -910,7 +910,7 @@ function ActivityModal({ user, onClose, showToast, lang }) {
 // UserCard
 // ═══════════════════════════════════════════════════════════════════════
 
-function UserCard({ user, onGrant, onRevoke, onHistory, onChangePlan, onChangePassword, onManageRoles, onActivity, onDeactivate, onActivate, onSuspend, onBan, onRestore, onForceLogout, canManageBilling, canManageRoles, canManageUsers, canDeactivate, canReactivate, canBan, canForceLogout }) {
+function UserCard({ user, onGrant, onRevoke, onHistory, onChangePlan, onChangePassword, onManageRoles, onActivity, onDeactivate, onActivate, onSuspend, onBan, onRestore, onForceLogout, onDelete, canManageBilling, canManageRoles, canManageUsers, canDeactivate, canReactivate, canBan, canForceLogout }) {
   return (
     <div className={classNames('aum-card', user.is_premium && 'aum-card-premium')}>
       <div className="aum-card-top">
@@ -1077,6 +1077,16 @@ function UserCard({ user, onGrant, onRevoke, onHistory, onChangePlan, onChangePa
               <i className="fas fa-user-check" aria-hidden="true" /> Reactivate
             </button>
           )
+        )}
+        {canBan && (
+          <button
+            type="button"
+            className="aum-btn aum-btn-danger"
+            onClick={() => onDelete?.(user)}
+            title={user?.username ? `Siprime ${user.username} + voye rezon` : 'Delete user'}
+          >
+            <i className="fas fa-trash" aria-hidden="true" /> Delete
+          </button>
         )}
       </div>
     </div>
@@ -1265,6 +1275,9 @@ export default function AdminUserManagement({ lang = 'ht', showToast, user, onNa
   const [forceLogoutTarget, setForceLogoutTarget] = useState(null);
   const [forceLogoutReason, setForceLogoutReason] = useState('');
   const [forceLogouting, setForceLogouting] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleteReason, setDeleteReason] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   // ─── Admin gate ────────────────────────────────────────────────
   const { isAdmin, loading: permsLoading } = useHasAdminAccess();
@@ -1449,6 +1462,28 @@ export default function AdminUserManagement({ lang = 'ht', showToast, user, onNa
     }
   }, [restoreTarget, restoreReason, isHt, showToast, fetchUsers]);
 
+  // ─── Delete user confirm (admin tout pouvwa + notifye rezon) ───
+  const handleDeleteUser = useCallback(async (e) => {
+    e?.preventDefault?.();
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await adminUserService.deleteUser(deleteTarget.id, deleteReason.trim());
+      showToast?.(
+        isHt ? `🗑️ ${deleteTarget.username} kont siprime + notifye.` : `🗑️ ${deleteTarget.username} deleted + notified.`,
+        'trash',
+      );
+      setDeleteTarget(null);
+      setDeleteReason('');
+      fetchUsers();
+    } catch (err) {
+      const detail = err?.response?.data?.error || err?.message || 'Delete failed.';
+      showToast?.(detail, 'circle-exclamation');
+    } finally {
+      setDeleting(false);
+    }
+  }, [deleteTarget, deleteReason, isHt, showToast, fetchUsers]);
+
   // ─── Force Logout confirm ─────────────────────────────────────
   const handleForceLogout = useCallback(async (e) => {
     e?.preventDefault?.();
@@ -1619,6 +1654,7 @@ export default function AdminUserManagement({ lang = 'ht', showToast, user, onNa
                 onBan={setBanTarget}
                 onRestore={setRestoreTarget}
                 onForceLogout={setForceLogoutTarget}
+                onDelete={setDeleteTarget}
                 canDeactivate={canDeactivate}
                 canReactivate={canReactivate}
               />
@@ -1723,6 +1759,68 @@ export default function AdminUserManagement({ lang = 'ht', showToast, user, onNa
           onClose={() => setActivityTarget(null)}
           showToast={showToast}
         />
+      )}
+
+      {/* Delete User Confirm Modal — admin tout pouvwa + rezon notifye */}
+      {deleteTarget && (
+        <div
+          className="aum-modal-backdrop"
+          onClick={(e) => { if (e.target === e.currentTarget) setDeleteTarget(null); }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Delete user"
+        >
+          <div className="aum-modal aum-modal-narrow" onClick={(e) => e.stopPropagation()}>
+            <div className="aum-modal-header">
+              <div>
+                <h3 className="aum-modal-title">
+                  <i className="fas fa-trash" aria-hidden="true" />
+                  {' '}{isHt ? 'Siprime Itilizatè' : 'Delete User'}
+                </h3>
+                <p className="aum-modal-subtitle">
+                  {deleteTarget.username} · {deleteTarget.email || '—'}
+                </p>
+              </div>
+              <button type="button" className="aum-modal-close" onClick={() => setDeleteTarget(null)} aria-label="Close">
+                <i className="fas fa-times" aria-hidden="true" />
+              </button>
+            </div>
+
+            <form onSubmit={handleDeleteUser} className="aum-form">
+              <p className="aum-revoke-warning">
+                <i className="fas fa-exclamation-triangle" aria-hidden="true" />
+                {' '}
+                {isHt
+                  ? 'Sa a ap siprime kont lan (dezaktive + revoke sesyon) epi voye rezon an bay itilizatè a kòm notifikasyon.'
+                  : 'This deletes the account (deactivate + revoke sessions) and notifies the user with your reason.'}
+              </p>
+
+              <label className="aum-field">
+                <span className="aum-field-label">{isHt ? 'Rezon (voye bay user)' : 'Reason (sent to user)'}</span>
+                <input
+                  className="aum-input"
+                  type="text"
+                  value={deleteReason}
+                  onChange={(e) => setDeleteReason(e.target.value)}
+                  placeholder={isHt ? 'Ex: vyolasyon règleman...' : 'Ex: policy violation...'}
+                />
+              </label>
+
+              <div className="aum-actions">
+                <button type="button" className="aum-btn-secondary" onClick={() => setDeleteTarget(null)} disabled={deleting}>
+                  {isHt ? 'Anile' : 'Cancel'}
+                </button>
+                <button type="submit" className="aum-btn-danger-solid" disabled={deleting}>
+                  {deleting ? (
+                    <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {isHt ? 'Ap siprime...' : 'Deleting...'}</>
+                  ) : (
+                    <><i className="fas fa-trash" aria-hidden="true" /> {isHt ? 'Konfime Sipresyon' : 'Confirm Delete'}</>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
       {/* Deactivate Confirm Modal */}

@@ -2025,6 +2025,10 @@ export const adminUserService = {
       reason: reason || 'force_logout',
       ...(deviceJti ? { device_jti: deviceJti } : {}),
     }),
+  // POST /api/admin/users/<id>/delete_user/  { reason? }
+  // Admin tout pouvwa: dezaktive kont + notifye itilizatè a.
+  deleteUser: (id, reason) =>
+    api.post(`admin/users/${id}/delete_user/`, { reason: reason || '' }),
 };
 
 // ─── Media Provider Center (Phase 53) ─────────────────────────────────
@@ -2094,6 +2098,20 @@ export const creatorProfileService = {
     api.post(`creator-profiles/${encodeURIComponent(slug)}/tip/`, { amount, message }),
   bookService: (slug, { service_name, description, preferred_date }) =>
     api.post(`creator-profiles/${encodeURIComponent(slug)}/book-service/`, { service_name, description, preferred_date }),
+  // DELETE /api/creator-profiles/<slug>/posts/<post_slug>/ { reason? }
+  // Admin ka siprime nenpòt post + voye rezon bay otè a.
+  deletePost: (slug, postSlug, reason) =>
+    api.delete(`creator-profiles/${encodeURIComponent(slug)}/posts/${encodeURIComponent(postSlug)}/`, {
+      data: { reason: reason || '' },
+    }),
+  // ─── Admin creator posts (lis konplè — pa bezwen kole slug alamen) ─
+  // GET /api/admin/creator-posts/?search=&page=&page_size=
+  // DELETE /api/admin/creator-posts/<post_slug>/ { reason? }
+  adminList: (params) => api.get('admin/creator-posts/', { params }),
+  adminDelete: (postSlug, reason) =>
+    api.delete(`admin/creator-posts/${encodeURIComponent(postSlug)}/`, {
+      data: { reason: reason || '' },
+    }),
   // ─── Affiliate & Campaigns ──────────────────────────────────────
   affiliateStatus: (slug) => api.get(`creator-profiles/${encodeURIComponent(slug)}/affiliate-status/`),
   campaigns: (slug) => api.get(`creator-profiles/${encodeURIComponent(slug)}/campaigns/`),

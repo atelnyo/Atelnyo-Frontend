@@ -297,6 +297,55 @@ export function Explore({
     return saved.filter || 'all';
   });
 
+  // ─── Responsive chip rail ─────────────────────────────────────────────
+  // 12 filter chips cannot fit one row on a phone, so the rail swipes
+  // horizontally — but a scrollbar-less row gives no hint that more chips
+  // sit off-screen. Below 900px we add edge arrows + a fade on whichever
+  // side still has chips; from 900px up CSS wraps the rail into rows, so
+  // every chip is visible and no scrolling is needed at all.
+  const chipsRef = useRef(null);
+  const [chipsScroll, setChipsScroll] = useState({ prev: false, next: false });
+
+  const syncChipsScroll = useCallback(() => {
+    const el = chipsRef.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    setChipsScroll({
+      prev: el.scrollLeft > 4,
+      next: max > 4 && el.scrollLeft < max - 4,
+    });
+  }, []);
+
+  useEffect(() => {
+    const el = chipsRef.current;
+    if (!el) return undefined;
+    syncChipsScroll();
+    el.addEventListener('scroll', syncChipsScroll, { passive: true });
+    window.addEventListener('resize', syncChipsScroll);
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(syncChipsScroll) : null;
+    if (ro) ro.observe(el);
+    return () => {
+      el.removeEventListener('scroll', syncChipsScroll);
+      window.removeEventListener('resize', syncChipsScroll);
+      if (ro) ro.disconnect();
+    };
+  }, [syncChipsScroll]);
+
+  // Deep links (?filter=spotlight) and chip taps keep the selected chip
+  // centred. block:'nearest' stops this from scrolling the page vertically.
+  useEffect(() => {
+    const el = chipsRef.current;
+    if (!el) return;
+    const active = el.querySelector('.explore-chip.active');
+    if (active) active.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+  }, [filter]);
+
+  const scrollChips = useCallback((dir) => {
+    const el = chipsRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * Math.max(140, el.clientWidth * 0.7), behavior: 'smooth' });
+  }, []);
+
   // Keep the URL in sync with user-driven changes. `replace: true` keeps
   // the history stack shallow (filter toggling shouldn't spawn 8 entries).
   useEffect(() => {
@@ -1937,21 +1986,55 @@ export function Explore({
         </div>
       </nav>
 
-      {/* Filter chips */}
-      <div className="explore-chips" role="tablist" aria-label={t.explore_filter_aria || 'Explore filter'}>
-        {CHIPS.map((chip) => (
-          <button
-            type="button"
-            key={chip.id}
-            role="tab"
-            aria-selected={filter === chip.id}
-            className={classNames('explore-chip', filter === chip.id && 'active')}
-            onClick={() => { setFilter(chip.id); if (chip.id === 'all' || chip.id === 'featured' || chip.id === 'new') { window.history.replaceState(null, '', window.location.pathname + window.location.search); window.scrollTo({ top: 0, behavior: 'smooth' }); } else { window.location.hash = `explore-${chip.id}`; } }}
-          >
-            <i className={`fas ${chip.icon}`} aria-hidden="true" />
-            <span>{getChipLabel(chip, lang)}</span>
-          </button>
-        ))}
+      {/* Filter chips — wraps into rows on desktop/tablet; on phones the
+          rail swipes and both edge arrows make that discoverable. */}
+      <div className={classNames(
+        'explore-chips-wrap',
+        chipsScroll.prev && 'has-prev',
+        chipsScroll.next && 'has-next',
+        !chipsScroll.prev && !chipsScroll.next && 'is-static',
+      )}>
+        <button
+          type="button"
+          className="explore-chips-nav explore-chips-nav--prev"
+          onClick={() => scrollChips(-1)}
+          disabled={!chipsScroll.prev}
+          aria-label={lang === 'ht' ? 'Filtè anvan yo' : 'Previous filters'}
+          aria-controls="explore-chips-rail"
+        >
+          <i className="fas fa-chevron-left" aria-hidden="true" />
+        </button>
+        <div
+          className="explore-chips"
+          id="explore-chips-rail"
+          ref={chipsRef}
+          role="tablist"
+          aria-label={t.explore_filter_aria || 'Explore filter'}
+        >
+          {CHIPS.map((chip) => (
+            <button
+              type="button"
+              key={chip.id}
+              role="tab"
+              aria-selected={filter === chip.id}
+              className={classNames('explore-chip', filter === chip.id && 'active')}
+              onClick={() => { setFilter(chip.id); if (chip.id === 'all' || chip.id === 'featured' || chip.id === 'new') { window.history.replaceState(null, '', window.location.pathname + window.location.search); window.scrollTo({ top: 0, behavior: 'smooth' }); } else { window.location.hash = `explore-${chip.id}`; } }}
+            >
+              <i className={`fas ${chip.icon}`} aria-hidden="true" />
+              <span>{getChipLabel(chip, lang)}</span>
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          className="explore-chips-nav explore-chips-nav--next"
+          onClick={() => scrollChips(1)}
+          disabled={!chipsScroll.next}
+          aria-label={lang === 'ht' ? 'Plis filtè' : 'More filters'}
+          aria-controls="explore-chips-rail"
+        >
+          <i className="fas fa-chevron-right" aria-hidden="true" />
+        </button>
       </div>
 
       {/* Active-filter summary — tells the user what is narrowing the

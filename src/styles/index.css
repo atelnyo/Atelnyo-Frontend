@@ -9202,15 +9202,97 @@ body.fx-matrix main {
 }
 .explore-search-clear:hover { color: var(--pink-primary, #d81b60); }
 
+/* ─── Responsive filter chips ─────────────────────────────────────────
+   Desktop/tablet (≥900px): the 12 chips WRAP into rows, so no chip is
+   ever parked off-screen behind a scroll. Phones (< 900px): one swipeable
+   row flanked by arrow buttons, because a scrollbar-less row gives no
+   hint that more chips exist to the right (and none to the left once you
+   swipe). The fade only appears on the side that still has chips. */
+.explore-chips-wrap {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  position: relative;
+}
 .explore-chips {
   display: flex; gap: 8px; overflow-x: auto;
+  flex: 1 1 auto; min-width: 0;
   padding: 8px 4px 12px;
   scrollbar-width: none;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-x pan-y;
+  scroll-behavior: smooth;
 }
 .explore-chips::-webkit-scrollbar { display: none; }
+
+.explore-chips-nav {
+  display: none; /* shown only on the swipe layout, see the media query */
+  flex: 0 0 auto;
+  align-items: center; justify-content: center;
+  width: 30px; height: 30px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(216, 27, 96, 0.2);
+  background: var(--card-bg, #fff);
+  color: var(--pink-primary, #d81b60);
+  font-size: 0.7rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.explore-chips-nav:hover:not(:disabled) {
+  border-color: var(--pink-primary, #d81b60);
+}
+/* An arrow with nothing to scroll to is hidden (space kept, so the rail
+   never jumps) instead of showing a dimmed dead button. */
+.explore-chips-nav:disabled {
+  visibility: hidden;
+  pointer-events: none;
+  box-shadow: none;
+}
+
+/* Narrow phones: tighten the chips so a third one fits beside the arrows. */
+@media (max-width: 400px) {
+  .explore-chip { padding: 7px 11px; font-size: 0.8rem; gap: 5px; }
+  .explore-chips { gap: 6px; }
+  .explore-chips-nav { width: 28px; height: 28px; }
+}
+body.dark-mode .explore-chips-nav {
+  background: var(--card-bg, #1e1e24);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: none;
+}
+
+/* Edge fade on the scrollable side only. */
+.explore-chips-wrap.has-prev .explore-chips {
+  mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 100%);
+}
+.explore-chips-wrap.has-next .explore-chips {
+  mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 16px), transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 16px), transparent 100%);
+}
+.explore-chips-wrap.has-prev.has-next .explore-chips {
+  mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
+}
+
+@media (max-width: 899px) {
+  .explore-chips-wrap .explore-chips-nav { display: inline-flex; }
+  /* A rail that fits needs no arrows at all. */
+  .explore-chips-wrap.is-static .explore-chips-nav { display: none; }
+}
+
+@media (min-width: 900px) {
+  .explore-chips {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    row-gap: 8px;
+    scroll-behavior: auto;
+  }
+}
 .explore-chip {
   display: inline-flex; align-items: center; gap: 6px;
   flex: 0 0 auto;

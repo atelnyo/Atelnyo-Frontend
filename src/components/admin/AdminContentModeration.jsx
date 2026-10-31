@@ -11,7 +11,8 @@
  */
 import { useEffect, useState, useCallback } from 'react';
 import { useHasAdminAccess } from '../../hooks/useHasAdminAccess';
-import { adminMediaService } from '../../services/api';
+import { adminMediaService, creatorProfileService } from '../../services/api';
+import { useRoleGate } from '../../hooks/useRoleGate';
 
 const MOD_STATUSES = [
   { key: '', label: 'All', icon: 'fa-list', color: 'var(--text-secondary, #64748b)' },
@@ -64,6 +65,15 @@ export default function AdminContentModeration({ lang = 'ht', showToast, user, o
   const [loading, setLoading] = useState(true);
   const [reason, setReason] = useState('');
   const [actionModal, setActionModal] = useState(null);
+  // Admin siprime nenpòt creator post + rezon notifye otè a (lis konplè)
+  const modGate = useRoleGate('can_resolve_reports');
+  const canModeratePosts = modGate.allowed === true || user?.is_superuser === true;
+  const [posts, setPosts] = useState([]);
+  const [postTotal, setPostTotal] = useState(0);
+  const [postSearch, setPostSearch] = useState('');
+  const [postReason, setPostReason] = useState('');
+  const [postsLoading, setPostsLoading] = useState(false);
+  const [deletingSlug, setDeletingSlug] = useState('');
 
   useEffect(() => {
     if (user && !permsLoading && !hasStaffAccess) {
@@ -82,7 +92,45 @@ export default function AdminContentModeration({ lang = 'ht', showToast, user, o
     } finally { setLoading(false); }
   }, [statusFilter]);
 
-  useEffect(() => { if (hasStaffAccess) fetchItems(); }, [fetchItems, hasStaffAccess]);
+  useEffect(() => { if (hasStaffAccess) { fetchItems(); } }, [fetchItems, hasStaffAccess]);
+
+  // Lis konplè post yo — pa bezwen kole slug alamen.
+  const fetchPosts = useCallback(async () => {
+    if (!canModeratePosts) return;
+    setPostsLoading(true);
+    try {
+      const res = await creatorProfileService.adminList({
+        ...(postSearch.trim() ? { search: postSearch.trim() } : {}),
+        page_size: 20,
+      });
+      setPosts(res.data?.results || []);
+      setPostTotal(res.data?.count || 0);
+    } catch {
+      showToast?.(isHt ? 'Pa kapab chaje post yo.' : 'Failed to load posts.', 'exclamation-triangle');
+    } finally { setPostsLoading(false); }
+  }, [canModeratePosts, postSearch, isHt, showToast]);
+
+  // Post yo chaje sou demann (bouton Chaje) pou evite setState-in-effect.
+  // Pa auto-fetch isit la — lint entèdi setState synchrone nan effect.
+
+  const handleDeletePostRow = async (post) => {
+    if (!post?.slug) return;
+    const ok = window.confirm(
+      isHt
+        ? `Siprime post @${post.author_username} (${post.slug})? Otè a ap resevwa rezon an.`
+        : `Delete post @${post.author_username} (${post.slug})? Author will be notified.`,
+    );
+    if (!ok) return;
+    setDeletingSlug(post.slug);
+    try {
+      await creatorProfileService.adminDelete(post.slug, postReason.trim());
+      showToast?.(isHt ? '🗑️ Post siprime + otè a notifye.' : '🗑️ Post deleted + author notified.', 'trash');
+      setPostReason('');
+      fetchPosts();
+    } catch (err) {
+      showToast?.(err?.response?.data?.error || (isHt ? 'Erè siprime post.' : 'Delete post failed.'), 'exclamation-triangle');
+    } finally { setDeletingSlug(''); }
+  };
 
   const handleModerate = async (id, status, reason) => {
     try {
@@ -110,6 +158,40 @@ export default function AdminContentModeration({ lang = 'ht', showToast, user, o
         </div>
         <button type="button" className="acm-btn" onClick={fetchItems}><i className="fas fa-sync" /> {isHt ? 'Rafrechi' : 'Refresh'}</button>
       </div>
+
+      {canModeratePosts && (
+        <div className="acm-filters" style={{ marginBottom: 12, flexDirection: 'column', alignItems: 'stretch', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+            <strong style={{ fontSize: '.85rem' }}>
+              {isHt ? `Post kreyatè yo (${postTotal}) — admin ka siprime nenpòt:` : `Creator posts (${postTotal}) — admin can delete any:`}
+            </strong>
+            <input type="text" value={postSearch} onChange={(e) => setPostSearch(e.target.value)} placeholder={isHt ? 'Chèche tèks oswa @user...' : 'Search text or @user...'} aria-label="search posts" style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border-color)', fontSize: '.82rem', minWidth: 200 }} />
+            <input type="text" value={postReason} onChange={(e) => setPostReason(e.target.value)} placeholder={isHt ? 'Rezon (voye bay otè)' : 'Reason (sent to author)'} aria-label="reason" style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border-color)', fontSize: '.82rem', minWidth: 220 }} />
+            <button type="button" className="acm-btn" onClick={fetchPosts} disabled={postsLoading}>
+              <i className="fas fa-sync" /> {isHt ? 'Chaje' : 'Load'}
+            </button>
+          </div>
+          {postsLoading ? (
+            <div className="acm-loading"><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap chaje post...' : 'Loading posts...'}</div>
+          ) : posts.length === 0 ? (
+            <p style={{ fontSize: '.82rem', opacity: .7 }}>{isHt ? 'Pa gen post.' : 'No posts.'}</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 320, overflowY: 'auto' }}>
+              {posts.map((p) => (
+                <div key={p.slug} style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '8px 10px', border: '1px solid var(--border-color)', borderRadius: 10 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '.82rem', fontWeight: 600 }}>@{p.author_username} · <span style={{ opacity: .6 }}>{p.slug}</span></div>
+                    <div style={{ fontSize: '.82rem', opacity: .85, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.body}</div>
+                  </div>
+                  <button type="button" className="acm-action-btn" disabled={deletingSlug === p.slug} onClick={() => handleDeletePostRow(p)} title={isHt ? 'Siprime + notifye otè' : 'Delete + notify author'}>
+                    <i className="fas fa-trash" /> {deletingSlug === p.slug ? '...' : (isHt ? 'Siprime' : 'Delete')}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="acm-filters">
         {MOD_STATUSES.map((f) => (
