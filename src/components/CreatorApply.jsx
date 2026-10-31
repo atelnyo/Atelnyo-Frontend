@@ -125,6 +125,23 @@ function tVal(lang, obj) {
   return obj?.[lang] || obj?.en || '';
 }
 
+// Human-readable status title + hint for the Status Dashboard.
+// Exported for unit tests. (STATUS_CONFIG keys are labelEn/labelHt /
+// hintEn/hintHt — a generic obj[lang] lookup returns '' here, which
+// used to render an empty hero.)
+export function getStatusDisplay(status, lang) {
+  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.draft;
+  const isHt = lang === 'ht';
+  return {
+    label: isHt ? cfg.labelHt : cfg.labelEn,
+    hint: isHt ? cfg.hintHt : cfg.hintEn,
+    color: cfg.color,
+    icon: cfg.icon,
+  };
+}
+
+export { validateStep };
+
 // ─── Sub-components ───────────────────────────────────────────────────────
 
 function CreatorSkeleton({ rows = 6 }) {
@@ -304,7 +321,7 @@ function StepNav({ currentStep, onNext, onPrev, isSubmitting, lang }) {
         ) : isLast ? (
           <>{lang === 'ht' ? 'Voye aplikasyon' : 'Submit'} <i className="fas fa-paper-plane" aria-hidden="true" /></>
         ) : (
-          <>{lang === 'ht' ? 'Next' : 'Next'} <i className="fas fa-arrow-right" aria-hidden="true" /></>
+          <>{lang === 'ht' ? 'Pwochen' : 'Next'} <i className="fas fa-arrow-right" aria-hidden="true" /></>
         )}
       </button>
     </div>
@@ -338,7 +355,12 @@ function hasText(value) {
 function validateStep(step, form, lang) {
   const isHt = lang === 'ht';
   const errs = {};
-  const add = (key, ht, en) => { errs[key] = isHt ? ht : en; };
+  // Two call shapes exist: add(key, htMsg, enMsg) picks by language, while
+  // add(key, alreadyLocalizedMsg) passes a pre-selected `isHt ? ht : en`
+  // template (used for messages with character counts). With only two
+  // args the third param is undefined — which used to store `undefined`
+  // for English and render NO inline error. Detect it and keep the message.
+  const add = (key, ht, en) => { errs[key] = en === undefined ? ht : (isHt ? ht : en); };
   switch (step) {
     case 1: // Identity
       if (!hasText(form.full_name)) add('full_name', 'Non konplè obligatwa.', 'Full name is required.');
@@ -815,7 +837,7 @@ function StepSubmit({ form, lang, submitting, onSubmit }) {
 // STATUS DASHBOARD
 // ═══════════════════════════════════════════════════════════════════════════
 
-function StatusDashboard({ app, lang }) {
+function StatusDashboard({ app, lang, onResume }) {
   const isHt = lang === 'ht';
   const cfg = STATUS_CONFIG[app.status] || STATUS_CONFIG.draft;
   const estimate = ESTIMATED_WAIT[app.status];
@@ -829,8 +851,8 @@ function StatusDashboard({ app, lang }) {
           <i className={`fas ${cfg.icon}`} aria-hidden="true" />
         </div>
         <div className="ca-dash-hero-text">
-          <h2 className="ca-dash-status">{tVal(lang, cfg)}</h2>
-          <p className="ca-dash-hint">{tVal(lang, cfg)}</p>
+          <h2 className="ca-dash-status">{getStatusDisplay(app.status, lang).label}</h2>
+          <p className="ca-dash-hint">{getStatusDisplay(app.status, lang).hint}</p>
           {estimate && (
             <span className="ca-dash-estimate">
               <i className="fas fa-clock" aria-hidden="true" />
@@ -897,9 +919,10 @@ function StatusDashboard({ app, lang }) {
         </div>
       )}
 
-      {/* Next Action */}
+      {/* Next Action — resumes the wizard with the server draft so the
+          applicant can fix and re-submit (was a dead no-op button). */}
       {(app.status === 'rejected' || app.status === 'need_information') && (
-        <NextAction status={app.status} lang={lang} onAction={() => {}} />
+        <NextAction status={app.status} lang={lang} onAction={onResume} />
       )}
     </div>
   );
@@ -1175,6 +1198,19 @@ export default function CreatorApply({ lang = 'ht', showToast, user, onClose }) 
     setWizardStep(1);
   }, []);
 
+  // Resume editing after a rejection / need-information: reload the
+  // server draft into the wizard (step 1) so corrections re-submit
+  // through the normal validated path instead of a dead button.
+  const handleResume = useCallback(() => {
+    if (app) {
+      setFormFromServer(app, setForm);
+      setFieldErrors({});
+      setError(null);
+    }
+    setShowIntro(false);
+    setWizardStep(1);
+  }, [app]);
+
   function buildPayload(f) {
     return {
       full_name: f.full_name?.trim(),
@@ -1358,7 +1394,7 @@ export default function CreatorApply({ lang = 'ht', showToast, user, onClose }) 
             />
           </div>
         ) : app && wizardStep >= 10 ? (
-          <StatusDashboard app={app} lang={lang} />
+          <StatusDashboard app={app} lang={lang} onResume={handleResume} />
         ) : null}
       </main>
     </div>

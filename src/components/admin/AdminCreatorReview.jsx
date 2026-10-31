@@ -26,7 +26,7 @@
 // silences future "unused React" warnings.
 import { useEffect, useState, useCallback } from 'react';
 import { useHasAdminAccess } from '../../hooks/useHasAdminAccess';
-import api from '../../services/api';
+import api, { creatorAdminService } from '../../services/api';
 import { CREATOR_STATUS_CONFIG, getStatusConfig, getStatusLabel, getStatusIcon, getStatusStyle } from '../../constants/statusConfig';
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -145,6 +145,84 @@ function StatusPill({ status }) {
 // ReviewModal — With Risk Widget + Enriched Status Options
 // ═══════════════════════════════════════════════════════════════════════
 
+// ═══════════════════════════════════════════════════════════════════════
+// NotesWidget — staff-only internal notes (never shown to applicants)
+// ═══════════════════════════════════════════════════════════════════════
+
+function NotesWidget({ applicationId, showToast }) {
+  const [notes, setNotes] = useState(null);
+  const [draft, setDraft] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const load = useCallback(async () => {
+    try {
+      const res = await creatorAdminService.internalNotes(applicationId);
+      setNotes(Array.isArray(res?.data?.notes) ? res.data.notes : []);
+    } catch {
+      setNotes([]);
+    }
+  }, [applicationId]);
+
+  // Fetch-on-mount: loading notes into state after the async fetch settles
+  // is initialization, not a render-loop anti-pattern.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { load(); }, [load]);
+
+  const addNote = async () => {
+    const text = draft.trim();
+    if (!text || saving) return;
+    setSaving(true);
+    try {
+      const res = await creatorAdminService.addInternalNote(applicationId, text);
+      setNotes(Array.isArray(res?.data?.notes) ? res.data.notes : []);
+      setDraft('');
+      showToast?.('Note saved.', 'check-circle');
+    } catch (err) {
+      showToast?.(err?.response?.data?.detail || 'Could not save note.', 'circle-exclamation');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="admin-cr-notes">
+      <h4 className="admin-cr-panel-title">
+        <i className="fas fa-sticky-note" aria-hidden="true" />
+        {' '}Internal Notes <span className="admin-cr-staff-only">staff only</span>
+      </h4>
+      {notes === null ? (
+        <p className="admin-cr-notes-empty">Loading…</p>
+      ) : notes.length === 0 ? (
+        <p className="admin-cr-notes-empty">No internal notes yet.</p>
+      ) : (
+        <ul className="admin-cr-notes-list">
+          {notes.map((n, i) => (
+            <li key={i} className="admin-cr-note-item">
+              <p>{n.note}</p>
+              <small>{n.by || '—'} · {n.at ? new Date(n.at).toLocaleString() : '—'}</small>
+            </li>
+          ))}
+        </ul>
+      )}
+      <div className="admin-cr-note-add">
+        <input
+          className="field-input"
+          type="text"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          placeholder="Add an internal note…"
+          aria-label="Add an internal note"
+          maxLength={2000}
+          disabled={saving}
+        />
+        <button type="button" className="btn-secondary" onClick={addNote} disabled={saving || !draft.trim()}>
+          {saving ? <i className="fas fa-spinner fa-spin" aria-hidden="true" /> : <i className="fas fa-plus" aria-hidden="true" />}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function ReviewModal({ application, onClose, onReviewed, showToast }) {
   const [status, setStatus] = useState(application.status);
   const [reviewNote, setReviewNote] = useState(application.review_note || '');
@@ -160,7 +238,7 @@ function ReviewModal({ application, onClose, onReviewed, showToast }) {
     setLoading(true);
     setError(null);
     try {
-      await api.patch(`identity/creator-apply/${application.id}/review/`, {
+      await creatorAdminService.review(application.id, {
         status,
         review_note: reviewNote.trim(),
       });
@@ -186,6 +264,38 @@ function ReviewModal({ application, onClose, onReviewed, showToast }) {
       setLoading(false);
     }
   }, [application, status, reviewNote, showToast, onReviewed, onClose]);
+
+  const handleSuspend = useCallback(async () => {
+    const reason = reviewNote.trim() || window.prompt('Suspension reason (shown to the creator):');
+    if (!reason) return;
+    setLoading(true);
+    setError(null);
+    try {
+      await creatorAdminService.suspend(application.id, reason.trim());
+      showToast?.(`⛔ ${application.applicant_username || 'User'} suspended.`, 'ban');
+      onReviewed?.();
+      onClose?.();
+    } catch (err) {
+      setError(err?.response?.data?.detail || 'Suspend failed.');
+    } finally {
+      setLoading(false);
+    }
+  }, [application, reviewNote, showToast, onReviewed, onClose]);
+
+  const handleRestore = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      await creatorAdminService.restore(application.id);
+      showToast?.(`✅ ${application.applicant_username || 'User'} restored.`, 'check-circle');
+      onReviewed?.();
+      onClose?.();
+    } catch (err) {
+      setError(err?.response?.data?.detail || 'Restore failed.');
+    } finally {
+      setLoading(false);
+    }
+  }, [application, showToast, onReviewed, onClose]);
 
   const reviewStatusOptions = ['approved', 'rejected', 'under_review', 'need_information'];
 
@@ -232,12 +342,8 @@ function ReviewModal({ application, onClose, onReviewed, showToast }) {
                 <span className="admin-cr-detail-label">Full Name</span>
                 <span className="admin-cr-detail-value">{application.full_name || '—'}</span>
               </div>
-              <div className="admin-cr-detail-item">
-                <span className="admin-cr-detail-label">Why Creator</span>
-                <span className="admin-cr-detail-value">{application.why_creator || '—'}</span>
-              </div>
-              <div className="admin-cr-detail-item">
-                <span className="admin-cr-detail-label">Experience</span>
+            <div className="admin-cr-detail-item">
+              <span className="admin-cr-detail-label">Experience</span>
                 <span className="admin-cr-detail-value">{application.experience_years || '—'} years</span>
               </div>
               <div className="admin-cr-detail-item">
@@ -269,6 +375,54 @@ function ReviewModal({ application, onClose, onReviewed, showToast }) {
               <span className="admin-cr-detail-label">Biography</span>
               <p className="admin-cr-bio">{application.biography || '—'}</p>
             </div>
+            <div className="admin-cr-detail-item" style={{ gridColumn: '1 / -1' }}>
+              <span className="admin-cr-detail-label">Why Creator</span>
+              <p className="admin-cr-bio">{application.why_creator || '—'}</p>
+            </div>
+            {application.experience_description && (
+              <div className="admin-cr-detail-item" style={{ gridColumn: '1 / -1' }}>
+                <span className="admin-cr-detail-label">Experience Detail</span>
+                <p className="admin-cr-bio">{application.experience_description}</p>
+              </div>
+            )}
+            <div className="admin-cr-detail-item">
+              <span className="admin-cr-detail-label">Contact Email</span>
+              <span className="admin-cr-detail-value">{application.contact_email || '—'}</span>
+            </div>
+            <div className="admin-cr-detail-item">
+              <span className="admin-cr-detail-label">Languages</span>
+              <span className="admin-cr-detail-value">
+                {Array.isArray(application.languages) && application.languages.length > 0
+                  ? application.languages.join(', ')
+                  : (application.languages || '—')}
+              </span>
+            </div>
+            <div className="admin-cr-detail-item">
+              <span className="admin-cr-detail-label">ID Document</span>
+              <span className="admin-cr-detail-value">
+                {application.identity_document_url
+                  ? <a href={application.identity_document_url} target="_blank" rel="noopener noreferrer">View <i className="fas fa-external-link-alt" style={{ fontSize: '0.65rem' }} /></a>
+                  : <span className="admin-cr-missing-doc">missing — raises risk</span>}
+              </span>
+            </div>
+            <div className="admin-cr-detail-item">
+              <span className="admin-cr-detail-label">Terms</span>
+              <span className="admin-cr-detail-value">
+                {[application.terms_accepted && 'ToS', application.code_of_conduct_accepted && 'CoC', application.content_guidelines_accepted && 'Guidelines'].filter(Boolean).join(' · ') || 'not accepted'}
+              </span>
+            </div>
+            {application.social_links && Object.keys(application.social_links).length > 0 && (
+              <div className="admin-cr-detail-item" style={{ gridColumn: '1 / -1' }}>
+                <span className="admin-cr-detail-label">Social Links</span>
+                <span className="admin-cr-detail-value admin-cr-socials">
+                  {Object.entries(application.social_links).map(([platform, url]) => (
+                    <a key={platform} href={url} target="_blank" rel="noopener noreferrer" title={platform}>
+                      <i className={`fab fa-${platform}`} aria-hidden="true" /> {platform}
+                    </a>
+                  ))}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* ─── Right: Risk Analysis + Timeline ──────────────────── */}
@@ -296,6 +450,8 @@ function ReviewModal({ application, onClose, onReviewed, showToast }) {
             {application.review_timeline && (
               <TimelineWidget timeline={application.review_timeline} />
             )}
+
+            <NotesWidget applicationId={application.id} showToast={showToast} />
           </div>
         </div>
 
@@ -350,6 +506,16 @@ function ReviewModal({ application, onClose, onReviewed, showToast }) {
             <button type="button" className="btn-secondary" onClick={onClose} disabled={loading}>
               Cancel
             </button>
+            {application.status === 'approved' && (
+              <button type="button" className="btn-secondary admin-cr-danger" onClick={handleSuspend} disabled={loading}>
+                <i className="fas fa-ban" aria-hidden="true" /> Suspend
+              </button>
+            )}
+            {application.status === 'suspended' && (
+              <button type="button" className="btn-secondary" onClick={handleRestore} disabled={loading}>
+                <i className="fas fa-rotate-left" aria-hidden="true" /> Restore
+              </button>
+            )}
             <button type="submit" className="btn-primary" disabled={loading}>
               {loading ? (
                 <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> Submitting...</>
@@ -469,8 +635,10 @@ const FILTER_OPTIONS = [
   { value: '',     label: 'All',        icon: 'fa-list' },
   { value: 'pending',      label: 'Pending',      icon: 'fa-hourglass-half' },
   { value: 'under_review', label: 'Under Review', icon: 'fa-magnifying-glass' },
+  { value: 'need_information', label: 'Need Info', icon: 'fa-circle-info' },
   { value: 'approved',     label: 'Approved',     icon: 'fa-circle-check' },
   { value: 'rejected',     label: 'Rejected',     icon: 'fa-circle-xmark' },
+  { value: 'suspended',    label: 'Suspended',    icon: 'fa-ban' },
 ];
 
 export default function AdminCreatorReview({ lang = 'ht', showToast, user, onNavigate }) {
@@ -510,6 +678,8 @@ export default function AdminCreatorReview({ lang = 'ht', showToast, user, onNav
     }
   }, [filter, searchQuery]);
 
+  // Fetch-on-mount: initial list load is initialization, not a prop-sync.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchApplications(); }, [fetchApplications]);
 
   // ─── Early return for non-staff ─────────────────────────────────

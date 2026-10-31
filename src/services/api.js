@@ -1925,10 +1925,8 @@ export const creatorAdminService = {
   suspend: (id, reason) => api.post(`identity/creator-apply/${id}/suspend/`, { reason }),
   // POST /api/identity/creator-apply/<id>/restore/
   restore: (id) => api.post(`identity/creator-apply/${id}/restore/`),
-  // GET /api/identity/creator-apply/<id>/reports/
-  reports: (id) => api.get(`identity/creator-apply/${id}/reports/`),
-  // GET /api/identity/creator-apply/<id>/violations/
-  violations: (id) => api.get(`identity/creator-apply/${id}/violations/`),
+  // Report/violation COUNTS ride on the application payload itself
+  // (report_count / violation_count in the risk panel) — no endpoints.
   // GET /api/identity/creator-apply/<id>/notes/
   internalNotes: (id) => api.get(`identity/creator-apply/${id}/notes/`),
   // POST /api/identity/creator-apply/<id>/notes/
