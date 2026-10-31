@@ -68,13 +68,13 @@ const CHIPS = [
   { id: 'all',      icon: 'fa-globe',        ht: 'Tout',     en: 'All',         fr: 'Tout',     es: 'Todo' },
   { id: 'courses',  icon: 'fa-graduation-cap', ht: 'Kou',    en: 'Courses',     fr: 'Cours',    es: 'Cursos' },
   { id: 'music',    icon: 'fa-music',        ht: 'Mizik',    en: 'Music',       fr: 'Musique',  es: 'Música' },
+  { id: "marketplace", icon: "fa-shopping-bag", ht: "Mache", en: "Market", fr: "Marché", es: "Mercado" },
   { id: 'talents',  icon: 'fa-star',         ht: 'Talan',    en: 'Talents',     fr: 'Talents',  es: 'Talentos' },
   { id: 'featured', icon: 'fa-bookmark',     ht: 'Rekòmande', en: 'Featured',   fr: 'Vedette',  es: 'Destacado' },
   { id: 'new',      icon: 'fa-sparkles',     ht: 'Nouvo',    en: 'New',         fr: 'Nouveau',  es: 'Nuevo' },
   { id: "communities",  icon: "fa-users",        ht: "Kominote",  en: "Communities",  fr: "Communautés",  es: "Comunidades" },
   { id: "jobs",  icon: "fa-briefcase",  ht: "Travay",  en: "Jobs",  fr: "Emplois",  es: "Empleos" },
   { id: "portfolio", icon: "fa-palette", ht: "Pòtfolyo", en: "Portfolio", fr: "Portfolio", es: "Portafolio" },
-  { id: "marketplace", icon: "fa-shopping-bag", ht: "Mache", en: "Market", fr: "Marché", es: "Mercado" },
   { id: "events", icon: "fa-calendar-alt", ht: "Evènman", en: "Events", fr: "Événements", es: "Eventos" },
   // Phase 47 — Creator Spotlight chip. A curated list of inventions
   // that don't exist anywhere else on the platform. The
