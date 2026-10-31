@@ -508,7 +508,8 @@ function SearchRoute({ lang }) {
   const navigate = useSafeNavigate();
   const q = (params.get('q') || '').trim();
   const page = Math.max(1, Number(params.get('page') || 1) || 1);
-  const key = `${q}|${page}`;
+  const sort = params.get('sort') || 'relevance';
+  const key = `${q}|${page}|${sort}`;
   // Derived loading: the effect only ever calls setState from async
   // callbacks, so no cascading synchronous render is triggered.
   const [result, setResult] = useState({ key: '', data: null });
@@ -518,7 +519,7 @@ function SearchRoute({ lang }) {
     if (!q) return undefined;
     let cancelled = false;
     const myKey = key;
-    api.get('search/', { params: { q, page } })
+    api.get('search/', { params: { q, page, page_size: 20, sort } })
       .then((res) => {
         if (!cancelled) setResult({ key: myKey, data: res?.data || null });
       })
@@ -526,7 +527,7 @@ function SearchRoute({ lang }) {
         if (!cancelled) setResult({ key: myKey, data: null });
       });
     return () => { cancelled = true; };
-  }, [key, q, page]);
+  }, [key, q, page, sort]);
 
   const data = result.key === key ? result.data : null;
   const results = data?.results || [];
