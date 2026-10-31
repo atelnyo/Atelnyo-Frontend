@@ -191,7 +191,10 @@ function NotesWidget({ applicationId, showToast }) {
         {' '}Internal Notes <span className="admin-cr-staff-only">staff only</span>
       </h4>
       {notes === null ? (
-        <p className="admin-cr-notes-empty">Loading…</p>
+        <div className="admin-cr-skel-list" role="status" aria-busy="true" aria-label="Loading internal notes">
+          <div className="admin-cr-skel-row" aria-hidden="true" />
+          <div className="admin-cr-skel-row" aria-hidden="true" />
+        </div>
       ) : notes.length === 0 ? (
         <p className="admin-cr-notes-empty">No internal notes yet.</p>
       ) : (

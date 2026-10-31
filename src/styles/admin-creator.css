@@ -758,3 +758,106 @@ body.dark-mode .admin-cr-input {
   justify-content: flex-end;
   gap: 8px;
 }
+
+/* ─── Internal Notes (staff only) ──────────────────────────────────── */
+
+.admin-cr-notes {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-color, rgba(216,27,96,0.12));
+}
+
+.admin-cr-staff-only {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: rgba(245,158,11,0.14);
+  color: #b45309;
+}
+
+body.dark-mode .admin-cr-staff-only {
+  background: rgba(245,158,11,0.2);
+  color: #fbbf24;
+}
+
+.admin-cr-notes-empty {
+  font-size: 0.78rem;
+  color: var(--text-secondary, #888);
+  margin: 6px 0;
+}
+
+.admin-cr-notes-list {
+  list-style: none;
+  margin: 8px 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-cr-note-item {
+  background: var(--input-bg, #f5f5f5);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.8rem;
+}
+
+.admin-cr-note-item p {
+  margin: 0 0 4px;
+  color: var(--text-main, #222);
+}
+
+.admin-cr-note-item small {
+  color: var(--text-secondary, #888);
+  font-size: 0.68rem;
+}
+
+body.dark-mode .admin-cr-note-item {
+  background: #1a1a2e;
+}
+
+body.dark-mode .admin-cr-note-item p {
+  color: #e0e4f0;
+}
+
+.admin-cr-note-add {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-cr-note-add .field-input {
+  flex: 1;
+}
+
+/* ─── Review enrichments ───────────────────────────────────────────── */
+
+.admin-cr-danger {
+  border-color: rgba(220,38,38,0.4) !important;
+  color: #dc2626 !important;
+}
+
+.admin-cr-missing-doc {
+  color: #b45309;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.admin-cr-socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.admin-cr-socials a {
+  color: var(--admin-pink);
+  font-size: 0.78rem;
+  text-decoration: none;
+}
+
+/* Compact skeleton rows inside the notes widget */
+.admin-cr-notes .admin-cr-skel-row {
+  height: 44px;
+}
