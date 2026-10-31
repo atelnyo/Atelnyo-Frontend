@@ -66,9 +66,9 @@ import {
 // ─── Filter chips ───────────────────────────────────────────────────────────
 const CHIPS = [
   { id: 'all',      icon: 'fa-globe',        ht: 'Tout',     en: 'All',         fr: 'Tout',     es: 'Todo' },
+  { id: "marketplace", icon: "fa-shopping-bag", ht: "Mache", en: "Market", fr: "Marché", es: "Mercado" },
   { id: 'courses',  icon: 'fa-graduation-cap', ht: 'Kou',    en: 'Courses',     fr: 'Cours',    es: 'Cursos' },
   { id: 'music',    icon: 'fa-music',        ht: 'Mizik',    en: 'Music',       fr: 'Musique',  es: 'Música' },
-  { id: "marketplace", icon: "fa-shopping-bag", ht: "Mache", en: "Market", fr: "Marché", es: "Mercado" },
   { id: 'talents',  icon: 'fa-star',         ht: 'Talan',    en: 'Talents',     fr: 'Talents',  es: 'Talentos' },
   { id: 'featured', icon: 'fa-bookmark',     ht: 'Rekòmande', en: 'Featured',   fr: 'Vedette',  es: 'Destacado' },
   { id: 'new',      icon: 'fa-sparkles',     ht: 'Nouvo',    en: 'New',         fr: 'Nouveau',  es: 'Nuevo' },
