@@ -3994,6 +3994,25 @@ body.dark-mode .cd-tag-category {
   transform: rotate(180deg);
 }
 
+/* Locked module (visitor has not enrolled yet): titles stay readable,
+   the row is not expandable, and a lock replaces the chevron. */
+.cd-syllabus-header--locked {
+  cursor: default;
+}
+.cd-syllabus-header--locked:hover {
+  background: transparent;
+}
+.cd-syllabus-header--locked .cd-syllabus-number {
+  background: var(--cd-surface);
+  color: var(--cd-text-secondary);
+  border: 1px solid var(--cd-border);
+}
+.cd-syllabus-lock {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  color: var(--cd-text-secondary);
+}
+
 .cd-syllabus-body {
   padding: 0 18px 14px 68px;
   color: var(--cd-text-secondary);

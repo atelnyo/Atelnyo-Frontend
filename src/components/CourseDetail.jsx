@@ -8,6 +8,7 @@ import { resolveVideoSource } from '../modules/explore/utils/videoSource';
 import LanguagePracticeBlock from './learning/LanguagePracticeBlock';
 import QuizBlock from './learning/QuizBlock';
 import SEOHead, { courseSchema } from './shared/SEOHead';
+import { SHEETS } from '../routes/sheets';
 
 /**
  * CourseDetail — full-viewport course detail page.
@@ -51,6 +52,12 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
   // Paid courses create a real pending order through the existing
   // payment architecture — promo codes are validated server-side.
   const [isEnrolled, setIsEnrolled] = useState(false);
+  // ``source`` from /access/ explains WHY the backend granted access:
+  // 'creator' | 'staff' | 'free' | 'purchase' | 'promo' | 'admin' |
+  // 'enrollment' | null. Only the learner sources mean "enrolled" — a
+  // creator (or staff) opening the page gets has_access=true without
+  // ever enrolling and must not see learner UI.
+  const [accessSource, setAccessSource] = useState(null);
   const [promoCode, setPromoCode] = useState('');
   const [promoMsg, setPromoMsg] = useState('');
   const [promoErr, setPromoErr] = useState('');
@@ -65,7 +72,15 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
       .then((res) => {
         if (cancelled) return;
         const body = res?.data || {};
-        setIsEnrolled(Boolean(body.has_access));
+        const source = body.source || null;
+        setAccessSource(source);
+        // Creator / staff access is a backend permission, NOT an
+        // enrollment. Counting it as one produced the contradictory
+        // page: 0% progress + "you have access" + Enter, before the
+        // visitor ever enrolled.
+        setIsEnrolled(
+          Boolean(body.has_access) && source !== 'creator' && source !== 'staff',
+        );
       })
       .catch(() => {});
     return () => { cancelled = true; };
@@ -265,6 +280,15 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
   // Promo video — same resolver the explore cards/sheets use (YouTube /
   // Vimeo → iframe embed, direct MP4/WebM → native <video>).
   const promoVideo = course.video_url ? resolveVideoSource(course.video_url) : null;
+
+  // ─── Viewer role: creator / staff preview vs. real learner ─────────
+  // The creator and staff may OPEN the content without enrolling; that
+  // is not enrollment. Modules stay locked (titles visible, content
+  // closed) until the learner has real access.
+  const isCreatorViewer = Boolean(user) && accessSource === 'creator';
+  const isStaffViewer = Boolean(user) && accessSource === 'staff';
+  const isPrivilegedViewer = isCreatorViewer || isStaffViewer;
+  const modulesLocked = !isEnrolled && !isPrivilegedViewer;
 
   // ─── Helper: format price ─────────────────────────────────────────
   const fmtPrice = (price) => {
@@ -529,7 +553,7 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
           </section>
 
           {/* ─── Continue where you left off — REAL resume position ── */}
-          {user && progress && resumeModule >= 0 && (
+          {isEnrolled && user && progress && resumeModule >= 0 && (
             <section className="cd-section">
               <div className="cd-resume-card">
                 <span className="cd-resume-icon"><i className="fas fa-rotate-right" aria-hidden="true" /></span>
@@ -652,7 +676,10 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
                   // (additive — courses without blocks render exactly as before).
                   const blocks = !isString && Array.isArray(item?.blocks) ? item.blocks : [];
                   const stats = moduleBlockStats[index] || { total: 0, done: 0 };
-                  const moduleDone = completedModules.includes(index);
+                  // Progress belongs to enrolled learners only — never
+                  // show 0% to a visitor who has not started.
+                  const moduleDone = isEnrolled && completedModules.includes(index);
+                  const locked = modulesLocked;
 
                   return (
                     <div
@@ -662,31 +689,40 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
                     >
                       <button
                         type="button"
-                        className="cd-syllabus-header"
+                        className={`cd-syllabus-header ${locked ? 'cd-syllabus-header--locked' : ''}`}
                         onClick={() => {
+                          if (locked) return;
                           toggleWeek(index);
                           // Opening a module is a meaningful position.
                           if (!isExpanded && user) handleRecordPosition(index);
                         }}
-                        aria-expanded={isExpanded}
+                        aria-expanded={locked ? false : isExpanded}
+                        aria-disabled={locked || undefined}
+                        title={locked
+                          ? (isHt ? 'Enskri nan kou sa a pou w ouvri modil la.' : 'Enroll in this course to open this module.')
+                          : undefined}
                       >
                         <span className="cd-syllabus-number">
                           {moduleDone ? <i className="fas fa-circle-check" aria-hidden="true" /> : String(index + 1).padStart(2, '0')}
                         </span>
                         <span className="cd-syllabus-title">{title}</span>
-                        {stats.total > 0 && user && (
+                        {isEnrolled && stats.total > 0 && user && (
                           <span className="cd-syllabus-module-pct">
                             {Math.round((stats.done / stats.total) * 100)}%
                           </span>
                         )}
-                        <i
-                          className={`fas fa-chevron-down cd-syllabus-chevron ${isExpanded ? 'cd-syllabus-chevron--open' : ''}`}
-                          aria-hidden="true"
-                        />
+                        {locked ? (
+                          <i className="fas fa-lock cd-syllabus-lock" aria-hidden="true" data-testid="cd-module-lock" />
+                        ) : (
+                          <i
+                            className={`fas fa-chevron-down cd-syllabus-chevron ${isExpanded ? 'cd-syllabus-chevron--open' : ''}`}
+                            aria-hidden="true"
+                          />
+                        )}
                       </button>
-                      {isExpanded && (desc || blocks.length > 0) && (
+                      {!locked && isExpanded && (desc || blocks.length > 0) && (
                         <div className="cd-syllabus-body">
-                          {stats.total > 0 && user && (
+                          {isEnrolled && stats.total > 0 && user && (
                             <div className="cd-module-progress">
                               <div className="cd-module-progress-track">
                                 <span
@@ -769,8 +805,49 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
             </section>
           )}
 
+          {/* ─── Creator / staff: full access, no enrollment box ── */}
+          {isPrivilegedViewer && (
+            <section className="cd-section">
+              <div className="cd-price-card" data-testid="cd-privileged-card">
+                <div className="cd-price-card-header">
+                  <div className="cd-price-card-info">
+                    <span className="cd-price-label">
+                      {isCreatorViewer
+                        ? (isHt ? 'Kreyatè kou sa a' : 'Creator of this course')
+                        : (isHt ? 'Apèsi ekip' : 'Team preview')}
+                    </span>
+                    <span className="cd-price-amount cd-price-amount--free">
+                      {isHt ? 'Aksè konplè' : 'Full access'}
+                    </span>
+                  </div>
+                  {isCreatorViewer ? (
+                    <a className="cd-cta-btn" href={SHEETS.STUDIO} data-testid="cd-manage-course">
+                      <i className="fas fa-sliders" aria-hidden="true" />
+                      {isHt ? 'Jere kou a' : 'Manage course'}
+                    </a>
+                  ) : onEnterLearning ? (
+                    <button type="button" className="cd-cta-btn" onClick={() => onEnterLearning(course)}>
+                      <i className="fas fa-graduation-cap" aria-hidden="true" />
+                      {isHt ? 'Antre nan Espas Aprantisaj' : 'Enter Learning Space'}
+                    </button>
+                  ) : null}
+                </div>
+                <p className="cd-price-disclaimer">
+                  <i className="fas fa-circle-info" aria-hidden="true" />{' '}
+                  {isCreatorViewer
+                    ? (isHt
+                      ? 'Se ou menm ki kreye kou sa a — ou pa bezwen enskri.'
+                      : 'You created this course — no enrollment required.')
+                    : (isHt
+                      ? 'Ou gen aksè ekip sou kou sa a — ou pa bezwen enskri.'
+                      : 'You have team access to this course — no enrollment required.')}
+                </p>
+              </div>
+            </section>
+          )}
+
           {/* ─── Price & Enrollment ────────────────────────── */}
-          {course.price != null && (
+          {course.price != null && !isPrivilegedViewer && (
             <section className="cd-section">
               <div className="cd-price-card">
                 <div className="cd-price-card-header">
@@ -822,7 +899,9 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
                     onEnterLearning ? (
                       <button type="button" className="cd-cta-btn" onClick={() => onEnterLearning(course)}>
                         <i className="fas fa-graduation-cap" aria-hidden="true" />
-                        {isHt ? 'Antre nan Espas Aprantisaj' : 'Enter Learning Space'}
+                        {Number(progress?.percentage) > 0
+                          ? (isHt ? 'Kontinye Aprantisaj' : 'Continue Learning')
+                          : (isHt ? 'Antre nan Espas Aprantisaj' : 'Enter Learning Space')}
                       </button>
                     ) : (
                       <button type="button" className="cd-cta-btn" disabled aria-disabled="true">
@@ -844,7 +923,7 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
                       ) : (
                         <i className="fas fa-arrow-right" aria-hidden="true" />
                       )}
-                      {isHt ? 'Enskri' : 'Enroll Now'}
+                      {isHt ? 'Enskri nan kou sa a — Gratis' : 'Enroll in this course — Free'}
                     </button>
                   ) : (
                     // Paid course — promo code + real checkout. Promo
@@ -861,7 +940,7 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
                       ) : (
                         <i className="fas fa-arrow-right" aria-hidden="true" />
                       )}
-                      {isHt ? 'Enskri' : 'Enroll Now'}
+                      {isHt ? 'Enskri nan kou sa a' : 'Enroll in this course'}
                     </button>
                   )}
                 </div>
@@ -898,20 +977,20 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
                   <p className="cd-price-disclaimer">
                     <i className="fas fa-check-circle" aria-hidden="true" />{' '}
                     {isHt
-                      ? 'Ou gen aksè sou kou a.'
-                      : 'You have access to this course.'}
+                      ? 'Ou enskri nan kou sa a. Ou gen aksè konplè.'
+                      : 'You are enrolled in this course. You have full access.'}
                   </p>
                 ) : Number(course.price) === 0 ? (
                   <p className="cd-price-disclaimer">
-                    {t.explore_price_disclaimer || (isHt
-                      ? 'Kou gratis — ou ka enskri dirèkteman, pa gen peman nesesè.'
-                      : 'Free course — enroll directly, no payment required.')}
+                    {isHt
+                      ? 'Jwenn aksè konplè imedyatman apre enskripsyon.'
+                      : 'Get full access immediately after enrolling.'}
                   </p>
                 ) : (
                   <p className="cd-price-disclaimer">
-                    {t.explore_price_disclaimer || (isHt
-                      ? 'Aplike yon kòd promosyon pou rabè. Tout validasyon fèt sou sèvè a.'
-                      : 'Apply a promo code for a discount. All validation happens server-side.')}
+                    {isHt
+                      ? 'Jwenn aksè konplè imedyatman apre peman an.'
+                      : 'Get full access immediately after payment.'}
                   </p>
                 )}
               </div>
