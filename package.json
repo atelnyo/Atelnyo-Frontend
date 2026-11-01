@@ -35,7 +35,7 @@
     "react-dom": "^18.2.0",
     "react-helmet-async": "^2.0.5",
     "react-player": "^3.4.0",
-    "react-router-dom": "^6.18.0",
+    "react-router-dom": "^7.18.5",
     "zustand": "^4.5.7"
   },
   "devDependencies": {
@@ -52,6 +52,10 @@
     "jsdom": "^30.0.1",
     "vite": "^6.4.5",
     "vitest": "^4.1.10"
+  },
+  "//overrides": "@firebase/firestore pins @grpc/grpc-js ~1.9.0, which carries the auth-context and status-message advisories. 1.13.6 is the first patched 1.x; the override stays inside major 1 so the gRPC API firestore uses is unchanged.",
+  "overrides": {
+    "@grpc/grpc-js": "^1.13.6"
   },
   "allowScripts": {
     "esbuild@0.25.12": true,
