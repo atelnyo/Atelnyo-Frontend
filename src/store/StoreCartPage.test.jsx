@@ -68,8 +68,10 @@ const renderCart = () =>
     </HelmetProvider>,
   );
 
+// The cart's primary CTA is "Proceed to Payment" (the Checkout label was
+// retired when the shipping-first flow landed).
 const startCheckout = async () => {
-  fireEvent.click(screen.getByRole('button', { name: 'Checkout' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Proceed to Payment' }));
   await waitFor(() => expect(checkoutOrder).toHaveBeenCalled());
 };
 
@@ -106,7 +108,7 @@ describe('StoreCartPage checkout preparation', () => {
     });
     // ...and the button keeps saying what is happening.
     expect(screen.getByText('Preparing payment')).toBeTruthy();
-    expect(screen.queryByText('Checkout')).toBeNull();
+    expect(screen.queryByText('Proceed to Payment')).toBeNull();
 
     // The mount point for the SDK exists even while the placeholder is up —
     // rendering the skeleton INSTEAD of the container would break the render.
@@ -125,8 +127,8 @@ describe('StoreCartPage checkout preparation', () => {
     await waitFor(() => {
       expect(screen.queryByText('Loading secure payment options…')).toBeNull();
     });
-    expect(screen.getByRole('button', { name: 'Checkout' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Checkout' }).disabled).toBe(false);
+    expect(screen.getByRole('button', { name: 'Proceed to Payment' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Proceed to Payment' }).disabled).toBe(false);
   });
 
   it('replaces the placeholder with the error message when the SDK fails to load', async () => {
@@ -139,7 +141,7 @@ describe('StoreCartPage checkout preparation', () => {
       expect(screen.getByRole('alert').textContent).toMatch(/PayPal is unavailable/);
     });
     expect(screen.queryByText('Loading secure payment options…')).toBeNull();
-    expect(screen.getByRole('button', { name: 'Checkout' }).disabled).toBe(false);
+    expect(screen.getByRole('button', { name: 'Proceed to Payment' }).disabled).toBe(false);
   });
 
   it('requires an explicit confirmation before accepting a different PayPal delivery address', async () => {
@@ -167,18 +169,22 @@ describe('StoreCartPage checkout preparation', () => {
 
     renderCart();
     await waitFor(() => expect(screen.getByText('Print')).toBeTruthy());
-    fireEvent.change(screen.getByLabelText('First name'), { target: { value: 'Ada' } });
-    fireEvent.change(screen.getByLabelText('Last name'), { target: { value: 'Lovelace' } });
-    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'ada@example.test' } });
-    fireEvent.change(screen.getByLabelText('Address'), { target: { value: '1 Main St' } });
-    fireEvent.change(screen.getByLabelText('City'), { target: { value: 'Oakland' } });
-    fireEvent.change(screen.getByLabelText('State / region'), { target: { value: 'CA' } });
-    fireEvent.change(screen.getByLabelText('Postal code'), { target: { value: '94612' } });
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Check shipping options' })).toBeTruthy());
-    fireEvent.click(screen.getByRole('button', { name: 'Check shipping options' }));
+    // The shipping form only appears once the shopper opts into shipping.
+    fireEvent.click(screen.getByRole('button', { name: 'Continue to shipping address' }));
+    // Required labels carry a trailing "*" marker, hence the regex matchers.
+    fireEvent.change(screen.getByLabelText(/^First name/), { target: { value: 'Ada' } });
+    fireEvent.change(screen.getByLabelText(/^Last name/), { target: { value: 'Lovelace' } });
+    fireEvent.change(screen.getByLabelText(/^Email/), { target: { value: 'ada@example.test' } });
+    fireEvent.change(screen.getByLabelText(/^Phone number/), { target: { value: '555-0100' } });
+    fireEvent.change(screen.getByLabelText(/^Address line 1/), { target: { value: '1 Main St' } });
+    fireEvent.change(screen.getByLabelText(/^City/), { target: { value: 'Oakland' } });
+    fireEvent.change(screen.getByLabelText(/^State \/ Province \/ Region/), { target: { value: 'CA' } });
+    fireEvent.change(screen.getByLabelText(/^Postal \/ ZIP code/), { target: { value: '94612' } });
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Calculate shipping options' })).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: 'Calculate shipping options' }));
     await waitFor(() => expect(screen.getByRole('radio', { name: /Standard/ })).toBeTruthy());
     fireEvent.click(screen.getByRole('radio', { name: /Standard/ }));
-    fireEvent.click(screen.getByRole('button', { name: 'Checkout' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Proceed to Payment' }));
     await waitFor(() => expect(checkoutOrder).toHaveBeenCalled());
     await waitFor(() => expect(paypalCallbacks).toBeTruthy());
 
@@ -210,6 +216,6 @@ describe('StoreCartPage checkout preparation', () => {
       expect(screen.getByRole('alert').textContent).toMatch(/took too long/);
     });
     expect(screen.queryByText('Loading secure payment options…')).toBeNull();
-    expect(screen.getByRole('button', { name: 'Checkout' }).disabled).toBe(false);
+    expect(screen.getByRole('button', { name: 'Proceed to Payment' }).disabled).toBe(false);
   });
 });

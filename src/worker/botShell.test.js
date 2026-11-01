@@ -138,7 +138,7 @@ describe('worker bot shell meta for static pages', () => {
     ['/status', 'Platform Status | Atelnyo', 'Check the current status of Atelnyo services, API availability, and system health.'],
     ['/developers', 'Developers | Atelnyo', 'Atelnyo developer documentation, API reference, integration guides, and open-source resources.'],
     ['/themes', 'Themes | Atelnyo', 'Browse available themes on Atelnyo.'],
-    ['/store', 'Store | Atelnyo', 'Shop products from creators on the Atelnyo store.'],
+    ['/store', 'Atelnyo Store | Atelnyo', 'Shop products from creators on Atelnyo Store.'],
     ['/affiliate/discover', 'Discover Affiliate Offers | Atelnyo', 'Find affiliate offers from creators on Atelnyo.'],
   ])('serves route-specific title and description to bots on %s', async (path, title, desc) => {
     const resp = await worker.fetch(req(path, BOT_UA), env, {});
