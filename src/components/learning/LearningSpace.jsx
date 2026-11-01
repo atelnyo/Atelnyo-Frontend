@@ -272,9 +272,41 @@ export default function LearningSpace({
         }).catch(() => { if (!cancelled) setLoadFailed(true); });
       });
     if (user) {
-      courseCheckoutService.access(courseId)
-        .then((res) => { if (!cancelled) setAccess(res?.data || null); })
-        .catch(() => { if (!cancelled) setAccess({ has_access: false }); });
+      // Access is granted SERVER-SIDE (CourseEntitlement rows written by
+      // checkout for a free course, or by _mark_order_paid when a payment
+      // captures). Right after a payment the entitlement can land a moment
+      // after the client sees "success", so a single read could return
+      // has_access:false and strand a learner who just paid on the lock
+      // screen until they refresh the page by hand. Re-check a couple of
+      // times in the background: the denial shows at once (honest), and the
+      // space unlocks by itself as soon as the grant is visible.
+      let accessTimer = null;
+      let attempt = 0;
+      const RETRY_DELAYS = [1200, 3000, 6000];
+      const checkAccess = () => {
+        courseCheckoutService.access(courseId)
+          .then((res) => {
+            if (cancelled) return;
+            const data = res?.data || {};
+            setAccess(data);
+            if (data.has_access === false && attempt < RETRY_DELAYS.length) {
+              accessTimer = window.setTimeout(checkAccess, RETRY_DELAYS[attempt]);
+              attempt += 1;
+            }
+          })
+          .catch(() => {
+            if (cancelled) return;
+            // A failed check is NOT a denial: keep the skeleton while we
+            // retry, and only report "no access" once we truly cannot tell.
+            if (attempt < RETRY_DELAYS.length) {
+              accessTimer = window.setTimeout(checkAccess, RETRY_DELAYS[attempt]);
+              attempt += 1;
+              return;
+            }
+            setAccess({ has_access: false });
+          });
+      };
+      checkAccess();
       progressService.getAll()
         .then((res) => {
           if (cancelled) return;
@@ -282,6 +314,10 @@ export default function LearningSpace({
           setProgress(list.find((p) => Number(p.course) === Number(courseId)) || null);
         })
         .catch(() => {});
+      return () => {
+        cancelled = true;
+        if (accessTimer) window.clearTimeout(accessTimer);
+      };
     }
     return () => { cancelled = true; };
   }, [courseId, user]);
