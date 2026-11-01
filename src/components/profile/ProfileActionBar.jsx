@@ -18,7 +18,7 @@ import React from 'react';
  * @param {{
  *   profile: any, lang: string, isOwner: boolean, isFollowing: boolean,
  *   onFollow: ()=>void, onShare: ()=>void, onCopyLink: ()=>void,
- *   copied: boolean, followLoading: boolean, showToast: Function,
+ *   copied: boolean, followLoading: boolean,
  *   onMessage: (presetSubject?:string)=>void, onHire: ()=>void,
  *   onCollab: ()=>void, onTip: ()=>void, onBook: ()=>void,
  *   onSubscribe: ()=>void, subscriptionsEnabled: boolean,
@@ -28,7 +28,7 @@ import React from 'react';
  */
 export default function ActionBar({
   profile, lang, isOwner, isFollowing,
-  onFollow, onShare, onCopyLink, copied, followLoading, showToast, t,
+  onFollow, onShare, onCopyLink, copied, followLoading, t,
   onMessage, onHire, onCollab, onTip, onBook, onSubscribe,
   subscriptionsEnabled = false, isSubscribed = false,
   affiliateActive = false, campaignsEnabled = false,
@@ -168,14 +168,6 @@ export default function ActionBar({
         </button>
       )}
 
-      <button
-        type="button"
-        className="csp-btn csp-btn--ghost csp-btn--icon"
-        title={t.profile_more || 'More'}
-        onClick={() => showToast?.(t.profile_more_options || 'More options', 'info-circle')}
-      >
-        <i className="fas fa-ellipsis-h" aria-hidden="true" />
-      </button>
     </div>
   );
 }

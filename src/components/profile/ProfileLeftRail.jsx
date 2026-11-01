@@ -54,6 +54,7 @@ export default function LeftNavRail({ activeTab, onChange, lang, items }) {
         className="csp-rail-item"
         aria-label="Settings"
         title="Settings"
+        onClick={() => navigate('/sheet/settings')}
       >
         <i className="fas fa-cog" aria-hidden="true" />
         <span className="csp-rail-tooltip">Settings</span>

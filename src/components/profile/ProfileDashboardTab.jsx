@@ -391,7 +391,8 @@ const DASHBOARD_SECTION_RENDERERS = {
             <span className="csp-compact-card-icon"><i className="fas fa-hand-holding-usd" /></span>
             <div className="csp-compact-card-body">
               <div className="csp-compact-card-title">{offer.title}</div>
-              <div className="csp-compact-card-meta">${offer.commission || 0} commission</div>
+              {/* ``commission`` is a percentage, not a dollar amount. */}
+              <div className="csp-compact-card-meta">{`${offer.commission ?? 0}% commission`}</div>
             </div>
           </div>
         ))}

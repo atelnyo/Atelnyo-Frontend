@@ -10,6 +10,7 @@
  */
 
 import React from 'react';
+import { languageEntry, ensureHttpUrl } from './profileUtils';
 
 export default function AboutTab({ profile, lang, t, isOwner }) {
   if (!profile) return null;
@@ -85,19 +86,23 @@ export default function AboutTab({ profile, lang, t, isOwner }) {
         <div className="csp-about-block">
           <div className="csp-about-label">{labels.languages}</div>
           <div className="csp-lang-row">
-            {profile.languages.map((code, i) => (
-              <div key={i} className="csp-lang-item">
-                <span className="csp-lang-name">{code.toUpperCase()}</span>
-                <span className="csp-lang-level">Native</span>
-              </div>
-            ))}
+            {profile.languages.map((code, i) => {
+              // Codes carry no proficiency — never claim "Native".
+              const { name, level } = languageEntry(code);
+              return (
+                <div key={i} className="csp-lang-item">
+                  <span className="csp-lang-name">{name.toUpperCase()}</span>
+                  {level && <span className="csp-lang-level">{level}</span>}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
       {profile.website_url && (
         <div className="csp-about-block">
           <div className="csp-about-label">{labels.website}</div>
-          <a href={profile.website_url} target="_blank" rel="noopener noreferrer" className="csp-social-link">
+          <a href={ensureHttpUrl(profile.website_url)} target="_blank" rel="noopener noreferrer" className="csp-social-link">
             <i className="fas fa-globe" aria-hidden="true" /> {profile.website_url}
           </a>
         </div>
@@ -119,7 +124,7 @@ export default function AboutTab({ profile, lang, t, isOwner }) {
             <div className="csp-about-label">{labels.social}</div>
             <div className="csp-skills-row">
               {entries.map(([platform, url]) => (
-                <a key={platform} href={typeof url === 'string' && url.startsWith('http') ? url : `https://${url || ''}`}
+                <a key={platform} href={ensureHttpUrl(url)}
                   target="_blank" rel="noopener noreferrer" className="csp-social-link">
                   <i className={`fab fa-${platform}`} aria-hidden="true" /> {platform}
                 </a>

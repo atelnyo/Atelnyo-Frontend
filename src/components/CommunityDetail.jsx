@@ -488,7 +488,10 @@ export function CommunityBannedMembers() {
     const slug = community?.slug;
     if (!slug || !canSee) return;
     let cancelled = false;
-    setLoading(true);
+    // Deferral (react-hooks/set-state-in-effect): push the spinner state
+    // into a microtask so the effect body stays free of synchronous
+    // setState — same pattern as the public-profile fetches.
+    Promise.resolve().then(() => { if (!cancelled) setLoading(true); });
     communitiesService.bannedMembers(slug)
       .then((r) => { if (!cancelled) setList(Array.isArray(r?.data) ? r.data : []); })
       .catch(() => { /* silent */ })
@@ -820,7 +823,7 @@ export default function CommunityDetail({ lang = 'ht', t = {}, showToast, user }
     try {
       await communitiesService.delete(slug);
       showToast?.(lang === 'ht' ? 'Kominote a efase.' : 'Community deleted.', 'trash');
-      navigate('/creator/studio?section=communities');
+      navigate('/sheet/studio?section=communities');
     } catch (err) {
       showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase kominote a.' : 'Could not delete community'), 'circle-exclamation');
     }
@@ -918,7 +921,7 @@ export default function CommunityDetail({ lang = 'ht', t = {}, showToast, user }
                   <button
                     type="button"
                     className="c-banner-btn"
-                    onClick={() => navigate('/creator/studio?section=communities')}
+                    onClick={() => navigate('/sheet/studio?section=communities')}
                     title={lang === 'ht' ? 'Paramèt kominote a' : 'Community settings'}
                   >
                     <i className="fas fa-cog" aria-hidden="true" />

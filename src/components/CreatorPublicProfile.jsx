@@ -32,6 +32,7 @@ import {
   communityEventsService,
   walletService,
   cachedGet,
+  invalidateCache,
 } from '../services/api';
 import { prefetchOnHover, prefetch } from '../services/prefetch';
 import '../styles/public-profile.css';
@@ -263,18 +264,12 @@ export default function CreatorPublicProfile({
   const [tiktokPosts, setTiktokPosts] = useState(null); // C.6 showcase cache
   const [dashLoading, setDashLoading] = useState(false);
 
-  // Owner detection
-  const storedUserId = (() => {
-    try {
-      const raw = localStorage.getItem('atelnyo_user_id') || localStorage.getItem('proauth_user');
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      const candidate = parsed?.id ?? parsed?.user_id ?? parsed;
-      const num = Number(candidate);
-      return Number.isFinite(num) && num > 0 ? num : null;
-    } catch { return null; }
-  })();
-  const effectiveUserId = currentUserId ?? storedUserId;
+  // Owner detection — the logged-in user id comes from App as a prop
+  // (`currentUserId={user?.id}` on both /c/ and /creator/). Nothing in
+  // the app writes the legacy "atelnyo_user_id"/"proauth_user" keys, so
+  // the old localStorage fallback was dead code that could only ever
+  // surface a stale owner.
+  const effectiveUserId = currentUserId ?? null;
   const isOwner = !!(effectiveUserId && profile?.user_id && effectiveUserId === profile.user_id);
 
   // ─── Fetch profile ────────────────────────────────────────────────
@@ -615,7 +610,15 @@ export default function CreatorPublicProfile({
     creatorProfileService.follow(username)
       .then((res) => {
         setIsFollowing(!!res?.data?.is_following);
-        setFollowersCount(Number(res?.data?.followers_count) || followersCount);
+        // ``||`` kept the OLD count when the server legitimately returned 0
+        // (the last follower just unfollowed, so the badge stayed on 1).
+        const serverCount = res?.data?.followers_count;
+        setFollowersCount(serverCount != null ? Number(serverCount) : followersCount);
+        // Drop the cached profile payload — it was fetched BEFORE this
+        // follow and carries the old is_following / followers_count, so
+        // without this a re-open within the 30s TTL showed "Follow" again
+        // (the follow looked like it never happened).
+        invalidateCache(`GET:creator-profiles/${username}/`).catch(() => {});
         if (res?.data?.is_following && res?.data?.creator_has_affiliate_program) {
           showToast?.(
             lang === 'ht'
@@ -694,7 +697,7 @@ export default function CreatorPublicProfile({
   }, []);
 
   const handleShare = useCallback(() => {
-    // Never share a broken "/@" URL — bail when there is no username.
+    // Never share a broken "/c/" URL — bail when there is no username.
     if (!username) return;
     const url = `${window.location.origin}/c/${username}`;
     if (typeof navigator !== 'undefined' && navigator.share) {
@@ -819,15 +822,8 @@ export default function CreatorPublicProfile({
     if (profile?.products_count > 0) parts.push(profile.products_count + ' product' + (profile.products_count > 1 ? 's' : ''));
     return parts.length > 0 ? parts.join(' — ') + ' on Atelnyo.' : '';
   })();
-  // og:url stays the bare /@username deep-link so shares across all
-  // localized versions aggregate on ONE object. The canonical, however,
-  // must be the URL the crawler is actually on (spec §17 — each
-  // localized page canonicalizes to itself, never to the bare URL).
-  const ogUrl = `${window.location.origin}/c/${username || ''}`;
-  // Always use @ in canonical — even if Cloudflare redirected to %40.
-  // Crawlers must see the clean /@username URL as canonical.
-  const canonicalUrl = `${window.location.origin}/c/${username || ''}`;
-
+  // Canonical/og:url are built by SEOHead from the ``url`` prop below
+  // (/c/<username>, locale-aware), so no absolute URL is assembled here.
 
   // ─── Render branches ─────────────────────────────────────────────
   if (loading) return <ProfileSkeleton />;

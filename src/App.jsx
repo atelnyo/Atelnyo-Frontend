@@ -346,7 +346,7 @@ import CommunityDetail, {
   CommunityCourses,
 } from './components/CommunityDetail';
 const ActivityTimeline = lazy(() => import('./components/ActivityTimeline'));
-import { SHEETS } from './routes/sheets';
+import { SHEETS, legacyProfileTarget } from './routes/sheets';
 import EmailVerificationRoute from './routes/EmailVerificationRoute';
 import { translations } from './data/translations';
 import api, { courseService, communitiesService, authService, sessionService, progressService, favoriteService, activityFeedService, proposalService, clearTokenPair, broadcastLogout, API_URL } from './services/api';
@@ -441,20 +441,26 @@ function PolicyPageRoute({ lang, showToast }) {
 
 /**
  * CatchAllRoute — handles the catch-all <Route path="*" />.
- * React Router v6 does not match the @ character in route path patterns
- * (e.g. "/@:username"), so this wrapper checks the current URL manually.
- * If the path starts with /@, it renders <CreatorPublicProfile> with the
- * extracted username. Otherwise it renders <NotFound>.
+ *
+ * React Router v6 cannot match the @ character in a route pattern
+ * (e.g. "/@:username"), so the legacy profile shape is resolved from the
+ * actual pathname here. This is ALSO where every unknown path lands, so
+ * it must always redirect — returning null rendered a blank page instead
+ * of the NotFound page.
  */
 function CatchAllRoute({ lang, showToast, currentUserId, onOpenCheckout, user, onAuthRequired, pathname }) {
   const location = useLocation();
-  const navigate = useNavigate();
   // ``pathname`` is the EFFECTIVE path (locale segment stripped) passed
-  // by App — a localized /ht-HT/@username must still resolve the
-  // creator profile instead of 404-ing.
+  // by App — a localized /ht-HT/@username must still resolve instead of
+  // 404-ing.
   const p = pathname || location.pathname;
 
-  // Match /c/username (new pattern) and legacy /@username (redirect).
+  // Legacy /@username (and the percent-encoded /%40username a CDN can
+  // produce) → canonical /c/username.
+  const legacyTarget = legacyProfileTarget(p);
+  if (legacyTarget) return <Navigate to={legacyTarget} replace />;
+
+  // Match /c/username (new pattern).
   if (p.match(/^\/c\/([^/]+)/)) {
     const username = p.match(/^\/c\/([^/]+)/)?.[1];
     if (username) {
@@ -477,7 +483,7 @@ function CatchAllRoute({ lang, showToast, currentUserId, onOpenCheckout, user, o
 
   // Unknown path — redirect to the proper /404 route which renders
   // NotFound inside <main> via the effectivePathname check in App.
-  return null;
+  return <Navigate to="/404" replace />;
 }
 
 /**
@@ -3472,12 +3478,18 @@ function App() {
             lang={lang}
             showToast={showToast}
             currentUserId={user?.id}
+            // user + onAuthRequired: without them the Follow / Message
+            // buttons on this route did NOTHING — a logged-in visitor was
+            // treated as anonymous, the auth modal call was a no-op, and
+            // the pending follow never fired. Same wiring as /c/:username.
+            user={user}
+            onAuthRequired={() => setIsAuthOpen(true)}
             onOpenCheckout={(type, price, meta) => handleOpenCheckout(type, price, meta)}
           />
         } />
-        {/* /@:username — REMOVED 2026-07-30: React Router v6 does not match
-            the @ character in route path patterns, causing a 404 error.
-            Handled by CatchAllRoute (<Route path="*" />) below instead. */}        {/* /sheet/page/:slug — Dynamic CMS pages (About, Pricing, FAQ, etc.)
+        {/* /@:username — React Router v6 does not match the @ character in
+            route path patterns, so CatchAllRoute (<Route path="*" />)
+            redirects it to the canonical /c/username. */}        {/* /sheet/page/:slug — Dynamic CMS pages (About, Pricing, FAQ, etc.)
             Canonical under /sheet/ per the sheet-routing convention (T093).
             The legacy /page/:slug shape redirects (replace) to the canonical
             URL so old bookmarks / shared links keep working. */}
@@ -3632,7 +3644,17 @@ function App() {
             the catch-all ``*`` below. NotFound renders inside <main>
             (see the effectivePathname check in App). */}
         <Route path="/404" element={null} />
-        <Route path="*" element={<Navigate to="/404" replace />} />
+        <Route path="*" element={
+          <CatchAllRoute
+            lang={lang}
+            showToast={showToast}
+            currentUserId={user?.id}
+            user={user}
+            onAuthRequired={() => setIsAuthOpen(true)}
+            onOpenCheckout={(type, price, meta) => handleOpenCheckout(type, price, meta)}
+            pathname={effectivePathname}
+          />
+        } />
       </Routes>
       </Suspense>
       </ChunkLoadErrorBoundary>

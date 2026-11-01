@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fmtCount, fmtDate } from './profileUtils';
+import { fmtCount, fmtDate, languageEntry } from './profileUtils';
 
 /**
  * PremiumHero — cinematic cover + ringed avatar + identity bar.
@@ -13,9 +13,16 @@ export default function PremiumHero({ profile, lang, followersCount }) {
   const [avatarError, setAvatarError] = useState(false);
 
   // Reset avatarError lè avatar_url chanje (pou nouvo imaj ka reload)
-  // Reset coverError lè cover_url chanje tou
-  useEffect(() => setAvatarError(false), [profile.avatar_url]);
-  useEffect(() => setCoverError(false), [profile.cover_url]);
+  // Reset coverError lè cover_url chanje tou.
+  // Deferral (react-hooks/set-state-in-effect): run the reset in a
+  // microtask so the effect body has no synchronous setState — same
+  // pattern as the profile fetches.
+  useEffect(() => {
+    Promise.resolve().then(() => setAvatarError(false));
+  }, [profile.avatar_url]);
+  useEffect(() => {
+    Promise.resolve().then(() => setCoverError(false));
+  }, [profile.cover_url]);
   const hasCover = profile.cover_url?.trim() && !coverError;
   const avatarInitial = profile.avatar_initial
     || profile.display_name?.[0]?.toUpperCase()
@@ -169,7 +176,7 @@ export default function PremiumHero({ profile, lang, followersCount }) {
             {profile.languages?.length > 0 && (
               <span className="csp-identity-meta-item">
                 <i className="fas fa-language" aria-hidden="true" />
-                {profile.languages.join(' · ')}
+                {profile.languages.map((code) => languageEntry(code).name).filter(Boolean).join(' · ')}
               </span>
             )}
             {profile.created_at && (

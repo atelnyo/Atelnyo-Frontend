@@ -36,6 +36,43 @@ export function fmtDate(iso, lang) {
 }
 
 /**
+ * languageEntry — normalize one entry of ``CreatorPublicProfile.languages``.
+ *
+ * The stored JSON is normally a list of CODES ('ht', 'fr'), which carries
+ * NO proficiency — so callers must never invent one. An object entry
+ * ({name|code, level|proficiency}) is honored when present.
+ *
+ * @param {string|object} code
+ * @returns {{ name: string, level: string }}
+ */
+export function languageEntry(code) {
+  if (typeof code === 'string') return { name: code, level: '' };
+  if (code && typeof code === 'object') {
+    return {
+      name: code.name || code.label || code.code || '',
+      level: code.level || code.proficiency || '',
+    };
+  }
+  return { name: '', level: '' };
+}
+
+/**
+ * ensureHttpUrl — make a user-entered URL absolute.
+ *
+ * Profiles store bare domains ("atelnyo.site"); rendering that as an href
+ * made the link resolve relative to the current page (a broken link).
+ *
+ * @param {string} url
+ * @returns {string} absolute http(s) URL, or '' when empty
+ */
+export function ensureHttpUrl(url) {
+  if (typeof url !== 'string') return '';
+  const trimmed = url.trim();
+  if (!trimmed) return '';
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+}
+
+/**
  * isNewItem — true when an ISO timestamp falls within ``days`` (default 14)
  * of now. Used to stamp a "New" badge on freshly created catalog cards.
  * Invalid/missing timestamps return false.

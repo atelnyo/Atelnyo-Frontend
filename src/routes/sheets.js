@@ -194,10 +194,11 @@ export const SHEETS = Object.freeze({
   ADMIN_RULE_ENGINE: '/sheet/admin/rules',
   // Admin FAQ — staff-specific help center for admin tools.
   ADMIN_FAQ: '/sheet/admin/faq',
-  // Phase 54 — Creator Public Profile
-  // Dynamic route with @:username param (industry-standard).
-  // Navigate via navigate(`/@${username}`).
-  // Legacy /creator/:username redirects to /@:username via App.jsx.
+  // Phase 54 — Creator Public Profile.
+  // Canonical public URL is /c/:username; navigate via
+  // navigate(`/c/${username}`). /creator/:username still renders the same
+  // page (older links / Explore use it), and the legacy /@username shape
+  // is redirected to /c/username by CatchAllRoute in App.jsx.
   CREATOR_PROFILE: '/c/:username',
   CREATOR_PROFILE_LEGACY: '/creator/:username',
   // Phase 55 — Search & Discovery Engine. Public, shareable URL:
@@ -213,3 +214,29 @@ export const SHEETS = Object.freeze({
   // page's "no media loaded" empty state and bounces to /sheet/studio.
   MEDIA_ENTITY: '/sheet/media/:id',
 });
+
+/**
+ * Map a legacy creator-profile URL to its canonical /c/<username> path.
+ *
+ * React Router v6 cannot match the ``@`` character in a route pattern, so
+ * the old ``/@username`` shape (and the ``/%40username`` variant a CDN can
+ * produce) is resolved from the raw pathname instead of a <Route path>.
+ *
+ * @param {string} pathname — path without any locale prefix (see App.jsx)
+ * @returns {string|null} canonical path, or null when this is not a
+ *          legacy profile URL
+ */
+export function legacyProfileTarget(pathname) {
+  if (typeof pathname !== 'string') return null;
+  const match = pathname.match(/^\/(?:@|%40)([^/]+)\/?$/i);
+  if (!match) return null;
+  let username = match[1];
+  try {
+    username = decodeURIComponent(username);
+  } catch (_) {
+    // Malformed escape — keep the raw segment rather than throwing.
+  }
+  username = username.trim();
+  if (!username) return null;
+  return `/c/${encodeURIComponent(username)}`;
+}

@@ -20,7 +20,7 @@
 
 import React from 'react';
 import ProfileM3Section from './ProfileM3Section';
-import { fmtDate } from './profileUtils';
+import { fmtDate, languageEntry, ensureHttpUrl } from './profileUtils';
 
 /* About section — bio + skills */
 export function AboutCard({ profile }) {
@@ -45,12 +45,18 @@ export function LanguageCard({ languages }) {
   return (
     <ProfileM3Section icon="fa-language" title="Languages" configId="languages">
       <div className="csp-lang-row">
-        {languages.map((code, i) => (
-          <div key={i} className="csp-lang-item">
-            <span className="csp-lang-name">{code.toUpperCase()}</span>
-            <span className="csp-lang-level">Native</span>
-          </div>
-        ))}
+        {languages.map((code, i) => {
+          // The API sends language CODES only (no proficiency), so never
+          // invent one — "Native" used to be hard-coded here for every
+          // language. `languageEntry` reads {name, level} when present.
+          const { name, level } = languageEntry(code);
+          return (
+            <div key={i} className="csp-lang-item">
+              <span className="csp-lang-name">{name.toUpperCase()}</span>
+              {level && <span className="csp-lang-level">{level}</span>}
+            </div>
+          );
+        })}
       </div>
     </ProfileM3Section>
   );
@@ -71,7 +77,7 @@ export function QuickLinksCard({ socialLinks, websiteUrl }) {
       entries = Object.entries(socialLinks).filter(([, v]) => v);
     }
     entries.forEach(([platform, url]) => {
-      const href = typeof url === 'string' && url.startsWith('http') ? url : `https://${url || ''}`;
+      const href = ensureHttpUrl(url);
       links.push({ icon: `fa-${platform}`, label: platform, url: href });
     });
   }
@@ -200,7 +206,9 @@ export function AffiliateCard({ offers, lang }) {
           <span className="csp-compact-card-icon"><i className="fas fa-hand-holding-usd" /></span>
           <div className="csp-compact-card-body">
             <div className="csp-compact-card-title">{offer.title}</div>
-            <div className="csp-compact-card-meta">${offer.commission || 0} commission</div>
+            {/* ``commission`` is a PERCENTAGE (commission_pct upstream) —
+                the old ``$`` prefix advertised dollars. */}
+            <div className="csp-compact-card-meta">{`${offer.commission ?? 0}% commission`}</div>
           </div>
         </div>
       ))}
