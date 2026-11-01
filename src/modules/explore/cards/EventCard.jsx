@@ -125,42 +125,44 @@ export default function EventCard({ event, t, lang = 'ht', onOpenCheckout, showT
       data-testid="event-card"
       data-event-id={event.id}
     >
-      {(hasCover || hasTrailer) && (
-        <div className="explore-card-image-wrap explore-card-image-square">
-          {hasCover && !imgFailed ? (
-            <img
-              className={`explore-card-image ${imgLoaded ? 'explore-card-image--loaded' : ''}`}
-              src={cover}
-              alt={event.title}
-              loading="lazy"
-              onLoad={() => setImgLoaded(true)}
-              onError={() => setImgFailed(true)}
-            />
-          ) : (
-            <EventFallback title={event.title} isHt={lang === 'ht'} />
-          )}
-          {showPreview && (
-            <HoverVideoPreview videoSrc={videoSrc} title={event.title} />
-          )}
-          {/* Trending Velocity — shows how fast this event is gaining traction */}
-          {Number(event?._score?.trending) > 10 && (
-            <TrendingVelocity
-              score={event._score.trending}
-              lang={lang}
-              size="sm"
-            />
-          )}
-          {hasTrailer && (
-            <div
-              className="explore-card-video-badge"
-              aria-label={t.explore_event_trailer || 'Trailer'}
-              title={t.explore_event_trailer || 'Trailer'}
-            >
-              <i className="fas fa-video" aria-hidden="true" />
-            </div>
-          )}
-        </div>
-      )}
+      {/* Always reserve the 130px cover frame, even without a cover: this
+          card used to drop the whole block, so a coverless event rendered
+          half the height of every neighbour in the list. The SVG fallback
+          fills the frame instead of leaving a gap. */}
+      <div className="explore-card-image-wrap explore-card-image-square">
+        {hasCover && !imgFailed ? (
+          <img
+            className={`explore-card-image ${imgLoaded ? 'explore-card-image--loaded' : ''}`}
+            src={cover}
+            alt={event.title}
+            loading="lazy"
+            onLoad={() => setImgLoaded(true)}
+            onError={() => setImgFailed(true)}
+          />
+        ) : (
+          <EventFallback title={event.title} isHt={lang === 'ht'} />
+        )}
+        {showPreview && (
+          <HoverVideoPreview videoSrc={videoSrc} title={event.title} />
+        )}
+        {/* Trending Velocity — shows how fast this event is gaining traction */}
+        {Number(event?._score?.trending) > 10 && (
+          <TrendingVelocity
+            score={event._score.trending}
+            lang={lang}
+            size="sm"
+          />
+        )}
+        {hasTrailer && (
+          <div
+            className="explore-card-video-badge"
+            aria-label={t.explore_event_trailer || 'Trailer'}
+            title={t.explore_event_trailer || 'Trailer'}
+          >
+            <i className="fas fa-video" aria-hidden="true" />
+          </div>
+        )}
+      </div>
       <div className="explore-event-layout">
         <div className="explore-event-date">
           <span className="explore-event-date-day">

@@ -17407,3 +17407,8 @@ body.dark-mode .gami-goal-menu { background: #0f172a; border-color: rgba(59, 130
   .ls-curriculum .ls-module.is-side-left,
   .ls-curriculum .ls-module.is-side-right { transform: none; }
 }
+
+/* Platform-wide image guard: a user-uploaded image must never overflow
+   its container. Fixed-size components (avatars, covers, galleries) set
+   their own width/height/object-fit, so this only caps the extremes. */
+img { max-width: 100%; }

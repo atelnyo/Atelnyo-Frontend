@@ -89,10 +89,17 @@ body.dark-mode .cms .btn-light {
 /* ─── Hero ───────────────────────────────────────────────────────── */
 .cms-hero {
   position: relative;
-  min-height: 300px;
+  /* Absolute height, NOT content-driven: `min-height` let a long title or
+     description stretch the frame (and the background photo with it). The
+     frame is always between 300px (mobile) and 400px (desktop). */
+  height: clamp(300px, 38vw, 400px);
+  min-height: 0;
   display: flex;
   align-items: center;
   overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .cms-hero-overlay {
@@ -105,6 +112,9 @@ body.dark-mode .cms .btn-light {
   position: relative;
   z-index: 2;
   max-width: 700px;
+  max-height: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
   margin: 0 auto;
   text-align: center;
   padding: 40px 20px;
@@ -116,6 +126,13 @@ body.dark-mode .cms .btn-light {
   font-weight: 800;
   margin: 0 0 0.5rem;
   line-height: 1.2;
+  /* The hero has a DEFINITE height (300–400px, see `.cms-hero`). An
+     unbounded headline would be clipped by that frame, so it is clamped
+     to three lines here and the copy continues in the page body. */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .cms-hero-subtitle,
@@ -123,6 +140,20 @@ body.dark-mode .cms .btn-light {
   font-size: 1.1rem;
   opacity: 0.9;
   margin: 0 0 1.5rem;
+  display: -webkit-box;
+  /* 2 lines (not 3) so title + description + CTA always fit inside the
+     300px mobile frame without the button being clipped. */
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@media (max-width: 720px) {
+  /* Tighter vertical padding on the smallest frame (300px) keeps the
+     fixed-height hero from cropping the CTA. */
+  .cms-hero-content {
+    padding: 24px 20px;
+  }
 }
 
 .cms-hero-cta {

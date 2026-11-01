@@ -207,7 +207,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
 
   // ─── File upload handlers ──────────────────────────────────────────
 
-  const handleAvatarUpload = useCallback((e) => {
+  const handleAvatarUpload = useCallback(async (e) => {
     const file = e.target.files?.[0];
     if (!file) {return;}
 
@@ -221,30 +221,33 @@ export default function PublicProfileSection({ lang, showToast, user }) {
     }
 
     setUploadingAvatar(true);
-    creatorProfileService.uploadAvatar(file)
-      .then((res) => {
-        const url = res?.data?.url;
-        if (url) {
-          setForm((prev) => ({ ...prev, avatar_url: url }));
-          showToast?.(
-            isHt ? 'Avatè telechaje!' : 'Avatar uploaded!',
-            'check-circle',
-          );
-        }
-      })
-      .catch(() => {
+    try {
+      // Shared guard: size cap + downscale before the request goes out.
+      const { prepareImageForUpload } = await import('../../../utils/prepareImageUpload');
+      const prepared = await prepareImageForUpload(file);
+      const res = await creatorProfileService.uploadAvatar(prepared);
+      const url = res?.data?.url;
+      if (url) {
+        setForm((prev) => ({ ...prev, avatar_url: url }));
         showToast?.(
-          isHt ? 'Erè nan telechaje avatè.' : 'Error uploading avatar.',
-          'exclamation-triangle',
+          isHt ? 'Avatè telechaje!' : 'Avatar uploaded!',
+          'check-circle',
         );
-      })
-      .finally(() => {
-        setUploadingAvatar(false);
-        if (avatarInputRef.current) {avatarInputRef.current.value = '';}
-      });
+      }
+    } catch (err) {
+      showToast?.(
+        err?.message === 'too_large'
+          ? (isHt ? 'Imaj twò gwo (maks 8 MB).' : 'Image too large (max 8 MB).')
+          : (isHt ? 'Erè nan telechaje avatè.' : 'Error uploading avatar.'),
+        'exclamation-triangle',
+      );
+    } finally {
+      setUploadingAvatar(false);
+      if (avatarInputRef.current) {avatarInputRef.current.value = '';}
+    }
   }, [isHt, showToast]);
 
-  const handleCoverUpload = useCallback((e) => {
+  const handleCoverUpload = useCallback(async (e) => {
     const file = e.target.files?.[0];
     if (!file) {return;}
 
@@ -257,27 +260,30 @@ export default function PublicProfileSection({ lang, showToast, user }) {
     }
 
     setUploadingCover(true);
-    creatorProfileService.uploadCover(file)
-      .then((res) => {
-        const url = res?.data?.url;
-        if (url) {
-          setForm((prev) => ({ ...prev, cover_url: url }));
-          showToast?.(
-            isHt ? 'Kouvèti telechaje!' : 'Cover uploaded!',
-            'check-circle',
-          );
-        }
-      })
-      .catch(() => {
+    try {
+      // Same shared guard as the avatar (size cap + downscale).
+      const { prepareImageForUpload } = await import('../../../utils/prepareImageUpload');
+      const prepared = await prepareImageForUpload(file);
+      const res = await creatorProfileService.uploadCover(prepared);
+      const url = res?.data?.url;
+      if (url) {
+        setForm((prev) => ({ ...prev, cover_url: url }));
         showToast?.(
-          isHt ? 'Erè nan telechaje kouvèti.' : 'Error uploading cover.',
-          'exclamation-triangle',
+          isHt ? 'Kouvèti telechaje!' : 'Cover uploaded!',
+          'check-circle',
         );
-      })
-      .finally(() => {
-        setUploadingCover(false);
-        if (coverInputRef.current) {coverInputRef.current.value = '';}
-      });
+      }
+    } catch (err) {
+      showToast?.(
+        err?.message === 'too_large'
+          ? (isHt ? 'Imaj twò gwo (maks 8 MB).' : 'Image too large (max 8 MB).')
+          : (isHt ? 'Erè nan telechaje kouvèti.' : 'Error uploading cover.'),
+        'exclamation-triangle',
+      );
+    } finally {
+      setUploadingCover(false);
+      if (coverInputRef.current) {coverInputRef.current.value = '';}
+    }
   }, [isHt, showToast]);
 
   // Auto-create profile for active creators whose profile wasn't

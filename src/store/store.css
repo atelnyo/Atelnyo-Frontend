@@ -202,7 +202,15 @@
 .store-favorites { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .store-favorites a { color: var(--store-navy); }
 .store-card__category { margin: 10px 12px 0; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #6b7280; }
-.store-card__title { font-size: 1rem; margin: 4px 12px 4px; }
+/* A long product title must not stretch the card (nor its row in the
+   store grid): clamp to two lines and reserve that height so cards with
+   a one-line title stay aligned with two-line neighbours. */
+.store-card__title {
+  font-size: 1rem; margin: 4px 12px 4px; line-height: 1.3;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.6em;
+}
 .store-card__rating { margin: 0 12px 6px; font-size: 0.85rem; color: #6b7280; }
 .store-card__stars { color: #d4a017; letter-spacing: 1px; }
 .store-card__price { margin: 0 12px 12px; font-weight: 700; display: flex; gap: 8px; align-items: baseline; }
