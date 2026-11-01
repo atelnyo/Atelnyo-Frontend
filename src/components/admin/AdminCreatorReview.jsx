@@ -538,8 +538,8 @@ function ReviewModal({ application, onClose, onReviewed, showToast }) {
 // ═══════════════════════════════════════════════════════════════════════
 
 function ApplicationCard({ app, onReview, showToast }) {
-  const isPendingAction = app.status === 'pending' || app.status === 'under_review';
-  const needsAttention = app.status === 'pending';
+  const isPendingAction = app.status === 'submitted' || app.status === 'under_review';
+  const needsAttention = app.status === 'submitted';
 
   return (
     <div className={classNames('admin-cr-card', needsAttention && 'admin-cr-card-urgent')}>
@@ -636,7 +636,7 @@ function EmptyState({ icon, title, hint }) {
 
 const FILTER_OPTIONS = [
   { value: '',     label: 'All',        icon: 'fa-list' },
-  { value: 'pending',      label: 'Pending',      icon: 'fa-hourglass-half' },
+  { value: 'submitted',    label: 'Submitted',    icon: 'fa-hourglass-half' },
   { value: 'under_review', label: 'Under Review', icon: 'fa-magnifying-glass' },
   { value: 'need_information', label: 'Need Info', icon: 'fa-circle-info' },
   { value: 'approved',     label: 'Approved',     icon: 'fa-circle-check' },
@@ -698,7 +698,7 @@ export default function AdminCreatorReview({ lang = 'ht', showToast, user, onNav
     );
   }
 
-  const pendingCount = applications?.filter((a) => a.status === 'pending').length || 0;
+  const pendingCount = applications?.filter((a) => a.status === 'submitted').length || 0;
   const allCount = applications?.length || 0;
 
   return (
@@ -741,7 +741,7 @@ export default function AdminCreatorReview({ lang = 'ht', showToast, user, onNav
               <i className={`fas ${opt.icon}`} aria-hidden="true" />
               <span>{opt.label}</span>
               {opt.value === '' && allCount > 0 && <span className="admin-cr-count-badge">{allCount}</span>}
-              {opt.value === 'pending' && pendingCount > 0 && <span className="admin-cr-count-badge">{pendingCount}</span>}
+              {opt.value === 'submitted' && pendingCount > 0 && <span className="admin-cr-count-badge">{pendingCount}</span>}
             </button>
           ))}
         </div>

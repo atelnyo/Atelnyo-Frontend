@@ -291,7 +291,7 @@ function StatCard({ icon, label, value, formatter, accent, subtitle, onClick }) 
 // ─── QueueItem ────────────────────────────────────────────────────────
 
 function QueueItem({ app, onReview }) {
-  const cfg = CREATOR_APP_STATUS[app.status] || CREATOR_APP_STATUS.pending;
+  const cfg = CREATOR_APP_STATUS[app.status] || CREATOR_APP_STATUS.submitted;
   // The backend sends ``user`` as a plain integer FK id (never a nested
   // object), so the display name must come from ``applicant_username`` —
   // same contract AdminCreatorReview uses. Reading ``app.user?.username``
@@ -392,7 +392,7 @@ export default function AdminDashboard({ lang = 'ht', showToast, user, onNavigat
       const [dashRes, healthRes, queueRes] = await Promise.allSettled([
         api.get('admin/dashboard/'),
         api.get('admin/health/').catch(() => null),
-        api.get('identity/creator-apply/admin_all/', { params: { status: 'pending' } }),
+        api.get('identity/creator-apply/admin_all/', { params: { status: 'submitted' } }),
       ]);
 
       if (dashRes.status === 'fulfilled') {
