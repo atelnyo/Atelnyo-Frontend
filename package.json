@@ -51,7 +51,7 @@
     "eslint-plugin-react-refresh": "^0.5.3",
     "jsdom": "^30.0.1",
     "vite": "^6.4.5",
-    "vitest": "^4.1.10"
+    "vitest": "^5.0.5"
   },
   "//overrides": "@firebase/firestore pins @grpc/grpc-js ~1.9.0, which carries the auth-context and status-message advisories. 1.13.6 is the first patched 1.x; the override stays inside major 1 so the gRPC API firestore uses is unchanged.",
   "overrides": {
