@@ -23,7 +23,7 @@
  *   - Smart suggestions based on context
  */
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { aiWorkerService, searchService, courseService } from '../services/api';
+import api, { aiWorkerService, searchService, courseService } from '../services/api';
 import {
   executeEnroll,
   executeToggleSave,
