@@ -50,14 +50,14 @@ const SECURITY_HEADERS = {
   // console violation — no server-side error at all.
   'Content-Security-Policy': [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://connect.facebook.net https://cdnjs.cloudflare.com https://www.google-analytics.com https://*.paypal.com https://*.paypalobjects.com https://static.cloudflareinsights.com",
-    "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://connect.facebook.net https://cdnjs.cloudflare.com https://www.google-analytics.com https://*.paypal.com https://*.paypalobjects.com https://static.cloudflareinsights.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.googletagmanager.com https://connect.facebook.net https://cdnjs.cloudflare.com https://www.google-analytics.com https://*.paypal.com https://*.paypalobjects.com https://static.cloudflareinsights.com",
+    "script-src-elem 'self' 'unsafe-inline' https://accounts.google.com https://www.googletagmanager.com https://connect.facebook.net https://cdnjs.cloudflare.com https://www.google-analytics.com https://*.paypal.com https://*.paypalobjects.com https://static.cloudflareinsights.com",
     "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://*.paypal.com https://*.paypalobjects.com",
     "font-src 'self' https://cdnjs.cloudflare.com data:",
     "img-src 'self' data: blob: https: http:",
     "media-src 'self' blob: https: http:",
-    "connect-src 'self' https://api.atelnyo.site https://atelnyo.atelnyo.workers.dev https://www.google-analytics.com https://firebasestorage.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com wss://api.atelnyo.site ws://127.0.0.1:8000 https://*.sentry.io https://*.paypal.com https://*.paypalobjects.com https://static.cloudflareinsights.com",
-    "frame-src 'self' https://www.youtube.com https://player.vimeo.com https://js.stripe.com https://*.paypal.com https://*.paypalobjects.com",
+    "connect-src 'self' https://accounts.google.com https://api.atelnyo.site https://atelnyo.atelnyo.workers.dev https://www.google-analytics.com https://firebasestorage.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com wss://api.atelnyo.site ws://127.0.0.1:8000 https://*.sentry.io https://*.paypal.com https://*.paypalobjects.com https://static.cloudflareinsights.com",
+    "frame-src 'self' https://accounts.google.com https://www.youtube.com https://player.vimeo.com https://js.stripe.com https://*.paypal.com https://*.paypalobjects.com",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",

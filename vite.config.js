@@ -28,6 +28,14 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 3000,
+    // strictPort: without it Vite silently falls back to 3001/3002 when
+    // 3000 is taken, which changes the page ORIGIN. Google Identity
+    // Services matches the origin against the OAuth client's
+    // authorized JavaScript origins exactly, so a drifted port renders
+    // no "Continue with Google" button and logs nothing the user can
+    // see. Fail loudly instead — scripts/run_vite.sh and dev-up.sh
+    // already reap :3000 before spawning.
+    strictPort: true,
     hmr: codespaceHost
       ? { host: codespaceHost, clientPort: 443, protocol: 'wss', path: '/__vite_hmr' }
       : true,
