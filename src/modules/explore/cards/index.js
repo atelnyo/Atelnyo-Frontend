@@ -33,6 +33,7 @@ import {
   SkeletonCourseCard,
   SkeletonMusicCard,
   SkeletonTalentCard,
+  SkeletonSpotlightCard,
 } from './skeleton/SkeletonCards';
 
 const CourseCard = React.memo(_CourseCard);
@@ -57,15 +58,16 @@ export const CardRegistry = {
   product:   { component: ProductCard,   skeleton: 'course' },
   event:     { component: EventCard,     skeleton: 'course' },
   job:       { component: JobPostCard,   skeleton: 'course' },
-  spotlight: { component: SpotlightCard, skeleton: 'course' },
+  spotlight: { component: SpotlightCard, skeleton: 'spotlight' },
   creator:   { component: FollowSuggestionCard, skeleton: 'talent' },
 };
 
 /** Map skeleton type string → Skeleton component */
 export const SkeletonMap = {
-  course:  SkeletonCourseCard,
-  music:   SkeletonMusicCard,
-  talent:  SkeletonTalentCard,
+  course:    SkeletonCourseCard,
+  music:     SkeletonMusicCard,
+  talent:    SkeletonTalentCard,
+  spotlight: SkeletonSpotlightCard,
 };
 
 export {
@@ -86,4 +88,5 @@ export {
   SkeletonCourseCard,
   SkeletonMusicCard,
   SkeletonTalentCard,
+  SkeletonSpotlightCard,
 };

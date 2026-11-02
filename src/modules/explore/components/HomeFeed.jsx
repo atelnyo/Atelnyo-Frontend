@@ -21,6 +21,7 @@ import {
   FollowSuggestionCard,
   SectionLabel, PremiumEmpty,
   SkeletonCourseCard, SkeletonMusicCard, SkeletonTalentCard,
+  SkeletonSpotlightCard,
 } from '../cards';
 
 // ─── Home-feed localStorage cache (second-visit zero-request) ─────────
@@ -115,6 +116,49 @@ const SECTION_RENDERERS = {
   creator_discovery:     { icon: 'fa-user-plus',     defaultCard: 'dynamic' },
   community_discovery:   { icon: 'fa-users',         defaultCard: 'dynamic' },
 };
+
+// ─── Cross-rail dedupe (client-side guarantee) ─────────────────────────
+// The backend already drops repeats across rails, but a payload cached in
+// localStorage (30-min TTL) or the DEIE engine can still carry the same
+// row twice. The FE never shows it twice either: the FIRST rail wins —
+// display order IS the algorithm's ranking — and every later repeat is
+// dropped, together with any rail the pass empties out.
+const SECTION_ITEM_TYPES = {
+  trending_course: 'course', featured_courses: 'course', newest_course: 'course',
+  trending_music: 'music', newest_music: 'music',
+  trending_talent: 'talent', newest_talent: 'talent',
+  trending_community: 'community', newest_community: 'community',
+  trending_product: 'product', newest_product: 'product',
+  trending_job: 'job', newest_job: 'job',
+  upcoming_events: 'event', portfolio_showcase: 'portfolio',
+  spotlight: 'spotlight', follow_suggestions: 'creator',
+};
+
+export function dedupeFeedSections(sections) {
+  if (!Array.isArray(sections)) return [];
+  const seen = new Set();
+  const deduped = [];
+  sections.forEach((section) => {
+    const fallback = SECTION_ITEM_TYPES[section?.type];
+    const kept = [];
+    (section?.items || []).forEach((item) => {
+      const type = item?.item_type || fallback;
+      const id = item?.id;
+      // No usable key → always keep (matches the backend rule).
+      if (!type || id === null || id === undefined) {
+        kept.push(item);
+        return;
+      }
+      const key = `${type}:${id}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      kept.push(item);
+    });
+    if (kept.length === 0) return;
+    deduped.push({ ...section, items: kept, count: kept.length });
+  });
+  return deduped;
+}
 
 /**
  * Resolve which card component to use for a given item + section.
@@ -265,7 +309,7 @@ export default function HomeFeed({
     );
     if (canPaintStale) {
       /* eslint-disable react-hooks/set-state-in-effect */
-      setSections(staleCache.sections);
+      setSections(dedupeFeedSections(staleCache.sections));
       setLoading(false);
       setEntered(true);
       /* eslint-enable react-hooks/set-state-in-effect */
@@ -283,7 +327,9 @@ export default function HomeFeed({
         if (seq !== fetchRef.current) return;
         // Unwrap ApiResponseRenderer envelope if present
         const data = (res.data?.data) || res.data || {};
-        const items = Array.isArray(data.sections) ? data.sections : [];
+        const items = dedupeFeedSections(
+          Array.isArray(data.sections) ? data.sections : [],
+        );
         setSections(items);
         setError(null);
         // Content is on screen — release the cascade entrance (the
@@ -328,20 +374,28 @@ export default function HomeFeed({
         <SectionLabel icon={t.explore_recommended_icon || 'fa-star'}>
           {t.explore_recommended || (lang === 'ht' ? 'Rekòmande pou ou' : 'Recommended For You')}
         </SectionLabel>
+        {/* Counts mirror the real feed (6 per section from
+            ``feedService.home(6)``) so the rails don't reflow on arrival. */}
         <div className="explore-hscroll" aria-hidden="true">
-          {Array.from({ length: 4 }).map((_, i) => <SkeletonCourseCard key={`course-${i}`} />)}
+          {Array.from({ length: 6 }).map((_, i) => <SkeletonCourseCard key={`course-${i}`} />)}
         </div>
         <SectionLabel icon="fa-music">
           {lang === 'ht' ? 'Mizik' : 'Music'}
         </SectionLabel>
         <div className="explore-hscroll" aria-hidden="true">
-          {Array.from({ length: 4 }).map((_, i) => <SkeletonMusicCard key={`music-${i}`} />)}
+          {Array.from({ length: 6 }).map((_, i) => <SkeletonMusicCard key={`music-${i}`} />)}
         </div>
         <SectionLabel icon="fa-user-plus">
           {lang === 'ht' ? 'Talan' : 'Talent'}
         </SectionLabel>
         <div className="explore-hscroll" aria-hidden="true">
-          {Array.from({ length: 3 }).map((_, i) => <SkeletonTalentCard key={`talent-${i}`} />)}
+          {Array.from({ length: 4 }).map((_, i) => <SkeletonTalentCard key={`talent-${i}`} />)}
+        </div>
+        <SectionLabel icon="fa-lightbulb">
+          {lang === 'ht' ? 'An premye plan' : 'Spotlight'}
+        </SectionLabel>
+        <div className="explore-hscroll" aria-hidden="true">
+          {Array.from({ length: 3 }).map((_, i) => <SkeletonSpotlightCard key={`spotlight-${i}`} />)}
         </div>
         <div className="feed-loading-more" role="status">
           <i className="fas fa-spinner fa-spin" aria-hidden="true" />

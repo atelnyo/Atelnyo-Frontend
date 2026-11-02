@@ -11979,9 +11979,9 @@ body.dark-mode .explore-card-spotlight .spotlight-card-arrow {
 .explore-skel-line--sub-sm { height: 11px; width: 56%; border-radius: 6px; }
 .explore-skel-line--meta { height: 10px; width: 40%; border-radius: 6px; }
 .explore-skel-circle { width: 44px; height: 44px; border-radius: 50%; flex: none; }
-.explore-skeleton-talent .explore-talent-row {
-  display: flex; align-items: center; gap: 10px; padding: 10px 14px;
-}
+/* Spotlight skeletons are taller than the 130px course cover, matching the
+   real card's hero so the rail keeps its height when data lands. */
+.explore-card-spotlight.explore-skeleton .explore-card-image-wrap { height: 160px; }
 
 /* Stronger focus ring for keyboard nav — pink ring + a small lift so
    the focused card is unambiguous (and the lift matches the hover
@@ -15466,6 +15466,26 @@ body.dark-mode .explore-hero {
 }
 .explore-hscroll > * {
   scroll-snap-align: start;
+}
+
+/* Talent / event cards are authored for the vertical lists ("width: 100%"
+   in a grid / a column stack). Dropped into a feed RAIL that resolves to
+   "one card per viewport", so those two rails stopped matching the
+   course/product rhythm. Pin them to a rail width so every rail wraps
+   consistently (4-6 cards visible instead of one stretched slide). */
+.explore-hscroll > .explore-card-talent,
+.explore-hscroll > .explore-card-event {
+  width: 260px;
+  min-width: 240px;
+  max-width: 260px;
+}
+@media (max-width: 480px) {
+  .explore-hscroll > .explore-card-talent,
+  .explore-hscroll > .explore-card-event {
+    width: 220px;
+    min-width: 200px;
+    max-width: 220px;
+  }
 }
 
 /* Section labels — gradient accent chip on the icon */
