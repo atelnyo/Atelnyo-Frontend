@@ -509,6 +509,9 @@ export default function HomeFeed({
                       t={t}
                       lang={lang}
                       onOpen={(post) => {
+                        // Backend attaches the canonical post URL; fall back
+                        // to the author's profile for a legacy row.
+                        if (post?.url) { navigate(post.url); return; }
                         const username = post?.author_username || post?.creator_name;
                         if (username) navigate(`/c/${username}`);
                       }}

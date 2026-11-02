@@ -2109,6 +2109,10 @@ export const creatorProfileService = {
     api.delete(`creator-profiles/${encodeURIComponent(slug)}/posts/${encodeURIComponent(postSlug)}/`, {
       data: { reason: reason || '' },
     }),
+  // GET /api/creator-profiles/<slug>/posts/<post_slug>/ — public detail
+  // (the /c/{username}/post/{slug} page reads this).
+  getPost: (slug, postSlug) =>
+    api.get(`creator-profiles/${encodeURIComponent(slug)}/posts/${encodeURIComponent(postSlug)}/`),
   // GET /api/creator-profiles/<slug>/posts/ — public list (newest first).
   // Same rows the home feed's posts rails render.
   listPosts: (slug, params) =>

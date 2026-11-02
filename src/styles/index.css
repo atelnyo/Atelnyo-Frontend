@@ -15504,6 +15504,70 @@ body.dark-mode .explore-hero {
   line-height: 1.4;
 }
 .explore-card-badge-post { left: auto; right: 12px; }
+
+/* ─── Public single-post page (/c/{username}/post/{slug}) ──────────── */
+.creator-post-page {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 24px 16px 96px;
+}
+.creator-post-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-primary, #d81b60);
+  text-decoration: none;
+  margin-bottom: 18px;
+}
+.creator-post-back:hover { text-decoration: underline; }
+.creator-post-header { margin-bottom: 14px; }
+.creator-post-title {
+  font-size: 1.4rem;
+  line-height: 1.25;
+  margin: 0 0 6px;
+  color: var(--text-primary, #111827);
+}
+.creator-post-meta {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary, #6b7280);
+  word-break: break-word;
+}
+.creator-post-author {
+  color: var(--color-primary, #d81b60);
+  text-decoration: none;
+  font-weight: 600;
+}
+.creator-post-image {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  object-position: center top;
+  border-radius: 14px;
+  margin: 4px 0 16px;
+  display: block;
+}
+.creator-post-body {
+  font-size: 1rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--text-primary, #111827);
+}
+.creator-post-footer { margin-top: 28px; }
+.creator-post-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 0;
+}
+@media (max-width: 480px) {
+  .creator-post-page { padding: 16px 12px 96px; }
+  .creator-post-title { font-size: 1.2rem; }
+}
 @media (max-width: 480px) {
   .explore-card-post { width: 220px; min-width: 200px; max-width: 220px; }
 }

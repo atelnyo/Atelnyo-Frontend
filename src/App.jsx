@@ -126,6 +126,7 @@ const AdminProviderHealth = lazy(() => import('./components/admin/AdminProviderH
 const AdminMediaMonitor = lazy(() => import('./components/admin/AdminMediaMonitor'));
 const SecurityDashboard = lazy(() => import('./components/admin/SecurityDashboard'));
 const CreatorPublicProfile = lazy(() => import('./components/CreatorPublicProfile'));
+const CreatorPostPage = lazy(() => import('./components/CreatorPostPage'));
 const SearchResultsPage = lazy(() => import('./components/SearchResultsPage'));
 
 // Warm the /search route chunk ahead of the Enter key.
@@ -3606,6 +3607,12 @@ function App() {
         } />
         <Route path="/sheet/event/:id" element={
           <ProfileItemDetail lang={lang} showToast={showToast} user={user} type="event" />
+        } />
+        {/* /c/:username/post/:slug — one creator post (canonical URL the
+            feed's post cards link to). Declared before the profile route
+            so the more specific path always wins. */}
+        <Route path="/c/:username/post/:slug" element={
+          <CreatorPostPage lang={lang} showToast={showToast} user={user} />
         } />
         {/* /c/:username — Creator public profile. Must come BEFORE
             /:key/:type so React Router doesn't match key="c". */}
