@@ -102,6 +102,10 @@ export default function CourseCard({ course, onOpen, lang, t, saveCount = null, 
             <i className="fas fa-video" aria-hidden="true" />
           </div>
         )}
+        {/* Badge slot. ``display: contents`` on the default surface, so
+            Explore keeps its absolute offsets; the Learner Dashboard turns
+            this into a wrapping flex row where badges can never overlap. */}
+        <div className="explore-card-badges">
         {/* External course — learning happens outside atelnyo. Always
             labeled on cards so the delivery model is never a surprise. */}
         {course.delivery_type === 'external' && (
@@ -158,6 +162,7 @@ export default function CourseCard({ course, onOpen, lang, t, saveCount = null, 
             <span>{Math.round(Number(course._score.popularity))}</span>
           </div>
         )}
+        </div>
       </div>
       <div className="explore-card-body">
         <div className="explore-card-title">{course.title}</div>
