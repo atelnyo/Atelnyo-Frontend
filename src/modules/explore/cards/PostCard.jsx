@@ -7,6 +7,7 @@
  * post list lives (``/c/{username}``).
  */
 import React, { useState } from 'react';
+import ContentFeedbackMenu from '../../../components/shared/ContentFeedbackMenu';
 
 function PostFallback({ label }) {
   return (
@@ -81,6 +82,7 @@ export default function PostCard({ post, onOpen, t }) {
               <i className="fas fa-at" aria-hidden="true" /> {author}
             </span>
           )}
+          <ContentFeedbackMenu contentType="post" contentId={post.id} />
           <span className="explore-card-cta" aria-hidden="true" style={{ marginLeft: 'auto' }}>
             <i className="fas fa-arrow-right" />
           </span>

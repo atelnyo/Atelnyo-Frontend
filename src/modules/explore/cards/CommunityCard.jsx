@@ -4,6 +4,7 @@
  * Community card component — extracted from Explore.jsx
  */
 import React, { useState } from 'react';
+import ContentFeedbackMenu from '../../../components/shared/ContentFeedbackMenu';
 
 /** SVG fallback — community-themed gradient */
 function CommunityFallback({ name }) {
@@ -84,6 +85,7 @@ export default function CommunityCard({ community, onOpen, t }) {
           <span className="explore-card-plays" style={{ marginLeft: 'auto' }}>
             <i className="fas fa-user" aria-hidden="true" /> {community.member_count || 0} {t.explore_community_members || 'members'}
           </span>
+          <ContentFeedbackMenu contentType="community" contentId={community.id} />
           <span className="explore-card-cta" aria-hidden="true">
             <i className="fas fa-arrow-right" />
           </span>

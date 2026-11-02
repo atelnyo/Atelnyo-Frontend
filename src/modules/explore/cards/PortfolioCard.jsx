@@ -8,6 +8,7 @@ import { portfolioService } from '../../../services/api';
 import { useHoverVideoPreview } from '../hooks/useHoverVideoPreview';
 import HoverVideoPreview from '../components/HoverVideoPreview';
 import { resolvePortfolioVideo } from '../utils/cardHelpers';
+import ContentFeedbackMenu from '../../../components/shared/ContentFeedbackMenu';
 import SaveCountChip from './SaveCountChip';
 
 /** Inline SVG fallback — bèl ilistrasyon lè pa gen imaj oswa imaj kase */
@@ -104,6 +105,7 @@ export default function PortfolioCard({ project, t, showToast, onOpen, saveCount
             <span className="explore-card-tag explore-card-tag-skill">{project.difficulty}</span>
           )}
           <SaveCountChip count={saveCount} t={t} />
+          <ContentFeedbackMenu contentType="portfolio" contentId={project.id} />
           <span className="explore-card-cta" aria-hidden="true">
             <i className="fas fa-arrow-right" />
           </span>

@@ -6,6 +6,7 @@
 import React, { useState } from 'react';
 import { useHoverVideoPreview } from '../hooks/useHoverVideoPreview';
 import HoverVideoPreview from '../components/HoverVideoPreview';
+import ContentFeedbackMenu from '../../../components/shared/ContentFeedbackMenu';
 import SaveCountChip from './SaveCountChip';
 import TrendingVelocity from './TrendingVelocity';
 
@@ -193,6 +194,7 @@ export default function CourseCard({ course, onOpen, lang, t, saveCount = null, 
             </span>
           )}
           <SaveCountChip count={saveCount} t={t} />
+          <ContentFeedbackMenu contentType="course" contentId={course.id} lang={isHt ? 'ht' : 'en'} />
           <span className="explore-card-cta" aria-hidden="true">
             <i className="fas fa-arrow-right" />
           </span>

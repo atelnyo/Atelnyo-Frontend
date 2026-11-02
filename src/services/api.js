@@ -2355,3 +2355,42 @@ export const mediaProviderService = {
 
 export default api;
 
+
+// Phase 4 + 13 — unified viewer feedback (hide / not interested / mute /
+// block) and private content reports. One write path for every discovery
+// surface; the backend keeps hide/mute state per viewer.
+export const contentFeedbackService = {
+  hide: (contentType, objectId, action = 'hide') =>
+    api.post('content/feedback/', { content_type: contentType, object_id: objectId, action }),
+  notInterested: (contentType, objectId) =>
+    api.post('content/feedback/', { content_type: contentType, object_id: objectId, action: 'not_interested' }),
+  muteCreator: (contentType, objectId) =>
+    api.post('content/feedback/', { content_type: contentType, object_id: objectId, action: 'mute_creator' }),
+  blockCreator: (contentType, objectId) =>
+    api.post('content/feedback/', { content_type: contentType, object_id: objectId, action: 'block_creator' }),
+  report: (contentType, objectId, reason, description = '') =>
+    api.post('content/reports/', { content_type: contentType, object_id: objectId, reason, description }),
+};
+
+// Phase 11/12 — publication lifecycle controls. Every call returns the
+// fresh ContentState row (publication_state / effective_distribution /
+// is_discoverable) so the UI can update without a second request.
+export const contentStateService = {
+  list: (params = {}) => api.get('content-state/', { params }),
+  publish: (contentType, objectId, reason = '') =>
+    api.post('content-state/publish/', { content_type: contentType, object_id: objectId, reason }),
+  unpublish: (contentType, objectId, reason = '') =>
+    api.post('content-state/unpublish/', { content_type: contentType, object_id: objectId, reason }),
+  schedule: (contentType, objectId, scheduledFor) =>
+    api.post('content-state/schedule/', { content_type: contentType, object_id: objectId, scheduled_for: scheduledFor }),
+  archive: (contentType, objectId, reason = '') =>
+    api.post('content-state/archive/', { content_type: contentType, object_id: objectId, reason }),
+  restore: (contentType, objectId, reason = '') =>
+    api.post('content-state/restore/', { content_type: contentType, object_id: objectId, reason }),
+  remove: (contentType, objectId, reason = '') =>
+    api.post('content-state/delete/', { content_type: contentType, object_id: objectId, reason }),
+  visibility: (contentType, objectId, visibility) =>
+    api.post('content-state/visibility/', { content_type: contentType, object_id: objectId, visibility }),
+  moderate: (contentType, objectId, moderationState, reason = '') =>
+    api.post('content-state/moderate/', { content_type: contentType, object_id: objectId, moderation_state: moderationState, reason }),
+};

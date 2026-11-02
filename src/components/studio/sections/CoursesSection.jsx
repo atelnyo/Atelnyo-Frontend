@@ -11,6 +11,7 @@ import { courseService } from '../../../services/api';
 import useFetch from '../../../hooks/useFetch';
 import { StudioSkeleton, EmptyState, SectionHeader, fmtCount } from '../shared';
 import ConfirmModal from '../../common/ConfirmModal';
+import ContentLifecycleControls from '../../shared/ContentLifecycleControls';
 import CourseAnalyticsModal from './CourseAnalyticsModal';
 import CurriculumAnalyticsModal from './CurriculumAnalyticsModal';
 import CourseExportImportModal from './CourseExportImportModal';
@@ -170,6 +171,19 @@ export default function CoursesSection({ lang, t, showToast, setShowCourseModal,
                     </span>
                   )}
                 </div>
+                {/* Lifecycle controls — publish / unpublish / archive /
+                    visibility from the creator's own studio (not only the
+                    admin moderation panel). The publication state is
+                    seeded from the course's real status. */}
+                <ContentLifecycleControls
+                  contentType="course"
+                  objectId={course.id}
+                  initialState={{
+                    publication_state: course.status === 'published' ? 'published' : 'draft',
+                  }}
+                  lang={lang}
+                  onChanged={() => refetch?.()}
+                />
               </div>
               <div className={styles.itemActions}>
                 <button type="button" className={styles.statsBtn} onClick={() => setAnalyticsCourse(course)}

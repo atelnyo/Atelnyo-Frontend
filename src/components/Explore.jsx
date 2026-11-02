@@ -27,7 +27,7 @@
 import React, { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, startTransition } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import useSafeNavigate from '../hooks/useSafeNavigate';
-import api, { courseService, savedMusicService, savedTalentsService, savedItemService, recommendedService, interactionService, communitiesService, jobService, portfolioService, marketplaceService, eventsService, spotlightService, businessSpotlightService, searchService, categoryService } from '../services/api';
+import api, { courseService, savedMusicService, savedTalentsService, savedItemService, recommendedService, interactionService, contentFeedbackService, communitiesService, jobService, portfolioService, marketplaceService, eventsService, spotlightService, businessSpotlightService, searchService, categoryService } from '../services/api';
 import SEOHead, { webSiteSchema } from './shared/SEOHead';
 import { buildContentUrl } from '../utils/contentUrl';
 
@@ -915,6 +915,10 @@ export function Explore({
       metadata: { surface: 'recommended_rail' },
     });
     flushInteractions();
+    // Phase 13 — persist the negative feedback server-side (hide + topic
+    // suppression), not just the impression log. Guests get a 401 and
+    // keep the local-only behaviour.
+    contentFeedbackService.notInterested(itemType, itemId).catch(() => {});
     // Drop the localStorage snapshot too — otherwise a user who
     // dismisses an item then revisits within the 5-min TTL hits the
     // zero-request gate and the cache restore re-paints the dismissed

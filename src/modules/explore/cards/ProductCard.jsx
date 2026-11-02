@@ -4,6 +4,7 @@
  * Marketplace Product card — extracted from Explore.jsx
  */
 import React, { useState, useId } from 'react';
+import ContentFeedbackMenu from '../../../components/shared/ContentFeedbackMenu';
 import SaveCountChip from './SaveCountChip';
 import TrendingVelocity from './TrendingVelocity';
 
@@ -193,6 +194,7 @@ export default function ProductCard({ product, t, onOpen, onOpenCheckout, showTo
             <SaveCountChip count={saveCount} t={t} />
           </div>
           <div className="explore-card-meta-right">
+            <ContentFeedbackMenu contentType="product" contentId={product.id} />
             <span className="explore-card-price">
               {isFree ? (
                 <span className="explore-card-price-value explore-card-price-free">

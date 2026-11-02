@@ -4,6 +4,7 @@
  * Job Post card — extracted from Explore.jsx
  */
 import React, { useState } from 'react';
+import ContentFeedbackMenu from '../../../components/shared/ContentFeedbackMenu';
 import SaveCountChip from './SaveCountChip';
 import TrendingVelocity from './TrendingVelocity';
 
@@ -118,6 +119,7 @@ export default function JobPostCard({ job, t, showToast, onOpenSheet, saveCount 
           <span className="explore-card-plays" style={{ marginLeft: 'auto' }}>
             <i className="fas fa-file-signature" aria-hidden="true" /> {job.proposal_count || 0} {t.explore_job_proposals || 'proposals'}
           </span>
+          <ContentFeedbackMenu contentType="job" contentId={job.id} />
           <span className="explore-card-cta" aria-hidden="true">
             <i className="fas fa-arrow-right" />
           </span>

@@ -11,7 +11,8 @@
  */
 import { useEffect, useState, useCallback } from 'react';
 import { useHasAdminAccess } from '../../hooks/useHasAdminAccess';
-import { adminMediaService, creatorProfileService } from '../../services/api';
+import { adminMediaService, creatorProfileService, contentStateService } from '../../services/api';
+import ContentLifecycleControls from '../shared/ContentLifecycleControls';
 import { useRoleGate } from '../../hooks/useRoleGate';
 
 const MOD_STATUSES = [
@@ -74,6 +75,11 @@ export default function AdminContentModeration({ lang = 'ht', showToast, user, o
   const [postReason, setPostReason] = useState('');
   const [postsLoading, setPostsLoading] = useState(false);
   const [deletingSlug, setDeletingSlug] = useState('');
+  // Phase 11/12 — publication lifecycle rows (ContentState). Staff can
+  // publish / unpublished / archive / change visibility per item.
+  const [lifecycle, setLifecycle] = useState([]);
+  const [lifecycleLoading, setLifecycleLoading] = useState(false);
+  const [lifecycleType, setLifecycleType] = useState('course');
 
   useEffect(() => {
     if (user && !permsLoading && !hasStaffAccess) {
@@ -92,7 +98,21 @@ export default function AdminContentModeration({ lang = 'ht', showToast, user, o
     } finally { setLoading(false); }
   }, [statusFilter]);
 
+  const fetchLifecycle = useCallback(async () => {
+    setLifecycleLoading(true);
+    try {
+      const res = await contentStateService.list({ content_type: lifecycleType });
+      const payload = res.data?.results || res.data || [];
+      setLifecycle(Array.isArray(payload) ? payload : []);
+    } catch {
+      showToast?.(isHt ? 'Pa kapab chaje estati yo.' : 'Failed to load lifecycle rows.', 'exclamation-triangle');
+    } finally {
+      setLifecycleLoading(false);
+    }
+  }, [lifecycleType, isHt, showToast]);
+
   useEffect(() => { if (hasStaffAccess) { fetchItems(); } }, [fetchItems, hasStaffAccess]);
+  useEffect(() => { if (hasStaffAccess) { fetchLifecycle(); } }, [fetchLifecycle, hasStaffAccess]);
 
   // Lis konplè post yo — pa bezwen kole slug alamen.
   const fetchPosts = useCallback(async () => {
@@ -157,6 +177,58 @@ export default function AdminContentModeration({ lang = 'ht', showToast, user, o
           <p className="acm-subtitle">{isHt ? 'Make medya dapre politik kontni.' : 'Flag media according to content policy.'}</p>
         </div>
         <button type="button" className="acm-btn" onClick={fetchItems}><i className="fas fa-sync" /> {isHt ? 'Rafrechi' : 'Refresh'}</button>
+      </div>
+
+      {/* Phase 11/12 — publication lifecycle. Generic controls: the
+          backend enforces ownership, staff moderation and validation. */}
+      <div className="acm-filters" style={{ marginBottom: 12, flexDirection: 'column', alignItems: 'stretch', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+          <strong style={{ fontSize: '.85rem' }}>
+            {isHt ? 'Estati piblikasyon' : 'Publication status'}
+          </strong>
+          <select
+            value={lifecycleType}
+            onChange={(e) => setLifecycleType(e.target.value)}
+            aria-label="lifecycle content type"
+            style={{ padding: '6px 8px', borderRadius: 8, border: '1px solid var(--border-color)', fontSize: '.82rem' }}
+          >
+            {['course', 'post', 'product', 'music', 'talent', 'community', 'event', 'job', 'portfolio'].map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+          <button type="button" className="acm-btn" onClick={fetchLifecycle} disabled={lifecycleLoading}>
+            <i className="fas fa-sync" /> {isHt ? 'Chaje' : 'Load'}
+          </button>
+        </div>
+        {lifecycleLoading ? (
+          <div className="acm-loading"><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap chaje...' : 'Loading...'}</div>
+        ) : lifecycle.length === 0 ? (
+          <p style={{ fontSize: '.82rem', opacity: .7 }}>
+            {isHt ? 'Poko gen estati pou tip sa a.' : 'No lifecycle rows for this type yet.'}
+          </p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 360, overflowY: 'auto' }}>
+            {lifecycle.map((row) => (
+              <div key={row.id} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '8px 10px', border: '1px solid var(--border-color)', borderRadius: 10 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '.82rem', fontWeight: 600 }}>
+                    {row.content_type} #{row.object_id} · {row.publication_state}
+                  </div>
+                  <div style={{ fontSize: '.75rem', opacity: .7 }}>
+                    {isHt ? 'Distribisyon' : 'Distribution'}: {row.effective_distribution}
+                  </div>
+                </div>
+                <ContentLifecycleControls
+                  contentType={row.content_type}
+                  objectId={row.object_id}
+                  initialState={row}
+                  lang={lang}
+                  onChanged={fetchLifecycle}
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {canModeratePosts && (

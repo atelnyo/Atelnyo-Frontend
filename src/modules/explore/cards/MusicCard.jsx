@@ -8,6 +8,7 @@ import api from '../../../services/api';
 import { classNames, formatPlays } from '../utils/cardHelpers';
 import { useHoverVideoPreview } from '../hooks/useHoverVideoPreview';
 import HoverVideoPreview from '../components/HoverVideoPreview';
+import ContentFeedbackMenu from '../../../components/shared/ContentFeedbackMenu';
 import SaveCountChip from './SaveCountChip';
 import TrendingVelocity from './TrendingVelocity';
 
@@ -254,6 +255,7 @@ export default function MusicCard({ track, onOpen, showToast, t, isSaved, onSave
             <i className="fas fa-headphones" aria-hidden="true" /> {formatPlays(track.plays)}
           </span>
           <SaveCountChip count={saveCount} t={t} />
+          <ContentFeedbackMenu contentType="music" contentId={track.id} />
         </div>
       </div>
       {hasPreview && (
