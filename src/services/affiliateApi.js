@@ -9,17 +9,17 @@
  *   GET    /api/affiliate/program/                → program settings
  *   PUT    /api/affiliate/program/                → update settings
  *   POST   /api/affiliate/program/toggle/         → enable/disable
- *   GET    /api/affiliate/applications/           → pending applications
- *   GET    /api/affiliate/applications/<id>/review/  → application detail
- *   POST   /api/affiliate/applications/<id>/review/  → approve/reject
- *   GET    /api/affiliate/members/                → active affiliates
- *   GET    /api/affiliate/groups/                 → list groups
- *   POST   /api/affiliate/groups/                 → create group
- *   GET    /api/affiliate/commission-rules/       → list rules
- *   POST   /api/affiliate/commission-rules/       → create rule
- *   GET    /api/affiliate/stats/                  → creator stats
- *   POST   /api/affiliate/conversions/<id>/approve/  → approve conversion
- *   POST   /api/affiliate/conversions/<id>/reverse/  → reverse conversion
+ *   GET    /api/affiliate/program/applications/           → pending applications
+ *   GET    /api/affiliate/program/applications/<id>/review/  → detail
+ *   POST   /api/affiliate/program/applications/<id>/review/  → approve/reject
+ *   GET    /api/affiliate/program/members/                → active affiliates
+ *   GET    /api/affiliate/program/groups/                 → list groups
+ *   POST   /api/affiliate/program/groups/                 → create group
+ *   GET    /api/affiliate/program/commission-rules/       → list rules
+ *   POST   /api/affiliate/program/commission-rules/       → create rule
+ *   GET    /api/affiliate/program/stats/                  → creator stats
+ *   POST   /api/affiliate/program/conversions/<id>/approve/  → approve
+ *   POST   /api/affiliate/program/conversions/<id>/reverse/  → reverse
  *
  * Affiliate (self-service):
  *   POST   /api/affiliate/apply/                  → apply to program
@@ -42,30 +42,32 @@ export const affiliateApi = {
   toggleProgram: () => api.post('affiliate/program/toggle/'),
 
   // ─── Applications ───────────────────────────────────────────────
+  // The creator-side management routes live under /api/affiliate/program/
+  // — without the `program/` segment every one of them 404'd.
   getApplications: (status = '') =>
-    api.get('affiliate/applications/', { params: status ? { status } : {} }),
-  getApplicationDetail: (id) => api.get(`affiliate/applications/${id}/review/`),
+    api.get('affiliate/program/applications/', { params: status ? { status } : {} }),
+  getApplicationDetail: (id) => api.get(`affiliate/program/applications/${id}/review/`),
   reviewApplication: (id, status, reviewNotes = '') =>
-    api.post(`affiliate/applications/${id}/review/`, { status, review_notes: reviewNotes }),
+    api.post(`affiliate/program/applications/${id}/review/`, { status, review_notes: reviewNotes }),
 
   // ─── Members ────────────────────────────────────────────────────
-  getMembers: () => api.get('affiliate/members/'),
+  getMembers: () => api.get('affiliate/program/members/'),
 
   // ─── Groups ─────────────────────────────────────────────────────
-  getGroups: () => api.get('affiliate/groups/'),
-  createGroup: (data) => api.post('affiliate/groups/', data),
+  getGroups: () => api.get('affiliate/program/groups/'),
+  createGroup: (data) => api.post('affiliate/program/groups/', data),
 
   // ─── Commission Rules ──────────────────────────────────────────
-  getCommissionRules: () => api.get('affiliate/commission-rules/'),
-  createCommissionRule: (data) => api.post('affiliate/commission-rules/', data),
+  getCommissionRules: () => api.get('affiliate/program/commission-rules/'),
+  createCommissionRule: (data) => api.post('affiliate/program/commission-rules/', data),
 
   // ─── Stats ──────────────────────────────────────────────────────
-  getStats: () => api.get('affiliate/stats/'),
+  getStats: () => api.get('affiliate/program/stats/'),
 
   // ─── Conversion Management ─────────────────────────────────────
-  getConversations: () => api.get('affiliate/conversions/'),
-  approveConversion: (id) => api.post(`affiliate/conversions/${id}/approve/`),
-  reverseConversion: (id) => api.post(`affiliate/conversions/${id}/reverse/`),
+  getConversations: () => api.get('affiliate/program/conversions/'),
+  approveConversion: (id) => api.post(`affiliate/program/conversions/${id}/approve/`),
+  reverseConversion: (id) => api.post(`affiliate/program/conversions/${id}/reverse/`),
 
   // ─── Apply (affiliate self-service) ────────────────────────────
   apply: (creatorId, { motivation, promotionPlatforms, estimatedReach } = {}) =>
