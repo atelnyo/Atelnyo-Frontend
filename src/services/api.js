@@ -2109,6 +2109,16 @@ export const creatorProfileService = {
     api.delete(`creator-profiles/${encodeURIComponent(slug)}/posts/${encodeURIComponent(postSlug)}/`, {
       data: { reason: reason || '' },
     }),
+  // GET /api/creator-profiles/<slug>/posts/ — public list (newest first).
+  // Same rows the home feed's posts rails render.
+  listPosts: (slug, params) =>
+    api.get(`creator-profiles/${encodeURIComponent(slug)}/posts/`, { params }),
+  // POST /api/creator-profiles/<slug>/posts/create/ — owner only.
+  createPost: (slug, { body, image_url = '' } = {}) =>
+    api.post(`creator-profiles/${encodeURIComponent(slug)}/posts/create/`, {
+      body,
+      image_url,
+    }),
   // ─── Admin creator posts (lis konplè — pa bezwen kole slug alamen) ─
   // GET /api/admin/creator-posts/?search=&page=&page_size=
   // DELETE /api/admin/creator-posts/<post_slug>/ { reason? }

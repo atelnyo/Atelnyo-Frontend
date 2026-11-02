@@ -25,6 +25,7 @@ import _EventCard from './EventCard';
 import _JobPostCard from './JobPostCard';
 import _SpotlightCard from './SpotlightCard';
 import _FollowSuggestionCard from './FollowSuggestionCard';
+import _PostCard from './PostCard';
 import SectionLabel from './SectionLabel';
 import PremiumEmpty from './PremiumEmpty';
 import _TrendingVelocity from './TrendingVelocity';
@@ -46,6 +47,7 @@ const EventCard = React.memo(_EventCard);
 const JobPostCard = React.memo(_JobPostCard);
 const SpotlightCard = React.memo(_SpotlightCard);
 const FollowSuggestionCard = React.memo(_FollowSuggestionCard);
+const PostCard = React.memo(_PostCard);
 const TrendingVelocity = React.memo(_TrendingVelocity);
 
 /** Lookup: content type → { component, skeleton, skeletonComponent } */
@@ -59,6 +61,7 @@ export const CardRegistry = {
   event:     { component: EventCard,     skeleton: 'course' },
   job:       { component: JobPostCard,   skeleton: 'course' },
   spotlight: { component: SpotlightCard, skeleton: 'spotlight' },
+  post:      { component: PostCard,      skeleton: 'course' },
   creator:   { component: FollowSuggestionCard, skeleton: 'talent' },
 };
 
@@ -81,6 +84,7 @@ export {
   JobPostCard,
   SpotlightCard,
   FollowSuggestionCard,
+  PostCard,
   SectionLabel,
   PremiumEmpty,
   TrendingVelocity,

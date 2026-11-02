@@ -15488,6 +15488,26 @@ body.dark-mode .explore-hero {
   }
 }
 
+/* Creator post card — text-first, so the body gets the height budget
+   (3 clamped lines) instead of a big image. */
+.explore-card-post {
+  width: 260px;
+  min-width: 240px;
+  max-width: 260px;
+}
+.explore-card-post .explore-card-body { min-height: 118px; }
+.explore-card-post .explore-card-post-body {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  line-height: 1.4;
+}
+.explore-card-badge-post { left: auto; right: 12px; }
+@media (max-width: 480px) {
+  .explore-card-post { width: 220px; min-width: 200px; max-width: 220px; }
+}
+
 /* Section labels — gradient accent chip on the icon */
 .explore-section-label i {
   width: 26px;

@@ -18,7 +18,7 @@ import { requireLogin } from '../../../utils/history';
 import {
   CourseCard, MusicCard, TalentCard, CommunityCard,
   PortfolioCard, ProductCard, EventCard, JobPostCard, SpotlightCard,
-  FollowSuggestionCard,
+  FollowSuggestionCard, PostCard,
   SectionLabel, PremiumEmpty,
   SkeletonCourseCard, SkeletonMusicCard, SkeletonTalentCard,
   SkeletonSpotlightCard,
@@ -86,6 +86,10 @@ const SECTION_RENDERERS = {
   upcoming_events:       { icon: 'fa-calendar-alt',  defaultCard: EventCard },
   portfolio_showcase:    { icon: 'fa-palette',       defaultCard: PortfolioCard },
   spotlight:             { icon: 'fa-lightbulb',     defaultCard: SpotlightCard },
+  // Creator posts — text-first cards; the author's profile is the
+  // destination (posts have no standalone route).
+  newest_post:           { icon: 'fa-pen-nib',       defaultCard: PostCard },
+  trending_post:         { icon: 'fa-pen-nib',       defaultCard: PostCard },
   // Roadmap "plis direksyon" — recency + curated rails added to the
   // backend HomeFeedBuilder so fresh content (no score rows yet) and
   // admin-featured courses surface without waiting for the scoring cron.
@@ -132,6 +136,7 @@ const SECTION_ITEM_TYPES = {
   trending_job: 'job', newest_job: 'job',
   upcoming_events: 'event', portfolio_showcase: 'portfolio',
   spotlight: 'spotlight', follow_suggestions: 'creator',
+  newest_post: 'post', trending_post: 'post',
 };
 
 export function dedupeFeedSections(sections) {
@@ -493,6 +498,20 @@ export default function HomeFeed({
                       lang={lang}
                       t={t}
                       {...commonProps}
+                    />
+                  );
+                }
+                if (Card === PostCard) {
+                  return (
+                    <PostCard
+                      key={cardKey}
+                      post={item}
+                      t={t}
+                      lang={lang}
+                      onOpen={(post) => {
+                        const username = post?.author_username || post?.creator_name;
+                        if (username) navigate(`/c/${username}`);
+                      }}
                     />
                   );
                 }
