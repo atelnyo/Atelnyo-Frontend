@@ -31,6 +31,13 @@ export default function VideoBlock({ block, lang = 'ht', reportComplete }) {
   const [loadError, setLoadError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
+  // Declared before the early returns below: a hook called after a
+  // conditional return breaks the Rules of Hooks (hook order changes
+  // between renders).
+  const handleVideoError = useCallback(() => {
+    setLoadError(true);
+  }, []);
+
   const v = resolveVideoSource(block.videoUrl);
   if (!v) {
     return (
@@ -42,10 +49,6 @@ export default function VideoBlock({ block, lang = 'ht', reportComplete }) {
       </div>
     );
   }
-
-  const handleVideoError = useCallback(() => {
-    setLoadError(true);
-  }, []);
 
   if (loadError) {
     return (

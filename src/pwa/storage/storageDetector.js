@@ -80,7 +80,9 @@ export function detectCapabilities() {
       // handle.move() — rename/move file ops (Chrome 110+). NOT every
       // FSA browser allows every op; this is why capabilities() gates
       // rename/move per environment.
-      handleMove: fsaFile && typeof FileSystemFileHandle.prototype.move === 'function',
+      handleMove: fsaFile
+        && typeof globalThis.FileSystemFileHandle !== 'undefined'
+        && typeof globalThis.FileSystemFileHandle.prototype.move === 'function',
       // Static proxy for handle persistence: handles are
       // structured-cloneable into IndexedDB only where the handle
       // globals exist (the IDB global implies the IDBRequest

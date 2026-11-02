@@ -122,7 +122,8 @@ export default function CourseAIChat({
         ? `Ki fason mwen ka sonje "${lessonTitle || moduleTitle}" pi fasil? Bay mwen yon teknik.`
         : `How can I remember "${lessonTitle || moduleTitle}" more easily? Give me a technique.`,
     };
-    handleSend(templates[key] || question);
+    const prompt = templates[key];
+    if (prompt) handleSend(prompt);
   }, [lessonTitle, moduleTitle, isHt, handleSend]);
 
   // ─── Styles ──────────────────────────────────────────────────

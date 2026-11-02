@@ -12,6 +12,8 @@
  *   networkState.onChange((state) => { ... });
  */
 
+import { useEffect, useState } from 'react';
+
 // ─── State Constants ────────────────────────────────────────────────
 
 export const NetworkStatus = {
@@ -228,40 +230,30 @@ export const networkState = new NetworkStateManager();
  *   const { isOnline, status } = useNetworkState();
  */
 export function useNetworkState() {
-  // Dynamic import to avoid issues in non-React contexts
-  try {
-    const { useState, useEffect } = require('react');
+  // Hooks are imported at module scope: calling `require('react')` inside
+  // the function made them conditional (a Rules of Hooks violation) and
+  // `require` does not exist in a browser bundle.
+  const [state, setState] = useState({
+    status: networkState.status,
+    isOnline: networkState.isOnline,
+    isOffline: networkState.isOffline,
+    isReconnecting: networkState.isReconnecting,
+  });
 
-    const [state, setState] = useState({
-      status: networkState.status,
-      isOnline: networkState.isOnline,
-      isOffline: networkState.isOffline,
-      isReconnecting: networkState.isReconnecting,
+  useEffect(() => {
+    const unsubscribe = networkState.onChange((status) => {
+      setState({
+        status,
+        isOnline: status === NetworkStatus.ONLINE,
+        isOffline: status === NetworkStatus.OFFLINE,
+        isReconnecting: status === NetworkStatus.RECONNECTING,
+      });
     });
 
-    useEffect(() => {
-      const unsubscribe = networkState.onChange((status) => {
-        setState({
-          status,
-          isOnline: status === NetworkStatus.ONLINE,
-          isOffline: status === NetworkStatus.OFFLINE,
-          isReconnecting: status === NetworkStatus.RECONNECTING,
-        });
-      });
+    return unsubscribe;
+  }, []);
 
-      return unsubscribe;
-    }, []);
-
-    return state;
-  } catch {
-    // Fallback for non-React environments
-    return {
-      status: networkState.status,
-      isOnline: networkState.isOnline,
-      isOffline: networkState.isOffline,
-      isReconnecting: networkState.isReconnecting,
-    };
-  }
+  return state;
 }
 
 // ─── API Connectivity Check ─────────────────────────────────────────

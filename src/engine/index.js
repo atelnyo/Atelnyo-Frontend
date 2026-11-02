@@ -349,7 +349,7 @@ function buildProfileSchema(data) {
  * Used by share buttons and Web Share API.
  */
 export function getShareUrl(entityType, data) {
-  const locale = context?.locale || 'ht';
+  const locale = data?.locale || 'ht';
   const adapter = ADAPTERS[entityType];
   if (!adapter) return BASE_URL;
   const metadata = adapter(data, { locale });

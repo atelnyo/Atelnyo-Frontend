@@ -7,7 +7,7 @@
  *   - language: string (e.g. 'python', 'javascript')
  *   - title: string (optional label)
  */
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 export default function CodeBlock({ block, lang = 'ht', index, courseId, moduleIndex, onComplete, onViewed }) {
   const isHt = lang === 'ht';
@@ -25,6 +25,10 @@ export default function CodeBlock({ block, lang = 'ht', index, courseId, moduleI
       onComplete?.(moduleIndex, block.id, 'code');
     }
   }, [block.id, moduleIndex, onComplete, onViewed]);
+
+  // A block counts as viewed when it renders. `onLoad` is not a <div>
+  // event, so the old attribute never fired.
+  useEffect(() => { handleView(); }, [handleView]);
 
   const handleCopy = useCallback(async () => {
     try {
@@ -45,7 +49,7 @@ export default function CodeBlock({ block, lang = 'ht', index, courseId, moduleI
   }
 
   return (
-    <div onLoad={handleView}>
+    <div>
       {title && (
         <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: 4, color: 'var(--text-secondary)' }}>
           {language && <span style={{ textTransform: 'uppercase', marginRight: 8 }}>{language}</span>}

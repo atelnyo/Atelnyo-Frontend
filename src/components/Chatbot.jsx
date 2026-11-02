@@ -457,7 +457,7 @@ async function _executeCommand(command, lang) {
 }
 
 // ─── SEO Link Preview Card ─────────────────────────────────────
-function _LinkPreview({ url }) {
+function LinkPreview({ url }) {
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -1257,7 +1257,7 @@ const Chatbot = React.memo(({ lang = 'ht', translations }) => {
                 {msg.role === 'bot' ? (
                   <>
                     {msg.text && <div dangerouslySetInnerHTML={{ __html: _renderMarkdown(msg.text) }} />}
-                    {msg.linkPreview && <_LinkPreview url={msg.linkPreview} />}
+                    {msg.linkPreview && <LinkPreview url={msg.linkPreview} />}
                   </>
                 ) : (
                   <span>{msg.text}</span>

@@ -815,8 +815,12 @@ const StoragePanel = ({ lang }) => {
     if (!silent) {
       setTreeNotice(null);
     }
+    // Hoisted: the catalog sync runs after the try/catch and needs the
+    // browse result (`res` used to be block-scoped, so the sync below was
+    // a ReferenceError that lint caught).
+    let res = null;
     try {
-      const res = await storageManager.fs.browse();
+      res = await storageManager.fs.browse();
       setTree(res);
       if (res && res.ok === false) {
         setTreeNotice({ tone: 'err', scope: 'browse', text: _copyError(lang, storageManager.errorCategory(res)) });

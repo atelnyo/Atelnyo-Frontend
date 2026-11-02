@@ -12,7 +12,7 @@
  *   - content: string (the note text)
  *   - variant: 'important' | 'tip' | 'warning' | 'example' | 'remember' | 'note'
  */
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 
 const VARIANT_CONFIG = {
   important: { icon: 'fa-circle-info', label: { en: 'Important', ht: 'Enpòtan' } },
@@ -43,6 +43,10 @@ export default function CalloutBlock({ block, lang = 'ht', index, courseId, modu
     }
   }, [block.id, moduleIndex, onComplete, onViewed]);
 
+  // A callout counts as viewed when it renders. `onLoad` is not a <div>
+  // event, so the old attribute never fired.
+  useEffect(() => { handleView(); }, [handleView]);
+
   if (!content) return null;
 
   const label = config.label[lang] || config.label.en;
@@ -52,7 +56,6 @@ export default function CalloutBlock({ block, lang = 'ht', index, courseId, modu
       className={`ls-callout ls-callout--${variant}`}
       role="note"
       aria-label={label}
-      onLoad={handleView}
     >
       <div className="ls-callout-header">
         <i className={`fas ${config.icon} ls-callout-icon`} aria-hidden="true" />

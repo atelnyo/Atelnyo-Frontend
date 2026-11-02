@@ -88,7 +88,7 @@ export function createSaveStateMachine({ id, onChange }) {
     const allowed = TRANSITIONS[state];
     if (!allowed || !allowed.includes(nextState)) {
       // Invalid transition — log in dev but don't crash
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env?.DEV) {
         console.warn(`[SaveState:${id}] Invalid transition: ${state} → ${nextState}`);
       }
       return false;

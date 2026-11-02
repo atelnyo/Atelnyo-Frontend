@@ -36,6 +36,10 @@ export default function AssignmentBlock({ block, lang = 'ht', index, courseId, m
     }
   }, [block.id, moduleIndex, onViewed]);
 
+  // A block counts as viewed when it actually renders. `onLoad` is not a
+  // <div> event, so the old attribute never fired.
+  useEffect(() => { handleView(); }, [handleView]);
+
   // Restore a previously persisted submission for this block.
   useEffect(() => {
     if (!courseId || !block.id) return;
@@ -89,7 +93,7 @@ export default function AssignmentBlock({ block, lang = 'ht', index, courseId, m
   }, [submission, submitting, submissionId, courseId, block.id, moduleIndex, onComplete]);
 
   return (
-    <div onLoad={handleView}>
+    <div>
       {instructions && (
         <div style={{ marginBottom: 12, fontSize: '0.9rem', lineHeight: 1.6 }}>
           {instructions}

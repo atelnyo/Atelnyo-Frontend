@@ -18,6 +18,9 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { chatService, formatMessageTime, groupMessagesByDate } from '../../services/chat';
 import api from '../../services/api';
 
+// How long after the last keystroke the "typing" indicator clears.
+const TYPING_TIMEOUT = 1500;
+
 // ─── Message Bubble ────────────────────────────────────────────────
 
 function MessageBubble({ message, isOwn, showAvatar, lang }) {

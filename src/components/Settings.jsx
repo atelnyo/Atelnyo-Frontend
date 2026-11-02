@@ -1089,6 +1089,9 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
         console.warn('[Spotlight] Compression failed, uploading original:', compressErr);
       }
       setSpotlightCoverProgress({ stage: 'uploading', percent: 85 });
+      // The compressed file was never sent: `res` did not exist, so the
+      // handler filled the progress bar and stopped. Upload it now.
+      const res = await spotlightService.uploadCoverImage(uploadFile);
       const url = res?.data?.url || res?.data?.image_url;
       if (url) {
         setSpotlightCoverProgress({ stage: 'done', percent: 100 });

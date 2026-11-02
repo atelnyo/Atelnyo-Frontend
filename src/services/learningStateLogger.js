@@ -10,7 +10,9 @@
  * Completely dead code in production (no-op functions).
  */
 
-const isDev = process.env.NODE_ENV === 'development';
+// Vite exposes the mode on import.meta.env — `process` is not defined in
+// the browser, so the old check threw a ReferenceError instead of no-opping.
+const isDev = Boolean(import.meta.env?.DEV);
 
 const _log = (category, action, data) => {
   if (!isDev) return;

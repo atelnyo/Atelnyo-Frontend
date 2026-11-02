@@ -18,7 +18,7 @@ const localStorageMock = (() => {
     key: vi.fn((i) => Object.keys(store)[i] || null),
   };
 })();
-Object.defineProperty(global, 'localStorage', { value: localStorageMock });
+Object.defineProperty(globalThis, 'localStorage', { value: localStorageMock });
 
 if (typeof window !== 'undefined') {
   window.dispatchEvent = vi.fn();

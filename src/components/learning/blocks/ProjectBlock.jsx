@@ -39,6 +39,10 @@ export default function ProjectBlock({ block, lang = 'ht', index, courseId, modu
     }
   }, [block.id, moduleIndex, onViewed]);
 
+  // A block counts as viewed when it actually renders. `onLoad` is not a
+  // <div> event, so the old attribute never fired.
+  useEffect(() => { handleView(); }, [handleView]);
+
   // Restore a previously persisted submission for this block.
   useEffect(() => {
     if (!courseId || !block.id) return;
@@ -94,7 +98,7 @@ export default function ProjectBlock({ block, lang = 'ht', index, courseId, modu
   }, [submitting, submissionId, courseId, block.id, moduleIndex, notes, onComplete]);
 
   return (
-    <div onLoad={handleView}>
+    <div>
       {description && (
         <div style={{ marginBottom: 12, fontSize: '0.9rem', lineHeight: 1.6 }}>
           {description}

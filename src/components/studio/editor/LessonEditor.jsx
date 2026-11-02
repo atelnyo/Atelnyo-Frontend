@@ -23,6 +23,7 @@ import { validateBlock, scoreLessonContent } from '../../learning/blocks/blockSc
 import useUndoRedo from '../../../hooks/useUndoRedo';
 import useKeyboardShortcuts from '../../../hooks/useKeyboardShortcuts';
 import MediaPicker from '../../media/MediaPicker';
+import MediaPickerButton from './MediaPickerButton';
 import AIAssistPanel from './AIAssistPanel';
 import styles from './editor.module.css';
 
