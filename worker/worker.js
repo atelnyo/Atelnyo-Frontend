@@ -32,7 +32,12 @@ const SECURITY_HEADERS = {
   // Control referrer information
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   // Permissions policy — disable features Atelnyo doesn't use
-  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=(), magnetometer=(), gyroscope=()',
+  // ``microphone=(self)`` and ``geolocation=(self)`` are required: the
+  // language-practice blocks record speaking answers with getUserMedia
+  // and the location context uses geolocation. ``()`` denies the feature
+  // for the whole document, which made getUserMedia fail with
+  // NotAllowedError on every course page (the UI then blamed the user).
+  'Permissions-Policy': 'camera=(), microphone=(self), geolocation=(self), payment=(self), usb=(), bluetooth=(), magnetometer=(), gyroscope=()',
   // HSTS — force HTTPS for 1 year, include subdomains
   'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
   // XSS protection (legacy but still useful for older browsers)

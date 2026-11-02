@@ -100,9 +100,18 @@ export default function SpeechRecorder({
       const name = err?.name || '';
       if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
         setState('error');
+        // NotAllowedError is also what a Permissions-Policy block (or a
+        // non-secure context) returns — the browser never says which.
+        // Telling the learner "you denied it" sent them to their browser
+        // settings for something the SERVER had disabled.
         setErrorMsg(isHt
-          ? 'Ou refize aksè mikro a. Ou ka re-aktive l nan anviwònman navigatè a epi eseye ankò.'
-          : 'Microphone access was denied. You can re-enable it in the browser settings and try again.');
+          ? 'Mikwo a bloke. Si w pa t refize l, se yon politik sit oswa yon ekstansyon navigatè ki bloke l — eseye nan yon fenèt nòmal (pa incognito) epi re-aktive pèmisyon an.'
+          : 'Microphone is blocked. If you did not decline it, a site policy or a browser extension is blocking it — try a normal (non-private) window and re-enable the permission.');
+      } else if (name === 'SecurityError') {
+        setState('error');
+        setErrorMsg(isHt
+          ? 'Navigatè a bloke mikwo a sou paj sa a (politik sit oswa iframe). Louvri leson an nan yon onglet dirèk epi eseye ankò.'
+          : 'The browser blocked the microphone on this page (site policy or iframe). Open the lesson in a normal tab and try again.');
       } else if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
         setState('error');
         setErrorMsg(isHt ? 'Pa jwenn okenn mikro.' : 'No microphone was found.');
