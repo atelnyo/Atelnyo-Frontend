@@ -168,7 +168,8 @@ export function isMentorIntent(message) {
  */
 export async function executeEnroll(courseId) {
   try {
-    await api.post(`courses/${courseId}/enroll/`);
+    // Real enrollment endpoint (courses/<id>/enroll/ never existed).
+    await api.post('enrollments/', { course: courseId });
     return { success: true, message: 'enrolled' };
   } catch (err) {
     const msg = err?.response?.data?.detail || err?.message || 'Enrollment failed';

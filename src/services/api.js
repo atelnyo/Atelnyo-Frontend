@@ -550,7 +550,8 @@ export const chapterService = {
   create: (data) => api.post('chapters/', data),
   update: (id, data) => api.patch(`chapters/${id}/`, data),
   delete: (id) => api.delete(`chapters/${id}/`),
-  reorder: (courseId, items) => api.post(`courses/${courseId}/chapters/reorder/`, { items }),
+  // Flat route (the nested courses/<id>/chapters/… path does not exist).
+  reorder: (courseId, items) => api.post('chapters/reorder/', { course: courseId, items }),
 };
 
 export const lessonService = {
@@ -559,7 +560,7 @@ export const lessonService = {
   create: (data) => api.post('lessons/', data),
   update: (id, data) => api.patch(`lessons/${id}/`, data),
   delete: (id) => api.delete(`lessons/${id}/`),
-  reorder: (chapterId, items) => api.post(`chapters/${chapterId}/lessons/reorder/`, { items }),
+  reorder: (chapterId, items) => api.post('lessons/reorder/', { chapter: chapterId, items }),
 };
 
 export const contentBlockService = {
@@ -568,8 +569,10 @@ export const contentBlockService = {
   create: (data) => api.post('content-blocks/', data),
   update: (id, data) => api.patch(`content-blocks/${id}/`, data),
   delete: (id) => api.delete(`content-blocks/${id}/`),
-  duplicate: (lessonId, blockId) => api.post(`lessons/${lessonId}/blocks/${blockId}/duplicate/`),
-  reorder: (lessonId, items) => api.post(`lessons/${lessonId}/blocks/reorder/`, { items }),
+  // ``lessonId`` is kept in the signature for existing callers; the
+  // backend resolves the lesson from the block on the flat route.
+  duplicate: (_lessonId, blockId) => api.post(`content-blocks/${blockId}/duplicate/`),
+  reorder: (lessonId, items) => api.post('content-blocks/reorder/', { lesson: lessonId, items }),
 };
 
 export const musicService = {
@@ -1232,9 +1235,13 @@ export const communitiesService = {
   banMember: (slug, membershipId, reason = '') => api.post(`communities/${encodeURIComponent(slug)}/ban/`, { user_id: membershipId, reason }),
   unbanMember: (slug, membershipId) => api.post(`communities/${encodeURIComponent(slug)}/unban/`, { user_id: membershipId }),
   bannedMembers: (slug) => api.get(`communities/${encodeURIComponent(slug)}/banned_members/`),
-  announcements: (slug) => api.get(`communities/${encodeURIComponent(slug)}/announcements/`),
-  files: (slug) => api.get(`communities/${encodeURIComponent(slug)}/files/`),
-  linkedCourses: (slug) => api.get(`communities/${encodeURIComponent(slug)}/courses/`),
+  // These three live on their OWN flat routes, scoped by ?community=<slug>
+  // — the nested communities/<slug>/…/ paths returned 404.
+  announcements: (slug) =>
+    api.get('community-announcements/', { params: { community: slug } }),
+  files: (slug) => api.get('community-files/', { params: { community: slug } }),
+  linkedCourses: (slug) =>
+    api.get('community-courses/', { params: { community: slug } }),
   getSEO: (id) => api.get(`intelligence/community/${id}/seo/`),
 };
 

@@ -367,7 +367,7 @@ async function _executeCommand(command, lang) {
     }
     case 'calendar': {
       try {
-        const res = await api.get('events/', { params: { page_size: 5, upcoming: true } });
+        const res = await api.get('community-events/upcoming/', { params: { page_size: 5 } });
         const events = res?.data?.results || [];
         if (events.length > 0) {
           const items = events.map(e => {
@@ -397,7 +397,9 @@ async function _executeCommand(command, lang) {
     case 'saved': {
       try {
         const [coursesRes, musicRes, talentsRes] = await Promise.allSettled([
-          api.get('explore/saved/courses/', { params: { page_size: 3 } }),
+          // Saved courses share the generic saved-items endpoint; there is
+          // no explore/saved/courses/ route (music/talents have their own).
+          api.get('explore/saved/items/', { params: { item_type: 'course', page_size: 3 } }),
           api.get('explore/saved/music/', { params: { page_size: 3 } }),
           api.get('explore/saved/talents/', { params: { page_size: 3 } }),
         ]);
