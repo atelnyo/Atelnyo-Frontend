@@ -53,8 +53,6 @@ export const RAIL_ITEMS = [
   { id: 'courses',    icon: 'fa-graduation-cap', label: 'Courses',   labelHt: 'Kou' },
   { id: 'products',   icon: 'fa-cube',      label: 'Products',   labelHt: 'Pwodwi' },
   { id: 'portfolio',  icon: 'fa-briefcase', label: 'Portfolio',  labelHt: 'Pòtfolyo' },
-  // TikTok showcase — opt-in (visibility defaults to false; spec 🖼️)
-  { id: 'tiktok',     icon: 'fab fa-tiktok', label: 'TikTok',    labelHt: 'TikTok' },
   { id: 'reviews',    icon: 'fa-star',      label: 'Reviews',    labelHt: 'Revi' },
   { id: 'about',      icon: 'fa-user',      label: 'About',      labelHt: 'Sou nou' },
 ];
@@ -67,11 +65,11 @@ export const PROFILE_TABS = RAIL_ITEMS;
 export const DEFAULT_SECTION_CONFIG = {
   section_order: [
     'dashboard', 'picks', 'courses', 'products',
-    'portfolio', 'tiktok', 'reviews', 'about',
+    'portfolio', 'reviews', 'about',
   ],
   section_visibility: {
     dashboard: true, picks: true, courses: true,
-    products: true, portfolio: true, tiktok: false, reviews: true,
+    products: true, portfolio: true, reviews: true,
     about: true,
   },
 };

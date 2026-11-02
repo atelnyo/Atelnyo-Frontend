@@ -26,7 +26,6 @@ const ALL_SECTIONS = [
   { id: 'courses',   icon: 'fa-graduation-cap', label: 'Courses',  labelHt: 'Kou' },
   { id: 'products',  icon: 'fa-cube',      label: 'Products',  labelHt: 'Pwodwi' },
   { id: 'portfolio', icon: 'fa-briefcase', label: 'Portfolio', labelHt: 'Pòtfolyo' },
-  { id: 'tiktok',    icon: 'fab fa-tiktok', label: 'TikTok',    labelHt: 'TikTok' },
   { id: 'reviews',   icon: 'fa-star',      label: 'Reviews',   labelHt: 'Revi' },
   { id: 'about',     icon: 'fa-user',      label: 'About',     labelHt: 'Sou nou' },
 ];
@@ -34,7 +33,7 @@ const ALL_SECTIONS = [
 const DEFAULT_SECTION_CONFIG = {
   section_order: ALL_SECTIONS.map(s => s.id),
   section_visibility: Object.fromEntries(
-    ALL_SECTIONS.map(s => [s.id, s.id !== 'tiktok']),
+    ALL_SECTIONS.map(s => [s.id, true]),
   ),
 };
 
