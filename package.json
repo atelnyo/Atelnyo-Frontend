@@ -54,8 +54,10 @@
     "vitest": "^4.1.10"
   },
   "//overrides": "@firebase/firestore pins @grpc/grpc-js ~1.9.0, which carries the auth-context and status-message advisories. 1.13.6 is the first patched 1.x; the override stays inside major 1 so the gRPC API firestore uses is unchanged.",
+  "//overrides-minimatch": "The eslint toolchain (eslint, @eslint/config-array, @eslint/eslintrc, eslint-plugin-react) still pins minimatch ~3.x, whose globparts amplification advisory (GHSA-g3hv-75wg-m249) is only patched in 11.0.1+. Dev-only, but it keeps `npm audit` noisy; the override is verified against `npm run lint` before release.",
   "overrides": {
-    "@grpc/grpc-js": "^1.13.6"
+    "@grpc/grpc-js": "^1.13.6",
+    "minimatch": "^11.0.3"
   },
   "allowScripts": {
     "esbuild@0.25.12": true,
