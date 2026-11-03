@@ -16,7 +16,7 @@
 import React, { useState, useRef, useEffect, startTransition } from 'react';
 import { useLocation } from 'react-router-dom';
 import useSafeNavigate from '../hooks/useSafeNavigate';
-import { creatorProfileService } from '../services/api';
+import { creatorProfileService, enrollmentService } from '../services/api';
 import { SHEETS } from '../routes/sheets';
 import { getUserIdentity } from '../utils/userIdentity';
 import { t2 } from '../utils/i18n';
@@ -45,6 +45,27 @@ const Header = ({
   const location = useLocation();
   const t = translations[lang] || translations?.ht || {};
   const identity = getUserIdentity(user);
+
+  // ─── Learner flag: graduation cap shows only for enrolled learners ─
+  // Anonymous visitors and users with zero enrollments never see it.
+  const [isLearner, setIsLearner] = useState(false);
+  useEffect(() => {
+    if (!user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIsLearner(false);
+      return;
+    }
+    let cancelled = false;
+    enrollmentService.getAll()
+      .then((res) => {
+        if (cancelled) { return; }
+        const data = res?.data;
+        const list = Array.isArray(data) ? data : (data?.results || data?.enrollments || []);
+        setIsLearner(Array.isArray(list) ? list.length > 0 : false);
+      })
+      .catch(() => { if (!cancelled) { setIsLearner(false); } });
+    return () => { cancelled = true; };
+  }, [user?.id]);
 
   // ─── Fetch creator avatar_url from CreatorProfile ────────────────
   const [creatorAvatarUrl, setCreatorAvatarUrl] = useState(null);
@@ -135,7 +156,9 @@ const Header = ({
 
       {/* Center: Brand name */}
       <h1 className="app-header__brand">
-        <i className="fas fa-graduation-cap" aria-hidden="true" />
+        {isLearner && (
+          <i className="fas fa-graduation-cap" aria-hidden="true" />
+        )}
         <span>{t.brand_name}</span>
       </h1>
 
