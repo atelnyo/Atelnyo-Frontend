@@ -33,6 +33,9 @@ import {
   executeSearch,
   executeGetNotifications,
   executeMarkAllRead,
+  executeMyPosts,
+  executeLatestPosts,
+  executeVerifyCertificate,
 } from './chatbotCommands';
 import { useAuthStore } from '../store/useAuthStore';
 import userActivity from '../services/userActivity';
@@ -201,6 +204,26 @@ const COMMAND_PATTERNS = [
   // Saved / bookmarks
   { regex: /^(?:sove|mwen\s+sove|saved|bookmark|mwen\s+make|liked|mwen\s+renmen|mwen\s+guard|mwen\s+retne|show\s+(?:me\s+)?saved)/i,
     type: 'saved',
+  },
+  // My own creator posts (keep in sync with chatbotCommands.js)
+  { regex: /^(?:post\s+mwen|p(?:ò|o)s\s+mwen|my\s+posts?|mes\s+posts?|montre\s+m(?:wen)?\s+p(?:ò|o)st|show\s+(?:me\s+)?my\s+posts?|p(?:ò|o)st\s+yo\s+mwen|ki\s+p(?:ò|o)st\s+mwen(?:\s+(?:fè|gen|pibliye))?)/i,
+    type: 'my_posts',
+  },
+  // Latest platform posts (keep in sync with chatbotCommands.js)
+  { regex: /^(?:d(?:è|e)nye\s+p(?:ò|o)sts?|latest\s+posts?|derniers\s+posts?|nouvo\s+p(?:ò|o)sts?|ki\s+d(?:è|e)nye\s+p(?:ò|o)st|what(?:'s|\s+is)\s+new)/i,
+    type: 'latest_posts',
+  },
+  // Verify a certificate code (keep in sync with chatbotCommands.js)
+  { regex: /^(?:verifye|verify|verifie|verifica|tcheke\s+s(?:è|e)tifika|check\s+certificate)\s+([A-Za-z]{2,5}-[A-Za-z0-9-]{4,})\s*$/i,
+    type: 'verify',
+  },
+  // Bare certificate code pasted alone
+  { regex: /^([A-Za-z]{2,5}-[A-Za-z0-9]{4}(?:-[A-Za-z0-9]{4}){1,2})\s*$/i,
+    type: 'verify',
+  },
+  // Clear / restart the conversation (keep in sync with chatbotCommands.js)
+  { regex: /^(?:efase\s+(?:konv(?:èsasyon)?|chat|istwa|tout)|clear\s+(?:chat|conversation|history)|nouvo\s+konv|new\s+chat|rekomanse)/i,
+    type: 'clear_chat',
   },
 ];
 
@@ -449,6 +472,71 @@ async function _executeCommand(command, lang) {
           : '✅ All notifications marked as read!' };
       } catch { return { executed: false, message: '' }; }
     }
+    case 'my_posts': {
+      const { posts, username, isCreator } = await executeMyPosts();
+      if (!isCreator) {
+        return { executed: true, message: isHt
+          ? '📝 Ou pa gen pwofil kreyatè ankò — se sèlman kreyatè ki ka pibliye post. [Vin yon kreyatè](https://atelnyo.site/explore) pou kòmanse pataje!'
+          : '📝 You don\'t have a creator profile yet — only creators can publish posts. [Become a creator](https://atelnyo.site/explore) to start sharing!' };
+      }
+      if (posts.length === 0) {
+        return { executed: true, message: isHt
+          ? `📝 Ou poko pibliye okenn post, @${username}. Ale sou [pwofil ou](https://atelnyo.site/c/${username}) pou ekri premye post ou!`
+          : `📝 You haven't published any posts yet, @${username}. Visit [your profile](https://atelnyo.site/c/${username}) to write your first post!` };
+      }
+      const items = posts.map(p => {
+        const date = p.created_at ? new Date(p.created_at).toLocaleDateString() : '';
+        return `- "${p.excerpt}"${date ? ` (${date})` : ''}\n  ${p.url}`;
+      }).join('\n');
+      return { executed: true, message: isHt
+        ? `📝 **POST OU YO (@${username}):**\n${items}`
+        : `📝 **YOUR POSTS (@${username}):**\n${items}` };
+    }
+    case 'latest_posts': {
+      const posts = await executeLatestPosts(5);
+      if (posts.length === 0) {
+        return { executed: true, message: isHt
+          ? '📰 Pa gen post resan pou kounye a. Tcheke ankò pita!'
+          : '📰 No recent posts right now. Check back later!' };
+      }
+      const items = posts.map(p => {
+        const date = p.published_at ? new Date(p.published_at).toLocaleDateString() : '';
+        return `- @${p.author}: "${p.excerpt}"${date ? ` (${date})` : ''}\n  ${p.url}`;
+      }).join('\n');
+      return { executed: true, message: isHt
+        ? `📰 **DÈNYE POST YO:**\n${items}`
+        : `📰 **LATEST POSTS:**\n${items}` };
+    }
+    case 'verify': {
+      // Query arrives lowercased from _parseCommand — codes are uppercase.
+      const code = (command.query || '').trim().toUpperCase();
+      if (!code) return { executed: false, message: '' };
+      const res = await executeVerifyCertificate(code);
+      if (res.ok && res.valid) {
+        const date = res.issued_at ? new Date(res.issued_at).toLocaleDateString() : '';
+        return { executed: true, message: isHt
+          ? `✅ **SÈTIFIKA VALAB**\n\n🎓 Elèv: **${res.learner_name || '?'}**\n📚 Kou: **${res.course_title || '?'}**\n🔢 Nimewo: \`${res.certificate_number}\`${date ? `\n📅 Bay: ${date}` : ''}${res.verify_url ? `\n\n🔗 [Verifye sou sit la](${res.verify_url})` : ''}`
+          : `✅ **VALID CERTIFICATE**\n\n🎓 Learner: **${res.learner_name || '?'}**\n📚 Course: **${res.course_title || '?'}**\n🔢 Number: \`${res.certificate_number}\`${date ? `\n📅 Issued: ${date}` : ''}${res.verify_url ? `\n\n🔗 [Verify on site](${res.verify_url})` : ''}` };
+      }
+      if (res.reason === 'not_found') {
+        return { executed: true, message: isHt
+          ? `❌ Kòd \`${code}\` **pa koresponn ak okenn sètifika**. Verifye ou kopye l byen (fòma: ATN-XXXX-XXXX-XXXX).`
+          : `❌ Code \`${code}\` does **not match any certificate**. Check you copied it correctly (format: ATN-XXXX-XXXX-XXXX).` };
+      }
+      if (res.reason === 'rate_limited') {
+        return { executed: true, message: isHt
+          ? '⏳ Twòp verifikasyon youn dèyè lòt. Rete tann yon ti moman epi re-eseye.'
+          : '⏳ Too many verifications in a row. Wait a moment and try again.' };
+      }
+      return { executed: true, message: isHt
+        ? '⚠️ Mwen pa ka verifye kòd la kounye a. Eseye ankò pita.'
+        : '⚠️ I cannot verify the code right now. Try again later.' };
+    }
+    case 'clear_chat': {
+      return { executed: true, action: 'clear', message: isHt
+        ? '✨ Konvèsasyon an efase — nou kòmanse fre! Kijan mwen ka ede ou?'
+        : '✨ Conversation cleared — fresh start! How can I help you?' };
+    }
     case 'url': {
       // Fetch SEO meta for the URL and show preview
       return { executed: false, message: '', url: command.url };
@@ -676,6 +764,7 @@ LINK RULES (anti-hallucination — breaking these misleads the user):
 4. Post links use the post's author username + slug from the data: https://atelnyo.site/c/{username}/post/{slug}
 5. A question about "my post" / "my posts" refers to USER'S OWN POSTS below — answer from that list with its links.
 6. If the requested item is NOT in your data, say so honestly and link https://atelnyo.site/explore instead of guessing.
+7. Certificate codes look like ATN-XXXX-XXXX-XXXX. You cannot verify them yourself — invite the user to type "verifye CODE" and the assistant will check it instantly.
 
 CONTENT: courses (programming, design, music, languages, business), digital products, music tracks, talent showcases, communities, events, jobs
 
@@ -771,6 +860,21 @@ function _getFollowUpSuggestions(lastBotText, lang) {
   if (/wallet|bous|lajan|balance|solde/i.test(text)) {
     suggestions.push(
       { icon: '⭐', text: lang === 'ht' ? 'Moun yo sove mwen' : lang === 'fr' ? 'Mes éléments sauvegardés' : lang === 'es' ? 'Mis elementos guardados' : 'My saved items' },
+    );
+  }
+
+  // Posts follow-ups — point users at the new post commands
+  if (/post|p(?:ò|o)s/i.test(text)) {
+    suggestions.push(
+      { icon: '📝', text: lang === 'ht' ? 'Montre m post mwen yo' : lang === 'fr' ? 'Montre mes posts' : lang === 'es' ? 'Muestra mis posts' : 'Show my posts' },
+      { icon: '📰', text: lang === 'ht' ? 'Ki dènye post yo?' : lang === 'fr' ? 'Quels sont les derniers posts?' : lang === 'es' ? '¿Cuáles son los últimos posts?' : 'What are the latest posts?' },
+    );
+  }
+
+  // Certificate follow-ups — verification goes through the verify command
+  if (/s(?:è|e)tifika|certificate|certificat/i.test(text)) {
+    suggestions.push(
+      { icon: '✅', text: lang === 'ht' ? 'Verifye yon sètifika (ekri: verifye KÒD)' : lang === 'fr' ? 'Vérifier un certificat (écrire: verifye CODE)' : lang === 'es' ? 'Verificar un certificado (escribe: verifye CÓDIGO)' : 'Verify a certificate (type: verifye CODE)' },
     );
   }
 
@@ -1039,6 +1143,18 @@ const Chatbot = React.memo(({ lang = 'ht', translations }) => {
     if (command) {
       const result = await _executeCommand(command, lang);
       if (result.executed) {
+        // "clear chat" — wipe history and start fresh (also clears storage).
+        if (result.action === 'clear') {
+          try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+          setMessages([{
+            role: 'bot',
+            text: result.message,
+            timestamp: Date.now(),
+            isCommand: true,
+          }]);
+          setIsThinking(false);
+          return;
+        }
         setMessages(prev => [...prev, {
           role: 'bot',
           text: result.message,

@@ -59,7 +59,9 @@ function CertificatePreviewPanel({ lang: _lang, onNavigate }) {
     let cancelled = false;
     (async () => {
       try {
-        const res = await api.get('/api/certificates/admin/list/');
+        // NOTE: api baseURL already ends with /api/ — no leading /api prefix here
+        // (it would resolve to /api/api/... and 404).
+        const res = await api.get('certificates/admin/list/');
         if (!cancelled) {
           setCerts(res.data);
           setLoading(false);

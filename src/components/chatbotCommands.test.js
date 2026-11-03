@@ -2,10 +2,16 @@
  * Unit tests for src/components/chatbotCommands.js
  *
  * Tests command parsing (parseCommand), intent detection (detectIntent),
- * and mentor intent detection (isMentorIntent).
+ * mentor intent detection (isMentorIntent), and the post/certificate
+ * action executors with a mocked api client.
  */
-import { describe, it, expect } from 'vitest';
-import { parseCommand, detectIntent, isMentorIntent, INTENTS } from './chatbotCommands';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import api from '../services/api';
+import { parseCommand, detectIntent, isMentorIntent, INTENTS, executeMyPosts, executeLatestPosts, executeVerifyCertificate } from './chatbotCommands';
+
+vi.mock('../services/api', () => ({
+  default: { get: vi.fn(), post: vi.fn(), delete: vi.fn() },
+}));
 
 // ═══════════════════════════════════════════════════════════════════
 // parseCommand — structured command detection from user messages
@@ -268,6 +274,124 @@ describe('detectIntent', () => {
   it('returns correct label in Haitian Creole', () => {
     const intent = detectIntent('kou');
     expect(intent.label.ht).toContain('📚');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// parseCommand — posts, verify, clear_chat
+// ═══════════════════════════════════════════════════════════════════
+describe('parseCommand — posts / verify / clear', () => {
+  it('detects "montre m post mwen yo" as my_posts', () => {
+    expect(parseCommand('montre m post mwen yo')).toMatchObject({ type: 'my_posts' });
+  });
+
+  it('detects "my posts" as my_posts', () => {
+    expect(parseCommand('my posts')).toMatchObject({ type: 'my_posts' });
+  });
+
+  it('detects "ki dènye post yo" as latest_posts', () => {
+    expect(parseCommand('ki dènye post yo')).toMatchObject({ type: 'latest_posts' });
+  });
+
+  it('detects "latest posts" as latest_posts', () => {
+    expect(parseCommand('latest posts')).toMatchObject({ type: 'latest_posts' });
+  });
+
+  it('detects "verifye ATN-AB12-CD34-EF56" as verify with the code', () => {
+    const cmd = parseCommand('verifye ATN-AB12-CD34-EF56');
+    expect(cmd).toMatchObject({ type: 'verify' });
+    // parseCommand lowercases — execution upper-cases back.
+    expect(cmd.query.toUpperCase()).toBe('ATN-AB12-CD34-EF56');
+  });
+
+  it('detects a bare certificate code as verify', () => {
+    const cmd = parseCommand('ATN-AB12-CD34-EF56');
+    expect(cmd).toMatchObject({ type: 'verify' });
+  });
+
+  it('detects "efase konvèsasyon" as clear_chat', () => {
+    expect(parseCommand('efase konvèsasyon')).toMatchObject({ type: 'clear_chat' });
+  });
+
+  it('detects "clear chat" as clear_chat', () => {
+    expect(parseCommand('clear chat')).toMatchObject({ type: 'clear_chat' });
+  });
+
+  it('does not steal "efase notifikasyon" (still mark_read)', () => {
+    expect(parseCommand('efase notifikasyon')).toMatchObject({ type: 'mark_read' });
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// executeMyPosts / executeLatestPosts / executeVerifyCertificate
+// ═══════════════════════════════════════════════════════════════════
+describe('post + certificate executors', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('executeMyPosts returns posts with REAL canonical URLs', async () => {
+    api.get
+      .mockResolvedValueOnce({ data: { slug: 'marie', username: 'marie' } })
+      .mockResolvedValueOnce({ data: [{ slug: 'abc123', body: 'Bonjou tout moun!', created_at: '2026-08-28T12:00:00Z' }] });
+
+    const res = await executeMyPosts();
+    expect(res.isCreator).toBe(true);
+    expect(res.username).toBe('marie');
+    expect(res.posts).toHaveLength(1);
+    expect(res.posts[0].url).toBe('https://atelnyo.site/c/marie/post/abc123');
+    expect(res.posts[0].excerpt).toContain('Bonjou');
+  });
+
+  it('executeMyPosts reports non-creators without throwing', async () => {
+    api.get.mockRejectedValueOnce({ response: { status: 404 } });
+    const res = await executeMyPosts();
+    expect(res).toMatchObject({ posts: [], isCreator: false });
+  });
+
+  it('executeLatestPosts maps backend preview URLs to absolute links', async () => {
+    api.get.mockResolvedValueOnce({
+      data: { results: [
+        { published_at: '2026-08-28T12:00:00Z', preview: { id: 9, type: 'post', text: 'Bonjou!', creator_name: 'marie', slug: 'abc123', url: '/c/marie/post/abc123' } },
+        { published_at: '2026-08-27T12:00:00Z', preview: { id: 10, type: 'post', text: 'Sans URL' } },
+      ] },
+    });
+
+    const posts = await executeLatestPosts(5);
+    // Only the post with a backend-provided URL survives — never guessed.
+    expect(posts).toHaveLength(1);
+    expect(posts[0].url).toBe('https://atelnyo.site/c/marie/post/abc123');
+    expect(posts[0].author).toBe('marie');
+  });
+
+  it('executeLatestPosts returns [] on failure (never throws)', async () => {
+    api.get.mockRejectedValueOnce(new Error('network down'));
+    await expect(executeLatestPosts()).resolves.toEqual([]);
+  });
+
+  it('executeVerifyCertificate returns details for a valid code', async () => {
+    api.get.mockResolvedValueOnce({
+      data: { valid: true, certificate_number: 'ATN-AB12-CD34-EF56', learner_name: 'Marie', course_title: 'Kreyòl', issued_at: '2026-08-28T12:00:00Z' },
+    });
+
+    const res = await executeVerifyCertificate('atn-ab12-cd34-ef56');
+    expect(res.ok).toBe(true);
+    expect(res.valid).toBe(true);
+    expect(res.learner_name).toBe('Marie');
+    // Called with the UPPER-CASED code (backend lookup is exact).
+    expect(api.get).toHaveBeenCalledWith('certificates/verify/ATN-AB12-CD34-EF56/');
+  });
+
+  it('executeVerifyCertificate maps 404 to not_found (never throws)', async () => {
+    api.get.mockRejectedValueOnce({ response: { status: 404, data: { valid: false } } });
+    const res = await executeVerifyCertificate('ATN-XXXX-XXXX-XXXX');
+    expect(res).toMatchObject({ ok: false, reason: 'not_found', valid: false });
+  });
+
+  it('executeVerifyCertificate maps 429 to rate_limited', async () => {
+    api.get.mockRejectedValueOnce({ response: { status: 429 } });
+    const res = await executeVerifyCertificate('ATN-AB12-CD34-EF56');
+    expect(res).toMatchObject({ ok: false, reason: 'rate_limited' });
   });
 });
 

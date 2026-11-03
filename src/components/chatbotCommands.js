@@ -113,6 +113,27 @@ const COMMAND_PATTERNS = [
   { regex: /^(?:mark\s+read|li\s+tout|read\s+all|efase\s+notifikasyon|clear\s+notifikasyon|mark\s+all\s+read)/i,
     type: 'mark_read',
   },
+  // My own creator posts (newest first, with REAL canonical links)
+  { regex: /^(?:post\s+mwen|p(?:ò|o)s\s+mwen|my\s+posts?|mes\s+posts?|montre\s+m(?:wen)?\s+p(?:ò|o)st|show\s+(?:me\s+)?my\s+posts?|p(?:ò|o)st\s+yo\s+mwen|ki\s+p(?:ò|o)st\s+mwen(?:\s+(?:fè|gen|pibliye))?)/i,
+    type: 'my_posts',
+  },
+  // Latest platform posts (newest first, with REAL canonical links)
+  { regex: /^(?:d(?:è|e)nye\s+p(?:ò|o)sts?|latest\s+posts?|derniers\s+posts?|nouvo\s+p(?:ò|o)sts?|ki\s+d(?:è|e)nye\s+p(?:ò|o)st|what(?:'s|\s+is)\s+new)/i,
+    type: 'latest_posts',
+  },
+  // Verify a certificate: "verifye ATN-XXXX-XXXX-XXXX" (code case preserved
+  // by upper-casing at execution time — parseCommand lowercases matches).
+  { regex: /^(?:verifye|verify|verifie|verifica|tcheke\s+s(?:è|e)tifika|check\s+certificate)\s+([A-Za-z]{2,5}-[A-Za-z0-9-]{4,})\s*$/i,
+    type: 'verify',
+  },
+  // Bare certificate code pasted alone (e.g. "ATN-AB12-CD34-EF56").
+  { regex: /^([A-Za-z]{2,5}-[A-Za-z0-9]{4}(?:-[A-Za-z0-9]{4}){1,2})\s*$/i,
+    type: 'verify',
+  },
+  // Clear / restart the conversation (handled by the chat UI).
+  { regex: /^(?:efase\s+(?:konv(?:èsasyon)?|chat|istwa|tout)|clear\s+(?:chat|conversation|history)|nouvo\s+konv|new\s+chat|rekomanse)/i,
+    type: 'clear_chat',
+  },
 ];
 
 /**
@@ -323,5 +344,80 @@ export async function executeMarkAllRead() {
     return { success: true };
   } catch {
     return { success: false };
+  }
+}
+
+/**
+ * Fetch the logged-in creator's own newest posts with REAL canonical URLs.
+ * @returns {Promise<{posts: Array<{slug, excerpt, url, created_at}>, username: string, isCreator: boolean}>}
+ */
+export async function executeMyPosts() {
+  try {
+    const me = (await api.get('creator-profiles/me/'))?.data;
+    const slug = me?.slug;
+    if (!slug) return { posts: [], username: '', isCreator: false };
+    const username = me?.username || slug;
+    const res = await api.get(`creator-profiles/${encodeURIComponent(slug)}/posts/`, {
+      params: { page_size: 5 },
+    });
+    const rows = Array.isArray(res?.data) ? res.data : (res?.data?.results || []);
+    return {
+      posts: rows.slice(0, 5).map(p => ({
+        slug: p.slug,
+        excerpt: String(p.body || '').slice(0, 120),
+        url: `https://atelnyo.site/c/${username}/post/${p.slug}`,
+        created_at: p.created_at || null,
+      })).filter(p => p.slug),
+      username,
+      isCreator: true,
+    };
+  } catch {
+    return { posts: [], username: '', isCreator: false };
+  }
+}
+
+/**
+ * Fetch the newest platform posts with the REAL canonical URLs provided
+ * by the backend feed preview (never guessed).
+ * @param {number} [limit] — max posts to return
+ * @returns {Promise<Array<{excerpt, author, url, published_at}>>}
+ */
+export async function executeLatestPosts(limit = 5) {
+  try {
+    const res = await api.get('feed/latest/', {
+      params: { limit, content_type: 'post' },
+    });
+    const rows = res?.data?.results || [];
+    return rows.slice(0, limit).map(r => {
+      const p = r.preview || {};
+      return {
+        excerpt: String(p.title || p.text || '').slice(0, 120),
+        author: p.creator_name || '',
+        url: p.url ? `https://atelnyo.site${p.url}` : '',
+        published_at: r.published_at || null,
+      };
+    }).filter(p => p.url);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Verify a course certificate code via the public verify endpoint.
+ * Never throws — returns a normalized result the UI can render.
+ * @param {string} code — raw code as typed by the user (case-insensitive)
+ * @returns {Promise<{ok: boolean, valid?: boolean, reason?: string, ...details}>}
+ */
+export async function executeVerifyCertificate(code) {
+  const clean = String(code || '').trim().toUpperCase();
+  if (!clean) return { ok: false, reason: 'empty' };
+  try {
+    const res = await api.get(`certificates/verify/${encodeURIComponent(clean)}/`);
+    return { ok: true, ...(res?.data || {}) };
+  } catch (err) {
+    const status = err?.response?.status;
+    if (status === 404) return { ok: false, reason: 'not_found', valid: false };
+    if (status === 429) return { ok: false, reason: 'rate_limited' };
+    return { ok: false, reason: 'error' };
   }
 }

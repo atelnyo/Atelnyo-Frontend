@@ -17,7 +17,7 @@ export default function TemplatePicker({ lang = 'ht', onSelect }) {
 
   const loadTemplates = async () => {
     try {
-      const res = await api.get('/api/courses/templates/');
+      const res = await api.get('courses/templates/');
       setTemplates(res.data.templates || []);
     } catch (e) {
       console.error('Failed to load templates:', e);

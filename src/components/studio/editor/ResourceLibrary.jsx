@@ -30,7 +30,7 @@ export default function ResourceLibrary({ lang = 'ht', courseId, onInsert }) {
 
   const loadResources = async () => {
     try {
-      const res = await api.get('/api/resources/');
+      const res = await api.get('resources/');
       setResources(res.data.resources || []);
     } catch (e) {
       console.error('Failed to load resources:', e);
@@ -41,7 +41,7 @@ export default function ResourceLibrary({ lang = 'ht', courseId, onInsert }) {
 
   const handleCreate = async () => {
     try {
-      await api.post('/api/resources/', {
+      await api.post('resources/', {
         ...newResource,
         tags: newResource.tags ? newResource.tags.split(',').map(t => t.trim()) : [],
       });
