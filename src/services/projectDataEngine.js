@@ -39,6 +39,7 @@ async function fetchProjectData() {
       jobsRes,
       productsRes,
       communitiesRes,
+      postsRes,
     ] = await Promise.allSettled([
       api.get('courses/', { params: { page_size: 10, status: 'published' } }),
       api.get('creator-profiles/', { params: { page_size: 10 } }),
@@ -47,6 +48,10 @@ async function fetchProjectData() {
       api.get('explore/recommended/jobs/', { params: { page_size: 5 } }),
       api.get('explore/recommended/products/', { params: { page_size: 5 } }),
       api.get('communities/', { params: { page_size: 5 } }),
+      // Recent creator posts platform-wide (public). The preview carries
+      // the canonical post URL (/c/{username}/post/{slug}) so the chatbot
+      // can answer post questions with REAL links instead of guessing.
+      api.get('feed/latest/', { params: { limit: 6, content_type: 'post' } }),
     ]);
 
     const courses = coursesRes.status === 'fulfilled' ? coursesRes.value.data : {};
@@ -56,6 +61,7 @@ async function fetchProjectData() {
     const jobs = jobsRes.status === 'fulfilled' ? jobsRes.value.data : {};
     const products = productsRes.status === 'fulfilled' ? productsRes.value.data : {};
     const communities = communitiesRes.status === 'fulfilled' ? communitiesRes.value.data : {};
+    const latestPosts = postsRes.status === 'fulfilled' ? postsRes.value.data : {};
 
     cache = {
       courses: {
@@ -77,6 +83,7 @@ async function fetchProjectData() {
         top: (creators.results || []).slice(0, 6).map(c => ({
           id: c.id,
           slug: c.slug,
+          username: c.username || c.slug,
           display_name: c.display_name,
           is_verified: c.is_verified,
           is_featured: c.is_featured,
@@ -120,9 +127,29 @@ async function fetchProjectData() {
         total: communities.count || 0,
         top: (communities.results || []).slice(0, 3).map(c => ({
           id: c.id,
+          slug: c.slug,
           name: c.name,
           members: c.member_count || 0,
         })),
+      },
+      posts: {
+        total: (latestPosts.results || []).length,
+        // Newest creator posts platform-wide. Each carries its REAL
+        // canonical URL — the ONLY post links the bot may emit.
+        top: (latestPosts.results || []).slice(0, 5).map(r => {
+          const p = r.preview || {};
+          const author = p.creator_name || '';
+          const slug = p.slug || '';
+          const url = p.url || (author && slug ? `/c/${author}/post/${slug}` : '');
+          return {
+            id: p.id ?? r.object_id,
+            excerpt: (p.title || p.text || '').slice(0, 120),
+            author_username: author,
+            slug,
+            url,
+            published_at: r.published_at || null,
+          };
+        }).filter(p => p.url),
       },
       fetched_at: new Date().toISOString(),
     };
@@ -145,12 +172,15 @@ function buildProjectContext(data) {
   // Cap each item line — long titles would inflate every prompt.
   const clip = (s, n = 60) => String(s || '').length > n ? String(s).slice(0, n - 1) + '…' : String(s || '');
 
-  // Course catalog
+  // Course catalog — every line carries its REAL canonical URL so the
+  // bot never has to guess a link.
   if (data.courses?.total > 0) {
     lines.push(`COURSE CATALOG (${data.courses.total} total):`);
     for (const c of data.courses.top) {
       const price = c.price ? `$${c.price}` : 'Free';
-      lines.push(`  - [${c.id}] "${clip(c.title, 48)}" @${clip(c.creator, 24)} — ${price}`);
+      const key = c.slug || c.id;
+      const url = `https://atelnyo.site/${encodeURIComponent(key)}/by/${encodeURIComponent(c.creator || 'atelnyo')}/course`;
+      lines.push(`  - [${c.id}] "${clip(c.title, 48)}" @${clip(c.creator, 24)} — ${price}\n    Link: ${url}`);
     }
   }
 
@@ -161,7 +191,17 @@ function buildProjectContext(data) {
       const badges = [];
       if (c.is_verified) badges.push('✓');
       if (c.is_featured) badges.push('★');
-      lines.push(`  - @${clip(c.slug, 24)} — ${c.followers} followers, ${c.courses} courses ${badges.join('')}`);
+      const uname = c.username || c.slug;
+      lines.push(`  - @${clip(uname, 24)} — ${c.followers} followers, ${c.courses} courses ${badges.join('')}\n    Link: https://atelnyo.site/c/${encodeURIComponent(uname)}`);
+    }
+  }
+
+  // Recent creator posts — with REAL canonical URLs.
+  if (data.posts?.top?.length > 0) {
+    lines.push(`\nRECENT CREATOR POSTS (newest first — use these EXACT links when asked about posts):`);
+    for (const p of data.posts.top) {
+      const when = p.published_at ? new Date(p.published_at).toLocaleDateString() : '';
+      lines.push(`  - @${clip(p.author_username, 24)}: "${clip(p.excerpt, 80)}"${when ? ` (${when})` : ''}\n    Link: https://atelnyo.site${p.url}`);
     }
   }
 
@@ -202,7 +242,8 @@ function buildProjectContext(data) {
   if (data.communities?.total > 0) {
     lines.push(`\nCOMMUNITIES (${data.communities.total} total):`);
     for (const c of data.communities.top) {
-      lines.push(`  - "${clip(c.name, 40)}" — ${c.members} members`);
+      const link = c.slug ? `\n    Link: https://atelnyo.site/sheet/community/${encodeURIComponent(c.slug)}` : '';
+      lines.push(`  - "${clip(c.name, 40)}" — ${c.members} members${link}`);
     }
   }
 
@@ -248,6 +289,29 @@ async function fetchUserData(user) {
       api.get('activity/feed/', { params: { page_size: 5 } }).catch(() => ({ data: { results: [] } })),
     ]);
 
+    // The user's OWN creator posts (best-effort, creators only): my public
+    // profile slug, then my newest posts. Gives the bot REAL links to the
+    // user's posts so it can answer "my post" questions precisely.
+    let myPosts = [];
+    const myUsername = user.username || '';
+    try {
+      const meRes = await api.get('creator-profiles/me/');
+      const mySlug = meRes?.data?.slug;
+      if (mySlug && myUsername) {
+        const postsRes = await api.get(
+          `creator-profiles/${encodeURIComponent(mySlug)}/posts/`,
+          { params: { page_size: 5 } },
+        );
+        const rows = Array.isArray(postsRes?.data) ? postsRes.data : (postsRes?.data?.results || []);
+        myPosts = rows.slice(0, 5).map(p => ({
+          slug: p.slug,
+          excerpt: String(p.body || '').slice(0, 120),
+          url: `/c/${myUsername}/post/${p.slug}`,
+          created_at: p.created_at || null,
+        })).filter(p => p.slug);
+      }
+    } catch { /* not a creator or offline — myPosts stays empty */ }
+
     const progress = progressRes.status === 'fulfilled' ? progressRes.value.data : {};
     const wallet = walletRes.status === 'fulfilled' ? walletRes.value.data : {};
     const savedCourses = savedCoursesRes.status === 'fulfilled' ? savedCoursesRes.value.data : {};
@@ -290,6 +354,8 @@ async function fetchUserData(user) {
         unread: activity.unread_count || 0,
         total: activity.count || 0,
       },
+      username: myUsername,
+      my_posts: myPosts,
       fetched_at: new Date().toISOString(),
     };
 
@@ -345,6 +411,16 @@ function buildUserContext(userData) {
   // Unread activity
   if (userData.activity?.unread > 0) {
     lines.push(`\nUNREAD ACTIVITY: ${userData.activity.unread} unread notifications`);
+  }
+
+  // The user's OWN creator posts — REAL links, newest first.
+  if (userData.my_posts?.length > 0) {
+    const uname = userData.username || 'you';
+    lines.push(`\nUSER'S OWN POSTS (${userData.my_posts.length} newest — these are YOUR posts, @${uname}):`);
+    for (const p of userData.my_posts) {
+      const date = p.created_at ? new Date(p.created_at).toLocaleDateString() : '';
+      lines.push(`  - "${clipU(p.excerpt, 80)}"${date ? ` (${date})` : ''}\n    Link: https://atelnyo.site${p.url}`);
+    }
   }
 
   return lines.length > 0

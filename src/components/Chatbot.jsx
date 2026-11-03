@@ -620,10 +620,16 @@ function _buildSystemPrompt(lang, conversationHistory = [], user = null, activit
 - Format links as [text](URL) and use **bold** for key info.
 `;
 
-  // Build user context block
+  // Build user context block — ALWAYS present so the model knows whether
+  // it is talking to a logged-in user (with name + username) or a guest.
   let userBlock = '';
-  if (user) {
-    userBlock = `\n\nCURRENT USER:\n- Name: ${user.display_name || user.username || 'Unknown'}\n- Username: @${user.username || 'unknown'}\n- Premium: ${user.premium?.is_premium ? 'Yes (' + (user.premium.plan || 'active') + ')' : 'No'}\n- Creator: ${user.is_creator ? 'Yes' : 'No'}\n- Staff: ${user.is_staff ? 'Yes' : 'No'}`;
+  if (user?.id || user?.username) {
+    const fullName = user.display_name
+      || [user.first_name, user.last_name].filter(Boolean).join(' ')
+      || user.username || 'Unknown';
+    userBlock = `\n\nCURRENT USER (LOGGED IN — address them by name):\n- Name: ${fullName}\n- Username: @${user.username || 'unknown'} (user id ${user.id ?? '?'})\n- Premium: ${user.premium?.is_premium ? 'Yes (' + (user.premium.plan || 'active') + ')' : 'No'}\n- Creator: ${user.is_creator ? 'Yes' : 'No'}\n- Staff: ${user.is_staff ? 'Yes' : 'No'}`;
+  } else {
+    userBlock = `\n\nCURRENT USER:\n- NOT LOGGED IN (guest visitor). You do NOT know their name. Never invent one. For personal questions (my progress, my wallet, my posts), invite them to log in first.`;
   }
 
   // Build activity context block — where the user is right now
@@ -656,10 +662,20 @@ ${langRules}PERSONALITY:
 - Warm, helpful, conversational — like a knowledgeable friend; emojis sparingly 😊
 - Honest about what you don't know — redirect to https://atelnyo.site/explore
 
-PLATFORM URLS (use EXACT formats):
+PLATFORM URLS (use EXACT formats — {slug}/{creator} are filled from live data, never guessed):
 - Course: https://atelnyo.site/{slug}/by/{creator}/course
-- Creator profile: https://atelnyo.site/c/{creator-slug}
+- Creator post: https://atelnyo.site/c/{username}/post/{slug}
+- Creator profile: https://atelnyo.site/c/{username}
+- Community: https://atelnyo.site/sheet/community/{slug}
 - Explore + Premium info: https://atelnyo.site/explore (Settings → Premium)
+
+LINK RULES (anti-hallucination — breaking these misleads the user):
+1. Link a course/creator/community/post ONLY when it appears in LIVE PLATFORM DATA, USER'S PERSONAL DATA, USER'S OWN POSTS, or a search result in this conversation.
+2. Copy URLs EXACTLY as given — never invent, complete, shorten, or "fix" a slug, id, or username.
+3. Course links use the course's own slug + creator username from the data: https://atelnyo.site/{slug}/by/{creator}/course
+4. Post links use the post's author username + slug from the data: https://atelnyo.site/c/{username}/post/{slug}
+5. A question about "my post" / "my posts" refers to USER'S OWN POSTS below — answer from that list with its links.
+6. If the requested item is NOT in your data, say so honestly and link https://atelnyo.site/explore instead of guessing.
 
 CONTENT: courses (programming, design, music, languages, business), digital products, music tracks, talent showcases, communities, events, jobs
 

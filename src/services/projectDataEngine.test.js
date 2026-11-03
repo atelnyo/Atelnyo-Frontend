@@ -123,6 +123,39 @@ describe('buildProjectContext', () => {
     expect(ctx).not.toContain('COURSE CATALOG');
     expect(ctx).not.toContain('MUSIC TRACKS');
   });
+
+  it('emits REAL canonical links for courses, creators, communities, posts', () => {
+    const data = {
+      courses: { total: 1, top: [{ id: 7, title: 'Kreyòl De Baz', creator: 'marie', price: 0, slug: 'kreyol-de-baz' }] },
+      creators: { total: 1, top: [{ id: 2, slug: 'marie', username: 'marie', display_name: 'Marie', is_verified: true, is_featured: false, followers: 10, courses: 3 }] },
+      communities: { total: 1, top: [{ id: 3, slug: 'kreyol-fans', name: 'Kreyòl Fans', members: 42 }] },
+      posts: { total: 1, top: [{ id: 9, excerpt: 'Bonjou tout moun!', author_username: 'marie', slug: 'abc123', url: '/c/marie/post/abc123', published_at: '2026-08-28T12:00:00Z' }] },
+      fetched_at: '2026-08-28T12:00:00Z',
+    };
+
+    const ctx = buildProjectContext(data);
+    // Course canonical URL — slug + creator, never guessed.
+    expect(ctx).toContain('https://atelnyo.site/kreyol-de-baz/by/marie/course');
+    // Creator profile URL.
+    expect(ctx).toContain('https://atelnyo.site/c/marie');
+    // Community URL.
+    expect(ctx).toContain('https://atelnyo.site/sheet/community/kreyol-fans');
+    // Post section with the EXACT backend-provided link.
+    expect(ctx).toContain('RECENT CREATOR POSTS');
+    expect(ctx).toContain('https://atelnyo.site/c/marie/post/abc123');
+    expect(ctx).toContain('@marie');
+  });
+
+  it('omits community link when slug is missing (never invent URLs)', () => {
+    const data = {
+      communities: { total: 1, top: [{ id: 3, name: 'Sans Slug', members: 1 }] },
+      fetched_at: '2026-08-28T12:00:00Z',
+    };
+
+    const ctx = buildProjectContext(data);
+    expect(ctx).toContain('Sans Slug');
+    expect(ctx).not.toContain('Link:');
+  });
 });
 
 describe('buildUserContext', () => {
@@ -211,6 +244,22 @@ describe('buildUserContext', () => {
     const ctx = buildUserContext(data);
     expect(ctx).toContain('UNREAD ACTIVITY');
     expect(ctx).toContain('5 unread');
+  });
+
+  it("builds context with the user's own posts and REAL links", () => {
+    const data = {
+      username: 'marie',
+      my_posts: [
+        { slug: 'abc123', excerpt: 'Premye post mwen!', url: '/c/marie/post/abc123', created_at: '2026-08-28T12:00:00Z' },
+      ],
+      fetched_at: '2026-08-28T12:00:00Z',
+    };
+
+    const ctx = buildUserContext(data);
+    expect(ctx).toContain("USER'S OWN POSTS");
+    expect(ctx).toContain('@marie');
+    expect(ctx).toContain('Premye post mwen!');
+    expect(ctx).toContain('https://atelnyo.site/c/marie/post/abc123');
   });
 
   it('skips empty sections', () => {
