@@ -13,9 +13,12 @@
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   padding: 10px 15px;
+  padding-top: calc(10px + env(safe-area-inset-top, 0px));
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: nowrap;
+  overflow: visible;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 0;
@@ -52,7 +55,18 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 0;
+  /* Like the fixed bottom bar, the top actions never push the page
+     into a horizontal scroll: extra tools stay reachable via a
+     swipeable row instead of overflowing on narrow phones. */
+  overflow-x: auto;
+  overflow-y: visible;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.app-header__actions::-webkit-scrollbar {
+  display: none;
 }
 
 @media (max-width: 400px) {
@@ -490,8 +504,8 @@ body.dark-mode .header-profile-btn:hover .header-avatar {
   transform: scale(0.985);
 }
 
-/* ─── Responsive ─────────────────────────────────────────────── */
-@media (max-width: 500px) {
+/* ─── Responsive (mirrors bottom-nav 480px / 360px steps) ────────── */
+@media (max-width: 480px) {
   .header-username {
     display: none;
   }
@@ -525,7 +539,7 @@ body.dark-mode .header-profile-btn:hover .header-avatar {
    round buttons to 36px (still ≥ 40px is impossible at this width with
    8 items; 36px + spacing keeps every shortcut reachable without a
    horizontal scroll). The language picker stays reachable via Settings. */
-@media (max-width: 380px) {
+@media (max-width: 360px) {
   .header-lang-wrapper {
     display: none;
   }
