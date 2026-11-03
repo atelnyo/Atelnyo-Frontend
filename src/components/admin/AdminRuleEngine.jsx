@@ -598,6 +598,11 @@ export default function AdminRuleEngine({ lang = 'en', translations = {}, showTo
               <i className="fas fa-play" style={{ marginRight: '8px', color: 'var(--pink-primary, #d81b60)' }} />
               {t('admin_rule_engine_run_title', 'Run rule')}: {runRule.name}
             </h2>
+            {/* Run is NOT a simulation — it fires the actions for real. */}
+            <div style={{ background: '#fff8e1', border: '1px solid #ffe082', borderRadius: '10px', padding: '10px 12px', marginBottom: '12px', fontSize: '0.82rem', color: '#8d6e00' }}>
+              <i className="fas fa-triangle-exclamation" style={{ marginRight: '6px' }} />
+              {t('admin_rule_engine_run_real', 'Run executes the actions FOR REAL (notifications, emails, badges, queued jobs…) — not a simulation. Always test with a test user ID.')}
+            </div>
             <form onSubmit={handleRunSubmit}>
               <div style={s.formRow}>
                 <label style={{ fontSize: '0.85rem' }}>

@@ -146,6 +146,27 @@ describe('buildProjectContext', () => {
     expect(ctx).toContain('@marie');
   });
 
+  it('emits product price + stock + description + REAL link', () => {
+    const data = {
+      products: { total: 2, top: [
+        { id: 11, slug: 'konpa-tshirt', title: 'Konpa T-Shirt', description: 'Bel mayo koton ak logo konpa.', price: 25, stock: 7, seller: 'marie' },
+        { id: 12, slug: 'vye-bag', title: 'Vye Bag', description: '', price: 0, stock: 0, seller: 'marie' },
+      ] },
+      fetched_at: '2026-08-28T12:00:00Z',
+    };
+
+    const ctx = buildProjectContext(data);
+    expect(ctx).toContain('MARKETPLACE PRODUCTS');
+    // Price + stock + description from live data.
+    expect(ctx).toContain('$25');
+    expect(ctx).toContain('7 in stock');
+    expect(ctx).toContain('Bel mayo koton');
+    // Sold-out product is flagged, still with its real link.
+    expect(ctx).toContain('OUT OF STOCK');
+    expect(ctx).toContain('https://atelnyo.site/konpa-tshirt/by/marie/product');
+    expect(ctx).toContain('https://atelnyo.site/vye-bag/by/marie/product');
+  });
+
   it('omits community link when slug is missing (never invent URLs)', () => {
     const data = {
       communities: { total: 1, top: [{ id: 3, name: 'Sans Slug', members: 1 }] },

@@ -117,10 +117,16 @@ async function fetchProjectData() {
       },
       products: {
         total: products.count || 0,
+        // Full commerce fields so the chatbot can answer price, stock
+        // and "what is it" questions with REAL data + canonical link.
         top: (products.results || []).slice(0, 3).map(p => ({
           id: p.id,
+          slug: p.slug,
           title: p.title,
+          description: p.description || '',
           price: p.price,
+          stock: p.stock ?? null,
+          seller: p.user_key || p.seller_username || 'atelnyo',
         })),
       },
       communities: {
@@ -229,12 +235,18 @@ function buildProjectContext(data) {
     }
   }
 
-  // Products
+  // Products — price + stock + short description + REAL canonical link.
   if (data.products?.total > 0) {
     lines.push(`\nMARKETPLACE PRODUCTS (${data.products.total} total):`);
     for (const p of data.products.top) {
       const price = p.price ? `$${p.price}` : 'Free';
-      lines.push(`  - "${clip(p.title, 48)}" — ${price}`);
+      const stock = p.stock == null
+        ? 'Available'
+        : (Number(p.stock) > 0 ? `${p.stock} in stock` : 'OUT OF STOCK');
+      const key = p.slug || p.id;
+      const url = `https://atelnyo.site/${encodeURIComponent(key)}/by/${encodeURIComponent(p.seller || 'atelnyo')}/product`;
+      const desc = p.description ? `\n    About: ${clip(p.description, 120)}` : '';
+      lines.push(`  - "${clip(p.title, 48)}" — ${price} — ${stock}${desc}\n    Link: ${url}`);
     }
   }
 
