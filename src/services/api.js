@@ -1520,6 +1520,18 @@ export const feedService = {
     }
     return api.get('feed/home/', { params });
   },
+  // Flat chronological stream (Phase 15/16 backend) for infinite scroll.
+  // ``cursor`` is the opaque ``next_cursor`` of the previous page (omit
+  // for the first batch). ``contentType`` narrows to one lifecycle type.
+  // The response is ``{ results, next_cursor, has_more }`` — ``has_more``
+  // (not the cursor alone) tells the list whether another page exists.
+  // Public endpoint: no auth header and no ``anon_key`` needed.
+  latest: (limit = 12, cursor = null, contentType = null) => {
+    const params = { limit };
+    if (cursor) params.cursor = cursor;
+    if (contentType) params.content_type = contentType;
+    return api.get('feed/latest/', { params });
+  },
 };
 
 // ─── Creator analytics (Phase 38) ────────────────────────────────────────
