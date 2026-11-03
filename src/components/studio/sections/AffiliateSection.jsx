@@ -14,25 +14,33 @@
 import React, { useState, useCallback, useEffect, lazy, Suspense } from 'react';
 import { affiliateApi } from '../../../services/affiliateApi';
 import useFetch from '../../../hooks/useFetch';
+import { t as t4 } from '../../../utils/i18n';
 import { StudioSkeleton, EmptyState, SectionHeader, fmtCurrency, fmtCount, fmtDate, classNames } from '../shared';
 import styles from './sections.module.css';
 
 const CampaignDetail = lazy(() => import('../../CampaignDetail'));
 
 const SUB_TABS = [
-  { id: 'overview',     icon: 'fa-chart-pie',      label: 'Overview',     labelHt: 'Apèsi' },
-  { id: 'settings',     icon: 'fa-cog',             label: 'Settings',     labelHt: 'Anviwònman' },
-  { id: 'members',      icon: 'fa-users',           label: 'Members',      labelHt: 'Manb' },
-  { id: 'applications', icon: 'fa-file-alt',        label: 'Applications', labelHt: 'Aplikasyon' },
-  { id: 'conversions',  icon: 'fa-shopping-cart',   label: 'Conversions',  labelHt: 'Konvèsyon' },
-  { id: 'groups',       icon: 'fa-layer-group',     label: 'Groups',       labelHt: 'Gwoup' },
-  { id: 'rules',        icon: 'fa-balance-scale',   label: 'Commission Rules', labelHt: 'Règ Komisyon' },
-  { id: 'campaigns',    icon: 'fa-bullhorn',        label: 'Campaigns',   labelHt: 'Kanpay' },
-  { id: 'intelligence', icon: 'fa-robot',           label: 'AI Insights', labelHt: 'AI Insights' },
-  { id: 'wizard',       icon: 'fa-wand-magic',      label: 'Campaign Wizard', labelHt: 'Gid Kanpay' },
-  { id: 'budget',       icon: 'fa-calculator',       label: 'Budget & Score', labelHt: 'Bidjè & Skò' },
-  { id: 'ai-assist',    icon: 'fa-brain',      label: 'AI Optimize',    labelHt: 'AI Optimize' },
+  { id: 'overview',     icon: 'fa-chart-pie',      label: 'Overview',     labelHt: 'Apèsi', labelFr: 'Aperçu', labelEs: 'Resumen' },
+  { id: 'settings',     icon: 'fa-cog',             label: 'Settings',     labelHt: 'Anviwònman', labelFr: 'Paramètres', labelEs: 'Ajustes' },
+  { id: 'members',      icon: 'fa-users',           label: 'Members',      labelHt: 'Manb', labelFr: 'Membres', labelEs: 'Miembros' },
+  { id: 'applications', icon: 'fa-file-alt',        label: 'Applications', labelHt: 'Aplikasyon', labelFr: 'Candidatures', labelEs: 'Solicitudes' },
+  { id: 'conversions',  icon: 'fa-shopping-cart',   label: 'Conversions',  labelHt: 'Konvèsyon', labelFr: 'Conversions', labelEs: 'Conversiones' },
+  { id: 'groups',       icon: 'fa-layer-group',     label: 'Groups',       labelHt: 'Gwoup', labelFr: 'Groupes', labelEs: 'Grupos' },
+  { id: 'rules',        icon: 'fa-balance-scale',   label: 'Commission Rules', labelHt: 'Règ Komisyon', labelFr: 'Règles de commission', labelEs: 'Reglas de comisión' },
+  { id: 'campaigns',    icon: 'fa-bullhorn',        label: 'Campaigns',   labelHt: 'Kanpay', labelFr: 'Campagnes', labelEs: 'Campañas' },
+  { id: 'intelligence', icon: 'fa-robot',           label: 'AI Insights', labelHt: 'AI Insights', labelFr: 'AI Insights', labelEs: 'AI Insights' },
+  { id: 'wizard',       icon: 'fa-wand-magic',      label: 'Campaign Wizard', labelHt: 'Gid Kanpay', labelFr: 'Assistant campagne', labelEs: 'Asistente de campaña' },
+  { id: 'budget',       icon: 'fa-calculator',       label: 'Budget & Score', labelHt: 'Bidjè & Skò', labelFr: 'Budget et score', labelEs: 'Presupuesto y puntuación' },
+  { id: 'ai-assist',    icon: 'fa-brain',      label: 'AI Optimize',    labelHt: 'AI Optimize', labelFr: 'AI Optimize', labelEs: 'AI Optimize' },
 ];
+
+function pickLabel(item, lang) {
+  if (lang === 'ht') return item.labelHt || item.label;
+  if (lang === 'fr') return item.labelFr || item.label;
+  if (lang === 'es') return item.labelEs || item.label;
+  return item.label;
+}
 
 // ═══════════════════════════════════════════════════════════════════════
 // Sub-Components
@@ -59,8 +67,8 @@ function OverviewTab({ lang, t, showToast }) {
         <i className={`fas ${isActive ? 'fa-check-circle' : 'fa-pause-circle'}`} aria-hidden="true" />
         <span>
           {isActive
-            ? (lang === 'ht' ? 'Pwogram afilyasyon aktive' : 'Affiliate program active')
-            : (lang === 'ht' ? 'Pwogram afilyasyon dezaktive' : 'Affiliate program inactive')}
+            ? (t4(lang, "Pwogram afilyasyon aktive", "Affiliate program active", "Programme d'affiliation actif", "Programa de afiliación activo"))
+            : (t4(lang, "Pwogram afilyasyon dezaktive", "Affiliate program inactive", "Programme d'affiliation inactif", "Programa de afiliación inactivo"))}
         </span>
       </div>
 
@@ -68,19 +76,19 @@ function OverviewTab({ lang, t, showToast }) {
       <div className={styles.affiliateGrid}>
         <div className={styles.affiliateStatCard}>
           <div className={styles.affiliateStatValue}>{fmtCount(stats?.total_affiliates || 0)}</div>
-          <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Total Afilye' : 'Total Affiliates'}</div>
+          <div className={styles.affiliateStatLabel}>{t4(lang, "Total Afilye", "Total Affiliates", "Total affiliés", "Total afiliados")}</div>
         </div>
         <div className={styles.affiliateStatCard}>
           <div className={styles.affiliateStatValue}>{fmtCount(stats?.active_affiliates || 0)}</div>
-          <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Aktif' : 'Active'}</div>
+          <div className={styles.affiliateStatLabel}>{t4(lang, "Aktif", "Active", "Actif", "Activo")}</div>
         </div>
         <div className={styles.affiliateStatCard}>
           <div className={styles.affiliateStatValue}>{fmtCurrency(stats?.total_sales_generated || 0)}</div>
-          <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Vant Jenere' : 'Sales Generated'}</div>
+          <div className={styles.affiliateStatLabel}>{t4(lang, "Vant Jenere", "Sales Generated", "Ventes générées", "Ventas generadas")}</div>
         </div>
         <div className={styles.affiliateStatCard}>
           <div className={styles.affiliateStatValue}>{fmtCurrency(stats?.total_commission_paid || 0)}</div>
-          <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Komisyon Peye' : 'Commission Paid'}</div>
+          <div className={styles.affiliateStatLabel}>{t4(lang, "Komisyon Peye", "Commission Paid", "Commissions payées", "Comisiones pagadas")}</div>
         </div>
       </div>
 
@@ -89,7 +97,7 @@ function OverviewTab({ lang, t, showToast }) {
         <>
           <h3 className={styles.sectionSubtitle}>
             <i className="fas fa-crown" aria-hidden="true" />
-            {lang === 'ht' ? 'Pi bon Afilye' : 'Top Affiliates'}
+            {t4(lang, "Pi bon Afilye", "Top Affiliates", "Meilleurs affiliés", "Mejores afiliados")}
           </h3>
           <div className={styles.list}>
             {stats.top_affiliates.map((a, i) => (
@@ -99,7 +107,7 @@ function OverviewTab({ lang, t, showToast }) {
                     {i + 1}. {a.username}
                   </span>
                   <span className={styles.listMeta}>
-                    {fmtCount(a.total_conversions)} {lang === 'ht' ? 'konvèsyon' : 'conversions'} · Nivo: {a.level}
+                    {fmtCount(a.total_conversions)} {t4(lang, "konvèsyon", "conversions", "conversions", "conversiones")} · Nivo: {a.level}
                   </span>
                 </div>
                 <div className={styles.affiliateEarned}>{fmtCurrency(a.total_earned)}</div>
@@ -113,7 +121,7 @@ function OverviewTab({ lang, t, showToast }) {
         <div className={styles.affiliateNotice}>
           <i className="fas fa-bell" aria-hidden="true" />
           <span>
-            {stats.pending_applications} {lang === 'ht' ? 'aplikasyon annatant revizyon' : 'applications pending review'}
+            {stats.pending_applications} {t4(lang, "aplikasyon annatant revizyon", "applications pending review", "candidatures en attente de révision", "solicitudes pendientes de revisión")}
           </span>
         </div>
       )}
@@ -174,11 +182,9 @@ function SettingsTab({ lang, t, showToast }) {
       {/* Toggle */}
       <div className={styles.affiliateToggleRow}>
         <div>
-          <strong>{lang === 'ht' ? 'Pwogram Afilyasyon' : 'Affiliate Program'}</strong>
+          <strong>{t4(lang, "Pwogram Afilyasyon", "Affiliate Program", "Programme d'affiliation", "Programa de afiliación")}</strong>
           <p className={styles.affiliateToggleDesc}>
-            {lang === 'ht'
-              ? 'Pèmèt itilizatè yo vin afilye ak pwogram ou an'
-              : 'Allow users to become affiliates of your program'}
+            {t4(lang, "Pèmèt itilizatè yo vin afilye ak pwogram ou an", "Allow users to become affiliates of your program", "Permettez aux utilisateurs de devenir affiliés à votre programme", "Permite que los usuarios se conviertan en afiliados de tu programa")}
           </p>
         </div>
         <label className={styles.affiliateSwitch}>
@@ -194,20 +200,20 @@ function SettingsTab({ lang, t, showToast }) {
       {form && (
         <div className={styles.affiliateForm}>
           <div className={styles.formGroup}>
-            <label>{lang === 'ht' ? 'Mòd Apwobasyon' : 'Approval Mode'}</label>
+            <label>{t4(lang, "Mòd Apwobasyon", "Approval Mode", "Mode d'approbation", "Modo de aprobación")}</label>
             <select
               value={form.approval_mode}
               onChange={(e) => setForm({ ...form, approval_mode: e.target.value })}
               className={styles.formSelect}
             >
-              <option value="manual">{lang === 'ht' ? 'Manyèl' : 'Manual'}</option>
-              <option value="automatic">{lang === 'ht' ? 'Otomatik' : 'Automatic'}</option>
-              <option value="invite_only">{lang === 'ht' ? 'Sèlman envite' : 'Invite Only'}</option>
+              <option value="manual">{t4(lang, "Manyèl", "Manual", "Manuel", "Manual")}</option>
+              <option value="automatic">{t4(lang, "Otomatik", "Automatic", "Automatique", "Automático")}</option>
+              <option value="invite_only">{t4(lang, "Sèlman envite", "Invite Only", "Sur invitation uniquement", "Solo por invitación")}</option>
             </select>
           </div>
 
           <div className={styles.formGroup}>
-            <label>{lang === 'ht' ? 'Komisyon Defo (%)' : 'Default Commission (%)'}</label>
+            <label>{t4(lang, "Komisyon Defo (%)", "Default Commission (%)", "Commission par défaut (%)", "Comisión predeterminada (%)")}</label>
             <input
               type="number"
               step="0.01"
@@ -220,7 +226,7 @@ function SettingsTab({ lang, t, showToast }) {
           </div>
 
           <div className={styles.formGroup}>
-            <label>{lang === 'ht' ? 'Komisyon VIP (%)' : 'VIP Commission (%)'}</label>
+            <label>{t4(lang, "Komisyon VIP (%)", "VIP Commission (%)", "Commission VIP (%)", "Comisión VIP (%)")}</label>
             <input
               type="number"
               step="0.01"
@@ -233,7 +239,7 @@ function SettingsTab({ lang, t, showToast }) {
           </div>
 
           <div className={styles.formGroup}>
-            <label>{lang === 'ht' ? 'Maksimòm Afilye' : 'Max Affiliates'}</label>
+            <label>{t4(lang, "Maksimòm Afilye", "Max Affiliates", "Max. affiliés", "Máx. afiliados")}</label>
             <input
               type="number"
               min="0"
@@ -241,11 +247,11 @@ function SettingsTab({ lang, t, showToast }) {
               onChange={(e) => setForm({ ...form, max_affiliates: parseInt(e.target.value, 10) || 0 })}
               className={styles.formInput}
             />
-            <small className={styles.formHint}>{lang === 'ht' ? '0 = san limit' : '0 = unlimited'}</small>
+            <small className={styles.formHint}>{t4(lang, "0 = san limit", "0 = unlimited", "0 = illimité", "0 = ilimitado")}</small>
           </div>
 
           <div className={styles.formGroup}>
-            <label>{lang === 'ht' ? 'Laj Minimòm Kont (jou)' : 'Min Account Age (days)'}</label>
+            <label>{t4(lang, "Laj Minimòm Kont (jou)", "Min Account Age (days)", "Âge min. du compte (jours)", "Antigüedad mín. de cuenta (días)")}</label>
             <input
               type="number"
               min="0"
@@ -262,9 +268,9 @@ function SettingsTab({ lang, t, showToast }) {
             disabled={saving}
           >
             {saving ? (
-              <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {lang === 'ht' ? 'Anrejistre...' : 'Saving...'}</>
+              <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {t4(lang, "Anrejistre...", "Saving...", "Enregistrement...", "Guardando...")}</>
             ) : (
-              <><i className="fas fa-save" aria-hidden="true" /> {lang === 'ht' ? 'Anrejistre' : 'Save Settings'}</>
+              <><i className="fas fa-save" aria-hidden="true" /> {t4(lang, "Anrejistre", "Save Settings", "Enregistrer", "Guardar ajustes")}</>
             )}
           </button>
         </div>
@@ -286,8 +292,8 @@ function MembersTab({ lang, t, showToast }) {
       {members.length === 0 ? (
         <EmptyState
           icon="fa-users"
-          title={lang === 'ht' ? 'Pokò gen afilye' : 'No affiliates yet'}
-          hint={lang === 'ht' ? 'Lè itilizatè yo vin afilye, yo parèt isit' : 'When users become affiliates, they appear here'}
+          title={t4(lang, "Pokò gen afilye", "No affiliates yet", "Aucun affilié pour le moment", "Aún no hay afiliados")}
+          hint={t4(lang, "Lè itilizatè yo vin afilye, yo parèt isit", "When users become affiliates, they appear here", "Lorsque des utilisateurs deviennent affiliés, ils apparaissent ici", "Cuando los usuarios se convierten en afiliados, aparecen aquí")}
         />
       ) : (
         <div className={styles.list}>
@@ -299,10 +305,10 @@ function MembersTab({ lang, t, showToast }) {
               <div className={styles.listBody}>
                 <div className={styles.listTitle}>{m.username}</div>
                 <div className={styles.listMeta}>
-                  {fmtCount(m.total_clicks)} {lang === 'ht' ? 'klik' : 'clicks'} ·
-                  {fmtCount(m.total_conversions)} {lang === 'ht' ? 'konvèsyon' : 'conversions'} ·
-                  {lang === 'ht' ? 'Nivo' : 'Level'}: {m.level} ·
-                  {lang === 'ht' ? 'Konfyans' : 'Trust'}: {m.trust_score}/100
+                  {fmtCount(m.total_clicks)} {t4(lang, "klik", "clicks", "clics", "clics")} ·
+                  {fmtCount(m.total_conversions)} {t4(lang, "konvèsyon", "conversions", "conversions", "conversiones")} ·
+                  {t4(lang, "Nivo", "Level", "Niveau", "Nivel")}: {m.level} ·
+                  {t4(lang, "Konfyans", "Trust", "Confiance", "Confianza")}: {m.trust_score}/100
                 </div>
               </div>
               <div className={styles.affiliateEarned}>{fmtCurrency(m.total_earned)}</div>
@@ -337,8 +343,8 @@ function ApplicationsTab({ lang, t, showToast }) {
       {apps.length === 0 ? (
         <EmptyState
           icon="fa-file-alt"
-          title={lang === 'ht' ? 'Pa gen aplikasyon annatant' : 'No pending applications'}
-          hint={lang === 'ht' ? 'Yo parèt isit lè yon itilizatè aplike' : 'They appear here when someone applies'}
+          title={t4(lang, "Pa gen aplikasyon annatant", "No pending applications", "Aucune candidature en attente", "No hay solicitudes pendientes")}
+          hint={t4(lang, "Yo parèt isit lè yon itilizatè aplike", "They appear here when someone applies", "Ils apparaissent ici lorsqu'un utilisateur postule", "Aparecen aquí cuando alguien aplica")}
         />
       ) : (
         <div className={styles.list}>
@@ -359,7 +365,7 @@ function ApplicationsTab({ lang, t, showToast }) {
                   type="button"
                   className={styles.affiliateBtnApprove}
                   onClick={() => handleReview(app.id, 'approved')}
-                  title={lang === 'ht' ? 'Apwouve' : 'Approve'}
+                  title={t4(lang, "Apwouve", "Approve", "Approuver", "Aprobar")}
                 >
                   <i className="fas fa-check" aria-hidden="true" />
                 </button>
@@ -367,7 +373,7 @@ function ApplicationsTab({ lang, t, showToast }) {
                   type="button"
                   className={styles.affiliateBtnReject}
                   onClick={() => handleReview(app.id, 'rejected')}
-                  title={lang === 'ht' ? 'Refize' : 'Reject'}
+                  title={t4(lang, "Refize", "Reject", "Rejeter", "Rechazar")}
                 >
                   <i className="fas fa-times" aria-hidden="true" />
                 </button>
@@ -410,10 +416,10 @@ function ConversionsTab({ lang, t, showToast }) {
 
   const statusBadge = (status) => {
     const map = {
-      pending: { bg: '#f59e0b', label: lang === 'ht' ? 'Annatant' : 'Pending' },
-      approved: { bg: '#10b981', label: lang === 'ht' ? 'Apwouve' : 'Approved' },
-      reversed: { bg: '#ef4444', label: lang === 'ht' ? 'Anile' : 'Reversed' },
-      disputed: { bg: '#8b5cf6', label: lang === 'ht' ? 'Diskite' : 'Disputed' },
+      pending: { bg: '#f59e0b', label: t4(lang, "Annatant", "Pending", "En attente", "Pendiente") },
+      approved: { bg: '#10b981', label: t4(lang, "Apwouve", "Approved", "Approuvé", "Aprobado") },
+      reversed: { bg: '#ef4444', label: t4(lang, "Anile", "Reversed", "Annulée", "Revertida") },
+      disputed: { bg: '#8b5cf6', label: t4(lang, "Diskite", "Disputed", "Contestée", "Disputada") },
     };
     const s = map[status] || map.pending;
     return <span className={styles.badge} style={{ background: s.bg, color: '#fff' }}>{s.label}</span>;
@@ -423,14 +429,14 @@ function ConversionsTab({ lang, t, showToast }) {
     <div className={styles.section}>
       <h3 className={styles.sectionSubtitle}>
         <i className="fas fa-shopping-cart" aria-hidden="true" />
-        {lang === 'ht' ? 'Konvèsyon' : 'Conversions'}
+        {t4(lang, "Konvèsyon", "Conversions", "Conversions", "Conversiones")}
       </h3>
 
       {conversions.length === 0 ? (
         <EmptyState
           icon="fa-shopping-cart"
-          title={lang === 'ht' ? 'Pokò gen konvèsyon' : 'No conversions yet'}
-          hint={lang === 'ht' ? 'Konvèsyon yo parèt isit lè yon afilye fè yon achte' : 'Conversions appear here when an affiliate makes a sale'}
+          title={t4(lang, "Pokò gen konvèsyon", "No conversions yet", "Aucune conversion pour le moment", "Aún no hay conversiones")}
+          hint={t4(lang, "Konvèsyon yo parèt isit lè yon afilye fè yon achte", "Conversions appear here when an affiliate makes a sale", "Les conversions apparaissent ici lorsqu'un affilié réalise une vente", "Las conversiones aparecen aquí cuando un afiliado genera una venta")}
         />
       ) : (
         <div className={styles.list}>
@@ -453,14 +459,14 @@ function ConversionsTab({ lang, t, showToast }) {
                 {c.status === 'pending' && (
                   <button type="button" className={styles.affiliateBtnApprove}
                     onClick={() => handleApprove(c.id)}
-                    title={lang === 'ht' ? 'Apwouve' : 'Approve'}>
+                    title={t4(lang, "Apwouve", "Approve", "Approuver", "Aprobar")}>
                     <i className="fas fa-check" aria-hidden="true" />
                   </button>
                 )}
                 {c.status === 'approved' && (
                   <button type="button" className={styles.affiliateBtnReject}
                     onClick={() => handleReverse(c.id)}
-                    title={lang === 'ht' ? 'Anile' : 'Reverse'}>
+                    title={t4(lang, "Anile", "Reverse", "Annuler", "Revertir")}>
                     <i className="fas fa-undo" aria-hidden="true" />
                   </button>
                 )}
@@ -501,7 +507,7 @@ function GroupsTab({ lang, t, showToast }) {
       <div className={styles.sectionHeaderRow}>
         <h3 className={styles.sectionSubtitle}>
           <i className="fas fa-layer-group" aria-hidden="true" />
-          {lang === 'ht' ? 'Gwoup Afilyasyon' : 'Affiliate Groups'}
+          {t4(lang, "Gwoup Afilyasyon", "Affiliate Groups", "Groupes d'affiliation", "Grupos de afiliación")}
         </h3>
         <button
           type="button"
@@ -509,24 +515,24 @@ function GroupsTab({ lang, t, showToast }) {
           onClick={() => setShowForm(!showForm)}
         >
           <i className="fas fa-plus" aria-hidden="true" />
-          {lang === 'ht' ? 'Nouvo Gwoup' : 'New Group'}
+          {t4(lang, "Nouvo Gwoup", "New Group", "Nouveau groupe", "Nuevo grupo")}
         </button>
       </div>
 
       {showForm && (
         <div className={styles.affiliateForm}>
           <div className={styles.formGroup}>
-            <label>{lang === 'ht' ? 'Non Gwoup' : 'Group Name'}</label>
+            <label>{t4(lang, "Non Gwoup", "Group Name", "Nom du groupe", "Nombre del grupo")}</label>
             <input
               type="text"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               className={styles.formInput}
-              placeholder={lang === 'ht' ? 'Eg: VIP, An komen' : 'e.g. VIP, Basic'}
+              placeholder={t4(lang, "Eg: VIP, An komen", "e.g. VIP, Basic", "Ex : VIP, Basique", "Ej.: VIP, Básico")}
             />
           </div>
           <div className={styles.formGroup}>
-            <label>{lang === 'ht' ? 'Komisyon (%)' : 'Commission (%)'}</label>
+            <label>{t4(lang, "Komisyon (%)", "Commission (%)", "Commission (%)", "Comisión (%)")}</label>
             <input
               type="number"
               step="0.1"
@@ -538,7 +544,7 @@ function GroupsTab({ lang, t, showToast }) {
             />
           </div>
           <div className={styles.formGroup}>
-            <label>{lang === 'ht' ? 'Deskripsyon' : 'Description'}</label>
+            <label>{t4(lang, "Deskripsyon", "Description", "Description", "Descripción")}</label>
             <textarea
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -552,7 +558,7 @@ function GroupsTab({ lang, t, showToast }) {
             onClick={handleCreate}
           >
             <i className="fas fa-save" aria-hidden="true" />
-            {lang === 'ht' ? 'Kreye Gwoup' : 'Create Group'}
+            {t4(lang, "Kreye Gwoup", "Create Group", "Créer un groupe", "Crear grupo")}
           </button>
         </div>
       )}
@@ -560,7 +566,7 @@ function GroupsTab({ lang, t, showToast }) {
       {groups.length === 0 ? (
         <EmptyState
           icon="fa-layer-group"
-          title={lang === 'ht' ? 'Pokò gen gwoup' : 'No groups yet'}
+          title={t4(lang, "Pokò gen gwoup", "No groups yet", "Aucun groupe pour le moment", "Aún no hay grupos")}
         />
       ) : (
         <div className={styles.list}>
@@ -570,8 +576,8 @@ function GroupsTab({ lang, t, showToast }) {
                 <div className={styles.listTitle}>{g.name}</div>
                 <div className={styles.listMeta}>
                   {g.description && <>{g.description} · </>}
-                  {fmtCount(g.member_count || 0)} {lang === 'ht' ? 'manb' : 'members'} ·
-                  {g.is_active ? (lang === 'ht' ? 'Aktif' : 'Active') : (lang === 'ht' ? 'Inaktif' : 'Inactive')}
+                  {fmtCount(g.member_count || 0)} {t4(lang, "manb", "members", "membres", "miembros")} ·
+                  {g.is_active ? (t4(lang, "Aktif", "Active", "Actif", "Activo")) : (t4(lang, "Inaktif", "Inactive", "Inactif", "Inactivo"))}
                 </div>
               </div>
               <div className={styles.affiliateEarned}>{g.commission_pct}%</div>
@@ -611,7 +617,7 @@ function RulesTab({ lang, t, showToast }) {
       <div className={styles.sectionHeaderRow}>
         <h3 className={styles.sectionSubtitle}>
           <i className="fas fa-balance-scale" aria-hidden="true" />
-          {lang === 'ht' ? 'Règ Komisyon' : 'Commission Rules'}
+          {t4(lang, "Règ Komisyon", "Commission Rules", "Règles de commission", "Reglas de comisión")}
         </h3>
         <button
           type="button"
@@ -619,26 +625,26 @@ function RulesTab({ lang, t, showToast }) {
           onClick={() => setShowForm(!showForm)}
         >
           <i className="fas fa-plus" aria-hidden="true" />
-          {lang === 'ht' ? 'Nouvo Règ' : 'New Rule'}
+          {t4(lang, "Nouvo Règ", "New Rule", "Nouvelle règle", "Nueva regla")}
         </button>
       </div>
 
       {showForm && (
         <div className={styles.affiliateForm}>
           <div className={styles.formGroup}>
-            <label>{lang === 'ht' ? ' Kalite' : 'Scope'}</label>
+            <label>{t4(lang, " Kalite", "Scope", "Portée", "Alcance")}</label>
             <select
               value={form.scope}
               onChange={(e) => setForm({ ...form, scope: e.target.value })}
               className={styles.formSelect}
             >
-              <option value="product">{lang === 'ht' ? 'Pwodwi' : 'Product'}</option>
-              <option value="category">{lang === 'ht' ? 'Kategori' : 'Category'}</option>
-              <option value="program">{lang === 'ht' ? 'Pwogram' : 'Program'}</option>
+              <option value="product">{t4(lang, "Pwodwi", "Product", "Produit", "Producto")}</option>
+              <option value="category">{t4(lang, "Kategori", "Category", "Catégorie", "Categoría")}</option>
+              <option value="program">{t4(lang, "Pwogram", "Program", "Programme", "Programa")}</option>
             </select>
           </div>
           <div className={styles.formGroup}>
-            <label>{lang === 'ht' ? 'Valè (ID pwodwi oswa non kategori)' : 'Value (Product ID or Category Name)'}</label>
+            <label>{t4(lang, "Valè (ID pwodwi oswa non kategori)", "Value (Product ID or Category Name)", "Valeur (ID produit ou nom de catégorie)", "Valor (ID de producto o nombre de categoría)")}</label>
             <input
               type="text"
               value={form.scope_value}
@@ -647,7 +653,7 @@ function RulesTab({ lang, t, showToast }) {
             />
           </div>
           <div className={styles.formGroup}>
-            <label>{lang === 'ht' ? 'Komisyon (%)' : 'Commission (%)'}</label>
+            <label>{t4(lang, "Komisyon (%)", "Commission (%)", "Commission (%)", "Comisión (%)")}</label>
             <input
               type="number"
               step="0.1"
@@ -664,7 +670,7 @@ function RulesTab({ lang, t, showToast }) {
             onClick={handleCreate}
           >
             <i className="fas fa-save" aria-hidden="true" />
-            {lang === 'ht' ? 'Kreye Règ' : 'Create Rule'}
+            {t4(lang, "Kreye Règ", "Create Rule", "Créer une règle", "Crear regla")}
           </button>
         </div>
       )}
@@ -672,8 +678,8 @@ function RulesTab({ lang, t, showToast }) {
       {rules.length === 0 ? (
         <EmptyState
           icon="fa-balance-scale"
-          title={lang === 'ht' ? 'Pokò gen règ komisyon' : 'No commission rules yet'}
-          hint={lang === 'ht' ? 'Règ pèmèt ou pèsonalize komisyon pou pwodwi oswa kategori espesifik' : 'Rules let you customize commissions for specific products or categories'}
+          title={t4(lang, "Pokò gen règ komisyon", "No commission rules yet", "Aucune règle de commission pour le moment", "Aún no hay reglas de comisión")}
+          hint={t4(lang, "Règ pèmèt ou pèsonalize komisyon pou pwodwi oswa kategori espesifik", "Rules let you customize commissions for specific products or categories", "Les règles permettent de personnaliser les commissions pour des produits ou catégories spécifiques", "Las reglas permiten personalizar las comisiones para productos o categorías específicos")}
         />
       ) : (
         <div className={styles.list}>
@@ -684,9 +690,9 @@ function RulesTab({ lang, t, showToast }) {
                   {r.scope}: {r.scope_value}
                 </div>
                 <div className={styles.listMeta}>
-                  {r.is_active ? (lang === 'ht' ? 'Aktif' : 'Active') : (lang === 'ht' ? 'Inaktif' : 'Inactive')}
-                  {r.starts_at && <> · {lang === 'ht' ? 'Kòmanse' : 'Starts'}: {fmtDate(r.starts_at)}</>}
-                  {r.ends_at && <> · {lang === 'ht' ? 'Fini' : 'Ends'}: {fmtDate(r.ends_at)}</>}
+                  {r.is_active ? (t4(lang, "Aktif", "Active", "Actif", "Activo")) : (t4(lang, "Inaktif", "Inactive", "Inactif", "Inactivo"))}
+                  {r.starts_at && <> · {t4(lang, "Kòmanse", "Starts", "Début", "Inicio")}: {fmtDate(r.starts_at)}</>}
+                  {r.ends_at && <> · {t4(lang, "Fini", "Ends", "Fin", "Fin")}: {fmtDate(r.ends_at)}</>}
                 </div>
               </div>
               <div className={styles.affiliateEarned}>{r.commission_pct}%</div>
@@ -768,66 +774,66 @@ function CampaignsTab({ lang, t, showToast }) {
       <div className={styles.sectionHeaderRow}>
         <h3 className={styles.sectionSubtitle}>
           <i className="fas fa-bullhorn" aria-hidden="true" />
-          {lang === 'ht' ? 'Kanpay' : 'Campaigns'}
+          {t4(lang, "Kanpay", "Campaigns", "Campagnes", "Campañas")}
         </h3>
         <button type="button" className="btn-secondary" onClick={() => setShowForm(!showForm)}>
           <i className="fas fa-plus" aria-hidden="true" />
-          {lang === 'ht' ? 'Nouvo Kanpay' : 'New Campaign'}
+          {t4(lang, "Nouvo Kanpay", "New Campaign", "Nouvelle campagne", "Nueva campaña")}
         </button>
       </div>
 
       {showForm && (
         <div className={styles.affiliateForm}>
           <div className={styles.formGroup}>
-            <label>{lang === 'ht' ? 'Non' : 'Name'}</label>
+            <label>{t4(lang, "Non", "Name", "Nom", "Nombre")}</label>
             <input type="text" value={form.name}
               onChange={(e) => setForm({...form, name: e.target.value})}
               className={styles.formInput} />
           </div>
           <div className={styles.formGroup}>
-            <label>{lang === 'ht' ? 'Deskripsyon' : 'Description'}</label>
+            <label>{t4(lang, "Deskripsyon", "Description", "Description", "Descripción")}</label>
             <textarea value={form.description}
               onChange={(e) => setForm({...form, description: e.target.value})}
               className={styles.formInput} rows={2} />
           </div>
           <div className={styles.formRow}>
             <div className={styles.formGroup}>
-              <label>{lang === 'ht' ? 'Dat Kòmanse' : 'Start Date'}</label>
+              <label>{t4(lang, "Dat Kòmanse", "Start Date", "Date de début", "Fecha de inicio")}</label>
               <input type="date" value={form.start_date}
                 onChange={(e) => setForm({...form, start_date: e.target.value})}
                 className={styles.formInput} />
             </div>
             <div className={styles.formGroup}>
-              <label>{lang === 'ht' ? 'Dat Fini' : 'End Date'}</label>
+              <label>{t4(lang, "Dat Fini", "End Date", "Date de fin", "Fecha de fin")}</label>
               <input type="date" value={form.end_date}
                 onChange={(e) => setForm({...form, end_date: e.target.value})}
                 className={styles.formInput} />
             </div>
           </div>
           <div className={styles.formGroup}>
-            <label>{lang === 'ht' ? 'Komisyon (%)' : 'Commission (%)'}</label>
+            <label>{t4(lang, "Komisyon (%)", "Commission (%)", "Commission (%)", "Comisión (%)")}</label>
             <input type="number" step="0.1" min="0" max="100"
               value={form.commission_pct}
               onChange={(e) => setForm({...form, commission_pct: parseFloat(e.target.value) || 0})}
               className={styles.formInput} />
           </div>
           <div className={styles.formGroup}>
-            <label>{lang === 'ht' ? 'Sib Odyans' : 'Target Audience'}</label>
+            <label>{t4(lang, "Sib Odyans", "Target Audience", "Audience cible", "Audiencia objetivo")}</label>
             <input type="text" value={form.target_audience}
               onChange={(e) => setForm({...form, target_audience: e.target.value})}
               className={styles.formInput}
-              placeholder={lang === 'ht' ? 'Eg: mizisyen, devlòpè' : 'e.g. musicians, developers'} />
+              placeholder={t4(lang, "Eg: mizisyen, devlòpè", "e.g. musicians, developers", "Ex : musiciens, développeurs", "Ej.: músicos, desarrolladores")} />
           </div>
           <button type="button" className="btn-primary" onClick={handleCreate}>
             <i className="fas fa-save" aria-hidden="true" />
-            {lang === 'ht' ? 'Kreye Kanpay' : 'Create Campaign'}
+            {t4(lang, "Kreye Kanpay", "Create Campaign", "Créer une campagne", "Crear campaña")}
           </button>
         </div>
       )}
 
       {campaigns.length === 0 ? (
         <EmptyState icon="fa-bullhorn"
-          title={lang === 'ht' ? 'Pokò gen kanpay' : 'No campaigns yet'} />
+          title={t4(lang, "Pokò gen kanpay", "No campaigns yet", "Aucune campagne pour le moment", "Aún no hay campañas")} />
       ) : (
         <div className={styles.list}>
           {campaigns.map((c) => (
@@ -849,21 +855,21 @@ function CampaignsTab({ lang, t, showToast }) {
                 {c.status === 'draft' && (
                   <button type="button" className={styles.affiliateBtnApprove}
                     onClick={() => handleAction(c.id, 'activate')}
-                    title={lang === 'ht' ? 'Aktive' : 'Activate'}>
+                    title={t4(lang, "Aktive", "Activate", "Activer", "Activar")}>
                     <i className="fas fa-play" aria-hidden="true" />
                   </button>
                 )}
                 {c.status === 'active' && (
                   <button type="button" className={styles.affiliateBtnReject}
                     onClick={() => handleAction(c.id, 'pause')}
-                    title={lang === 'ht' ? 'Poz' : 'Pause'}>
+                    title={t4(lang, "Poz", "Pause", "Pause", "Pausa")}>
                     <i className="fas fa-pause" aria-hidden="true" />
                   </button>
                 )}
                 {c.status !== 'ended' && c.status !== 'draft' && (
                   <button type="button" className={styles.affiliateBtnReject}
                     onClick={() => handleAction(c.id, 'end')}
-                    title={lang === 'ht' ? 'Fini' : 'End'}>
+                    title={t4(lang, "Fini", "End", "Terminer", "Finalizar")}>
                     <i className="fas fa-stop" aria-hidden="true" />
                   </button>
                 )}
@@ -901,20 +907,20 @@ function IntelligenceTab({ lang, t, showToast }) {
     <div className={styles.section}>
       <h3 className={styles.sectionSubtitle}>
         <i className="fas fa-robot" aria-hidden="true" />
-        {lang === 'ht' ? 'AI Insights' : 'AI Insights'}
+        {t4(lang, "AI Insights", "AI Insights", "AI Insights", "AI Insights")}
       </h3>
 
       {/* Partner suggestions */}
       <div className={styles.sectionHeaderRow}>
         <h4 className={styles.sectionSubtitle} style={{ fontSize: '1rem' }}>
           <i className="fas fa-star" aria-hidden="true" />
-          {lang === 'ht' ? 'Pi bon Patnè' : 'Top Partner Suggestions'}
+          {t4(lang, "Pi bon Patnè", "Top Partner Suggestions", "Meilleures suggestions de partenaires", "Mejores sugerencias de socios")}
         </h4>
       </div>
 
       {partners.length === 0 ? (
         <EmptyState icon="fa-users"
-          title={lang === 'ht' ? 'Pokò gen done' : 'No data yet'} />
+          title={t4(lang, "Pokò gen done", "No data yet", "Aucune donnée pour le moment", "Aún no hay datos")} />
       ) : (
         <div className={styles.list}>
           {partners.map((p) => (
@@ -923,9 +929,9 @@ function IntelligenceTab({ lang, t, showToast }) {
               <div className={styles.listBody}>
                 <div className={styles.listTitle}>{p.username}</div>
                 <div className={styles.listMeta}>
-                  {lang === 'ht' ? 'Nivo' : 'Level'}: {p.level} ·
-                  {lang === 'ht' ? 'Konfyans' : 'Trust'}: {p.trust_score} ·
-                  {lang === 'ht' ? 'Konvèsyon' : 'Conversions'}: {p.total_conversions} ·
+                  {t4(lang, "Nivo", "Level", "Niveau", "Nivel")}: {p.level} ·
+                  {t4(lang, "Konfyans", "Trust", "Confiance", "Confianza")}: {p.trust_score} ·
+                  {t4(lang, "Konvèsyon", "Conversions", "Conversions", "Conversiones")}: {p.total_conversions} ·
                   {p.conversion_rate?.toFixed(1)}%
                 </div>
               </div>
@@ -939,32 +945,32 @@ function IntelligenceTab({ lang, t, showToast }) {
       <div className={styles.sectionHeaderRow} style={{ marginTop: '24px' }}>
         <h4 className={styles.sectionSubtitle} style={{ fontSize: '1rem' }}>
           <i className="fas fa-chart-line" aria-hidden="true" />
-          {lang === 'ht' ? 'Vant 30 Jou' : '30-Day Sales Trends'}
+          {t4(lang, "Vant 30 Jou", "30-Day Sales Trends", "Tendances des ventes sur 30 jours", "Tendencias de ventas de 30 días")}
         </h4>
       </div>
 
       {trends.length === 0 ? (
         <EmptyState icon="fa-chart-line"
-          title={lang === 'ht' ? 'Pokò gen vant' : 'No sales data yet'} />
+          title={t4(lang, "Pokò gen vant", "No sales data yet", "Aucune vente pour le moment", "Aún no hay ventas")} />
       ) : (
         <div className={styles.affiliateGrid}>
           <div className={styles.affiliateStatCard}>
             <div className={styles.affiliateStatValue}>
               {fmtCurrency(trends.reduce((s, t) => s + t.sales, 0))}
             </div>
-            <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Total Vant' : 'Total Sales'}</div>
+            <div className={styles.affiliateStatLabel}>{t4(lang, "Total Vant", "Total Sales", "Total ventes", "Total ventas")}</div>
           </div>
           <div className={styles.affiliateStatCard}>
             <div className={styles.affiliateStatValue}>
               {fmtCurrency(trends.reduce((s, t) => s + t.commissions, 0))}
             </div>
-            <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Total Komisyon' : 'Total Commissions'}</div>
+            <div className={styles.affiliateStatLabel}>{t4(lang, "Total Komisyon", "Total Commissions", "Total commissions", "Total comisiones")}</div>
           </div>
           <div className={styles.affiliateStatCard}>
             <div className={styles.affiliateStatValue}>
               {trends.reduce((s, t) => s + t.conversions, 0)}
             </div>
-            <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Konvèsyon' : 'Conversions'}</div>
+            <div className={styles.affiliateStatLabel}>{t4(lang, "Konvèsyon", "Conversions", "Conversions", "Conversiones")}</div>
           </div>
         </div>
       )}
@@ -978,14 +984,14 @@ function IntelligenceTab({ lang, t, showToast }) {
 // ═══════════════════════════════════════════════════════════════════════
 
 const OBJECTIVE_OPTIONS = [
-  { value: 'sell_product', icon: 'fa-cube', label: 'Sell Product', labelHt: 'Vann Pwodwi' },
-  { value: 'sell_course', icon: 'fa-graduation-cap', label: 'Sell Course', labelHt: 'Vann Kou' },
-  { value: 'gain_followers', icon: 'fa-users', label: 'Gain Followers', labelHt: 'Atire Swivè' },
-  { value: 'increase_views', icon: 'fa-eye', label: 'Increase Views', labelHt: 'Ogmante Vizyon' },
-  { value: 'promote_profile', icon: 'fa-user-circle', label: 'Promote Profile', labelHt: 'Ankouraje Pwofil' },
-  { value: 'promote_event', icon: 'fa-calendar', label: 'Promote Event', labelHt: 'Ankouraje Evènman' },
-  { value: 'recruit_affiliates', icon: 'fa-handshake', label: 'Recruit Affiliates', labelHt: 'Rekrute Afilye' },
-  { value: 'brand_awareness', icon: 'fa-bullhorn', label: 'Brand Awareness', labelHt: 'Konsyantizasyon' },
+  { value: 'sell_product', icon: 'fa-cube', label: 'Sell Product', labelHt: 'Vann Pwodwi', labelFr: 'Vendre un produit', labelEs: 'Vender producto' },
+  { value: 'sell_course', icon: 'fa-graduation-cap', label: 'Sell Course', labelHt: 'Vann Kou', labelFr: 'Vendre un cours', labelEs: 'Vender curso' },
+  { value: 'gain_followers', icon: 'fa-users', label: 'Gain Followers', labelHt: 'Atire Swivè', labelFr: 'Gagner des abonnés', labelEs: 'Ganar seguidores' },
+  { value: 'increase_views', icon: 'fa-eye', label: 'Increase Views', labelHt: 'Ogmante Vizyon', labelFr: 'Augmenter les vues', labelEs: 'Aumentar vistas' },
+  { value: 'promote_profile', icon: 'fa-user-circle', label: 'Promote Profile', labelHt: 'Ankouraje Pwofil', labelFr: 'Promouvoir le profil', labelEs: 'Promocionar perfil' },
+  { value: 'promote_event', icon: 'fa-calendar', label: 'Promote Event', labelHt: 'Ankouraje Evènman', labelFr: "Promouvoir l'événement", labelEs: 'Promocionar evento' },
+  { value: 'recruit_affiliates', icon: 'fa-handshake', label: 'Recruit Affiliates', labelHt: 'Rekrute Afilye', labelFr: 'Recruter des affiliés', labelEs: 'Reclutar afiliados' },
+  { value: 'brand_awareness', icon: 'fa-bullhorn', label: 'Brand Awareness', labelHt: 'Konsyantizasyon', labelFr: 'Notoriété', labelEs: 'Reconocimiento' },
 ];
 
 function WizardTab({ lang, t, showToast }) {
@@ -1089,10 +1095,10 @@ function WizardTab({ lang, t, showToast }) {
   }, [wizard, showToast]);
 
   const stepLabels = [
-    lang === 'ht' ? 'Objektif' : 'Objective',
-    lang === 'ht' ? 'Byen' : 'Asset',
-    lang === 'ht' ? 'Odyans' : 'Audience',
-    lang === 'ht' ? 'Bidjè' : 'Budget',
+    t4(lang, "Objektif", "Objective", "Objectif", "Objetivo"),
+    t4(lang, "Byen", "Asset", "Élément", "Elemento"),
+    t4(lang, "Odyans", "Audience", "Audience", "Audiencia"),
+    t4(lang, "Bidjè", "Budget", "Budget", "Presupuesto"),
   ];
 
   return (
@@ -1119,7 +1125,7 @@ function WizardTab({ lang, t, showToast }) {
       {step === 1 && (
         <div className={styles.affiliateForm}>
           <h4 style={{ margin: '0 0 12px' }}>
-            {lang === 'ht' ? 'Kisa ou vle reyalize?' : 'What do you want to achieve?'}
+            {t4(lang, "Kisa ou vle reyalize?", "What do you want to achieve?", "Que voulez-vous accomplir ?", "¿Qué quieres lograr?")}
           </h4>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
             {OBJECTIVE_OPTIONS.map((opt) => (
@@ -1139,24 +1145,24 @@ function WizardTab({ lang, t, showToast }) {
               >
                 <i className={`fas ${opt.icon}`} style={{ fontSize: '1.2rem', color: '#6366f1', display: 'block', marginBottom: '4px' }} />
                 <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-                  {lang === 'ht' ? opt.labelHt : opt.label}
+                  {pickLabel(opt, lang)}
                 </span>
               </button>
             ))}
           </div>
           {wizard.objective && (
             <div className={styles.formGroup} style={{ marginTop: '12px' }}>
-              <label>{lang === 'ht' ? 'Objektif nimerik (si genyen)' : 'Target value (optional)'}</label>
+              <label>{t4(lang, "Objektif nimerik (si genyen)", "Target value (optional)", "Valeur cible (facultatif)", "Valor objetivo (opcional)")}</label>
               <input type="number" className={styles.formInput}
                 value={wizard.target_value}
                 onChange={(e) => updateWizard('target_value', e.target.value)}
-                placeholder={lang === 'ht' ? 'Eg: 1000, 5000' : 'e.g. 1000 followers'} />
+                placeholder={t4(lang, "Eg: 1000, 5000", "e.g. 1000 followers", "Ex : 1000, 5000", "Ej.: 1000, 5000")} />
             </div>
           )}
           <button type="button" className="btn-primary" onClick={handleNext}
             disabled={!wizard.objective}
             style={{ marginTop: '16px' }}>
-            {lang === 'ht' ? 'Pwochen →' : 'Next →'}
+            {t4(lang, "Pwochen →", "Next →", "Suivant →", "Siguiente →")}
           </button>
         </div>
       )}
@@ -1165,26 +1171,26 @@ function WizardTab({ lang, t, showToast }) {
       {step === 2 && (
         <div className={styles.affiliateForm}>
           <h4 style={{ margin: '0 0 12px' }}>
-            {lang === 'ht' ? 'Kisa w ap pwomouvwa?' : 'What are you promoting?'}
+            {t4(lang, "Kisa w ap pwomouvwa?", "What are you promoting?", "Que promouvez-vous ?", "¿Qué estás promocionando?")}
           </h4>
           <div className={styles.formGroup}>
-            <label>{lang === 'ht' ? 'Kalite Byen' : 'Asset Type'}</label>
+            <label>{t4(lang, "Kalite Byen", "Asset Type", "Type d'élément", "Tipo de elemento")}</label>
             <select className={styles.formSelect} value={wizard.asset_type}
               onChange={(e) => updateWizard('asset_type', e.target.value)}>
-              <option value="product">{lang === 'ht' ? 'Pwodwi' : 'Product'}</option>
-              <option value="course">{lang === 'ht' ? 'Kou' : 'Course'}</option>
+              <option value="product">{t4(lang, "Pwodwi", "Product", "Produit", "Producto")}</option>
+              <option value="course">{t4(lang, "Kou", "Course", "Cours", "Curso")}</option>
               <option value="music">Music</option>
-              <option value="service">{lang === 'ht' ? 'Sèvis' : 'Service'}</option>
-              <option value="profile">{lang === 'ht' ? 'Pwofil Kreyatè' : 'Creator Profile'}</option>
+              <option value="service">{t4(lang, "Sèvis", "Service", "Service", "Servicio")}</option>
+              <option value="profile">{t4(lang, "Pwofil Kreyatè", "Creator Profile", "Profil créateur", "Perfil de creador")}</option>
             </select>
           </div>
           <button type="button" className="btn-primary" onClick={handleNext}
             style={{ marginTop: '12px' }}>
-            {lang === 'ht' ? 'Pwochen →' : 'Next →'}
+            {t4(lang, "Pwochen →", "Next →", "Suivant →", "Siguiente →")}
           </button>
           <button type="button" className="btn-secondary" onClick={handleBack}
             style={{ marginLeft: '8px' }}>
-            ← {lang === 'ht' ? 'Retounen' : 'Back'}
+            ← {t4(lang, "Retounen", "Back", "Retour", "Atrás")}
           </button>
         </div>
       )}
@@ -1193,33 +1199,33 @@ function WizardTab({ lang, t, showToast }) {
       {step === 3 && (
         <div className={styles.affiliateForm}>
           <h4 style={{ margin: '0 0 12px' }}>
-            {lang === 'ht' ? 'Ki moun ou vize?' : 'Who is your target audience?'}
+            {t4(lang, "Ki moun ou vize?", "Who is your target audience?", "Qui visez-vous ?", "¿A quién te diriges?")}
           </h4>
           <div className={styles.formGroup}>
-            <label>{lang === 'ht' ? 'Enterè (separe pa vigil)' : 'Interests (comma separated)'}</label>
+            <label>{t4(lang, "Enterè (separe pa vigil)", "Interests (comma separated)", "Centres d'intérêt (séparés par virgule)", "Intereses (separados por coma)")}</label>
             <input type="text" className={styles.formInput}
               value={(wizard.audience.interests || []).join(', ')}
               onChange={(e) => updateWizard('audience', {
                 ...wizard.audience,
                 interests: e.target.value.split(',').map((s) => s.trim()).filter(Boolean),
               })}
-              placeholder={lang === 'ht' ? 'mizik, teknoloji, atizana' : 'music, tech, art'} />
+              placeholder={t4(lang, "mizik, teknoloji, atizana", "music, tech, art", "musique, tech, art", "música, tecnología, arte")} />
           </div>
           <div className={styles.formGroup}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
               <input type="checkbox" checked={wizard.audience.follower_similarity}
                 onChange={(e) => updateWizard('audience', { ...wizard.audience, follower_similarity: e.target.checked })}
                 style={{ width: '16px', height: '16px' }} />
-              {lang === 'ht' ? 'Moun ki sanble ak swivè m yo' : 'Users similar to my followers'}
+              {t4(lang, "Moun ki sanble ak swivè m yo", "Users similar to my followers", "Utilisateurs similaires à mes abonnés", "Usuarios similares a mis seguidores")}
             </label>
           </div>
           <button type="button" className="btn-primary" onClick={handleNext}
             style={{ marginTop: '12px' }}>
-            {lang === 'ht' ? 'Pwochen →' : 'Next →'}
+            {t4(lang, "Pwochen →", "Next →", "Suivant →", "Siguiente →")}
           </button>
           <button type="button" className="btn-secondary" onClick={handleBack}
             style={{ marginLeft: '8px' }}>
-            ← {lang === 'ht' ? 'Retounen' : 'Back'}
+            ← {t4(lang, "Retounen", "Back", "Retour", "Atrás")}
           </button>
         </div>
       )}
@@ -1228,24 +1234,24 @@ function WizardTab({ lang, t, showToast }) {
       {step === 4 && (
         <div className={styles.affiliateForm}>
           <h4 style={{ margin: '0 0 12px' }}>
-            {lang === 'ht' ? 'Bidjè ak Previzyon' : 'Budget & Estimate'}
+            {t4(lang, "Bidjè ak Previzyon", "Budget & Estimate", "Budget et estimation", "Presupuesto y estimación")}
           </h4>
           <div className={styles.formRow}>
             <div className={styles.formGroup}>
-              <label>{lang === 'ht' ? 'Bidjè Total ($)' : 'Total Budget ($)'}</label>
+              <label>{t4(lang, "Bidjè Total ($)", "Total Budget ($)", "Budget total ($)", "Presupuesto total ($)")}</label>
               <input type="number" min="1" className={styles.formInput}
                 value={wizard.budget.total_budget}
                 onChange={(e) => updateWizard('budget', { ...wizard.budget, total_budget: parseFloat(e.target.value) || 0 })} />
             </div>
             <div className={styles.formGroup}>
-              <label>{lang === 'ht' ? 'Dire (jou)' : 'Duration (days)'}</label>
+              <label>{t4(lang, "Dire (jou)", "Duration (days)", "Durée (jours)", "Duración (días)")}</label>
               <input type="number" min="1" className={styles.formInput}
                 value={wizard.budget.budget_days}
                 onChange={(e) => updateWizard('budget', { ...wizard.budget, budget_days: parseInt(e.target.value, 10) || 30 })} />
             </div>
           </div>
           <div className={styles.formGroup}>
-            <label>{lang === 'ht' ? 'Komisyon Afilye (%)' : 'Affiliate Commission (%)'}</label>
+            <label>{t4(lang, "Komisyon Afilye (%)", "Affiliate Commission (%)", "Commission d'affiliation (%)", "Comisión de afiliación (%)")}</label>
             <input type="number" step="0.1" min="0" max="100" className={styles.formInput}
               value={wizard.budget.commission_pct}
               onChange={(e) => updateWizard('budget', { ...wizard.budget, commission_pct: parseFloat(e.target.value) || 0 })} />
@@ -1254,9 +1260,9 @@ function WizardTab({ lang, t, showToast }) {
           <button type="button" className="btn-primary" onClick={handleCalculate} disabled={calculating}
             style={{ marginTop: '8px' }}>
             {calculating ? (
-              <><i className="fas fa-spinner fa-spin" /> {lang === 'ht' ? 'Kalkil...' : 'Calculating...'}</>
+              <><i className="fas fa-spinner fa-spin" /> {t4(lang, "Kalkil...", "Calculating...", "Calcul...", "Calculando...")}</>
             ) : (
-              <><i className="fas fa-calculator" /> {lang === 'ht' ? 'Kalkile Previzyon' : 'Calculate Estimate'}</>
+              <><i className="fas fa-calculator" /> {t4(lang, "Kalkile Previzyon", "Calculate Estimate", "Calculer l'estimation", "Calcular estimación")}</>
             )}
           </button>
 
@@ -1264,26 +1270,26 @@ function WizardTab({ lang, t, showToast }) {
             <div className={styles.affiliateGrid} style={{ marginTop: '16px' }}>
               <div className={styles.affiliateStatCard}>
                 <div className={styles.affiliateStatValue}>{estimate.estimated_impressions?.toLocaleString() || 0}</div>
-                <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Impresyon' : 'Impressions'}</div>
+                <div className={styles.affiliateStatLabel}>{t4(lang, "Impresyon", "Impressions", "Impressions", "Impresiones")}</div>
               </div>
               <div className={styles.affiliateStatCard}>
                 <div className={styles.affiliateStatValue}>{estimate.estimated_clicks?.toLocaleString() || 0}</div>
-                <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Klik' : 'Clicks'}</div>
+                <div className={styles.affiliateStatLabel}>{t4(lang, "Klik", "Clicks", "Clics", "Clics")}</div>
               </div>
               <div className={styles.affiliateStatCard}>
                 <div className={styles.affiliateStatValue}>{estimate.estimated_conversions?.toLocaleString() || 0}</div>
-                <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Konvèsyon' : 'Conversions'}</div>
+                <div className={styles.affiliateStatLabel}>{t4(lang, "Konvèsyon", "Conversions", "Conversions", "Conversiones")}</div>
               </div>
               <div className={styles.affiliateStatCard} style={{ borderColor: '#10b981' }}>
                 <div className={styles.affiliateStatValue} style={{ color: '#10b981' }}>{fmtCurrency(estimate.estimated_revenue || 0)}</div>
-                <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Revni Estime' : 'Est. Revenue'}</div>
+                <div className={styles.affiliateStatLabel}>{t4(lang, "Revni Estime", "Est. Revenue", "Revenu estimé", "Ingresos estimados")}</div>
               </div>
               <div className={styles.affiliateStatCard} style={{ borderColor: estimate?.profit >= 0 ? '#10b981' : '#ef4444' }}>
                 <div className={styles.affiliateStatValue}
                   style={{ color: estimate?.profit >= 0 ? '#10b981' : '#ef4444' }}>
                   {fmtCurrency(estimate.profit || 0)}
                 </div>
-                <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Pwofi' : 'Profit'}</div>
+                <div className={styles.affiliateStatLabel}>{t4(lang, "Pwofi", "Profit", "Profit", "Beneficio")}</div>
               </div>
               <div className={styles.affiliateStatCard}>
                 <div className={styles.affiliateStatValue} style={{ color: estimate?.roi_pct >= 100 ? '#10b981' : '#f59e0b' }}>
@@ -1296,10 +1302,10 @@ function WizardTab({ lang, t, showToast }) {
 
           <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
             <button type="button" className="btn-secondary" onClick={handleBack}>
-              ← {lang === 'ht' ? 'Retounen' : 'Back'}
+              ← {t4(lang, "Retounen", "Back", "Retour", "Atrás")}
             </button>
             <button type="button" className="btn-primary" onClick={handleCreateFromWizard}>
-              <i className="fas fa-check" /> {lang === 'ht' ? 'Kreye Kanpay' : 'Create Campaign'}
+              <i className="fas fa-check" /> {t4(lang, "Kreye Kanpay", "Create Campaign", "Créer une campagne", "Crear campaña")}
             </button>
           </div>
         </div>
@@ -1355,25 +1361,25 @@ function BudgetTab({ lang, t, showToast }) {
     <div className={styles.section}>
       <h3 className={styles.sectionSubtitle}>
         <i className="fas fa-calculator" />
-        {lang === 'ht' ? 'Kalkilatè Bidjè' : 'Budget Calculator'}
+        {t4(lang, "Kalkilatè Bidjè", "Budget Calculator", "Calculateur de budget", "Calculadora de presupuesto")}
       </h3>
 
       <div className={styles.affiliateForm}>
         <div className={styles.formRow}>
           <div className={styles.formGroup}>
-            <label>{lang === 'ht' ? 'Bidjè ($)' : 'Budget ($)'}</label>
+            <label>{t4(lang, "Bidjè ($)", "Budget ($)", "Budget ($)", "Presupuesto ($)")}</label>
             <input type="number" min="1" className={styles.formInput}
               value={form.budget_amount}
               onChange={(e) => setForm({...form, budget_amount: e.target.value})} />
           </div>
           <div className={styles.formGroup}>
-            <label>{lang === 'ht' ? 'Jou' : 'Days'}</label>
+            <label>{t4(lang, "Jou", "Days", "Jours", "Días")}</label>
             <input type="number" min="1" className={styles.formInput}
               value={form.budget_days}
               onChange={(e) => setForm({...form, budget_days: e.target.value})} />
           </div>
           <div className={styles.formGroup}>
-            <label>{lang === 'ht' ? 'Komisyon %' : 'Commission %'}</label>
+            <label>{t4(lang, "Komisyon %", "Commission %", "Commission %", "Comisión %")}</label>
             <input type="number" step="0.1" min="0" max="100" className={styles.formInput}
               value={form.commission_pct}
               onChange={(e) => setForm({...form, commission_pct: e.target.value})} />
@@ -1381,7 +1387,7 @@ function BudgetTab({ lang, t, showToast }) {
         </div>
         <details style={{ marginTop: '8px' }}>
           <summary style={{ cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-secondary, #6b7280)' }}>
-            {lang === 'ht' ? 'Metrik avanse' : 'Advanced metrics'}
+            {t4(lang, "Metrik avanse", "Advanced metrics", "Métriques avancées", "Métricas avanzadas")}
           </summary>
           <div className={styles.formRow} style={{ marginTop: '8px' }}>
             <div className={styles.formGroup}>
@@ -1403,7 +1409,7 @@ function BudgetTab({ lang, t, showToast }) {
                 onChange={(e) => setForm({...form, cvr_pct: e.target.value})} />
             </div>
             <div className={styles.formGroup}>
-              <label>{lang === 'ht' ? 'Vvalè Mwayèn' : 'AOV ($)'}</label>
+              <label>{t4(lang, "Valè Mwayèn", "AOV ($)", "Panier moyen ($)", "Valor medio ($)")}</label>
               <input type="number" step="0.1" className={styles.formInput}
                 value={form.aov} placeholder="50.00"
                 onChange={(e) => setForm({...form, aov: e.target.value})} />
@@ -1412,15 +1418,15 @@ function BudgetTab({ lang, t, showToast }) {
         </details>
         <button type="button" className="btn-primary" onClick={calculate} disabled={calculating}
           style={{ marginTop: '12px' }}>
-          {calculating ? <><i className="fas fa-spinner fa-spin" /> {lang === 'ht' ? 'Kalkil...' : 'Calculating...'}</>
-            : <><i className="fas fa-calculator" /> {lang === 'ht' ? 'Kalkile' : 'Calculate'}</>}
+          {calculating ? <><i className="fas fa-spinner fa-spin" /> {t4(lang, "Kalkil...", "Calculating...", "Calcul...", "Calculando...")}</>
+            : <><i className="fas fa-calculator" /> {t4(lang, "Kalkile", "Calculate", "Calculer", "Calcular")}</>}
         </button>
       </div>
 
       {result && (
         <div className={styles.affiliateGrid} style={{ marginTop: '16px' }}>
           <div className={styles.affiliateStatCard}>
-            <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Depans Chak Jou' : 'Daily Spend'}</div>
+            <div className={styles.affiliateStatLabel}>{t4(lang, "Depans Chak Jou", "Daily Spend", "Dépense quotidienne", "Gasto diario")}</div>
             <div className={styles.affiliateStatValue}>{fmtCurrency(result.daily_spend)}</div>
           </div>
           <div className={styles.affiliateStatCard}>
@@ -1432,19 +1438,19 @@ function BudgetTab({ lang, t, showToast }) {
             <div className={styles.affiliateStatValue}>{result.estimated_clicks?.toLocaleString()}</div>
           </div>
           <div className={styles.affiliateStatCard}>
-            <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Konvèsyon' : 'Conversions'}</div>
+            <div className={styles.affiliateStatLabel}>{t4(lang, "Konvèsyon", "Conversions", "Conversions", "Conversiones")}</div>
             <div className={styles.affiliateStatValue}>{result.estimated_conversions?.toLocaleString()}</div>
           </div>
           <div className={styles.affiliateStatCard} style={{ borderColor: '#6366f1' }}>
-            <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Revni' : 'Revenue'}</div>
+            <div className={styles.affiliateStatLabel}>{t4(lang, "Revni", "Revenue", "Revenu", "Ingresos")}</div>
             <div className={styles.affiliateStatValue} style={{ color: '#6366f1' }}>{fmtCurrency(result.estimated_revenue)}</div>
           </div>
           <div className={styles.affiliateStatCard}>
-            <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Komisyon' : 'Commission Cost'}</div>
+            <div className={styles.affiliateStatLabel}>{t4(lang, "Komisyon", "Commission Cost", "Coût de commission", "Costo de comisión")}</div>
             <div className={styles.affiliateStatValue}>{fmtCurrency(result.commission_cost)}</div>
           </div>
           <div className={styles.affiliateStatCard} style={{ borderColor: result?.profit >= 0 ? '#10b981' : '#ef4444' }}>
-            <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Pwofi' : 'Profit'}</div>
+            <div className={styles.affiliateStatLabel}>{t4(lang, "Pwofi", "Profit", "Profit", "Beneficio")}</div>
             <div className={styles.affiliateStatValue} style={{ color: result?.profit >= 0 ? '#10b981' : '#ef4444' }}>{fmtCurrency(result.profit)}</div>
           </div>
           <div className={styles.affiliateStatCard}>
@@ -1457,19 +1463,19 @@ function BudgetTab({ lang, t, showToast }) {
       {/* Campaign Score */}
       <h3 className={styles.sectionSubtitle} style={{ marginTop: '32px' }}>
         <i className="fas fa-chart-simple" />
-        {lang === 'ht' ? 'Skò Kanpay' : 'Campaign Score'}
+        {t4(lang, "Skò Kanpay", "Campaign Score", "Score de campagne", "Puntuación de campaña")}
       </h3>
       <div className={styles.affiliateForm}>
         <div className={styles.formRow}>
           <div className={styles.formGroup}>
-            <label>{lang === 'ht' ? 'ID Kanpay' : 'Campaign ID'}</label>
+            <label>{t4(lang, "ID Kanpay", "Campaign ID", "ID de campagne", "ID de campaña")}</label>
             <input type="number" className={styles.formInput}
               value={campaignId}
               onChange={(e) => setCampaignId(e.target.value)} />
           </div>
           <div style={{ display: 'flex', alignItems: 'flex-end' }}>
             <button type="button" className="btn-primary" onClick={calculateScore}>
-              <i className="fas fa-star" /> {lang === 'ht' ? 'Kalkile Skò' : 'Calculate Score'}
+              <i className="fas fa-star" /> {t4(lang, "Kalkile Skò", "Calculate Score", "Calculer le score", "Calcular puntuación")}
             </button>
           </div>
         </div>
@@ -1554,7 +1560,7 @@ function AIAssistTab({ lang, t, showToast }) {
       <div className={styles.affiliateForm}>
         <div className={styles.formRow}>
           <div className={styles.formGroup}>
-            <label>{lang === 'ht' ? 'ID Kanpay' : 'Campaign ID'}</label>
+            <label>{t4(lang, "ID Kanpay", "Campaign ID", "ID de campagne", "ID de campaña")}</label>
             <input type="number" className={styles.formInput}
               value={campaignId}
               onChange={(e) => setCampaignId(e.target.value)} />
@@ -1562,10 +1568,10 @@ function AIAssistTab({ lang, t, showToast }) {
           <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
             <button type="button" className="btn-primary" onClick={runAnalysis} disabled={analyzing}>
               {analyzing ? <><i className="fas fa-spinner fa-spin" /> Analyze</>
-                : <><i className="fas fa-robot" /> {lang === 'ht' ? 'Analize' : 'Analyze'}</>}
+                : <><i className="fas fa-robot" /> {t4(lang, "Analize", "Analyze", "Analyser", "Analizar")}</>}
             </button>
             <button type="button" className="btn-secondary" onClick={analyzeAudience}>
-              <i className="fas fa-users" /> {lang === 'ht' ? 'Odyans' : 'Audience'}
+              <i className="fas fa-users" /> {t4(lang, "Odyans", "Audience", "Audience", "Audiencia")}
             </button>
           </div>
         </div>
@@ -1576,7 +1582,7 @@ function AIAssistTab({ lang, t, showToast }) {
         <div className={styles.affiliateForm} style={{ marginTop: '16px', borderLeft: '4px solid #6366f1' }}>
           <h4 style={{ margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <i className="fas fa-robot" style={{ color: '#6366f1' }} />
-            {lang === 'ht' ? 'Analiz Kanpay' : 'Campaign Analysis'}
+            {t4(lang, "Analiz Kanpay", "Campaign Analysis", "Analyse de campagne", "Análisis de campaña")}
           </h4>
           <ul style={{ margin: 0, padding: '0 0 0 16px', fontSize: '0.9rem', lineHeight: 1.7 }}>
             {analysis.insights?.map((insight, i) => (
@@ -1591,11 +1597,11 @@ function AIAssistTab({ lang, t, showToast }) {
         <div className={styles.affiliateForm} style={{ marginTop: '12px', borderLeft: '4px solid #a855f7' }}>
           <h4 style={{ margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <i className="fas fa-users" style={{ color: '#a855f7' }} />
-            {lang === 'ht' ? 'Analiz Odyans' : 'Audience Analysis'}
+            {t4(lang, "Analiz Odyans", "Audience Analysis", "Analyse d'audience", "Análisis de audiencia")}
           </h4>
           {audienceInsights.estimated_size > 0 && (
             <p style={{ fontSize: '0.85rem', marginBottom: '8px' }}>
-              <strong>{lang === 'ht' ? 'Gwosè odyans' : 'Audience size'}:</strong>{' '}
+              <strong>{t4(lang, "Gwosè odyans", "Audience size", "Taille d'audience", "Tamaño de audiencia")}:</strong>{' '}
               {audienceInsights.estimated_size.toLocaleString()}
             </p>
           )}
@@ -1612,7 +1618,7 @@ function AIAssistTab({ lang, t, showToast }) {
         <>
           <h3 className={styles.sectionSubtitle} style={{ marginTop: '24px' }}>
             <i className="fas fa-microchip" />
-            {lang === 'ht' ? 'Rekòmandasyon Optimizasyon' : 'Optimization Recommendations'}
+            {t4(lang, "Rekòmandasyon Optimizasyon", "Optimization Recommendations", "Recommandations d'optimisation", "Recomendaciones de optimización")}
           </h3>
           <div className={styles.list}>
             {optimizations.map((opt) => (
@@ -1624,12 +1630,12 @@ function AIAssistTab({ lang, t, showToast }) {
                   <div className={styles.listMeta}>{opt.reason}</div>
                   {opt.expected_impact && (
                     <div className={styles.listMeta} style={{ color: '#10b981', fontWeight: 600 }}>
-                      {lang === 'ht' ? 'Efè espere' : 'Expected impact'}: {opt.expected_impact}
+                      {t4(lang, "Efè espere", "Expected impact", "Impact attendu", "Impacto esperado")}: {opt.expected_impact}
                     </div>
                   )}
                 </div>
                 <span className={`${styles.badge} ${opt.is_applied ? styles.badgeCompleted : styles.badgePending}`}>
-                  {opt.is_applied ? (lang === 'ht' ? 'Aplike' : 'Applied') : (lang === 'ht' ? 'An atant' : 'Pending')}
+                  {opt.is_applied ? (t4(lang, "Aplike", "Applied", "Appliqué", "Aplicado")) : (t4(lang, "An atant", "Pending", "En attente", "Pendiente"))}
                 </span>
               </div>
             ))}
@@ -1641,7 +1647,7 @@ function AIAssistTab({ lang, t, showToast }) {
       <div className={styles.sectionHeaderRow} style={{ marginTop: '24px' }}>
         <h3 className={styles.sectionSubtitle}>
           <i className="fas fa-lightbulb" />
-          {lang === 'ht' ? 'Konsey Jeneral' : 'General Advice'}
+          {t4(lang, "Konsey Jeneral", "General Advice", "Conseils généraux", "Consejos generales")}
         </h3>
         <button type="button" className="btn-secondary" onClick={getAdvice}>
           <i className="fas fa-sync" />
@@ -1650,7 +1656,7 @@ function AIAssistTab({ lang, t, showToast }) {
 
       {advice.length === 0 ? (
         <EmptyState icon="fa-lightbulb"
-          title={lang === 'ht' ? 'Klike pou jwenn konsey' : 'Click to get advice'} />
+          title={t4(lang, "Klike pou jwenn konsey", "Click to get advice", "Cliquez pour obtenir des conseils", "Haz clic para obtener consejos")} />
       ) : (
         <div className={styles.affiliateForm} style={{ borderLeft: '4px solid #f59e0b' }}>
           <ul style={{ margin: 0, padding: '0 0 0 16px', fontSize: '0.9rem', lineHeight: 1.7 }}>
@@ -1676,15 +1682,15 @@ export default function AffiliateSection({ lang, t, showToast }) {
     <div className={styles.section}>
       <SectionHeader
         icon="fa-handshake"
-        title={lang === 'ht' ? 'Afilyasyon' : 'Affiliate'}
+        title={t4(lang, "Afilyasyon", "Affiliate", "Affiliation", "Afiliación")}
         lang={lang}
         help={{
           ht: 'Jere pwogram afilyasyon ou — afilye yo, komisyon, gwoup, règ, kanpay ak analytics. Aktiv pwogram nan pou kòmanse aksepte afilye.',
           en: 'Manage your affiliate program — affiliates, commissions, groups, rules, campaigns and analytics. Activate the program to start accepting affiliates.',
+          fr: "Gérez votre programme d'affiliation — affiliés, commissions, groupes, règles, campagnes et analyses. Activez le programme pour commencer à accepter des affiliés.",
+          es: 'Gestiona tu programa de afiliación — afiliados, comisiones, grupos, reglas, campañas y análisis. Activa el programa para empezar a aceptar afiliados.',
         }}
-        tip={lang === 'ht'
-          ? 'Afilye yo touche komisyon sou chak vant ki soti nan lyen yo.'
-          : 'Affiliates earn a commission on every sale that comes through their links.'}
+        tip={t4(lang, "Afilye yo touche komisyon sou chak vant ki soti nan lyen yo.", "Affiliates earn a commission on every sale that comes through their links.", "Les affiliés touchent une commission sur chaque vente issue de leurs liens.", "Los afiliados ganan una comisión por cada venta que llegue a través de sus enlaces.")}
       />
 
       {/* Sub-tabs */}
@@ -1697,7 +1703,7 @@ export default function AffiliateSection({ lang, t, showToast }) {
             onClick={() => setActiveTab(tab.id)}
           >
             <i className={`fas ${tab.icon}`} aria-hidden="true" />
-            {lang === 'ht' ? tab.labelHt : tab.label}
+            {pickLabel(tab, lang)}
           </button>
         ))}
       </div>

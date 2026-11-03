@@ -1049,7 +1049,7 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
     // Validate file type
     if (!file.type.startsWith('image/')) {
       showToast?.(
-        lang === 'ht' ? 'Sèlman imaj yo aksepte.' : 'Only images are accepted.',
+        t2(lang, { ht: "Sèlman imaj yo aksepte.", en: "Only images are accepted.", fr: "Seules les images sont acceptées.", es: "Solo se aceptan imágenes." }),
         'circle-exclamation',
       );
       return;
@@ -1057,7 +1057,7 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
     // Validate file size (10MB max before compression)
     if (file.size > 10 * 1024 * 1024) {
       showToast?.(
-        lang === 'ht' ? 'Imaj la twò gwo (max 10MB).' : 'Image is too large (max 10MB).',
+        t2(lang, { ht: "Imaj la twò gwo (max 10MB).", en: "Image is too large (max 10MB).", fr: "Image trop volumineuse (max 10 Mo).", es: "Imagen demasiado grande (máx. 10 MB)." }),
         'circle-exclamation',
       );
       return;
@@ -1097,14 +1097,14 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
         setSpotlightCoverProgress({ stage: 'done', percent: 100 });
         setSpotlightForm((f) => ({ ...f, cover_image: url }));
         showToast?.(
-          lang === 'ht' ? '✅ Imaj la monte!' : '✅ Image uploaded!',
+          t2(lang, { ht: "✅ Imaj la monte!", en: "✅ Image uploaded!", fr: "✅ Image téléversée !", es: "✅ ¡Imagen subida!" }),
           'check-circle',
         );
       }
     } catch (err) {
       const msg = err?.response?.data?.detail
         || err?.message
-        || (lang === 'ht' ? 'Pa t kapab monte imaj lan.' : 'Could not upload image.');
+        || (t2(lang, { ht: "Pa t kapab monte imaj lan.", en: "Could not upload image.", fr: "Impossible de téléverser l'image.", es: "No se pudo subir la imagen." }));
       showToast?.(msg, 'circle-exclamation');
     } finally {
       setSpotlightCoverUploading(false);
@@ -1438,18 +1438,18 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
                                 <span className="settings-countdown-block">
                                   <span className={`settings-countdown-num ${isUrgent ? 'settings-countdown-urgent' : ''}`}>{days}</span>
                                   <span className="settings-countdown-unit">
-                                    {lang === 'ht' ? 'jou' : 'd'}</span>
+                                    {t2(lang, { ht: "jou", en: "d", fr: "j", es: "d" })}</span>
                                 </span>
                               )}
                               <span className="settings-countdown-block">
                                 <span className={`settings-countdown-num ${isUrgent ? 'settings-countdown-urgent' : ''}`}>{hours}</span>
                                 <span className="settings-countdown-unit">
-                                  {lang === 'ht' ? 'èdtan' : 'h'}</span>
+                                  {t2(lang, { ht: "èdtan", en: "h", fr: "h", es: "h" })}</span>
                               </span>
                               <span className="settings-countdown-block">
                                 <span className={`settings-countdown-num ${isUrgent ? 'settings-countdown-urgent' : ''}`}>{minutes}</span>
                                 <span className="settings-countdown-unit">
-                                  {lang === 'ht' ? 'minit' : 'm'}</span>
+                                  {t2(lang, { ht: "minit", en: "m", fr: "min", es: "min" })}</span>
                               </span>
                             </div>
                           </div>
@@ -1545,9 +1545,7 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
               <div className="settings-item-desc">
                 <span className="settings-item-label settings-item-label--bold">{t2(lang, { ht: 'Reyajiste tout aparans', en: 'Reset all appearance' })}</span>
                 <span className="settings-item-label-sm">
-                  {lang === 'ht'
-                    ? 'Retire tout efè vizyèl + tèm. W ap toujou konekte.'
-                    : 'Clear all visual FX + theme. You will stay logged in.'}
+                  {t2(lang, { ht: "Retire tout efè vizyèl + tèm. W ap toujou konekte.", en: "Clear all visual FX + theme. You will stay logged in.", fr: "Effacez tous les effets visuels + le thème. Vous resterez connecté.", es: "Borra todos los efectos visuales + tema. Seguirás conectado." })}
                 </span>
               </div>
             </div>
@@ -2126,9 +2124,7 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
                 <i className="fas fa-chevron-right" aria-hidden="true" />
               </button>
               <p className="creator-apply-launcher-hint">
-                {t.settings_creator_apply_hint || (lang === 'ht'
-                  ? 'Anseye kou, vann pwodwi, òfri sèvis sou atelnyo. N ap revize aplikasyon w nan 2-3 jou.'
-                  : 'Teach courses, sell products, offer services on atelnyo. We review your application in 2-3 days.')}
+                {t.settings_creator_apply_hint || (t2(lang, { ht: "Anseye kou, vann pwodwi, òfri sèvis sou atelnyo. N ap revize aplikasyon w nan 2-3 jou.", en: "Teach courses, sell products, offer services on atelnyo. We review your application in 2-3 days.", fr: "Donnez des cours, vendez des produits, offrez des services sur atelnyo. Nous examinons votre candidature sous 2-3 jours.", es: "Enseña cursos, vende productos, ofrece servicios en atelnyo. Revisamos tu solicitud en 2-3 días." }))}
               </p>
             </div>
           </div>
@@ -2233,9 +2229,7 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
               )}
               <p className="spotlight-launcher-hint">
                 {t.settings_spotlight_hint
-                  || (lang === 'ht'
-                    ? 'Spotlight se yon lis envansyon ou fè ki poko egziste sou platfòm lan. Aplike pou parèt nan Explore.'
-                    : 'Spotlight is a curated list of inventions that do not exist anywhere else on the platform. Apply to appear in Explore.')}
+                  || (t2(lang, { ht: "Spotlight se yon lis envansyon ou fè ki poko egziste sou platfòm lan. Aplike pou parèt nan Explore.", en: "Spotlight is a curated list of inventions that do not exist anywhere else on the platform. Apply to appear in Explore.", fr: "Spotlight est une sélection d'inventions qui n'existent nulle part ailleurs sur la plateforme. Postulez pour apparaître dans Explorer.", es: "Spotlight es una selección de inventos que no existen en ningún otro lugar de la plataforma. Aplica para aparecer en Explorar." }))}
               </p>
             </div>
           </div>
@@ -2442,7 +2436,7 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
               <span className="spotlight-field-label">
                 {t.settings_spotlight_field_cover_image || (t2(lang, { ht: 'Imaj kouvèti', en: 'Cover image' }))}
                 <span style={{ fontSize: '0.75rem', fontWeight: 400, marginLeft: 6, opacity: 0.6 }}>
-                  ({lang === 'ht' ? 'opsyonel' : 'optional'})
+                  ({t2(lang, { ht: "opsyonel", en: "optional", fr: "facultatif", es: "opcional" })})
                 </span>
               </span>
               {user?.premium?.is_premium ? (
@@ -2458,13 +2452,13 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
                     }}>
                       <i className="fas fa-spinner fa-spin" style={{ fontSize: '1.5rem', color: '#d81b60', marginBottom: 8 }} />
                       <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#d81b60' }}>
-                        {spotlightCoverProgress?.stage === 'reading' && (lang === 'ht' ? 'Ap li imaj...' : 'Reading image...')}
-                        {spotlightCoverProgress?.stage === 'loading' && (lang === 'ht' ? 'Ap chaje imaj...' : 'Loading image...')}
-                        {spotlightCoverProgress?.stage === 'processing' && (lang === 'ht' ? 'Ap tretan imaj...' : 'Processing image...')}
-                        {spotlightCoverProgress?.stage === 'compressing' && (lang === 'ht' ? 'Ap konpwese imaj...' : 'Compressing image...')}
-                        {spotlightCoverProgress?.stage === 'uploading' && (lang === 'ht' ? 'Ap monte imaj...' : 'Uploading image...')}
-                        {spotlightCoverProgress?.stage === 'done' && (lang === 'ht' ? '✅ Fini!' : '✅ Done!')}
-                        {!spotlightCoverProgress && (lang === 'ht' ? 'Ap tretan...' : 'Processing...')}
+                        {spotlightCoverProgress?.stage === 'reading' && (t2(lang, { ht: "Ap li imaj...", en: "Reading image...", fr: "Lecture de l'image...", es: "Leyendo imagen..." }))}
+                        {spotlightCoverProgress?.stage === 'loading' && (t2(lang, { ht: "Ap chaje imaj...", en: "Loading image...", fr: "Chargement de l'image...", es: "Cargando imagen..." }))}
+                        {spotlightCoverProgress?.stage === 'processing' && (t2(lang, { ht: "Ap tretan imaj...", en: "Processing image...", fr: "Traitement de l'image...", es: "Procesando imagen..." }))}
+                        {spotlightCoverProgress?.stage === 'compressing' && (t2(lang, { ht: "Ap konpwese imaj...", en: "Compressing image...", fr: "Compression de l'image...", es: "Comprimiendo imagen..." }))}
+                        {spotlightCoverProgress?.stage === 'uploading' && (t2(lang, { ht: "Ap monte imaj...", en: "Uploading image...", fr: "Téléversement de l'image...", es: "Subiendo imagen..." }))}
+                        {spotlightCoverProgress?.stage === 'done' && (t2(lang, { ht: "✅ Fini!", en: "✅ Done!", fr: "✅ Terminé !", es: "✅ ¡Listo!" }))}
+                        {!spotlightCoverProgress && (t2(lang, { ht: "Ap tretan...", en: "Processing...", fr: "Traitement...", es: "Procesando..." }))}
                       </span>
                       {/* Progress bar */}
                       <div style={{
@@ -2505,7 +2499,7 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
                     >
                       <i className="fas fa-cloud-arrow-up" style={{ fontSize: '1.5rem', color: 'var(--text-secondary, #94a3b8)', marginBottom: 8 }} />
                       <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary, #1e293b)' }}>
-                        {lang === 'ht' ? 'Klike pou monte imaj' : 'Click to upload image'}
+                        {t2(lang, { ht: "Klike pou monte imaj", en: "Click to upload image", fr: "Cliquez pour téléverser une image", es: "Haz clic para subir una imagen" })}
                       </span>
                       <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary, #64748b)', marginTop: 4 }}>
                         JPG, PNG, WebP — max 5MB
@@ -2525,7 +2519,7 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
                   {/* Format selector for premium */}
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                     <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary, #64748b)' }}>
-                      {lang === 'ht' ? 'Fòma:' : 'Format:'}
+                      {t2(lang, { ht: "Fòma:", en: "Format:", fr: "Format :", es: "Formato:" })}
                     </span>
                     {['auto', 'webp', 'jpeg'].map((fmt) => (
                       <button
@@ -2564,7 +2558,7 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
                   {/* Quality slider */}
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                     <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary, #64748b)' }}>
-                      {lang === 'ht' ? 'Kalite:' : 'Quality:'}
+                      {t2(lang, { ht: "Kalite:", en: "Quality:", fr: "Qualité :", es: "Calidad:" })}
                     </span>
                     <input
                       type="range"
@@ -2586,10 +2580,10 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
                   </div>
                   <span style={{ fontSize: '0.6rem', color: 'var(--text-tertiary, #94a3b8)' }}>
                     {spotlightCoverQuality >= 80
-                      ? (lang === 'ht' ? 'Kalite wo, fichye pi gwo' : 'High quality, larger file')
+                      ? (t2(lang, { ht: "Kalite wo, fichye pi gwo", en: "High quality, larger file", fr: "Haute qualité, fichier plus volumineux", es: "Alta calidad, archivo más grande" }))
                       : spotlightCoverQuality >= 60
-                        ? (lang === 'ht' ? 'Bon balans' : 'Good balance')
-                        : (lang === 'ht' ? 'Fichye piti, kalite redwi' : 'Smaller file, reduced quality')
+                        ? (t2(lang, { ht: "Bon balans", en: "Good balance", fr: "Bon équilibre", es: "Buen equilibrio" }))
+                        : (t2(lang, { ht: "Fichye piti, kalite redwi", en: "Smaller file, reduced quality", fr: "Fichier plus petit, qualité réduite", es: "Archivo más pequeño, calidad reducida" }))
                     }
                   </span>
                   {/* Preview if image is uploaded */}
@@ -2617,9 +2611,7 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
                   )}
                   <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary, #64748b)' }}>
                     <i className="fas fa-crown" style={{ color: '#f59e0b', marginRight: 4 }} />
-                    {lang === 'ht'
-                      ? 'Premium: monte imaj dirèkteman nan òdinatè ou'
-                      : 'Premium: upload image directly from your device'}
+                    {t2(lang, { ht: "Premium: monte imaj dirèkteman nan òdinatè ou", en: "Premium: upload image directly from your device", fr: "Premium : téléversez une image directement depuis votre appareil", es: "Premium: sube una imagen directamente desde tu dispositivo" })}
                   </span>
                 </div>
               ) : (
@@ -2635,9 +2627,7 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
                   />
                   <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary, #64748b)' }}>
                     <i className="fas fa-link" style={{ marginRight: 4, opacity: 0.6 }} />
-                    {lang === 'ht'
-                      ? 'Mete yon lyen imaj soti nan yon lòt sous (Imgur, Google Photos, etc.)'
-                      : 'Paste an image URL from another source (Imgur, Google Photos, etc.)'}
+                    {t2(lang, { ht: "Mete yon lyen imaj soti nan yon lòt sous (Imgur, Google Photos, etc.)", en: "Paste an image URL from another source (Imgur, Google Photos, etc.)", fr: "Collez l'URL d'une image d'une autre source (Imgur, Google Photos, etc.)", es: "Pega la URL de una imagen de otra fuente (Imgur, Google Photos, etc.)" })}
                   </span>
                 </div>
               )}
@@ -2648,9 +2638,7 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
               2. {t.settings_spotlight_section_kyc || (t2(lang, { ht: 'Idantite (KYC)', en: 'Identity (KYC)' }))}
             </div>
             <p className="spotlight-kyc-help">
-              {t.settings_spotlight_kyc_help || (lang === 'ht'
-                ? 'Nou bezwen idantite ou pou nou ka verifye aplikasyon an. Done sa yo prive.'
-                : 'We need your identity to verify this application. These details are private.')}
+              {t.settings_spotlight_kyc_help || (t2(lang, { ht: "Nou bezwen idantite ou pou nou ka verifye aplikasyon an. Done sa yo prive.", en: "We need your identity to verify this application. These details are private.", fr: "Nous avons besoin de votre identité pour vérifier cette candidature. Ces informations sont privées.", es: "Necesitamos tu identidad para verificar esta solicitud. Estos datos son privados." }))}
             </p>
             <label className="spotlight-field">
               <span className="spotlight-field-label">
@@ -2801,9 +2789,7 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
                 required
               />
               <span className="spotlight-field-label">
-                {t.settings_spotlight_field_accept_terms || (lang === 'ht'
-                  ? 'Mwen sètifye enfòmasyon sa yo vrè e mwen aksepte Règleman Kreyatè a.'
-                  : 'I certify this information is true and I accept the Creator Terms.')}
+                {t.settings_spotlight_field_accept_terms || (t2(lang, { ht: "Mwen sètifye enfòmasyon sa yo vrè e mwen aksepte Règleman Kreyatè a.", en: "I certify this information is true and I accept the Creator Terms.", fr: "Je certifie que ces informations sont exactes et j’accepte les Conditions Créateur.", es: "Certifico que esta información es verdadera y acepto los Términos de Creador." }))}
               </span>
             </label>
 
@@ -2937,9 +2923,7 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
       {resetConfirm && (
         <ConfirmModal
           title={t2(lang, { ht: 'Reyajiste aparans', en: 'Reset appearance' })}
-          message={lang === 'ht'
-            ? 'Reyajiste tout paramèt aparans? W ap toujou konekte.'
-            : 'Reset all appearance settings? You will stay logged in.'}
+          message={t2(lang, { ht: "Reyajiste tout paramèt aparans? W ap toujou konekte.", en: "Reset all appearance settings? You will stay logged in.", fr: "Réinitialiser tous les paramètres d’apparence ? Vous resterez connecté.", es: "¿Restablecer todos los ajustes de apariencia? Seguirás conectado." })}
           lang={lang}
           variant="warning"
           confirmText={t2(lang, { ht: 'Wi, reyajiste', en: 'Yes, reset' })}

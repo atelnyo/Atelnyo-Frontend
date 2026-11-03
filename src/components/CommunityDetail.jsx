@@ -30,6 +30,7 @@ import SEOHead from './shared/SEOHead';
 import { useParams, NavLink, Outlet, useOutletContext, useNavigate } from 'react-router-dom';
 import { communitiesService, communityEventsService } from '../services/api';
 import useVirtualScroll from '../hooks/useVirtualScroll';
+import { t as t4 } from '../utils/i18n';
 
 const TAB_KEYS = ['events', 'members', 'banned', 'announcements', 'files', 'courses'];
 // The banned list is a moderation surface — only owner/admin see the tab.
@@ -40,10 +41,10 @@ const MOD_ONLY_TABS = ['banned'];
 /** Translates a role slug into the localized label shown in the Members tab. */
 function roleLabel(role, lang) {
   switch (role) {
-    case 'owner':     return lang === 'ht' ? 'Fondatè' : 'Owner';
+    case 'owner':     return t4(lang, "Fondatè", "Owner", "Fondateur", "Fundador");
     case 'admin':     return 'Admin';
-    case 'moderator': return lang === 'ht' ? 'Moderatè' : 'Moderator';
-    default:          return lang === 'ht' ? 'Manm' : 'Member';
+    case 'moderator': return t4(lang, "Moderatè", "Moderator", "Modérateur", "Moderador");
+    default:          return t4(lang, "Manm", "Member", "Membre", "Miembro");
   }
 }
 
@@ -52,17 +53,17 @@ function LoadingLine({ lang }) {
   return (
     <div className="c-state">
       <i className="fas fa-spinner fa-spin" />
-      {' '}{lang === 'ht' ? 'Ap chaje...' : 'Loading...'}
+      {' '}{t4(lang, "Ap chaje...", "Loading...", "Chargement...", "Cargando...")}
     </div>
   );
 }
 
 /** Localized empty-state block for any tab whose list came back empty. */
-function EmptyState({ icon, lang, ht, en }) {
+function EmptyState({ icon, lang, ht, en, fr, es }) {
   return (
     <div className="c-state">
       <i className={`fas ${icon} c-state-icon`} />
-      <p className="c-state-text">{lang === 'ht' ? ht : en}</p>
+      <p className="c-state-text">{t4(lang, ht, en, fr || en, es || en)}</p>
     </div>
   );
 }
@@ -99,7 +100,7 @@ export function CommunityEvents() {
   }, [community?.slug]);
 
   if (loading) return <LoadingLine lang={lang} />;
-  if (list.length === 0) return <EmptyState icon="fa-calendar-alt" lang={lang} ht="Pa gen evènman ankò" en="No events yet" />;
+  if (list.length === 0) return <EmptyState icon="fa-calendar-alt" lang={lang} ht="Pa gen evènman ankò" en="No events yet" fr="Aucun événement pour le moment" es="Aún no hay eventos" />;
 
   return (
     <div className="c-list c-list--gap10">
@@ -123,7 +124,7 @@ export function CommunityEvents() {
             </div>
           </div>
           <span className={`c-badge-price ${ev.is_free ? 'c-badge-price--free' : 'c-badge-price--paid'}`}>
-            {ev.is_free ? (lang === 'ht' ? 'Gratis' : 'Free') : `$${ev.price}`}
+            {ev.is_free ? (t4(lang, "Gratis", "Free", "Gratuit", "Gratis")) : `$${ev.price}`}
           </span>
         </div>
       ))}
@@ -176,7 +177,7 @@ export function CommunityMembers() {
       refresh();
     } catch (err) {
       const detail = err?.response?.data?.detail
-        || (lang === 'ht' ? 'Aksyon an refize.' : 'Action refused.');
+        || (t4(lang, "Aksyon an refize.", "Action refused.", "Action refusée.", "Acción rechazada."));
       showToast?.(detail, 'circle-exclamation');
     } finally {
       setBusyId(null);
@@ -185,12 +186,12 @@ export function CommunityMembers() {
 
   const handleMute = (m) => act(
     m.id,
-    lang === 'ht' ? `@${m.username} mute 24 èdtan.` : `@${m.username} muted for 24h.`,
+    t4(lang, `@${m.username} mute 24 èdtan.`, `@${m.username} muted for 24h.`, `@${m.username} en sourdine pour 24 h.`, `@${m.username} silenciado por 24 h.`),
     () => communitiesService.mute(community.slug, m.id, 24),
   );
   const handleUnmute = (m) => act(
     m.id,
-    lang === 'ht' ? `@${m.username} ka pale ankò.` : `@${m.username} unmuted.`,
+    t4(lang, `@${m.username} ka pale ankò.`, `@${m.username} unmuted.`, `@${m.username} peut parler à nouveau.`, `@${m.username} puede hablar de nuevo.`),
     () => communitiesService.unmute(community.slug, m.id),
   );
   // Ban asks for a reason first (stored in the audit trail the banned
@@ -207,7 +208,7 @@ export function CommunityMembers() {
     setBanTarget(null);
     await act(
       m.id,
-      lang === 'ht' ? `@${m.username} bloke.` : `@${m.username} banned.`,
+      t4(lang, `@${m.username} bloke.`, `@${m.username} banned.`, `@${m.username} banni.`, `@${m.username} expulsado.`),
       () => communitiesService.banMember(community.slug, m.id, banReason.trim()),
     );
   };
@@ -215,13 +216,13 @@ export function CommunityMembers() {
     const next = m.role === 'member' ? 'moderator' : 'admin';
     return act(
       m.id,
-      lang === 'ht' ? `@${m.username} kounye a ${next}.` : `@${m.username} is now ${next}.`,
+      t4(lang, `@${m.username} kounye a ${next}.`, `@${m.username} is now ${next}.`, `@${m.username} est maintenant ${next}.`, `@${m.username} ahora es ${next}.`),
       () => communitiesService.promote(community.slug, m.id, next),
     );
   };
   const handleDemote = (m) => act(
     m.id,
-    lang === 'ht' ? `@${m.username} desann yon nivo.` : `@${m.username} demoted.`,
+    t4(lang, `@${m.username} desann yon nivo.`, `@${m.username} demoted.`, `@${m.username} rétrogradé.`, `@${m.username} degradado.`),
     () => communitiesService.demote(community.slug, m.id),
   );
 
@@ -258,12 +259,10 @@ export function CommunityMembers() {
             style={{ margin: '0 0 6px', fontSize: '1.05rem', color: 'var(--text-primary, #1f2937)' }}
           >
             <i className="fas fa-ban" style={{ color: '#ef4444', marginRight: 8 }} aria-hidden="true" />
-            {lang === 'ht' ? `Bloke @${banTarget.username}?` : `Ban @${banTarget.username}?`}
+            {t4(lang, `Bloke @${banTarget.username}?`, `Ban @${banTarget.username}?`, `Bannir @${banTarget.username} ?`, `¿Expulsar a @${banTarget.username}?`)}
           </h3>
           <p style={{ margin: '0 0 12px', fontSize: '0.85rem', color: 'var(--text-secondary, #64748b)', lineHeight: 1.45 }}>
-            {lang === 'ht'
-              ? 'Manm nan pèdi aksè imedyatman. Rezon an soti nan lis bloke a — li ede owner a revize desizyon an.'
-              : 'The member loses access immediately. The reason appears in the banned list — it helps the owner review the decision.'}
+            {t4(lang, "Manm nan pèdi aksè imedyatman. Rezon an soti nan lis bloke a — li ede owner a revize desizyon an.", "The member loses access immediately. The reason appears in the banned list — it helps the owner review the decision.", "Le membre perd l'accès immédiatement. La raison figure dans la liste des bannis — cela aide le fondateur à réexaminer la décision.", "El miembro pierde el acceso de inmediato. El motivo aparece en la lista de expulsados — ayuda al fundador a revisar la decisión.")}
           </p>
           <input
             type="text"
@@ -275,8 +274,8 @@ export function CommunityMembers() {
               if (e.key === 'Escape') setBanTarget(null);
             }}
             maxLength={255}
-            placeholder={lang === 'ht' ? 'Rezon (egz: spam)...' : 'Reason (e.g. spam)...'}
-            aria-label={lang === 'ht' ? 'Rezon blokaj' : 'Ban reason'}
+            placeholder={t4(lang, "Rezon (egz: spam)...", "Reason (e.g. spam)...", "Raison (ex : spam)...", "Motivo (p. ej. spam)...")}
+            aria-label={t4(lang, "Rezon blokaj", "Ban reason", "Motif du bannissement", "Motivo de expulsión")}
             style={{
               width: '100%', boxSizing: 'border-box', padding: '10px 12px',
               border: '1.5px solid var(--border-color, #d1d5db)', borderRadius: 10,
@@ -295,7 +294,7 @@ export function CommunityMembers() {
                 fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer',
               }}
             >
-              {lang === 'ht' ? 'Anile' : 'Cancel'}
+              {t4(lang, "Anile", "Cancel", "Annuler", "Cancelar")}
             </button>
             <button
               type="button"
@@ -306,7 +305,7 @@ export function CommunityMembers() {
                 fontSize: '0.9rem', fontWeight: 700, cursor: 'pointer',
               }}
             >
-              {lang === 'ht' ? 'Bloke' : 'Ban'}
+              {t4(lang, "Bloke", "Ban", "Bannir", "Expulsar")}
             </button>
           </div>
         </div>
@@ -341,7 +340,7 @@ export function CommunityMembers() {
   });
 
   if (loading) return <LoadingLine lang={lang} />;
-  if (list.length === 0) return <EmptyState icon="fa-user" lang={lang} ht="Pa gen manm ankò" en="No members yet" />;
+  if (list.length === 0) return <EmptyState icon="fa-user" lang={lang} ht="Pa gen manm ankò" en="No members yet" fr="Aucun membre pour le moment" es="Aún no hay miembros" />;
 
   const renderRow = (m, style) => (
     <div key={m.id} className="c-row-card" style={style}>
@@ -354,7 +353,7 @@ export function CommunityMembers() {
           {new Date(m.joined_at).toLocaleDateString()}
           {m.is_muted && (
             <span className="c-role-badge c-role-badge--member" style={{ marginLeft: 6 }}>
-              <i className="fas fa-volume-xmark" aria-hidden="true" /> {lang === 'ht' ? 'mute' : 'muted'}
+              <i className="fas fa-volume-xmark" aria-hidden="true" /> {t4(lang, "mute", "muted", "en sourdine", "silenciado")}
             </span>
           )}
         </div>
@@ -368,8 +367,8 @@ export function CommunityMembers() {
                   type="button"
                   className="icon-btn"
                   style={{ width: 32, height: 32, fontSize: '0.75rem' }}
-                  title={lang === 'ht' ? 'Desann yon nivo' : 'Demote one rank'}
-                  aria-label={lang === 'ht' ? `Desann @${m.username}` : `Demote @${m.username}`}
+                  title={t4(lang, "Desann yon nivo", "Demote one rank", "Rétrograder d'un rang", "Degradar un rango")}
+                  aria-label={t4(lang, `Desann @${m.username}`, `Demote @${m.username}`, `Rétrograder @${m.username}`, `Degradar a @${m.username}`)}
                   disabled={busyId === m.id}
                   onClick={() => handleDemote(m)}
                 >
@@ -381,8 +380,8 @@ export function CommunityMembers() {
                   type="button"
                   className="icon-btn"
                   style={{ width: 32, height: 32, fontSize: '0.75rem' }}
-                  title={lang === 'ht' ? 'Monte yon nivo' : 'Promote one rank'}
-                  aria-label={lang === 'ht' ? `Monte @${m.username}` : `Promote @${m.username}`}
+                  title={t4(lang, "Monte yon nivo", "Promote one rank", "Promouvoir d'un rang", "Ascender un rango")}
+                  aria-label={t4(lang, `Monte @${m.username}`, `Promote @${m.username}`, `Promouvoir @${m.username}`, `Ascender a @${m.username}`)}
                   disabled={busyId === m.id}
                   onClick={() => handlePromote(m)}
                 >
@@ -396,8 +395,8 @@ export function CommunityMembers() {
               type="button"
               className="icon-btn"
               style={{ width: 32, height: 32, fontSize: '0.75rem', color: 'var(--color-success, #10b981)' }}
-              title={lang === 'ht' ? 'Leve mute a' : 'Unmute'}
-              aria-label={lang === 'ht' ? `Leve mute @${m.username}` : `Unmute @${m.username}`}
+              title={t4(lang, "Leve mute a", "Unmute", "Réactiver le son", "Quitar silencio")}
+              aria-label={t4(lang, `Leve mute @${m.username}`, `Unmute @${m.username}`, `Réactiver le son de @${m.username}`, `Quitar silencio a @${m.username}`)}
               disabled={busyId === m.id}
               onClick={() => handleUnmute(m)}
             >
@@ -408,8 +407,8 @@ export function CommunityMembers() {
               type="button"
               className="icon-btn"
               style={{ width: 32, height: 32, fontSize: '0.75rem' }}
-              title={lang === 'ht' ? 'Mute 24 èdtan' : 'Mute for 24h'}
-              aria-label={lang === 'ht' ? `Mute @${m.username}` : `Mute @${m.username}`}
+              title={t4(lang, "Mute 24 èdtan", "Mute for 24h", "Muet pendant 24 h", "Silenciar por 24 h")}
+              aria-label={t4(lang, `Mute @${m.username}`, `Mute @${m.username}`, `Mettre en sourdine @${m.username}`, `Silenciar a @${m.username}`)}
               disabled={busyId === m.id}
               onClick={() => handleMute(m)}
             >
@@ -420,8 +419,8 @@ export function CommunityMembers() {
             type="button"
             className="icon-btn"
             style={{ width: 32, height: 32, fontSize: '0.75rem', color: '#ef4444' }}
-            title={lang === 'ht' ? 'Bloke' : 'Ban'}
-            aria-label={lang === 'ht' ? `Bloke @${m.username}` : `Ban @${m.username}`}
+            title={t4(lang, "Bloke", "Ban", "Bannir", "Expulsar")}
+            aria-label={t4(lang, `Bloke @${m.username}`, `Ban @${m.username}`, `Bannir @${m.username}`, `Expulsar a @${m.username}`)}
             disabled={busyId === m.id}
             onClick={() => handleBan(m)}
           >
@@ -506,6 +505,8 @@ export function CommunityBannedMembers() {
         lang={lang}
         ht="Se owner ak admin ka wè lis bloke yo."
         en="Only the owner and admins can view the banned list."
+        fr="Seuls le fondateur et les admins peuvent voir la liste des bannis."
+        es="Solo el fundador y los administradores pueden ver la lista de expulsados."
       />
     );
   }
@@ -518,6 +519,8 @@ export function CommunityBannedMembers() {
         lang={lang}
         ht="Pa gen pyès manm bloke."
         en="No banned members."
+        fr="Aucun membre banni."
+        es="Ningún miembro expulsado."
       />
     );
   }
@@ -528,13 +531,13 @@ export function CommunityBannedMembers() {
     try {
       await communitiesService.unbanMember(community.slug, m.id);
       showToast?.(
-        lang === 'ht' ? `@${m.username} debloke.` : `@${m.username} unbanned.`,
+        t4(lang, `@${m.username} debloke.`, `@${m.username} unbanned.`, `@${m.username} débanni.`, `@${m.username} readmitido.`),
         'shield-halved',
       );
       setList((prev) => prev.filter((row) => row.id !== m.id));
     } catch (err) {
       const detail = err?.response?.data?.detail
-        || (lang === 'ht' ? 'Aksyon an refize.' : 'Action refused.');
+        || (t4(lang, "Aksyon an refize.", "Action refused.", "Action refusée.", "Acción rechazada."));
       showToast?.(detail, 'circle-exclamation');
     } finally {
       setBusyId(null);
@@ -552,10 +555,10 @@ export function CommunityBannedMembers() {
             <div className="c-title c-title--xs">@{m.username}</div>
             <div className="c-subtitle">
               {m.ban_reason
-                ? (lang === 'ht' ? `Rezon: ${m.ban_reason}` : `Reason: ${m.ban_reason}`)
-                : (lang === 'ht' ? 'Pa gen rezon' : 'No reason given')}
+                ? (t4(lang, `Rezon: ${m.ban_reason}`, `Reason: ${m.ban_reason}`, `Motif : ${m.ban_reason}`, `Motivo: ${m.ban_reason}`))
+                : (t4(lang, "Pa gen rezon", "No reason given", "Aucune raison indiquée", "Sin motivo indicado"))}
               {m.banned_by_username && (
-                <> · {lang === 'ht' ? 'pa' : 'by'} @{m.banned_by_username}</>
+                <> · {t4(lang, "pa", "by", "par", "por")} @{m.banned_by_username}</>
               )}
             </div>
           </div>
@@ -565,12 +568,12 @@ export function CommunityBannedMembers() {
             style={{ cursor: 'pointer', border: 'none' }}
             disabled={busyId === m.id}
             onClick={() => handleUnban(m)}
-            title={lang === 'ht' ? 'Debloke manm sa a' : 'Unban this member'}
+            title={t4(lang, "Debloke manm sa a", "Unban this member", "Débannir ce membre", "Readmitir a este miembro")}
           >
             {busyId === m.id
               ? <i className="fas fa-spinner fa-spin" aria-hidden="true" />
               : <i className="fas fa-unlock" aria-hidden="true" />}
-            {' '}{lang === 'ht' ? 'Debloke' : 'Unban'}
+            {' '}{t4(lang, "Debloke", "Unban", "Débannir", "Readmitir")}
           </button>
         </div>
       ))}
@@ -604,7 +607,7 @@ export function CommunityAnnouncements() {
   }, [community?.slug]);
 
   if (loading) return <LoadingLine lang={lang} />;
-  if (list.length === 0) return <EmptyState icon="fa-bullhorn" lang={lang} ht="Pa gen anons" en="No announcements" />;
+  if (list.length === 0) return <EmptyState icon="fa-bullhorn" lang={lang} ht="Pa gen anons" en="No announcements" fr="Aucune annonce" es="Ningún anuncio" />;
 
   return (
     <div className="c-list c-list--gap12">
@@ -615,7 +618,7 @@ export function CommunityAnnouncements() {
             <span className="c-title c-title--sm">{a.title}</span>
             {a.created_by_username && (
               <span className="c-ann-author">
-                {lang === 'ht' ? 'pa' : 'by'} {a.created_by_username}
+                {t4(lang, "pa", "by", "par", "por")} {a.created_by_username}
               </span>
             )}
           </div>
@@ -652,7 +655,7 @@ export function CommunityFiles() {
   }, [community?.slug]);
 
   if (loading) return <LoadingLine lang={lang} />;
-  if (list.length === 0) return <EmptyState icon="fa-file" lang={lang} ht="Pa gen fichye" en="No files" />;
+  if (list.length === 0) return <EmptyState icon="fa-file" lang={lang} ht="Pa gen fichye" en="No files" fr="Aucun fichier" es="Ningún archivo" />;
 
   return (
     <div className="c-files-grid">
@@ -704,7 +707,7 @@ export function CommunityCourses() {
   }, [community?.slug]);
 
   if (loading) return <LoadingLine lang={lang} />;
-  if (list.length === 0) return <EmptyState icon="fa-graduation-cap" lang={lang} ht="Pa gen kou" en="No linked courses" />;
+  if (list.length === 0) return <EmptyState icon="fa-graduation-cap" lang={lang} ht="Pa gen kou" en="No linked courses" fr="Aucun cours lié" es="Ningún curso vinculado" />;
 
   return (
     <div className="c-list c-list--gap10">
@@ -716,7 +719,7 @@ export function CommunityCourses() {
           </div>
           {c.is_featured && (
             <span className="c-featured-badge">
-              {lang === 'ht' ? 'Rekòmande' : 'Featured'}
+              {t4(lang, "Rekòmande", "Featured", "En vedette", "Destacado")}
             </span>
           )}
         </div>
@@ -755,7 +758,7 @@ export default function CommunityDetail({ lang = 'ht', t = {}, showToast, user }
       })
       .catch((err) => {
         if (!cancelled) {
-          setError(err?.response?.data?.detail || (lang === 'ht' ? 'Kominote a pa jwenn.' : 'Community not found'));
+          setError(err?.response?.data?.detail || (t4(lang, "Kominote a pa jwenn.", "Community not found", "Communauté introuvable", "Comunidad no encontrada")));
           setCommunity(null);
         }
       })
@@ -778,7 +781,7 @@ export default function CommunityDetail({ lang = 'ht', t = {}, showToast, user }
 
   async function handleJoin() {
     if (!user) {
-      showToast?.(t.mwen_signin_required || (lang === 'ht' ? 'Konekte pou w antre' : 'Sign in to join'), 'user-lock');
+      showToast?.(t.mwen_signin_required || (t4(lang, "Konekte pou w antre", "Sign in to join", "Connectez-vous pour rejoindre", "Inicia sesión para unirte")), 'user-lock');
       return;
     }
     setJoining(true);
@@ -790,12 +793,12 @@ export default function CommunityDetail({ lang = 'ht', t = {}, showToast, user }
       if (joinedStatus === 'active') setMemberCount((c) => c + 1);
       showToast?.(
         joinedStatus === 'pending'
-          ? (lang === 'ht' ? 'Demann ou voye! Tann apwobasyon fondatè a.' : 'Request sent! Wait for the founder\'s approval.')
-          : (t?.explore_community_join || (lang === 'ht' ? 'Ou rantre!' : 'Joined!')),
+          ? (t4(lang, "Demann ou voye! Tann apwobasyon fondatè a.", "Request sent! Wait for the founder's approval.", "Demande envoyée ! Attendez l'approbation du fondateur.", "¡Solicitud enviada! Espera la aprobación del fundador."))
+          : (t?.explore_community_join || (t4(lang, "Ou rantre!", "Joined!", "Rejoint !", "¡Te uniste!"))),
         'check-circle',
       );
     } catch (err) {
-      showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Nou pa ka rantre.' : 'Could not join'), 'circle-exclamation');
+      showToast?.(err?.response?.data?.detail || (t4(lang, "Nou pa ka rantre.", "Could not join", "Impossible de rejoindre", "No se pudo unir")), 'circle-exclamation');
     } finally {
       setJoining(false);
     }
@@ -808,24 +811,24 @@ export default function CommunityDetail({ lang = 'ht', t = {}, showToast, user }
       setIsMember(false);
       setMyStatus(null);
       setMemberCount((c) => Math.max(0, c - 1));
-      showToast?.(lang === 'ht' ? 'Ou kite kominote a.' : 'Left community.', 'sign-out-alt');
+      showToast?.(t4(lang, "Ou kite kominote a.", "Left community.", "Communauté quittée.", "Saliste de la comunidad."), 'sign-out-alt');
     } catch (err) {
-      showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Nou pa ka kite.' : 'Could not leave'), 'circle-exclamation');
+      showToast?.(err?.response?.data?.detail || (t4(lang, "Nou pa ka kite.", "Could not leave", "Impossible de quitter", "No se pudo salir")), 'circle-exclamation');
     } finally {
       setJoining(false);
     }
   }
 
   async function handleDelete() {
-    if (!window.confirm(lang === 'ht' ? 'Èske w sèten w vle efase kominote sa a? Aksyon sa a pa ka anile.' : 'Are you sure you want to delete this community? This action cannot be undone.')) {
+    if (!window.confirm(t4(lang, "Èske w sèten w vle efase kominote sa a? Aksyon sa a pa ka anile.", "Are you sure you want to delete this community? This action cannot be undone.", "Êtes-vous sûr de vouloir supprimer cette communauté ? Cette action est irréversible.", "¿Seguro que quieres eliminar esta comunidad? Esta acción no se puede deshacer."))) {
       return;
     }
     try {
       await communitiesService.delete(slug);
-      showToast?.(lang === 'ht' ? 'Kominote a efase.' : 'Community deleted.', 'trash');
+      showToast?.(t4(lang, "Kominote a efase.", "Community deleted.", "Communauté supprimée.", "Comunidad eliminada."), 'trash');
       navigate('/sheet/studio?section=communities');
     } catch (err) {
-      showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase kominote a.' : 'Could not delete community'), 'circle-exclamation');
+      showToast?.(err?.response?.data?.detail || (t4(lang, "Pa t kapab efase kominote a.", "Could not delete community", "Impossible de supprimer la communauté", "No se pudo eliminar la comunidad")), 'circle-exclamation');
     }
   }
 
@@ -853,7 +856,7 @@ export default function CommunityDetail({ lang = 'ht', t = {}, showToast, user }
     return (
       <div className="c-state">
         <i className="fas fa-spinner fa-spin c-state-spinner" />
-        <p>{lang === 'ht' ? 'Ap chaje...' : 'Loading...'}</p>
+        <p>{t4(lang, "Ap chaje...", "Loading...", "Chargement...", "Cargando...")}</p>
       </div>
     );
   }
@@ -862,7 +865,7 @@ export default function CommunityDetail({ lang = 'ht', t = {}, showToast, user }
     return (
       <div className="c-state">
         <i className="fas fa-users-slash c-state-icon c-state-icon--lg" />
-        <p className="c-state-text">{error || (lang === 'ht' ? 'Kominote a pa jwenn.' : 'Community not found.')}</p>
+        <p className="c-state-text">{error || (t4(lang, "Kominote a pa jwenn.", "Community not found.", "Communauté introuvable.", "Comunidad no encontrada."))}</p>
       </div>
     );
   }
@@ -900,7 +903,7 @@ export default function CommunityDetail({ lang = 'ht', t = {}, showToast, user }
           <div className="c-banner-info">
             <h2 className="c-banner-name">{community.name}</h2>
             <div className="c-banner-meta">
-              <i className="fas fa-user" /> {memberCount} {lang === 'ht' ? 'manm' : 'members'}
+              <i className="fas fa-user" /> {memberCount} {t4(lang, "manm", "members", "membres", "miembros")}
               {community.category && ` · ${community.category}`}
             </div>
           </div>
@@ -909,10 +912,10 @@ export default function CommunityDetail({ lang = 'ht', t = {}, showToast, user }
               type="button"
               className="c-banner-btn c-banner-btn--pending"
               disabled
-              title={lang === 'ht' ? 'Demann ou nan tann apwobasyon' : 'Your request is awaiting approval'}
+              title={t4(lang, "Demann ou nan tann apwobasyon", "Your request is awaiting approval", "Votre demande est en attente d’approbation", "Tu solicitud está pendiente de aprobación")}
             >
               <i className="fas fa-user-clock" aria-hidden="true" />
-              {lang === 'ht' ? 'Demann voye' : 'Request sent'}
+              {t4(lang, "Demann voye", "Request sent", "Demande envoyée", "Solicitud enviada")}
             </button>
           ) : isMember ? (
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -922,20 +925,20 @@ export default function CommunityDetail({ lang = 'ht', t = {}, showToast, user }
                     type="button"
                     className="c-banner-btn"
                     onClick={() => navigate('/sheet/studio?section=communities')}
-                    title={lang === 'ht' ? 'Paramèt kominote a' : 'Community settings'}
+                    title={t4(lang, "Paramèt kominote a", "Community settings", "Paramètres de la communauté", "Ajustes de la comunidad")}
                   >
                     <i className="fas fa-cog" aria-hidden="true" />
-                    {lang === 'ht' ? 'Paramèt' : 'Settings'}
+                    {t4(lang, "Paramèt", "Settings", "Paramètres", "Ajustes")}
                   </button>
                   <button
                     type="button"
                     className="c-banner-btn"
                     onClick={handleDelete}
                     style={{ background: 'rgba(239,68,68,0.9)', border: '1px solid rgba(239,68,68,0.9)' }}
-                    title={lang === 'ht' ? 'Efase kominote a' : 'Delete community'}
+                    title={t4(lang, "Efase kominote a", "Delete community", "Supprimer la communauté", "Eliminar comunidad")}
                   >
                     <i className="fas fa-trash" aria-hidden="true" />
-                    {lang === 'ht' ? 'Efase' : 'Delete'}
+                    {t4(lang, "Efase", "Delete", "Supprimer", "Eliminar")}
                   </button>
                 </>
               )}
@@ -946,7 +949,7 @@ export default function CommunityDetail({ lang = 'ht', t = {}, showToast, user }
                   onClick={handleLeave}
                   disabled={joining}
                 >
-                  {joining ? <i className="fas fa-spinner fa-spin" /> : (lang === 'ht' ? 'Kite' : 'Leave')}
+                  {joining ? <i className="fas fa-spinner fa-spin" /> : (t4(lang, "Kite", "Leave", "Quitter", "Salir"))}
                 </button>
               )}
             </div>
@@ -957,7 +960,7 @@ export default function CommunityDetail({ lang = 'ht', t = {}, showToast, user }
               onClick={handleJoin}
               disabled={joining}
             >
-              {joining ? <i className="fas fa-spinner fa-spin" /> : (lang === 'ht' ? 'Antre' : 'Join')}
+              {joining ? <i className="fas fa-spinner fa-spin" /> : (t4(lang, "Antre", "Join", "Rejoindre", "Unirse"))}
             </button>
           )}
         </div>

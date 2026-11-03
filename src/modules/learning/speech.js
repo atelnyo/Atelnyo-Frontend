@@ -58,7 +58,10 @@ export function createSpeechRecognizer(lang = 'en-US') {
   if (!SR) return null;
   const rec = new SR();
   rec.lang = lang;
-  rec.continuous = false;
+  // continuous = true so a short pause mid-take doesn't kill the take.
+  // Without this, single-shot recognition auto-stops after a breath and
+  // the learner gets "we didn't hear you" even though they spoke.
+  rec.continuous = true;
   rec.interimResults = true;
   rec.maxAlternatives = 1;
 
@@ -223,10 +226,32 @@ export function analyzeSpeech(target, transcript) {
 
   const totalWords = targetWords.length;
   const score = (matchedWords.length + nearMisses.length * 0.5) / totalWords;
+  const passed = score >= SPEECH_ANALYSIS.PASS_THRESHOLD;
+  if (!passed) {
+    // Tokenization fallback: server models sometimes split one spoken
+    // word into two written tokens ("peyi" → "Pe yi."). The words are
+    // all there and in order — only the spaces differ. Compare the
+    // strings with spaces removed: a near-identical joined string
+    // means the learner said the right thing and must pass.
+    // (Unrelated words still fail: "moi" vs "mwen" ≈ 0.25.)
+    const joinedSimilarity = wordSimilarity(targetWords.join(''), spoken.join(''));
+    if (joinedSimilarity >= 0.92) {
+      return {
+        score: Math.max(score, joinedSimilarity),
+        totalWords,
+        passed: true,
+        matchedWords: [...targetWords],
+        nearMisses: [],
+        missingWords: [],
+        extraWords: [],
+        joinedSimilarity,
+      };
+    }
+  }
   return {
     score,
     totalWords,
-    passed: score >= SPEECH_ANALYSIS.PASS_THRESHOLD,
+    passed,
     matchedWords,
     nearMisses,
     missingWords,

@@ -78,7 +78,12 @@ export function useSpeechRecognition(recognitionLang = 'en-US', { translateError
       error: pendingErrorRef.current,
     };
     pendingErrorRef.current = '';
-    recognition?.abort?.(); // take is done — stop listening
+    // Graceful stop (not abort): abort() discards pending audio and drops
+    // the final result that arrives just after the learner taps Stop —
+    // the classic "I spoke but it says it didn't hear me". stop() lets
+    // the recognizer deliver its last finals. The interim transcript is
+    // already in the ref, so even a late final can't blank the take.
+    try { recognition?.stop?.(); } catch (e) { /* already stopped */ }
     return result;
   }, [recognition]);
 

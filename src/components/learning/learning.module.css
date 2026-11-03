@@ -378,6 +378,65 @@
   margin-top: var(--sp-md);
 }
 
+/* AI pronunciation coach — learner-tapped help for a missed word.
+   The bubble is advice only; the speech score above stays the judge. */
+.practiceAiCoach {
+  margin-top: var(--sp-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-sm);
+  align-items: flex-start;
+}
+
+.practiceAiCoachButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-sm);
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-primary);
+  background: transparent;
+  color: var(--color-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.practiceAiCoachButton:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.practiceAiCoachLoading {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.practiceAiCoachError {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-error);
+}
+
+.practiceAiCoachBubble {
+  border-inline-start: 3px solid var(--color-primary);
+  background: var(--surface-card-alt);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: var(--sp-sm) var(--sp-md);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+}
+
+.practiceAiCoachBubble p {
+  margin: 0;
+}
+
+.practiceAiCoachWord {
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: 2px;
+}
+
 .practiceTranscript {
   margin: 0;
   font-size: var(--text-sm);
@@ -1314,4 +1373,172 @@
   .quizQuestions { padding: var(--sp-xl); gap: var(--sp-xl); }
   .quizOption { padding: 12px 14px; min-height: 48px; font-size: 0.88rem; }
   .quizSubmitBtn { width: 100%; justify-content: center; min-height: 48px; }
+}
+
+/* ─── SpeechRecorder upgrades: timer + level meter + duration ─── */
+.recorderLiveLabel {
+  font-weight: var(--font-weight-semibold);
+}
+.recorderTimer {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--font-weight-bold);
+  background: rgba(239, 68, 68, 0.12);
+  border-radius: var(--radius-pill-lg);
+  padding: 2px 10px;
+  font-size: var(--text-sm);
+}
+.recorderMeter {
+  flex: 1;
+  min-width: 60px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(239, 68, 68, 0.15);
+  overflow: hidden;
+}
+.recorderMeterFill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-error);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+.recorderDuration {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ─── AudioPlayer card (real player UI over a ref-driven <audio>) ─── */
+.audioPlayerCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-sm);
+  margin: var(--sp-md) 0;
+  padding: var(--sp-lg) var(--sp-xl);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  background: var(--surface-card-alt);
+}
+.audioPlayerCardCompact {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 2px 0;
+  padding: var(--sp-sm) var(--sp-lg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card-alt);
+}
+.audioPlayerHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.audioPlayerRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-md);
+  width: 100%;
+}
+.audioPlayerPlay {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: var(--text-base);
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+.audioPlayerPlay:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-primary);
+}
+.audioPlayerPlay:disabled {
+  opacity: 0.6;
+  cursor: default;
+  transform: none;
+}
+.audioPlayerCardCompact .audioPlayerPlay {
+  width: 32px;
+  height: 32px;
+  font-size: var(--text-sm);
+}
+.audioPlayerBar {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.audioPlayerBarTrack {
+  display: block;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--border-color);
+  overflow: hidden;
+}
+.audioPlayerBarFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-primary);
+  transition: width 0.15s linear;
+}
+.audioPlayerTime {
+  flex: 0 0 auto;
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.audioPlayerRate {
+  flex: 0 0 auto;
+  min-height: 32px;
+  padding: 2px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-pill-lg);
+  background: var(--surface-card);
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+}
+.audioPlayerRate:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.audioPlayerFailedCompact {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-sm);
+  font-size: var(--text-xs);
+  color: var(--color-error);
+  padding: 4px 0;
+}
+
+/* ─── Server Creole-model source badge ─── */
+.practiceSourceBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: rgba(0, 132, 255, 0.12);
+  color: var(--color-primary);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
 }

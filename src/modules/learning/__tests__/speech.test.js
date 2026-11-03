@@ -111,6 +111,20 @@ describe('analyzeSpeech — word-level error detection', () => {
     expect(a.extraWords).toEqual(['bonjou']);
   });
 
+  it('server tokenization split ("peyi" → "Pe yi.") still passes', () => {
+    // Real Whisper-medium output for the Wiktionary "peyi" clip.
+    const a = analyzeSpeech('peyi', 'Pe yi.');
+    expect(a.passed).toBe(true);
+    expect(a.matchedWords).toEqual(['peyi']);
+  });
+
+  it('joined fallback does not rescue unrelated words ("mwen" vs "Moi.")', () => {
+    // Real Whisper-small output: French-leaning, honestly wrong.
+    const a = analyzeSpeech('mwen', 'Moi.');
+    expect(a.passed).toBe(false);
+    expect(a.missingWords).toEqual(['mwen']);
+  });
+
   it('does not mutate inputs', () => {
     const target = 'bonjou mwen rele Jean';
     const transcript = 'bonjou mwen rele jan';

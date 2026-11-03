@@ -896,6 +896,24 @@ export const speechSubmissionService = {
   report: (courseId) => api.get('speech-submissions/report/', {
     params: { course_id: courseId },
   }),
+  // Server-side Haitian Creole transcription (Whisper, language='ht').
+  // Used when the browser recognizer caught nothing but the mic did
+  // record audio. Throws on 503 (engine not deployed) — the caller
+  // then keeps its honest "not understood" message.
+  transcribe: (courseId, blob) => {
+    const form = new FormData();
+    form.append('course_id', String(courseId));
+    // Keep the filename extension truthful: the server picks its temp
+    // file suffix from it before decoding by content.
+    const mime = blob?.type || '';
+    const name = mime.includes('mp4') || mime.includes('m4a') ? 'take.m4a'
+      : mime.includes('ogg') || mime.includes('oga') ? 'take.ogg'
+      : mime.includes('wav') ? 'take.wav'
+      : mime.includes('mpeg') || mime.includes('mp3') ? 'take.mp3'
+      : 'take.webm';
+    form.append('audio', blob, name);
+    return api.post('speech-submissions/transcribe/', form);
+  },
 };
 
 // ─── Assignment / project submissions (real backend) ─────────────────
@@ -971,6 +989,11 @@ export const aiService = {
     api.post('ai/generate_quiz_questions/', { content, count, question_types: questionTypes }),
   generateFaq: (content, count = 5) =>
     api.post('ai/generate_faq/', { content, count }),
+  // Speech practice — learner-tapped pronunciation coach for a missed word.
+  // Called only on explicit tap (never automatically) to bound AI cost;
+  // the AI explains HOW to say it, the speech score stays the judge.
+  pronunciationHelp: ({ target_word, heard = '', target_phrase = '', lang = 'ht' } = {}) =>
+    api.post('ai/pronunciation_help/', { target_word, heard, target_phrase, lang }),
   improveText: (text, goal = 'clearer') =>
     api.post('ai/improve_text/', { text, goal }),
   translateContent: (text, targetLang = 'English') =>

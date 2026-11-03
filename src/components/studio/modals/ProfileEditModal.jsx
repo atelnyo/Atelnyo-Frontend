@@ -16,6 +16,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import api, { applyTokenPair, creatorProfileService } from '../../../services/api';
 import { StudioModal, FormField, LoadingOverlay } from './shared';
 import styles from './modals.module.css';
+import { t as t4 } from '../../../utils/i18n';
 
 // Repeatable-entry defaults for the dynamic list editors (experience /
 // education / social links) — same shapes the backend model stores.
@@ -103,7 +104,7 @@ export default function ProfileEditModal({ onClose, onSuccess, lang, showToast, 
   const handleSubmit = useCallback(async (e) => {
     e?.preventDefault?.();
     const errs = {};
-    if (!form.username.trim()) errs.username = lang === 'ht' ? 'Non itilizatè oblije' : 'Username required';
+    if (!form.username.trim()) errs.username = t4(lang, "Non itilizatè oblije", "Username required", "Nom d'utilisateur requis", "Nombre de usuario obligatorio");
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
     setLoading(true);
     try {
@@ -139,13 +140,13 @@ export default function ProfileEditModal({ onClose, onSuccess, lang, showToast, 
         ),
       };
       await creatorProfileService.updateMe(profilePayload);
-      showToast?.(lang === 'ht' ? '✅ Pwofil mete ajou!' : '✅ Profile updated!', 'check-circle');
+      showToast?.(t4(lang, "✅ Pwofil mete ajou!", "✅ Profile updated!", "✅ Profil mis à jour !", "✅ ¡Perfil actualizado!"), 'check-circle');
       onSuccess?.(); onClose?.();
     } catch (err) {
       const detail = err?.response?.data?.error
         || err?.response?.data?.detail || err?.response?.data?.username?.[0]
         || err?.message
-        || (lang === 'ht' ? 'Pa t kapab mete pwofil la ajou.' : 'Could not update profile.');
+        || (t4(lang, "Pa t kapab mete pwofil la ajou.", "Could not update profile.", "Impossible de mettre à jour le profil.", "No se pudo actualizar el perfil."));
       setErrors((e) => ({ ...e, _api: detail }));
       showToast?.(detail, 'circle-exclamation');
     } finally { setLoading(false); }
@@ -153,8 +154,8 @@ export default function ProfileEditModal({ onClose, onSuccess, lang, showToast, 
 
   return (
     <StudioModal onClose={onClose} icon="fa-user-circle" wide
-      title={lang === 'ht' ? 'Pwofil Creator' : 'Creator Profile'}
-      subtitle={lang === 'ht' ? 'Mete ajou enpres ou, kontak ou ak istwa ou' : 'Update your identity, contact info and story'}>
+      title={t4(lang, "Pwofil Creator", "Creator Profile", "Profil Créateur", "Perfil de creador")}
+      subtitle={t4(lang, "Mete ajou enpres ou, kontak ou ak istwa ou", "Update your identity, contact info and story", "Mettez à jour votre identité, vos coordonnées et votre histoire", "Actualiza tu identidad, contacto e historia")}>
       <form onSubmit={handleSubmit} className={styles.form}>
         {errors._api && <div className={styles.apiError} role="alert">{errors._api}</div>}
         <LoadingOverlay loading={profileLoading || loading}>
@@ -165,29 +166,29 @@ export default function ProfileEditModal({ onClose, onSuccess, lang, showToast, 
               <div className={styles.formCardTitle}>
                 <i className="fas fa-user-circle" aria-hidden="true" />
                 <div>
-                  <h4>{lang === 'ht' ? 'Idantite' : 'Identity'}</h4>
+                  <h4>{t4(lang, "Idantite", "Identity", "Identité", "Identidad")}</h4>
                   <p className={styles.formCardHint}>
-                    {lang === 'ht' ? 'Non ou, imèl koneksyon ak non mak ou.' : 'Your username, login email and brand name.'}
+                    {t4(lang, "Non ou, imèl koneksyon ak non mak ou.", "Your username, login email and brand name.", "Votre nom d'utilisateur, e-mail de connexion et nom de marque.", "Tu nombre de usuario, correo de acceso y nombre de marca.")}
                   </p>
                 </div>
               </div>
               <div className={styles.formCardFields}>
-                <FormField label={lang === 'ht' ? 'Non Itilizatè' : 'Username'} required error={errors.username}>
+                <FormField label={t4(lang, "Non Itilizatè", "Username", "Nom d'utilisateur", "Nombre de usuario")} required error={errors.username}>
                   <input className={styles.input} value={form.username}
                     onChange={(e) => handleChange('username', e.target.value)}
-                    placeholder={lang === 'ht' ? 'Non ou' : 'Your username'}
+                    placeholder={t4(lang, "Non ou", "Your username", "Votre nom d'utilisateur", "Tu nombre de usuario")}
                     maxLength={150} autoFocus />
                 </FormField>
                 <FormField label="Email" error={errors.email}
-                  hint={lang === 'ht' ? 'Imèl koneksyon ou' : 'Your login email'}>
+                  hint={t4(lang, "Imèl koneksyon ou", "Your login email", "Votre e-mail de connexion", "Tu correo de acceso")}>
                   <input className={styles.input} type="email" value={form.email}
                     onChange={(e) => handleChange('email', e.target.value)}
                     placeholder="user@example.com" maxLength={254} />
                 </FormField>
-                <FormField label={lang === 'ht' ? 'Non Artist / Brand' : 'Artist / Brand Name'}>
+                <FormField label={t4(lang, "Non Artist / Brand", "Artist / Brand Name", "Nom d'artiste / Marque", "Nombre de artista / Marca")}>
                   <input className={styles.input} value={form.artist_name}
                     onChange={(e) => handleChange('artist_name', e.target.value)}
-                    placeholder={lang === 'ht' ? 'Non piblik ou' : 'Your public brand name'}
+                    placeholder={t4(lang, "Non piblik ou", "Your public brand name", "Votre nom de marque public", "Tu nombre de marca público")}
                     maxLength={120} />
                 </FormField>
               </div>
@@ -198,17 +199,17 @@ export default function ProfileEditModal({ onClose, onSuccess, lang, showToast, 
               <div className={styles.formCardTitle}>
                 <i className="fas fa-align-left" aria-hidden="true" />
                 <div>
-                  <h4>{lang === 'ht' ? 'Biyografi' : 'Biography'}</h4>
+                  <h4>{t4(lang, "Biyografi", "Biography", "Biographie", "Biografía")}</h4>
                   <p className={styles.formCardHint}>
-                    {lang === 'ht' ? 'Deskripsyon kout sou ou — li parèt anba non ou.' : 'A short description about you — shown under your name.'}
+                    {t4(lang, "Deskripsyon kout sou ou — li parèt anba non ou.", "A short description about you — shown under your name.", "Une courte description de vous — affichée sous votre nom.", "Una breve descripción sobre ti — se muestra bajo tu nombre.")}
                   </p>
                 </div>
               </div>
               <div className={styles.formCardFields}>
-                <FormField label={lang === 'ht' ? 'Biografi' : 'Bio'}>
+                <FormField label={t4(lang, "Biografi", "Bio", "Bio", "Bio")}>
                   <textarea className={styles.input} value={form.bio}
                     onChange={(e) => handleChange('bio', e.target.value)}
-                    placeholder={lang === 'ht' ? 'Kout deskripsyon...' : 'Short bio...'}
+                    placeholder={t4(lang, "Kout deskripsyon...", "Short bio...", "Courte bio...", "Bio corta...")}
                     rows={3} maxLength={500} />
                 </FormField>
               </div>
@@ -219,23 +220,23 @@ export default function ProfileEditModal({ onClose, onSuccess, lang, showToast, 
               <div className={styles.formCardTitle}>
                 <i className="fas fa-map-marker-alt" aria-hidden="true" />
                 <div>
-                  <h4>{lang === 'ht' ? 'Lokalizasyon' : 'Location'}</h4>
+                  <h4>{t4(lang, "Lokalizasyon", "Location", "Localisation", "Ubicación")}</h4>
                   <p className={styles.formCardHint}>
-                    {lang === 'ht' ? 'Vil ak peyi kote w ye.' : 'The city and country where you are.'}
+                    {t4(lang, "Vil ak peyi kote w ye.", "The city and country where you are.", "La ville et le pays où vous vous trouvez.", "La ciudad y el país donde estás.")}
                   </p>
                 </div>
               </div>
               <div className={styles.formCardFields}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <FormField label={lang === 'ht' ? 'Vil' : 'City'}>
+                  <FormField label={t4(lang, "Vil", "City", "Ville", "Ciudad")}>
                     <input className={styles.input} value={form.city}
                       onChange={(e) => handleChange('city', e.target.value)}
-                      placeholder={lang === 'ht' ? 'Vil ou' : 'City'} maxLength={100} />
+                      placeholder={t4(lang, "Vil ou", "City", "Votre ville", "Tu ciudad")} maxLength={100} />
                   </FormField>
-                  <FormField label={lang === 'ht' ? 'Peyi' : 'Country'}>
+                  <FormField label={t4(lang, "Peyi", "Country", "Pays", "País")}>
                     <input className={styles.input} value={form.country}
                       onChange={(e) => handleChange('country', e.target.value)}
-                      placeholder={lang === 'ht' ? 'Peyi ou' : 'Country'} maxLength={60} />
+                      placeholder={t4(lang, "Peyi ou", "Country", "Votre pays", "Tu país")} maxLength={60} />
                   </FormField>
                 </div>
               </div>
@@ -246,9 +247,9 @@ export default function ProfileEditModal({ onClose, onSuccess, lang, showToast, 
               <div className={styles.formCardTitle}>
                 <i className="fas fa-briefcase" aria-hidden="true" />
                 <div>
-                  <h4>{lang === 'ht' ? 'Istwa' : 'Story'}</h4>
+                  <h4>{t4(lang, "Istwa", "Story", "Histoire", "Historia")}</h4>
                   <p className={styles.formCardHint}>
-                    {lang === 'ht' ? 'Eksperyans pwofesyonèl ak edikasyon ou — yo parèt nan tab About la.' : 'Your professional experience and education — shown in the About tab.'}
+                    {t4(lang, "Eksperyans pwofesyonèl ak edikasyon ou — yo parèt nan tab About la.", "Your professional experience and education — shown in the About tab.", "Votre expérience professionnelle et votre formation — affichées dans l'onglet À propos.", "Tu experiencia profesional y educación — se muestran en la pestaña Acerca de.")}
                   </p>
                 </div>
               </div>
@@ -257,16 +258,16 @@ export default function ProfileEditModal({ onClose, onSuccess, lang, showToast, 
                 <div>
                   <div className={styles.formRepeatTitle}>
                     <span className={styles.fieldLabel}>
-                      {lang === 'ht' ? 'Eksperyans' : 'Experience'}
+                      {t4(lang, "Eksperyans", "Experience", "Expérience", "Experiencia")}
                     </span>
                     <button type="button" className={styles.formAddChip}
                       onClick={() => addRow('experience', EMPTY_EXPERIENCE)}>
-                      <i className="fas fa-plus" aria-hidden="true" /> {lang === 'ht' ? 'Ajoute' : 'Add'}
+                      <i className="fas fa-plus" aria-hidden="true" /> {t4(lang, "Ajoute", "Add", "Ajouter", "Añadir")}
                     </button>
                   </div>
                   {!form.experience?.length && (
                     <span className={styles.hint}>
-                      {lang === 'ht' ? 'Pa gen eksperyans ankò.' : 'No experience yet.'}
+                      {t4(lang, "Pa gen eksperyans ankò.", "No experience yet.", "Aucune expérience pour le moment.", "Aún no hay experiencia.")}
                     </span>
                   )}
                   {(form.experience || []).map((exp, i) => (
@@ -274,24 +275,24 @@ export default function ProfileEditModal({ onClose, onSuccess, lang, showToast, 
                       <div className={styles.row}>
                         <input className={styles.input} value={exp.title || ''}
                           onChange={(e) => updateRow('experience', i, { title: e.target.value })}
-                          placeholder={lang === 'ht' ? 'Pòs' : 'Role'} />
+                          placeholder={t4(lang, "Pòs", "Role", "Poste", "Puesto")} />
                         <input className={styles.input} value={exp.company || ''}
                           onChange={(e) => updateRow('experience', i, { company: e.target.value })}
-                          placeholder={lang === 'ht' ? 'Konpanyi' : 'Company'} />
+                          placeholder={t4(lang, "Konpanyi", "Company", "Entreprise", "Empresa")} />
                       </div>
                       <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
                         <input className={styles.input} style={{ flex: 1 }} value={exp.period || ''}
                           onChange={(e) => updateRow('experience', i, { period: e.target.value })}
-                          placeholder={lang === 'ht' ? 'Peryòd (eg. 2022 — 2025)' : 'Period (e.g. 2022 — 2025)'} />
+                          placeholder={t4(lang, "Peryòd (eg. 2022 — 2025)", "Period (e.g. 2022 — 2025)", "Période (ex : 2022 — 2025)", "Período (ej.: 2022 — 2025)")} />
                         <button type="button" onClick={() => removeRow('experience', i)}
                           style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', minHeight: 46 }}
-                          aria-label={lang === 'ht' ? 'Retire' : 'Remove'}>
+                          aria-label={t4(lang, "Retire", "Remove", "Retirer", "Quitar")}>
                           <i className="fas fa-trash" aria-hidden="true" />
                         </button>
                       </div>
                       <textarea className={styles.textarea} style={{ minHeight: 64 }} value={exp.description || ''}
                         onChange={(e) => updateRow('experience', i, { description: e.target.value })}
-                        placeholder={lang === 'ht' ? 'Deskripsyon...' : 'Description...'} />
+                        placeholder={t4(lang, "Deskripsyon...", "Description...", "Description...", "Descripción...")} />
                     </div>
                   ))}
                 </div>
@@ -300,16 +301,16 @@ export default function ProfileEditModal({ onClose, onSuccess, lang, showToast, 
                 <div>
                   <div className={styles.formRepeatTitle}>
                     <span className={styles.fieldLabel}>
-                      {lang === 'ht' ? 'Edikasyon' : 'Education'}
+                      {t4(lang, "Edikasyon", "Education", "Formation", "Educación")}
                     </span>
                     <button type="button" className={styles.formAddChip}
                       onClick={() => addRow('education', EMPTY_EDUCATION)}>
-                      <i className="fas fa-plus" aria-hidden="true" /> {lang === 'ht' ? 'Ajoute' : 'Add'}
+                      <i className="fas fa-plus" aria-hidden="true" /> {t4(lang, "Ajoute", "Add", "Ajouter", "Añadir")}
                     </button>
                   </div>
                   {!form.education?.length && (
                     <span className={styles.hint}>
-                      {lang === 'ht' ? 'Pa gen edikasyon ankò.' : 'No education yet.'}
+                      {t4(lang, "Pa gen edikasyon ankò.", "No education yet.", "Aucune formation pour le moment.", "Aún no hay educación.")}
                     </span>
                   )}
                   {(form.education || []).map((edu, i) => (
@@ -317,24 +318,24 @@ export default function ProfileEditModal({ onClose, onSuccess, lang, showToast, 
                       <div className={styles.row}>
                         <input className={styles.input} value={edu.institution || ''}
                           onChange={(e) => updateRow('education', i, { institution: e.target.value })}
-                          placeholder={lang === 'ht' ? 'Enstitisyon' : 'Institution'} />
+                          placeholder={t4(lang, "Enstitisyon", "Institution", "Institution", "Institución")} />
                         <input className={styles.input} value={edu.degree || ''}
                           onChange={(e) => updateRow('education', i, { degree: e.target.value })}
-                          placeholder={lang === 'ht' ? 'Diplòm' : 'Degree'} />
+                          placeholder={t4(lang, "Diplòm", "Degree", "Diplôme", "Título")} />
                       </div>
                       <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
                         <input className={styles.input} style={{ flex: 1 }} value={edu.year || ''}
                           onChange={(e) => updateRow('education', i, { year: e.target.value })}
-                          placeholder={lang === 'ht' ? 'Ane (eg. 2023)' : 'Year (e.g. 2023)'} />
+                          placeholder={t4(lang, "Ane (eg. 2023)", "Year (e.g. 2023)", "Année (ex : 2023)", "Año (ej.: 2023)")} />
                         <button type="button" onClick={() => removeRow('education', i)}
                           style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', minHeight: 46 }}
-                          aria-label={lang === 'ht' ? 'Retire' : 'Remove'}>
+                          aria-label={t4(lang, "Retire", "Remove", "Retirer", "Quitar")}>
                           <i className="fas fa-trash" aria-hidden="true" />
                         </button>
                       </div>
                       <textarea className={styles.textarea} style={{ minHeight: 64 }} value={edu.description || ''}
                         onChange={(e) => updateRow('education', i, { description: e.target.value })}
-                        placeholder={lang === 'ht' ? 'Deskripsyon...' : 'Description...'} />
+                        placeholder={t4(lang, "Deskripsyon...", "Description...", "Description...", "Descripción...")} />
                     </div>
                   ))}
                 </div>
@@ -346,25 +347,25 @@ export default function ProfileEditModal({ onClose, onSuccess, lang, showToast, 
               <div className={styles.formCardTitle}>
                 <i className="fas fa-share-alt" aria-hidden="true" />
                 <div>
-                  <h4>{lang === 'ht' ? 'Kontak & Lyen' : 'Contact & Links'}</h4>
+                  <h4>{t4(lang, "Kontak & Lyen", "Contact & Links", "Contact et liens", "Contacto y enlaces")}</h4>
                   <p className={styles.formCardHint}>
-                    {lang === 'ht' ? 'Sit ou ak fason moun ka kontakte ou.' : 'Your website and how people can reach you.'}
+                    {t4(lang, "Sit ou ak fason moun ka kontakte ou.", "Your website and how people can reach you.", "Votre site web et comment vous joindre.", "Tu sitio web y cómo contactarte.")}
                   </p>
                 </div>
               </div>
               <div className={styles.formCardFields}>
-                <FormField label={lang === 'ht' ? 'Sit Web' : 'Website'}>
+                <FormField label={t4(lang, "Sit Web", "Website", "Site web", "Sitio web")}>
                   <input className={styles.input} type="url" value={form.website_url}
                     onChange={(e) => handleChange('website_url', e.target.value)}
                     placeholder="https://..." maxLength={500} />
                 </FormField>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <FormField label={lang === 'ht' ? 'Imèl Kontak' : 'Contact Email'}>
+                  <FormField label={t4(lang, "Imèl Kontak", "Contact Email", "E-mail de contact", "Correo de contacto")}>
                     <input className={styles.input} type="email" value={form.contact_email}
                       onChange={(e) => handleChange('contact_email', e.target.value)}
                       placeholder="contact@example.com" maxLength={254} />
                   </FormField>
-                  <FormField label={lang === 'ht' ? 'Telefòn' : 'Phone'}>
+                  <FormField label={t4(lang, "Telefòn", "Phone", "Téléphone", "Teléfono")}>
                     <input className={styles.input} type="tel" value={form.contact_phone}
                       onChange={(e) => handleChange('contact_phone', e.target.value)}
                       placeholder="+509..." maxLength={30} />
@@ -375,29 +376,29 @@ export default function ProfileEditModal({ onClose, onSuccess, lang, showToast, 
                 <div>
                   <div className={styles.formRepeatTitle}>
                     <span className={styles.fieldLabel}>
-                      {lang === 'ht' ? 'Lyen Sosyal' : 'Social Links'}
+                      {t4(lang, "Lyen Sosyal", "Social Links", "Liens sociaux", "Enlaces sociales")}
                     </span>
                     <button type="button" className={styles.formAddChip}
                       onClick={() => addRow('social_links', EMPTY_SOCIAL)}>
-                      <i className="fas fa-plus" aria-hidden="true" /> {lang === 'ht' ? 'Ajoute' : 'Add'}
+                      <i className="fas fa-plus" aria-hidden="true" /> {t4(lang, "Ajoute", "Add", "Ajouter", "Añadir")}
                     </button>
                   </div>
                   {!form.social_links?.length && (
                     <span className={styles.hint}>
-                      {lang === 'ht' ? 'Pa gen lyen sosyal.' : 'No social links yet.'}
+                      {t4(lang, "Pa gen lyen sosyal.", "No social links yet.", "Aucun lien social pour le moment.", "Aún no hay enlaces sociales.")}
                     </span>
                   )}
                   {(form.social_links || []).map((s, i) => (
                     <div key={`social-${i}`} style={{ display: 'flex', gap: 8, marginTop: 8 }}>
                       <input className={styles.input} style={{ flex: 1 }} value={s.platform || ''}
                         onChange={(e) => updateRow('social_links', i, { platform: e.target.value })}
-                        placeholder={lang === 'ht' ? 'Platfòm (instagram, github…)' : 'Platform (instagram, github…)'} />
+                        placeholder={t4(lang, "Platfòm (instagram, github…)", "Platform (instagram, github…)", "Plateforme (instagram, github…)", "Plataforma (instagram, github…)")} />
                       <input className={styles.input} style={{ flex: 2 }} value={s.url || ''}
                         onChange={(e) => updateRow('social_links', i, { url: e.target.value })}
                         placeholder="https://…" />
                       <button type="button" onClick={() => removeRow('social_links', i)}
                         style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', minHeight: 46 }}
-                        aria-label={lang === 'ht' ? 'Retire' : 'Remove'}>
+                        aria-label={t4(lang, "Retire", "Remove", "Retirer", "Quitar")}>
                         <i className="fas fa-trash" aria-hidden="true" />
                       </button>
                     </div>
@@ -410,13 +411,13 @@ export default function ProfileEditModal({ onClose, onSuccess, lang, showToast, 
         </LoadingOverlay>
         <div className={styles.actions}>
           <button type="button" className="btn-secondary" onClick={onClose} disabled={loading}>
-            {lang === 'ht' ? 'Anile' : 'Cancel'}
+            {t4(lang, "Anile", "Cancel", "Annuler", "Cancelar")}
           </button>
           <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? (
-              <><i className="fas fa-spinner fa-spin" /> {lang === 'ht' ? 'Ap sove...' : 'Saving...'}</>
+              <><i className="fas fa-spinner fa-spin" /> {t4(lang, "Ap sove...", "Saving...", "Enregistrement...", "Guardando...")}</>
             ) : (
-              <><i className="fas fa-save" /> {lang === 'ht' ? 'Sove Chanjman' : 'Save Changes'}</>
+              <><i className="fas fa-save" /> {t4(lang, "Sove Chanjman", "Save Changes", "Enregistrer les modifications", "Guardar cambios")}</>
             )}
           </button>
         </div>

@@ -180,6 +180,12 @@ export default function CourseAnalyticsModal({ course, lang = 'ht', onClose }) {
                 <h3>
                   <i className="fas fa-chart-column" aria-hidden="true" /> {t('Speech analysis report', 'Rapò analiz pale')}
                 </h3>
+                <p className={styles.analyticsEmpty} style={{ textAlign: 'left' }}>
+                  {t(
+                    'Pass rate = share of takes with all key words said. “Difficult words” are the ones learners miss most — reteach them in your next lesson.',
+                    'Pousantaj pas = pati tantativ ki gen tout mo kle yo. “Mo difisil” yo se sa elèv yo rate pi souvan — reprann yo nan pwochen leson w.',
+                  )}
+                </p>
                 <div className={styles.analyticsStats}>
                   <div className={styles.analyticsStat}>
                     <span className={styles.analyticsStatValue}>{Math.round((speechReport.pass_rate || 0) * 100)}%</span>
@@ -244,6 +250,14 @@ export default function CourseAnalyticsModal({ course, lang = 'ht', onClose }) {
                   <i className="fas fa-microphone-lines" aria-hidden="true" /> {t('Speaking practice', 'Pratik pale')}
                   <span className={styles.analyticsCount}>{speech.length}</span>
                 </h3>
+                {/* How-to-read guide — creators asked what all this means. */}
+                <p className={styles.analyticsEmpty} style={{ textAlign: 'left' }}>
+                  <i className="fas fa-circle-info" aria-hidden="true" />{' '}
+                  {t(
+                    'How to read this: “Target” is what the learner was asked to say; “Heard” is what the engine understood. Confidence is how sure the engine is — NOT a grade. Chips: ✓ said well · ◐ almost (pronunciation) · ✕ missing · + extra. Source tells you which engine listened: Browser (the device) or Creole model (our server, best for Kreyòl).',
+                    'Kijan pou li paj sa a: “Sib” se sa elèv la te dwe di; “Tande” se sa motè a konprann. Konfyans se kijan motè a si — se PA yon nòt. Ti etikèt yo: ✓ byen di · ◐ preske (pwononsyasyon) · ✕ rate · + anplis. Sous la di ki motè ki te koute: Navigatè (aparèy la) oswa Modèl Kreyòl (sèvè nou an, pi bon pou Kreyòl).',
+                  )}
+                </p>
                 {speech.length === 0 ? (
                   <p className={styles.analyticsEmpty}>
                     {t(
@@ -253,7 +267,20 @@ export default function CourseAnalyticsModal({ course, lang = 'ht', onClose }) {
                   </p>
                 ) : (
                   <div className={styles.analyticsStudentList}>
-                    {speech.slice(0, 30).map((s, i) => (
+                    {speech.slice(0, 30).map((s, i) => {
+                      const rowAnalysis = s.analysis && typeof s.analysis === 'object' ? s.analysis : null;
+                      const hasScore = rowAnalysis && Number(rowAnalysis.totalWords) > 0;
+                      const verdict = hasScore
+                        ? (rowAnalysis.passed
+                          ? { label: t('Passed', 'Pase'), color: '#10b981', icon: 'fa-circle-check' }
+                          : { label: t('Not passed', 'Pa pase'), color: '#ef4444', icon: 'fa-circle-xmark' })
+                        : { label: t('Open response', 'Repons lib'), color: '#3b82f6', icon: 'fa-comment-dots' };
+                      const sourceLabel = s.transcript_source === 'server'
+                        ? { label: t('Creole model', 'Modèl Kreyòl'), icon: 'fa-robot' }
+                        : s.transcript_source === 'browser'
+                          ? { label: t('Browser', 'Navigatè'), icon: 'fa-globe' }
+                          : null;
+                      return (
                       <div key={s.id || i} className={styles.analyticsStudentRow}>
                         <span className={styles.analyticsStudentAvatar}>
                           {String(s.username || '?').charAt(0).toUpperCase()}
@@ -265,8 +292,37 @@ export default function CourseAnalyticsModal({ course, lang = 'ht', onClose }) {
                             {s.module_index != null ? ` · ${t('Modil', 'Module')} ${Number(s.module_index) + 1}` : ''}
                             {' · '}{new Date(s.created_at).toLocaleDateString()}
                           </span>
+                          {/* Verdict + engine source — the two things creators misread. */}
+                          <span style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center', marginTop: 4 }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: '0.72rem', fontWeight: 700, color: verdict.color }}>
+                              <i className={`fas ${verdict.icon}`} aria-hidden="true" /> {verdict.label}
+                            </span>
+                            {sourceLabel && (
+                              <span
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: '0.72rem', color: 'var(--text-muted, #6b7280)' }}
+                                title={t('Which engine transcribed this take.', 'Ki motè ki transkri tantativ sa a.')}
+                              >
+                                <i className={`fas ${sourceLabel.icon}`} aria-hidden="true" /> {sourceLabel.label}
+                              </span>
+                            )}
+                          </span>
+                          {s.target_text && (
+                            <span className={styles.analyticsSpeechTranscript}>
+                              🎯 {t('Target', 'Sib')}: “{s.target_text}”
+                            </span>
+                          )}
                           {s.transcript && (
-                            <span className={styles.analyticsSpeechTranscript}>“{s.transcript}”</span>
+                            <span className={styles.analyticsSpeechTranscript}>
+                              👂 {t('Heard', 'Tande')}: “{s.transcript}”
+                              {s.confidence != null && (
+                                <span title={t(
+                                  'Recognition confidence — how sure the engine is it heard right. Not a grade.',
+                                  'Konfyans rekonesans — kijan motè a si li tande byen. Se pa yon nòt.',
+                                )}>
+                                  {' '}({Math.round(Number(s.confidence) * 100)}% {t('sure', 'si')})
+                                </span>
+                              )}
+                            </span>
                           )}
                           {s.analysis && typeof s.analysis === 'object' && Number(s.analysis.totalWords) > 0 && (
                             <span className={styles.analyticsSpeechWords}>
@@ -297,13 +353,9 @@ export default function CourseAnalyticsModal({ course, lang = 'ht', onClose }) {
                             </span>
                           )}
                         </span>
-                        {s.confidence != null && (
-                          <span className={styles.analyticsSpeechConfidence}>
-                            {Math.round(Number(s.confidence) * 100)}%
-                          </span>
-                        )}
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </section>

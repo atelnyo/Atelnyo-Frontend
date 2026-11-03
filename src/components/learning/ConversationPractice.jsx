@@ -14,6 +14,7 @@
  */
 import React, { useState, useCallback, useRef } from 'react';
 import { useSpeechRecognition } from '../../modules/learning/useSpeechRecognition';
+import { transcribeTakeOnServer } from '../../modules/learning/serverTranscription';
 import { speechSubmissionService } from '../../services/api';
 import AudioPlayer from './AudioPlayer';
 import SpeechRecorder from './SpeechRecorder';
@@ -27,6 +28,7 @@ export default function ConversationPractice({ block, lang = 'ht', courseId, mod
   const [recordingUrl, setRecordingUrl] = useState(null);
   const [feedback, setFeedback] = useState(null);
   const [responses, setResponses] = useState([]);
+  const [serverWorking, setServerWorking] = useState(false);
   const completedRef = useRef(false);
   const {
     canRecognize,
@@ -39,15 +41,17 @@ export default function ConversationPractice({ block, lang = 'ht', courseId, mod
 
   const handleRecStart = useCallback(() => {
     setFeedback(null);
+    setServerWorking(false);
     startRecognition();
   }, [startRecognition]);
 
-  const handleRecorded = useCallback((url) => {
+  const handleRecorded = useCallback(async (url, blob) => {
     setRecordingUrl(url);
     if (!url) {
       // Retry — discard the previous take's recognition state.
       resetRecognition();
       setFeedback(null);
+      setServerWorking(false);
       return;
     }
     const { transcript, confidence, error } = finishRecognition();
@@ -56,19 +60,48 @@ export default function ConversationPractice({ block, lang = 'ht', courseId, mod
       return;
     }
     if (!canRecognize) return;
-    if (!transcript) {
-      setFeedback({ error: t("We didn't hear you — try again.", 'Nou pa tande w — eseye ankò.'), kind: 'error' });
-      return;
+    let finalTranscript = transcript;
+    let finalConfidence = confidence;
+    let source = 'browser';
+    if (!finalTranscript) {
+      const hasAudio = blob && typeof blob.size === 'number' ? blob.size > 800 : false;
+      if (!hasAudio) {
+        setFeedback({ error: t("We didn't hear you — try again.", 'Nou pa tande w — eseye ankò.'), kind: 'error' });
+        return;
+      }
+      if (courseId) {
+        setServerWorking(true);
+        const server = await transcribeTakeOnServer({ courseId, blob });
+        setServerWorking(false);
+        if (server) {
+          finalTranscript = server.transcript;
+          finalConfidence = null;
+          source = 'server';
+        }
+      }
+      if (!finalTranscript) {
+        setFeedback({
+          error: t(
+            'Recording saved, but recognition could not catch the words — listen to your playback, speak louder and clearer, then try again.',
+            'Anrejistreman an sove, men rekonesans lan pa t kenbe pawòl yo — koute anrejistreman w la, pale pi fò epi pi klè, epi eseye ankò.',
+          ),
+          kind: 'error',
+        });
+        return;
+      }
     }
-    setFeedback({ transcript, confidence, kind: 'open' });
-    if (courseId && transcript) {
+    setFeedback({ transcript: finalTranscript, confidence: finalConfidence, kind: 'open', source });
+    if (courseId && finalTranscript) {
       speechSubmissionService.create({
         course_id: courseId,
         module_index: Number(moduleIndex) || 0,
         block_id: block.id || '',
         block_type: 'conversation',
-        transcript,
-        confidence: typeof confidence === 'number' ? confidence : 0,
+        transcript: finalTranscript,
+        confidence: typeof finalConfidence === 'number' ? finalConfidence : 0,
+        // Open conversation: no target phrase, but the engine label
+        // still matters honestly in creator review.
+        ...(source === 'browser' || source === 'server' ? { transcript_source: source } : {}),
       }).catch(() => {});
     }
     // Final step answered = conversation completed (progress).
@@ -128,11 +161,25 @@ export default function ConversationPractice({ block, lang = 'ht', courseId, mod
             </p>
           </div>
         )}
-        {feedback && (
+        {serverWorking && (
+          <div className={styles.practiceLiveTranscript} role="status" aria-live="polite">
+            <span className={styles.practiceLiveTranscriptDot} aria-hidden="true" />
+            <p className={styles.practiceTranscript}>
+              <i className="fas fa-spinner fa-spin" aria-hidden="true" />{' '}
+              {t('Listening with the Creole model…', 'Ap koute ak modèl Kreyòl la…')}
+            </p>
+          </div>
+        )}
+        {feedback && !serverWorking && (
           <div className={styles.practiceFeedback} role="status">
             {feedback.transcript && (
               <p className={styles.practiceTranscript}>
                 <strong>{t('Recognized:', 'Rekonèt:')}</strong> “{feedback.transcript}”
+                {feedback.source === 'server' && (
+                  <span className={styles.practiceSourceBadge}>
+                    <i className="fas fa-server" aria-hidden="true" /> {t('Creole model', 'Modèl Kreyòl')}
+                  </span>
+                )}
               </p>
             )}
             {feedback.confidence != null && (

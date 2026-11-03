@@ -22,6 +22,7 @@ import useCompletionContract, { COMPLETION_MODE, BLOCK_REQUIREMENT } from '../..
 import useAutosave from '../../../hooks/useAutosave';
 import useBlockSaveContract from '../../../hooks/useBlockSaveContract';
 import { useSpeechRecognition } from '../../../modules/learning/useSpeechRecognition';
+import { transcribeTakeOnServer } from '../../../modules/learning/serverTranscription';
 import SpeechRecorder from '../SpeechRecorder';
 import styles from '../learning.module.css';
 
@@ -76,6 +77,7 @@ export default function ExerciseBlock({ block, lang = 'ht', courseId, moduleInde
   const [speechUrl, setSpeechUrl] = useState(null);
   const [speechTranscript, setSpeechTranscript] = useState('');
   const [speechError, setSpeechError] = useState('');
+  const [serverWorking, setServerWorking] = useState(false);
 
   const content = useMemo(
     () => ({ answer, checklistState, selectedOption, speechTranscript }),
@@ -124,14 +126,16 @@ export default function ExerciseBlock({ block, lang = 'ht', courseId, moduleInde
   const handleRecStart = useCallback(() => {
     setSpeechError('');
     setSpeechTranscript('');
+    setServerWorking(false);
     startRecognition();
   }, [startRecognition]);
 
-  const handleRecorded = useCallback((url) => {
+  const handleRecorded = useCallback(async (url, blob) => {
     setSpeechUrl(url);
     if (!url) {
       resetRecognition();
       setSpeechTranscript('');
+      setServerWorking(false);
       touchAfterSubmit();
       return;
     }
@@ -146,12 +150,33 @@ export default function ExerciseBlock({ block, lang = 'ht', courseId, moduleInde
       return;
     }
     if (!transcript) {
+      // The take has real audio (mic worked) but the browser recognizer
+      // caught nothing — second chance with the platform's Creole model.
+      const hasAudio = blob && typeof blob.size === 'number' ? blob.size > 800 : false;
+      if (hasAudio && courseId) {
+        setServerWorking(true);
+        setSpeechError('');
+        const server = await transcribeTakeOnServer({ courseId, blob });
+        setServerWorking(false);
+        if (server) {
+          setSpeechTranscript(server.transcript);
+          touchAfterSubmit();
+          return;
+        }
+      }
+      if (hasAudio) {
+        setSpeechError(t(
+          'Recording saved, but recognition could not catch the words — you can listen and re-record, or submit it as is.',
+          'Anrejistreman an sove, men rekonesans lan pa t kenbe pawòl yo — ou ka koute l epi anrejistre ankò, oswa soumèt li konsa.',
+        ));
+        return;
+      }
       setSpeechError(t('We didn\'t hear you — try again.', 'Nou pa tande w — eseye ankò.'));
       return;
     }
     setSpeechTranscript(transcript);
     touchAfterSubmit();
-  }, [finishRecognition, resetRecognition, canRecognize, touchAfterSubmit]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [finishRecognition, resetRecognition, canRecognize, touchAfterSubmit, courseId, t]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const canSubmit = isSpeaking
     ? Boolean(speechUrl)
@@ -276,7 +301,13 @@ export default function ExerciseBlock({ block, lang = 'ht', courseId, moduleInde
               <strong>{t('Recognized:', 'Rekonèt:')}</strong> “{speechTranscript}”
             </p>
           )}
-          {speechError && (
+          {serverWorking && (
+            <p className={styles.practiceTranscript} role="status" aria-live="polite">
+              <i className="fas fa-spinner fa-spin" aria-hidden="true" />{' '}
+              {t('Listening with the Creole model…', 'Ap koute ak modèl Kreyòl la…')}
+            </p>
+          )}
+          {speechError && !serverWorking && (
             <p className={styles.practiceError} role="alert">
               <i className="fas fa-circle-exclamation" aria-hidden="true" /> {speechError}
             </p>
