@@ -48,6 +48,29 @@ function classNames(...parts) {
   return parts.filter(Boolean).join(' ');
 }
 
+// ─── Certificate Skeleton Preview (zero-state) ──────────────────────
+// Miniature, non-interactive mock of the real certificate design so an
+// admin can see "how the certificate looks" before any is issued.
+// The full printable sample opens via openPreview(null) below.
+function CertificateSkeletonPreview() {
+  return (
+    <div className="ad-dash-cert-skel" aria-hidden="true">
+      <div className="ad-dash-cert-skel-stamp">SAMPLE</div>
+      <div className="ad-dash-cert-skel-brand">ATELNYO</div>
+      <div className="ad-dash-cert-skel-rule" />
+      <div className="ad-dash-cert-skel-kicker">CERTIFICATE</div>
+      <div className="ad-dash-cert-skel-title">Certificate of Completion</div>
+      <div className="ad-dash-cert-skel-bar" style={{ width: '46%' }} />
+      <div className="ad-dash-cert-skel-bar" style={{ width: '64%' }} />
+      <div className="ad-dash-cert-skel-bar" style={{ width: '38%' }} />
+      <div className="ad-dash-cert-skel-foot">
+        <div className="ad-dash-cert-skel-qr" />
+        <div className="ad-dash-cert-skel-sig">SIGNATURE</div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Certificate Preview Panel ──────────────────────────────────────
 
 function CertificatePreviewPanel({ lang: _lang, onNavigate }) {
@@ -157,6 +180,16 @@ function CertificatePreviewPanel({ lang: _lang, onNavigate }) {
             <p style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: 4 }}>
               Certificates are issued automatically when learners complete 100% of a course
             </p>
+            {/* Skeleton preview of the certificate design (sample data). */}
+            <CertificateSkeletonPreview />
+            <button
+              type="button"
+              className="ad-dash-panel-action-btn"
+              style={{ marginTop: 10, pointerEvents: 'auto' }}
+              onClick={() => openPreview(null)}
+            >
+              <i className="fas fa-eye" /> Preview full sample
+            </button>
           </div>
         ) : (
           <>
