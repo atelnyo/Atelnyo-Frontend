@@ -236,7 +236,7 @@ const ACTION_CONFIG_TEMPLATES = {
   add_points: { points: 10, reason: '' },
   unlock_feature: { feature: '' },
   webhook: { url: '', payload: {} },
-  custom_action: { note: '' },
+  custom_action: { behavior: 'notify', title: '', message: '' },
 };
 
 function emptyAction(type = 'send_notification') {
