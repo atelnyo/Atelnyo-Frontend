@@ -1338,7 +1338,20 @@ export const marketplaceService = {
   createVariant: (data) => api.post('marketplace/product-variants/', data),
   updateVariant: (id, data) => api.patch(`marketplace/product-variants/${id}/`, data),
   deleteVariant: (id) => api.delete(`marketplace/product-variants/${id}/`),
-  bulkDeleteVariants: (ids) => api.post('marketplace/product-variants/bulk-delete/', { ids }),
+  // Bulk delete — the server accepts at most 100 ids per call, so a big
+  // selection (e.g. 303 imported Printify variants) goes out as sequential
+  // batches of 100. Resolves ONE axios-shaped response whose data.deleted
+  // is the TOTAL across batches, so callers don't care about chunking.
+  bulkDeleteVariants: async (ids) => {
+    const list = Array.isArray(ids) ? ids : [];
+    let deleted = 0;
+    for (let i = 0; i < list.length; i += 100) {
+      const batch = list.slice(i, i + 100);
+      const res = await api.post('marketplace/product-variants/bulk-delete/', { ids: batch });
+      deleted += res?.data?.deleted ?? batch.length;
+    }
+    return { data: { deleted } };
+  },
   // Create an order. ``hold_payment=true`` keeps it PENDING so the
   // checkout flow can settle it via PayPal/Stripe (instead of the
   // legacy auto-paid internal flow).

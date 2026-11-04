@@ -260,8 +260,9 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
     }
   }, [syncVariants, isHt, showToast]);
 
-  // Bulk delete — ONE request for N variants (never N reloads, never
-  // throttle errors). The panel clears its selection after success.
+  // Bulk delete — batched requests of <=100 for N variants (never N
+  // reloads, never throttle errors; chunking lives in the service).
+  // The panel clears its selection after success.
   const removeVariants = useCallback(async (ids) => {
     if (!Array.isArray(ids) || ids.length === 0) return;
     try {
