@@ -16,7 +16,8 @@ import styles from './sections.module.css';
 
 export default function PortfolioSection({ lang, t, showToast, setShowProjectModal, onEdit }) {
   const [confirm, setConfirm] = useState(null);
-  const { data: projects, loading, refetch } = useFetch(
+  const [confirmBusy, setConfirmBusy] = useState(false);
+  const { data: projects, loading, refetch, removeLocal } = useFetch(
     () => portfolioService.list({ limit: 10, mine: true }),
     { defaultValue: [], transform: (d) => (Array.isArray(d?.results || d) ? (d?.results || d) : []) },
   );
@@ -27,19 +28,26 @@ export default function PortfolioSection({ lang, t, showToast, setShowProjectMod
       title: lang === 'ht' ? 'Efase pwojè' : 'Delete project',
       message: lang === 'ht' ? `Eske w sèten ou vle efase "${item.title}"?` : `Are you sure you want to delete "${item.title}"?`,
       onConfirm: async () => {
+        setConfirmBusy(true);
+        // Optimistic: the row vanishes instantly — no waiting on a slow
+        // network, no stale row if the refetch races. A failed delete
+        // refetches from the server, which restores the row.
+        removeLocal((row) => row.id === item.id);
         try {
           await portfolioService.delete(item.id);
           showToast?.(lang === 'ht' ? '✅ Pwojè efase!' : '✅ Project deleted!', 'check-circle');
           refetch();
         } catch (err) {
           showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase.' : 'Could not delete.'), 'circle-exclamation');
+          refetch();
         }
+        setConfirmBusy(false);
         setConfirm(null);
       },
     });
   };
 
-  if (loading) return <StudioSkeleton rows={3} />;
+  if (loading && projects.length === 0) return <StudioSkeleton rows={3} />;
 
   const isEmpty = projects.length === 0;
 
@@ -107,8 +115,9 @@ export default function PortfolioSection({ lang, t, showToast, setShowProjectMod
           message={confirm.message}
           lang={lang}
           variant="danger"
+          loading={confirmBusy}
           onConfirm={confirm.onConfirm}
-          onCancel={() => setConfirm(null)}
+          onCancel={() => { if (!confirmBusy) setConfirm(null); }}
         />
       )}
     </div>

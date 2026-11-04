@@ -260,6 +260,22 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
     }
   }, [syncVariants, isHt, showToast]);
 
+  // Bulk delete — ONE request for N variants (never N reloads, never
+  // throttle errors). The panel clears its selection after success.
+  const removeVariants = useCallback(async (ids) => {
+    if (!Array.isArray(ids) || ids.length === 0) return;
+    try {
+      const res = await marketplaceService.bulkDeleteVariants(ids);
+      await syncVariants();
+      const n = res?.data?.deleted ?? ids.length;
+      showToast?.(isHt ? `${n} variant efase.` : `${n} variant(s) deleted.`, 'check-circle');
+    } catch (err) {
+      const detail = err?.response?.data?.detail || err?.response?.data?.ids?.[0] || err?.message || (isHt ? 'Pa t kapab efase variants yo.' : 'Could not delete the variants.');
+      showToast?.(detail, 'circle-exclamation');
+      throw err;
+    }
+  }, [syncVariants, isHt, showToast]);
+
   const removeVariant = useCallback(async (id) => {
     try {
       await marketplaceService.deleteVariant(id);
@@ -457,6 +473,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
           onAdd={addVariant}
           onUpdate={updateVariant}
           onRemove={removeVariant}
+          onRemoveMany={removeVariants}
         />
       </PropertyGroup>
 

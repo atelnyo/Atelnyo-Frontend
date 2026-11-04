@@ -40,7 +40,7 @@ export default function PromotionsSection({ lang = 'ht', showToast, t = {} }) {
   });
   const [formErr, setFormErr] = useState('');
 
-  const { data: promos, loading, refetch } = useFetch(
+  const { data: promos, loading, refetch, removeLocal } = useFetch(
     () => promoCodeService.list().then((r) => {
       const d = r?.data;
       return Array.isArray(d?.results) ? d.results : (Array.isArray(d) ? d : []);
@@ -104,12 +104,15 @@ export default function PromotionsSection({ lang = 'ht', showToast, t = {} }) {
 
   const remove = async (promo) => {
     if (!window.confirm(tr(`Delete promo ${promo.code}?`, `Efase kòd ${promo.code}?`))) return;
+    // Optimistic: the row vanishes instantly; a failed delete refetches.
+    removeLocal((row) => row.id === promo.id);
     try {
       await promoCodeService.remove(promo.id);
       showToast?.(tr('✅ Promo deleted.', '✅ Kòd promosyon efase.'), 'check-circle');
       refetch();
     } catch (err) {
       showToast?.(err?.response?.data?.detail || tr('Could not delete.', 'Pa t kapab efase.'), 'circle-exclamation');
+      refetch();
     }
   };
 
@@ -133,7 +136,7 @@ export default function PromotionsSection({ lang = 'ht', showToast, t = {} }) {
     return `$${p.discount_value}`;
   };
 
-  if (loading) return <StudioSkeleton rows={3} />;
+  if (loading && promos.length === 0) return <StudioSkeleton rows={3} />;
 
   return (
     <div className={styles.section}>

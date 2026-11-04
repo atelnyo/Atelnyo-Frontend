@@ -13,7 +13,8 @@ import styles from './sections.module.css';
 
 export default function TalentSection({ lang, t, showToast, setShowTalentModal, onEdit }) {
   const [confirm, setConfirm] = useState(null);
-  const { data: talents, loading, refetch } = useFetch(
+  const [confirmBusy, setConfirmBusy] = useState(false);
+  const { data: talents, loading, refetch, removeLocal } = useFetch(
     () => exploreService.talents({ mine: true }),
     { defaultValue: [], transform: (d) => (Array.isArray(d) ? d : (d?.results || [])) },
   );
@@ -24,13 +25,20 @@ export default function TalentSection({ lang, t, showToast, setShowTalentModal, 
       title: lang === 'ht' ? 'Efase talan' : 'Delete talent',
       message: lang === 'ht' ? `Eske w sèten ou vle efase "${item.name}"?` : `Are you sure you want to delete "${item.name}"?`,
       onConfirm: async () => {
+        setConfirmBusy(true);
+        // Optimistic: the row vanishes instantly — no waiting on a slow
+        // network, no stale row if the refetch races. A failed delete
+        // refetches from the server, which restores the row.
+        removeLocal((row) => row.id === item.id);
         try {
           await talentService.delete(item.id);
           showToast?.(lang === 'ht' ? '✅ Talan efase!' : '✅ Talent deleted!', 'check-circle');
           refetch();
         } catch (err) {
           showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase.' : 'Could not delete.'), 'circle-exclamation');
+          refetch();
         }
+        setConfirmBusy(false);
         setConfirm(null);
       },
     });
@@ -52,7 +60,7 @@ export default function TalentSection({ lang, t, showToast, setShowTalentModal, 
     }
   };
 
-  if (loading) return <StudioSkeleton rows={3} />;
+  if (loading && talents.length === 0) return <StudioSkeleton rows={3} />;
 
   const isEmpty = talents.length === 0;
 
@@ -169,8 +177,9 @@ export default function TalentSection({ lang, t, showToast, setShowTalentModal, 
           message={confirm.message}
           lang={lang}
           variant="danger"
+          loading={confirmBusy}
           onConfirm={confirm.onConfirm}
-          onCancel={() => setConfirm(null)}
+          onCancel={() => { if (!confirmBusy) setConfirm(null); }}
         />
       )}
     </div>

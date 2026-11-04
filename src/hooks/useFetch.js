@@ -17,8 +17,11 @@
  *
  * Features:
  *   - Real AbortController cancellation on unmount / dependency change
- *   - Returns { data, loading, error, refetch } — standard contract
- *   - ``refetch()`` re-runs the fetch without changing deps
+ *   - Returns { data, loading, error, refetch } — standard contract * - ``refetch()`` re-runs the fetch without changing deps
+ * - ``removeLocal(predicate)`` drops rows from the current data instantly
+ *   (optimistic delete — no loading flash). The next refetch reconciles
+ *   with the server (and restores rows when the mutation failed — callers
+ *   refetch in their catch path). Safe no-op when data isn't an array.
  *   - ``transform`` callback for normalising the response
  *   - ``defaultValue`` is used while loading AND on error
  *
@@ -34,7 +37,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
  * @param {any}                         [opts.defaultValue=null]
  * @param {Array}                       [opts.deps=[]]
  * @param {(responseData) => any}       [opts.transform]
- * @returns {{ data: any, loading: boolean, error: Error|null, refetch: () => void }}
+ * @returns {{ data: any, loading: boolean, error: Error|null, refetch: () => void, removeLocal: (predicate: (row: any) => boolean) => void }}
  */
 export default function useFetch(fetchFn, { defaultValue = null, deps, transform } = {}) {
   const [data, setData] = useState(defaultValue);
@@ -99,5 +102,11 @@ export default function useFetch(fetchFn, { defaultValue = null, deps, transform
     setTick((t) => t + 1);
   }, []);
 
-  return { data, loading, error, refetch };
+  // Optimistic local removal — filters the current data WITHOUT flipping
+  // ``loading`` (so no skeleton flash). See the contract note above.
+  const removeLocal = useCallback((predicate) => {
+    setData((prev) => (Array.isArray(prev) ? prev.filter((row) => !predicate(row)) : prev));
+  }, []);
+
+  return { data, loading, error, refetch, removeLocal };
 }

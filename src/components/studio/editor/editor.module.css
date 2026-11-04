@@ -1326,6 +1326,64 @@ select.propsInput {
   cursor: pointer;
 }
 
+.variantBulkBar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-md);
+  padding: var(--sp-sm) var(--sp-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--surface-muted, transparent);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.variantSelectAll {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-sm);
+  cursor: pointer;
+  font-weight: var(--font-weight-semibold);
+}
+
+.variantCheck {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.variantBulkCount {
+  margin-right: auto;
+}
+
+.variantBulkDelete {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-xs);
+  min-height: 32px;
+  padding: var(--sp-xs) var(--sp-md);
+  border: 1px solid var(--color-error);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-error);
+  font-family: inherit;
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.variantBulkDelete:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.variantBulkDelete:not(:disabled):hover {
+  background: var(--color-error);
+  color: #fff;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
    LANGUAGE PRACTICE EDITOR (creator side — CourseEditor module)
    ═══════════════════════════════════════════════════════════════════════ */

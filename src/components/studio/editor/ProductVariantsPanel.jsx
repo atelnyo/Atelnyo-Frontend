@@ -5,17 +5,47 @@
  * ProductVariant model (create/update/delete through the API). The
  * seller adds options like "Black / M" with an optional own price and
  * stock; checkout uses the variant's price/stock when one is selected.
+ *
+ * Bulk delete: checkboxes on each row + a "delete selected" bar that
+ * removes everything in ONE backend request (bulk-delete endpoint),
+ * so cleaning up imported Printify variants is fast and never hits
+ * the per-request throttle.
+ *
+ * Printify stock: POD has no numeric count — ``is_printify`` variants
+ * show "Available (Printify)" when the provider reports them available
+ * (stock null = unbounded) and "Unavailable on Printify" when the
+ * provider reports them unavailable (stock 0).
  */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import ConfirmModal from '../../common/ConfirmModal';
 import styles from './editor.module.css';
 
-export default function ProductVariantsPanel({ lang = 'ht', variants = [], canEdit, onAdd, onUpdate, onRemove }) {
+export default function ProductVariantsPanel({ lang = 'ht', variants = [], canEdit, onAdd, onUpdate, onRemove, onRemoveMany }) {
   const isHt = lang === 'ht';
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState({ name: '', price: '', stock: '', sku: '' });
   const [error, setError] = useState('');
+  const [selected, setSelected] = useState([]);
+  const [confirmBulk, setConfirmBulk] = useState(false);
+  const [bulkBusy, setBulkBusy] = useState(false);
 
   const t = (en, ht) => (isHt ? ht : en);
+
+  // Drop ids that are gone (after a delete + reload) so the count
+  // never references stale rows.
+  const liveIds = new Set(variants.map((v) => v.id));
+  useEffect(() => {
+    setSelected((prev) => prev.filter((id) => liveIds.has(id)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [variants]);
+
+  const toggleSelect = (id) => {
+    setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  };
+
+  const toggleSelectAll = () => {
+    setSelected((prev) => (prev.length === variants.length ? [] : variants.map((v) => v.id)));
+  };
 
   const submitAdd = () => {
     if (!draft.name.trim()) {
@@ -33,6 +63,27 @@ export default function ProductVariantsPanel({ lang = 'ht', variants = [], canEd
     setError('');
   };
 
+  const stockLabel = (v) => {
+    if (v.is_printify) {
+      if (v.stock == null) return t('Available (Printify)', 'Disponib (Printify)');
+      return t('Unavailable on Printify', 'Pa disponib sou Printify');
+    }
+    if (v.stock != null) return `${v.stock} ${isHt ? 'an stock' : 'in stock'}`;
+    return t('unlimited', 'illimite');
+  };
+
+  const submitBulkDelete = async () => {
+    if (selected.length === 0 || !onRemoveMany) return;
+    setBulkBusy(true);
+    try {
+      await onRemoveMany(selected);
+      setSelected([]);
+      setConfirmBulk(false);
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
   return (
     <div className={styles.variantsPanel}>
       {!canEdit ? (
@@ -44,14 +95,52 @@ export default function ProductVariantsPanel({ lang = 'ht', variants = [], canEd
         </p>
       ) : (
         <>
+          {variants.length > 1 && onRemoveMany && (
+            <div className={styles.variantBulkBar}>
+              <label className={styles.variantSelectAll}>
+                <input
+                  type="checkbox"
+                  className={styles.variantCheck}
+                  checked={selected.length === variants.length}
+                  onChange={toggleSelectAll}
+                  aria-label={t('Select all variants', 'Chwazi tout variants yo')}
+                />
+                {t('All', 'Tout')}
+              </label>
+              <span className={styles.variantBulkCount}>
+                {selected.length === 0
+                  ? t('Select variants to delete several at once.', 'Chwazi variants pou efase plizyè ansanm.')
+                  : t(`${selected.length} selected`, `${selected.length} chwazi`)}
+              </span>
+              <button
+                type="button"
+                className={styles.variantBulkDelete}
+                disabled={selected.length === 0}
+                onClick={() => setConfirmBulk(true)}
+              >
+                <i className="fas fa-trash" aria-hidden="true" />
+                {t('Delete selected', 'Efase seleksyon yo')}
+              </button>
+            </div>
+          )}
+
           {variants.map((v) => (
             <div key={v.id} className={styles.variantRow}>
+              {variants.length > 1 && onRemoveMany && (
+                <input
+                  type="checkbox"
+                  className={styles.variantCheck}
+                  checked={selected.includes(v.id)}
+                  onChange={() => toggleSelect(v.id)}
+                  aria-label={t(`Select variant ${v.name}`, `Chwazi variant ${v.name}`)}
+                />
+              )}
               <div className={styles.variantRowInfo}>
                 <span className={styles.variantRowName}>{v.name}</span>
                 <span className={styles.variantRowMeta}>
                   {v.price != null ? `$${Number(v.price).toFixed(2)}` : t('pri pwodwi', 'product price')}
                   {' · '}
-                  {v.stock != null ? `${v.stock} ${isHt ? 'an stock' : 'in stock'}` : t('illimite', 'unlimited')}
+                  {stockLabel(v)}
                   {v.sku ? ` · SKU ${v.sku}` : ''}
                 </span>
               </div>
@@ -127,6 +216,21 @@ export default function ProductVariantsPanel({ lang = 'ht', variants = [], canEd
             <button type="button" className={styles.variantAdd} onClick={() => setAdding(true)}>
               <i className="fas fa-plus" aria-hidden="true" /> {t('Add variant', 'Ajoute variant')}
             </button>
+          )}
+
+          {confirmBulk && (
+            <ConfirmModal
+              lang={lang}
+              variant="danger"
+              title={t('Delete selected variants?', 'Efase variants chwazi yo?')}
+              message={t(
+                `${selected.length} variant(s) will be permanently deleted. This cannot be undone.`,
+                `${selected.length} variant(s) pral efase pou tout tan. Sa pa ka defèt.`,
+              )}
+              loading={bulkBusy}
+              onConfirm={submitBulkDelete}
+              onCancel={() => { if (!bulkBusy) setConfirmBulk(false); }}
+            />
           )}
         </>
       )}

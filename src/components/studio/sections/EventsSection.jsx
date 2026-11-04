@@ -30,7 +30,8 @@ function formatWhen(ev, lang) {
 
 export default function EventsSection({ lang, t, showToast, setShowEventModal, onEdit, user }) {
   const [confirm, setConfirm] = useState(null);
-  const { data: events, loading, refetch } = useFetch(
+  const [confirmBusy, setConfirmBusy] = useState(false);
+  const { data: events, loading, refetch, removeLocal } = useFetch(
     () => communityEventsService.list({ created_by: user?.id, limit: 50 }),
     { defaultValue: [], transform: (d) => {
       if (Array.isArray(d)) return d;
@@ -47,13 +48,20 @@ export default function EventsSection({ lang, t, showToast, setShowEventModal, o
         ? `Eske w sèten ou vle efase "${item.title}"?`
         : `Are you sure you want to delete "${item.title}"?`,
       onConfirm: async () => {
+        setConfirmBusy(true);
+        // Optimistic: the row vanishes instantly — no waiting on a slow
+        // network, no stale row if the refetch races. A failed delete
+        // refetches from the server, which restores the row.
+        removeLocal((row) => row.id === item.id);
         try {
           await communityEventsService.delete(item.id);
           showToast?.(lang === 'ht' ? '✅ Evènman efase!' : '✅ Event deleted!', 'check-circle');
           refetch();
         } catch (err) {
           showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase.' : 'Could not delete.'), 'circle-exclamation');
+          refetch();
         }
+        setConfirmBusy(false);
         setConfirm(null);
       },
     });
@@ -69,7 +77,7 @@ export default function EventsSection({ lang, t, showToast, setShowEventModal, o
     }
   };
 
-  if (loading) return <StudioSkeleton rows={3} />;
+  if (loading && events.length === 0) return <StudioSkeleton rows={3} />;
 
   const isEmpty = events.length === 0;
 
@@ -182,8 +190,9 @@ export default function EventsSection({ lang, t, showToast, setShowEventModal, o
           message={confirm.message}
           confirmText={lang === 'ht' ? 'Efase' : 'Delete'}
           cancelText={lang === 'ht' ? 'Anile' : 'Cancel'}
+          loading={confirmBusy}
           onConfirm={confirm.onConfirm}
-          onCancel={() => setConfirm(null)}
+          onCancel={() => { if (!confirmBusy) setConfirm(null); }}
         />
       )}
     </div>

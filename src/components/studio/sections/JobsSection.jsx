@@ -32,7 +32,8 @@ const STATUS_LABEL = {
 
 export default function JobsSection({ lang, t, showToast, setShowJobModal, onEdit }) {
   const [confirm, setConfirm] = useState(null);
-  const { data: jobs, loading, refetch } = useFetch(
+  const [confirmBusy, setConfirmBusy] = useState(false);
+  const { data: jobs, loading, refetch, removeLocal } = useFetch(
     () => jobService.mine(),
     { defaultValue: [], transform: (d) => {
       if (Array.isArray(d)) return d;
@@ -47,13 +48,20 @@ export default function JobsSection({ lang, t, showToast, setShowJobModal, onEdi
       title: lang === 'ht' ? 'Efase travay' : 'Delete job',
       message: lang === 'ht' ? `Eske w sèten ou vle efase "${item.title}"?` : `Are you sure you want to delete "${item.title}"?`,
       onConfirm: async () => {
+        setConfirmBusy(true);
+        // Optimistic: the row vanishes instantly — no waiting on a slow
+        // network, no stale row if the refetch races. A failed delete
+        // refetches from the server, which restores the row.
+        removeLocal((row) => row.id === item.id);
         try {
           await jobService.delete(item.id);
           showToast?.(lang === 'ht' ? '✅ Travay efase!' : '✅ Job deleted!', 'check-circle');
           refetch();
         } catch (err) {
           showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase.' : 'Could not delete.'), 'circle-exclamation');
+          refetch();
         }
+        setConfirmBusy(false);
         setConfirm(null);
       },
     });
@@ -69,7 +77,7 @@ export default function JobsSection({ lang, t, showToast, setShowJobModal, onEdi
     }
   };
 
-  if (loading) return <StudioSkeleton rows={3} />;
+  if (loading && jobs.length === 0) return <StudioSkeleton rows={3} />;
 
   const isEmpty = jobs.length === 0;
 
@@ -174,6 +182,18 @@ export default function JobsSection({ lang, t, showToast, setShowJobModal, onEdi
             );
           })}
         </div>
+      )}
+
+      {confirm && (
+        <ConfirmModal
+          title={confirm.title}
+          message={confirm.message}
+          lang={lang}
+          variant="danger"
+          loading={confirmBusy}
+          onConfirm={confirm.onConfirm}
+          onCancel={() => { if (!confirmBusy) setConfirm(null); }}
+        />
       )}
     </div>
   );

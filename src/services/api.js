@@ -1338,6 +1338,7 @@ export const marketplaceService = {
   createVariant: (data) => api.post('marketplace/product-variants/', data),
   updateVariant: (id, data) => api.patch(`marketplace/product-variants/${id}/`, data),
   deleteVariant: (id) => api.delete(`marketplace/product-variants/${id}/`),
+  bulkDeleteVariants: (ids) => api.post('marketplace/product-variants/bulk-delete/', { ids }),
   // Create an order. ``hold_payment=true`` keeps it PENDING so the
   // checkout flow can settle it via PayPal/Stripe (instead of the
   // legacy auto-paid internal flow).

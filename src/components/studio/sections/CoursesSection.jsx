@@ -19,11 +19,12 @@ import styles from './sections.module.css';
 
 export default function CoursesSection({ lang, t, showToast, setShowCourseModal, onEdit }) {
   const [confirm, setConfirm] = useState(null);
+  const [confirmBusy, setConfirmBusy] = useState(false);
   const [analyticsCourse, setAnalyticsCourse] = useState(null);
   const [curriculumAnalyticsCourse, setCurriculumAnalyticsCourse] = useState(null);
   const [exportImportCourse, setExportImportCourse] = useState(null);
   const [showImportModal, setShowImportModal] = useState(false);
-  const { data: courses, loading, refetch } = useFetch(
+  const { data: courses, loading, refetch, removeLocal } = useFetch(
     () => courseService.getAll({ mine: true }),
     // The courses API is paginated ({ results: [...] } — CatalogPagination,
     // page_size 100). Unwrap the envelope the same way every other studio
@@ -51,13 +52,20 @@ export default function CoursesSection({ lang, t, showToast, setShowCourseModal,
       title: lang === 'ht' ? 'Efase kou' : 'Delete course',
       message: lang === 'ht' ? `Eske w sèten ou vle efase "${item.title}"?` : `Are you sure you want to delete "${item.title}"?`,
       onConfirm: async () => {
+        setConfirmBusy(true);
+        // Optimistic: the row vanishes instantly — no waiting on a slow
+        // network, no stale row if the refetch races. A failed delete
+        // refetches from the server, which restores the row.
+        removeLocal((row) => row.id === item.id);
         try {
           await courseService.delete(item.id);
           showToast?.(lang === 'ht' ? '✅ Kou efase!' : '✅ Course deleted!', 'check-circle');
           refetch();
         } catch (err) {
           showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase.' : 'Could not delete.'), 'circle-exclamation');
+          refetch();
         }
+        setConfirmBusy(false);
         setConfirm(null);
       },
     });
@@ -100,7 +108,7 @@ export default function CoursesSection({ lang, t, showToast, setShowCourseModal,
 
   const [publishingId, setPublishingId] = useState(null);
 
-  if (loading) return <StudioSkeleton rows={3} />;
+  if (loading && courses.length === 0) return <StudioSkeleton rows={3} />;
 
   const isEmpty = courses.length === 0;
 
@@ -229,8 +237,9 @@ export default function CoursesSection({ lang, t, showToast, setShowCourseModal,
           message={confirm.message}
           lang={lang}
           variant="danger"
+          loading={confirmBusy}
           onConfirm={confirm.onConfirm}
-          onCancel={() => setConfirm(null)}
+          onCancel={() => { if (!confirmBusy) setConfirm(null); }}
         />
       )}
 

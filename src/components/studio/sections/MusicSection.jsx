@@ -15,7 +15,8 @@ import styles from './sections.module.css';
 
 export default function MusicSection({ lang, t, showToast, setShowMusicModal, onEdit }) {
   const [confirm, setConfirm] = useState(null);
-  const { data: music, loading, refetch } = useFetch(
+  const [confirmBusy, setConfirmBusy] = useState(false);
+  const { data: music, loading, refetch, removeLocal } = useFetch(
     () => exploreService.music({ mine: true }),
     { defaultValue: [], transform: (d) => (Array.isArray(d) ? d : (d?.results || [])) },
   );
@@ -26,19 +27,26 @@ export default function MusicSection({ lang, t, showToast, setShowMusicModal, on
       title: lang === 'ht' ? 'Efase mizik' : 'Delete track',
       message: lang === 'ht' ? `Eske w sèten ou vle efase "${item.title}"?` : `Are you sure you want to delete "${item.title}"?`,
       onConfirm: async () => {
+        setConfirmBusy(true);
+        // Optimistic: the row vanishes instantly — no waiting on a slow
+        // network, no stale row if the refetch races. A failed delete
+        // refetches from the server, which restores the row.
+        removeLocal((row) => row.id === item.id);
         try {
           await musicService.delete(item.id);
           showToast?.(lang === 'ht' ? '✅ Mizik efase!' : '✅ Track deleted!', 'check-circle');
           refetch();
         } catch (err) {
           showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase.' : 'Could not delete.'), 'circle-exclamation');
+          refetch();
         }
+        setConfirmBusy(false);
         setConfirm(null);
       },
     });
   };
 
-  if (loading) return <StudioSkeleton rows={3} />;
+  if (loading && music.length === 0) return <StudioSkeleton rows={3} />;
 
   const isEmpty = music.length === 0;
 
@@ -115,8 +123,9 @@ export default function MusicSection({ lang, t, showToast, setShowMusicModal, on
           message={confirm.message}
           lang={lang}
           variant="danger"
+          loading={confirmBusy}
           onConfirm={confirm.onConfirm}
-          onCancel={() => setConfirm(null)}
+          onCancel={() => { if (!confirmBusy) setConfirm(null); }}
         />
       )}
     </div>
