@@ -548,30 +548,16 @@ export default function StoreCartPage() {
               <span className="store-shipping-address__label">Country</span>
               <select name="country" autoComplete="country" value={shippingAddress.country}
                 onChange={onShippingAddressChange} required>
+                {/* Only countries active in the backend printify_shipping_policy.
+                    US + CA: cheap North-American rates, no customs paperwork,
+                    no business registration needed. HT/DO disabled by owner
+                    (forwarder fees too high, no business papers); all other
+                    countries disabled (expensive international postage +
+                    EU/UK tax-registration requirements). The live Printify
+                    quote is the final check — keep this list in sync with
+                    the backend policy when an admin enables a country. */}
                 <option value="US">United States (US)</option>
                 <option value="CA">Canada (CA)</option>
-                <option value="GB">United Kingdom (GB)</option>
-                <option value="MX">Mexico (MX)</option>
-                <option value="AU">Australia (AU)</option>
-                <option value="FR">France (FR)</option>
-                <option value="DE">Germany (DE)</option>
-                <option value="IT">Italy (IT)</option>
-                <option value="ES">Spain (ES)</option>
-                <option value="NL">Netherlands (NL)</option>
-                <option value="BE">Belgium (BE)</option>
-                <option value="SE">Sweden (SE)</option>
-                <option value="NO">Norway (NO)</option>
-                <option value="DK">Denmark (DK)</option>
-                <option value="CH">Switzerland (CH)</option>
-                <option value="AT">Austria (AT)</option>
-                <option value="IE">Ireland (IE)</option>
-                <option value="NZ">New Zealand (NZ)</option>
-                <option value="JP">Japan (JP)</option>
-                <option value="KR">South Korea (KR)</option>
-                <option value="SG">Singapore (SG)</option>
-                <option value="BR">Brazil (BR)</option>
-                <option value="HT">Haiti (HT)</option>
-                <option value="DO">Dominican Republic (DO)</option>
               </select>
             </label>
           </div>
