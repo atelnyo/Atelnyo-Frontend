@@ -225,7 +225,7 @@ export default function CreatorPublicProfile({
     // the content type: course / product / portfolio / talent / music…).
     trackClick(type);
     // Communities are the one type with a tabbed page — ContentKeyRoute
-    // resolves the key (slug or pk) and redirects to /sheet/community/:slug.
+    // resolves the key (slug or pk) and redirects to /community/:slug.
     navigate(buildContentUrl(type, data));
   }, [navigate, trackClick]);
 

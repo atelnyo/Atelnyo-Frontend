@@ -1893,7 +1893,7 @@ async function getCommunityInfo({ community_slug }) {
       member_count: data.member_count ?? data.members_count ?? 0,
       join_mode: data.join_mode || 'public',
       is_member: data.is_member || false,
-      url: `https://atelnyo.site/sheet/community/${data.slug || community_slug}`,
+      url: `https://atelnyo.site/community/${data.slug || community_slug}`,
     };
   } catch (err) {
     return { error: err.message };
@@ -2964,7 +2964,7 @@ async function listCommunities({ query = '', category = '', limit = 10 } = {}) {
       description: c.description || '',
       member_count: c.member_count ?? c.members_count ?? 0,
       category: c.category || '',
-      url: `https://atelnyo.site/sheet/community/${c.slug || ''}`,
+      url: `https://atelnyo.site/community/${c.slug || ''}`,
     }));
     return { communities: items, total: data.count ?? items.length };
   } catch (err) {

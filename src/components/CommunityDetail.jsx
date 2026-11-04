@@ -3,16 +3,18 @@
  *
  * Phase 36 — Community detail page with URL-driven tabs.
  *
- * Mounted at /sheet/community/:slug via App.jsx Routes. Sub-tabs
+ * Mounted at /community/:slug via App.jsx Routes. Sub-tabs
  * each have their own URL segment so the browser Back button +
  * deep links work correctly:
  *
- *   /sheet/community/:slug              → redirect to /events
- *   /sheet/community/:slug/events       → CommunityEvents
- *   /sheet/community/:slug/members      → CommunityMembers
- *   /sheet/community/:slug/announcements → CommunityAnnouncements
- *   /sheet/community/:slug/files        → CommunityFiles
- *   /sheet/community/:slug/courses      → CommunityCourses
+ *   /community/:slug              → redirect to /events
+ *   /community/:slug/events       → CommunityEvents
+ *   /community/:slug/members      → CommunityMembers
+ *   /community/:slug/announcements → CommunityAnnouncements
+ *   /community/:slug/files        → CommunityFiles
+ *   /community/:slug/courses      → CommunityCourses
+ *
+ * Legacy /sheet/community/* URLs redirect (replace) to this shape.
  *
  * Phase 36.1 — the parent layout fetches the community ONCE (banner,
  * join/leave, member count, is_member, current_user_role) and exposes

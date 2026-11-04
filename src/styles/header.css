@@ -218,6 +218,13 @@ body.dark-mode .header-username {
   flex-shrink: 0;
 }
 
+/* Direct header children (lang + profile live outside the swipeable
+   actions row so its overflow never clips their dropdowns) */
+.app-header > .header-lang-wrapper,
+.app-header > .header-profile-wrapper {
+  flex-shrink: 0;
+}
+
 /* ─── Language switcher ───────────────────────────────────────── */
 .header-lang-wrapper {
   position: relative;

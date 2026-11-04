@@ -139,7 +139,7 @@ describe('buildProjectContext', () => {
     // Creator profile URL.
     expect(ctx).toContain('https://atelnyo.site/c/marie');
     // Community URL.
-    expect(ctx).toContain('https://atelnyo.site/sheet/community/kreyol-fans');
+    expect(ctx).toContain('https://atelnyo.site/community/kreyol-fans');
     // Post section with the EXACT backend-provided link.
     expect(ctx).toContain('RECENT CREATOR POSTS');
     expect(ctx).toContain('https://atelnyo.site/c/marie/post/abc123');

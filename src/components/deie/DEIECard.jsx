@@ -195,7 +195,7 @@ function getContentUrl(contentType, contentId) {
     course: `/sheet/course/${contentId}`,
     music: `/sheet/music/${contentId}`,
     talent: `/sheet/talent/${contentId}`,
-    community: `/sheet/community/${contentId}`,
+    community: `/community/${contentId}`,
     event: `/sheet/event/${contentId}`,
     job: `/job/${contentId}`,
     product: `/marketplace/${contentId}`,

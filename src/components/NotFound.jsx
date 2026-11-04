@@ -60,7 +60,7 @@ const NOT_FOUND_I18N = {
  * Extract probable search terms from a URL path.
  * E.g. "/javascript-course" → "javascript course"
  *      "/c/johndoe" → "johndoe"
- *      "/sheet/community/react-devs" → "react devs"
+ *      "/community/react-devs" → "react devs"
  */
 function _extractSearchTerms(pathname) {
   if (!pathname) return '';

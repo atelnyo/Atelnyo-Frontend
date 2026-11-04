@@ -19,7 +19,7 @@ const ROUTES = [
   '/help/wallet', '/legal', '/legal/terms', '/verify', '/academy',
   '/sheet/explore', '/sheet/explore/music', '/sheet/explore/talent',
   '/sheet/explore/job', '/sheet/calendar', '/sheet/search', '/sheet/deie/feed',
-  '/sheet/community/atelnyo-academy', '/sheet/course/1', '/sheet/learn',
+  '/community/atelnyo-academy', '/sheet/course/1', '/sheet/learn',
   '/sheet/page/about', '/c/Atelnyo', '/@Atelnyo', '/sheet/settings',
   '/sheet/wallet', '/sheet/messages', '/404', '/go/TEST-CODE',
 ];

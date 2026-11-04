@@ -3,7 +3,7 @@
  *
  * Phase 49 — Playwright coverage for the community deep-link alias
  * ``/{slug}@{user}/community``. Communities keep their canonical tabbed
- * page at ``/sheet/community/:slug``; the ``/:key/community`` route
+ * page at ``/community/:slug``; the ``/:key/community`` route
  * (CommunityKeyRoute in App.jsx) resolves the key — the community's
  * unique slug, or a numeric pk for hand-typed links — and redirects
  * (replace) to the canonical page.
@@ -11,9 +11,12 @@
  * Two tests pin the contract:
  *
  *   1. alias cold-load — visiting ``/{slug}@{user}/community`` from a
- *      fresh context redirects to ``/sheet/community/:slug`` (then the
+ *      fresh context redirects to ``/community/:slug`` (then the
  *      index ``<Navigate to="events">`` lands on ``…/events``) and the
- *      community detail sheet renders. Anonymous: no JWT.
+ *      community detail page renders. Anonymous: no JWT.
+ *
+ *   1b. legacy cold-load — visiting ``/sheet/community/:slug/events``
+ *      (pre-canonical shape) replace-redirects to ``/community/...``.
  *
  *   2. 404 stubbed — when the BE returns 404 for the key, the alias
  *      stays put (no redirect) and the NotFound surface renders
@@ -62,10 +65,15 @@ test.describe('Community deep-link alias (/:key/community)', () => {
     // CommunityKeyRoute resolves the slug and replace-redirects to the
     // canonical tabbed page; the index route bounces to the events tab.
     // Slugs are SlugField-safe ([a-z0-9-]), so a plain regex is fine.
-    await page.waitForURL(new RegExp(`/sheet/community/${row.slug}(/events)?$`));
+    await page.waitForURL(new RegExp(`/community/${row.slug}(/events)?$`));
 
     const sheet = page.locator('[data-testid="community-detail-sheet"]');
-    await expect(sheet, 'community detail sheet should render after redirect').toBeVisible();
+    await expect(sheet, 'community detail page should render after redirect').toBeVisible();
+
+    // Legacy shape still works — one-hop redirect to the canonical URL.
+    await page.goto(`http://127.0.0.1:3000/sheet/community/${row.slug}/events`);
+    await page.waitForURL(new RegExp(`/community/${row.slug}/events$`));
+    await expect(sheet, 'community detail page should render after legacy redirect').toBeVisible();
   });
 
   test('404 stubbed: alias renders NotFound, no redirect', async ({ page }) => {

@@ -650,7 +650,7 @@ export function Explore({
 
   // Phase 24 — Community card click: navigate via the canonical
   // /{slug}@{user}/community deep-link. CommunityKeyRoute resolves the
-  // slug and redirects (replace) to the tabbed /sheet/community/:slug
+  // slug and redirects (replace) to the tabbed /community/:slug
   // page, so every category now shares the id@user/content URL shape.
   // The payload rides along in location.state so the redirect hops to
   // the canonical page without an extra fetch on the common path.

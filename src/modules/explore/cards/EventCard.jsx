@@ -118,7 +118,7 @@ export default function EventCard({ event, t, lang = 'ht', onOpenCheckout, showT
       className="explore-card explore-card-event"
       role="button"
       tabIndex={0}
-      onClick={() => window.open(`/sheet/community/${event.community_slug || ''}`, '_self')}
+      onClick={() => window.open(`/community/${event.community_slug || ''}`, '_self')}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); } }}
       onMouseEnter={bind.onMouseEnter}
       onMouseLeave={bind.onMouseLeave}

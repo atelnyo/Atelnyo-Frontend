@@ -292,8 +292,8 @@ const SEO_ROUTES = {
     breadcrumbs: [{ label: 'Home', url: '/' }],
   },
 
-  // ─── Community pages ───────────────────────────────────────────────
-  '/sheet/community': {
+  // ─── Community pages (canonical /community/:slug — prefix match) ───
+  '/community/': {
     title: 'Community',
     description: DESCRIPTIONS.community,
     robots: 'index,follow',

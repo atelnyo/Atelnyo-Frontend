@@ -55,9 +55,9 @@ export const ROUTES = [
   '/sheet/calendar',
 
   // ── Community ──
-  '/sheet/community/atelnyo-academy',
-  '/sheet/community/atelnyo-academy/events',
-  '/sheet/community/atelnyo-academy/members',
+  '/community/atelnyo-academy',
+  '/community/atelnyo-academy/events',
+  '/community/atelnyo-academy/members',
 
   // ── CMS pages ──
   '/sheet/page/about',

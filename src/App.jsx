@@ -759,7 +759,7 @@ function CurriculumPlayerRoute({ lang, user, showToast }) {
  * backend's CommunityViewSet resolves either via SlugOrPkLookupMixin.
  *
  * Communities already have a canonical detail URL with tab routes
- * (``/sheet/community/:slug``), so the ``/:key/community`` form is a
+ * (``/community/:slug``), so the ``/:key/community`` form is a
  * shareable alias: this route fetches the community once and redirects
  * (replace) so the alias never pollutes history and the tabs, bottom-nav
  * highlighting and CommunityDetail's slug-based fetch all keep working.
@@ -795,7 +795,7 @@ function CommunityKeyRoute({ contentId, lang = 'en' }) {
   // visitor came from, not to the alias hop).
   useEffect(() => {
     if (!slug) return;
-    navigate(`/sheet/community/${encodeURIComponent(slug)}`, { replace: true });
+    navigate(`/community/${encodeURIComponent(slug)}`, { replace: true });
   }, [slug, navigate]);
 
   if (failed) {
@@ -817,7 +817,7 @@ function CommunityKeyRoute({ contentId, lang = 'en' }) {
  *
  * ``community`` is the one exception to "renders the detail page" —
  * communities keep their canonical tabbed URL at
- * ``/sheet/community/:slug``, so CommunityKeyRoute resolves the key
+ * ``/community/:slug``, so CommunityKeyRoute resolves the key
  * (slug or pk) and redirects there (replace).
  *
  * React Router v6 happily matches ``@`` inside a path segment value,
@@ -826,6 +826,16 @@ function CommunityKeyRoute({ contentId, lang = 'en' }) {
  * ``/marketplace/:id``, ``/portfolio/:id``, ``/legal/:slug`` …) always
  * win over this dynamic pair, and the single-segment routes never match.
  */
+/**
+ * LegacyCommunityRedirect — one-hop (replace) redirect from the legacy
+ * ``/sheet/community/*`` shape to the canonical ``/community/*`` shape
+ * so old shared links keep working without polluting history.
+ */
+function LegacyCommunityRedirect() {
+  const splat = useParams()['*'] || '';
+  return <Navigate to={`/community/${splat}`} replace />;
+}
+
 function ContentKeyRoute({ lang, showToast, user, onOpenCheckout }) {
   const params = useParams();
   const navigate = useNavigate();
@@ -1888,12 +1898,12 @@ function App() {
   // global <Header> + BottomNav. This is the general rule — /search was only
   // the most visible instance of it.
   const rendersInContentContainer = effectivePathname === '/' || effectivePathname === '/404';
-  const isSheetRoute = effectivePathname === '/legal' || effectivePathname.startsWith('/sheet/') || effectivePathname.startsWith('/creator/') || effectivePathname.startsWith('/portfolio/') || effectivePathname.startsWith('/marketplace/') || effectivePathname.match(/^\/c\//) || effectivePathname.match(/^\/(@|%40)/i) || effectivePathname.startsWith('/legal/') || effectivePathname === '/themes' || effectivePathname === '/faq' || effectivePathname === '/help' || effectivePathname === '/about' || effectivePathname === '/trust' || effectivePathname === '/contact' || effectivePathname === '/accessibility' || effectivePathname === '/status' || effectivePathname === '/developers' || effectivePathname === '/verify' || effectivePathname.startsWith('/affiliate') || effectivePathname.startsWith('/page/') || effectivePathname.startsWith('/company/') || effectivePathname === '/business' || effectivePathname.startsWith('/business/') || effectivePathname === SHEETS.LOGIN || effectivePathname === SHEETS.SIGNUP || isContentRoutePath(effectivePathname) || effectivePathname === '/explore' || effectivePathname.startsWith('/explore/');
+  const isSheetRoute = effectivePathname === '/legal' || effectivePathname.startsWith('/sheet/') || effectivePathname.startsWith('/creator/') || effectivePathname.startsWith('/portfolio/') || effectivePathname.startsWith('/marketplace/') || effectivePathname.match(/^\/c\//) || effectivePathname.match(/^\/(@|%40)/i) || effectivePathname.startsWith('/legal/') || effectivePathname === '/themes' || effectivePathname === '/faq' || effectivePathname === '/help' || effectivePathname === '/about' || effectivePathname === '/trust' || effectivePathname === '/contact' || effectivePathname === '/accessibility' || effectivePathname === '/status' || effectivePathname === '/developers' || effectivePathname === '/verify' || effectivePathname.startsWith('/affiliate') || effectivePathname.startsWith('/page/') || effectivePathname.startsWith('/company/') || effectivePathname.startsWith('/community/') || effectivePathname === '/business' || effectivePathname.startsWith('/business/') || effectivePathname === SHEETS.LOGIN || effectivePathname === SHEETS.SIGNUP || isContentRoutePath(effectivePathname) || effectivePathname === '/explore' || effectivePathname.startsWith('/explore/');
 
   // ─── Sheet isolation ────────────────────────────────────────────────
   // Phase 36.1 — toggles `body.sheet-open` whenever the URL is under
   // /sheet/* (any sheet route, including deep sub-routes like
-  // /sheet/community/:slug/events). The matching CSS rule in
+  // /community/:slug/events). The matching CSS rule in
   // ``styles/index.css`` (search for ``body.sheet-open``) hides the
   // root <Header> + .container (Tabs + <main> Explore + Footer) so
   // the underlying app chrome doesn't bleed through under the
@@ -2306,7 +2316,7 @@ function App() {
           p === SHEETS.CALENDAR ||
           p === SHEETS.ANALYTICS ||
           p === SHEETS.ATELIER ||
-          p.startsWith('/sheet/community/')) {return 'explore';}
+          p.startsWith('/community/')) {return 'explore';}
       if (p === SHEETS.REFERRAL) {return 'mwen';}
       // Phase 50 — Creator Apply is reached from Settings, so the
       // settings tab stays highlighted. Keeps the bottom-nav indicator
@@ -2999,7 +3009,7 @@ function App() {
           </AuthGate>
           </LearnerRouteErrorBoundary>
         } />
-        <Route path="/sheet/community/:slug" element={<CommunityDetail lang={lang} showToast={showToast} user={user} />}>
+        <Route path="/community/:slug" element={<CommunityDetail lang={lang} showToast={showToast} user={user} />}>
           <Route index element={<Navigate to="events" replace />} />
           <Route path="events" element={<CommunityEvents />} />
           <Route path="members" element={<CommunityMembers />} />
@@ -3008,6 +3018,10 @@ function App() {
           <Route path="files" element={<CommunityFiles />} />
           <Route path="courses" element={<CommunityCourses />} />
         </Route>
+        {/* Legacy ``/sheet/community/*`` URLs (pre-canonical shape) —
+            one-hop replace-redirect to ``/community/*`` so old shared
+            links keep working without polluting history. */}
+        <Route path="/sheet/community/*" element={<LegacyCommunityRedirect />} />
         <Route path="/sheet/analytics" element={
           <AuthGate user={user}>
             <CreatorAnalytics lang={lang} showToast={showToast} user={user} />
@@ -3022,8 +3036,7 @@ function App() {
             The parent route renders <CommunityDetail> which fetches community
             info once, exposes it via <Outlet context>, and renders the tab
             nav. Each sub-tab is its own route + component (member, events,
-            announcements, files, courses). A bare visit to /sheet/community/:slug
-            (e.g. from Explore.jsx › navigate(`/sheet/community/${slug}`))
+            announcements, files, courses). A bare visit to /community/:slug
             hits the ``index`` <Navigate to="events" replace /> so the user
             lands on the same default tab as before the refactor. */}
         {/* Phase ∞ — Admin Dashboard. Staff-only overview page with

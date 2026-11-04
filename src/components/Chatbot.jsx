@@ -755,7 +755,7 @@ PLATFORM URLS (use EXACT formats — {slug}/{creator} are filled from live data,
 - Creator post: https://atelnyo.site/c/{username}/post/{slug}
 - Creator profile: https://atelnyo.site/c/{username}
 - Product: https://atelnyo.site/{slug}/by/{seller}/product (price + stock + description come from MARKETPLACE PRODUCTS)
-- Community: https://atelnyo.site/sheet/community/{slug}
+- Community: https://atelnyo.site/community/{slug}
 - Explore + Premium info: https://atelnyo.site/explore (Settings → Premium)
 
 LINK RULES (anti-hallucination — breaking these misleads the user):

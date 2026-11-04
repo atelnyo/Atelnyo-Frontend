@@ -67,17 +67,18 @@ export const SHEETS = Object.freeze({
   // + global app chrome stay bleed-free.
   CALENDAR: '/sheet/calendar',
   // Phase 36 — Community detail page. Dynamic route with :slug param.
-  // Navigate via navigate(`/sheet/community/${community.slug}`).
+  // Canonical URL (no /sheet prefix — same as /company/:slug).
+  // Navigate via navigate(`/community/${community.slug}`).
   //
-  // The Community sheet is now URL-driven on its tabs too: each
+  // The Community page is URL-driven on its tabs too: each
   // ``events``/``members``/``announcements``/``files``/``courses``
-  // sub-tab lives at ``/sheet/community/:slug/<tab>``. The parent
-  // route has an ``index`` redirect to ``events`` so a bare
-  // visit (or a legacy ``navigate('/sheet/community/${slug}')``
-  // from Explore) still lands on the same default. Use the helper
-  // below when a future caller wants to deep-link a specific tab.
-  COMMUNITY: '/sheet/community/:slug',
-  COMMUNITY_TAB: (slug, tab) => `/sheet/community/${slug}/${tab}`,
+  // sub-tab lives at ``/community/:slug/<tab>``. The parent
+  // route has an ``index`` redirect to ``events`` so a bare visit
+  // still lands on the same default. Use the helper below when a
+  // future caller wants to deep-link a specific tab. Legacy
+  // ``/sheet/community/*`` URLs redirect (replace) to this shape.
+  COMMUNITY: '/community/:slug',
+  COMMUNITY_TAB: (slug, tab) => `/community/${slug}/${tab}`,
   // Phase 38 — Creator Analytics Dashboard
   ANALYTICS: '/sheet/analytics',
   // Phase 39 — Referral & Affiliate Dashboard

@@ -254,7 +254,7 @@ function buildProjectContext(data) {
   if (data.communities?.total > 0) {
     lines.push(`\nCOMMUNITIES (${data.communities.total} total):`);
     for (const c of data.communities.top) {
-      const link = c.slug ? `\n    Link: https://atelnyo.site/sheet/community/${encodeURIComponent(c.slug)}` : '';
+      const link = c.slug ? `\n    Link: https://atelnyo.site/community/${encodeURIComponent(c.slug)}` : '';
       lines.push(`  - "${clip(c.name, 40)}" — ${c.members} members${link}`);
     }
   }

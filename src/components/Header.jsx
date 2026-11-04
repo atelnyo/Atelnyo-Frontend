@@ -224,135 +224,138 @@ const Header = ({
         <button className="icon-btn header-btn" onClick={toggleTheme} title={t.toggle_theme} aria-label={t.toggle_theme}>
           <i className={`fas ${darkMode ? 'fa-sun' : 'fa-moon'}`} aria-hidden="true" />
         </button>
+      </div>
 
-        {/* Language switcher */}
-        <div className="header-lang-wrapper" ref={langRef}>
-          <button
-            className="icon-btn header-btn header-lang-btn"
-            onClick={() => setLangOpen((o) => !o)}
-            title={t2(lang, { ht: 'Lang', fr: 'Langue', es: 'Idioma', en: 'Language' })}
-            aria-label={t2(lang, { ht: 'Chwazi lang', fr: 'Choisir la langue', es: 'Elegir idioma', en: 'Choose language' })}
-            aria-haspopup="listbox"
-            aria-expanded={langOpen}
-          >
-            <i className="fas fa-language" aria-hidden="true" />
-          </button>
-          {langOpen && (
-            <div className="header-dropdown header-lang-dropdown">
-              {LANGUAGES.map((l) => (
-                <button
-                  key={l.code}
-                  type="button"
-                  className={`header-dropdown-item${l.code === lang ? ' active' : ''}`}
-                  onClick={() => {
-                    if (onLangChange) {onLangChange(l.code);}
-                    setLangOpen(false);
-                  }}
-                >
-                  <span className="header-lang-label">{l.label}</span>
-                  <span className="header-lang-code">{l.code.toUpperCase()}</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Profile menu — only when logged in */}
-        {user && (
-          <div className="header-profile-wrapper" ref={profileRef}>
-            <button
-              className="header-profile-btn"
-              onClick={() => setProfileOpen((o) => !o)}
-              aria-label={identity.displayLabel || (t2(lang, { ht: 'Pwofil', fr: 'Profil', es: 'Perfil', en: 'Profile' }))}
-              aria-haspopup="true"
-              aria-expanded={profileOpen}
-            >
-              <div className="header-avatar">
-                {avatarSrc ? (
-                  <img className="header-avatar-img" src={avatarSrc} alt={identity.displayName}
-                    onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement.textContent = identity.initial || '?'; }}
-                  />
-                ) : (
-                  identity.initial || '?'
-                )}
-              </div>
-              <span className="header-username">{identity.displayLabel || identity.displayName}</span>
-              <i className={`fas fa-chevron-${profileOpen ? 'up' : 'down'} header-chevron`} />
-            </button>
-
-            {profileOpen && (
-              <div className="header-dropdown header-profile-dropdown">
-                <div className="header-dropdown-user">
-                  <div className="header-avatar header-avatar-lg">
-                    {avatarSrc ? (
-                      <img className="header-avatar-img" src={avatarSrc} alt={identity.displayName}
-                        onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement.textContent = identity.initial || '?'; }}
-                      />
-                    ) : (
-                      identity.initial || '?'
-                    )}
-                  </div>
-                  <div className="header-dropdown-user-meta">
-                    <div className="header-dropdown-user-name">{identity.displayName}</div>
-                    <div className="header-dropdown-user-email">{identity.email || ''}</div>
-                  </div>
-                </div>
-                <div className="header-dropdown-divider" />
-                <button
-                  type="button"
-                  className="header-dropdown-item"
-                  onClick={() => { setProfileOpen(false); openSettings(); }}
-                >
-                  <i className="fas fa-gear" />
-                  <span>{t.settings || 'Settings'}</span>
-                </button>
-                {user.is_creator && (
-                  <button
-                    type="button"
-                    className="header-dropdown-item"
-                    onClick={() => { setProfileOpen(false); startTransition(() => navigate(SHEETS.STUDIO)); }}
-                  >
-                    <i className="fas fa-crown" />
-                    <span>{t.mwen_studio || 'Creator Studio'}</span>
-                  </button>
-                )}
-                {/* Phase Business — every account can manage Business
-                    Profiles (separate identity from the Creator branch).
-                    The hub is owner-scoped; a first-time visitor gets the
-                    create CTA instead of a 404. */}
-                <button
-                  type="button"
-                  className="header-dropdown-item"
-                  onClick={() => { setProfileOpen(false); startTransition(() => navigate(SHEETS.BUSINESS)); }}
-                  data-testid="header-business-link"
-                >
-                  <i className="fas fa-store" />
-                  <span>{t.business_hub_title || (t2(lang, { ht: 'Biznis mwen', en: 'My Businesses' }))}</span>
-                </button>
-                {(user.is_staff || user.is_superuser) && (
-                  <button
-                    type="button"
-                    className="header-dropdown-item"
-                    onClick={() => { setProfileOpen(false); startTransition(() => navigate(SHEETS.ADMIN_DASHBOARD)); }}
-                  >
-                    <i className="fas fa-shield-alt" />
-                    <span>Admin Dashboard</span>
-                  </button>
-                )}
-                <div className="header-dropdown-divider" />
-                <button
-                  type="button"
-                  className="header-dropdown-item header-dropdown-item-danger"
-                  onClick={() => { setProfileOpen(false); if (onLogout) {onLogout('user');} }}
-                >
-                  <i className="fas fa-sign-out-alt" />
-                  <span>{t.logout || (t2(lang, { ht: 'Dekonekte', en: 'Logout' }))}</span>
-                </button>
-              </div>
-            )}
+      {/* NOTE: lang + profile live OUTSIDE .app-header__actions —
+          that row swipes (overflow-x:auto) which would clip their
+        absolutely-positioned dropdowns. Order unchanged. */}
+      {/* Language switcher */}
+      <div className="header-lang-wrapper" ref={langRef}>
+        <button
+          className="icon-btn header-btn header-lang-btn"
+          onClick={() => setLangOpen((o) => !o)}
+          title={t2(lang, { ht: 'Lang', fr: 'Langue', es: 'Idioma', en: 'Language' })}
+          aria-label={t2(lang, { ht: 'Chwazi lang', fr: 'Choisir la langue', es: 'Elegir idioma', en: 'Choose language' })}
+          aria-haspopup="listbox"
+          aria-expanded={langOpen}
+        >
+          <i className="fas fa-language" aria-hidden="true" />
+        </button>
+        {langOpen && (
+          <div className="header-dropdown header-lang-dropdown">
+            {LANGUAGES.map((l) => (
+              <button
+                key={l.code}
+                type="button"
+                className={`header-dropdown-item${l.code === lang ? ' active' : ''}`}
+                onClick={() => {
+                  if (onLangChange) {onLangChange(l.code);}
+                  setLangOpen(false);
+                }}
+              >
+                <span className="header-lang-label">{l.label}</span>
+                <span className="header-lang-code">{l.code.toUpperCase()}</span>
+              </button>
+            ))}
           </div>
         )}
       </div>
+
+      {/* Profile menu — only when logged in */}
+      {user && (
+        <div className="header-profile-wrapper" ref={profileRef}>
+          <button
+            className="header-profile-btn"
+            onClick={() => setProfileOpen((o) => !o)}
+            aria-label={identity.displayLabel || (t2(lang, { ht: 'Pwofil', fr: 'Profil', es: 'Perfil', en: 'Profile' }))}
+            aria-haspopup="true"
+            aria-expanded={profileOpen}
+          >
+            <div className="header-avatar">
+              {avatarSrc ? (
+                <img className="header-avatar-img" src={avatarSrc} alt={identity.displayName}
+                  onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement.textContent = identity.initial || '?'; }}
+                />
+              ) : (
+                identity.initial || '?'
+              )}
+            </div>
+            <span className="header-username">{identity.displayLabel || identity.displayName}</span>
+            <i className={`fas fa-chevron-${profileOpen ? 'up' : 'down'} header-chevron`} />
+          </button>
+
+          {profileOpen && (
+            <div className="header-dropdown header-profile-dropdown">
+              <div className="header-dropdown-user">
+                <div className="header-avatar header-avatar-lg">
+                  {avatarSrc ? (
+                    <img className="header-avatar-img" src={avatarSrc} alt={identity.displayName}
+                      onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement.textContent = identity.initial || '?'; }}
+                    />
+                  ) : (
+                    identity.initial || '?'
+                  )}
+                </div>
+                <div className="header-dropdown-user-meta">
+                  <div className="header-dropdown-user-name">{identity.displayName}</div>
+                  <div className="header-dropdown-user-email">{identity.email || ''}</div>
+                </div>
+              </div>
+              <div className="header-dropdown-divider" />
+              <button
+                type="button"
+                className="header-dropdown-item"
+                onClick={() => { setProfileOpen(false); openSettings(); }}
+              >
+                <i className="fas fa-gear" />
+                <span>{t.settings || 'Settings'}</span>
+              </button>
+              {user.is_creator && (
+                <button
+                  type="button"
+                  className="header-dropdown-item"
+                  onClick={() => { setProfileOpen(false); startTransition(() => navigate(SHEETS.STUDIO)); }}
+                >
+                  <i className="fas fa-crown" />
+                  <span>{t.mwen_studio || 'Creator Studio'}</span>
+                </button>
+              )}
+              {/* Phase Business — every account can manage Business
+                  Profiles (separate identity from the Creator branch).
+                  The hub is owner-scoped; a first-time visitor gets the
+                  create CTA instead of a 404. */}
+              <button
+                type="button"
+                className="header-dropdown-item"
+                onClick={() => { setProfileOpen(false); startTransition(() => navigate(SHEETS.BUSINESS)); }}
+                data-testid="header-business-link"
+              >
+                <i className="fas fa-store" />
+                <span>{t.business_hub_title || (t2(lang, { ht: 'Biznis mwen', en: 'My Businesses' }))}</span>
+              </button>
+              {(user.is_staff || user.is_superuser) && (
+                <button
+                  type="button"
+                  className="header-dropdown-item"
+                  onClick={() => { setProfileOpen(false); startTransition(() => navigate(SHEETS.ADMIN_DASHBOARD)); }}
+                >
+                  <i className="fas fa-shield-alt" />
+                  <span>Admin Dashboard</span>
+                </button>
+              )}
+              <div className="header-dropdown-divider" />
+              <button
+                type="button"
+                className="header-dropdown-item header-dropdown-item-danger"
+                onClick={() => { setProfileOpen(false); if (onLogout) {onLogout('user');} }}
+              >
+                <i className="fas fa-sign-out-alt" />
+                <span>{t.logout || (t2(lang, { ht: 'Dekonekte', en: 'Logout' }))}</span>
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </header>
   );
 };

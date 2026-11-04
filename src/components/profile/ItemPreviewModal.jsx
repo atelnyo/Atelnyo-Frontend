@@ -50,8 +50,8 @@ const TYPE_CONFIG = {
                tags: [], icon: 'fa-calendar' },
   community: { endpoint: null,
                // Route requires a slug — null (no "View full details" button)
-               // when the row has none, so we never navigate to /sheet/community/.
-               route: (id, data) => (data?.slug ? `/sheet/community/${data.slug}` : null),
+               // when the row has none, so we never navigate to /community/.
+               route: (id, data) => (data?.slug ? `/community/${data.slug}` : null),
                titleKey: 'name', imgKey: 'avatar_url', descKey: 'description',
                priceKey: null, stats: ['member_count', 'category'],
                tags: [], icon: 'fa-users' },

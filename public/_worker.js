@@ -153,7 +153,7 @@ const PAGE_META = {
   '/sheet/explore/music': { title: 'Music', desc: 'Listen to music on Atelnyo — discover talented artists and their tracks.' },
   '/sheet/explore/talent': { title: 'Talent', desc: 'Discover talented creators on Atelnyo — find the right person for your project.' },
   '/sheet/explore/job': { title: 'Jobs', desc: 'Find remote jobs on Atelnyo — connect with opportunities from verified creators.' },
-  '/sheet/community': { title: 'Community', desc: 'Join a community on Atelnyo — connect with like-minded creators.' },
+  '/community/': { title: 'Community', desc: 'Join a community on Atelnyo — connect with like-minded creators.' },
   '/academy': { title: 'Language Academy', desc: 'Atelnyo Language Academy — published official language programs (Creole, French, Spanish, English) with structured curricula for every level.' },
   '/sheet/academy': { title: 'Language Academy', desc: 'Atelnyo Language Academy — published official language programs (Creole, French, Spanish, English) with structured curricula for every level.' },
 };
