@@ -54,6 +54,9 @@ export default function StoreProductPage() {
   const [review, setReview] = useState({ rating: 0, title: '', body: '' });
   const [reviewBusy, setReviewBusy] = useState(false);
   const [reviewNotice, setReviewNotice] = useState({ kind: '', text: '' });
+  // Orders of the signed-in buyer that contain this product — the backend
+  // requires every review to reference one of them (ReviewSerializer).
+  const [eligibleOrders, setEligibleOrders] = useState(null);
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
 
@@ -83,6 +86,34 @@ export default function StoreProductPage() {
   }, [slug]);
 
   const loadedId = state.product?.id;
+  // Load the buyer's orders once the product is known so a review can
+  // reference the purchase the backend requires.
+  useEffect(() => {
+    if (!user || !loadedId) {
+      setEligibleOrders(null);
+      return undefined;
+    }
+    let cancelled = false;
+    setEligibleOrders(null);
+    storeService
+      .listOrders()
+      .then(({ data }) => {
+        if (cancelled) return;
+        const rows = Array.isArray(data) ? data : data?.results || [];
+        const matching = rows.filter((o) =>
+          Array.isArray(o?.items) && o.items.some((it) => Number(it?.product) === Number(loadedId)),
+        );
+        // Newest purchase first so the review attaches to the latest order.
+        matching.sort((a, b) => Number(b?.id) - Number(a?.id));
+        setEligibleOrders(matching);
+      })
+      .catch(() => {
+        if (!cancelled) setEligibleOrders([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user, loadedId]);
   useEffect(() => {
     if (!user || !loadedId) {
       return undefined;
@@ -201,11 +232,24 @@ export default function StoreProductPage() {
       setReviewNotice({ kind: 'error', text: 'Choose a rating from 1 to 5.' });
       return;
     }
+    // The backend rejects reviews without a purchase backing them — pick
+    // the buyer's latest order containing this product.
+    const orderId = Array.isArray(eligibleOrders) && eligibleOrders.length > 0
+      ? eligibleOrders[0].id
+      : null;
+    if (eligibleOrders !== null && !orderId) {
+      setReviewNotice({
+        kind: 'error',
+        text: 'You can only review products you have purchased. Buy it first, then come back to leave a review.',
+      });
+      return;
+    }
     setReviewBusy(true);
     setReviewNotice({ kind: '', text: '' });
     try {
       await storeService.createReview({
         product: p.id,
+        ...(orderId ? { order: orderId } : {}),
         rating: review.rating,
         title: review.title.trim(),
         body: review.body.trim(),
@@ -213,7 +257,11 @@ export default function StoreProductPage() {
       setReview({ rating: 0, title: '', body: '' });
       setReviewNotice({ kind: 'ok', text: 'Thanks for your review.' });
     } catch (err) {
-      const detail = err?.response?.data?.detail;
+      const data = err?.response?.data;
+      const first = (v) => (Array.isArray(v) ? v[0] : v);
+      const detail = typeof data === 'object' && data !== null
+        ? first(data.detail) || first(data.order) || first(data.product) || first(data.rating) || first(data.non_field_errors)
+        : data;
       setReviewNotice({
         kind: 'error',
         text: detail || 'Could not submit your review. Try again.',
@@ -371,6 +419,11 @@ export default function StoreProductPage() {
                   onChange={(e) => setReview((r) => ({ ...r, body: e.target.value }))}
                 />
               </label>
+              {Array.isArray(eligibleOrders) && eligibleOrders.length === 0 && (
+                <p className="store-product__notice" role="note">
+                  Only buyers can review — purchase this product first, then your review form will work.
+                </p>
+              )}
               <button type="submit" className="store-buy" disabled={reviewBusy}>
                 {reviewBusy ? 'Submitting…' : 'Submit review'}
               </button>

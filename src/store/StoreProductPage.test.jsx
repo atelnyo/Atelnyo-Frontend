@@ -6,6 +6,8 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 
 const getProduct = vi.fn();
+const listOrders = vi.fn();
+const createReview = vi.fn();
 const listFavorites = vi.fn();
 const addFavorite = vi.fn();
 const removeFavorite = vi.fn();
@@ -14,6 +16,8 @@ let mockUser = null;
 vi.mock('./storeService', () => ({
   storeService: {
     getProduct: (...args) => getProduct(...args),
+    listOrders: (...args) => listOrders(...args),
+    createReview: (...args) => createReview(...args),
     listFavorites: (...args) => listFavorites(...args),
     addFavorite: (...args) => addFavorite(...args),
     removeFavorite: (...args) => removeFavorite(...args),
@@ -63,6 +67,8 @@ describe('StoreProductPage', () => {
     window.localStorage.clear();
     mockUser = null;
     getProduct.mockReset().mockResolvedValue({ data: product });
+    listOrders.mockReset().mockResolvedValue({ data: [] });
+    createReview.mockReset().mockResolvedValue({ data: { id: 1 } });
     listFavorites.mockReset().mockResolvedValue({ data: [] });
     addFavorite.mockReset();
     removeFavorite.mockReset();

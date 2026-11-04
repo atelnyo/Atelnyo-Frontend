@@ -1858,21 +1858,22 @@ async function getProductReviews({ product_id }) {
   }
 }
 
-async function submitProductReview({ product_id, rating, title = '', body = '' }) {
+async function submitProductReview({ product_id, order_id, rating, title = '', body = '' }) {
   try {
     const token = localStorage.getItem('access_token');
     if (!token) return { submitted: false, message: 'Authentication required — please log in first' };
     const resp = await fetch(`${SSR_API}/api/marketplace/reviews/`, {
       method: 'POST',
       headers: _getAuthHeaders(),
-      body: JSON.stringify({ product: product_id, rating, title, body }),
+      body: JSON.stringify({ product: product_id, ...(order_id ? { order: order_id } : {}), rating, title, body }),
     });
     if (resp.ok) {
       const data = await resp.json().catch(() => ({}));
       return { submitted: true, message: 'Review submitted successfully', review_id: data.id || '' };
     }
     const data = await resp.json().catch(() => ({}));
-    const msg = data.detail || data.error || data.non_field_errors?.[0] || `Review failed (${resp.status})`;
+    const first = (v) => (Array.isArray(v) ? v[0] : v);
+    const msg = first(data.detail) || first(data.error) || first(data.order) || first(data.product) || first(data.rating) || first(data.non_field_errors) || `Review failed (${resp.status})`;
     return { submitted: false, message: msg };
   } catch (err) {
     return { submitted: false, message: err.message };

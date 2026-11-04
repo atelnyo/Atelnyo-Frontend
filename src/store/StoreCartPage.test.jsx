@@ -71,6 +71,8 @@ const renderCart = () =>
 // The cart's primary CTA is "Proceed to Payment" (the Checkout label was
 // retired when the shipping-first flow landed).
 const startCheckout = async () => {
+  // Checkout stays blocked until product kinds load (shipping safety).
+  await waitFor(() => expect(screen.queryByText('Loading product…')).toBeNull());
   fireEvent.click(screen.getByRole('button', { name: 'Proceed to Payment' }));
   await waitFor(() => expect(checkoutOrder).toHaveBeenCalled());
 };

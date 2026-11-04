@@ -22,7 +22,11 @@ export default function StoreCartPage() {
         .then(({ data }) => {
           if (!cancelled) setDetails((d) => ({ ...d, [id]: data }));
         })
-        .catch(() => {});
+        .catch(() => {
+          // Mark as settled so checkout is never blocked forever by a
+          // failed lookup; unknown kinds keep the safe shipping path.
+          if (!cancelled) setDetails((d) => (d[id] === undefined ? { ...d, [id]: null } : d));
+        });
     });
     return () => {
       cancelled = true;
@@ -57,7 +61,11 @@ export default function StoreCartPage() {
   const [shippingFieldErrors, setShippingFieldErrors] = useState({});
   const user = useAuthStore((s) => s.user);
   const buttonsRef = useRef(null);
-  const requiresShipping = items.some((line) => details[line.productId]?.kind === 'physical');
+  // Product kinds arrive asynchronously. While they are unknown we assume
+  // shipping may be needed — otherwise "Proceed to Payment" shows with no
+  // address form and the server rejects the order for missing shipping.
+  const detailsReady = items.every((line) => details[line.productId] !== undefined);
+  const requiresShipping = items.some((line) => details[line.productId]?.kind === 'physical') || !detailsReady;
   const hasPrintifyItems = items.some((line) => details[line.productId]?.printify_product_id);
   // Require shipping details upfront for physical items so shipping cost is calculated.
   const needsShippingForm = requiresShipping;
@@ -226,6 +234,11 @@ export default function StoreCartPage() {
       if (quote.status !== 'ELIGIBLE') {
         setMessage(quote.warnings?.join(' ') || 'Shipping could not be verified for this address.');
       } else {
+        // Pre-select the server-recommended (or first) method so the shopper
+        // is not stuck on "Choose an available shipping method" after
+        // filling everything. They can still pick another method below.
+        const auto = quote.selected_shipping_method || quote.shipping_methods?.[0]?.id || '';
+        if (auto) setShippingMethod(auto);
         setMessage('');
       }
     } catch (err) {
@@ -238,6 +251,11 @@ export default function StoreCartPage() {
 
   const onCheckout = async (resumeExistingPayment = false) => {
     if (!items.length) return;
+    if (!detailsReady && !resumeExistingPayment) {
+      setMessage('Loading product details… try again in a moment.');
+      setStatus('error');
+      return;
+    }
     if (pendingShippingConfirmation && (!providerShippingConfirmation || !confirmProviderShipping)) {
       setMessage('Review and confirm the final payment-provider delivery address to continue.');
       return;
@@ -470,7 +488,10 @@ export default function StoreCartPage() {
           </div>
         </div>
       )}
-      {needsShippingForm && !showShippingForm && (
+      {!detailsReady && (
+        <p className="store-state" role="status">Loading product details…</p>
+      )}
+      {detailsReady && needsShippingForm && !showShippingForm && (
         <button
           type="button"
           className="store-btn"
