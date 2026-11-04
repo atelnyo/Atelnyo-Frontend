@@ -79,6 +79,7 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'ht', 
     cover_url: item?.cover_url || '',
     preview_url: item?.preview_url || '',
     video_url: item?.video_url || '',
+    external_url: item?.external_url || '',
     duration: item?.duration || '',
     hashtags: hashtagsToInput(item?.tags),
   });
@@ -177,6 +178,7 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'ht', 
       cover_url: form.cover_url.trim(),
       preview_url: form.preview_url.trim() || undefined,
       video_url: form.video_url.trim() || undefined,
+      external_url: form.external_url.trim() || undefined,
       duration: form.duration.trim(),
       tags: parseHashtags(form.hashtags),
     };
@@ -425,6 +427,19 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'ht', 
           isPremium={isPremium}
           lang={lang}
         />
+        <PropField
+          label="External Link"
+          labelHt="Lyen Ekstèn"
+          lang={lang}
+          hint={isHt ? 'Paj ofisyèl mizik la (Spotify, YouTube, SoundCloud) — bouton «Louvri» sou fich la' : 'Official track page (Spotify, YouTube, SoundCloud) — “Open” button on the sheet'}
+        >
+          <PropInput
+            type="url"
+            value={form.external_url}
+            onChange={(e) => handleChange('external_url', e.target.value)}
+            placeholder="https://open.spotify.com/track/..."
+          />
+        </PropField>
       </PropertyGroup>
 
       <PropertyGroup icon="fa-hashtag" label="Discovery" labelHt="Dekouvèt" lang={lang}>
