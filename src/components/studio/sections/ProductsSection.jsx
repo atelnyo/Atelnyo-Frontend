@@ -17,8 +17,11 @@ import styles from './sections.module.css';
 export default function ProductsSection({ lang, t, showToast, setShowProductModal, onEdit }) {
   const [confirm, setConfirm] = useState(null);
   const [confirmBusy, setConfirmBusy] = useState(false);
+  // Owner's management list (not the public catalog): a high limit so a
+  // freshly imported draft is always on the first page — with limit: 10
+  // new imports beyond the first page were invisible until a full reload.
   const { data: products, loading, refetch, removeLocal } = useFetch(
-    () => marketplaceService.list({ limit: 10, mine: true }),
+    () => marketplaceService.list({ limit: 100, mine: true }),
     { defaultValue: [], transform: (d) => (Array.isArray(d?.results || d) ? (d?.results || d) : []) },
   );
 

@@ -22,7 +22,7 @@ const IMPORT_FIELD_OPTIONS = [
 ];
 const ALL_IMPORT_FIELDS = IMPORT_FIELD_OPTIONS.map((o) => o.key);
 
-export default function PrintifyImportPanel({ isHt, showToast, onImported }) {
+export default function PrintifyImportPanel({ isHt, showToast, onImported, onClose }) {
   const [conn, setConn] = useState(null);
   const [connError, setConnError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -111,6 +111,7 @@ export default function PrintifyImportPanel({ isHt, showToast, onImported }) {
         'check-circle',
       );
       setImported(list);
+      setSelected([]);
       onImported?.(list);
       await handleLoadProducts();
     } catch (err) {
@@ -219,10 +220,17 @@ export default function PrintifyImportPanel({ isHt, showToast, onImported }) {
         </button>
       )}
       {imported.length > 0 && (
-        <p className={styles.propsHint}>
-          {t('Imported as drafts:', 'Enpòte kòm bouyon:')}{' '}
-          {imported.map((p) => p.title).join(', ')}
-        </p>
+        <div>
+          <p className={styles.propsHint}>
+            {t('Imported as drafts:', 'Enpòte kòm bouyon:')}{' '}
+            {imported.map((p) => p.title).join(', ')}
+          </p>
+          {onClose && (
+            <button type="button" className="btn-primary" onClick={onClose}>
+              {t('Close and view my products', 'Fèmen epi wè pwodwi m yo')}
+            </button>
+          )}
+        </div>
       )}
       {error && <p role="alert">{error}</p>}
     </div>

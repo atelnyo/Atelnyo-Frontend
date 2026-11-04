@@ -605,7 +605,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
 
       {form.kind === 'physical' && (
         <PropertyGroup icon="fa-print" label="Printify" labelHt="Printify" lang={lang}>
-          <PrintifyImportPanel isHt={isHt} showToast={showToast} onImported={onImported} />
+          <PrintifyImportPanel isHt={isHt} showToast={showToast} onImported={onImported} onClose={onClose} />
         </PropertyGroup>
       )}
 
