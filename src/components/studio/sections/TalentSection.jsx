@@ -24,22 +24,24 @@ export default function TalentSection({ lang, t, showToast, setShowTalentModal, 
       item,
       title: lang === 'ht' ? 'Efase talan' : 'Delete talent',
       message: lang === 'ht' ? `Eske w sèten ou vle efase "${item.name}"?` : `Are you sure you want to delete "${item.name}"?`,
-      onConfirm: async () => {
-        setConfirmBusy(true);
-        // Optimistic: the row vanishes instantly — no waiting on a slow
-        // network, no stale row if the refetch races. A failed delete
+      onConfirm: () => {
+        // Optimistic + non-blocking: the row vanishes instantly AND the
+        // dialog closes right away — the DELETE finishes in the
+        // background. (Backend cold starts can stall a request 30s+;
+        // never trap the user behind a spinner.) A failed delete
         // refetches from the server, which restores the row.
         removeLocal((row) => row.id === item.id);
-        try {
-          await talentService.delete(item.id);
-          showToast?.(lang === 'ht' ? '✅ Talan efase!' : '✅ Talent deleted!', 'check-circle');
-          refetch();
-        } catch (err) {
-          showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase.' : 'Could not delete.'), 'circle-exclamation');
-          refetch();
-        }
         setConfirmBusy(false);
         setConfirm(null);
+        (async () => {
+          try {
+            await talentService.delete(item.id);
+            showToast?.(lang === 'ht' ? '✅ Talan efase!' : '✅ Talent deleted!', 'check-circle');
+          } catch (err) {
+            showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase.' : 'Could not delete.'), 'circle-exclamation');
+          }
+          refetch();
+        })();
       },
     });
   };
