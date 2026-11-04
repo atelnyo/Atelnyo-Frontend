@@ -11,8 +11,7 @@
  * SAVE vs PUBLISH are REAL different states here — the marketplace
  * Product model has ``is_active`` (the publish flag):
  *   • Save draft → is_active=false (hidden from the marketplace)
- *   • Publish    → is_active=true  (live for buyers)
- * Autosave preserves the current visibility.
+ *   • Publish    → is_active=true  (live for buyers)  * Autosave preserves the current published/draft state.
  *
  * PRODUCT KINDS (backend: Product.KIND_CHOICES) drive contextual
  * panels — inventory for physical, the download resource for digital,
