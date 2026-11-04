@@ -2,7 +2,16 @@
  * src/components/studio/editor/JobEditor.jsx
  */
 import React, { useCallback, useRef, useState } from 'react';
-import { jobService } from '../../../services/api';
+import useFetch from '../../../hooks/useFetch';
+import { jobService, communitiesService } from '../../../services/api';
+
+function toLocalInput(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 import StudioEditorShell from './StudioEditorShell';
 import StudioPropertiesPanel, { PropertyGroup, PropField, PropInput } from './StudioPropertiesPanel';
 import { ImageUrlField } from '../modals/shared';
@@ -24,7 +33,13 @@ export default function JobEditor({ onClose, onSuccess, onSaved, lang = 'ht', sh
     is_remote: item?.is_remote ?? false,
     location: item?.location || '',
     visibility: item?.visibility || 'public',
+    community: item?.community ?? '',
+    expires_at: toLocalInput(item?.expires_at),
   });
+  const { data: communities } = useFetch(
+    () => communitiesService.list({ limit: 50 }),
+    { defaultValue: [], transform: (d) => (Array.isArray(d) ? d : (d?.results || [])) },
+  );
   const [errors, setErrors] = useState({});
   const [saveState, setSaveState] = useState('idle');
   const [dirty, setDirty] = useState(false);
@@ -51,6 +66,7 @@ export default function JobEditor({ onClose, onSuccess, onSaved, lang = 'ht', sh
     if (!Number.isFinite(min) || min < 0) errs.budget_min = isHt ? 'Envalid' : 'Invalid';
     if (!Number.isFinite(max) || max < 0) errs.budget_max = isHt ? 'Envalid' : 'Invalid';
     if (Number.isFinite(min) && Number.isFinite(max) && max < min) errs.budget_max = isHt ? 'Max dwe >= min' : 'Max must be >= min';
+    if (form.visibility === 'community' && !form.community) errs.community = isHt ? 'Chwazi kominote a' : 'Pick the community';
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }, [form, isHt]);
@@ -70,6 +86,8 @@ export default function JobEditor({ onClose, onSuccess, onSaved, lang = 'ht', sh
       is_remote: Boolean(form.is_remote),
       location: form.location.trim() || '',
       visibility: publish ? 'public' : form.visibility,
+      community: form.visibility === 'community' && form.community ? Number(form.community) : null,
+      expires_at: form.expires_at ? new Date(form.expires_at).toISOString() : null,
     };
     try {
       let res;
@@ -149,19 +167,34 @@ export default function JobEditor({ onClose, onSuccess, onSaved, lang = 'ht', sh
         <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: 12 }}>{isHt ? 'Ki moun ka wè sa a?' : 'Who can see this?'}</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <label style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: 12, border: '1px solid var(--border-color)', borderRadius: 8, cursor: 'pointer' }}>
-            <input type="radio" name="visibility" value="followers" checked={(form.visibility || 'public') === 'followers'} onChange={(e) => handleChange('visibility', e.target.value)} style={{ marginTop: 4 }} />
+            <input type="radio" name="visibility" value="public" checked={(form.visibility || 'public') === 'public'} onChange={(e) => handleChange('visibility', e.target.value)} style={{ marginTop: 4 }} />
             <div>
-              <div style={{ fontWeight: 600 }}>{isHt ? 'Swivè sèlman (gratis)' : 'Followers only (free)'}</div>
-              <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>{isHt ? 'Sèlman ou menm ak moun k ap swiv ou ka wè l.' : 'Only you and the people following you can see it.'}</div>
+              <div style={{ fontWeight: 600 }}>{isHt ? 'Piblik' : 'Public'}</div>
+              <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>{isHt ? 'Tout moun ka wè l' : 'Everyone can see it'}</div>
             </div>
           </label>
           <label style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: 12, border: '1px solid var(--border-color)', borderRadius: 8, cursor: 'pointer' }}>
-            <input type="radio" name="visibility" value="subscribers" checked={(form.visibility || 'public') === 'subscribers'} onChange={(e) => handleChange('visibility', e.target.value)} style={{ marginTop: 4 }} />
+            <input type="radio" name="visibility" value="community" checked={form.visibility === 'community'} onChange={(e) => handleChange('visibility', e.target.value)} style={{ marginTop: 4 }} />
             <div>
-              <div style={{ fontWeight: 600 }}>{isHt ? 'Abonè peyan sèlman' : 'Subscribers only (paid)'}</div>
-              <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>{isHt ? 'Sèlman abonè peyan yo ka wè l — mete pri abònman nan Anviwònman Pwofil.' : 'Only paid subscribers can see it — set a subscription price in Profile Settings.'}</div>
+              <div style={{ fontWeight: 600 }}>{isHt ? 'Kominote sèlman' : 'Community only'}</div>
+              <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>{isHt ? 'Sèlman manb kominote a ka wè l' : 'Only members of the community can see it'}</div>
             </div>
           </label>
+        </div>
+        {form.visibility === 'community' && (
+          <div style={{ marginTop: 12 }}>
+            <PropField label={isHt ? 'Kominote' : 'Community'} required error={errors.community}>
+              <select value={form.community} onChange={(e) => handleChange('community', e.target.value)} className={styles.select}>
+                <option value="">{isHt ? '-- Chwazi --' : '-- Select --'}</option>
+                {(communities || []).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </PropField>
+          </div>
+        )}
+        <div style={{ marginTop: 12 }}>
+          <PropField label={isHt ? 'Ekspire (opsyonèl)' : 'Expires (optional)'}>
+            <input type="datetime-local" value={form.expires_at} onChange={(e) => handleChange('expires_at', e.target.value)} className={styles.input} />
+          </PropField>
         </div>
       </div>
     </div>

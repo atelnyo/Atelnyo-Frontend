@@ -19,6 +19,24 @@ export default function ProjectFormModal({ onClose, onSuccess, lang, showToast, 
     title: item?.title || '', description: item?.description || '', category: item?.category || '', project_url: item?.project_url || '', cover_url: item?.cover_url || '',
     // Phase 60 — follower-gated content: 'public' or 'followers'.
     visibility: item?.visibility || 'public',
+    source_url: item?.source_url || '',
+    skills_used: Array.isArray(item?.skills_used) ? item.skills_used.join(', ') : '',
+    difficulty: item?.difficulty || 'intermediate',
+    completion_date: item?.completion_date || '',
+    is_published: item?.is_published ?? true,
+  });
+  const payload = () => ({
+    title: form.title.trim(),
+    description: form.description.trim() || undefined,
+    category: form.category || undefined,
+    project_url: form.project_url.trim() || undefined,
+    cover_url: form.cover_url.trim() || undefined,
+    visibility: form.visibility || 'public',
+    source_url: form.source_url.trim() || undefined,
+    skills_used: form.skills_used ? form.skills_used.split(',').map((s) => s.trim()).filter(Boolean) : [],
+    difficulty: form.difficulty,
+    completion_date: form.completion_date || null,
+    is_published: Boolean(form.is_published),
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -41,23 +59,9 @@ export default function ProjectFormModal({ onClose, onSuccess, lang, showToast, 
     setLoading(true);
     try {
 if (isEdit) {
-        await portfolioService.update(item.id, {
-          title: form.title.trim(),
-          description: form.description.trim() || undefined,
-          category: form.category || undefined,
-          project_url: form.project_url.trim() || undefined,
-          cover_url: form.cover_url.trim() || undefined,
-          visibility: form.visibility || 'public',
-        });
+        await portfolioService.update(item.id, payload());
       } else {
-        await api.post('portfolio/projects/', {
-          title: form.title.trim(),
-          description: form.description.trim() || undefined,
-          category: form.category || undefined,
-          project_url: form.project_url.trim() || undefined,
-          cover_url: form.cover_url.trim() || undefined,
-          visibility: form.visibility || 'public',
-        });
+        await api.post('portfolio/projects/', payload());
       }
       showToast?.(
         isEdit
@@ -146,6 +150,49 @@ if (isEdit) {
                 : 'Paste a DIRECT image URL (.jpg, .png, .webp) — not a gallery page.'}
               help={HELP_COPY.cover}
             />
+          </FormSection>
+
+          <FormSection
+            icon="fa-code"
+            title={lang === 'ht' ? 'Detay Pwojè' : 'Project Details'}
+            hint={lang === 'ht' ? 'Lyen sous, konpetans, nivo ak dat.' : 'Source link, skills, level and date.'}
+          >
+            <FormField label={lang === 'ht' ? 'URL Sous (GitHub)' : 'Source URL (GitHub)'}>
+              <input className={styles.input} value={form.source_url}
+                onChange={(e) => handleChange('source_url', e.target.value)}
+                placeholder="https://github.com/..." />
+            </FormField>
+            <FormField label={lang === 'ht' ? 'Konpetans (separe ak virgül)' : 'Skills (comma separated)'}>
+              <input className={styles.input} value={form.skills_used}
+                onChange={(e) => handleChange('skills_used', e.target.value)}
+                placeholder={lang === 'ht' ? 'React, Django, Design...' : 'React, Django, Design...'} />
+            </FormField>
+            <FormField label={lang === 'ht' ? 'Nivo' : 'Difficulty'}>
+              <select className={styles.input} value={form.difficulty}
+                onChange={(e) => handleChange('difficulty', e.target.value)}>
+                <option value="beginner">{lang === 'ht' ? 'Debitan' : 'Beginner'}</option>
+                <option value="intermediate">{lang === 'ht' ? 'Mwayen' : 'Intermediate'}</option>
+                <option value="advanced">{lang === 'ht' ? 'Avanse' : 'Advanced'}</option>
+                <option value="expert">{lang === 'ht' ? 'Ekspè' : 'Expert'}</option>
+              </select>
+            </FormField>
+            <FormField label={lang === 'ht' ? 'Dat finalizasyon' : 'Completion date'}>
+              <input type="date" className={styles.input} value={form.completion_date}
+                onChange={(e) => handleChange('completion_date', e.target.value)} />
+            </FormField>
+            <label className={styles.toggleRow}>
+              <span>
+                <strong>{lang === 'ht' ? 'Pibliye' : 'Published'}</strong>
+                <small>{lang === 'ht'
+                  ? 'Si w etenn li, pwojè a kache (bouyon).'
+                  : 'When off, the project is hidden (draft).'}</small>
+              </span>
+              <input
+                type="checkbox"
+                checked={Boolean(form.is_published)}
+                onChange={(e) => handleChange('is_published', e.target.checked)}
+              />
+            </label>
           </FormSection>
 
           <FormSection
