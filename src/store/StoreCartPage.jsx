@@ -258,8 +258,13 @@ export default function StoreCartPage() {
   };
 
   const onCheckout = async (resumeExistingPayment = false) => {
+    // onClick passes a SyntheticEvent as the first arg — only honour an
+    // explicit boolean true, otherwise a fresh checkout would send
+    // pending_shipping_confirmation:true and the backend answers 409
+    // "No pending shipping confirmation was found."
+    const resume = resumeExistingPayment === true;
     if (!items.length) return;
-    if (!detailsReady && !resumeExistingPayment) {
+    if (!detailsReady && !resume) {
       setMessage('Loading product details… try again in a moment.');
       setStatus('error');
       return;
@@ -334,7 +339,7 @@ export default function StoreCartPage() {
       const token = orderRes?.data?.guest_token || guestToken || null;
       setGuestToken(token);
       const payRes = await storeService.checkoutOrder(
-        resolvedOrderId, 'paypal', token, resumeExistingPayment,
+        resolvedOrderId, 'paypal', token, resume,
       );
       const pay = payRes?.data || {};
       if (!pay.paypal_order_id) {
@@ -693,7 +698,7 @@ export default function StoreCartPage() {
           <button
             type="button"
             className="store-btn store-cart__checkout"
-            onClick={onCheckout}
+            onClick={() => onCheckout(false)}
             disabled={Boolean(busyLabel)}
           >
             {busyLabel ? (
