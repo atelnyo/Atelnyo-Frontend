@@ -1273,6 +1273,11 @@ export const communitiesService = {
     api.post(`community-posts/?community=${encodeURIComponent(slug)}`, data),
   deletePost: (id) => api.delete(`community-posts/${id}/`),
   reactToPost: (id, emoji) => api.post(`community-posts/${id}/react/`, { emoji }),
+  postComments: (postId) =>
+    api.get('community-post-comments/', { params: { post: postId } }),
+  createComment: (postId, content) =>
+    api.post(`community-post-comments/?post=${encodeURIComponent(postId)}`, { content }),
+  deleteComment: (id) => api.delete(`community-post-comments/${id}/`),
   getSEO: (id) => api.get(`intelligence/community/${id}/seo/`),
 };
 

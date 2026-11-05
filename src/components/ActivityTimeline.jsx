@@ -35,6 +35,8 @@ const EVENT_META = {
   course_completed:       { icon: 'fa-trophy',          label_ht: 'Kou fini',                label_en: 'Course completed' },
   community_joined:       { icon: 'fa-users',           label_ht: 'Antre nan kominote',      label_en: 'Joined community' },
   event_created:          { icon: 'fa-calendar-plus',   label_ht: 'Evènman kreye',           label_en: 'Event created' },
+  community_post_comment: { icon: 'fa-comment',         label_ht: 'Kòmantè sou pòs ou',      label_en: 'Comment on your post' },
+  community_post_reaction:{ icon: 'fa-heart',           label_ht: 'Reyaksyon sou pòs ou',    label_en: 'Reaction on your post' },
   // Moderation notices — private timeline events for the targeted
   // member only (is_public=False on the backend).
   community_member_banned:   { icon: 'fa-ban',           label_ht: 'Ou te ban nan kominote',   label_en: 'You were banned from a community' },
@@ -116,6 +118,7 @@ const TYPE_ACCENTS = {
   profile_request_rejected: 'social',
   // Community — teal (moderation notices red)
   community_joined: 'community', event_created: 'community',
+  community_post_comment: 'community', community_post_reaction: 'community',
   community_member_banned: 'danger', community_member_unbanned: 'community',
   community_member_muted: 'community', community_member_unmuted: 'community',
   // Creative — amber
@@ -138,6 +141,8 @@ const NOTIFICATION_ROUTES = {
   course_enrolled:        (d) => d?.course_id ? `/sheet/course/${d.course_id}` : null,
   course_completed:       (d) => d?.course_id ? `/sheet/course/${d.course_id}` : null,
   community_joined:       (d) => d?.community_slug ? `/community/${d.community_slug}` : null,
+  community_post_comment: (d) => d?.community_slug ? `/community/${d.community_slug}/posts` : null,
+  community_post_reaction:(d) => d?.community_slug ? `/community/${d.community_slug}/posts` : null,
   contract_started:       () => '/sheet/studio?section=contracts',
   milestone_completed:    () => '/sheet/studio?section=contracts',
   milestone_approved:     () => '/sheet/studio?section=contracts',

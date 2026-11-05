@@ -49,6 +49,11 @@ export default function CommunityPosts() {
   const [draft, setDraft] = useState('');
   const [publishing, setPublishing] = useState(false);
   const [reacting, setReacting] = useState({});
+  const [openComments, setOpenComments] = useState({});
+  const [commentLists, setCommentLists] = useState({});
+  const [commentsLoading, setCommentsLoading] = useState({});
+  const [commentDrafts, setCommentDrafts] = useState({});
+  const [sendingComment, setSendingComment] = useState({});
 
   const slug = community?.slug;
   const isMember = Boolean(community?.is_member);
@@ -146,6 +151,80 @@ export default function CommunityPosts() {
     return user.id === post.author || user.username === post.author_username;
   }
 
+  function canDeleteComment(comment) {
+    if (!user) return false;
+    if (canModerate) return true;
+    return user.id === comment.author || user.username === comment.author_username;
+  }
+
+  function toggleComments(post) {
+    const willOpen = !openComments[post.id];
+    setOpenComments((m) => ({ ...m, [post.id]: willOpen }));
+    if (willOpen && commentLists[post.id] === undefined && !commentsLoading[post.id]) {
+      setCommentsLoading((m) => ({ ...m, [post.id]: true }));
+      communitiesService.postComments(post.id)
+        .then((r) => {
+          const data = Array.isArray(r?.data) ? r.data : (r?.data?.results || []);
+          setCommentLists((m) => ({ ...m, [post.id]: data }));
+        })
+        .catch(() => { setCommentLists((m) => ({ ...m, [post.id]: [] })); })
+        .finally(() => { setCommentsLoading((m) => ({ ...m, [post.id]: false })); });
+    }
+  }
+
+  async function handleSendComment(post) {
+    const content = (commentDrafts[post.id] || '').trim();
+    if (!content || sendingComment[post.id]) return;
+    if (!user) {
+      showToast?.(t4(lang, 'Konekte pou w kòmante', 'Sign in to comment', 'Connectez-vous pour commenter', 'Inicia sesión para comentar'), 'user-lock');
+      return;
+    }
+    const tempId = `temp-${Date.now()}`;
+    const optimistic = {
+      id: tempId, content, author: user.id, author_username: user.username,
+      created_at: new Date().toISOString(),
+    };
+    setCommentLists((m) => ({ ...m, [post.id]: [...(m[post.id] || []), optimistic] }));
+    setCommentDrafts((m) => ({ ...m, [post.id]: '' }));
+    setSendingComment((m) => ({ ...m, [post.id]: true }));
+    try {
+      const res = await communitiesService.createComment(post.id, content);
+      if (res?.data?.id) {
+        setCommentLists((m) => ({
+          ...m,
+          [post.id]: (m[post.id] || []).map((c) => (c.id === tempId ? res.data : c)),
+        }));
+      }
+      setPosts((list) => list.map((p) => (p.id === post.id
+        ? { ...p, comment_count: (p.comment_count || 0) + 1 }
+        : p)));
+    } catch (err) {
+      setCommentLists((m) => ({
+        ...m, [post.id]: (m[post.id] || []).filter((c) => c.id !== tempId),
+      }));
+      showToast?.(err?.response?.data?.detail || t4(lang, 'Nou pa ka kòmante.', 'Could not comment.', 'Commentaire impossible.', 'No se pudo comentar.'), 'circle-exclamation');
+    } finally {
+      setSendingComment((m) => ({ ...m, [post.id]: false }));
+    }
+  }
+
+  async function handleDeleteComment(post, comment) {
+    if (String(comment.id).startsWith('temp-')) return;
+    const prev = commentLists[post.id] || [];
+    setCommentLists((m) => ({
+      ...m, [post.id]: prev.filter((c) => c.id !== comment.id),
+    }));
+    try {
+      await communitiesService.deleteComment(comment.id);
+      setPosts((list) => list.map((p) => (p.id === post.id
+        ? { ...p, comment_count: Math.max(0, (p.comment_count || 1) - 1) }
+        : p)));
+    } catch (err) {
+      setCommentLists((m) => ({ ...m, [post.id]: prev }));
+      showToast?.(err?.response?.data?.detail || t4(lang, 'Pa t kapab efase.', 'Could not delete.', 'Suppression impossible.', 'No se pudo eliminar.'), 'circle-exclamation');
+    }
+  }
+
   if (loading) {
     return (
       <div className="c-list c-list--gap12" data-testid="posts-skeleton">
@@ -233,6 +312,78 @@ export default function CommunityPosts() {
           <p className="c-post-content">{post.content}</p>
           {post.image_url && (
             <img className="c-post-image" src={post.image_url} alt="" loading="lazy" />
+          )}
+          <div className="c-post-foot">
+            <button
+              type="button"
+              className={`c-comment-toggle${openComments[post.id] ? ' c-comment-toggle--open' : ''}`}
+              onClick={() => toggleComments(post)}
+              aria-expanded={Boolean(openComments[post.id])}
+              data-testid={`post-comments-toggle-${post.id}`}
+            >
+              <i className="fas fa-comment" aria-hidden="true" /> {post.comment_count || 0} {t4(lang, 'kòmantè', 'comments', 'commentaires', 'comentarios')}
+            </button>
+          </div>
+          {openComments[post.id] && (
+            <div className="c-comments" data-testid={`post-comments-${post.id}`}>
+              {commentsLoading[post.id] ? (
+                <div className="c-comments-loading">
+                  <i className="fas fa-spinner fa-spin" aria-hidden="true" />
+                </div>
+              ) : (commentLists[post.id] || []).length === 0 ? (
+                <p className="c-comments-empty">
+                  {t4(lang, 'Pa gen kòmantè ankò — kòmanse diskisyon an!', 'No comments yet — start the discussion!', 'Aucun commentaire — lancez la discussion !', '¡Sin comentarios — inicia la discusión!')}
+                </p>
+              ) : (commentLists[post.id] || []).map((comment) => (
+                <div key={comment.id} className="c-comment">
+                  <span className="c-comment-avatar" aria-hidden="true">
+                    {(comment.author_username || '?')[0].toUpperCase()}
+                  </span>
+                  <div className="c-comment-body">
+                    <span className="c-comment-author">@{comment.author_username}</span>
+                    <span className="c-comment-text">{comment.content}</span>
+                  </div>
+                  {canDeleteComment(comment) && (
+                    <button
+                      type="button"
+                      className="c-comment-delete"
+                      onClick={() => handleDeleteComment(post, comment)}
+                      title={t4(lang, 'Efase', 'Delete', 'Supprimer', 'Eliminar')}
+                      aria-label={t4(lang, 'Efase kòmantè', 'Delete comment', 'Supprimer', 'Eliminar')}
+                      data-testid={`comment-delete-${comment.id}`}
+                    >
+                      <i className="fas fa-trash" aria-hidden="true" />
+                    </button>
+                  )}
+                </div>
+              ))}
+              {isMember && (
+                <div className="c-comment-form">
+                  <input
+                    className="c-comment-input"
+                    value={commentDrafts[post.id] || ''}
+                    onChange={(e) => setCommentDrafts((m) => ({ ...m, [post.id]: e.target.value }))}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleSendComment(post); }}
+                    maxLength={1000}
+                    placeholder={t4(lang, 'Ekri yon kòmantè...', 'Write a comment...', 'Écrivez un commentaire...', 'Escribe un comentario...')}
+                    aria-label={t4(lang, 'Nouvo kòmantè', 'New comment', 'Nouveau commentaire', 'Nuevo comentario')}
+                    data-testid={`comment-input-${post.id}`}
+                  />
+                  <button
+                    type="button"
+                    className="c-comment-send"
+                    onClick={() => handleSendComment(post)}
+                    disabled={sendingComment[post.id] || !(commentDrafts[post.id] || '').trim()}
+                    aria-label={t4(lang, 'Voye kòmantè', 'Send comment', 'Envoyer', 'Enviar')}
+                    data-testid={`comment-send-${post.id}`}
+                  >
+                    {sendingComment[post.id]
+                      ? <i className="fas fa-spinner fa-spin" aria-hidden="true" />
+                      : <i className="fas fa-paper-plane" aria-hidden="true" />}
+                  </button>
+                </div>
+              )}
+            </div>
           )}
           <div className="c-post-reactions" role="group" aria-label={t4(lang, 'Reyaksyon', 'Reactions', 'Réactions', 'Reacciones')}>
             {REACTION_EMOJIS.map((emoji) => {

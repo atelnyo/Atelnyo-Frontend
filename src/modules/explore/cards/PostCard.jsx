@@ -36,7 +36,7 @@ function PostFallback({ label }) {
   );
 }
 
-export default function PostCard({ post, onOpen, t }) {
+export default function PostCard({ post, onOpen, t, feedbackType }) {
   const [imgFailed, setImgFailed] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
   const body = post.body || post.description || post.title || '';
@@ -81,8 +81,10 @@ export default function PostCard({ post, onOpen, t }) {
             <span className="explore-card-tag">
               <i className="fas fa-at" aria-hidden="true" /> {author}
             </span>
-          )}
-          <ContentFeedbackMenu contentType="post" contentId={post.id} />
+          )}            {/* Community-post rail rows report their own type so hide /
+                mute stays scoped to community posts (no id collision
+                with creator posts). Defaults to 'post' for legacy rows. */}
+            <ContentFeedbackMenu contentType={feedbackType || 'post'} contentId={post.id} />
           <span className="explore-card-cta" aria-hidden="true" style={{ marginLeft: 'auto' }}>
             <i className="fas fa-arrow-right" />
           </span>

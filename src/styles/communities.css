@@ -917,6 +917,127 @@ select.cm-input {
   border-radius: var(--radius-md);
   object-fit: cover;
 }
+.community-detail .c-post-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.community-detail .c-comment-toggle {
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 16px;
+}
+.community-detail .c-comment-toggle:hover {
+  background: var(--surface-highlight);
+}
+.community-detail .c-comment-toggle--open { color: var(--color-primary); }
+.community-detail .c-comments {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 8px;
+}
+.community-detail .c-comments-loading,
+.community-detail .c-comments-empty {
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+  text-align: center;
+  padding: 4px 0;
+}
+.community-detail .c-comment {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.community-detail .c-comment-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  background: var(--surface-highlight);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-bold);
+}
+.community-detail .c-comment-body {
+  flex: 1;
+  min-width: 0;
+  background: var(--surface-highlight);
+  border-radius: var(--radius-md);
+  padding: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.community-detail .c-comment-author {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+.community-detail .c-comment-text {
+  font-size: 0.82rem;
+  line-height: 1.45;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+.community-detail .c-comment-delete {
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+}
+.community-detail .c-comment-delete:hover { color: #ef4444; }
+.community-detail .c-comment-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.community-detail .c-comment-input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 7px 12px;
+  font: inherit;
+  font-size: 0.82rem;
+  color: var(--text-primary);
+  background: var(--surface-base, transparent);
+}
+.community-detail .c-comment-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+.community-detail .c-comment-send {
+  border: none;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  background: var(--color-primary);
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.community-detail .c-comment-send:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
 .community-detail .c-post-reactions {
   display: flex;
   flex-wrap: wrap;

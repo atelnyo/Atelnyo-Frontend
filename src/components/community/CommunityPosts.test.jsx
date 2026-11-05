@@ -17,6 +17,9 @@ vi.mock('../../services/api', () => ({
     createPost: vi.fn(),
     deletePost: vi.fn(),
     reactToPost: vi.fn(),
+    postComments: vi.fn(),
+    createComment: vi.fn(),
+    deleteComment: vi.fn(),
   },
 }));
 
@@ -91,5 +94,28 @@ describe('CommunityPosts', () => {
     await screen.findByText('Bonjou tout moun!');
     fireEvent.click(screen.getByTestId('post-delete-1'));
     await waitFor(() => expect(communitiesService.deletePost).toHaveBeenCalledWith(1));
+  });
+
+  it('expands comments and sends one', async () => {
+    communitiesService.postComments.mockResolvedValue({ data: [] });
+    communitiesService.createComment.mockResolvedValue({
+      data: { id: 10, content: 'Dakò!', author: 9, author_username: 'manm1' },
+    });
+    render(<Harness community={MEMBER_COMM} user={USER} />);
+    await screen.findByText('Bonjou tout moun!');
+    fireEvent.click(screen.getByTestId('post-comments-toggle-1'));
+    expect(await screen.findByTestId('post-comments-1')).toBeTruthy();
+    expect(communitiesService.postComments).toHaveBeenCalledWith(1);
+    fireEvent.change(screen.getByTestId('comment-input-1'), { target: { value: 'Dakò!' } });
+    fireEvent.click(screen.getByTestId('comment-send-1'));
+    await waitFor(() => expect(communitiesService.createComment).toHaveBeenCalledWith(1, 'Dakò!'));
+    expect(await screen.findByText('Dakò!')).toBeTruthy();
+  });
+
+  it('shows the comment count on the toggle', async () => {
+    const withCount = [{ ...POSTS[0], comment_count: 3 }];
+    communitiesService.posts.mockResolvedValue({ data: withCount });
+    render(<Harness community={MEMBER_COMM} user={USER} />);
+    expect(await screen.findByTestId('post-comments-toggle-1')).toHaveTextContent('3');
   });
 });

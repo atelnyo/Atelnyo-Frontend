@@ -90,6 +90,10 @@ const SECTION_RENDERERS = {
   // destination (posts have no standalone route).
   newest_post:           { icon: 'fa-pen-nib',       defaultCard: PostCard },
   trending_post:         { icon: 'fa-pen-nib',       defaultCard: PostCard },
+  // Community member posts (public communities only, backend-gated).
+  // Same text-first PostCard; the backend deep-link lands on the
+  // community's Posts tab.
+  newest_community_post: { icon: 'fa-comments',      defaultCard: PostCard },
   // Roadmap "plis direksyon" — recency + curated rails added to the
   // backend HomeFeedBuilder so fresh content (no score rows yet) and
   // admin-featured courses surface without waiting for the scoring cron.
@@ -137,6 +141,7 @@ const SECTION_ITEM_TYPES = {
   upcoming_events: 'event', portfolio_showcase: 'portfolio',
   spotlight: 'spotlight', follow_suggestions: 'creator',
   newest_post: 'post', trending_post: 'post',
+  newest_community_post: 'community_post',
 };
 
 export function dedupeFeedSections(sections) {
@@ -508,6 +513,7 @@ export default function HomeFeed({
                       post={item}
                       t={t}
                       lang={lang}
+                      feedbackType={item?.item_type === 'community_post' ? 'community_post' : undefined}
                       onOpen={(post) => {
                         // Backend attaches the canonical post URL; fall back
                         // to the author's profile for a legacy row.
