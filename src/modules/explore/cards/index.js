@@ -34,6 +34,7 @@ import {
   SkeletonCourseCard,
   SkeletonMusicCard,
   SkeletonTalentCard,
+  SkeletonEventCard,
   SkeletonSpotlightCard,
 } from './skeleton/SkeletonCards';
 
@@ -58,7 +59,7 @@ export const CardRegistry = {
   community: { component: CommunityCard, skeleton: 'course' },
   portfolio: { component: PortfolioCard, skeleton: 'course' },
   product:   { component: ProductCard,   skeleton: 'course' },
-  event:     { component: EventCard,     skeleton: 'course' },
+  event:     { component: EventCard,     skeleton: 'event' },
   job:       { component: JobPostCard,   skeleton: 'course' },
   spotlight: { component: SpotlightCard, skeleton: 'spotlight' },
   post:      { component: PostCard,      skeleton: 'course' },
@@ -70,6 +71,7 @@ export const SkeletonMap = {
   course:    SkeletonCourseCard,
   music:     SkeletonMusicCard,
   talent:    SkeletonTalentCard,
+  event:     SkeletonEventCard,
   spotlight: SkeletonSpotlightCard,
 };
 
@@ -92,5 +94,6 @@ export {
   SkeletonCourseCard,
   SkeletonMusicCard,
   SkeletonTalentCard,
+  SkeletonEventCard,
   SkeletonSpotlightCard,
 };

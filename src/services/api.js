@@ -1248,6 +1248,10 @@ export const communitiesService = {
   joinRequests: (slug) => api.get(`communities/${encodeURIComponent(slug)}/join_requests/`),
   approveJoinRequest: (slug, userId) => api.post(`communities/${encodeURIComponent(slug)}/join_requests/${userId}/approve/`),
   rejectJoinRequest: (slug, userId) => api.post(`communities/${encodeURIComponent(slug)}/join_requests/${userId}/reject/`),
+  // House rules — ordered list, replace-all semantics. Only a manager
+  // (owner/admin/moderator) may write; everyone may read (nested on detail).
+  saveRules: (slug, rules) =>
+    api.post(`communities/${encodeURIComponent(slug)}/rules/`, { rules }),
   // Role + discipline management (hierarchy-gated server-side: an actor
   // may only act strictly below their own role; owner-only promote/demote).
   // ``membershipId`` is the CommunityMembership row id (members list rows).
@@ -1288,6 +1292,9 @@ export const communityEventsService = {
   create: (data) => api.post('community-events/', data),
   update: (id, data) => api.patch(`community-events/${id}/`, data),
   delete: (id) => api.delete(`community-events/${id}/`),
+  // Guest list — moderator/owner only (backend 403s everyone else).
+  // Returns confirmed + reserved tickets with user info.
+  attendees: (id) => api.get(`community-events/${id}/attendees/`),
 };
 
 // ─── Jobs (Phase 25) ────────────────────────────────────────────────────
@@ -1330,10 +1337,34 @@ export const contractService = {
   cancel: (id) => api.post(`job-contracts/${id}/cancel/`),
 };
 
+// ─── Contract milestones — the funding checkpoints inside a contract ───
+// Backend: /api/job-milestones/ (ContractMilestoneViewSet). Participants
+// only; create requires ?contract=<id> of an active contract they belong
+// to. Lifecycle: pending →(freelancer) submitted →(client) approved →
+// paid. Funding (escrow hold) goes through checkoutService.escrow
+// (PayPal AUTHORIZE) while the milestone is pending/in_progress.
+export const milestoneService = {
+  // GET /api/job-milestones/?contract=<id> — milestones of one contract.
+  list: (params) => api.get('job-milestones/', { params }),
+  // POST /api/job-milestones/ { contract, title, description, amount,
+  // due_date, order } — participants of an active contract.
+  create: (data) => api.post('job-milestones/', data),
+  // POST /api/job-milestones/<id>/submit/ — freelancer; pending/in_progress.
+  submit: (id) => api.post(`job-milestones/${id}/submit/`),
+  // POST /api/job-milestones/<id>/approve/ — client; submitted only.
+  // Creates the bookkeeping transaction (escrow release handled server-side).
+  approve: (id) => api.post(`job-milestones/${id}/approve/`),
+  // POST /api/job-milestones/<id>/mark_paid/ — client (only when the
+  // provider confirmed the payment, i.e. linked_transaction_status ===
+  // 'succeeded') or staff override. Offers only when that status shows.
+  markPaid: (id) => api.post(`job-milestones/${id}/mark_paid/`),
+};
+
 // ─── Portfolio (Phase 26) ────────────────────────────────────────────────
 export const portfolioService = {
   list: (params) => api.get('portfolio/projects/', { params }),
   get: (id) => api.get(`portfolio/projects/${id}/`),
+  create: (data) => api.post('portfolio/projects/', data),
   update: (id, data) => api.patch(`portfolio/projects/${id}/`, data),
   delete: (id) => api.delete(`portfolio/projects/${id}/`),
   view: (id) => api.post(`portfolio/projects/${id}/view/`).catch(() => {}),

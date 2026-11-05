@@ -8,9 +8,12 @@
  *     (``is_member`` on each row, excluding ones they founded).
  *   * Pending join requests — per founded community with
  *     ``join_mode='approval'``; approve/reject inline.
- *   * "Found a Community" opens the same gated CreateCommunityModal
- *     used in Explore: can_create is probed first so ineligible
- *     creators get the explanation toast instead of a dead form.
+ *   * "Found a Community" opens the full StudioEditorShell-based
+ *     CommunityEditor (same workspace as Events/Jobs/Talent):
+ *     can_create is probed first so ineligible creators get the
+ *     explanation toast instead of a dead form.
+ *   * Founder cards carry an edit button wired to the same editor
+ *     via onEdit (handleEdit item/community in CreatorStudio).
  *
  * Styles: src/styles/communities.css (``cm-`` prefix, token-based).
  */
@@ -20,7 +23,6 @@ import useSafeNavigate from '../../../hooks/useSafeNavigate';
 import { communitiesService } from '../../../services/api';
 import { buildContentUrl } from '../../../utils/contentUrl';
 import { StudioSkeleton, EmptyState, SectionHeader } from '../shared';
-import CreateCommunityModal from '../../communities/CreateCommunityModal';
 import ConfirmModal from '../../common/ConfirmModal';
 import styles from './sections.module.css';
 
@@ -31,11 +33,11 @@ function formatWhen(value) {
   return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-export default function CommunitiesSection({ lang, t, showToast, user }) { // eslint-disable-line react/prop-types -- the codebase defines no PropTypes anywhere (same as EventsSection)
+export default function CommunitiesSection({ lang, t, showToast, user, setShowCommunityEditor, onEdit }) { // eslint-disable-line react/prop-types -- the codebase defines no PropTypes anywhere (same as EventsSection)
   const navigate = useSafeNavigate();
   const isHt = lang === 'ht';
-  // Same modal flow as Explore — eligibility is server-owned.
-  const [showCreate, setShowCreate] = useState(false);
+  // Same gating as Explore — eligibility is server-owned. Eligible
+  // creators land in the full CommunityEditor shell, not a mini modal.
 
   // Founded: the ?created_by= filter exists exactly for the public
   // profile dashboard (see CommunityViewSet.get_queryset) — reuse it.
@@ -110,8 +112,10 @@ export default function CommunitiesSection({ lang, t, showToast, user }) { // es
     setRejectTarget(null);
   }, [isHt, showToast, refetchRequests]);
 
-  // Probe can_create before showing the modal (same flow as Explore —
+  // Probe can_create before opening the editor (same gating as Explore —
   // ineligible creators get the explanation toast, not a dead form).
+  // The editor remounts CommunitiesSection via sectionVersion on save,
+  // so no local refetch is needed here.
   const handleFoundClick = useCallback(async () => {
     if (!user) {
       showToast?.(isHt ? 'Konekte pou w ka fonde yon kominote.' : 'Log in to found a community.', 'circle-exclamation');
@@ -121,7 +125,7 @@ export default function CommunitiesSection({ lang, t, showToast, user }) { // es
       const res = await communitiesService.canCreate();
       const data = res?.data?.data ?? res?.data ?? {};
       if (data?.can_create) {
-        setShowCreate(true);
+        setShowCommunityEditor?.(true);
       } else {
         // eslint-disable-next-line react/prop-types -- t is a plain translations object, untyped by convention
         showToast?.(t?.community_create_gated || (isHt
@@ -129,16 +133,9 @@ export default function CommunitiesSection({ lang, t, showToast, user }) { // es
           : 'Only creators with published content can found a community. Publish a course, product, or music first.'), 'circle-exclamation');
       }
     } catch {
-      setShowCreate(true); // server re-checks on submit
+      setShowCommunityEditor?.(true); // server re-checks on submit
     }
-  }, [user, isHt, t, showToast]);
-
-  const handleCreated = useCallback((community) => {
-    setShowCreate(false);
-    // eslint-disable-next-line react/prop-types -- t is a plain translations object, untyped by convention
-    showToast?.(t?.community_created || (isHt ? '✅ Kominote a kreye! Ou se fondatè li.' : '✅ Community created! You are its founder.'), 'check-circle');
-    if (community?.slug || community?.id) { openCommunity(community); }
-  }, [openCommunity, showToast, t, isHt]);
+  }, [user, isHt, t, showToast, setShowCommunityEditor]);
 
   const loading = loadingFounded || loadingJoined;
   if (loading) { return <StudioSkeleton rows={3} />; }
@@ -168,6 +165,17 @@ export default function CommunitiesSection({ lang, t, showToast, user }) { // es
         {c.description && <div className="cm-card-desc">{c.description}</div>}
       </div>
       <div className="cm-card-actions">
+        {isFounder && onEdit && (
+          <button
+            type="button"
+            className="cm-icon-btn"
+            onClick={() => onEdit(c)}
+            title={isHt ? 'Modifye kominote a' : 'Edit community'}
+            aria-label={isHt ? 'Modifye kominote a' : 'Edit community'}
+          >
+            <i className="fas fa-pen" aria-hidden="true" />
+          </button>
+        )}
         <button
           type="button"
           className="cm-icon-btn"
@@ -295,16 +303,6 @@ export default function CommunitiesSection({ lang, t, showToast, user }) { // es
           </>
         )}
       </div>
-
-      {showCreate && (
-        <CreateCommunityModal
-          lang={lang}
-          t={t}
-          showToast={showToast}
-          onClose={() => setShowCreate(false)}
-          onCreated={handleCreated}
-        />
-      )}
 
       {rejectTarget && (
         <ConfirmModal

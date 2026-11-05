@@ -41,7 +41,9 @@ export default function ProposalsSection({ lang, t, showToast }) {
   const [decision, setDecision] = useState(null);
 
   // ─── User's jobs (for the filter) ─────────────────────────────────────
-  const { data: jobs, loading: jobsLoading } = useFetch(
+  // refetchJobs keeps the hired progress (hired_count/positions) fresh
+  // after an accept fills a slot.
+  const { data: jobs, loading: jobsLoading, refetch: refetchJobs } = useFetch(
     () => jobService.mine(),
     { defaultValue: [], transform: (d) => {
       if (Array.isArray(d)) return d;
@@ -86,7 +88,8 @@ export default function ProposalsSection({ lang, t, showToast }) {
       mode === 'accept' ? 'check-circle' : 'ban',
     );
     refetch();
-  }, [lang, showToast, refetch]);
+    refetchJobs?.();
+  }, [lang, showToast, refetch, refetchJobs]);
 
   if (jobsLoading || loading) return <StudioSkeleton rows={4} />;
 
@@ -104,8 +107,8 @@ export default function ProposalsSection({ lang, t, showToast }) {
           en: 'Freelancers bid on your jobs with proposals. Filter by job, then accept or reject each offer — accepting creates a contract automatically.',
         }}
         tip={lang === 'ht'
-          ? 'Aksepte yon proposal rejte lòt proposal yo sou travay sa a otomatikman.'
-          : 'Accepting a proposal auto-rejects the other bids on that job.'}
+          ? 'Chak òf aksepte kreye pwòp kontra pa l (pwòp milestone + escrow). Lè dènye plas la pran, lòt òf yo rejte otomatikman.'
+          : 'Each accepted offer gets its own contract (own milestones + escrow). Taking the last slot auto-rejects the other bids.'}
         action={
           jobs.length > 0 ? (
             <select
@@ -118,15 +121,33 @@ export default function ProposalsSection({ lang, t, showToast }) {
                 {lang === 'ht' ? 'Tout travay' : 'All jobs'}
                 {pendingCount > 0 ? ` (${pendingCount} pendan)` : ''}
               </option>
-              {jobs.map((j) => (
-                <option key={j.id} value={j.id}>
-                  {j.title}
-                </option>
-              ))}
+              {jobs.map((j) => {
+                const pos = j.positions || 1;
+                const hired = j.hired_count ?? 0;
+                return (
+                  <option key={j.id} value={j.id}>
+                    {j.title}{pos > 1 ? ` (${hired}/${pos})` : ''}
+                  </option>
+                );
+              })}
             </select>
           ) : null
         }
       />
+
+      {selectedJob !== 'all' && (() => {
+        const j = jobs.find((x) => String(x.id) === String(selectedJob));
+        if (!j || (j.positions || 1) <= 1) return null;
+        const hired = j.hired_count ?? 0;
+        const left = Math.max(0, (j.positions || 1) - hired);
+        return (
+          <p className={styles.sectionDescription} role="status" style={{ marginTop: 0, marginBottom: 12 }}>
+            {lang === 'ht'
+              ? `👥 ${hired}/${j.positions} anboche — ${left} plas rete.`
+              : `👥 ${hired}/${j.positions} hired — ${left} slot(s) left.`}
+          </p>
+        );
+      })()}
 
       {isEmpty ? (
         <EmptyState
@@ -220,21 +241,26 @@ export default function ProposalsSection({ lang, t, showToast }) {
       {proposals.length > 0 && (
         <p className={styles.sectionDescription} style={{ marginTop: 16 }}>
           {lang === 'ht'
-            ? '💡 Aksepte yon proposal kreye yon kontra epi rejte lòt proposal yo otomatikman.'
-            : '💡 Accepting a proposal creates a contract and auto-rejects the other bids.'}
+            ? '💡 Aksepte yon proposal kreye yon kontra. Lòt òf yo rejte otomatikman sèlman lè tout plas yo plen.'
+            : '💡 Accepting a proposal creates a contract. Other bids auto-reject only once all slots are filled.'}
         </p>
       )}
 
       {/* Accept/Reject confirmation modal */}
-      {decision && (
-        <ProposalDecisionModal
-          proposal={decision.proposal}
-          mode={decision.mode}
-          lang={lang}
-          onClose={() => setDecision(null)}
-          onDone={() => handleDecisionDone(decision.mode)}
-        />
-      )}
+      {decision && (() => {
+        const j = jobs.find((x) => String(x.id) === String(decision.proposal?.job));
+        const slotsLeft = j ? Math.max(0, (j.positions || 1) - (j.hired_count ?? 0)) : null;
+        return (
+          <ProposalDecisionModal
+            proposal={decision.proposal}
+            mode={decision.mode}
+            lang={lang}
+            slotsLeft={decision.mode === 'accept' ? slotsLeft : null}
+            onClose={() => setDecision(null)}
+            onDone={() => handleDecisionDone(decision.mode)}
+          />
+        );
+      })()}
     </div>
   );
 }

@@ -6,7 +6,7 @@
  * Uses communityEventsService.list({ created_by: user.id }) so creators
  * only see their own events, including drafts.
  */
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import useFetch from '../../../hooks/useFetch';
 import { communityEventsService } from '../../../services/api';
 import { StudioSkeleton, EmptyState, SectionHeader } from '../shared';
@@ -78,6 +78,31 @@ export default function EventsSection({ lang, t, showToast, setShowEventModal, o
       showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab pibliye.' : 'Could not publish.'), 'circle-exclamation');
     }
   };
+
+  // ─── Guest list — organizer sees who is coming ──────────────────────
+  // Backend GET community-events/<id>/attendees/ is moderator-only;
+  // a 403 simply means "not your event to inspect" → show the message.
+  const [expandedAtt, setExpandedAtt] = useState({});
+  const [attendees, setAttendees] = useState({});
+  const [attLoading, setAttLoading] = useState({});
+
+  const toggleAttendees = useCallback(async (ev) => {
+    const next = !expandedAtt[ev.id];
+    setExpandedAtt((e) => ({ ...e, [ev.id]: next }));
+    if (next && attendees[ev.id] === undefined) {
+      setAttLoading((m) => ({ ...m, [ev.id]: true }));
+      try {
+        const res = await communityEventsService.attendees(ev.id);
+        const rows = Array.isArray(res?.data) ? res.data : (Array.isArray(res?.data?.results) ? res.data.results : []);
+        setAttendees((m) => ({ ...m, [ev.id]: rows }));
+      } catch (err) {
+        setAttendees((m) => ({ ...m, [ev.id]: [] }));
+        showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab wè envite yo.' : 'Could not load guests.'), 'circle-exclamation');
+      } finally {
+        setAttLoading((m) => ({ ...m, [ev.id]: false }));
+      }
+    }
+  }, [expandedAtt, attendees, lang, showToast]);
 
   if (loading && events.length === 0) return <StudioSkeleton rows={3} />;
 
@@ -160,6 +185,40 @@ export default function EventsSection({ lang, t, showToast, setShowEventModal, o
                       ))}
                       {ev.tags.length > 4 && (
                         <span className={styles.tag}>+{ev.tags.length - 4}</span>
+                      )}
+                    </div>
+                  )}
+                  <div style={{ marginTop: 6 }}>
+                    <button
+                      type="button"
+                      onClick={() => toggleAttendees(ev)}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: 6, border: '1px solid var(--border-color, #e5e7eb)', background: 'transparent', borderRadius: 999, padding: '3px 10px', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary, #64748b)', cursor: 'pointer' }}
+                      aria-expanded={Boolean(expandedAtt[ev.id])}
+                    >
+                      <i className="fas fa-users" aria-hidden="true" />
+                      {lang === 'ht' ? 'Envite' : 'Guests'}{' '}({ev.attendee_count ?? (attendees[ev.id] || []).length})
+                      <i className={`fas fa-chevron-${expandedAtt[ev.id] ? 'up' : 'down'}`} aria-hidden="true" />
+                    </button>
+                  </div>
+                  {expandedAtt[ev.id] && (
+                    <div style={{ marginTop: 6, border: '1px solid var(--border-color, #e5e7eb)', borderRadius: 8, padding: 8, fontSize: '0.8rem' }}>
+                      {attLoading[ev.id] ? (
+                        <span style={{ color: 'var(--text-secondary, #64748b)' }}>
+                          <i className="fas fa-spinner fa-spin" aria-hidden="true" /> {lang === 'ht' ? ' Ap chaje…' : ' Loading…'}
+                        </span>
+                      ) : (attendees[ev.id] || []).length === 0 ? (
+                        <span style={{ color: 'var(--text-secondary, #64748b)' }}>
+                          {lang === 'ht' ? 'Pokò gen envite konfime.' : 'No confirmed guests yet.'}
+                        </span>
+                      ) : (
+                        (attendees[ev.id] || []).map((a) => (
+                          <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
+                            <span style={{ fontWeight: 600 }}>{a.username || `#${a.user}`}</span>
+                            <span className={styles.badge} style={{ background: 'rgba(16,185,129,0.1)', color: '#059669' }}>
+                              {a.status || 'confirmed'}{a.quantity > 1 ? ` ×${a.quantity}` : ''}
+                            </span>
+                          </div>
+                        ))
                       )}
                     </div>
                   )}

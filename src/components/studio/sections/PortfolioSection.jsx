@@ -86,15 +86,54 @@ export default function PortfolioSection({ lang, t, showToast, setShowProjectMod
         <div className={styles.list}>
           {projects.map((p) => (
             <div key={p.id} className={styles.listItem}>
-              <div className={styles.listIcon}>
-                <i className="fas fa-file-alt" aria-hidden="true" />
-              </div>
+              {p.cover_url ? (
+                <img
+                  src={p.cover_url}
+                  alt=""
+                  loading="lazy"
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  style={{ width: 56, height: 56, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} />
+              ) : (
+                <div className={styles.listIcon}>
+                  <i className="fas fa-palette" aria-hidden="true" />
+                </div>
+              )}
               <div className={styles.listBody}>
-                <div className={styles.listTitle}>{p.title}</div>
+                <div className={styles.listTitle}>
+                  {p.title}
+                  {p.is_featured && (
+                    <span className={styles.badge} style={{ marginLeft: 8, background: 'rgba(245,158,11,0.12)', color: '#b45309' }}>
+                      ⭐ {lang === 'ht' ? 'Vedèt' : 'Featured'}
+                    </span>
+                  )}
+                  {p.is_published === false && (
+                    <span className={styles.badge} style={{ marginLeft: 8, background: 'rgba(100,116,139,0.12)', color: 'var(--color-gray-500)' }}>
+                      {lang === 'ht' ? 'Bouyon' : 'Draft'}
+                    </span>
+                  )}
+                </div>
                 <div className={styles.listMeta}>
                   {p.category && <span>{p.category}</span>}
-                  {p.views > 0 && <span>· {fmtCount(p.views)} {t.studio_views || 'views'}</span>}
+                  {p.difficulty && <span> · {p.difficulty}</span>}
+                  {p.visibility && p.visibility !== 'public' && (
+                    <span> · <i className={p.visibility === 'subscribers' ? 'fas fa-crown' : 'fas fa-user-check'} aria-hidden="true" /> {p.visibility}</span>
+                  )}
+                  {p.view_count > 0 && <span> · 👁 {fmtCount(p.view_count)}</span>}
+                  {p.like_count > 0 && <span> · ❤️ {fmtCount(p.like_count)}</span>}
+                  {Array.isArray(p.media_gallery) && p.media_gallery.length > 0 && (
+                    <span> · 🎞 {p.media_gallery.length}</span>
+                  )}
                 </div>
+                {Array.isArray(p.skills_used) && p.skills_used.length > 0 && (
+                  <div className={styles.tagRow}>
+                    {p.skills_used.slice(0, 4).map((s) => (
+                      <span key={s} className={styles.tag}>#{String(s).replace(/^#/, '')}</span>
+                    ))}
+                    {p.skills_used.length > 4 && (
+                      <span className={styles.tag}>+{p.skills_used.length - 4}</span>
+                    )}
+                  </div>
+                )}
               </div>
               <div className={styles.itemActions}>
                 <button type="button" className={styles.editBtn} onClick={() => onEdit?.(p)}

@@ -152,6 +152,9 @@ export default function JobsSection({ lang, t, showToast, setShowJobModal, onEdi
                     {job.proposal_count != null && (
                       <span> · {job.proposal_count} {t.explore_job_proposals || 'proposals'}</span>
                     )}
+                    {(job.positions || 1) > 1 && (
+                      <span> · 👥 {job.hired_count ?? 0}/{job.positions} {lang === 'ht' ? 'anboche' : 'hired'}</span>
+                    )}
                   </div>
                   {Array.isArray(job.skills_required) && job.skills_required.length > 0 && (
                     <div className={styles.tagRow}>

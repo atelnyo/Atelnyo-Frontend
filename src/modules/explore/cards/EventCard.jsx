@@ -41,6 +41,46 @@ function EventFallback({ title, isHt }) {
   );
 }
 
+// ─── Add to calendar (.ics) — pure client-side, works with Google /
+// Apple / Outlook. No backend needed: the event already carries every
+// field the file format requires (title, description, location, times).
+function toICSDate(iso) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getUTCFullYear()}${p(d.getUTCMonth() + 1)}${p(d.getUTCDate())}T${p(d.getUTCHours())}${p(d.getUTCMinutes())}00Z`;
+}
+function escapeICS(s) {
+  return String(s || '').replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+}
+function downloadICS(ev) {
+  const start = toICSDate(ev.start_time);
+  const end = toICSDate(ev.end_time) || start;
+  if (!start) return false;
+  const lines = [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Atelnyo//Events//EN', 'BEGIN:VEVENT',
+    `UID:event-${ev.id}@atelnyo`,
+    `DTSTAMP:${toICSDate(new Date().toISOString())}`,
+    `DTSTART:${start}`,
+    `DTSEND:${end}`,
+    `SUMMARY:${escapeICS(ev.title)}`,
+    `DESCRIPTION:${escapeICS(ev.description || '')}`,
+  ];
+  const loc = ev.is_online ? (ev.online_url || 'Online') : (ev.location || '');
+  if (loc) lines.push(`LOCATION:${escapeICS(loc)}`);
+  lines.push('END:VEVENT', 'END:VCALENDAR');
+  const blob = new Blob([lines.join('\r\n')], { type: 'text/calendar' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `event-${ev.id}.ics`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+  return true;
+}
+
 export default function EventCard({ event, t, lang = 'ht', onOpenCheckout, showToast, user, onRSVPSuccess, saveCount = null }) {
   const [rsvping, setRsvping] = useState(false);
   const [rsvped, setRsvped] = useState(event?.has_ticket || false);
@@ -232,6 +272,46 @@ export default function EventCard({ event, t, lang = 'ht', onOpenCheckout, showT
             </div>
           )}
           <SaveCountChip count={saveCount} t={t} />
+          <span className="explore-event-card-tools" style={{ display: 'inline-flex', gap: 4, marginLeft: 'auto' }}>
+            {!isCancelled && event.start_time && (
+              <button
+                type="button"
+                className="explore-card-tag"
+                style={{ cursor: 'pointer' }}
+                title={t.explore_event_add_calendar || (isHt ? 'Ajoute nan kalandriye' : 'Add to calendar')}
+                aria-label={t.explore_event_add_calendar || (isHt ? 'Ajoute nan kalandriye' : 'Add to calendar')}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (downloadICS(event)) showToast?.(t.explore_event_calendar_saved || (isHt ? 'Fichye kalandriye telechaje!' : 'Calendar file downloaded!'), 'calendar');
+                }}
+              >
+                <i className="fas fa-calendar-plus" aria-hidden="true" />
+              </button>
+            )}
+            <button
+              type="button"
+              className="explore-card-tag"
+              style={{ cursor: 'pointer' }}
+              title={t.explore_share || (isHt ? 'Pataje' : 'Share')}
+              aria-label={t.explore_share || (isHt ? 'Pataje' : 'Share')}
+              onClick={async (e) => {
+                e.stopPropagation();
+                const url = `${window.location.origin}/community/${event.community_slug || ''}`;
+                try {
+                  if (navigator.share) {
+                    await navigator.share({ title: event.title, text: event.description || event.title, url });
+                  } else {
+                    await navigator.clipboard.writeText(url);
+                    showToast?.(t.explore_link_copied || (isHt ? 'Lyen kopye!' : 'Link copied!'), 'link');
+                  }
+                } catch {
+                  // User dismissed the share sheet — not an error.
+                }
+              }}
+            >
+              <i className="fas fa-share-nodes" aria-hidden="true" />
+            </button>
+          </span>
         </div>
         <div className="explore-event-action">
           {isCancelled ? (

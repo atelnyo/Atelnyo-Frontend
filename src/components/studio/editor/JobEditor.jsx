@@ -28,6 +28,9 @@ export default function JobEditor({ onClose, onSuccess, onSaved, lang = 'ht', sh
     budget_min: item?.budget_min != null ? String(item.budget_min) : '',
     budget_max: item?.budget_max != null ? String(item.budget_max) : '',
     currency: item?.currency || 'USD',
+    // Hiring capacity: 1 = classic single hire, N > 1 = each accepted
+    // proposal gets its own contract (own milestones, own escrow).
+    positions: item?.positions != null ? String(item.positions) : '1',
     cover_url: item?.cover_url || '',
     skills_required: Array.isArray(item?.skills_required) ? item.skills_required.join(', ') : '',
     is_remote: item?.is_remote ?? false,
@@ -66,6 +69,8 @@ export default function JobEditor({ onClose, onSuccess, onSaved, lang = 'ht', sh
     if (!Number.isFinite(min) || min < 0) errs.budget_min = isHt ? 'Envalid' : 'Invalid';
     if (!Number.isFinite(max) || max < 0) errs.budget_max = isHt ? 'Envalid' : 'Invalid';
     if (Number.isFinite(min) && Number.isFinite(max) && max < min) errs.budget_max = isHt ? 'Max dwe >= min' : 'Max must be >= min';
+    const pos = Number(form.positions);
+    if (!Number.isInteger(pos) || pos < 1) errs.positions = isHt ? 'Omwen 1' : 'At least 1';
     if (form.visibility === 'community' && !form.community) errs.community = isHt ? 'Chwazi kominote a' : 'Pick the community';
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -81,6 +86,7 @@ export default function JobEditor({ onClose, onSuccess, onSaved, lang = 'ht', sh
       budget_min: Number(form.budget_min),
       budget_max: Number(form.budget_max),
       currency: form.currency.trim() || 'USD',
+      positions: Math.max(1, Math.floor(Number(form.positions) || 1)),
       cover_url: form.cover_url.trim() || '',
       skills_required: form.skills_required ? form.skills_required.split(',').map((s) => s.trim()).filter(Boolean) : [],
       is_remote: Boolean(form.is_remote),
@@ -136,9 +142,10 @@ export default function JobEditor({ onClose, onSuccess, onSaved, lang = 'ht', sh
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
           <PropField label={isHt ? 'Tip' : 'Type'}>
             <select value={form.budget_type} onChange={(e) => handleChange('budget_type', e.target.value)} className={styles.select}>
+              {/* Backend BUDGET_TYPE_CHOICES = fixed/hourly only — any other
+                  value 400s on save. Kept in sync with the serializer. */}
               <option value="fixed">Fixed</option>
               <option value="hourly">Hourly</option>
-              <option value="range">Range</option>
             </select>
           </PropField>
           <PropField label={isHt ? 'Min' : 'Min'} required error={errors.budget_min}>
@@ -154,6 +161,19 @@ export default function JobEditor({ onClose, onSuccess, onSaved, lang = 'ht', sh
           </PropField>
           <PropField label={isHt ? 'Kote' : 'Location'}>
             <PropInput value={form.location} onChange={(e) => handleChange('location', e.target.value)} placeholder={isHt ? 'Vide si remote' : 'Leave empty if remote'} />
+          </PropField>
+        </div>
+      </div>
+      <div className={styles.formSection} style={{ marginTop: 24 }}>
+        <h3 className={styles.sectionTitle}><i className="fas fa-users" /> {isHt ? 'Anbochaj' : 'Hiring'}</h3>
+        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: 12 }}>
+          {isHt
+            ? 'Konbyen freelancer ou ka anboche sou travay sa a? 1 = anboch klasik. Plis pase 1 = chak òf aksepte gen pwòp kontra, milestone ak escrow pa l.'
+            : 'How many freelancers can you hire on this job? 1 = classic single hire. More than 1 = each accepted offer gets its own contract, milestones and escrow.'}
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 16 }}>
+          <PropField label={isHt ? 'Kantite plas' : 'Openings'} required error={errors.positions}>
+            <PropInput type="number" min="1" step="1" value={form.positions} onChange={(e) => handleChange('positions', e.target.value)} />
           </PropField>
         </div>
       </div>

@@ -39,6 +39,10 @@ export default function ProposalDecisionModal({
   lang = 'ht',
   onClose,
   onDone,
+  // Multi-hire: remaining slots on the job (positions - hired). When this
+  // accept takes the LAST slot, the backend auto-rejects the other
+  // pending proposals — warn the poster before they confirm.
+  slotsLeft = null,
 }) {
   const isAccept = mode === 'accept';
   const [note, setNote] = useState('');
@@ -231,6 +235,15 @@ export default function ProposalDecisionModal({
               : (lang === 'ht' ? 'Nou chwazi yon lòt kandidat...' : 'We chose another candidate...')}
           />
         </FormField>
+
+        {isAccept && slotsLeft === 1 && (
+          <div role="status" style={{ fontSize: 'var(--text-sm)', color: '#92400e', background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.4)', borderRadius: 'var(--radius-lg)', padding: 'var(--sp-md) var(--sp-lg)', lineHeight: 1.5 }}>
+            <i className="fas fa-triangle-exclamation" aria-hidden="true" />{' '}
+            {lang === 'ht'
+              ? 'Dènye plas la! Aksepte isit la ap rejte tout lòt òf ki sou ret yo otomatikman.'
+              : 'Last slot! Accepting here will auto-reject all other pending offers.'}
+          </div>
+        )}
 
         {error && <div className={styles.apiError} role="alert">{error}</div>}
 

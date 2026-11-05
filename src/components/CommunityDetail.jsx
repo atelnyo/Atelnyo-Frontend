@@ -975,6 +975,24 @@ export default function CommunityDetail({ lang = 'ht', t = {}, showToast, user }
         <p className="c-desc">{community.description}</p>
       )}
 
+      {/* House rules — read-only, set by managers in Creator Studio */}
+      {Array.isArray(community.rules) && community.rules.length > 0 && (
+        <div className="c-rules">
+          <h3 className="c-rules-title">
+            <i className="fas fa-scroll" aria-hidden="true" />{' '}
+            {t4(lang, 'Règleman', 'House rules', 'Règles', 'Reglas')}
+          </h3>
+          <ol className="c-rules-list">
+            {[...community.rules].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).map((r) => (
+              <li key={r.id ?? r.title} className="c-rules-item">
+                <strong>{r.title}</strong>
+                {r.description && <span className="c-rules-desc"> — {r.description}</span>}
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
       {/* Tabs — URL-driven via NavLink. The banned tab renders only for
           owner/admin (moderation surface); others never see it and a
           direct URL still 403s server-side. */}

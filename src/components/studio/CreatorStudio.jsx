@@ -42,7 +42,6 @@ import MyMediaDashboard from './MyMediaDashboard';
 import WelcomeChecklist from '../WelcomeChecklist';
 import CreatorProfileHealth from './CreatorProfileHealth';
 import {
-  ProjectFormModal,
   WithdrawModal,
   ProfileEditModal,
   BrandingModal,
@@ -65,6 +64,7 @@ import TalentEditor from './editor/TalentEditor';
 import JobEditor from './editor/JobEditor';
 import EventEditor from './editor/EventEditor';
 import CommunityEditor from './editor/CommunityEditor';
+import PortfolioEditor from './editor/PortfolioEditor';
 import ProductTypeModal from './editor/ProductTypeModal';
 import { classNames } from './shared';
 import LoadingFallback from '../shared/LoadingFallback';
@@ -296,6 +296,7 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
     else if (type === 'talent') {setShowTalentModal(true);}
     else if (type === 'job') {setShowJobModal(true);}
     else if (type === 'event') {setShowEventModal(true);}
+    else if (type === 'community') {setShowCommunityEditor(true);}
   }, []);
 
   // ─── Create course — ask the delivery question FIRST ───────────
@@ -447,7 +448,7 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
       case 'talent':    return <TalentSection key={sectionVersion} lang={lang} t={t} showToast={showToast} setShowTalentModal={setShowTalentModal} onEdit={(item) => handleEdit(item, 'talent')} />;
       case 'jobs':      return <JobsSection key={sectionVersion} lang={lang} t={t} showToast={showToast} setShowJobModal={setShowJobModal} onEdit={(item) => handleEdit(item, 'job')} />;
       case 'events':    return <EventsSection key={sectionVersion} lang={lang} t={t} showToast={showToast} setShowEventModal={setShowEventModal} onEdit={(item) => handleEdit(item, 'event')} user={user} />;
-      case 'communities': return <CommunitiesSection lang={lang} t={t} showToast={showToast} user={user} />;
+      case 'communities': return <CommunitiesSection key={sectionVersion} lang={lang} t={t} showToast={showToast} user={user} setShowCommunityEditor={setShowCommunityEditor} onEdit={(item) => handleEdit(item, 'community')} />;
       case 'proposals': return <ProposalsSection lang={lang} t={t} showToast={showToast} />;
       case 'contracts': return <ContractsSection lang={lang} t={t} showToast={showToast} user={user} />;
       case 'music':     return <MusicSection key={sectionVersion} lang={lang} t={t} showToast={showToast} setShowMusicModal={setShowMusicModal} onEdit={(item) => handleEdit(item, 'music')} />;
@@ -724,11 +725,13 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
           />
         )}
         {showProjectModal && (
-          <ProjectFormModal
+          <PortfolioEditor
             lang={lang}
             showToast={showToast}
+            user={user}
             onClose={() => { setShowProjectModal(false); handleCloseEdit(); }}
             onSuccess={() => { setShowProjectModal(false); handleCloseEdit(); setActiveSection('portfolio'); bumpSection(); }}
+            onSaved={bumpSection}
             item={editingType === 'portfolio' ? editingItem : null}
           />
         )}

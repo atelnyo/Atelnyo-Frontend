@@ -53,9 +53,13 @@ export default function PortfolioCard({ project, t, showToast, onOpen, saveCount
     portfolioService.view(project.id).catch(() => {});
     onOpen?.(project);
   }
+  const skills = Array.isArray(project.skills_used) ? project.skills_used.filter(Boolean) : [];
+  const galleryCount = Array.isArray(project.media_gallery) ? project.media_gallery.length : 0;
+  const year = project.completion_date ? new Date(project.completion_date).getFullYear() : null;
+
   return (
     <div
-      className="explore-card explore-card-course"
+      className="explore-card explore-card-course explore-card-portfolio"
       onClick={handleClick}
       role="button"
       tabIndex={0}
@@ -90,6 +94,21 @@ export default function PortfolioCard({ project, t, showToast, onOpen, saveCount
         )}
       </div>
       <div className="explore-card-body">
+        {(project.is_featured || project.user_name) && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4, fontSize: '0.72rem', color: 'var(--text-secondary, #64748b)' }}>
+            {project.is_featured && (
+              <span style={{ fontWeight: 700, color: '#b45309', background: 'rgba(245,158,11,0.15)', borderRadius: 999, padding: '2px 8px' }}>
+                ⭐ {t.portfolio_featured || 'Featured'}
+              </span>
+            )}
+            {project.user_name && (
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <i className="fas fa-user" aria-hidden="true" style={{ marginRight: 4, opacity: 0.6 }} />
+                {project.user_name}
+              </span>
+            )}
+          </div>
+        )}
         <div className="explore-card-title">
           <i className="fas fa-palette" aria-hidden="true" style={{ marginRight: 6, opacity: 0.6 }} />
           {project.title}
@@ -99,10 +118,38 @@ export default function PortfolioCard({ project, t, showToast, onOpen, saveCount
             {project.description.slice(0, 90)}{project.description.length > 90 ? '…' : ''}
           </div>
         )}
+        {skills.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
+            {skills.slice(0, 3).map((s) => (
+              <span key={s} className="explore-card-tag explore-card-tag-skill">#{String(s).replace(/^#/, '')}</span>
+            ))}
+            {skills.length > 3 && (
+              <span className="explore-card-tag">+{skills.length - 3}</span>
+            )}
+          </div>
+        )}
         <div className="explore-card-meta">
           {project.category && <span className="explore-card-tag">{project.category}</span>}
           {project.difficulty && (
-            <span className="explore-card-tag explore-card-tag-skill">{project.difficulty}</span>
+            <span className="explore-card-tag">{project.difficulty}</span>
+          )}
+          {galleryCount > 0 && (
+            <span className="explore-card-tag" title={`${galleryCount} media`}>
+              <i className="fas fa-photo-video" aria-hidden="true" /> {galleryCount}
+            </span>
+          )}
+          {project.view_count > 0 && (
+            <span className="explore-card-plays">
+              <i className="fas fa-eye" aria-hidden="true" /> {project.view_count}
+            </span>
+          )}
+          {project.like_count > 0 && (
+            <span className="explore-card-plays">
+              <i className="fas fa-heart" aria-hidden="true" /> {project.like_count}
+            </span>
+          )}
+          {year && (
+            <span className="explore-card-plays">{year}</span>
           )}
           <SaveCountChip count={saveCount} t={t} />
           <ContentFeedbackMenu contentType="portfolio" contentId={project.id} />
@@ -110,6 +157,16 @@ export default function PortfolioCard({ project, t, showToast, onOpen, saveCount
             <i className="fas fa-arrow-right" />
           </span>
         </div>
+        {(project.project_url || project.source_url) && (
+          <div style={{ display: 'flex', gap: 6, marginTop: 6, fontSize: '0.72rem', color: 'var(--text-secondary, #64748b)' }}>
+            {project.project_url && (
+              <span><i className="fas fa-arrow-up-right-from-square" aria-hidden="true" style={{ marginRight: 4 }} />demo</span>
+            )}
+            {project.source_url && (
+              <span><i className="fab fa-github" aria-hidden="true" style={{ marginRight: 4 }} />code</span>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
