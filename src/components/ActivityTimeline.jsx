@@ -35,6 +35,38 @@ const EVENT_META = {
   course_completed:       { icon: 'fa-trophy',          label_ht: 'Kou fini',                label_en: 'Course completed' },
   community_joined:       { icon: 'fa-users',           label_ht: 'Antre nan kominote',      label_en: 'Joined community' },
   event_created:          { icon: 'fa-calendar-plus',   label_ht: 'Evènman kreye',           label_en: 'Event created' },
+  event_published:        { icon: 'fa-calendar-check',  label_ht: 'Evènman pibliye',         label_en: 'Event published' },
+  // Learning reminders (backend stores title/body/route in data).
+  continue_learning:      { icon: 'fa-play',             label_ht: 'Kontinye aprann',         label_en: 'Continue learning' },
+  lesson_unlocked:        { icon: 'fa-book-open',        label_ht: 'Nouvo leson',             label_en: 'New lesson available' },
+  project_reminder:       { icon: 'fa-folder-open',      label_ht: 'Kontinye pwojè',           label_en: 'Continue your project' },
+  project_completed:      { icon: 'fa-flag-checkered',   label_ht: 'Pwojè fini',              label_en: 'Project complete' },
+  achievement_earned:     { icon: 'fa-award',            label_ht: 'Siksè debloke',            label_en: 'Achievement unlocked' },
+  profile_tip:            { icon: 'fa-hand-holding-dollar', label_ht: 'Tip resevwa',           label_en: 'Tip received' },
+  post_removed_by_admin:  { icon: 'fa-trash-can',        label_ht: 'Post retire pa admin',    label_en: 'Post removed by admin' },
+  // Creator lifecycle.
+  creator_approved:             { icon: 'fa-circle-check', label_ht: 'Kreyatè apwouve',        label_en: 'Creator approved' },
+  creator_application_rejected: { icon: 'fa-user-xmark',  label_ht: 'Aplikasyon rejte',        label_en: 'Application rejected' },
+  creator_application_need_info:{ icon: 'fa-file-circle-question', label_ht: 'Bezwen plis enfòmasyon', label_en: 'More information needed' },
+  creator_application_suspended:{ icon: 'fa-circle-pause', label_ht: 'Aplikasyon sispann',    label_en: 'Application suspended' },
+  creator_application_restored: { icon: 'fa-rotate-right', label_ht: 'Aplikasyon retabli',     label_en: 'Application restored' },
+  // Legal & trust.
+  policy_updated:         { icon: 'fa-file-contract',    label_ht: 'Règleman ajou',           label_en: 'Policy updated' },
+  policy_consented:       { icon: 'fa-file-signature',   label_ht: 'Konsantman anrejistre',   label_en: 'Consent recorded' },
+  policy_violation:       { icon: 'fa-triangle-exclamation', label_ht: 'Vyalasyon règleman', label_en: 'Policy violation' },
+  appeal_reviewed:        { icon: 'fa-gavel',            label_ht: 'Apèl revize',             label_en: 'Appeal reviewed' },
+  course_message:         { icon: 'fa-message',          label_ht: 'Kesyon sou kou',          label_en: 'Course question' },
+  referral_commission:    { icon: 'fa-sack-dollar',      label_ht: 'Komisyon referal',        label_en: 'Referral commission' },
+  company_profile_approved:{ icon: 'fa-building-circle-check', label_ht: 'Konpayi apwouve',   label_en: 'Company approved' },
+  company_profile_rejected:{ icon: 'fa-building-circle-xmark', label_ht: 'Konpayi rejte',     label_en: 'Company rejected' },
+  spotlight_approved:     { icon: 'fa-lightbulb',        label_ht: 'Spotlight apwouve',       label_en: 'Spotlight approved' },
+  spotlight_rejected:     { icon: 'fa-lightbulb',        label_ht: 'Spotlight rejte',         label_en: 'Spotlight rejected' },
+  spotlight_admin_message:{ icon: 'fa-comment-dots',     label_ht: 'Mesaj admin (Spotlight)', label_en: 'Admin message (Spotlight)' },
+  spotlight_info_requested:{ icon: 'fa-file-circle-question', label_ht: 'Admin mande enfòmasyon', label_en: 'Admin requested info' },
+  // Rule-engine / automation.
+  rule_notification:      { icon: 'fa-robot',            label_ht: 'Notifikasyon sistèm',     label_en: 'System notification' },
+  rule_custom_action:     { icon: 'fa-gears',            label_ht: 'Aksyon otomatik',         label_en: 'Automated action' },
+  points_awarded:         { icon: 'fa-coins',            label_ht: 'Pwen touche',             label_en: 'Points earned' },
   community_post_comment: { icon: 'fa-comment',         label_ht: 'Kòmantè sou pòs ou',      label_en: 'Comment on your post' },
   community_post_reaction:{ icon: 'fa-heart',           label_ht: 'Reyaksyon sou pòs ou',    label_en: 'Reaction on your post' },
   // Moderation notices — private timeline events for the targeted
@@ -117,10 +149,26 @@ const TYPE_ACCENTS = {
   profile_service_booking: 'social', profile_request_accepted: 'social',
   profile_request_rejected: 'social',
   // Community — teal (moderation notices red)
-  community_joined: 'community', event_created: 'community',
+  community_joined: 'community', event_created: 'community', event_published: 'community',
   community_post_comment: 'community', community_post_reaction: 'community',
   community_member_banned: 'danger', community_member_unbanned: 'community',
   community_member_muted: 'community', community_member_unmuted: 'community',
+  // Learning — purple
+  continue_learning: 'learn', lesson_unlocked: 'learn', project_reminder: 'learn',
+  project_completed: 'learn', achievement_earned: 'learn',
+  course_message: 'learn',
+  // Legal & trust — slate (violation red), creator lifecycle — slate
+  policy_updated: 'account', policy_consented: 'account', appeal_reviewed: 'account',
+  policy_violation: 'danger', post_removed_by_admin: 'danger',
+  creator_approved: 'account', creator_application_rejected: 'danger',
+  creator_application_need_info: 'account', creator_application_suspended: 'account',
+  creator_application_restored: 'account',
+  company_profile_approved: 'account', company_profile_rejected: 'danger',
+  spotlight_approved: 'create', spotlight_rejected: 'danger',
+  spotlight_admin_message: 'create', spotlight_info_requested: 'create',
+  rule_notification: 'account', rule_custom_action: 'account',
+  // Money — green
+  profile_tip: 'money', referral_commission: 'money', points_awarded: 'money',
   // Creative — amber
   project_published: 'create', new_content: 'create', product_listed: 'create',
   announcement_posted: 'create', live_room_joined: 'create',
@@ -168,6 +216,43 @@ const NOTIFICATION_ROUTES = {
   community_member_muted:    (d) => d?.community_slug ? `/community/${d.community_slug}` : null,
   community_member_unmuted:  (d) => d?.community_slug ? `/community/${d.community_slug}` : null,
   event_created:          (d) => d?.community_slug ? `/community/${d.community_slug}` : (d?.event_id ? `/sheet/event/${d.event_id}` : null),
+  // Publish announcements go to every member — deep-link the event itself.
+  event_published:        (d) => (d?.event_id ? `/sheet/event/${d.event_id}` : null),
+  // Learning reminders + achievements.
+  continue_learning:      (d) => (d?.course_id ? `/sheet/course/${d.course_id}` : null),
+  lesson_unlocked:        (d) => (d?.course_id ? `/sheet/course/${d.course_id}` : null),
+  project_reminder:       (d) => (d?.course_id ? `/sheet/course/${d.course_id}` : null),
+  project_completed:      (d) => (d?.course_id ? `/sheet/course/${d.course_id}` : null),
+  achievement_earned:     () => '/sheet/studio?section=public_profile',
+  course_message:         () => '/sheet/messages',
+  profile_tip:            () => '/sheet/wallet',
+  referral_commission:    () => '/sheet/referral',
+  // Creator lifecycle.
+  creator_approved:             () => '/sheet/studio?section=public_profile',
+  creator_application_rejected: () => '/sheet/creator-apply',
+  creator_application_need_info:() => '/sheet/creator-apply',
+  creator_application_suspended:() => '/sheet/creator-apply',
+  creator_application_restored: () => '/sheet/creator-apply',
+  // Legal & trust.
+  policy_updated:         (d) => (d?.slug ? `/legal/${d.slug}` : '/legal'),
+  policy_consented:       () => '/legal',
+  policy_violation:       () => '/trust',
+  appeal_reviewed:        () => '/trust',
+  // Credentials land on the creator's public profile like endorsements.
+  credential_verified:    () => '/sheet/studio?section=public_profile',
+  // Removed / rejected content has no page to open — handled by
+  // NOTIFICATION_NOTICES below (visible explanation, no dead click).
+  post_removed_by_admin:       () => null,
+  profile_request_rejected:    () => null,
+  company_profile_approved:    () => null,
+  company_profile_rejected:    () => null,
+  spotlight_approved:          () => null,
+  spotlight_rejected:          () => null,
+  spotlight_admin_message:     () => null,
+  spotlight_info_requested:    () => null,
+  rule_notification:           () => null,
+  rule_custom_action:          () => null,
+  points_awarded:              () => null,
   review_received:        (d) => d?.product_id ? `/marketplace/${d.product_id}` : null,
   order_placed:           (d) => d?.product_id ? `/marketplace/${d.product_id}` : null,
   tip_received:           () => '/sheet/wallet',
@@ -217,14 +302,29 @@ const NOTIFICATION_ROUTES = {
   seller_unsuspended:     (d) => (d?.business_slug ? `/business/${d.business_slug}/workspace` : null),
 };
 
+function isInternalPath(value) {
+  return typeof value === 'string'
+    && value.startsWith('/')
+    && !value.startsWith('//');
+}
+
 function getEventRoute(event) {
+  const data = event?.data || {};
   const builder = NOTIFICATION_ROUTES[event?.event_type];
-  if (!builder) return null;
-  try {
-    return builder(event?.data || {}, event);
-  } catch {
-    return null;
+  if (builder) {
+    try {
+      const route = builder(data, event);
+      if (route) return route;
+    } catch {
+      // fall through to the data.route fallback below
+    }
   }
+  // Universal fallback: backend-driven notifications (learning
+  // reminders, rule engine, …) carry their own destination in
+  // data.route — honor it when it is a safe in-app path. This keeps
+  // every future backend notification clickable with zero FE mapping.
+  if (isInternalPath(data.route)) return data.route;
+  return null;
 }
 
 // ─── Dead-link notices ─────────────────────────────────────────────
@@ -240,6 +340,34 @@ const NOTIFICATION_NOTICES = {
   profile_request_rejected: {
     ht: 'Demann sa a te rejte — pa gen konvèsasyon ki louvri.',
     en: 'This request was rejected — no conversation was opened.',
+  },
+  post_removed_by_admin: {
+    ht: 'Post ou a te retire pa yon admin pou vyolasyon règleman. Detay la ekri anwo a.',
+    en: 'Your post was removed by an admin for a policy violation. Details are shown above.',
+  },
+  company_profile_approved: {
+    ht: 'Pwofil konpayi ou a apwouve! 🎉',
+    en: 'Your company profile was approved! 🎉',
+  },
+  company_profile_rejected: {
+    ht: 'Pwofil konpayi ou a rejte. Tcheke imèl ou oswa kontakte sipò pou rezon an.',
+    en: 'Your company profile was rejected. Check your email or contact support for the reason.',
+  },
+  spotlight_approved: {
+    ht: 'Aplikasyon Spotlight ou a apwouve! 🎉',
+    en: 'Your Spotlight application was approved! 🎉',
+  },
+  spotlight_rejected: {
+    ht: 'Aplikasyon Spotlight ou a rejte. Rezon an ekri nan detay anwo a.',
+    en: 'Your Spotlight application was rejected. The reason is in the details above.',
+  },
+  spotlight_admin_message: {
+    ht: 'Yon admin voye w yon mesaj sou aplikasyon Spotlight ou a.',
+    en: 'An admin sent you a message about your Spotlight application.',
+  },
+  spotlight_info_requested: {
+    ht: 'Admin mande plis enfòmasyon sou aplikasyon Spotlight ou a.',
+    en: 'An admin requested more information on your Spotlight application.',
   },
 };
 
@@ -362,10 +490,18 @@ function EventRow({ event, lang, t, onMarkRead, onNavigate, onShowNotice, onAcce
 
   let description = '';
   if (data.job_title) description = data.job_title;
+  // Combined course + lesson beats either one alone (lesson_unlocked).
+  else if (data.course_title && data.lesson_title) description = `${data.course_title} · ${data.lesson_title}`;
   else if (data.course_title) description = data.course_title;
+  // An event announcement names the EVENT, not just the community.
+  else if (data.event_title) description = data.event_title;
   else if (data.community_name) description = data.community_name;
   else if (data.skill_name) description = `${data.skill_name} · ${data.endorser_name || ''}`;
-  else if (data.event_title) description = data.event_title;
+  else if (data.achievement_name) description = data.achievement_name;
+  else if (data.invention_title) description = data.invention_title;
+  else if (data.company_name) description = data.company_name;
+  else if (data.policy_title) description = data.policy_title;
+  else if (data.violation_name) description = data.violation_name;
   else if (data.product_name) description = data.product_name;
   else if (data.project_title) description = data.project_title;
   else if (data.idea) description = data.idea;
@@ -379,6 +515,15 @@ function EventRow({ event, lang, t, onMarkRead, onNavigate, onShowNotice, onAcce
   // Messaging events carry the visitor's subject + body preview.
   else if (data.subject && data.subject !== '(no subject)') description = data.subject;
   else if (data.body_preview) description = data.body_preview;
+  // Rule-engine + admin-moderation rows carry a human body/summary —
+  // placed AFTER the messaging keys so a message subject always wins.
+  else if (data.body) description = data.body;
+  else if (data.summary) description = data.summary;
+  else if (data.message_preview) description = data.message_preview;
+  // Money rows: who + how much.
+  else if (data.amount != null && (data.from_user || data.referred_username)) description = `@${data.from_user || data.referred_username} · $${data.amount}`;
+  else if (data.points != null) description = data.reason ? `${data.reason} (+${data.points})` : `+${data.points}`;
+  else if (data.review_note) description = data.review_note;
 
   const isProposal = event.event_type === 'proposal_submitted' || event.event_type === 'proposal_sent';
   const isProfileRequest = PROFILE_REQUEST_TYPES.includes(event.event_type);
