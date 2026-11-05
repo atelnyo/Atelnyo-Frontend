@@ -692,6 +692,19 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
         : 'Activities and events',
     },
     {
+      path: SHEETS.WALLET,
+      icon: 'fa-wallet',
+      auth: true,
+      label: lang === 'ht' ? 'Bous mwen'
+        : lang === 'fr' ? 'Mon portefeuille'
+        : lang === 'es' ? 'Mi billetera'
+        : 'My Wallet',
+      hint: lang === 'ht' ? 'Balans, depoze, peye, retrè'
+        : lang === 'fr' ? 'Solde, dépôt, paiement, retrait'
+        : lang === 'es' ? 'Saldo, depósito, pago, retiro'
+        : 'Balance, top-up, pay, withdraw',
+    },
+    {
       path: SHEETS.STUDIO,
       icon: 'fa-crown',
       requiresCreator: true,

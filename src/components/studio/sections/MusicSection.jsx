@@ -21,6 +21,25 @@ export default function MusicSection({ lang, t, showToast, setShowMusicModal, on
     { defaultValue: [], transform: (d) => (Array.isArray(d) ? d : (d?.results || [])) },
   );
 
+  // Quick visibility toggle — flips is_active without opening the modal.
+  // Mirrors TalentSection so a deactivated track stays visible here
+  // (the backend ?mine=true view returns inactive rows too) and the
+  // creator can re-publish it instead of losing it from the list.
+  const handleToggleActive = async (item) => {
+    try {
+      await musicService.update(item.id, { is_active: !item.is_active });
+      showToast?.(
+        !item.is_active
+          ? (lang === 'ht' ? '✅ Mizik vizib kounye a!' : '✅ Track is now visible!')
+          : (lang === 'ht' ? '🙈 Mizik kache.' : '🙈 Track hidden.'),
+        'eye',
+      );
+      refetch();
+    } catch (err) {
+      showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab chanje vizibilite.' : 'Could not change visibility.'), 'circle-exclamation');
+    }
+  };
+
   const handleDeleteClick = (item) => {
     setConfirm({
       item,
@@ -97,14 +116,36 @@ export default function MusicSection({ lang, t, showToast, setShowMusicModal, on
                 }}
               />
               <div className={styles.listBody}>
-                <div className={styles.listTitle}>{track.title}</div>
+                <div className={styles.listTitle}>
+                  {track.title}
+                  {track.is_active === false && (
+                    <span className={styles.inactiveBadge}>
+                      <i className="fas fa-eye-slash" aria-hidden="true" />
+                      {lang === 'ht' ? 'Kache' : 'Hidden'}
+                    </span>
+                  )}
+                </div>
                 <div className={styles.listMeta}>
                   <span>{track.artist}</span>
                   {track.genre && <span>· {track.genre}</span>}
+                  {track.duration && <span>· {track.duration}</span>}
                   {track.plays > 0 && <span>· {fmtCount(track.plays)} plays</span>}
                 </div>
               </div>
               <div className={styles.itemActions}>
+                <button
+                  type="button"
+                  className={styles.editBtn}
+                  onClick={() => handleToggleActive(track)}
+                  title={track.is_active === false
+                    ? (lang === 'ht' ? 'Fè l vizib' : 'Make visible')
+                    : (lang === 'ht' ? 'Kache' : 'Hide')}
+                  aria-label={track.is_active === false
+                    ? (lang === 'ht' ? 'Fè mizik la vizib' : 'Make track visible')
+                    : (lang === 'ht' ? 'Kache mizik la' : 'Hide track')}
+                >
+                  <i className={track.is_active === false ? 'fas fa-eye' : 'fas fa-eye-slash'} aria-hidden="true" />
+                </button>
                 <button type="button" className={styles.editBtn} onClick={() => onEdit?.(track)}
                   title={lang === 'ht' ? 'Modifye' : 'Edit'}>
                   <i className="fas fa-pen" aria-hidden="true" />

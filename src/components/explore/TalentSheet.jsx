@@ -377,9 +377,14 @@ export function TalentSheet({ lang = 'ht', showToast, user, contentId }) {
                 <span className="cd-creator-name">
                   {creatorProfile.display_name || creatorProfile.artist_name || talent.name}
                 </span>
-                {talent.linked_username && (
+                {(talent.linked_username || talent.user_key || talent.created_by_username) ? (
                   <span style={{ fontSize: '0.75rem', color: 'var(--cd-text-secondary, #64748b)' }}>
-                    @{talent.linked_username}
+                    @{talent.linked_username || talent.user_key || talent.created_by_username}
+                  </span>
+                ) : (
+                  <span style={{ fontSize: '0.75rem', color: '#ef4444' }}>
+                    <i className="fas fa-user-slash" aria-hidden="true" />{' '}
+                    {t2(lang, { ht: 'Okenn itilizatè', fr: 'Aucun utilisateur', es: 'Sin usuario', en: 'No user' })}
                   </span>
                 )}
               </div>
@@ -439,9 +444,12 @@ export function TalentSheet({ lang = 'ht', showToast, user, contentId }) {
                   <InfoTile icon="fa-calendar"
                     label={t2(lang, { ht: 'Kreye', fr: 'Créé', es: 'Creado', en: 'Created' })} value={formatDate(talent.created_at, lang)} />
                 )}
-                {talent.linked_username && (
+                {(talent.linked_username || talent.user_key || talent.created_by_username) ? (
                   <InfoTile icon="fa-user"
-                    label={t2(lang, { ht: 'Kreyatè', fr: 'Créateur', es: 'Creador', en: 'Creator' })} value={`@${talent.linked_username}`} />
+                    label={t2(lang, { ht: 'Kreyatè', fr: 'Créateur', es: 'Creador', en: 'Creator' })} value={`@${talent.linked_username || talent.user_key || talent.created_by_username}`} />
+                ) : (
+                  <InfoTile icon="fa-user-slash"
+                    label={t2(lang, { ht: 'Kreyatè', fr: 'Créateur', es: 'Creador', en: 'Creator' })} value={t2(lang, { ht: 'Okenn itilizatè', fr: 'Aucun utilisateur', es: 'Sin usuario', en: 'No user' })} />
                 )}
                 {talent.role && (
                   <InfoTile icon="fa-briefcase"

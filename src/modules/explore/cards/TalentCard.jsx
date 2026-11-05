@@ -118,10 +118,15 @@ export default function TalentCard({ talent, onOpenSheet, showToast, t, isSaved,
             <i className="fas fa-map-marker-alt" aria-hidden="true" /> {talent.location}
           </div>
         )}
-        {talent.linked_username && (
-          <div className="explore-talent-linked" title={`@${talent.linked_username}`}>
+        {(talent.linked_username || talent.user_key || talent.created_by_username) ? (
+          <div className="explore-talent-linked" title={`@${talent.linked_username || talent.user_key || talent.created_by_username}`}>
             <i className="fas fa-user-check" aria-hidden="true" />
-            <span>@{talent.linked_username}</span>
+            <span>@{talent.linked_username || talent.user_key || talent.created_by_username}</span>
+          </div>
+        ) : (
+          <div className="explore-talent-linked explore-talent-unlinked" title={lang === 'ht' ? 'Okenn itilizatè' : 'No user'}>
+            <i className="fas fa-user-slash" aria-hidden="true" />
+            <span>{lang === 'ht' ? 'Okenn itilizatè' : lang === 'fr' ? 'Aucun utilisateur' : lang === 'es' ? 'Sin usuario' : 'No user'}</span>
           </div>
         )}
       </div>

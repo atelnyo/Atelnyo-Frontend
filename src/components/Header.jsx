@@ -310,6 +310,15 @@ const Header = ({
                 <i className="fas fa-gear" />
                 <span>{t.settings || 'Settings'}</span>
               </button>
+              <button
+                type="button"
+                className="header-dropdown-item"
+                onClick={() => { setProfileOpen(false); startTransition(() => navigate(SHEETS.WALLET)); }}
+                data-testid="header-wallet-link"
+              >
+                <i className="fas fa-wallet" />
+                <span>{t.studio_wallet || (t2(lang, { ht: 'Bous mwen', en: 'My Wallet', fr: 'Mon portefeuille', es: 'Mi billetera' }))}</span>
+              </button>
               {user.is_creator && (
                 <button
                   type="button"

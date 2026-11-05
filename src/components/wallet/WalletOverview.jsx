@@ -51,8 +51,8 @@ export default function WalletOverview({
     return (
       <div className="wlt-overview-empty">
         <i className="fas fa-wallet" />
-        <h3>{isHt ? 'Pa gen bous' : 'No wallet data'}</h3>
-        <p>{isHt ? 'Ou poko gen yon bous. Kreye yon kont kreyatè pou jwenn aksè.' : 'You don\'t have a wallet yet. Create a creator account to get access.'}</p>
+        <h3>{isHt ? 'Bous ap ouvri...' : 'Opening wallet...'}</h3>
+        <p>{isHt ? 'Bous ou ap kreye otomatikman. Rete sou paj sa a yon ti moman.' : 'Your wallet is created automatically. Stay on this page a moment.'}</p>
       </div>
     );
   }

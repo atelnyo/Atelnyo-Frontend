@@ -67,6 +67,86 @@ function probeAudioDuration(url) {
   });
 }
 
+function extractYouTubeId(url) {
+  const m = (url || '').trim().match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
+let ytApiPromise = null;
+function loadYouTubeApi() {
+  if (typeof window === 'undefined') return Promise.resolve(null);
+  if (window.YT && window.YT.Player) return Promise.resolve(window.YT);
+  if (ytApiPromise) return ytApiPromise;
+  ytApiPromise = new Promise((resolve) => {
+    const timeout = setTimeout(() => resolve(null), 15000);
+    const prev = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => {
+      clearTimeout(timeout);
+      if (typeof prev === 'function') { try { prev(); } catch { /* noop */ } }
+      resolve(window.YT || null);
+    };
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    tag.async = true;
+    tag.onerror = () => { clearTimeout(timeout); resolve(null); };
+    document.head.appendChild(tag);
+  });
+  return ytApiPromise;
+}
+
+/** Probe a YOUTUBE URL for its duration via the hidden iframe player. */
+function probeYouTubeDuration(url) {
+  return new Promise((resolve) => {
+    const videoId = extractYouTubeId(url);
+    if (!videoId || typeof document === 'undefined') { resolve(null); return; }
+    const timeout = setTimeout(() => { cleanup(); resolve(null); }, 25000);
+    let player = null;
+    let holder = null;
+    function cleanup() {
+      clearTimeout(timeout);
+      try { if (player && typeof player.destroy === 'function') player.destroy(); } catch { /* noop */ }
+      if (holder && holder.parentNode) holder.parentNode.removeChild(holder);
+      player = null;
+      holder = null;
+    }
+    loadYouTubeApi().then((YT) => {
+      if (!YT || !YT.Player) { cleanup(); resolve(null); return; }
+      holder = document.createElement('div');
+      holder.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:8px;height:8px;overflow:hidden;';
+      document.body.appendChild(holder);
+      try {
+        player = new YT.Player(holder, {
+          width: 8,
+          height: 8,
+          videoId,
+          playerVars: { autoplay: 0, controls: 0 },
+          events: {
+            onReady: (e) => {
+              try {
+                const secs = e?.target?.getDuration?.();
+                if (typeof secs === 'number' && Number.isFinite(secs) && secs > 0) {
+                  cleanup();
+                  resolve(secs);
+                } else {
+                  // Duration may need a beat after ready — retry once.
+                  setTimeout(() => {
+                    try {
+                      const retry = player?.getDuration?.();
+                      cleanup();
+                      resolve(typeof retry === 'number' && Number.isFinite(retry) && retry > 0 ? retry : null);
+                    } catch { cleanup(); resolve(null); }
+                  }, 1500);
+                }
+              } catch { cleanup(); resolve(null); }
+            },
+            onError: () => { cleanup(); resolve(null); },
+          },
+        });
+      } catch { cleanup(); resolve(null); }
+    });
+  });
+}
+
 export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'ht', showToast, user, item }) {
   const isPremium = !!(user?.premium?.is_premium);
   const isEdit = Boolean(item);
@@ -108,11 +188,18 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'ht', 
     }
   }, []);
 
-  const runDetection = useCallback(async (url, force = false) => {
+  // Auto-detect from the audio preview first, then fall back to the
+  // YouTube video (hidden iframe player) so a YouTube-only track gets
+  // its duration without forcing the creator to paste an MP3 URL.
+  const runDetection = useCallback(async (audioUrl, videoUrl, force = false) => {
     const mySeq = probeSeqRef.current;
     setDetectStatus('detecting');
-    const secs = await probeAudioDuration(url);
+    let secs = await probeAudioDuration(audioUrl);
     if (probeSeqRef.current !== mySeq) return;
+    if (secs == null && extractYouTubeId(videoUrl)) {
+      secs = await probeYouTubeDuration(videoUrl);
+      if (probeSeqRef.current !== mySeq) return;
+    }
     if (secs != null) {
       setForm((f) => {
         const current = (f.duration || '').trim();
@@ -138,13 +225,19 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'ht', 
     });
     if (errors[field]) setErrors((e) => ({ ...e, [field]: null }));
     markDirty();
-    if (field === 'preview_url') {
+    if (field === 'preview_url' || field === 'video_url') {
       if (detectTimerRef.current) clearTimeout(detectTimerRef.current);
       probeSeqRef.current += 1;
-      const url = value.trim();
-      if (url && !(form.duration || '').trim()) {
-        detectTimerRef.current = setTimeout(() => runDetection(url), 900);
-      } else if (!url) {
+      const nextForm = { ...form, [field]: value };
+      if (!(form.duration || '').trim()) {
+        const audioUrl = (field === 'preview_url' ? value : nextForm.preview_url || '').trim();
+        const videoUrl = (field === 'video_url' ? value : nextForm.video_url || '').trim();
+        if (audioUrl || extractYouTubeId(videoUrl)) {
+          const snapshot = { audioUrl, videoUrl };
+          detectTimerRef.current = setTimeout(() => runDetection(snapshot.audioUrl, snapshot.videoUrl), 900);
+        }
+      }
+      if (field === 'preview_url' && !value.trim() && !extractYouTubeId(nextForm.video_url || '')) {
         setDetectStatus('idle');
       }
     }
@@ -353,7 +446,7 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'ht', 
               ? (isHt ? 'Pa t kapab detekte — antre l manyèlman (M:SS)' : 'Could not detect — enter manually (M:SS)')
               : detectStatus === 'detecting'
                 ? (isHt ? 'Ap detekte dire a...' : 'Detecting duration…')
-                : (isHt ? 'M:SS (3:42) — oswa kite sistèm lan detekte l' : 'M:SS (3:42) — or let the system detect it')}
+                : (isHt ? 'M:SS (3:42) — oswa kole preview/YouTube pou detekte l' : 'M:SS (3:42) — or paste a preview/YouTube link to detect it')}
         >
           <div style={{ display: 'flex', gap: 'var(--sp-sm)', alignItems: 'stretch' }}>
             <PropInput
@@ -367,15 +460,16 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'ht', 
               type="button"
               className="btn-secondary"
               onClick={() => {
-                const url = form.preview_url.trim();
-                if (!url) {
-                  showToast?.(isHt ? 'Antre URL preview a an premye' : 'Add the preview URL first', 'circle-exclamation');
+                const audioUrl = form.preview_url.trim();
+                const videoUrl = form.video_url.trim();
+                if (!audioUrl && !extractYouTubeId(videoUrl)) {
+                  showToast?.(isHt ? 'Antre URL preview a oswa yon videyo YouTube an premye' : 'Add the preview URL or a YouTube video first', 'circle-exclamation');
                   return;
                 }
                 if (detectTimerRef.current) { clearTimeout(detectTimerRef.current); detectTimerRef.current = null; }
-                runDetection(url, true);
+                runDetection(audioUrl, videoUrl, true);
               }}
-              disabled={detectStatus === 'detecting' || !form.preview_url.trim()}
+              disabled={detectStatus === 'detecting' || (!form.preview_url.trim() && !extractYouTubeId(form.video_url || ''))}
               title={isHt ? 'Detekte dire a otomatikman' : 'Auto-detect the duration'}
             >
               {detectStatus === 'detecting' ? (
@@ -547,7 +641,7 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'ht', 
             if (url) {
               handleChange('preview_url', url);
               if (!form.duration.trim()) {
-                runDetection(url, true);
+                runDetection(url, form.video_url || '', true);
               }
             }
             setShowLibrary(false);
