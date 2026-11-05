@@ -10514,6 +10514,38 @@ body.dark-mode .explore-card-subtitle {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.explore-card-community-info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+}
+.explore-card-community-info .fas,
+.explore-card-community-tags .fas { margin-right: 3px; }
+.explore-card-join-public { background: rgba(16, 185, 129, 0.14); color: #059669; }
+.explore-card-join-approval { background: rgba(245, 158, 11, 0.16); color: #b45309; }
+.explore-card-join-invite { background: rgba(139, 92, 246, 0.14); color: #7c3aed; }
+.explore-card-events { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
+.explore-card-member-active { background: rgba(16, 185, 129, 0.14); color: #059669; }
+.explore-card-member-pending { background: rgba(245, 158, 11, 0.16); color: #b45309; }
+.explore-card-founder {
+  font-size: 0.68rem;
+  color: var(--text-secondary, #888);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.explore-card-community-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
 .explore-featured-pill {
   display: inline-flex;
   align-items: center;

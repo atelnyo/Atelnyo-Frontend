@@ -36,10 +36,29 @@ function CommunityFallback({ name }) {
   );
 }
 
-export default function CommunityCard({ community, onOpen, t }) {
+const JOIN_MODE_META = {
+  public: { icon: 'fa-lock-open', ht: 'Piblik', en: 'Public' },
+  approval: { icon: 'fa-hand-paper', ht: 'Apwobasyon', en: 'Approval' },
+  invite: { icon: 'fa-envelope', ht: 'Envite sèlman', en: 'Invite only' },
+};
+
+export default function CommunityCard({ community, onOpen, t, lang }) {
   const [imgFailed, setImgFailed] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
   const hasImage = Boolean(community.banner_url || community.avatar_url);
+  const isHt = lang === 'ht';
+  const joinMeta = JOIN_MODE_META[community.join_mode] || null;
+  const joinLabel = joinMeta ? (isHt ? joinMeta.ht : joinMeta.en) : null;
+  const tags = Array.isArray(community.tags) ? community.tags.filter(Boolean) : [];
+  const eventCount = Number(community.event_count) || 0;
+  const founder = community.created_by_username || community.user_key || '';
+  const memberStatus = community.my_status
+    || (community.is_member ? 'active' : null);
+  const memberLabel = memberStatus === 'active'
+    ? (t?.explore_community_member || (isHt ? 'Manm' : 'Member'))
+    : memberStatus === 'pending'
+      ? (t?.explore_community_pending || (isHt ? 'Demann voye' : 'Request sent'))
+      : null;
 
   return (
     <div
@@ -76,6 +95,53 @@ export default function CommunityCard({ community, onOpen, t }) {
         {community.description && (
           <div className="explore-card-subtitle">
             {community.description}
+          </div>
+        )}
+        {(joinLabel || eventCount > 0 || founder || memberLabel) && (
+          <div className="explore-card-community-info" data-testid="community-card-info">
+            {joinLabel && (
+              <span
+                className={`explore-card-tag explore-card-join explore-card-join-${community.join_mode}`}
+                title={isHt ? 'Kijan moun antre' : 'How to join'}
+              >
+                <i className={`fas ${joinMeta.icon}`} aria-hidden="true" /> {joinLabel}
+              </span>
+            )}
+            {eventCount > 0 && (
+              <span className="explore-card-tag explore-card-events">
+                <i className="fas fa-calendar-alt" aria-hidden="true" /> {eventCount} {t?.explore_community_events || (isHt ? 'evènman' : 'events')}
+              </span>
+            )}
+            {founder && (
+              <span
+                className="explore-card-founder"
+                title={`@${founder}`}
+              >
+                <i className="fas fa-crown" aria-hidden="true" /> @{founder}
+              </span>
+            )}
+            {memberLabel && (
+              <span
+                className={`explore-card-tag explore-card-member-status explore-card-member-${memberStatus}`}
+              >
+                <i className={`fas ${memberStatus === 'active' ? 'fa-check-circle' : 'fa-clock'}`} aria-hidden="true" /> {memberLabel}
+              </span>
+            )}
+          </div>
+        )}
+        {tags.length > 0 && (
+          <div className="explore-card-community-tags">
+            {tags.slice(0, 3).map((tag) => (
+              <span key={tag} className="explore-card-tag explore-card-tag-skill">{tag}</span>
+            ))}
+            {tags.length > 3 && (
+              <span
+                className="explore-card-tag explore-card-tag-overflow"
+                title={tags.slice(3).join(', ')}
+              >
+                +{tags.length - 3}
+              </span>
+            )}
           </div>
         )}
         <div className="explore-card-meta">
