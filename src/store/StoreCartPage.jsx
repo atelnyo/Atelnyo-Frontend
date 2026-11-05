@@ -56,6 +56,14 @@ export default function StoreCartPage() {
   const [loginLink, setLoginLink] = useState(null);
   const [providerShippingConfirmation, setProviderShippingConfirmation] = useState(null);
   const [confirmProviderShipping, setConfirmProviderShipping] = useState(false);
+  // Latest checkbox value for the PayPal onApprove closure. The buttons
+  // effect must NOT re-run on checkbox toggle (that would destroy and
+  // re-render the PayPal buttons mid-approval), so onApprove reads the
+  // ref instead of the state captured at render time.
+  const confirmShippingRef = useRef(false);
+  useEffect(() => {
+    confirmShippingRef.current = confirmProviderShipping;
+  }, [confirmProviderShipping]);
   const [showShippingForm, setShowShippingForm] = useState(false);
   const [shippingFormAnimating, setShippingFormAnimating] = useState(false);
   const [shippingFieldErrors, setShippingFieldErrors] = useState({});
@@ -110,7 +118,7 @@ export default function StoreCartPage() {
             setStatus('capturing');
             try {
               await checkoutService.capturePaypal(
-                txnId, data.orderID || paypalOrderId, guestToken, confirmProviderShipping,
+                txnId, data.orderID || paypalOrderId, guestToken, confirmShippingRef.current,
               );
               update([]);
               setPaypalOrderId(null);
@@ -350,6 +358,39 @@ export default function StoreCartPage() {
       const detail =
         err?.response?.data?.detail || err?.response?.data?.error || 'Checkout could not be started.';
       setMessage(String(detail));
+      setStatus('error');
+    }
+  };
+
+  // Retry the capture on the SAME PayPal order with the address confirmed.
+  // The backend confirms the address AND captures in this single call, so
+  // no new order/transaction is created and the 409 resume path
+  // (checkout/order with pending_shipping_confirmation) is never needed.
+  const onConfirmShipping = async () => {
+    if (!txnId || !paypalOrderId) return;
+    if (!confirmProviderShipping) {
+      setMessage('Review and confirm the final payment-provider delivery address to continue.');
+      return;
+    }
+    setStatus('capturing');
+    setMessage('');
+    try {
+      await checkoutService.capturePaypal(txnId, paypalOrderId, guestToken, true);
+      update([]);
+      setPaypalOrderId(null);
+      setPendingShippingConfirmation(false);
+      setProviderShippingConfirmation(null);
+      setConfirmProviderShipping(false);
+      setMessage(`Payment received for order #${orderId}.`);
+      setStatus('idle');
+    } catch (err) {
+      const body = err?.response?.data || {};
+      if (body.code === 'shipping_confirmation_required' && body.shipping_address) {
+        setProviderShippingConfirmation(body.shipping_address);
+        setPendingShippingConfirmation(true);
+        setConfirmProviderShipping(false);
+      }
+      setMessage(String(body.error || 'Payment could not be confirmed.'));
       setStatus('error');
     }
   };
@@ -624,9 +665,7 @@ export default function StoreCartPage() {
             type="button"
             className="store-btn"
             disabled={!confirmProviderShipping || Boolean(busyLabel)}
-            onClick={() => {
-              onCheckout(true);
-            }}
+            onClick={onConfirmShipping}
           >
             Confirm address and continue
           </button>
@@ -639,6 +678,12 @@ export default function StoreCartPage() {
         </p>
       )}
       {(() => {
+        // While the provider-address confirmation is open, the ONLY way
+        // forward is its own button (same PayPal order capture). Hiding the
+        // main CTA prevents starting a second order that orphans the first.
+        if (providerShippingConfirmation) {
+          return null;
+        }
         const shippingReady = !needsShippingForm || (shippingQuote?.status === 'ELIGIBLE' && shippingQuote.shipping_methods?.length > 0 && shippingMethod);
         const guestReady = user || (guestEmail.trim() && guestEmail.includes('@'));
         if (!shippingReady || !guestReady) {

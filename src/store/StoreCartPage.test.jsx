@@ -198,10 +198,12 @@ describe('StoreCartPage checkout preparation', () => {
 
     fireEvent.click(screen.getByRole('checkbox'));
     fireEvent.click(screen.getByRole('button', { name: 'Confirm address and continue' }));
-    await waitFor(() => expect(checkoutOrder).toHaveBeenCalledTimes(2));
+    // The confirmation retries the capture on the SAME PayPal order with
+    // the address confirmed — no second order, no second transaction.
+    await waitFor(() => expect(capturePaypal).toHaveBeenLastCalledWith(9, 'PP-1', 'guest-token', true));
+    expect(checkoutOrder).toHaveBeenCalledTimes(1);
     expect(createOrder).toHaveBeenCalledTimes(1);
-    await paypalCallbacks.onApprove({ orderID: 'PP-1' });
-    await waitFor(() => expect(capturePaypal).toHaveBeenLastCalledWith(9, 'PP-1', 'guest-token', false));
+    await waitFor(() => expect(screen.getByText('Your cart is empty')).toBeTruthy());
   });
 
   it('names a timed-out SDK load and lets the shopper try again', async () => {
