@@ -51,6 +51,10 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'h
     join_mode: item?.join_mode || 'public',
     avatar_url: item?.avatar_url || '',
     banner_url: item?.banner_url || '',
+    // Archive switch — is_active=false hides the community everywhere
+    // (listings filter it out) without destroying data. DELETE (danger
+    // zone below) is the irreversible path, owner only.
+    is_active: item?.is_active ?? true,
     // House rules — ordered [{title, description}]. The backend replaces
     // the whole list on save (POST .../rules/), so the editor owns the
     // full list and syncs it after the community itself is saved.
@@ -129,6 +133,7 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'h
       join_mode: form.join_mode,
       avatar_url: form.avatar_url.trim() || undefined,
       banner_url: form.banner_url.trim() || undefined,
+      is_active: Boolean(form.is_active),
     };
     try {
       let res;
@@ -170,6 +175,46 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'h
   const handleSave = useCallback(() => doSave(false), [doSave]);
   const handlePublish = useCallback(async () => { const ok = await doSave(true); if (ok) { onSuccess?.(); onClose?.(); } }, [doSave, onClose, onSuccess]);
 
+  // ─── Danger zone: delete (owner only, irreversible) ───────────────
+  const [deleteArmed, setDeleteArmed] = useState(false);
+  const handleDelete = useCallback(async () => {
+    if (!deleteArmed) {
+      setDeleteArmed(true);
+      setTimeout(() => setDeleteArmed(false), 4000);
+      return;
+    }
+    const slug = isEdit ? (item?.slug || item?.id) : savedIdRef.current;
+    if (!slug) return;
+    setSaveState('saving');
+    try {
+      await communitiesService.delete(slug);
+      showToast?.(isHt ? 'Kominote efase.' : 'Community deleted.', 'trash-can');
+      onSuccess?.();
+      onClose?.();
+    } catch (err) {
+      showToast?.(err?.response?.data?.detail || (isHt ? 'Pa t kapab efase.' : 'Could not delete.'), 'circle-exclamation');
+      setSaveState('error');
+    } finally {
+      setDeleteArmed(false);
+    }
+  }, [deleteArmed, isEdit, isHt, item, onClose, onSuccess, showToast]);
+
+  const communityUrl = (() => {
+    const slug = isEdit ? (item?.slug || item?.id) : savedIdRef.current;
+    if (!slug || typeof window === 'undefined') return '';
+    return `${window.location.origin}/community/${slug}`;
+  })();
+
+  const copyLink = useCallback(async () => {
+    if (!communityUrl) return;
+    try {
+      await navigator.clipboard.writeText(communityUrl);
+      showToast?.(isHt ? 'Lyen kopye!' : 'Link copied!', 'link');
+    } catch {
+      showToast?.(communityUrl, 'link');
+    }
+  }, [communityUrl, isHt, showToast]);
+
   const validationList = [];
   if (!form.name.trim()) validationList.push({ id: 'name', label: isHt ? 'Non obligatwa' : 'Name required', zone: 'editor' });
 
@@ -210,15 +255,70 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'h
 
   const propertiesContent = (
     <StudioPropertiesPanel>
-      <PropertyGroup title={isHt ? 'Paramèt' : 'Settings'} defaultOpen>
+      <PropertyGroup title={isHt ? 'Aksè' : 'Access'} defaultOpen>
         <PropField label={isHt ? 'Fason antre' : 'Join Mode'}>
           <select value={form.join_mode} onChange={(e) => handleChange('join_mode', e.target.value)} className={styles.select}>
-            <option value="public">{isHt ? 'Piblik' : 'Public'}</option>
-            <option value="approval">{isHt ? 'Bezwen apwobasyon' : 'Requires approval'}</option>
-            <option value="invite">{isHt ? 'Envitasyon sèlman' : 'Invite only'}</option>
+            <option value="public">{isHt ? 'Piblik — nenpòt moun antre touswit' : 'Public — anyone joins instantly'}</option>
+            <option value="approval">{isHt ? 'Apwobasyon — ou revize chak demann' : 'Approval — you review each request'}</option>
+            <option value="invite">{isHt ? 'Fèmen — pa gen antre dirèk' : 'Closed — no direct joins'}</option>
           </select>
         </PropField>
+        {form.join_mode === 'approval' && (
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: '4px 0 0' }}>
+            {isHt ? 'Demann yo tann nan Studio → Kominote jiskaske ou apwouve oswa rejte yo.' : 'Requests wait in Studio → Communities until you approve or reject them.'}
+          </p>
+        )}
+        {form.join_mode === 'invite' && (
+          <p style={{ fontSize: '0.75rem', color: '#b45309', margin: '4px 0 0' }}>
+            {isHt ? 'Mòd fèmen: bouton antre a pa mache pou pèsonn. Pataje kontni a ak manm ou fè konfyans dirèkteman.' : 'Closed mode: the join button works for nobody. Share content with trusted members directly.'}
+          </p>
+        )}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0 0' }}>
+          <div>
+            <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>{isHt ? 'Aktif (vizib tout kote)' : 'Active (visible everywhere)'}</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{isHt ? 'Etenn pou achive san efase' : 'Turn off to archive without deleting'}</div>
+          </div>
+          <button type="button" onClick={() => handleChange('is_active', !form.is_active)}
+            aria-pressed={Boolean(form.is_active)} aria-label={isHt ? 'Aktif' : 'Active'}
+            style={{ width: 44, height: 24, borderRadius: 12, border: 'none', background: form.is_active ? 'var(--color-primary)' : 'var(--border-color)', position: 'relative', cursor: 'pointer' }}>
+            <span style={{ position: 'absolute', top: 2, left: form.is_active ? 22 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }} />
+          </button>
+        </div>
       </PropertyGroup>
+      <PropertyGroup title={isHt ? 'Enfo' : 'Info'} defaultOpen>
+        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
+          <div>👥 {item?.member_count ?? 0} {isHt ? 'manm' : 'members'} · 📅 {item?.event_count ?? 0} {isHt ? 'evènman' : 'events'}</div>
+          {communityUrl ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{communityUrl}</span>
+              <button type="button" onClick={copyLink}
+                style={{ border: '1px solid var(--border-color, #e5e7eb)', background: 'transparent', borderRadius: 8, padding: '4px 10px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                <i className="fas fa-link" aria-hidden="true" style={{ marginRight: 4 }} />
+                {isHt ? 'Kopye' : 'Copy'}
+              </button>
+            </div>
+          ) : (
+            <div>{isHt ? 'Lyen an ap disponib apre premye sove.' : 'The link appears after the first save.'}</div>
+          )}
+        </div>
+      </PropertyGroup>
+      {isEdit && (
+        <PropertyGroup title={isHt ? 'Zòn danje' : 'Danger zone'} defaultOpen>
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={saveState === 'saving'}
+            style={{ border: `1px solid ${deleteArmed ? '#dc2626' : 'var(--border-color, #e5e7eb)'}`, background: deleteArmed ? 'rgba(220,38,38,0.1)' : 'transparent', color: deleteArmed ? '#dc2626' : 'inherit', borderRadius: 8, padding: '6px 12px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', width: '100%' }}
+          >
+            <i className="fas fa-trash-can" aria-hidden="true" style={{ marginRight: 6 }} />
+            {deleteArmed
+              ? (isHt ? 'Konfime efase kominote a?' : 'Confirm delete community?')
+              : (isHt ? 'Efase kominote a' : 'Delete community')}
+          </button>
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: '6px 0 0' }}>
+            {isHt ? 'Aksyon final — sèlman fondatè a. Achive (pi wo a) kache san efase.' : 'Final action — founder only. Archive (above) hides without deleting.'}
+          </p>
+        </PropertyGroup>
+      )}
       <PropertyGroup title={isHt ? 'Règleman' : 'House rules'} defaultOpen>
         {(form.rules || []).map((r, i) => (
           <div key={i} style={{ border: '1px solid var(--border-color, #e5e7eb)', borderRadius: 8, padding: 8, marginBottom: 8 }}>
