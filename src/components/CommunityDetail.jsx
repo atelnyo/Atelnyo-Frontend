@@ -9,6 +9,7 @@
  *
  *   /community/:slug              → redirect to /events
  *   /community/:slug/events       → CommunityEvents
+ *   /community/:slug/posts        → CommunityPosts (./community/CommunityPosts)
  *   /community/:slug/members      → CommunityMembers
  *   /community/:slug/announcements → CommunityAnnouncements
  *   /community/:slug/files        → CommunityFiles
@@ -34,7 +35,7 @@ import { communitiesService, communityEventsService } from '../services/api';
 import useVirtualScroll from '../hooks/useVirtualScroll';
 import { t as t4 } from '../utils/i18n';
 
-const TAB_KEYS = ['events', 'members', 'banned', 'announcements', 'files', 'courses'];
+const TAB_KEYS = ['events', 'posts', 'members', 'banned', 'announcements', 'files', 'courses'];
 // The banned list is a moderation surface — only owner/admin see the tab.
 const MOD_ONLY_TABS = ['banned'];
 
@@ -842,6 +843,7 @@ export default function CommunityDetail({ lang = 'ht', t = {}, showToast, user }
   // loading→content branch flipped mid-navigation).
   const tabLabels = useMemo(() => ({
     events:        lang === 'ht' ? 'Evènman' : lang === 'fr' ? 'Événements' : lang === 'es' ? 'Eventos' : 'Events',
+    posts:         lang === 'ht' ? 'Pòs'      : lang === 'fr' ? 'Publications'  : lang === 'es' ? 'Publicaciones' : 'Posts',
     members:       lang === 'ht' ? 'Manm'     : lang === 'fr' ? 'Membres'     : lang === 'es' ? 'Miembros'  : 'Members',
     banned:        lang === 'ht' ? 'Bloke'    : lang === 'fr' ? 'Bannis'      : lang === 'es' ? 'Baneados' : 'Banned',
     announcements: lang === 'ht' ? 'Anons'    : lang === 'fr' ? 'Annonces'    : lang === 'es' ? 'Anuncios'  : 'Announcements',

@@ -346,6 +346,7 @@ import CommunityDetail, {
   CommunityFiles,
   CommunityCourses,
 } from './components/CommunityDetail';
+import CommunityPosts from './components/community/CommunityPosts';
 const ActivityTimeline = lazy(() => import('./components/ActivityTimeline'));
 import { SHEETS, legacyProfileTarget } from './routes/sheets';
 import EmailVerificationRoute from './routes/EmailVerificationRoute';
@@ -3012,6 +3013,7 @@ function App() {
         <Route path="/community/:slug" element={<CommunityDetail lang={lang} showToast={showToast} user={user} />}>
           <Route index element={<Navigate to="events" replace />} />
           <Route path="events" element={<CommunityEvents />} />
+          <Route path="posts" element={<CommunityPosts />} />
           <Route path="members" element={<CommunityMembers />} />
           <Route path="banned" element={<CommunityBannedMembers />} />
           <Route path="announcements" element={<CommunityAnnouncements />} />

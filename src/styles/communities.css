@@ -799,3 +799,171 @@ select.cm-input {
   /* Tabs stay scrollable; keep pills compact. */
   .community-detail .c-tab { padding: 8px 14px; }
 }
+
+/* ── Community posts (feed, composer, reactions, skeletons) ── */
+.community-detail .c-post-composer {
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.community-detail .c-post-composer-input {
+  width: 100%;
+  resize: vertical;
+  min-height: 64px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  font: inherit;
+  color: var(--text-primary);
+  background: var(--surface-base, transparent);
+}
+.community-detail .c-post-composer-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+.community-detail .c-post-composer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.community-detail .c-post-composer-hint {
+  font-size: 0.72rem;
+  color: var(--text-tertiary);
+}
+.community-detail .c-post-composer-btn {
+  border: none;
+  border-radius: 20px;
+  padding: 8px 18px;
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.community-detail .c-post-composer-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.community-detail .c-post-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.community-detail .c-post-card--pinned {
+  border-color: color-mix(in srgb, var(--color-primary) 35%, transparent);
+  background: linear-gradient(
+    135deg,
+    var(--surface-selected, rgba(216, 27, 96, 0.12)),
+    var(--surface-card) 55%
+  );
+}
+.community-detail .c-post-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.community-detail .c-post-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-selected, rgba(216, 27, 96, 0.12));
+  color: var(--color-primary);
+  font-weight: var(--font-weight-bold);
+}
+.community-detail .c-post-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.community-detail .c-post-time {
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+}
+.community-detail .c-post-pinned { color: var(--color-primary); }
+.community-detail .c-post-delete {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+}
+.community-detail .c-post-delete:hover { color: #ef4444; }
+.community-detail .c-post-content {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
+}
+.community-detail .c-post-image {
+  width: 100%;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+}
+.community-detail .c-post-reactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.community-detail .c-react-btn {
+  border: 1px solid var(--border-color);
+  background: var(--surface-base, transparent);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: transform 0.12s ease, border-color 0.12s ease;
+}
+.community-detail .c-react-btn:hover { transform: scale(1.06); }
+.community-detail .c-react-btn--active {
+  border-color: var(--color-primary);
+  background: var(--surface-selected, rgba(216, 27, 96, 0.12));
+}
+.community-detail .c-react-count {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+/* Skeleton shimmer for the posts feed */
+.community-detail .c-post-skeleton { pointer-events: none; }
+.community-detail .c-post-skeleton-line {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--surface-highlight) 25%, var(--border-color) 50%, var(--surface-highlight) 75%);
+  background-size: 200% 100%;
+  animation: c-post-shimmer 1.4s infinite;
+}
+.community-detail .c-post-skeleton-line--head { height: 16px; width: 40%; }
+.community-detail .c-post-skeleton-line--short { width: 65%; }
+.community-detail .c-post-skeleton-reactions { display: flex; gap: 6px; }
+.community-detail .c-post-skeleton-pill {
+  width: 52px;
+  height: 26px;
+  border-radius: 20px;
+  background: var(--surface-highlight);
+  animation: c-post-shimmer 1.4s infinite;
+}
+@keyframes c-post-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
