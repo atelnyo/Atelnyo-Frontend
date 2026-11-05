@@ -112,6 +112,17 @@ export default function EventCard({ event, t, lang = 'ht', onOpenCheckout, showT
 
   const isPastEvent = event.is_past;
   const isFull = event.max_attendees && event.attendee_count >= event.max_attendees;
+  // ``cancelled`` events still ship in the feed — surface it on the card so
+  // nobody RSVPs (or pays) for an event that will not happen.
+  const isCancelled = event.status === 'cancelled';
+  const isHt = lang === 'ht';
+  const tags = Array.isArray(event.tags) ? event.tags.filter(Boolean) : [];
+  // The backend sends ``currency`` (default USD) — the old card hardcoded
+  // ``$``, which mislabels HTG/EUR prices. Map the common symbols,
+  // otherwise prefix the ISO code.
+  const currency = String(event.currency || 'USD').toUpperCase();
+  const CURRENCY_SYMBOLS = { USD: '$', HTG: 'G', EUR: '€', GBP: '£', CAD: 'CA$', DOP: 'RD$' };
+  const priceLabel = `${CURRENCY_SYMBOLS[currency] || `${currency} `}${price.toFixed(2)}`;
 
   return (
     <div
@@ -176,8 +187,19 @@ export default function EventCard({ event, t, lang = 'ht', onOpenCheckout, showT
         </div>
         <div className="explore-event-info">
           <div className="explore-event-title explore-card-title">{event.title}</div>
+          {event.description && (
+            <div className="explore-event-desc" title={event.description}>
+              {event.description}
+            </div>
+          )}
           <div className="explore-event-meta">
             <span><i className="fas fa-clock" aria-hidden="true" /> {formatEventDate(event.start_time)}</span>
+            {event.end_time && (
+              <>
+                <span className="explore-event-meta-sep">→</span>
+                <span>{formatEventDate(event.end_time)}</span>
+              </>
+            )}
             {event.location && <span className="explore-event-meta-sep">·</span>}
             {event.location && (
               <span><i className="fas fa-map-marker-alt" aria-hidden="true" /> {event.location}</span>
@@ -194,10 +216,29 @@ export default function EventCard({ event, t, lang = 'ht', onOpenCheckout, showT
           <div className="explore-event-community">
             <i className="fas fa-users" aria-hidden="true" /> {event.community_name || ''}
           </div>
+          {tags.length > 0 && (
+            <div className="explore-event-tags">
+              {tags.slice(0, 3).map((tag) => (
+                <span key={tag} className="explore-card-tag explore-card-tag-skill">{tag}</span>
+              ))}
+              {tags.length > 3 && (
+                <span
+                  className="explore-card-tag explore-card-tag-overflow"
+                  title={tags.slice(3).join(', ')}
+                >
+                  +{tags.length - 3}
+                </span>
+              )}
+            </div>
+          )}
           <SaveCountChip count={saveCount} t={t} />
         </div>
         <div className="explore-event-action">
-          {isFull ? (
+          {isCancelled ? (
+            <span className="explore-event-cancelled-pill">
+              <i className="fas fa-ban" aria-hidden="true" /> {t.explore_event_cancelled || (isHt ? 'Anile' : 'Cancelled')}
+            </span>
+          ) : isFull ? (
             <span className="explore-event-full-pill">{t.explore_event_full || 'Full'}</span>
           ) : isPastEvent ? (
             <span className="explore-event-past-pill">{t.explore_event_past || 'Ended'}</span>
@@ -224,10 +265,10 @@ export default function EventCard({ event, t, lang = 'ht', onOpenCheckout, showT
               onClick={handleBuyTicket}
               aria-label={t.explore_event_buy_ticket || 'Buy Ticket'}
             >
-              <i className="fas fa-ticket-alt" /> ${price.toFixed(2)}
+              <i className="fas fa-ticket-alt" /> {priceLabel}
             </button>
           )}
-          {!isFree && !isPastEvent && !isFull && !rsvped && (
+          {!isFree && !isPastEvent && !isFull && !isCancelled && !rsvped && (
             <div className="explore-event-attendees">
               <i className="fas fa-user" aria-hidden="true" /> {event.attendee_count || 0}
               {event.max_attendees ? ` / ${event.max_attendees}` : ''}

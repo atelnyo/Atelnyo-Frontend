@@ -11043,6 +11043,32 @@ body.dark-mode .explore-card-talent .explore-card-image-wrap {
   color: var(--text-secondary, #888);
   text-align: center;
 }
+.explore-event-desc {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #666);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.explore-event-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.explore-event-cancelled-pill {
+  background: rgba(239,68,68,0.12);
+  color: #ef4444;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
 body.dark-mode .explore-card-event {
   background: var(--bg-elevated-dark, #1e1b2e);
   border-color: rgba(255,255,255,0.06);
