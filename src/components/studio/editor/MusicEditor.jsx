@@ -25,6 +25,7 @@ import StudioPropertiesPanel, {
   PropertyGroup, PropField, PropInput,
 } from './StudioPropertiesPanel';
 import { ImageUrlField, MediaUrlField, HelpTip, HELP_COPY } from '../modals/shared';
+import { youtubeThumbnail } from '../../../modules/explore/utils/videoSource';
 import styles from './editor.module.css';
 
 function secondsToDuration(secs) {
@@ -125,7 +126,16 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'ht', 
   }, []);
 
   const handleChange = useCallback((field, value) => {
-    setForm((f) => ({ ...f, [field]: value }));
+    setForm((f) => {
+      const next = { ...f, [field]: value };
+      // Auto cover: pasting a YouTube video fills an empty cover with
+      // the video thumbnail so creators skip the second URL paste.
+      if (field === 'video_url' && !(f.cover_url || '').trim()) {
+        const thumb = youtubeThumbnail(value || '');
+        if (thumb) next.cover_url = thumb;
+      }
+      return next;
+    });
     if (errors[field]) setErrors((e) => ({ ...e, [field]: null }));
     markDirty();
     if (field === 'preview_url') {
@@ -149,7 +159,9 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'ht', 
     if (form.duration.trim() && !/^\d{1,2}:[0-5]\d$/.test(form.duration.trim())) {
       errs.duration = isHt ? 'Fòma: M:SS (egzanp: 3:42)' : 'Format: M:SS (e.g. 3:42)';
     }
-    if (!form.cover_url.trim()) errs.cover_url = isHt ? 'URL kouvèti oblije' : 'Cover URL required';
+    // Cover is required only when the video can't supply one: a YouTube
+    // video_url already carries artwork via its thumbnail.
+    if (!form.cover_url.trim() && !youtubeThumbnail(form.video_url || '')) errs.cover_url = isHt ? 'URL kouvèti oblije (oswa kole yon videyo YouTube)' : 'Cover URL required (or paste a YouTube video)';
     return errs;
   }, [form.title, form.artist, form.duration, form.cover_url, isHt]);
 
@@ -157,7 +169,7 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'ht', 
     const items = [];
     if (!form.title.trim()) items.push({ message: isHt ? 'Ajoute tit mizik la' : 'Add the track title', target: 'canvas' });
     if (!form.artist.trim()) items.push({ message: isHt ? 'Ajoute non atis la' : 'Add the artist name', target: 'canvas' });
-    if (!form.cover_url.trim()) items.push({ message: isHt ? 'Ajoute yon kouvèti' : 'Add cover art', target: 'props' });
+    if (!form.cover_url.trim() && !youtubeThumbnail(form.video_url || '')) items.push({ message: isHt ? 'Ajoute yon kouvèti (oswa yon videyo YouTube)' : 'Add cover art (or a YouTube video)', target: 'props' });
     if (!form.duration.trim()) items.push({ message: isHt ? 'Ajoute dire a (M:SS)' : 'Add the duration (M:SS)', target: 'props' });
     return items;
   }, [form.title, form.artist, form.cover_url, form.duration, isHt]);
@@ -171,11 +183,12 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'ht', 
     }
     setErrors({});
     setSaveState('saving');
+    const autoThumb = youtubeThumbnail(form.video_url || '');
     const payload = {
       title: form.title.trim(),
       artist: form.artist.trim(),
       genre: form.genre.trim() || undefined,
-      cover_url: form.cover_url.trim(),
+      cover_url: form.cover_url.trim() || autoThumb,
       preview_url: form.preview_url.trim() || undefined,
       video_url: form.video_url.trim() || undefined,
       external_url: form.external_url.trim() || undefined,
@@ -383,10 +396,24 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'ht', 
           label={isHt ? 'Imaj Kouvèti' : 'Cover Image'}
           placeholder="https://example.com/cover.jpg"
           isPremium={isPremium}
-          required
+          required={!youtubeThumbnail(form.video_url || '')}
           error={errors.cover_url}
           lang={lang}
         />
+        {(() => {
+          const thumb = youtubeThumbnail(form.video_url || '');
+          if (!thumb || form.cover_url.trim() === thumb) return null;
+          return (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: -4 }}>
+              <img src={thumb} alt="" aria-hidden="true" style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover' }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+              <button type="button" className="btn-secondary" onClick={() => handleChange('cover_url', thumb)} style={{ fontSize: '0.8rem' }}>
+                <i className="fab fa-youtube" aria-hidden="true" style={{ marginRight: 6 }} />
+                {isHt ? 'Sèvi ak imaj videyo a' : 'Use video thumbnail'}
+              </button>
+              <HelpTip help={isHt ? 'Videyo YouTube la deja gen yon imaj — ou ka sèvi ak li olye ou kole yon lòt URL.' : 'This YouTube video already has artwork — use it instead of pasting another URL.'} lang={lang} />
+            </div>
+          );
+        })()}
         <PropField
           label="Preview URL"
           labelHt="URL Preview"

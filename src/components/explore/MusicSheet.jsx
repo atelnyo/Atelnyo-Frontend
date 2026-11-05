@@ -13,7 +13,7 @@ import api, { musicService, recentService, savedMusicService, savedItemService }
 import SaveHeartButton from '../SaveHeartButton';
 import { translations } from '../../data/translations';
 import { buildContentUrl, buildContentShareUrl, isLegacyContentUrl } from '../../utils/contentUrl';
-import { resolveVideoSource } from '../../modules/explore/utils/videoSource';
+import { resolveVideoSource, coverWithFallback } from '../../modules/explore/utils/videoSource';
 import SEOHead, { musicSchema } from '../shared/SEOHead';
 import { t2 } from '../../utils/i18n';
 
@@ -199,9 +199,10 @@ export function MusicSheet({ lang = 'ht', showToast, user, contentId, track: ini
 
   const hasPreview = Boolean(track.preview || track.preview_url);
   const previewSrc = track.preview || track.preview_url || '';
-  const cover = track.cover || track.cover_url || '';
-  const external = track.external || track.external_url || '';
   const videoSrc = track.video || track.video_url || '';
+  const rawCover = track.cover || track.cover_url || track?.image_url || '';
+  // Same fallback as the card: YouTube thumbnail when no cover pasted.
+  const cover = rawCover || coverWithFallback({ video_url: videoSrc });
   const video = resolveVideoSource(videoSrc);
   const handleBack = () => (onBack ? onBack() : navigate(-1));
 

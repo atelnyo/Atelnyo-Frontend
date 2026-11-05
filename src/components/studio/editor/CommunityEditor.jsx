@@ -2,7 +2,7 @@
  * src/components/studio/editor/CommunityEditor.jsx
  */
 import React, { useCallback, useRef, useState } from 'react';
-import { communitiesService } from '../../../services/api';
+import api, { communitiesService } from '../../../services/api';
 import { parseHashtags, hashtagsToInput } from '../../../utils/hashtags';
 
 // Canonical category vocabulary — same slugs as CreateCommunityModal and
@@ -69,6 +69,13 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'h
   const [dirty, setDirty] = useState(false);
   const dirtyRef = useRef(false);
   const savedIdRef = useRef(isEdit ? (item.slug || item.id) : null);
+  // Gallery upload — avatar + banner accept URL paste OR file picker.
+  // Uses the generic POST /api/media/upload/ (all authenticated users),
+  // same flow as MediaUploadButton, so phones can pick from the gallery.
+  const avatarInputRef = useRef(null);
+  const bannerInputRef = useRef(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
 
   const markDirty = useCallback(() => {
     if (!dirtyRef.current) { dirtyRef.current = true; setDirty(true); setSaveState('dirty'); }
@@ -79,6 +86,36 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'h
     if (errors[field]) setErrors((e) => ({ ...e, [field]: null }));
     markDirty();
   }, [errors, markDirty]);
+
+  const uploadImageFile = useCallback(async (file, field) => {
+    if (!file) return;
+    if (!file.type?.startsWith('image/')) {
+      showToast?.(isHt ? 'Chwazi yon fichye imaj.' : 'Please select an image file.', 'exclamation-triangle');
+      return;
+    }
+    const setUploading = field === 'avatar_url' ? setUploadingAvatar : setUploadingBanner;
+    setUploading(true);
+    try {
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('read_failed'));
+        reader.readAsDataURL(file);
+      });
+      const res = await api.post('media/upload/', { file: base64, kind: 'image', filename: file.name || 'community-image' });
+      const url = res?.data?.url;
+      if (url) {
+        setForm((f) => ({ ...f, [field]: url }));
+        setErrors((e) => ({ ...e, [field]: null }));
+        markDirty();
+        showToast?.(isHt ? 'Imaj telechaje!' : 'Image uploaded!', 'check-circle');
+      }
+    } catch {
+      showToast?.(isHt ? 'Erè nan telechaje imaj.' : 'Image upload failed.', 'circle-exclamation');
+    } finally {
+      setUploading(false);
+    }
+  }, [isHt, showToast, markDirty]);
 
   const validate = useCallback(() => {
     const errs = {};
@@ -245,8 +282,26 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'h
       <div className={styles.formSection} style={{ marginTop: 24 }}>
         <h3 className={styles.sectionTitle}><i className="fas fa-image" /> {isHt ? 'Imaj' : 'Images'}</h3>
         <div style={{ display: 'grid', gap: 16 }}>
-          <ImageUrlField label={isHt ? 'URL Avatè' : 'Avatar URL'} value={form.avatar_url} onChange={(v) => handleChange('avatar_url', v)} lang={lang} />
-          <ImageUrlField label={isHt ? 'URL Banner' : 'Banner URL'} value={form.banner_url} onChange={(v) => handleChange('banner_url', v)} lang={lang} />
+          <div>
+            <ImageUrlField label={isHt ? 'URL Avatè' : 'Avatar URL'} value={form.avatar_url} onChange={(v) => handleChange('avatar_url', v)} lang={lang} />
+            <input ref={avatarInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImageFile(f, 'avatar_url'); e.target.value = ''; }} />
+            <button type="button" onClick={() => avatarInputRef.current?.click()} disabled={uploadingAvatar}
+              style={{ marginTop: 8, border: '1px dashed var(--border-color, #cbd5e1)', background: 'transparent', borderRadius: 8, padding: '6px 12px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}>
+              <i className={`fas ${uploadingAvatar ? 'fa-spinner fa-spin' : 'fa-images'}`} aria-hidden="true" style={{ marginRight: 6 }} />
+              {uploadingAvatar ? (isHt ? 'Ap telechaje...' : 'Uploading...') : (isHt ? 'Chwazi nan galri' : 'Choose from gallery')}
+            </button>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: 4 }}>{isHt ? 'Kole yon URL oswa pran yon foto nan galri telefòn ou.' : 'Paste a URL or pick a photo from your gallery.'}</div>
+          </div>
+          <div>
+            <ImageUrlField label={isHt ? 'URL Banner' : 'Banner URL'} value={form.banner_url} onChange={(v) => handleChange('banner_url', v)} lang={lang} />
+            <input ref={bannerInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImageFile(f, 'banner_url'); e.target.value = ''; }} />
+            <button type="button" onClick={() => bannerInputRef.current?.click()} disabled={uploadingBanner}
+              style={{ marginTop: 8, border: '1px dashed var(--border-color, #cbd5e1)', background: 'transparent', borderRadius: 8, padding: '6px 12px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}>
+              <i className={`fas ${uploadingBanner ? 'fa-spinner fa-spin' : 'fa-images'}`} aria-hidden="true" style={{ marginRight: 6 }} />
+              {uploadingBanner ? (isHt ? 'Ap telechaje...' : 'Uploading...') : (isHt ? 'Chwazi nan galri' : 'Choose from gallery')}
+            </button>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: 4 }}>{isHt ? 'Kole yon URL oswa pran yon foto nan galri telefòn ou.' : 'Paste a URL or pick a photo from your gallery.'}</div>
+          </div>
         </div>
       </div>
 

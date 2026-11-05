@@ -6,6 +6,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import api from '../../../services/api';
 import { classNames, formatPlays } from '../utils/cardHelpers';
+import { coverWithFallback } from '../utils/videoSource';
 import { useHoverVideoPreview } from '../hooks/useHoverVideoPreview';
 import HoverVideoPreview from '../components/HoverVideoPreview';
 import ContentFeedbackMenu from '../../../components/shared/ContentFeedbackMenu';
@@ -61,9 +62,12 @@ export default function MusicCard({ track, onOpen, showToast, t, isSaved, onSave
   // dep array before this line threw ``Cannot access 'video' before
   // initialization`` on EVERY MusicCard render, blanking the whole
   // Explore page).
-  const cover = track.cover || track.cover_url || '';
+  const rawCover = track.cover || track.cover_url || '';
   const preview = track.preview || track.preview_url || '';
   const video = track.video || track.video_url || '';
+  // No cover pasted? Reuse the YouTube thumbnail when the video URL
+  // already carries artwork — creators skip the second URL paste.
+  const cover = rawCover || coverWithFallback({ video_url: video });
 
   useEffect(() => {
     return () => { if (audioRef.current) audioRef.current.pause(); };
@@ -120,7 +124,10 @@ export default function MusicCard({ track, onOpen, showToast, t, isSaved, onSave
 
   async function togglePreview(e) {
     e.stopPropagation();
+    // No audio preview but a video exists → open the full sheet where
+    // the expressive video + audio player lives, instead of doing nothing.
     if (!hasPreview) {
+      if (hasVideo && onOpen) onOpen(track);
       return;
     }
     const audio = audioRef.current;
@@ -197,10 +204,19 @@ export default function MusicCard({ track, onOpen, showToast, t, isSaved, onSave
           type="button"
           className={`explore-card-play-overlay ${previewing ? 'is-playing' : ''}`}
           onClick={togglePreview}
-          aria-label={previewing ? (t.explore_pause || 'Pause') : (t.explore_play || 'Play preview')}
+          aria-label={previewing ? (t.explore_pause || 'Pause') : (hasPreview ? (t.explore_play || 'Play preview') : (t.explore_video_title || 'Open video player'))}
           aria-pressed={previewing}
         >
-          <i className={`fas ${previewing ? 'fa-pause' : 'fa-play'}`} aria-hidden="true" />
+          {previewing ? (
+            <span className="explore-card-eq" aria-hidden="true">
+              <span className="explore-card-eq-bar" style={{ animationDelay: '0s' }} />
+              <span className="explore-card-eq-bar" style={{ animationDelay: '0.2s' }} />
+              <span className="explore-card-eq-bar" style={{ animationDelay: '0.4s' }} />
+              <span className="explore-card-eq-bar" style={{ animationDelay: '0.1s' }} />
+            </span>
+          ) : (
+            <i className={`fas ${hasPreview || hasVideo ? 'fa-play' : 'fa-music'}`} aria-hidden="true" />
+          )}
         </button>
         {track.is_featured && (
           <div className="explore-card-badge explore-card-badge-star" aria-label={t.explore_chip_featured || 'Featured'}>

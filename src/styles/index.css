@@ -10296,6 +10296,28 @@ body.dark-mode .explore-card-creator {
   box-shadow: 0 6px 20px rgba(216,27,96,0.4);
 }
 
+/* ─── Expressive playing state (MusicCard) ───────────────────
+   When the inline audio preview is playing the card swaps the
+   static play icon for a 4-bar equalizer that dances while the
+   progress bar below fills. Keeps the same 48px pink circle so
+   layout never shifts. */
+@keyframes explore-eq-bounce {
+  0%, 100% { transform: scaleY(0.35); }
+  50%      { transform: scaleY(1); }
+}
+.explore-card-eq {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--pink-primary, #d81b60);
+  display: flex; align-items: center; justify-content: center; gap: 3px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.4), 0 0 0 4px rgba(216,27,96,0.25);
+}
+.explore-card-eq-bar {
+  width: 4px; height: 18px; border-radius: 2px;
+  background: #fff;
+  transform-origin: center;
+  animation: explore-eq-bounce 0.9s ease-in-out infinite;
+}
+
 /* ─── Audio preview progress bar (MusicCard) ───────────────────
    Bottom-of-image progress bar for the inline audio preview.
    MusicCard.jsx drives the fill via the ``--pct`` CSS custom

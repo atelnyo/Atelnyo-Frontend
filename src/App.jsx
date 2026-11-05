@@ -339,6 +339,7 @@ import ViolationNotice from './components/legal/ViolationNotice';
 // Components used on the initial render or in main content are kept
 // as static imports so they load eagerly with the first paint.
 import CommunityDetail, {
+  CommunityHome,
   CommunityEvents,
   CommunityMembers,
   CommunityBannedMembers,
@@ -3011,7 +3012,8 @@ function App() {
           </LearnerRouteErrorBoundary>
         } />
         <Route path="/community/:slug" element={<CommunityDetail lang={lang} showToast={showToast} user={user} />}>
-          <Route index element={<Navigate to="events" replace />} />
+          <Route index element={<Navigate to="home" replace />} />
+          <Route path="home" element={<CommunityHome />} />
           <Route path="events" element={<CommunityEvents />} />
           <Route path="posts" element={<CommunityPosts />} />
           <Route path="members" element={<CommunityMembers />} />

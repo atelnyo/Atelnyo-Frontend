@@ -7,7 +7,8 @@
  * each have their own URL segment so the browser Back button +
  * deep links work correctly:
  *
- *   /community/:slug              → redirect to /events
+ *   /community/:slug              → redirect to /home
+ *   /community/:slug/home         → CommunityHome (events + posts preview)
  *   /community/:slug/events       → CommunityEvents
  *   /community/:slug/posts        → CommunityPosts (./community/CommunityPosts)
  *   /community/:slug/members      → CommunityMembers
@@ -35,7 +36,7 @@ import { communitiesService, communityEventsService } from '../services/api';
 import useVirtualScroll from '../hooks/useVirtualScroll';
 import { t as t4 } from '../utils/i18n';
 
-const TAB_KEYS = ['events', 'posts', 'members', 'banned', 'announcements', 'files', 'courses'];
+const TAB_KEYS = ['home', 'events', 'posts', 'members', 'banned', 'announcements', 'files', 'courses'];
 // The banned list is a moderation surface — only owner/admin see the tab.
 const MOD_ONLY_TABS = ['banned'];
 
@@ -74,6 +75,102 @@ function EmptyState({ icon, lang, ht, en, fr, es }) {
 // ── Tab components ──────────────────────────────────────────────────────
 // Each tab reads community + lang + t from useOutletContext() and
 // fetches its own list on mount.
+
+/**
+ * /home — Akèy kominote a: dènye evènman + dènye pòs ansanm.
+ *
+ * Repons pou "pa gen home": anvan, /community/:slug te redireksyon
+ * sou /events sèlman, kidonk yon vizitè pa t janm wè pòs yo san
+ * klike sou onglè Pòs. Akèy la montre tou de (3 evènman + 4 pòs)
+ * ak bouton "Wè tout" pou ale sou onglè konplè yo.
+ */
+export function CommunityHome() {
+  const { community, lang } = useOutletContext();
+  const navigate = useNavigate();
+  const [events, setEvents] = useState([]);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const slug = community?.slug;
+    if (!slug) return;
+    let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sync skeleton flip on slug change is intentional
+    setLoading(true);
+    Promise.allSettled([
+      communityEventsService.list({ community: slug }),
+      communitiesService.posts(slug),
+    ]).then(([evRes, postRes]) => {
+      if (cancelled) return;
+      const evData = evRes.status === 'fulfilled'
+        ? (Array.isArray(evRes.value?.data) ? evRes.value.data : (evRes.value?.data?.results || [])) : [];
+      const postData = postRes.status === 'fulfilled'
+        ? (Array.isArray(postRes.value?.data) ? postRes.value.data : (postRes.value?.data?.results || [])) : [];
+      setEvents(evData.filter((ev) => ['published', 'completed'].includes(ev.status)).slice(0, 3));
+      setPosts(postData.slice(0, 4));
+      setLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, [community?.slug]);
+
+  if (loading) return <LoadingLine lang={lang} />;
+  if (events.length === 0 && posts.length === 0) {
+    return <EmptyState icon="fa-house" lang={lang} ht="Pa gen aktivite ankò — tounen byento!" en="No activity yet — check back soon!" fr="Aucune activité pour le moment — revenez bientôt !" es="Sin actividad aún — ¡vuelve pronto!" />;
+  }
+  const go = (tab) => navigate(`../${tab}`, { relative: 'path' });
+  return (
+    <div className="c-list c-list--gap12" data-testid="community-home">
+      {events.length > 0 && (
+        <section aria-label={t4(lang, 'Evènman', 'Events', 'Événements', 'Eventos')}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="c-title c-title--sm"><i className="fas fa-calendar-alt" aria-hidden="true" /> {t4(lang, 'Evènman yo', 'Events', 'Événements', 'Eventos')}</h3>
+            <button type="button" className="c-tab c-tab--active" style={{ border: 'none', background: 'transparent', cursor: 'pointer' }} onClick={() => go('events')}>
+              {t4(lang, 'Wè tout →', 'See all →', 'Tout voir →', 'Ver todo →')}
+            </button>
+          </div>
+          <div className="c-list c-list--gap10">
+            {events.map((ev) => (
+              <div key={ev.id} className="c-row-card">
+                <div className="c-date-badge">
+                  <span className="c-date-badge-day">{ev.start_time ? new Date(ev.start_time).getDate() : '?'}</span>
+                  <span>{ev.start_time ? new Date(ev.start_time).toLocaleDateString(undefined, { month: 'short' }) : ''}</span>
+                </div>
+                <div className="c-info">
+                  <div className="c-title c-title--sm">{ev.title}</div>
+                  <div className="c-subtitle">{ev.start_time ? new Date(ev.start_time).toLocaleString() : ''}{ev.location ? ` · ${ev.location}` : ''}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+      {posts.length > 0 && (
+        <section aria-label={t4(lang, 'Pòs yo', 'Posts', 'Publications', 'Publicaciones')}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h3 className="c-title c-title--sm"><i className="fas fa-comments" aria-hidden="true" /> {t4(lang, 'Dènye piblikasyon', 'Latest posts', 'Dernières publications', 'Últimas publicaciones')}</h3>
+            <button type="button" className="c-tab c-tab--active" style={{ border: 'none', background: 'transparent', cursor: 'pointer' }} onClick={() => go('posts')}>
+              {t4(lang, 'Wè tout →', 'See all →', 'Tout voir →', 'Ver todo →')}
+            </button>
+          </div>
+          <div className="c-list c-list--gap10">
+            {posts.map((p) => (
+              <article key={p.id} className="c-post-card" data-testid={`community-home-post-${p.id}`}>
+                <div className="c-post-header">
+                  <span className="c-post-avatar" aria-hidden="true">{(p.author_username || '?')[0].toUpperCase()}</span>
+                  <div className="c-post-meta">
+                    <span className="c-title c-title--xs">@{p.author_username}</span>
+                  </div>
+                </div>
+                <p className="c-post-content">{String(p.content || '').slice(0, 220)}{String(p.content || '').length > 220 ? '…' : ''}</p>
+                {p.image_url && <img className="c-post-image" src={p.image_url} alt="" loading="lazy" />}
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}
 
 /**
  * /events — list of community events.
@@ -842,6 +939,7 @@ export default function CommunityDetail({ lang = 'ht', t = {}, showToast, user }
   // them, violating rules-of-hooks and crashing when the
   // loading→content branch flipped mid-navigation).
   const tabLabels = useMemo(() => ({
+    home:          lang === 'ht' ? 'Akèy' : lang === 'fr' ? 'Accueil' : lang === 'es' ? 'Inicio' : 'Home',
     events:        lang === 'ht' ? 'Evènman' : lang === 'fr' ? 'Événements' : lang === 'es' ? 'Eventos' : 'Events',
     posts:         lang === 'ht' ? 'Pòs'      : lang === 'fr' ? 'Publications'  : lang === 'es' ? 'Publicaciones' : 'Posts',
     members:       lang === 'ht' ? 'Manm'     : lang === 'fr' ? 'Membres'     : lang === 'es' ? 'Miembros'  : 'Members',

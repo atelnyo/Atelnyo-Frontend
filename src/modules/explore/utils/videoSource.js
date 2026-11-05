@@ -16,6 +16,39 @@
  * Matches what the studio editors accept (react-player): YouTube,
  * Vimeo, Facebook, TikTok, or a direct media file.
  */
+/** Extract a YouTube video id from any supported YouTube URL, or '' if none. */
+export function youtubeVideoId(url) {
+  if (!url || typeof url !== 'string') return '';
+  try {
+    const u = new URL(url.trim());
+    const host = u.hostname.replace(/^www\./, '');
+    const pathId = u.pathname.replace(/^\//, '').split('/').filter(Boolean);
+    if (host === 'youtu.be') return pathId[0] || '';
+    if (host === 'youtube.com' || host === 'm.youtube.com') {
+      const v = u.searchParams.get('v');
+      if (v) return v;
+      if (pathId[0] === 'shorts' || pathId[0] === 'embed' || pathId[0] === 'live') return pathId[1] || '';
+    }
+  } catch { /* malformed — no id */ }
+  return '';
+}
+
+/** Public thumbnail for a YouTube URL (hqdefault), or '' when not YouTube. */
+export function youtubeThumbnail(url) {
+  const id = youtubeVideoId(url);
+  return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : '';
+}
+
+/**
+ * Cover fallback chain: explicit cover → YouTube video thumbnail → ''.
+ * Lets creators skip the cover field when the video already carries
+ * artwork (YouTube), instead of forcing a second URL paste.
+ */
+export function coverWithFallback({ cover, cover_url, video, video_url } = {}) {
+  if (cover || cover_url) return cover || cover_url;
+  return youtubeThumbnail(video || video_url || '');
+}
+
 function hasAudioExtension(url) {
   const pathname = url.split(/[?#]/, 1)[0] || '';
   const fileName = pathname.split('/').pop() || '';

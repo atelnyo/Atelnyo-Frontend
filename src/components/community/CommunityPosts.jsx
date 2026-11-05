@@ -9,10 +9,21 @@
  * roll back on error; posting and deleting patch the local list so
  * the UI never waits on a refetch.
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { communitiesService } from '../../services/api';
+import api, { communitiesService } from '../../services/api';
 import { t as t4 } from '../../utils/i18n';
+import { resolveVideoSource, youtubeThumbnail } from '../../modules/explore/utils/videoSource';
+
+/** First playable video URL inside a post body (YouTube/Vimeo/direct file), or '' — same resolver as Music. */
+function firstVideoUrl(text) {
+  if (!text || typeof text !== 'string') return '';
+  const urls = text.match(/https?:\/\/[^\s)]+/gi) || [];
+  for (const u of urls) {
+    if (resolveVideoSource(u)) return u;
+  }
+  return '';
+}
 
 const REACTION_EMOJIS = ['❤️', '👍', '🎉', '😮', '😢'];
 
@@ -48,6 +59,32 @@ export default function CommunityPosts() {
   const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState('');
   const [publishing, setPublishing] = useState(false);
+  const [imageUrl, setImageUrl] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const imageInputRef = useRef(null);
+
+  async function handlePickImage(file) {
+    if (!file) return;
+    if (!file.type?.startsWith('image/')) {
+      showToast?.(t4(lang, 'Chwazi yon fichye imaj.', 'Please select an image file.', 'Choisissez une image.', 'Elige una imagen.'), 'exclamation-triangle');
+      return;
+    }
+    setUploadingImage(true);
+    try {
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('read_failed'));
+        reader.readAsDataURL(file);
+      });
+      const res = await api.post('media/upload/', { file: base64, kind: 'image', filename: file.name || 'post-image' });
+      if (res?.data?.url) setImageUrl(res.data.url);
+    } catch {
+      showToast?.(t4(lang, 'Erè nan telechaje imaj.', 'Image upload failed.', 'Échec du téléversement.', 'Falló la subida.'), 'circle-exclamation');
+    } finally {
+      setUploadingImage(false);
+    }
+  }
   const [reacting, setReacting] = useState({});
   const [openComments, setOpenComments] = useState({});
   const [commentLists, setCommentLists] = useState({});
@@ -88,9 +125,15 @@ export default function CommunityPosts() {
     }
     setPublishing(true);
     try {
-      const res = await communitiesService.createPost(slug, { content });
+      // Same as Music: a YouTube link already carries artwork — reuse its
+      // thumbnail when the user didn't attach a photo from the gallery.
+      const autoThumb = !imageUrl ? youtubeThumbnail(firstVideoUrl(content)) : '';
+      const finalImage = imageUrl || autoThumb;
+      const payload = finalImage ? { content, image_url: finalImage } : { content };
+      const res = await communitiesService.createPost(slug, payload);
       if (res?.data?.id) setPosts((prev) => [res.data, ...prev.filter((p) => p.id !== res.data.id)]);
       setDraft('');
+      setImageUrl('');
       showToast?.(t4(lang, 'Pòs pibliye!', 'Post published!', 'Publication réussie !', '¡Publicación exitosa!'), 'check-circle');
     } catch (err) {
       showToast?.(err?.response?.data?.detail || t4(lang, 'Nou pa ka pibliye.', 'Could not publish.', 'Publication impossible.', 'No se pudo publicar.'), 'circle-exclamation');
@@ -249,10 +292,36 @@ export default function CommunityPosts() {
             aria-label={t4(lang, 'Nouvo pòs', 'New post', 'Nouvelle publication', 'Nueva publicación')}
             data-testid="post-composer-input"
           />
+          {(() => {
+            if (imageUrl) return null;
+            const vUrl = firstVideoUrl(draft);
+            const thumb = vUrl ? youtubeThumbnail(vUrl) : '';
+            if (!thumb) return null;
+            return (
+              <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8rem', opacity: 0.85 }} data-testid="post-composer-video-thumb">
+                <img src={thumb} alt="" loading="lazy" style={{ width: 72, height: 48, borderRadius: 6, objectFit: 'cover' }} />
+                <span><i className="fab fa-youtube" aria-hidden="true" style={{ marginRight: 4 }} />{t4(lang, 'Imaj videyo a ap sèvi kòm foto pòs la.', 'Video thumbnail will be used as the post image.', 'La miniature servira d\u2019image.', 'La miniatura se usará como imagen.')}</span>
+              </div>
+            );
+          })()}
+          {imageUrl && (
+            <div style={{ position: 'relative', marginTop: 8 }}>
+              <img src={imageUrl} alt="" loading="lazy" style={{ width: '100%', borderRadius: 8, maxHeight: 220, objectFit: 'cover' }} data-testid="post-composer-preview" />
+              <button type="button" onClick={() => setImageUrl('')} aria-label={t4(lang, 'Retire imaj', 'Remove image', 'Retirer', 'Quitar')} data-testid="post-composer-remove-image"
+                style={{ position: 'absolute', top: 6, right: 6, border: 'none', background: 'rgba(0,0,0,0.65)', color: '#fff', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer' }}>
+                <i className="fas fa-times" aria-hidden="true" />
+              </button>
+            </div>
+          )}
           <div className="c-post-composer-row">
             <span className="c-post-composer-hint">
               {t4(lang, 'Manm sèlman ka wè pòs yo.', 'Members only can see posts.', 'Seuls les membres voient les publications.', 'Solo los miembros ven las publicaciones.')}
             </span>
+            <input ref={imageInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePickImage(f); e.target.value = ''; }} data-testid="post-composer-file" />
+            <button type="button" onClick={() => imageInputRef.current?.click()} disabled={uploadingImage || publishing} title={t4(lang, 'Ajoute foto nan galri', 'Add photo from gallery', 'Ajouter une photo', 'Añadir foto')} data-testid="post-composer-gallery"
+              style={{ border: '1px dashed var(--border-color, #cbd5e1)', background: 'transparent', borderRadius: 8, padding: '6px 10px', cursor: 'pointer' }}>
+              <i className={`fas ${uploadingImage ? 'fa-spinner fa-spin' : 'fa-images'}`} aria-hidden="true" />
+            </button>
             <button
               type="submit"
               className="c-post-composer-btn"
@@ -310,9 +379,27 @@ export default function CommunityPosts() {
             )}
           </div>
           <p className="c-post-content">{post.content}</p>
-          {post.image_url && (
-            <img className="c-post-image" src={post.image_url} alt="" loading="lazy" />
-          )}
+          {(() => {
+            const vidUrl = post.video_url || firstVideoUrl(post.content);
+            const video = vidUrl ? resolveVideoSource(vidUrl) : null;
+            // Same as Music: YouTube link carries its own thumbnail when
+            // the author didn't attach a photo.
+            const img = post.image_url || (vidUrl ? youtubeThumbnail(vidUrl) : '');
+            return (
+              <>
+                {img && <img className="c-post-image" src={img} alt="" loading="lazy" />}
+                {video && (
+                  video.kind === 'embed' ? (
+                    <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: 8, background: '#000', marginTop: 8 }}>
+                      <iframe src={video.src} title="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen loading="lazy" />
+                    </div>
+                  ) : (
+                    <video src={video.src} controls preload="metadata" playsInline poster={img || undefined} style={{ width: '100%', borderRadius: 8, background: '#000', marginTop: 8, display: 'block' }} />
+                  )
+                )}
+              </>
+            );
+          })()}
           <div className="c-post-foot">
             <button
               type="button"

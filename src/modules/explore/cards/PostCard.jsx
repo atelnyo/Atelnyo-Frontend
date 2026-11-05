@@ -8,6 +8,7 @@
  */
 import React, { useState } from 'react';
 import ContentFeedbackMenu from '../../../components/shared/ContentFeedbackMenu';
+import { youtubeThumbnail } from '../utils/videoSource';
 
 function PostFallback({ label }) {
   return (
@@ -41,7 +42,8 @@ export default function PostCard({ post, onOpen, t, feedbackType }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const body = post.body || post.description || post.title || '';
   const author = post.author_username || post.creator_name || '';
-  const image = post.image_url || post.thumbnail_url;
+  const firstUrl = typeof body === 'string' ? (body.match(/https?:\/\/[^\s)]+/gi) || [])[0] || '' : '';
+  const image = post.image_url || post.thumbnail_url || (firstUrl ? youtubeThumbnail(firstUrl) : '');
   const open = () => onOpen?.(post);
 
   return (
