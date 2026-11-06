@@ -3530,6 +3530,9 @@ function App() {
             <Footer lang={lang} translations={translations} />
           </>
         } />
+        {/* Canonical legal aliases → avoid duplicate SEO/indexing */}
+        <Route path="/privacy" element={<Navigate to="/legal/privacy-policy" replace />} />
+        <Route path="/terms" element={<Navigate to="/legal/terms-of-service" replace />} />
         {/* /faq — Public FAQ page (platform-wide, managed by admins) */}
         <Route path="/faq" element={
           <FAQPage lang={lang} />

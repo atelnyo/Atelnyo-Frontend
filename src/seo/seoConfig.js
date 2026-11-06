@@ -217,20 +217,21 @@ const SEO_ROUTES = {
     indexable: true,
     breadcrumbs: [{ label: 'Home', url: '/' }],
   },
+  // Redirect aliases → canonical legal slugs (avoid duplicate indexing)
   '/privacy': {
     title: 'Privacy Policy',
     description: 'Read how Atelnyo collects, uses, and protects your personal data.',
-    robots: 'index,follow',
+    robots: 'noindex,follow',
     ogType: 'website',
-    indexable: true,
+    indexable: false,
     breadcrumbs: [{ label: 'Home', url: '/' }],
   },
   '/terms': {
     title: 'Terms of Service',
     description: 'Read the Atelnyo Terms of Service.',
-    robots: 'index,follow',
+    robots: 'noindex,follow',
     ogType: 'website',
-    indexable: true,
+    indexable: false,
     breadcrumbs: [{ label: 'Home', url: '/' }],
   },
   '/help/': {

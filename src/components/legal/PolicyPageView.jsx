@@ -362,9 +362,13 @@ export default function PolicyPageView({ slug, lang = 'en', showToast }) {
         <SEOHead
           title={p.title || slug}
           description={summary || `Policy: ${p.title || slug}`}
-          url={`https://atelnyo.site/legal/${slug}`}
-          robots="index,follow"
+          url={`/legal/${slug}`}
           lang={lang}
+          breadcrumbs={[
+            { label: 'Home', url: '/' },
+            { label: 'Legal', url: '/legal' },
+            { label: p.title || slug },
+          ]}
         />
         {policy.cms.sections?.map((section) => {
           const Component = getCMSComponent(section.section_type);
@@ -383,9 +387,13 @@ export default function PolicyPageView({ slug, lang = 'en', showToast }) {
       <SEOHead
         title={policyTitle}
         description={summary || `Policy: ${policyTitle}`}
-        url={`https://atelnyo.site/legal/${slug}`}
-        robots="index,follow"
+        url={`/legal/${slug}`}
         lang={lang}
+        breadcrumbs={[
+          { label: 'Home', url: '/' },
+          { label: 'Legal', url: '/legal' },
+          { label: policyTitle },
+        ]}
       />
       {/* Header */}
       <div style={s.header}>
