@@ -25,6 +25,86 @@ function firstVideoUrl(text) {
   return '';
 }
 
+/** First non-video http(s) URL in a text, or '' — used for generic link unfurl. */
+function firstGenericLinkUrl(text) {
+  if (!text || typeof text !== 'string') return '';
+  const urls = text.match(/https?:\/\/[^\s)]+/gi) || [];
+  for (const raw of urls) {
+    const u = raw.replace(/[.,;:!?]+$/, '');
+    if (!u) continue;
+    try {
+      const scheme = new URL(u).protocol;
+      if (scheme !== 'http:' && scheme !== 'https:') continue;
+    } catch { continue; }
+    if (resolveVideoSource(u)) continue;
+    return u;
+  }
+  return '';
+}
+
+/** In-memory preview cache + in-flight dedup — avoids refetching the same link while typing/scrolling. */
+const _previewCache = new Map();
+const _previewInflight = new Map();
+function fetchLinkPreview(url) {
+  if (_previewCache.has(url)) return Promise.resolve(_previewCache.get(url));
+  if (_previewInflight.has(url)) return _previewInflight.get(url);
+  const p = api.get(`link-preview/?url=${encodeURIComponent(url)}`, { timeout: 15000 })
+    .then((r) => {
+      const data = r?.data || null;
+      // Cache only usable cards (skip detail/error payloads).
+      if (data && (data.title || data.description || data.image)) _previewCache.set(url, data);
+      return data;
+    })
+    .catch(() => null)
+    .finally(() => { _previewInflight.delete(url); });
+  _previewInflight.set(url, p);
+  if (_previewCache.size > 200) { const k = _previewCache.keys().next().value; _previewCache.delete(k); }
+  return p;
+}
+
+/** Generic link preview card (og:title / og:description / og:image via /api/link-preview/).
+ * Debounced 500ms so typing a link doesn't fire one request per keystroke. */
+function LinkPreviewCard({ url }) {
+  const [meta, setMeta] = useState(() => (_previewCache.get(url) || null));
+  const [loading, setLoading] = useState(() => (!_previewCache.has(url) && Boolean(url)));
+  useEffect(() => {
+    if (!url) return;
+    if (_previewCache.has(url)) { setMeta(_previewCache.get(url)); setLoading(false); return; }
+    let cancelled = false;
+    setLoading(true);
+    const t = setTimeout(() => {
+      fetchLinkPreview(url)
+        .then((data) => { if (!cancelled && data) setMeta(data); })
+        .finally(() => { if (!cancelled) setLoading(false); });
+    }, 500);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [url]);
+  if (!url) return null;
+  if (loading) {
+    return (
+      <div style={{ marginTop: 8, border: '1px solid var(--border-color, #e2e8f0)', borderRadius: 8, height: 72, background: 'var(--bg-soft, #f8fafc)' }} data-testid="link-preview-loading" />
+    );
+  }
+  if (!meta || (!meta.title && !meta.description && !meta.image)) return null;
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer"
+      style={{ marginTop: 8, display: 'flex', gap: 10, border: '1px solid var(--border-color, #e2e8f0)', borderRadius: 8, overflow: 'hidden', textDecoration: 'none', color: 'inherit', background: 'var(--bg-soft, #fff)' }}
+      data-testid="link-preview-card">
+      {meta.image && (
+        <img src={meta.image} alt="" loading="lazy" style={{ width: 96, height: 72, objectFit: 'cover', flexShrink: 0 }} />
+      )}
+      <span style={{ padding: '8px 10px 8px 0', minWidth: 0, flex: 1 }}>
+        <span style={{ display: 'block', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.5px', opacity: 0.6 }}>{meta.domain || (() => { try { return new URL(url).hostname; } catch { return ''; } })()}</span>
+        <span style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{meta.title || url}</span>
+        {meta.description && (
+          <span style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', fontSize: '0.72rem', opacity: 0.75, lineHeight: 1.4 }}>{meta.description}</span>
+        )}
+      </span>
+      <span style={{ alignSelf: 'center', paddingRight: 10, opacity: 0.5 }} aria-hidden="true"><i className="fas fa-external-link-alt" /></span>
+    </a>
+  );
+}
+
 const REACTION_EMOJIS = ['❤️', '👍', '🎉', '😮', '😢'];
 
 function PostSkeleton() {
@@ -62,6 +142,20 @@ export default function CommunityPosts() {
   const [imageUrl, setImageUrl] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
   const imageInputRef = useRef(null);
+  const draftInputRef = useRef(null);
+  const [showLinkInput, setShowLinkInput] = useState(false);
+  const [linkValue, setLinkValue] = useState('');
+
+  function focusDraft() { try { draftInputRef.current?.focus(); } catch { /* noop */ } }
+  function appendLinkToDraft(raw) {
+    const u = (raw || '').trim();
+    if (!u) return;
+    const clean = u.replace(/^[^h]+(?=https?:)/, '');
+    setDraft((d) => (d && !d.endsWith('\n') ? `${d}\n${clean}` : `${d || ''}${clean}`));
+    setLinkValue('');
+    setShowLinkInput(false);
+    focusDraft();
+  }
 
   async function handlePickImage(file) {
     if (!file) return;
@@ -97,16 +191,27 @@ export default function CommunityPosts() {
   const myRole = community?.current_user_role;
   const canModerate = ['owner', 'admin', 'moderator'].includes(myRole);
 
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
+
   const load = useCallback(() => {
     if (!slug) return;
     let cancelled = false;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- sync skeleton flip on slug change is intentional
     setLoading(true);
-    communitiesService.posts(slug)
+    setPage(1);
+    communitiesService.posts(slug, { page: 1 })
       .then((r) => {
         if (cancelled) return;
         const data = Array.isArray(r?.data) ? r.data : (r?.data?.results || []);
+        const count = Array.isArray(r?.data) ? r.data.length : (r?.data?.count ?? data.length);
+        const next = Array.isArray(r?.data) ? null : (r?.data?.next || null);
         setPosts(data);
+        setTotalCount(count);
+        // next URL from DRF, or heuristic: full page => probably more.
+        setHasMore(Boolean(next) || data.length >= 20);
       })
       .catch(() => { /* silent — empty state covers failure */ })
       .finally(() => { if (!cancelled) setLoading(false); });
@@ -114,6 +219,25 @@ export default function CommunityPosts() {
   }, [slug]);
 
   useEffect(() => load(), [load]);
+
+  async function handleLoadMore() {
+    if (loadingMore || !hasMore) return;
+    const nextPage = page + 1;
+    setLoadingMore(true);
+    try {
+      const r = await communitiesService.posts(slug, { page: nextPage });
+      const data = Array.isArray(r?.data) ? r.data : (r?.data?.results || []);
+      const next = Array.isArray(r?.data) ? null : (r?.data?.next || null);
+      if (data.length === 0) { setHasMore(false); return; }
+      setPosts((prev) => {
+        const seen = new Set(prev.map((p) => p.id));
+        return [...prev, ...data.filter((p) => !seen.has(p.id))];
+      });
+      setPage(nextPage);
+      setHasMore(Boolean(next) || data.length >= 20);
+    } catch { /* silent — button stays so user can retry */ }
+    finally { setLoadingMore(false); }
+  }
 
   async function handlePublish(e) {
     e?.preventDefault?.();
@@ -131,7 +255,17 @@ export default function CommunityPosts() {
       const finalImage = imageUrl || autoThumb;
       const payload = finalImage ? { content, image_url: finalImage } : { content };
       const res = await communitiesService.createPost(slug, payload);
-      if (res?.data?.id) setPosts((prev) => [res.data, ...prev.filter((p) => p.id !== res.data.id)]);
+      if (res?.data?.id) {
+        // Backend order is pinned-first then newest: insert the new post
+        // right after the pinned block so epengle posts never move.
+        setPosts((prev) => {
+          const rest = prev.filter((p) => p.id !== res.data.id);
+          const idx = rest.findIndex((p) => !p.is_pinned);
+          if (res.data.is_pinned || idx === -1) return [res.data, ...rest];
+          return [...rest.slice(0, idx), res.data, ...rest.slice(idx)];
+        });
+        setTotalCount((c) => c + 1);
+      }
       setDraft('');
       setImageUrl('');
       showToast?.(t4(lang, 'Pòs pibliye!', 'Post published!', 'Publication réussie !', '¡Publicación exitosa!'), 'check-circle');
@@ -281,17 +415,25 @@ export default function CommunityPosts() {
   return (
     <div className="c-list c-list--gap12">
       {isMember && (
-        <form className="c-post-composer" onSubmit={handlePublish}>
-          <textarea
-            className="c-post-composer-input"
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            rows={3}
-            maxLength={2000}
-            placeholder={t4(lang, 'Ekri yon bagay pou kominote a...', 'Write something for the community...', 'Écrivez quelque chose pour la communauté...', 'Escribe algo para la comunidad...')}
-            aria-label={t4(lang, 'Nouvo pòs', 'New post', 'Nouvelle publication', 'Nueva publicación')}
-            data-testid="post-composer-input"
-          />
+        <form className="c-post-composer c-post-composer--nice" onSubmit={handlePublish}
+          style={{ border: '1px solid var(--border-color, #e2e8f0)', borderRadius: 12, padding: 12, background: 'var(--bg-soft, #fff)' }}>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+            <span aria-hidden="true" style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#2d1b69,#d81b60)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, flexShrink: 0 }}>
+              {((user?.username || '?')[0] || '?').toUpperCase()}
+            </span>
+            <textarea
+              ref={draftInputRef}
+              className="c-post-composer-input"
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              rows={3}
+              maxLength={2000}
+              placeholder={t4(lang, 'Kisa w ap panse? Ekri tèks, kole link, oswa ajoute foto/videyo...', 'What\'s on your mind? Write text, paste a link, or add photo/video...', 'À quoi pensez-vous ? Écrivez, collez un lien ou ajoutez photo/vidéo...', '¿Qué piensas? Escribe, pega un enlace o añade foto/video...')}
+              aria-label={t4(lang, 'Nouvo pòs', 'New post', 'Nouvelle publication', 'Nueva publicación')}
+              data-testid="post-composer-input"
+              style={{ flex: 1, border: 'none', outline: 'none', resize: 'vertical', background: 'transparent' }}
+            />
+          </div>
           {(() => {
             if (imageUrl) return null;
             const vUrl = firstVideoUrl(draft);
@@ -304,6 +446,11 @@ export default function CommunityPosts() {
               </div>
             );
           })()}
+          {(() => {
+            const link = firstGenericLinkUrl(draft);
+            if (!link) return null;
+            return <LinkPreviewCard url={link} />;
+          })()}
           {imageUrl && (
             <div style={{ position: 'relative', marginTop: 8 }}>
               <img src={imageUrl} alt="" loading="lazy" style={{ width: '100%', borderRadius: 8, maxHeight: 220, objectFit: 'cover' }} data-testid="post-composer-preview" />
@@ -313,24 +460,53 @@ export default function CommunityPosts() {
               </button>
             </div>
           )}
-          <div className="c-post-composer-row">
-            <span className="c-post-composer-hint">
+          {showLinkInput && (
+            <div style={{ display: 'flex', gap: 8, marginTop: 8 }} data-testid="post-composer-link-row">
+              <input
+                value={linkValue}
+                onChange={(e) => setLinkValue(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); appendLinkToDraft(linkValue); } }}
+                placeholder="https://..."
+                inputMode="url"
+                aria-label={t4(lang, 'Kole link', 'Paste link', 'Coller le lien', 'Pegar enlace')}
+                data-testid="post-composer-link-input"
+                style={{ flex: 1, border: '1px solid var(--border-color, #cbd5e1)', borderRadius: 8, padding: '8px 10px' }}
+              />
+              <button type="button" onClick={() => appendLinkToDraft(linkValue)} disabled={!linkValue.trim()} data-testid="post-composer-link-add"
+                style={{ borderRadius: 8, padding: '8px 12px', cursor: 'pointer' }}>
+                {t4(lang, 'Ajoute', 'Add', 'Ajouter', 'Añadir')}
+              </button>
+            </div>
+          )}
+          <div className="c-post-composer-row" style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+            <span style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }} role="group" aria-label={t4(lang, 'Tip kontni', 'Content type', 'Type de contenu', 'Tipo de contenido')}>
+              <button type="button" onClick={() => imageInputRef.current?.click()} disabled={uploadingImage || publishing} title={t4(lang, 'Foto', 'Photo', 'Photo', 'Foto')} data-testid="post-composer-gallery"
+                style={{ border: imageUrl ? '1px solid #16a34a' : '1px solid var(--border-color, #cbd5e1)', background: imageUrl ? '#f0fdf4' : 'transparent', borderRadius: 20, padding: '6px 12px', cursor: 'pointer', fontSize: '0.8rem' }}>
+                <i className={`fas ${uploadingImage ? 'fa-spinner fa-spin' : 'fa-images'}`} aria-hidden="true" /> {t4(lang, 'Foto', 'Photo', 'Photo', 'Foto')}
+              </button>
+              <button type="button" onClick={() => { focusDraft(); showToast?.(t4(lang, 'Kole link YouTube/Vimeo dirèkteman nan tèks la.', 'Paste a YouTube/Vimeo link directly in the text.', 'Collez un lien YouTube/Vimeo dans le texte.', 'Pega un enlace de YouTube/Vimeo en el texto.'), 'info'); }} title="Video" data-testid="post-composer-video-btn"
+                style={{ border: firstVideoUrl(draft) ? '1px solid #7c3aed' : '1px solid var(--border-color, #cbd5e1)', background: firstVideoUrl(draft) ? '#f5f3ff' : 'transparent', borderRadius: 20, padding: '6px 12px', cursor: 'pointer', fontSize: '0.8rem' }}>
+                <i className="fas fa-video" aria-hidden="true" /> Video
+              </button>
+              <button type="button" onClick={() => setShowLinkInput((v) => !v)} title="Link" data-testid="post-composer-link-btn" aria-expanded={showLinkInput}
+                style={{ border: firstGenericLinkUrl(draft) ? '1px solid #0284c7' : '1px solid var(--border-color, #cbd5e1)', background: firstGenericLinkUrl(draft) ? '#f0f9ff' : 'transparent', borderRadius: 20, padding: '6px 12px', cursor: 'pointer', fontSize: '0.8rem' }}>
+                <i className="fas fa-link" aria-hidden="true" /> Link
+              </button>
+            </span>
+            <span className="c-post-composer-hint" style={{ marginLeft: 'auto', fontSize: '0.72rem', opacity: 0.65 }}>
               {t4(lang, 'Manm sèlman ka wè pòs yo.', 'Members only can see posts.', 'Seuls les membres voient les publications.', 'Solo los miembros ven las publicaciones.')}
             </span>
             <input ref={imageInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePickImage(f); e.target.value = ''; }} data-testid="post-composer-file" />
-            <button type="button" onClick={() => imageInputRef.current?.click()} disabled={uploadingImage || publishing} title={t4(lang, 'Ajoute foto nan galri', 'Add photo from gallery', 'Ajouter une photo', 'Añadir foto')} data-testid="post-composer-gallery"
-              style={{ border: '1px dashed var(--border-color, #cbd5e1)', background: 'transparent', borderRadius: 8, padding: '6px 10px', cursor: 'pointer' }}>
-              <i className={`fas ${uploadingImage ? 'fa-spinner fa-spin' : 'fa-images'}`} aria-hidden="true" />
-            </button>
             <button
               type="submit"
               className="c-post-composer-btn"
               disabled={publishing || !draft.trim()}
               data-testid="post-composer-submit"
+              style={{ borderRadius: 20, padding: '8px 16px', fontWeight: 700 }}
             >
               {publishing
                 ? <i className="fas fa-spinner fa-spin" aria-hidden="true" />
-                : <><i className="fas fa-paper-plane" aria-hidden="true" /> {t4(lang, 'Pibliye', 'Publish', 'Publier', 'Publicar')}</>}
+                : <><i className="fas fa-paper-plane" aria-hidden="true" /> {t4(lang, 'Voye', 'Send', 'Envoyer', 'Enviar')}</>}
             </button>
           </div>
         </form>
@@ -385,6 +561,7 @@ export default function CommunityPosts() {
             // Same as Music: YouTube link carries its own thumbnail when
             // the author didn't attach a photo.
             const img = post.image_url || (vidUrl ? youtubeThumbnail(vidUrl) : '');
+            const link = firstGenericLinkUrl(post.content);
             return (
               <>
                 {img && <img className="c-post-image" src={img} alt="" loading="lazy" />}
@@ -397,6 +574,7 @@ export default function CommunityPosts() {
                     <video src={video.src} controls preload="metadata" playsInline poster={img || undefined} style={{ width: '100%', borderRadius: 8, background: '#000', marginTop: 8, display: 'block' }} />
                   )
                 )}
+                {link && <LinkPreviewCard url={link} />}
               </>
             );
           })()}
@@ -495,6 +673,21 @@ export default function CommunityPosts() {
           </div>
         </article>
       ))}
+      {hasMore && posts.length > 0 && (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0' }}>
+          <button
+            type="button"
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+            data-testid="posts-load-more"
+            style={{ border: '1px solid var(--border-color, #cbd5e1)', borderRadius: 20, padding: '8px 20px', cursor: 'pointer', background: '#fff', fontWeight: 600 }}
+          >
+            {loadingMore
+              ? <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> ...</>
+              : <>{t4(lang, `Chaje plis (${posts.length}/${totalCount || '?'})`, `Load more (${posts.length}/${totalCount || '?'})`, `Charger plus (${posts.length}/${totalCount || '?'})`, `Cargar más (${posts.length}/${totalCount || '?'})`)}</>}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

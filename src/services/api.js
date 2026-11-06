@@ -1271,8 +1271,8 @@ export const communitiesService = {
     api.get('community-courses/', { params: { community: slug } }),
   // Member posts live on their OWN flat route, scoped by ?community=<slug>
   // — same shape as announcements/files/courses.
-  posts: (slug) =>
-    api.get('community-posts/', { params: { community: slug } }),
+  posts: (slug, params = {}) =>
+    api.get('community-posts/', { params: { community: slug, page_size: 20, ...params } }),
   createPost: (slug, data) =>
     api.post(`community-posts/?community=${encodeURIComponent(slug)}`, data),
   deletePost: (id) => api.delete(`community-posts/${id}/`),

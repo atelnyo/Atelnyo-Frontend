@@ -553,8 +553,8 @@ function LinkPreview({ url }) {
 
   useEffect(() => {
     let cancelled = false;
-    // Try to extract OG meta from the URL via a proxy or the backend
-    fetch(`https://atelnyo.site/api/og-proxy/?url=${encodeURIComponent(url)}`)
+    // Generic unfurl via the backend link-preview endpoint (cached 24h).
+    fetch(`https://atelnyo.site/api/link-preview/?url=${encodeURIComponent(url)}`)
       .then(r => r.ok ? r.json() : null)
       .then(data => { if (!cancelled && data) setMeta(data); })
       .catch(() => {
