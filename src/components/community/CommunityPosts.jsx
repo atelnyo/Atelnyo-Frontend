@@ -105,6 +105,78 @@ function LinkPreviewCard({ url }) {
   );
 }
 
+/** Inline poll ballot for a post (single/multiple choice, live bars). */
+function PostPoll({ post, lang, user, onVoted, showToast }) {
+  const opts = Array.isArray(post.poll_options) ? post.poll_options : [];
+  const total = opts.reduce((s, o) => s + (Number(o?.votes) || 0), 0);
+  const myVote = Array.isArray(post.poll_user_vote) ? post.poll_user_vote : [];
+  const [picked, setPicked] = useState(myVote);
+  const [voting, setVoting] = useState(false);
+  useEffect(() => { setPicked(Array.isArray(post.poll_user_vote) ? post.poll_user_vote : []); }, [post.id, JSON.stringify(post.poll_user_vote)]);
+  if (!post.poll_question || opts.length < 2) return null;
+  const expired = post.poll_expires_at ? new Date(post.poll_expires_at) <= new Date() : false;
+  const hasVoted = myVote.length > 0;
+  const showBars = hasVoted || expired;
+  function toggle(i) {
+    if (hasVoted || expired || voting) return;
+    if (post.poll_allow_multiple) {
+      setPicked((p) => (p.includes(i) ? p.filter((x) => x !== i) : [...p, i].slice(0, 10)));
+    } else {
+      setPicked([i]);
+    }
+  }
+  async function submit() {
+    if (!user) { showToast?.(t4(lang, 'Konekte pou w vote', 'Sign in to vote', 'Connectez-vous pour voter', 'Inicia sesión para votar'), 'user-lock'); return; }
+    if (picked.length === 0 || voting || hasVoted || expired) return;
+    setVoting(true);
+    try {
+      const res = await communitiesService.votePoll(post.id, picked);
+      if (res?.data?.id) onVoted?.(res.data);
+    } catch (err) {
+      showToast?.(err?.response?.data?.detail || t4(lang, 'Nou pa ka vote.', 'Could not vote.', 'Vote impossible.', 'No se pudo votar.'), 'circle-exclamation');
+    } finally { setVoting(false); }
+  }
+  return (
+    <div style={{ marginTop: 8, border: '1px solid var(--border-color, #e2e8f0)', borderRadius: 8, padding: 10, background: 'var(--bg-soft, #fff)' }} data-testid={`post-poll-${post.id}`}>
+      <div style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: 8 }}><i className="fas fa-chart-bar" aria-hidden="true" style={{ marginRight: 6 }} />{post.poll_question}</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {opts.map((o, i) => {
+          const votes = Number(o?.votes) || 0;
+          const pct = total > 0 ? Math.round((votes / total) * 100) : 0;
+          const active = picked.includes(i);
+          if (!showBars) {
+            return (
+              <button key={i} type="button" onClick={() => toggle(i)} data-testid={`post-poll-opt-${post.id}-${i}`} aria-pressed={active}
+                style={{ textAlign: 'left', border: active ? '2px solid #7c3aed' : '1px solid var(--border-color, #cbd5e1)', background: active ? '#f5f3ff' : '#fff', borderRadius: 8, padding: '8px 10px', cursor: 'pointer', fontSize: '0.82rem' }}>
+                {post.poll_allow_multiple ? (active ? '☑ ' : '☐ ') : (active ? '● ' : '○ ')}{o?.text}
+              </button>
+            );
+          }
+          return (
+            <div key={i} style={{ position: 'relative', borderRadius: 8, overflow: 'hidden', border: active ? '2px solid #7c3aed' : '1px solid var(--border-color, #e2e8f0)', background: '#fff' }}>
+              <div style={{ position: 'absolute', inset: 0, width: `${pct}%`, background: active ? '#ddd6fe' : '#f1f5f9' }} />
+              <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', padding: '8px 10px', fontSize: '0.82rem', fontWeight: active ? 700 : 400 }}>
+                <span>{o?.text}</span><span>{votes} · {pct}%</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, fontSize: '0.75rem', opacity: 0.8 }}>
+        <span data-testid={`post-poll-total-${post.id}`}>{total} {t4(lang, 'vòt', 'votes', 'votes', 'votos')}</span>
+        {expired && <span>· {t4(lang, 'Sondaj fini', 'Poll ended', 'Sondage terminé', 'Encuesta terminada')}</span>}
+        {post.poll_allow_multiple && !expired && !hasVoted && <span>· {t4(lang, 'Chwazi plizyè', 'Multiple choice', 'Choix multiple', 'Opción múltiple')}</span>}
+        {!hasVoted && !expired && (
+          <button type="button" onClick={submit} disabled={picked.length === 0 || voting} data-testid={`post-poll-vote-${post.id}`}
+            style={{ marginLeft: 'auto', borderRadius: 20, padding: '6px 14px', fontWeight: 700, cursor: 'pointer' }}>
+            {voting ? '...' : t4(lang, 'Vòte', 'Vote', 'Voter', 'Votar')}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 const REACTION_EMOJIS = ['❤️', '👍', '🎉', '😮', '😢'];
 
 function PostSkeleton() {
@@ -157,6 +229,31 @@ export default function CommunityPosts() {
     focusDraft();
   }
 
+  // ── Poll composer state ──────────────────────────────────
+  const [showPollCreator, setShowPollCreator] = useState(false);
+  const [pollQuestion, setPollQuestion] = useState('');
+  const [pollOptions, setPollOptions] = useState(['', '']);
+  const [pollAllowMultiple, setPollAllowMultiple] = useState(false);
+
+  function resetPollCreator() {
+    setShowPollCreator(false);
+    setPollQuestion('');
+    setPollOptions(['', '']);
+    setPollAllowMultiple(false);
+  }
+
+  function pollPayload() {
+    const q = pollQuestion.trim();
+    if (!showPollCreator || !q) return {};
+    const opts = pollOptions.map((o) => o.trim()).filter(Boolean).slice(0, 10);
+    if (opts.length < 2) return { __invalid: true };
+    return {
+      poll_question: q.slice(0, 300),
+      poll_options: opts.map((text) => ({ text, votes: 0 })),
+      poll_allow_multiple: pollAllowMultiple,
+    };
+  }
+
   async function handlePickImage(file) {
     if (!file) return;
     if (!file.type?.startsWith('image/')) {
@@ -195,6 +292,14 @@ export default function CommunityPosts() {
   const [hasMore, setHasMore] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
+  const [search, setSearch] = useState('');
+
+  // Debounce search typing 400ms so one request per query, not per keystroke.
+  useEffect(() => {
+    const t = setTimeout(() => setSearch(searchInput.trim()), 400);
+    return () => clearTimeout(t);
+  }, [searchInput]);
 
   const load = useCallback(() => {
     if (!slug) return;
@@ -202,7 +307,7 @@ export default function CommunityPosts() {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- sync skeleton flip on slug change is intentional
     setLoading(true);
     setPage(1);
-    communitiesService.posts(slug, { page: 1 })
+    communitiesService.posts(slug, { page: 1, ...(search ? { search } : {}) })
       .then((r) => {
         if (cancelled) return;
         const data = Array.isArray(r?.data) ? r.data : (r?.data?.results || []);
@@ -219,13 +324,14 @@ export default function CommunityPosts() {
   }, [slug]);
 
   useEffect(() => load(), [load]);
+  useEffect(() => { if (slug) load(); }, [search]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleLoadMore() {
     if (loadingMore || !hasMore) return;
     const nextPage = page + 1;
     setLoadingMore(true);
     try {
-      const r = await communitiesService.posts(slug, { page: nextPage });
+      const r = await communitiesService.posts(slug, { page: nextPage, ...(search ? { search } : {}) });
       const data = Array.isArray(r?.data) ? r.data : (r?.data?.results || []);
       const next = Array.isArray(r?.data) ? null : (r?.data?.next || null);
       if (data.length === 0) { setHasMore(false); return; }
@@ -253,7 +359,14 @@ export default function CommunityPosts() {
       // thumbnail when the user didn't attach a photo from the gallery.
       const autoThumb = !imageUrl ? youtubeThumbnail(firstVideoUrl(content)) : '';
       const finalImage = imageUrl || autoThumb;
-      const payload = finalImage ? { content, image_url: finalImage } : { content };
+      const base = finalImage ? { content, image_url: finalImage } : { content };
+      const poll = pollPayload();
+      if (poll.__invalid) {
+        showToast?.(t4(lang, 'Sondaj bezwen yon kesyon + omwen 2 opsyon.', 'A poll needs a question + at least 2 options.', 'Un sondage exige une question + 2 options.', 'Una encuesta necesita pregunta + 2 opciones.'), 'circle-exclamation');
+        setPublishing(false);
+        return;
+      }
+      const payload = { ...base, ...poll };
       const res = await communitiesService.createPost(slug, payload);
       if (res?.data?.id) {
         // Backend order is pinned-first then newest: insert the new post
@@ -268,6 +381,7 @@ export default function CommunityPosts() {
       }
       setDraft('');
       setImageUrl('');
+      resetPollCreator();
       showToast?.(t4(lang, 'Pòs pibliye!', 'Post published!', 'Publication réussie !', '¡Publicación exitosa!'), 'check-circle');
     } catch (err) {
       showToast?.(err?.response?.data?.detail || t4(lang, 'Nou pa ka pibliye.', 'Could not publish.', 'Publication impossible.', 'No se pudo publicar.'), 'circle-exclamation');
@@ -460,6 +574,50 @@ export default function CommunityPosts() {
               </button>
             </div>
           )}
+          {showPollCreator && (
+            <div style={{ marginTop: 8, border: '1px dashed var(--border-color, #cbd5e1)', borderRadius: 8, padding: 10 }} data-testid="post-composer-poll-creator">
+              <input
+                value={pollQuestion}
+                onChange={(e) => setPollQuestion(e.target.value)}
+                maxLength={300}
+                placeholder={t4(lang, 'Kesyon sondaj la...', 'Poll question...', 'Question du sondage...', 'Pregunta de la encuesta...')}
+                aria-label={t4(lang, 'Kesyon sondaj', 'Poll question', 'Question', 'Pregunta')}
+                data-testid="post-composer-poll-question"
+                style={{ width: '100%', border: '1px solid var(--border-color, #cbd5e1)', borderRadius: 8, padding: '8px 10px', marginBottom: 8 }}
+              />
+              {pollOptions.map((opt, i) => (
+                <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
+                  <input
+                    value={opt}
+                    onChange={(e) => setPollOptions((list) => list.map((v, j) => (j === i ? e.target.value : v)))}
+                    maxLength={200}
+                    placeholder={t4(lang, `Opsyon ${i + 1}`, `Option ${i + 1}`, `Option ${i + 1}`, `Opción ${i + 1}`)}
+                    data-testid={`post-composer-poll-opt-${i}`}
+                    style={{ flex: 1, border: '1px solid var(--border-color, #cbd5e1)', borderRadius: 8, padding: '6px 10px' }}
+                  />
+                  {pollOptions.length > 2 && (
+                    <button type="button" onClick={() => setPollOptions((list) => list.filter((_, j) => j !== i))} data-testid={`post-composer-poll-del-${i}`} aria-label="Remove"
+                      style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}><i className="fas fa-times" aria-hidden="true" /></button>
+                  )}
+                </div>
+              ))}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4, fontSize: '0.78rem', flexWrap: 'wrap' }}>
+                {pollOptions.length < 10 && (
+                  <button type="button" onClick={() => setPollOptions((list) => [...list, ''])} data-testid="post-composer-poll-add"
+                    style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#7c3aed', fontWeight: 700 }}>
+                    + {t4(lang, 'Ajoute opsyon', 'Add option', 'Ajouter', 'Añadir')}
+                  </button>
+                )}
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                  <input type="checkbox" checked={pollAllowMultiple} onChange={(e) => setPollAllowMultiple(e.target.checked)} data-testid="post-composer-poll-multi" />
+                  {t4(lang, 'Plizyè chwa', 'Multiple choice', 'Choix multiple', 'Opción múltiple')}
+                </label>
+                <button type="button" onClick={resetPollCreator} style={{ marginLeft: 'auto', border: 'none', background: 'transparent', cursor: 'pointer', opacity: 0.7 }}>
+                  {t4(lang, 'Retire sondaj', 'Remove poll', 'Retirer', 'Quitar')}
+                </button>
+              </div>
+            </div>
+          )}
           {showLinkInput && (
             <div style={{ display: 'flex', gap: 8, marginTop: 8 }} data-testid="post-composer-link-row">
               <input
@@ -492,6 +650,10 @@ export default function CommunityPosts() {
                 style={{ border: firstGenericLinkUrl(draft) ? '1px solid #0284c7' : '1px solid var(--border-color, #cbd5e1)', background: firstGenericLinkUrl(draft) ? '#f0f9ff' : 'transparent', borderRadius: 20, padding: '6px 12px', cursor: 'pointer', fontSize: '0.8rem' }}>
                 <i className="fas fa-link" aria-hidden="true" /> Link
               </button>
+              <button type="button" onClick={() => setShowPollCreator((v) => !v)} title={t4(lang, 'Sondaj', 'Poll', 'Sondage', 'Encuesta')} data-testid="post-composer-poll-btn" aria-expanded={showPollCreator}
+                style={{ border: showPollCreator ? '1px solid #7c3aed' : '1px solid var(--border-color, #cbd5e1)', background: showPollCreator ? '#f5f3ff' : 'transparent', borderRadius: 20, padding: '6px 12px', cursor: 'pointer', fontSize: '0.8rem' }}>
+                <i className="fas fa-chart-bar" aria-hidden="true" /> {t4(lang, 'Sondaj', 'Poll', 'Sondage', 'Encuesta')}
+              </button>
             </span>
             <span className="c-post-composer-hint" style={{ marginLeft: 'auto', fontSize: '0.72rem', opacity: 0.65 }}>
               {t4(lang, 'Manm sèlman ka wè pòs yo.', 'Members only can see posts.', 'Seuls les membres voient les publications.', 'Solo los miembros ven las publicaciones.')}
@@ -510,6 +672,31 @@ export default function CommunityPosts() {
             </button>
           </div>
         </form>
+      )}
+
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div style={{ position: 'relative', flex: 1 }}>
+          <i className="fas fa-search" aria-hidden="true" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} />
+          <input
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder={t4(lang, 'Chache yon pòs... (tèks oswa @user)', 'Search posts... (text or @user)', 'Rechercher... (texte ou @user)', 'Buscar... (texto o @usuario)')}
+            aria-label={t4(lang, 'Chache pòs', 'Search posts', 'Rechercher', 'Buscar')}
+            data-testid="posts-search-input"
+            style={{ width: '100%', border: '1px solid var(--border-color, #cbd5e1)', borderRadius: 20, padding: '8px 32px 8px 32px' }}
+          />
+          {searchInput && (
+            <button type="button" onClick={() => setSearchInput('')} aria-label="Clear" data-testid="posts-search-clear"
+              style={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'transparent', cursor: 'pointer', opacity: 0.6 }}>
+              <i className="fas fa-times" aria-hidden="true" />
+            </button>
+          )}
+        </div>
+      </div>
+      {search && (
+        <p style={{ fontSize: '0.78rem', opacity: 0.7 }} data-testid="posts-search-status">
+          {t4(lang, `Rezilta pou "${search}" — ${totalCount}`, `Results for "${search}" — ${totalCount}`, `Résultats pour "${search}" — ${totalCount}`, `Resultados para "${search}" — ${totalCount}`)}
+        </p>
       )}
 
       {posts.length === 0 ? (
@@ -575,6 +762,10 @@ export default function CommunityPosts() {
                   )
                 )}
                 {link && <LinkPreviewCard url={link} />}
+                {post.poll_question && (
+                  <PostPoll post={post} lang={lang} user={user} showToast={showToast}
+                    onVoted={(updated) => setPosts((list) => list.map((p) => (p.id === updated.id ? updated : p)))} />
+                )}
               </>
             );
           })()}

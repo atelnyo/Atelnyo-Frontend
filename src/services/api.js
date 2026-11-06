@@ -1277,6 +1277,7 @@ export const communitiesService = {
     api.post(`community-posts/?community=${encodeURIComponent(slug)}`, data),
   deletePost: (id) => api.delete(`community-posts/${id}/`),
   reactToPost: (id, emoji) => api.post(`community-posts/${id}/react/`, { emoji }),
+  votePoll: (id, option_indices) => api.post(`community-posts/${id}/poll-vote/`, { option_indices }),
   postComments: (postId) =>
     api.get('community-post-comments/', { params: { post: postId } }),
   createComment: (postId, content) =>
