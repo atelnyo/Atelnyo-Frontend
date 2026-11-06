@@ -1566,7 +1566,7 @@ export function Explore({
     let list = apiCommunities || [];
     if (q) {
       list = list.filter((c) =>
-        (c.name || '').toLowerCase().includes(q) ||
+        (c.name || c.title || '').toLowerCase().includes(q) ||
         (c.description || '').toLowerCase().includes(q) ||
         (c.category || '').toLowerCase().includes(q)
       );

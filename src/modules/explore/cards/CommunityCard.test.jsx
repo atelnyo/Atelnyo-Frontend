@@ -55,6 +55,13 @@ describe('CommunityCard pre-click info', () => {
     expect(screen.queryByTestId('community-card-info')).toBeNull();
   });
 
+  it('falls back to title when the rail sends a search-shaped item', () => {
+    const { container } = render(
+      <CommunityCard community={{ id: 9, title: 'Kominote Rechèch', member_count: 5 }} t={{}} lang="ht" onOpen={vi.fn()} />,
+    );
+    expect(container.querySelector('.explore-card-title').textContent).toContain('Kominote Rechèch');
+  });
+
   it('still opens the community on click', () => {
     const onOpen = vi.fn();
     render(<CommunityCard community={BASE} t={{}} lang="ht" onOpen={onOpen} />);

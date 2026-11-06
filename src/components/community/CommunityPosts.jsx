@@ -85,7 +85,24 @@ function LinkPreviewCard({ url }) {
       <div style={{ marginTop: 8, border: '1px solid var(--border-color, #e2e8f0)', borderRadius: 8, height: 72, background: 'var(--bg-soft, #f8fafc)' }} data-testid="link-preview-loading" />
     );
   }
-  if (!meta || (!meta.title && !meta.description && !meta.image)) return null;
+  // Fetch failed (WhatsApp/Facebook login walls, offline host...): still
+  // render a minimal tappable card so every pasted link shows something.
+  if (!meta || (!meta.title && !meta.description && !meta.image)) {
+    let domain = '';
+    try { domain = new URL(url).hostname; } catch { domain = ''; }
+    return (
+      <a href={url} target="_blank" rel="noopener noreferrer"
+        style={{ marginTop: 8, display: 'flex', gap: 10, alignItems: 'center', border: '1px dashed var(--border-color, #cbd5e1)', borderRadius: 8, overflow: 'hidden', textDecoration: 'none', color: 'inherit', background: 'var(--bg-soft, #fff)', padding: '8px 10px' }}
+        data-testid="link-preview-card">
+        <span style={{ width: 36, height: 36, borderRadius: 8, background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }} aria-hidden="true"><i className="fas fa-link" /></span>
+        <span style={{ minWidth: 0, flex: 1 }}>
+          {domain && <span style={{ display: 'block', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.5px', opacity: 0.6 }}>{domain}</span>}
+          <span style={{ display: 'block', fontSize: '0.78rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{url}</span>
+        </span>
+        <span style={{ opacity: 0.5 }} aria-hidden="true"><i className="fas fa-external-link-alt" /></span>
+      </a>
+    );
+  }
   return (
     <a href={url} target="_blank" rel="noopener noreferrer"
       style={{ marginTop: 8, display: 'flex', gap: 10, border: '1px solid var(--border-color, #e2e8f0)', borderRadius: 8, overflow: 'hidden', textDecoration: 'none', color: 'inherit', background: 'var(--bg-soft, #fff)' }}
@@ -174,6 +191,39 @@ function PostPoll({ post, lang, user, onVoted, showToast }) {
         )}
       </div>
     </div>
+  );
+}
+
+/** Clickable video title (YouTube/Vimeo/...): fetches the real title via
+ * /api/link-preview/ (oEmbed server-side) so a pasted video shows more
+ * than a bare thumbnail — and the link opens the source on tap. */
+function VideoTitleLink({ url }) {
+  const [meta, setMeta] = useState(() => (_previewCache.get(url) || null));
+  const [loading, setLoading] = useState(() => (!_previewCache.has(url) && Boolean(url)));
+  useEffect(() => {
+    if (!url) return;
+    if (_previewCache.has(url)) { setMeta(_previewCache.get(url)); setLoading(false); return; }
+    let cancelled = false;
+    setLoading(true);
+    const t = setTimeout(() => {
+      fetchLinkPreview(url)
+        .then((data) => { if (!cancelled && data) setMeta(data); })
+        .finally(() => { if (!cancelled) setLoading(false); });
+    }, 300);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [url]);
+  if (!url) return null;
+  let domain = '';
+  try { domain = new URL(url).hostname.replace(/^www\./, ''); } catch { domain = ''; }
+  const title = meta?.title && meta.title !== meta?.domain ? meta.title : null;
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer" data-testid="video-title-link"
+      style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, fontSize: '0.82rem', fontWeight: 600, textDecoration: 'none', color: 'inherit' }}>
+      <i className="fas fa-play-circle" aria-hidden="true" style={{ color: '#e11d48' }} />
+      <span style={{ flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{loading ? '...' : (title || domain || url)}</span>
+      {domain && <span style={{ fontWeight: 400, fontSize: '0.7rem', opacity: 0.6 }}>{domain}</span>}
+      <i className="fas fa-external-link-alt" aria-hidden="true" style={{ fontSize: '0.7rem', opacity: 0.5 }} />
+    </a>
   );
 }
 
@@ -554,9 +604,12 @@ export default function CommunityPosts() {
             const thumb = vUrl ? youtubeThumbnail(vUrl) : '';
             if (!thumb) return null;
             return (
-              <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8rem', opacity: 0.85 }} data-testid="post-composer-video-thumb">
-                <img src={thumb} alt="" loading="lazy" style={{ width: 72, height: 48, borderRadius: 6, objectFit: 'cover' }} />
-                <span><i className="fab fa-youtube" aria-hidden="true" style={{ marginRight: 4 }} />{t4(lang, 'Imaj videyo a ap sèvi kòm foto pòs la.', 'Video thumbnail will be used as the post image.', 'La miniature servira d\u2019image.', 'La miniatura se usará como imagen.')}</span>
+              <div data-testid="post-composer-video-thumb">
+                <VideoTitleLink url={vUrl} />
+                <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8rem', opacity: 0.85 }}>
+                  <img src={thumb} alt="" loading="lazy" style={{ width: 72, height: 48, borderRadius: 6, objectFit: 'cover' }} />
+                  <span><i className="fab fa-youtube" aria-hidden="true" style={{ marginRight: 4 }} />{t4(lang, 'Imaj videyo a ap sèvi kòm foto pòs la.', 'Video thumbnail will be used as the post image.', 'La miniature servira d\u2019image.', 'La miniatura se usará como imagen.')}</span>
+                </div>
               </div>
             );
           })()}
@@ -752,6 +805,7 @@ export default function CommunityPosts() {
             return (
               <>
                 {img && <img className="c-post-image" src={img} alt="" loading="lazy" />}
+                {vidUrl && <VideoTitleLink url={vidUrl} />}
                 {video && (
                   video.kind === 'embed' ? (
                     <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: 8, background: '#000', marginTop: 8 }}>

@@ -51,7 +51,11 @@ export default function CommunityCard({ community, onOpen, t, lang }) {
   const joinLabel = joinMeta ? (isHt ? joinMeta.ht : joinMeta.en) : null;
   const tags = Array.isArray(community.tags) ? community.tags.filter(Boolean) : [];
   const eventCount = Number(community.event_count) || 0;
-  const founder = community.created_by_username || community.user_key || '';
+  // Different API shapes carry the name under different keys: catalog +
+  // home-feed serializers use ``name``, unified search + DEIE rails use
+  // ``title``. Accept all so the card never renders an empty title.
+  const displayName = community.name || community.title || community.display_name || '';
+  const founder = community.created_by_username || community.user_key || community.creator_name || '';
   const memberStatus = community.my_status
     || (community.is_member ? 'active' : null);
   const memberLabel = memberStatus === 'active'
@@ -72,14 +76,14 @@ export default function CommunityCard({ community, onOpen, t, lang }) {
         {hasImage && !imgFailed ? (
           <img
             className={`explore-card-image ${imgLoaded ? 'explore-card-image--loaded' : ''}`}
-            src={community.banner_url || community.avatar_url}
-            alt={community.name}
+            src={community.banner_url || community.avatar_url || community.image_url}
+            alt={displayName}
             loading="lazy"
             onLoad={() => setImgLoaded(true)}
             onError={() => setImgFailed(true)}
           />
         ) : (
-          <CommunityFallback name={community.name} />
+          <CommunityFallback name={displayName} />
         )}
         {community.is_featured && (
           <div className="explore-card-badge explore-card-badge-star" aria-label={t.explore_chip_featured || 'Featured'}>
@@ -90,7 +94,7 @@ export default function CommunityCard({ community, onOpen, t, lang }) {
       <div className="explore-card-body">
         <div className="explore-card-title">
           <i className="fas fa-users" aria-hidden="true" style={{ marginRight: 6, opacity: 0.6 }} />
-          {community.name}
+          {displayName}
         </div>
         {community.description && (
           <div className="explore-card-subtitle">
