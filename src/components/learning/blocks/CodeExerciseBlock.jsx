@@ -118,6 +118,95 @@ builtins.input = _patched_input
   }
 }
 
+// ─── Web (JavaScript / HTML) sandbox ─────────────────────────────────
+// Canvas exercises need a real browser canvas, not a Python runtime.
+// The code runs in a sandboxed iframe (allow-scripts only, no
+// same-origin), its console.log output is captured for auto-grading,
+// and errors come back as text so the learner always sees something.
+let webRunSeq = 0;
+
+export function buildWebDoc(code, language, token = 'preview') {
+  const isHtml = language === 'html';
+  const open = '<' + 'script>';
+  const close = '</' + 'script>';
+  const body = isHtml
+    ? code
+    : '<canvas id="demo" width="480" height="320"></canvas>' + open + code + close;
+
+  return `<!doctype html><html lang="ht"><head><meta charset="utf-8">
+<style>
+  html,body{margin:0;padding:12px;font-family:system-ui,sans-serif;background:#fff}
+  canvas{display:block;max-width:100%;border-radius:8px;background:#f1f5f9}
+</style>
+${open}
+window.__logs = [];
+window.__errors = [];
+(function () {
+  var orig = console.log;
+  console.log = function () {
+    var line = Array.prototype.slice.call(arguments).map(function (v) {
+      try { return typeof v === 'object' ? JSON.stringify(v) : String(v); }
+      catch (e) { return String(v); }
+    }).join(' ');
+    window.__logs.push(line);
+    orig.apply(console, arguments);
+  };
+})();
+window.addEventListener('error', function (e) { window.__errors.push(e.message); });
+${close}
+${body}
+${open}
+setTimeout(function () {
+  parent.postMessage({
+    source: 'atelnyo-preview',
+    token: ${JSON.stringify(token)},
+    type: 'preview-logs',
+    logs: window.__logs,
+    errors: window.__errors
+  }, '*');
+}, 120);
+${close}
+</body></html>`;
+}
+
+function runWeb(code, language, setDoc) {
+  return new Promise((resolve) => {
+    const token = `webrun-${++webRunSeq}`;
+    const srcDoc = buildWebDoc(code, language, token);
+    let settled = false;
+
+    const finish = (result) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      window.removeEventListener('message', onMessage);
+      resolve(result);
+    };
+
+    const onMessage = (event) => {
+      const data = event.data;
+      if (!data || data.source !== 'atelnyo-preview' || data.token !== token) return;
+      if (data.type !== 'preview-logs') return;
+      const errors = (data.errors || []).filter(Boolean);
+      finish({
+        success: errors.length === 0,
+        output: (data.logs || []).join('\n'),
+        error: errors.join('\n'),
+        result: '',
+      });
+    };
+
+    // 6s is generous for a canvas paint; after that we never trap the
+    // learner — the run resolves as a failure they can retry or skip.
+    const timer = setTimeout(() => finish({
+      success: false, output: '', error: 'Ekzekisyon an pran twò lontan.', result: '',
+    }), 6000);
+
+    window.addEventListener('message', onMessage);
+    setDoc(srcDoc);
+  });
+}
+
 // ─── CodeExerciseBlock Component ──────────────────────────────────────
 export default function CodeExerciseBlock({
   block,
@@ -134,7 +223,8 @@ export default function CodeExerciseBlock({
   const config = block.content || block.config || {};
   const instructions = config.instructions || '';
   const starterCode = config.code || config.starter_code || '# Write your code here\n';
-  const language = config.language || 'python';
+  const language = String(config.language || block.language || 'python').toLowerCase();
+  const isWeb = language === 'javascript' || language === 'js' || language === 'html';
   const expectedOutput = config.expected_output || '';
   const title = config.title || block.title || '';
   const hint = config.hint || '';
@@ -145,8 +235,10 @@ export default function CodeExerciseBlock({
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
   const [isRunning, setIsRunning] = useState(false);
-  const [pyodideReady, setPyodideReady] = useState(false);
+  const [pyodideReady, setPyodideReady] = useState(isWeb);
   const [pyodideLoading, setPyodideLoading] = useState(false);
+  const [runtimeError, setRuntimeError] = useState('');
+  const [previewDoc, setPreviewDoc] = useState('');
   const [showHint, setShowHint] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(null);
@@ -155,22 +247,36 @@ export default function CodeExerciseBlock({
   const [startTime] = useState(Date.now());
   const editorRef = useRef(null);
 
-  // Preload Pyodide
+  // Preload Pyodide only when the exercise is Python. Canvas exercises
+  // must never wait on a 10 MB WebAssembly download they don't use.
   useEffect(() => {
+    if (isWeb) return;
     loadPyodide()
       .then(() => setPyodideReady(true))
-      .catch(() => {});
-  }, []);
+      .catch((err) => setRuntimeError(err?.message || 'Runtime pa chaje.'));
+  }, [isWeb]);
+
+  // Show the starter canvas right away for web exercises.
+  useEffect(() => {
+    if (isWeb) setPreviewDoc(buildWebDoc(starterCode, language, 'preview'));
+  }, [isWeb, language, starterCode]);
+
+  const execute = useCallback(
+    (source, stdin = '') => (
+      isWeb ? runWeb(source, language, setPreviewDoc) : runPython(source, stdin)
+    ),
+    [isWeb, language],
+  );
 
   // ─── Run code ───────────────────────────────────────────────────
   const handleRun = useCallback(async () => {
-    if (isRunning || language !== 'python') return;
+    if (isRunning) return;
     setIsRunning(true);
     setOutput('');
     setError('');
 
     try {
-      const result = await runPython(code);
+      const result = await execute(code);
       setOutput(result.output + (result.result ? `\n>>> ${result.result}` : ''));
       setError(result.error || '');
       onViewed?.(moduleIndex, block.id, 'code_exercise');
@@ -179,7 +285,7 @@ export default function CodeExerciseBlock({
     } finally {
       setIsRunning(false);
     }
-  }, [code, isRunning, language, moduleIndex, block.id, onViewed]);
+  }, [code, isRunning, execute, moduleIndex, block.id, onViewed]);
 
   // ─── Submit for grading ─────────────────────────────────────────
   const handleSubmit = useCallback(async () => {
@@ -188,7 +294,7 @@ export default function CodeExerciseBlock({
 
     try {
       // Run code to get output
-      const result = await runPython(code);
+      const result = await execute(code);
       const userOutput = (result.output + (result.result ? `\n${result.result}` : '')).trim();
       setSubmittedOutput(userOutput);
 
@@ -198,7 +304,7 @@ export default function CodeExerciseBlock({
         let passed = 0;
         for (const tc of testCases) {
           try {
-            const tcResult = await runPython(code, tc.input || '');
+            const tcResult = await execute(code, tc.input || '');
             const tcOutput = (tcResult.output + (tcResult.result ? `\n${tcResult.result}` : '')).trim();
             if (tcOutput === (tc.expected || '').trim()) passed++;
           } catch { /* skip */ }
@@ -234,7 +340,30 @@ export default function CodeExerciseBlock({
     } catch (err) {
       setError(err.message || 'Submission failed');
     }
-  }, [code, submitted, isRunning, testCases, expectedOutput, courseId, moduleIndex, block.id, onComplete]);
+  }, [code, submitted, isRunning, testCases, expectedOutput, execute, courseId, moduleIndex, block.id, onComplete]);
+
+  // ─── Never-block fallback ────────────────────────────────────────
+  // If the runtime itself cannot load (offline, CDN blocked, school
+  // proxy), the learner still finishes the module: the attempt is
+  // recorded as pending review instead of locking the step forever.
+  const handleFallback = useCallback(async () => {
+    if (submitted) return;
+    setSubmitted(true);
+    setScore(null);
+    try {
+      if (courseId) {
+        await blockSubmissionService.create({
+          course: courseId,
+          module_index: moduleIndex,
+          block_id: block.id,
+          block_type: 'code_exercise',
+          content: { code, output: '', runtime_unavailable: true },
+          status: 'pending',
+        });
+      }
+    } catch { /* best effort */ }
+    onComplete?.(moduleIndex, block.id, 'code_exercise');
+  }, [submitted, courseId, moduleIndex, block.id, code, onComplete]);
 
   // ─── Reset code ─────────────────────────────────────────────────
   const handleReset = useCallback(() => {
@@ -311,6 +440,14 @@ export default function CodeExerciseBlock({
             <span style={{ fontWeight: 600 }}>{isHt ? 'Sòti' : 'Output'}</span>
             {pyodideLoading && <span style={{ color: '#f59e0b' }}>Loading Python...</span>}
           </div>
+          {isWeb && previewDoc && (
+            <iframe
+              title={isHt ? 'Preview kòd la' : 'Code preview'}
+              srcDoc={previewDoc}
+              sandbox="allow-scripts"
+              style={{ width: '100%', height: 260, border: 'none', borderBottom: '1px solid var(--border-subtle)', background: '#fff' }}
+            />
+          )}
           <div style={{
             flex: 1,
             padding: 12,
@@ -343,7 +480,7 @@ export default function CodeExerciseBlock({
         <button
           type="button"
           onClick={handleRun}
-          disabled={isRunning || !pyodideReady}
+          disabled={isRunning || (!isWeb && !pyodideReady) || Boolean(runtimeError)}
           aria-label={isRunning ? (isHt ? 'Ap ekzekye...' : 'Running...') : (isHt ? 'Ekzekye kòd la' : 'Run code')}
           style={{
             padding: '6px 14px',
@@ -363,6 +500,20 @@ export default function CodeExerciseBlock({
           <i className={`fas ${isRunning ? 'fa-spinner fa-spin' : 'fa-play'}`} />
           {isHt ? 'Ekzekye' : 'Run'}
         </button>
+
+        {runtimeError && !submitted && (
+          <button
+            type="button"
+            onClick={handleFallback}
+            style={{
+              padding: '6px 12px', borderRadius: 6, border: '1px dashed #f59e0b',
+              background: 'transparent', color: '#b45309', cursor: 'pointer',
+              fontSize: '0.8rem', fontFamily: 'inherit',
+            }}
+          >
+            <i className="fas fa-forward" /> {isHt ? 'Kontinye san ekzekisyon' : 'Continue without running'}
+          </button>
+        )}
 
         <button
           type="button"
@@ -417,7 +568,7 @@ export default function CodeExerciseBlock({
               fontWeight: 600,
               fontSize: '0.82rem',
             }}>
-              {score >= 70 ? '✅' : '❌'} {score}%
+              {score == null ? '🕒 Pending' : `${score >= 70 ? '✅' : '❌'} ${score}%`}
             </span>
           </div>
         )}
@@ -466,9 +617,13 @@ export default function CodeExerciseBlock({
           background: score >= 70 ? 'rgba(16,185,129,0.04)' : 'rgba(239,68,68,0.04)',
           fontSize: '0.82rem',
         }}>
-          {score >= 70
-            ? (isHt ? '🎉 Brav! Ou pase egzèsis sa a!' : '🎉 Great! You passed this exercise!')
-            : (isHt ? '⚠️ Eseye ankò — revize kòd ou a epi tcheke sòti a.' : '⚠️ Try again — review your code and check the output.')}
+          {score == null
+            ? (isHt
+              ? '🕒 Sèvis ekzekisyon pa disponib — travay ou anrejistre pou revizyon. Ou ka kontinye.'
+              : '🕒 Runtime unavailable — your work is saved for review. You can continue.')
+            : score >= 70
+              ? (isHt ? '🎉 Brav! Ou pase egzèsis sa a!' : '🎉 Great! You passed this exercise!')
+              : (isHt ? '⚠️ Eseye ankò — revize kòd ou a epi tcheke sòti a.' : '⚠️ Try again — review your code and check the output.')}
         </div>
       )}
     </div>
