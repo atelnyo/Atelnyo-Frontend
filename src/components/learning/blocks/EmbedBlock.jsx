@@ -53,13 +53,16 @@ export default function EmbedBlock({
   const completedRef = useRef(false);
 
   useEffect(() => {
-    onViewed?.(block.id);
+    // Signature matches every other block: (moduleIndex, blockId, type).
+    // It used to pass only the id, so the session recorded the wrong
+    // position (module 0, no block id) every time an embed was opened.
+    onViewed?.(moduleIndex, block.id, 'embed');
     // Auto-complete on view (same as CalloutBlock, ImageBlock)
     if (!completedRef.current) {
       completedRef.current = true;
       reportComplete?.();
     }
-  }, [block.id, onViewed, reportComplete]);
+  }, [block.id, moduleIndex, onViewed, reportComplete]);
 
   const isValidUrl = useMemo(() => {
     if (!embedUrl) return false;

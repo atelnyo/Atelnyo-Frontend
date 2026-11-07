@@ -151,6 +151,13 @@ export default function ModuleSession({
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (placedRef.current) return;
+    // Auto-placement only ever runs BEFORE the learner has moved. The
+    // step space settles late (the quiz list is a network call), and a
+    // video/embed step marks itself done the moment it appears — without
+    // this guard the effect fired after the learner was already on that
+    // step and jumped them past it ("I watched the video and now the
+    // video is gone and Continue is dead").
+    if (current !== 0) { placedRef.current = true; return; }
     if (!quizzesLoaded) return;
     if (stepCount === 0) { placedRef.current = true; return; }
     if (initialBlockId) {
@@ -164,7 +171,7 @@ export default function ModuleSession({
     const firstUndone = [...Array(stepCount).keys()].find((i) => !isStepDone(i));
     setCurrent(firstUndone == null ? 0 : firstUndone);
     placedRef.current = true;
-  }, [quizzesLoaded, stepCount, isStepDone, initialBlockId, sessionBlocks]);
+  }, [quizzesLoaded, stepCount, isStepDone, initialBlockId, sessionBlocks, current]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
   const markDone = useCallback((stepIdx) => {
