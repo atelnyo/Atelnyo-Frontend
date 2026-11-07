@@ -52,8 +52,16 @@ export function normalizeSections(raw, isHt = true) {
       const content = typeof section.content === 'string' ? section.content : items;
       return {
         key: section.key || section.id || `section-${i}`,
-        title: typeof title === 'object' ? (title[isHt ? 'ht' : 'en'] || title.en || '') : String(title),
-        hint: section.hint ? (typeof section.hint === 'object' ? (section.hint[isHt ? 'ht' : 'en'] || '') : String(section.hint)) : '',
+        // Fall back to the other language rather than showing an empty
+        // heading when only one translation was filled in.
+        title: typeof title === 'object'
+          ? (title[isHt ? 'ht' : 'en'] || title.ht || title.en || '')
+          : String(title),
+        hint: section.hint
+          ? (typeof section.hint === 'object'
+            ? (section.hint[isHt ? 'ht' : 'en'] || section.hint.ht || section.hint.en || '')
+            : String(section.hint))
+          : '',
         content: content || '',
       };
     })

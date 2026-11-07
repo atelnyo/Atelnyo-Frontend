@@ -22,6 +22,7 @@ import { BlockRenderer } from '../../learning/blocks';
 import ConversationStepsEditor from './ConversationStepsEditor';
 import MatchingPairsEditor from './MatchingPairsEditor';
 import ChecklistItemsEditor from './ChecklistItemsEditor';
+import CanvasSectionsEditor from './CanvasSectionsEditor';
 import QuizInlineEditor from './QuizInlineEditor';
 import BlockPreview from './BlockPreview';
 import useKeyboardShortcuts from '../../../hooks/useKeyboardShortcuts';
@@ -146,6 +147,8 @@ const BLOCK_FIELDS = {
   ],
   matching: [],
   // pairs handled by MatchingPairsEditor; title rendered separately
+  canvas: [],
+  // sections handled by CanvasSectionsEditor; title rendered separately
   resource: [
     { key: 'title', label: { en: 'Title', ht: 'Tit' }, type: 'text' },
     { key: 'description', label: { en: 'Description', ht: 'Deskripsyon' }, type: 'textarea', rows: 2 },
@@ -556,6 +559,23 @@ export default function BlockEditor({ blocks = [], onBlocksChange, lang = 'ht', 
                     />
                   </label>
                   <ChecklistItemsEditor
+                    block={draft}
+                    onChange={(updated) => setDraft(updated)}
+                    lang={lang}
+                  />
+                </>
+              ) : block.type === 'canvas' ? (
+                <>
+                  <label className={styles.blockField}>
+                    <span className={styles.blockFieldLabel}>{t('Tit', 'Title')}</span>
+                    <input
+                      type="text"
+                      className={styles.blockFieldInput}
+                      value={draft.title || ''}
+                      onChange={(e) => handleFieldChange('title', e.target.value)}
+                    />
+                  </label>
+                  <CanvasSectionsEditor
                     block={draft}
                     onChange={(updated) => setDraft(updated)}
                     lang={lang}
