@@ -6,7 +6,7 @@
  * the Atelnyo backend.
  */
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { authService } from '../../services/api';
+import { authService, applyTokenPair } from '../../services/api';
 import {
   getGoogleClientId, gsiPromptSkipped, rememberGsiSkipped,
   readPendingGoogle, writePendingGoogle, clearPendingGoogle,
@@ -51,12 +51,25 @@ export default function useGoogleAuth({ lang, onLoginSuccess, showToast, isLoadi
     }
     setGoogleLoading(true);
     try {
-      const { data } = await authService.googleLogin(idToken);
+      const { data: raw } = await authService.googleLogin(idToken);
+      // Unwrap the optional ApiResponseRenderer envelope ({success, data}) so
+      // both plain and wrapped login payloads resolve the same way.
+      const payload = raw?.data ?? raw;
+      // PERSIST THE SESSION — exactly like the password login does.
+      // Without this the Google session only lived in React state, so a
+      // page refresh (which restores `access_token` / `refresh_token` /
+      // `user` from localStorage in App.jsx) logged the user straight
+      // back out. The JWT pair + user blob are all the boot path reads.
+      applyTokenPair({
+        access: payload?.access,
+        refresh: payload?.refresh,
+        user: payload?.user,
+      });
       clearPendingGoogle();
       setPendingGoogle(null);
       if (showToast) showToast(lang === 'ht' ? 'Koneksyon siksè!' : 'Login successful!', 'check-circle');
-      onLoginSuccess(data.user, data);
-      return { success: true, user: data.user };
+      onLoginSuccess(payload?.user, payload);
+      return { success: true, user: payload?.user };
     } catch (err) {
       const msg = err?.response?.data?.error || err?.response?.data?.detail
         || (lang === 'ht' ? 'Google koneksyon echwe.' : 'Google sign-in failed.');

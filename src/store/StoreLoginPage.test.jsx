@@ -7,6 +7,7 @@ import { HelmetProvider } from 'react-helmet-async';
 
 const loginMock = vi.fn();
 const setUserMock = vi.fn();
+const setTokensMock = vi.fn();
 const applyTokenPairMock = vi.fn();
 let googleSuccess = null;
 
@@ -15,6 +16,7 @@ vi.mock('./useAuthStore', () => {
     user: null,
     login: (...args) => loginMock(...args),
     setUser: (...args) => setUserMock(...args),
+    setTokens: (...args) => setTokensMock(...args),
   };
   const useAuthStore = (selector) => selector(state);
   useAuthStore.setState = () => {};
@@ -65,6 +67,7 @@ describe('StoreLoginPage', () => {
     googleSuccess({ id: 7, username: 'amy' }, { access: 'a1', refresh: 'r1', user: { id: 7 } });
     expect(applyTokenPairMock).toHaveBeenCalledWith({ access: 'a1', refresh: 'r1', user: { id: 7, username: 'amy' } });
     expect(setUserMock).toHaveBeenCalledWith({ id: 7, username: 'amy' });
+    expect(setTokensMock).toHaveBeenCalledWith('a1', 'r1');
     expect(await screen.findByText('STORE HOME')).toBeTruthy();
   });
 

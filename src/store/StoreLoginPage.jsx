@@ -22,6 +22,11 @@ export default function StoreLoginPage() {
   const onGoogleSuccess = (signedInUser, payload) => {
     applyTokenPair({ access: payload?.access, refresh: payload?.refresh, user: signedInUser });
     useAuthStore.getState().setUser(signedInUser);
+    // Also sync tokens into the store state (mirrors the password-login path
+    // so refresh/interceptor flows behave identically for Google vs email users).
+    if (payload?.access) {
+      useAuthStore.getState().setTokens(payload.access, payload.refresh);
+    }
     navigate(next, { replace: true });
   };
   const { googleRef, googleLoading } = useGoogleAuth({
