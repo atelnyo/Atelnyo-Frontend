@@ -45,7 +45,9 @@ export default function EmbedBlock({
   onViewed,
 }) {
   const isHt = lang === 'ht';
-  const embedUrl = toEmbedUrl(block.embedUrl || '');
+  // ``embedUrl`` is the canonical field; ``embedCode`` is accepted as a
+  // legacy alias because the registry's old defaults wrote it.
+  const embedUrl = toEmbedUrl(block.embedUrl || block.embedCode || '');
   const caption = block.caption || '';
   const height = block.height || 400;
   const completedRef = useRef(false);

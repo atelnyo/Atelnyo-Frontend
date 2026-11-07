@@ -16,6 +16,18 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { blockSubmissionService } from '../../../services/api';
 
+/** Accepts an array or a newline-separated string and returns a list. */
+function asList(value) {
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string') {
+    return value
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean);
+  }
+  return [];
+}
+
 export default function ProjectBlock({ block, lang = 'ht', index, courseId, moduleIndex, onComplete, onViewed }) {
   const isHt = lang === 'ht';
   const viewedRef = useRef(false);
@@ -28,7 +40,11 @@ export default function ProjectBlock({ block, lang = 'ht', index, courseId, modu
   const [score, setScore] = useState(null); // creator score (if graded)
 
   const description = block.description || block.config?.description || '';
-  const deliverables = block.deliverables || block.config?.deliverables || [];
+  // ``deliverables`` may arrive as an array OR as one newline-separated
+  // string (that is how the seeded capstone stores it). Calling .map()
+  // on the string threw and the error boundary replaced the whole final
+  // project with a failure notice.
+  const deliverables = asList(block.deliverables || block.config?.deliverables);
   const resources = block.resources || block.config?.resources || [];
   const maxScore = block.maxScore || block.config?.maxScore || null;
 

@@ -83,10 +83,14 @@ export function resolveVideoSource(url) {
       if (!id && pathId[0] === 'live') id = pathId[1];
       return id ? { kind: 'embed', provider: 'youtube', src: `https://www.youtube.com/embed/${id}` } : null;
     }
-    if (host === 'vimeo.com') {
-      // Accept /ID and /channels/.../ID — the video id is the LAST
-      // numeric path segment (player.vimeo.com/video/ID is also a
-      // valid paste).
+    if (host === 'vimeo.com' || host === 'player.vimeo.com') {
+      // Accept /ID, /channels/.../ID and the player/video/ID form — the
+      // video id is the LAST numeric path segment. ``player.vimeo.com``
+      // matters: the EMBED url (what creators copy out of Vimeo's own
+      // share dialog, and what the seed commands store) used to fall
+      // through to the ``file`` branch and mount a <video> against an
+      // HTML player page, which never loads — the lesson then showed
+      // "This video could not be loaded." even though the link was fine.
       let id = null;
       for (let i = pathId.length - 1; i >= 0; i -= 1) {
         if (/^\d+$/.test(pathId[i])) { id = pathId[i]; break; }

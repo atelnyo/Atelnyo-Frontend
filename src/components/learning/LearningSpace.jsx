@@ -18,7 +18,7 @@
  * No fake state: a module is "completed" only from real completed
  * blocks; the continue card comes from the backend-recorded position.
  */
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { courseService, courseCheckoutService, progressService, courseSupportService, masteryService } from '../../services/api';
 import { stageCourse, getCachedCourse, stageQuizzes, enqueueProgress } from '../../services/offlineCourse';
 import ModuleSession from './ModuleSession';
@@ -28,9 +28,7 @@ import GamificationBar from './GamificationBar';
 import useLearnerStats from '../../hooks/useLearnerStats';
 import { playChime, burstConfetti } from '../../utils/celebrate';
 import { openCertificateWindow } from './CertificateTemplate';
-import BusinessWorkspace from '../studio/editor/BusinessWorkspace';
 import '../studio/editor/BusinessWorkspace.css';
-import ProjectWorkspace from './workspace/ProjectWorkspace';
 import './workspace/ProjectWorkspace.css';
 import useLearningNavigation from '../../hooks/useLearningNavigation';
 import useLessonPrefetch from '../../hooks/useLessonPrefetch';
@@ -40,6 +38,14 @@ import ProgressDomains from './ProgressDomains';
 import SaveIndicator from './SaveIndicator';
 import RecoveryBanner from './RecoveryBanner';
 import { saveSessionState as saveSession, loadSessionState as loadSession, clearSessionState as clearSession } from '../../services/learningSessionStore';
+import LearningCommandPalette from './LearningCommandPalette';
+
+// Both workspaces are big, self-contained surfaces opened by a toggle.
+// Loading them lazily keeps the lesson path (open a course, move through
+// steps) free of the business-editor and project bundles until the
+// learner genuinely asks for them.
+const BusinessWorkspace = React.lazy(() => import('../studio/editor/BusinessWorkspace'));
+const ProjectWorkspace = React.lazy(() => import('./workspace/ProjectWorkspace'));
 
 // ─── Session persistence — survives page reload ──────────────────
 // Migrated from raw localStorage to draftStore primitive for proper
@@ -196,6 +202,12 @@ export default function LearningSpace({
   const [showWorkspace, setShowWorkspace] = useState(false);
   // §1-§49 — Project-Based Learning Workspace
   const [showProjectWorkspace, setShowProjectWorkspace] = useState(false);
+  // ⌘K — quick jump over modules + activities
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  // { moduleIndex, blockId, nonce } — direct jump requested from the
+  // palette. The nonce remounts ModuleSession so the same module can be
+  // re-entered at a different activity.
+  const [jumpTarget, setJumpTarget] = useState(null);
   // §25, §32 — Recovery state
   const [recoveryType, setRecoveryType] = useState(null); // 'restored' | 'sync_pending' | null
   const [recoveryDismissed, setRecoveryDismissed] = useState(false);
@@ -551,6 +563,52 @@ export default function LearningSpace({
     enqueueProgress,
   });
 
+  // ─── ⌘K / Ctrl+K — quick jump ──────────────────────────────────────
+  // Additive on purpose: it reuses the exact same guards as the sidebar
+  // (moduleState + maxReached), so the palette can never open a module
+  // the curriculum would keep locked.
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      if (!(event.metaKey || event.ctrlKey)) return;
+      if (event.key !== 'k' && event.key !== 'K') return;
+      event.preventDefault();
+      setPaletteOpen((open) => !open);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
+
+  // Palette sees the same state the sidebar does, plus a lock flag it can
+  // render instead of guessing.
+  const paletteModuleState = useCallback((index) => {
+    const state = moduleState(index);
+    return { ...state, locked: index > maxReached && state.status === 'available' };
+  }, [moduleState, maxReached]);
+
+  const isModuleLocked = useCallback((mi) => paletteModuleState(mi).locked, [paletteModuleState]);
+
+  const notifyLocked = useCallback(() => {
+    showToast?.(isHt ? 'Modil sa a poko louvri. Fini sa ki anvan yo.' : 'That module is not unlocked yet. Finish the earlier ones.', 'lock');
+  }, [isHt, showToast]);
+
+  const jumpToModule = useCallback((mi) => {
+    if (mi == null) return;
+    if (isModuleLocked(mi)) { notifyLocked(); return; }
+    setReviewModule(null);
+    setJumpTarget(null);
+    setSessionModule(mi);
+  }, [isModuleLocked, notifyLocked]);
+
+  const jumpToBlock = useCallback((mi, blockId) => {
+    if (mi == null) return;
+    if (isModuleLocked(mi)) { notifyLocked(); return; }
+    setReviewModule(null);
+    // A fresh nonce remounts the session so it lands on this activity even
+    // when the learner is already inside the same module.
+    setJumpTarget({ moduleIndex: mi, blockId, nonce: Date.now() });
+    setSessionModule(mi);
+  }, [isModuleLocked, notifyLocked]);
+
   // §38 — Confirmation: when learner is inside a session and tries to go back,
   // only ask if there is real unsaved work. Normal navigation flows freely.
   const confirmLeaveSession = useCallback((action) => {
@@ -630,7 +688,11 @@ export default function LearningSpace({
       if (tag === 'TEXTAREA' || tag === 'INPUT') {
         // Small delay to let the keyboard animate open
         setTimeout(() => {
-          e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          if (!e.target?.isConnected) return;
+          // The ⌘K palette is a fixed overlay: "revealing" its input by
+          // scrolling would just shove the lesson behind it.
+          if (e.target.closest?.('.ls-cmd')) return;
+          e.target.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
         }, 300);
       }
     };
@@ -845,6 +907,70 @@ export default function LearningSpace({
     setSessionModule(mi);
   }, [resumeInfo, syllabus, isHt, showToast]);
 
+  // ─── Palette content: resume row + fixed commands ─────────────────
+  const paletteResumeItem = useMemo(() => {
+    if (!progress || !resumeInfo || !syllabus.length) return null;
+    return {
+      id: 'resume',
+      kind: 'block',
+      moduleIndex: resumeInfo.moduleIndex,
+      blockId: progress.last_block_id || null,
+      label: isHt ? 'Kontinye kote w te ye' : 'Continue where you left off',
+      meta: [resumeInfo.moduleTitle, resumeInfo.blockTitle].filter(Boolean).join(' · '),
+      icon: 'fa-play',
+      locked: false,
+      done: false,
+    };
+  }, [progress, resumeInfo, syllabus.length, isHt]);
+
+  const paletteActions = useMemo(() => {
+    const items = [];
+    // `sessionItem` is computed further down the render body — read the
+    // raw state here so the memo cannot touch it before declaration.
+    const inSession = sessionModule != null || reviewModule != null;
+    if (!inSession) {
+      items.push({
+        id: 'action-resume',
+        label: isHt ? 'Kontinye aprantisaj la' : 'Continue learning',
+        meta: resumeInfo ? resumeInfo.moduleTitle : '',
+        icon: 'fa-play',
+        keywords: 'continue kontinye resume start komanse',
+        run: handleContinue,
+      });
+      items.push({
+        id: 'action-practice',
+        label: isHt ? 'Louvi Sant Pratik' : 'Open Practice Center',
+        icon: 'fa-dumbbell',
+        keywords: 'practice pratik exercice egzèsis',
+        run: () => setMode((m) => (m === 'practice' ? 'curriculum' : 'practice')),
+      });
+      items.push({
+        id: 'action-project',
+        label: isHt ? 'Pwojè Mwen' : 'My Project',
+        icon: 'fa-folder-open',
+        keywords: 'project pwoje workspace atelye',
+        run: () => { setShowProjectWorkspace(true); },
+      });
+      items.push({
+        id: 'action-business',
+        label: isHt ? 'Biznis Workspace' : 'Business Workspace',
+        icon: 'fa-briefcase',
+        keywords: 'business biznis workspace',
+        run: () => { setShowWorkspace(true); },
+      });
+    }
+    items.push({
+      id: 'action-focus',
+      label: focusMode
+        ? (isHt ? 'Sòti nan mòd konsantrasyon' : 'Exit focus mode')
+        : (isHt ? 'Antre nan mòd konsantrasyon' : 'Enter focus mode'),
+      icon: 'fa-moon',
+      keywords: 'focus konsantrasyon distraction mode',
+      run: () => setFocusMode((f) => !f),
+    });
+    return items;
+  }, [sessionModule, reviewModule, resumeInfo, isHt, handleContinue, focusMode]);
+
   // Advance to the next NON-future module (real path progression: once
   // a module completes, its successor unlocks server-side). Falls back
   // to closing the session when there is no further available module.
@@ -1011,6 +1137,15 @@ export default function LearningSpace({
   // ─── LearningShell header actions (injected into shell header) ────
   const shellHeaderActions = (
     <>
+      <button
+        type="button"
+        className="ls-shell-header-btn"
+        title={isHt ? 'Ale vit — Ctrl+K' : 'Quick jump — Ctrl+K'}
+        aria-label={isHt ? 'Ale vit nan kou a' : 'Quick jump in the course'}
+        onClick={() => setPaletteOpen(true)}
+      >
+        <i className="fas fa-magnifying-glass" aria-hidden="true" />
+      </button>
       {!sessionItem && (<>
       <button
         type="button"
@@ -1062,7 +1197,7 @@ export default function LearningSpace({
       onModuleSelect={(mi) => {
         const st = moduleState(mi);
         const isFuture = mi > maxReached && st.status === 'available';
-        if (!isFuture) setSessionModule(mi);
+        if (!isFuture) { setJumpTarget(null); setSessionModule(mi); }
       }}
       onOpenCourse={onOpenCourse}
       headerActions={shellHeaderActions}
@@ -1074,7 +1209,7 @@ export default function LearningSpace({
           <button
             type="button"
             className="ls-btn"
-            onClick={() => confirmLeaveSession(() => { setSessionModule(null); setReviewModule(null); clearSessionState(courseId); })}
+            onClick={() => confirmLeaveSession(() => { setSessionModule(null); setReviewModule(null); setJumpTarget(null); clearSessionState(courseId); })}
           >
             <i className="fas fa-arrow-left" aria-hidden="true" /> {isHt ? 'Kou a' : 'Course'}
           </button>
@@ -1087,6 +1222,22 @@ export default function LearningSpace({
         </>
       ) : undefined}
     >
+      {/* ─── ⌘K quick jump — modules, activities, commands ───── */}
+      <LearningCommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        isHt={isHt}
+        syllabus={syllabus}
+        completedBlocksMap={completedBlocksMap}
+        completedModules={completedModules}
+        moduleState={paletteModuleState}
+        actions={paletteActions}
+        resumeItem={paletteResumeItem}
+        onSelectModule={jumpToModule}
+        onSelectBlock={jumpToBlock}
+        onBlocked={notifyLocked}
+      />
+
       {/* ─── +XP celebration popup (Duolingo-style) ─────────── */}
       {xpPopup && (
         <div key={xpPopup.id} className="ls-xp-popup" role="status">
@@ -1176,8 +1327,8 @@ export default function LearningSpace({
         <ModuleSessionErrorBoundary
           isHt={isHt}
           onRetry={() => { setSessionRetryKey((k) => k + 1); }}
-          onExit={() => { setSessionModule(null); setReviewModule(null); setSessionRetryKey(0); clearSessionState(courseId); }}
-          key={sessionRetryKey}
+          onExit={() => { setSessionModule(null); setReviewModule(null); setJumpTarget(null); setSessionRetryKey(0); clearSessionState(courseId); }}
+          key={`${sessionRetryKey}:${jumpTarget?.nonce || 0}`}
         >
         <ModuleSession
           courseId={courseId}
@@ -1189,9 +1340,10 @@ export default function LearningSpace({
           completedBlocksMap={completedBlocksMap}
           completedModules={completedModules}
           review={reviewModule != null}
+          initialBlockId={jumpTarget && jumpTarget.moduleIndex === activeModule ? jumpTarget.blockId : null}
           onComplete={handleComplete}
           onViewed={reviewModule != null ? () => {} : handleViewed}
-          onExit={() => { setSessionModule(null); setReviewModule(null); clearSessionState(courseId); }}
+          onExit={() => { setSessionModule(null); setReviewModule(null); setJumpTarget(null); clearSessionState(courseId); }}
           onNextModule={() => { setReviewModule(null); handleNextModule(); }}
           cachedQuizzes={offlineMode ? cachedQuizzes : undefined}
           gamification={gamiStats}
@@ -1351,7 +1503,12 @@ export default function LearningSpace({
           <span className="ls-workspace-arrow">{showWorkspace ? '▲' : '▼'}</span>
         </button>
         {showWorkspace && (
-          <BusinessWorkspace courseId={courseId} user={user} showToast={showToast} />
+          <Suspense fallback={<div className="ls-workspace-loading" aria-busy="true">
+            <div className="ls-skeleton" />
+            <div className="ls-skeleton" />
+          </div>}>
+            <BusinessWorkspace courseId={courseId} user={user} showToast={showToast} />
+          </Suspense>
         )}
       </section>
 
@@ -1365,14 +1522,19 @@ export default function LearningSpace({
           <span className="ls-workspace-arrow">{showProjectWorkspace ? '▲' : '▼'}</span>
         </button>
         {showProjectWorkspace && (
-          <ProjectWorkspace
-            courseId={courseId}
-            lang={lang}
-            user={user}
-            showToast={showToast}
-            originLesson={sessionItem?.block?.id || null}
-            onReturnToLesson={() => setShowProjectWorkspace(false)}
-          />
+          <Suspense fallback={<div className="ls-workspace-loading" aria-busy="true">
+            <div className="ls-skeleton" />
+            <div className="ls-skeleton" />
+          </div>}>
+            <ProjectWorkspace
+              courseId={courseId}
+              lang={lang}
+              user={user}
+              showToast={showToast}
+              originLesson={sessionItem?.block?.id || null}
+              onReturnToLesson={() => setShowProjectWorkspace(false)}
+            />
+          </Suspense>
         )}
       </section>
 

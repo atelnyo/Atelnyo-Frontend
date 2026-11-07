@@ -49,6 +49,13 @@ describe('resolveVideoSource', () => {
     expect(r?.src).toBe('https://player.vimeo.com/video/123456789');
   });
 
+  it('resolves Vimeo player/embed URLs (player.vimeo.com/video/ID)', () => {
+    const r = resolveVideoSource('https://player.vimeo.com/video/148751763');
+    expect(r?.kind).toBe('embed');
+    expect(r?.provider).toBe('vimeo');
+    expect(r?.src).toBe('https://player.vimeo.com/video/148751763');
+  });
+
   it('resolves Facebook watch URLs via the plugin', () => {
     const r = resolveVideoSource('https://www.facebook.com/watch/?v=123456789');
     expect(r?.provider).toBe('facebook');

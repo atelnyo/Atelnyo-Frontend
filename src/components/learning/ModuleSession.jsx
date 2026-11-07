@@ -63,6 +63,10 @@ export default function ModuleSession({
   gamification = null,
   onGamification = null,
   review = false, // practice-only session: mixed blocks, NO progress writes
+  // Jump-to-activity (⌘K palette): land on THIS block instead of the
+  // first unfinished one, so "open that typography exercise" is one
+  // search away instead of a scroll hunt.
+  initialBlockId = null,
   // §42 — Learning Navigation Engine integration
   onSafeNavigate, // optional: external safe navigate handler (from LearningSpace)
   // §25-§26 — Course-level learning objectives for LessonIntroduction
@@ -149,10 +153,18 @@ export default function ModuleSession({
     if (placedRef.current) return;
     if (!quizzesLoaded) return;
     if (stepCount === 0) { placedRef.current = true; return; }
+    if (initialBlockId) {
+      const target = sessionBlocks.findIndex((b) => String(b.id) === String(initialBlockId));
+      if (target >= 0) {
+        setCurrent(target);
+        placedRef.current = true;
+        return;
+      }
+    }
     const firstUndone = [...Array(stepCount).keys()].find((i) => !isStepDone(i));
     setCurrent(firstUndone == null ? 0 : firstUndone);
     placedRef.current = true;
-  }, [quizzesLoaded, stepCount, isStepDone]);
+  }, [quizzesLoaded, stepCount, isStepDone, initialBlockId, sessionBlocks]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
   const markDone = useCallback((stepIdx) => {

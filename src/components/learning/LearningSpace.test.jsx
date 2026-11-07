@@ -9,7 +9,7 @@
  * boundary.
  */
 import React from 'react';
-import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, act, within } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import LearningSpace from './LearningSpace';
 
@@ -292,6 +292,88 @@ describe('Session persistence', () => {
     await waitFor(() => {
       expect(clearSessionState).toHaveBeenCalledWith(7);
     });
+  });
+});
+
+describe('⌘K quick jump (inside the real space)', () => {
+  const renderSpace = () => render(
+    <LearningSpace
+      courseId={7}
+      lang="ht"
+      translations={{ ht: {} }}
+      user={USER}
+      showToast={vi.fn()}
+      onBack={vi.fn()}
+      onOpenCourse={vi.fn()}
+      onNavigate={vi.fn()}
+    />,
+  );
+
+  // The shell renders other dialogs (mobile drawer, confirmations), so
+  // every assertion targets the palette itself by its class.
+  const palette = () => document.querySelector('.ls-cmd');
+
+  it('opens with Ctrl+K from the curriculum and closes with Escape', async () => {
+    renderSpace();
+    await waitFor(() => expect(screen.getAllByText('Kreyòl 101').length).toBeGreaterThan(0));
+    expect(palette()).toBeNull();
+
+    fireEvent.keyDown(window, { key: 'k', ctrlKey: true });
+    await waitFor(() => expect(palette()).not.toBeNull());
+
+    fireEvent.keyDown(within(palette()).getByRole('textbox'), { key: 'Escape' });
+    await waitFor(() => expect(palette()).toBeNull());
+  });
+
+  it('jumps straight to the chosen activity instead of the first unfinished step', async () => {
+    // Module 1 has already been reached, so module 2 is unlocked.
+    progressService.getAll.mockResolvedValue({
+      data: {
+        results: [{
+          id: 1, course: 7, percentage: 20,
+          last_module_index: 1, resume_module_index: 1,
+          completed_blocks: {}, completed_modules: [],
+        }],
+      },
+    });
+    renderSpace();
+    await waitFor(() => expect(screen.getAllByText('Kreyòl 101').length).toBeGreaterThan(0));
+
+    fireEvent.keyDown(window, { key: 'k', ctrlKey: true });
+    await waitFor(() => expect(palette()).not.toBeNull());
+    fireEvent.change(within(palette()).getByRole('textbox'), { target: { value: 'reading' } });
+    fireEvent.keyDown(within(palette()).getByRole('textbox'), { key: 'Enter' });
+
+    await waitFor(() => expect(screen.getByTestId('module-session')).toBeInTheDocument());
+    // Landed on module 2 AND on the reading block itself (not step 1).
+    expect(screen.getByText('Modil 2')).toBeInTheDocument();
+    expect(screen.getByText('Yon paragraf lekti.')).toBeInTheDocument();
+  });
+
+  it('refuses to open a module that is still locked', async () => {
+    // Default progress: last_module_index 0 → module 2 is in the future.
+    const showToast = vi.fn();
+    render(
+      <LearningSpace
+        courseId={7}
+        lang="ht"
+        translations={{ ht: {} }}
+        user={USER}
+        showToast={showToast}
+        onBack={vi.fn()}
+        onOpenCourse={vi.fn()}
+        onNavigate={vi.fn()}
+      />,
+    );
+    await waitFor(() => expect(screen.getAllByText('Kreyòl 101').length).toBeGreaterThan(0));
+
+    fireEvent.keyDown(window, { key: 'k', ctrlKey: true });
+    await waitFor(() => expect(palette()).not.toBeNull());
+    fireEvent.change(within(palette()).getByRole('textbox'), { target: { value: 'modil 2' } });
+    fireEvent.keyDown(within(palette()).getByRole('textbox'), { key: 'Enter' });
+
+    expect(showToast).toHaveBeenCalled();
+    expect(screen.queryByTestId('module-session')).not.toBeInTheDocument();
   });
 });
 

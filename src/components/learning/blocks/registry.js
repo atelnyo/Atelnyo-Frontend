@@ -196,8 +196,13 @@ export const BLOCK_TYPES = {
     layouts: [BLOCK_LAYOUT.WIDE, BLOCK_LAYOUT.FULL],
     defaultLayout: BLOCK_LAYOUT.WIDE,
     description: { en: 'External embed', ht: 'Ekstèn ki make' },
-    validation: { required: ['embedCode'] },
-    defaults: { embedCode: '' },
+    // The renderer (EmbedBlock) and the Studio's field list both use
+    // ``embedUrl``. This contract used to require ``embedCode``, so a
+    // freshly added embed block carried a field nothing renders and the
+    // lesson showed "No valid embed URL provided." ``caption`` + ``height``
+    // are the other keys EmbedBlock reads.
+    validation: { required: ['embedUrl'] },
+    defaults: { embedUrl: '', caption: '', height: 400 },
   },
   timeline: {
     icon: 'fa-timeline', label: { en: 'Timeline', ht: 'Tanbwa' },
