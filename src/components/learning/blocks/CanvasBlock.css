@@ -1,0 +1,116 @@
+/* CanvasBlock — Business Model Canvas.
+   Nine flexible cells in a responsive grid; on mobile it stacks so each
+   section stays typable with the keyboard open. */
+
+.ls-canvas-block {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ls-canvas-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ls-canvas-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.ls-canvas-progress {
+  font-size: 0.74rem;
+  color: var(--text-secondary, #6b7280);
+}
+
+.ls-canvas-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  font-size: 0.76rem;
+  font-family: inherit;
+  border-radius: 8px;
+  border: 1px solid var(--border-color, rgba(216, 27, 96, 0.18));
+  background: var(--surface-card-alt, #f8fafc);
+  color: var(--text-primary, #111827);
+  cursor: pointer;
+}
+
+.ls-canvas-btn:hover {
+  border-color: var(--color-primary, #3b82f6);
+  color: var(--color-primary, #3b82f6);
+}
+
+.ls-canvas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.ls-canvas-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color, rgba(216, 27, 96, 0.12));
+  background: var(--surface-card, #fff);
+}
+
+.ls-canvas-cell.is-filled {
+  border-color: var(--color-primary, #3b82f6);
+}
+
+.ls-canvas-cell-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.ls-canvas-cell-hint {
+  font-size: 0.7rem;
+  color: var(--text-secondary, #6b7280);
+}
+
+.ls-canvas-textarea {
+  width: 100%;
+  min-height: 68px;
+  resize: vertical;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color, rgba(216, 27, 96, 0.14));
+  background: var(--surface-card-alt, #f8fafc);
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.ls-canvas-textarea:focus-visible {
+  outline: 2px solid var(--color-primary, #3b82f6);
+  outline-offset: 1px;
+}
+
+.ls-canvas-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.ls-canvas-note {
+  font-size: 0.74rem;
+  color: var(--text-secondary, #6b7280);
+}
+
+@media (max-width: 560px) {
+  .ls-canvas-grid {
+    grid-template-columns: 1fr;
+  }
+}

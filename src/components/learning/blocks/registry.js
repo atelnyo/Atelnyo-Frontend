@@ -55,6 +55,7 @@ import ExerciseBlock from './ExerciseBlock';
 import ReflectionBlock from './ReflectionBlock';
 import ScenarioBlock from './ScenarioBlock';
 import CalculatorBlock from './CalculatorBlock';
+import CanvasBlock from './CanvasBlock';
 import TimelineBlock from './TimelineBlock';
 import ResourceBlock from './ResourceBlock';
 import MultipleChoiceBlock from './MultipleChoiceBlock';
@@ -488,6 +489,7 @@ export const BLOCK_REGISTRY = {
   code_exercise: CodeExerciseBlock,
   scenario:      ScenarioBlock,
   calculator:    CalculatorBlock,
+  canvas:        CanvasBlock,
   resource:      ResourceBlock,
   multiple_choice: MultipleChoiceBlock,
   multiple_answer: MultipleAnswerBlock,

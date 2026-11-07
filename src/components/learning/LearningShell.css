@@ -1768,6 +1768,48 @@
 }
 
 /* ─── Reduced motion ───────────────────────────────────────────── */
+/* Sidebar shortcut hint — same action as Ctrl+K / ⌘K. */
+.ls-sidebar-search-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 10px;
+  padding: 7px 9px;
+  border: 1px solid var(--border-color, rgba(216, 27, 96, 0.12));
+  border-radius: 9px;
+  background: var(--surface-card-alt, #f1f5f9);
+  color: var(--text-secondary, #6b7280);
+  font-family: inherit;
+  font-size: 0.74rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ls-sidebar-search-hint span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ls-sidebar-search-hint kbd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.64rem;
+  padding: 2px 5px;
+  border-radius: 5px;
+  border: 1px solid var(--border-color, rgba(216, 27, 96, 0.16));
+  background: var(--surface-card, #fff);
+}
+
+.ls-sidebar-search-hint:hover,
+.ls-sidebar-search-hint:focus-visible {
+  border-color: var(--color-primary, #3b82f6);
+  color: var(--color-primary, #3b82f6);
+  outline: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ls-shell-progress-fill {
     transition: none;

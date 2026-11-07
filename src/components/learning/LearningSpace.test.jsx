@@ -175,6 +175,30 @@ describe('Session persistence', () => {
     expect(screen.getByText('Modil 2')).toBeInTheDocument();
   });
 
+  it('restores the exact activity, not just the module', async () => {
+    // The learner was on the reading block of module 2 when the page
+    // reloaded — they should come back to it, not to step 1.
+    _sessionStore.set('7', {
+      data: { sessionModule: 1, currentBlockId: 't1', savedAt: Date.now() },
+      updatedAt: Date.now(),
+    });
+
+    render(
+      <LearningSpace
+        courseId={7}
+        lang="ht"
+        translations={{ ht: {} }}
+        user={USER}
+        onBack={vi.fn()}
+        onOpenCourse={vi.fn()}
+        onNavigate={vi.fn()}
+      />,
+    );
+    await waitFor(() => expect(screen.getByTestId('module-session')).toBeInTheDocument());
+    expect(screen.getByText('Modil 2')).toBeInTheDocument();
+    expect(screen.getByText('Yon paragraf lekti.')).toBeInTheDocument();
+  });
+
   it('does NOT restore when ?module=N is provided (explicit takes precedence)', async () => {
     // §16 — Persist module 1, but pass initialModule=0
     _sessionStore.set('7', { data: { sessionModule: 1, savedAt: Date.now() }, updatedAt: Date.now() });

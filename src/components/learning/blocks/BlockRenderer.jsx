@@ -73,6 +73,7 @@ const CATEGORY_MAP = {
   code_exercise: 'interactive',
   scenario: 'interactive',
   calculator: 'interactive',
+  canvas: 'interactive',
   vocabulary: 'interactive',
   repeat: 'interactive',
   pronunciation: 'interactive',

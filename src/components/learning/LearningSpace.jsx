@@ -474,6 +474,16 @@ export default function LearningSpace({
         const blocks = (typeof item === 'object' && Array.isArray(item.blocks)) ? item.blocks : [];
         if (blocks.length > 0) {
           setSessionModule(state.sessionModule);
+          // Resume on the exact activity the learner was on, not merely
+          // the module: after a refresh mid-module the session used to
+          // restart at the first unfinished step.
+          if (state.currentBlockId && blocks.some((b) => String(b.id) === String(state.currentBlockId))) {
+            setJumpTarget({
+              moduleIndex: state.sessionModule,
+              blockId: state.currentBlockId,
+              nonce: Date.now(),
+            });
+          }
           // §32 — Show recovery banner when restoring a previous session
           if (!recoveryDismissed) setRecoveryType('restored');
         }
@@ -484,8 +494,13 @@ export default function LearningSpace({
   // Persist session state whenever it changes
   useEffect(() => {
     if (!courseId || sessionModule == null) return;
-    saveSessionState(courseId, { sessionModule, reviewModule });
-  }, [courseId, sessionModule, reviewModule]);
+    saveSessionState(courseId, {
+      sessionModule,
+      reviewModule,
+      // Keep the exact activity too, so the next reload can land on it.
+      ...(jumpTarget && jumpTarget.moduleIndex === sessionModule ? { currentBlockId: jumpTarget.blockId } : {}),
+    });
+  }, [courseId, sessionModule, reviewModule, jumpTarget]);
 
   // ─── Completed-state helpers (real blocks only) ─────────────────────
   const completedBlocksMap = useMemo(() => {
@@ -1181,6 +1196,17 @@ export default function LearningSpace({
         <span>{isHt ? 'Modil' : 'Modules'}</span>
         <span>{completedModules.length}/{totalModules}</span>
       </div>
+      {/* Discoverability: a shortcut nobody knows about is a shortcut
+          nobody uses. This is the same action as Ctrl+K. */}
+      <button
+        type="button"
+        className="ls-sidebar-search-hint"
+        onClick={() => setPaletteOpen(true)}
+      >
+        <i className="fas fa-magnifying-glass" aria-hidden="true" />
+        <span>{isHt ? 'Chèche nan kou a' : 'Search this course'}</span>
+        <kbd>Ctrl K</kbd>
+      </button>
     </div>
   );
 
