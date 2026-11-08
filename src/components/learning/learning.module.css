@@ -1341,7 +1341,7 @@
 
 .exerciseRetry:hover { border-color: var(--color-primary); }
 
-@media (max-width: 480px) {
+@media (max-width: 320px) {
   .exercise { padding: var(--sp-xl); }
   .exerciseSubmit, .exerciseRetry { min-height: 48px; }
   .audioPlayer { flex-direction: column; align-items: flex-start; }
@@ -1358,7 +1358,140 @@
   .ls-block-badge { font-size: 0.68rem; padding: 2px 8px; }
   .practiceBlock { padding: var(--sp-xl); border-radius: var(--radius-lg); margin: var(--sp-lg) 0; }
   .practiceHeader { gap: 6px; }
-  .practiceType { font-size: 0.65rem; padding: 2px var(--sp-md); }
+}
+
+@media (max-width: 360px) {
+  .exercise { padding: calc(var(--sp-xl) - 4px); }
+  .exerciseSubmit, .exerciseRetry { min-height: 44px; font-size: 0.78rem; }
+  .audioPlayer { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .audioPlayerControl { width: 100%; height: 26px; min-width: 0; font-size: 0.78rem; }
+  .audioPlayerCompact { width: 100%; height: 22px; }
+  .recorderStart { width: 100%; justify-content: center; min-height: 44px; }
+  .recorderLive { width: 100%; justify-content: center; min-height: 44px; }
+  .quizOption { padding: 8px 10px; font-size: 0.78rem; }
+  .quizSubmit { width: 100%; justify-content: center; min-height: 40px; font-size: 0.78rem; }
+  .quizResult { padding: 10px; font-size: 0.78rem; }
+  .ls-block { padding: 10px; border-radius: 8px; margin-bottom: 8px; }
+  .ls-block-header { gap: 6px; margin-bottom: 8px; }
+  .ls-block-title { font-size: 0.82rem; }
+  .ls-block-badge { font-size: 0.6rem; padding: 1px 6px; }
+  .practiceBlock { padding: calc(var(--sp-xl) - 4px); border-radius: var(--radius-md); margin: var(--sp-md) 0; }
+  .practiceHeader { gap: 4px; }
+}
+
+@media (max-width: 390px) {
+  .exercise { padding: calc(var(--sp-xl) - 2px); }
+  .exerciseSubmit, .exerciseRetry { min-height: 40px; font-size: 0.82rem; }
+  .audioPlayer { flex-direction: column; align-items: flex-start; gap: 2px; }
+  .audioPlayerControl { width: 100%; height: 24px; min-width: 0; font-size: 0.82rem; }
+  .audioPlayerCompact { width: 100%; height: 20px; }
+  .recorderStart { width: 100%; justify-content: center; min-height: 40px; }
+  .recorderLive { width: 100%; justify-content: center; min-height: 40px; }
+  .quizOption { padding: 8px 10px; font-size: 0.82rem; }
+  .quizSubmit { width: 100%; justify-content: center; min-height: 44px; font-size: 0.82rem; }
+  .quizResult { padding: 10px; font-size: 0.82rem; }
+  .ls-block { padding: 12px; border-radius: 10px; margin-bottom: 8px; }
+  .ls-block-header { gap: 6px; margin-bottom: 8px; }
+  .ls-block-title { font-size: 0.88rem; }
+  .ls-block-badge { font-size: 0.62rem; padding: 1px 6px; }
+  .practiceBlock { padding: calc(var(--sp-xl) - 2px); border-radius: var(--radius-lg); margin: var(--sp-md) 0; }
+  .practiceHeader { gap: 4px; }
+}
+
+@media (max-width: 430px) {
+  .exercise { padding: var(--sp-xl); }
+  .exerciseSubmit, .exerciseRetry { min-height: 44px; font-size: 0.82rem; }
+  .audioPlayer { flex-direction: column; align-items: flex-start; }
+  .audioPlayerControl { width: 100%; height: 28px; min-width: 0; }
+  .audioPlayerCompact { width: 100%; height: 24px; }
+  .recorderStart { width: 100%; justify-content: center; min-height: 44px; }
+  .recorderLive { width: 100%; justify-content: center; min-height: 44px; }
+  .quizOption { padding: 10px 12px; font-size: 0.82rem; }
+  .quizSubmit { width: 100%; justify-content: center; min-height: 44px; }
+  .quizResult { padding: 12px; }
+  .ls-block { padding: 14px; border-radius: 12px; margin-bottom: 10px; }
+  .ls-block-header { gap: 8px; margin-bottom: 10px; }
+  .ls-block-title { font-size: 0.92rem; }
+  .ls-block-badge { font-size: 0.68rem; padding: 2px 8px; }
+  .practiceBlock { padding: var(--sp-xl); border-radius: var(--radius-lg); margin: var(--sp-lg) 0; }
+  .practiceHeader { gap: 6px; }
+}
+
+@media (max-width: 768px) {
+  .exercise { padding: var(--sp-lg); }
+  .exerciseSubmit, .exerciseRetry { min-height: 48px; font-size: 0.88rem; }
+  .audioPlayer { flex-direction: column; align-items: flex-start; }
+  .audioPlayerControl { width: 100%; height: 32px; min-width: 0; }
+  .audioPlayerCompact { width: 100%; height: 28px; }
+  .recorderStart { width: 100%; justify-content: center; min-height: 48px; }
+  .recorderLive { width: 100%; justify-content: center; min-height: 48px; }
+  .quizOption { padding: 12px 14px; font-size: 0.88rem; }
+  .quizSubmit { width: 100%; justify-content: center; min-height: 48px; font-size: 0.88rem; }
+  .quizResult { padding: 14px; font-size: 0.88rem; }
+  .ls-block { padding: var(--sp-md); border-radius: var(--radius-md); margin: var(--sp-md) 0; }
+  .ls-block-header { gap: var(--sp-sm); margin-bottom: var(--sp-md); }
+  .ls-block-title { font-size: 0.96rem; }
+  .ls-block-badge { font-size: 0.72rem; padding: 2px 10px; }
+  .practiceBlock { padding: var(--sp-lg); border-radius: var(--radius-lg); margin: var(--sp-lg) 0; }
+  .practiceHeader { gap: 8px; }
+}
+
+@media (max-width: 1024px) {
+  .exercise { padding: var(--sp-md); }
+  .exerciseSubmit, .exerciseRetry { min-height: 48px; font-size: 0.94rem; }
+  .audioPlayer { flex-direction: column; align-items: flex-start; }
+  .audioPlayerControl { width: 100%; height: 36px; min-width: 0; }
+  .audioPlayerCompact { width: 100%; height: 32px; }
+  .recorderStart { width: 100%; justify-content: center; min-height: 48px; }
+  .recorderLive { width: 100%; justify-content: center; min-height: 48px; }
+  .quizOption { padding: 14px 16px; font-size: 0.94rem; }
+  .quizSubmit { width: 100%; justify-content: center; min-height: 48px; font-size: 0.94rem; }
+  .quizResult { padding: 16px; font-size: 0.94rem; }
+  .ls-block { padding: var(--sp-md); border-radius: var(--radius-sm); margin: var(--sp-sm) 0; }
+  .ls-block-header { gap: var(--sp-sm); margin-bottom: var(--sp-sm); }
+  .ls-block-title { font-size: 1.04rem; }
+  .ls-block-badge { font-size: 0.76rem; padding: 3px 12px; }
+  .practiceBlock { padding: var(--sp-md); border-radius: var(--radius-md); margin: var(--sp-md) 0; }
+  .practiceHeader { gap: 8px; }
+}
+
+@media (max-width: 1280px) {
+  .exercise { padding: var(--sp-md); }
+  .exerciseSubmit, .exerciseRetry { min-height: 48px; font-size: 1rem; }
+  .audioPlayer { flex-direction: column; align-items: flex-start; }
+  .audioPlayerControl { width: 100%; height: 40px; min-width: 0; }
+  .audioPlayerCompact { width: 100%; height: 36px; }
+  .recorderStart { width: 100%; justify-content: center; min-height: 48px; }
+  .recorderLive { width: 100%; justify-content: center; min-height: 48px; }
+  .quizOption { padding: 14px 16px; font-size: 1rem; }
+  .quizSubmit { width: 100%; justify-content: center; min-height: 48px; font-size: 1rem; }
+  .quizResult { padding: 16px; font-size: 1rem; }
+  .ls-block { padding: var(--sp-md); border-radius: var(--radius-md); margin: var(--sp-md) 0; }
+  .ls-block-header { gap: var(--sp-md); margin-bottom: var(--sp-md); }
+  .ls-block-title { font-size: 1.12rem; }
+  .ls-block-badge { font-size: 0.82rem; padding: 3px 12px; }
+  .practiceBlock { padding: var(--sp-md); border-radius: var(--radius-md); margin: var(--sp-md) 0; }
+  .practiceHeader { gap: 8px; }
+}
+
+@media (max-width: 1440px) {
+  .exercise { padding: var(--sp-md); }
+  .exerciseSubmit, .exerciseRetry { min-height: 48px; font-size: 1.04rem; }
+  .audioPlayer { flex-direction: column; align-items: flex-start; }
+  .audioPlayerControl { width: 100%; height: 44px; min-width: 0; }
+  .audioPlayerCompact { width: 100%; height: 40px; }
+  .recorderStart { width: 100%; justify-content: center; min-height: 48px; }
+  .recorderLive { width: 100%; justify-content: center; min-height: 48px; }
+  .quizOption { padding: 16px 18px; font-size: 1.04rem; }
+  .quizSubmit { width: 100%; justify-content: center; min-height: 48px; font-size: 1.04rem; }
+  .quizResult { padding: 18px; font-size: 1.04rem; }
+  .ls-block { padding: var(--sp-md); border-radius: var(--radius-md); margin: var(--sp-md) 0; }
+  .ls-block-header { gap: var(--sp-md); margin-bottom: var(--sp-md); }
+  .ls-block-title { font-size: 1.18rem; }
+  .ls-block-badge { font-size: 0.86rem; padding: 3px 12px; }
+  .practiceBlock { padding: var(--sp-md); border-radius: var(--radius-md); margin: var(--sp-md) 0; }
+  .practiceHeader { gap: 8px; }
+}  .practiceType { font-size: 0.65rem; padding: 2px var(--sp-md); }
   .practicePhrase { font-size: 1rem; }
   .practiceChoice { padding: var(--sp-md) var(--sp-lg); min-height: 48px; font-size: 0.9rem; }
   .practiceInput { min-height: 48px; font-size: 0.95rem; }

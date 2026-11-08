@@ -20,7 +20,7 @@
  *   - captions/transcript metadata support
  *   - loading announced to screen readers
  */
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { resolveVideoSource } from '../../modules/explore/utils/videoSource';
 import styles from './learning.module.css';
 
@@ -28,6 +28,10 @@ export default function VideoBlock({ block, lang = 'ht', reportComplete }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
   const [watchDone, setWatchDone] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const playbackRateRef = useRef(1);
+  playbackRateRef.current = playbackRate;
+  const videoRef = useRef(null);
   const [loadError, setLoadError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -99,6 +103,7 @@ export default function VideoBlock({ block, lang = 'ht', reportComplete }) {
           />
         ) : (
           <video
+            ref={videoRef}
             src={v.src}
             controls
             playsInline
@@ -125,8 +130,7 @@ export default function VideoBlock({ block, lang = 'ht', reportComplete }) {
         )}
       </div>
 
-      {/* Phase 10: transcript link */}
-      {transcriptUrl && (
+      {/* Phase 10: transcript link */}          {transcriptUrl && (
         <div style={{ marginTop: 8 }}>
           <a
             href={transcriptUrl}
@@ -147,6 +151,45 @@ export default function VideoBlock({ block, lang = 'ht', reportComplete }) {
           </a>
         </div>
       )}
+
+      {/* Playback speed controls */}
+      <div style={{ marginTop: 8, display: 'flex', gap: 4, alignItems: 'center' }}>
+        <button
+          type="button"
+          className="ls-btn ls-btn--tiny"
+          onClick={async () => {
+            const newRate = Math.max(0.5, Math.min(2, playbackRate - 0.5));
+            setPlaybackRate(newRate);
+            playbackRateRef.current = newRate;
+            if (v.kind === 'video') {
+              videoRef.current?.setPlaybackRate(newRate);
+            }
+          }}
+          aria-label={isHt ? 'Vitese -= 0.5x' : 'Speed -0.5x'}
+          disabled={playbackRate <= 0.5}
+        >
+          <i className="fas fa-slower" aria-hidden="true" /> 0.5x
+        </button>
+        <button
+          type="button"
+          className="ls-btn ls-btn--tiny"
+          onClick={async () => {
+            const newRate = Math.min(2, playbackRate + 0.5);
+            setPlaybackRate(newRate);
+            playbackRateRef.current = newRate;
+            if (v.kind === 'video') {
+              videoRef.current?.setPlaybackRate(newRate);
+            }
+          }}
+          aria-label={isHt ? 'Vitese += 0.5x' : 'Speed +0.5x'}
+          disabled={playbackRate >= 2}
+        >
+          <i className="fas fa-faster" aria-hidden="true" /> 2x
+        </button>
+        <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+          ×{playbackRate.toFixed(1)}
+        </span>
+      </div>
 
       <button
         type="button"
