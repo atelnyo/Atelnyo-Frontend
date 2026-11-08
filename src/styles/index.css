@@ -16869,8 +16869,20 @@ body.dark-mode .badge[data-badge-type="draft"] { background: rgba(245, 158, 11, 
     .ls-session-head-title span { font-size: 0.7rem; }
     .ls-session-assessment-head { padding: 12px 14px; gap: 10px; }
     .ls-session-assessment-icon { width: 34px; height: 34px; font-size: 0.9rem; }
-    .ls-session-footer { gap: 10px; margin-top: 14px; padding-top: 12px; }
-    .ls-session-continue { padding: 10px 20px; font-size: 0.88rem; }
+    .ls-session-footer {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 95;
+        gap: 10px;
+        margin: 0;
+        padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+        background: var(--surface-card, #fff);
+        border-top: 1px solid var(--border-color, rgba(216, 27, 96, 0.12));
+        box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.08);
+    }
+    .ls-session-continue { padding: 10px 20px; font-size: 0.88rem; min-height: 48px; }
     .ls-session-back { padding: 8px 14px; font-size: 0.85rem; }
     .ls-celebrate-spark { display: none; }
     .ls-session-done-badge { width: 68px; height: 68px; font-size: 1.6rem; }

@@ -2579,6 +2579,7 @@
   display: flex;
   gap: var(--pr-size-3, 12px);
   justify-content: flex-end;
+  flex-wrap: wrap;
 }
 .ls-session-back {
   min-height: var(--pr-size-10, 40px);
@@ -2592,6 +2593,57 @@
   padding: var(--pr-size-4, 16px) var(--pr-size-5, 20px);
   border-top: 1px solid var(--border-color, rgba(216, 27, 96, 0.1));
   margin-top: var(--pr-size-4, 16px);
+}
+.ls-session-continue:disabled {
+  opacity: 0.6;
+}
+
+/* ─── §39 — Mobile: Continue must ALWAYS be visible ──────────────────
+   Pwoblèm: sou Android bouton Kontinye a te nan pi ba kontni a
+   (pa kolan) — nan leson long ou dwe defile anpil pou w jwenn li,
+   epi sou laptop li parèt pa defo poutèt gwo ekran. Fiks anba a
+   fè l rete vizib san defile, menm jan ak .ls-action-area.
+   Breakpoint 700px = menm jan ak index.css (.ls-session-footer
+   fiks la) pou de ba fiks yo pa sipèpoze konbyen lajè a. */
+@media (max-width: 700px) {
+  .ls-session-footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 95;
+    margin: 0;
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+    background: var(--surface-card, #fff);
+    border-top: 1px solid var(--border-color, rgba(216, 27, 96, 0.12));
+    box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.08);
+  }
+  .dark-mode .ls-session-footer {
+    background: rgba(17, 24, 39, 0.97);
+    border-top-color: rgba(255, 255, 255, 0.08);
+  }
+  .ls-session-nav {
+    flex: 1 1 100%;
+    justify-content: space-between;
+  }
+  .ls-session-continue {
+    flex: 1 1 auto;
+    min-width: 150px;
+    min-height: 48px;
+  }
+  .ls-session-back {
+    min-height: 48px;
+  }
+  /* .ls-action-area (ba "Kou a" fiks) ak .ls-session-footer (ba fiks)
+     ta sipèpoze nan menm plas anba a — ba Kontinye se priyorite,
+     bouton retounen nan header epifè deja. */
+  .ls-action-area {
+    display: none;
+  }
+  /* Kontni pa dwe antre anba ba fiks la. */
+  .ls-lesson-area {
+    padding-bottom: 180px;
+  }
 }
 .ls-session-hint {
   font-size: var(--pr-font-xs, 0.72rem);
