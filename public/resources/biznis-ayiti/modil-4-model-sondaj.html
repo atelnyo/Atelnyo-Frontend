@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Modèl Sondaj Kliyan — Modil 4 · Atelnyo</title>
+<style>
+  :root{--brand:#d81b60;--soft:#fce4ec;--ink:#1f2937;--muted:#6b7280;--line:#d1d5db;--bg:#f8fafc}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.6}
+  .page{max-width:860px;margin:0 auto;padding:24px 18px 64px}
+  header{background:#fff;border-top:6px solid var(--brand);border-radius:12px;padding:20px 22px}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:700;color:var(--brand);font-size:.8rem;letter-spacing:.04em;text-transform:uppercase}
+  .brand i{width:10px;height:10px;border-radius:50%;background:var(--brand);display:block}
+  h1{font-size:1.4rem;margin:10px 0 4px;line-height:1.3}
+  .sub{margin:0;color:var(--muted);font-size:.9rem}
+  .toolbar{margin:16px 0 4px}
+  button{font:inherit;font-weight:600;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:var(--brand);color:#fff}
+  section{background:#fff;border:1px solid #e8ecf1;border-radius:12px;padding:18px 20px;margin-top:14px}
+  section h2{font-size:1rem;margin:0 0 10px}
+  .q{margin:14px 0 0;padding-top:10px;border-top:1px dashed #e5e7eb}
+  .q:first-of-type{border-top:0;padding-top:0}
+  .q p{margin:0 0 6px}
+  .opts{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.88rem;color:var(--ink)}
+  .opt{display:flex;align-items:center;gap:7px}
+  .cb{width:15px;height:15px;border:1.5px solid var(--line);border-radius:4px;display:inline-block}
+  .l{border-bottom:1px solid var(--line);height:24px;margin-top:6px}
+  .note{background:var(--soft);border-left:4px solid var(--brand);border-radius:0 10px 10px 0;padding:11px 13px;font-size:.86rem;margin-top:12px}
+  .scale{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .scale span{width:30px;height:30px;border:1.5px solid var(--line);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.82rem;color:var(--muted)}
+  footer{margin-top:18px;text-align:center;font-size:.76rem;color:var(--muted)}
+  @media(max-width:560px){.page{padding:16px 12px 48px}header,section{padding:15px;border-radius:10px}h1{font-size:1.15rem}}
+  @media print{body{background:#fff;font-size:11pt}.page{max-width:none;padding:0}.toolbar{display:none}section,header{border-radius:0;break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="brand"><i></i> Atelnyo Academy</div>
+    <h1>Modèl Sondaj Kliyan</h1>
+    <p class="sub">Modil 4 — 12 kesyon kout pou 30 repons oswa plis. Objektif: mezire konbyen, pa esplike poukisa.</p>
+  </header>
+
+  <div class="toolbar">
+    <button type="button" onclick="window.print()">🖨️ Enprime / Sove an PDF</button>
+  </div>
+
+  <section>
+    <h2>Entwodiksyon (li l jan li ye)</h2>
+    <p style="margin:0;font-size:.9rem">« Bonjou. M ap etidye yon bezwen nan zòn sa a pou yon ti pwojè. Sondaj la gen 12 kesyon epi li pran 5 minit. Repons ou rete konfidansyèl. Mèsi anpil. »</p>
+    <p class="note"><strong>Konsèy:</strong> pa mande « èske w ta achte? » — prèske tout moun di wi. Mande sou <em>sa ki te pase deja</em>.</p>
+  </section>
+
+  <section>
+    <h2>Kesyon</h2>
+
+    <div class="q">
+      <p><strong>1.</strong> Ki zòn ou rete oswa ou travay?</p>
+      <div class="l"></div>
+    </div>
+
+    <div class="q">
+      <p><strong>2.</strong> Ki gwoup laj ou ye?</p>
+      <div class="opts">
+        <span class="opt"><span class="cb"></span> 18–24</span>
+        <span class="opt"><span class="cb"></span> 25–34</span>
+        <span class="opt"><span class="cb"></span> 35–44</span>
+        <span class="opt"><span class="cb"></span> 45–54</span>
+        <span class="opt"><span class="cb"></span> 55+</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <p><strong>3.</strong> Ki aktivite prensipal ou?</p>
+      <div class="opts">
+        <span class="opt"><span class="cb"></span> Elèv/etidyan</span>
+        <span class="opt"><span class="cb"></span> Anplwaye</span>
+        <span class="opt"><span class="cb"></span> Komèsan/travay pou kont mwen</span>
+        <span class="opt"><span class="cb"></span> San travay</span>
+        <span class="opt"><span class="cb"></span> Lòt</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <p><strong>4.</strong> Èske w te bezwen [pwodwi/sèvis] nan 30 dènye jou yo?</p>
+      <div class="opts">
+        <span class="opt"><span class="cb"></span> Wi</span>
+        <span class="opt"><span class="cb"></span> Non</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <p><strong>5.</strong> Si wi, konbyen fwa?</p>
+      <div class="opts">
+        <span class="opt"><span class="cb"></span> 1 fwa</span>
+        <span class="opt"><span class="cb"></span> 2–3 fwa</span>
+        <span class="opt"><span class="cb"></span> 4 fwa oswa plis</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <p><strong>6.</strong> Kote ou te jwenn li?</p>
+      <div class="opts">
+        <span class="opt"><span class="cb"></span> Makèt</span>
+        <span class="opt"><span class="cb"></span> Ti boutik</span>
+        <span class="opt"><span class="cb"></span> WhatsApp/Facebook</span>
+        <span class="opt"><span class="cb"></span> Yon moun ki fè livrezon</span>
+        <span class="opt"><span class="cb"></span> Pa t jwenn li</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <p><strong>7.</strong> Konbyen ou te peye (oswa ou ta peye) pou sa?</p>
+      <div class="l"></div>
+    </div>
+
+    <div class="q">
+      <p><strong>8.</strong> Ki jan ou peye pi souvan pou bagay konsa?</p>
+      <div class="opts">
+        <span class="opt"><span class="cb"></span> Kach</span>
+        <span class="opt"><span class="cb"></span> MonCash</span>
+        <span class="opt"><span class="cb"></span> Transfè labank</span>
+        <span class="opt"><span class="cb"></span> Kredi (peye pita)</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <p><strong>9.</strong> Ki sa ki pi enpòtan pou ou nan yon sèvis konsa?</p>
+      <div class="opts">
+        <span class="opt"><span class="cb"></span> Pri</span>
+        <span class="opt"><span class="cb"></span> Bon kalite</span>
+        <span class="opt"><span class="cb"></span> Vitès/livrezon</span>
+        <span class="opt"><span class="cb"></span> Konfyans</span>
+        <span class="opt"><span class="cb"></span> Pwoksimite</span>
+      </div>
+    </div>
+
+    <div class="q">
+      <p><strong>10.</strong> Sou yon echèl 1 a 5, konbyen li ta itil pou ou? (1 = pa itil, 5 = trè itil)</p>
+      <div class="scale"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+    </div>
+
+    <div class="q">
+      <p><strong>11.</strong> Ki sa ki ta anpeche w achte?</p>
+      <div class="l"></div>
+      <div class="l"></div>
+    </div>
+
+    <div class="q">
+      <p><strong>12.</strong> Èske w ta dakò pou m rele w pou 2 kesyon anplis?</p>
+      <div class="opts">
+        <span class="opt"><span class="cb"></span> Wi — nimewo:</span>
+        <span class="opt"><span class="cb"></span> Non</span>
+      </div>
+      <div class="l"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Tablo konte repons (ranpli lè w gen 10+)</h2>
+    <p style="margin:0;color:var(--muted);font-size:.85rem">Konbyen moun chwazi chak repons? Se sa ki bay yon chif ou ka site.</p>
+    <div style="overflow-x:auto;margin-top:10px">
+      <table style="width:100%;border-collapse:collapse;font-size:.85rem;min-width:480px">
+        <thead><tr><th style="border:1px solid var(--line);padding:8px;background:var(--soft);text-align:left">Kesyon</th><th style="border:1px solid var(--line);padding:8px;background:var(--soft)">Repons A</th><th style="border:1px solid var(--line);padding:8px;background:var(--soft)">Repons B</th><th style="border:1px solid var(--line);padding:8px;background:var(--soft)">Repons C</th></tr></thead>
+        <tbody>
+          <tr><td style="border:1px solid var(--line);padding:8px"></td><td style="border:1px solid var(--line);height:30px"></td><td style="border:1px solid var(--line)"></td><td style="border:1px solid var(--line)"></td></tr>
+          <tr><td style="border:1px solid var(--line);padding:8px"></td><td style="border:1px solid var(--line);height:30px"></td><td style="border:1px solid var(--line)"></td><td style="border:1px solid var(--line)"></td></tr>
+          <tr><td style="border:1px solid var(--line);padding:8px"></td><td style="border:1px solid var(--line);height:30px"></td><td style="border:1px solid var(--line)"></td><td style="border:1px solid var(--line)"></td></tr>
+          <tr><td style="border:1px solid var(--line);padding:8px"></td><td style="border:1px solid var(--line);height:30px"></td><td style="border:1px solid var(--line)"></td><td style="border:1px solid var(--line)"></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>Atelnyo Academy · Dokiman Modil 4 — Modèl Sondaj</footer>
+</div>
+</body>
+</html>
