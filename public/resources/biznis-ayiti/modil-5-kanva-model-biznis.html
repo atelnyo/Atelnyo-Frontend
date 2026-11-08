@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kanva Modèl Biznis (Modèl Vide) — Modil 5 · Atelnyo</title>
+<style>
+  :root{--brand:#d81b60;--soft:#fce4ec;--ink:#1f2937;--muted:#6b7280;--line:#d1d5db;--bg:#f8fafc}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.55}
+  .page{max-width:1040px;margin:0 auto;padding:24px 18px 64px}
+  header{background:#fff;border-top:6px solid var(--brand);border-radius:12px;padding:20px 22px}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:700;color:var(--brand);font-size:.8rem;letter-spacing:.04em;text-transform:uppercase}
+  .brand i{width:10px;height:10px;border-radius:50%;background:var(--brand);display:block}
+  h1{font-size:1.4rem;margin:10px 0 4px;line-height:1.3}
+  .sub{margin:0;color:var(--muted);font-size:.9rem}
+  .toolbar{margin:16px 0 4px}
+  button{font:inherit;font-weight:600;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:var(--brand);color:#fff}
+  .ident{display:grid;grid-template-columns:2fr 1fr;gap:10px;background:#fff;border:1px solid #e8ecf1;border-radius:12px;padding:14px 16px;margin-top:14px}
+  .ident div{border-bottom:1px solid var(--line);font-size:.84rem;color:var(--muted);padding-bottom:4px;min-height:26px}
+  .canvas{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+  .box{background:#fff;border:1px solid #e8ecf1;border-top:3px solid var(--brand);border-radius:10px;padding:11px 12px;min-height:186px;display:flex;flex-direction:column}
+  .box h2{font-size:.84rem;margin:0;color:#7a1238;display:flex;gap:6px;align-items:baseline}
+  .box h2 b{color:var(--brand);font-size:.72rem;border:1.5px solid var(--brand);border-radius:5px;padding:0 4px}
+  .box p{margin:5px 0 8px;font-size:.75rem;color:var(--muted);line-height:1.4}
+  .lines{flex:1;background:repeating-linear-gradient(to bottom,transparent 0,transparent 23px,var(--line) 23px,var(--line) 24px);border-radius:2px}
+  .note{background:var(--soft);border-left:4px solid var(--brand);border-radius:0 10px 10px 0;padding:11px 13px;font-size:.85rem;margin-top:12px}
+  footer{margin-top:18px;text-align:center;font-size:.76rem;color:var(--muted)}
+  @media(max-width:720px){.page{padding:16px 12px 48px}header{padding:15px;border-radius:10px}h1{font-size:1.15rem}.canvas{grid-template-columns:1fr}.ident{grid-template-columns:1fr}.box{min-height:150px}}
+  @media print{body{background:#fff;font-size:10pt}.page{max-width:none;padding:0}.toolbar,.note{display:none}header,.box{border-radius:0;break-inside:avoid}.canvas{gap:8px}.box{min-height:120px}}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="brand"><i></i> Atelnyo Academy</div>
+    <h1>Kanva Modèl Biznis — 9 Blòk</h1>
+    <p class="sub">Modil 5 — ranpli l pou ide ou te chwazi nan Modil 1, ak prèv ou te ranmase nan Modil 4.</p>
+  </header>
+
+  <div class="toolbar">
+    <button type="button" onclick="window.print()">🖨️ Enprime / Sove an PDF</button>
+  </div>
+
+  <div class="ident">
+    <div>Non biznis / pwojè:</div>
+    <div>Dat vèsyon:</div>
+  </div>
+
+  <div class="canvas">
+    <div class="box">
+      <h2><b>1</b> Segman kliyan</h2>
+      <p>Ki moun presi? Laj, zòn, bezwen, bidjè, abitid achte.</p>
+      <div class="lines"></div>
+    </div>
+    <div class="box">
+      <h2><b>2</b> Pwopozisyon valè</h2>
+      <p>Ki pwoblèm ou rezoud, ak ki prèv (delè, garanti, pri).</p>
+      <div class="lines"></div>
+    </div>
+    <div class="box">
+      <h2><b>3</b> Kanal</h2>
+      <p>Kijan kliyan dekouvri w, achte, epi resevwa (2 prensipal).</p>
+      <div class="lines"></div>
+    </div>
+    <div class="box">
+      <h2><b>4</b> Relasyon kliyan</h2>
+      <p>Ki règ swivi, plent, ak rekòmandasyon ou genyen.</p>
+      <div class="lines"></div>
+    </div>
+    <div class="box">
+      <h2><b>5</b> Sous revni</h2>
+      <p>Pri pa inite, ritm, peman, revni pa mwa.</p>
+      <div class="lines"></div>
+    </div>
+    <div class="box">
+      <h2><b>6</b> Resous kle</h2>
+      <p>Sa w genyen deja ak sa w manke.</p>
+      <div class="lines"></div>
+    </div>
+    <div class="box">
+      <h2><b>7</b> Aktivite kle</h2>
+      <p>Sa w dwe fè chak jou/semèn pou pwomès la kenbe.</p>
+      <div class="lines"></div>
+    </div>
+    <div class="box">
+      <h2><b>8</b> Patenarya kle</h2>
+      <p>Founisè, transpò, kote, moun ki pote kliyan.</p>
+      <div class="lines"></div>
+    </div>
+    <div class="box">
+      <h2><b>9</b> Estrikti kou</h2>
+      <p>Kou varyab pa inite + kou fiks pa mwa = ?</p>
+      <div class="lines"></div>
+    </div>
+  </div>
+
+  <p class="note">
+    <strong>Lòd pou ranpli:</strong> 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9. Apre sa, poze chak kaz: <em>si m chanje sa, ki lòt kaz ki chanje?</em> Yon kanva ki pa gen chif nan kaz 5 ak 9 poko yon modèl — se yon deskripsyon.
+  </p>
+
+  <footer>Atelnyo Academy · Dokiman Modil 5 — Kanva Modèl Biznis</footer>
+</div>
+</body>
+</html>

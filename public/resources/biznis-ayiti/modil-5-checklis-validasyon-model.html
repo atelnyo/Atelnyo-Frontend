@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tcheklis Validasyon Modèl — Modil 5 · Atelnyo</title>
+<style>
+  :root{--brand:#d81b60;--soft:#fce4ec;--ink:#1f2937;--muted:#6b7280;--line:#d1d5db;--bg:#f8fafc}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.6}
+  .page{max-width:900px;margin:0 auto;padding:24px 18px 64px}
+  header{background:#fff;border-top:6px solid var(--brand);border-radius:12px;padding:20px 22px}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:700;color:var(--brand);font-size:.8rem;letter-spacing:.04em;text-transform:uppercase}
+  .brand i{width:10px;height:10px;border-radius:50%;background:var(--brand);display:block}
+  h1{font-size:1.4rem;margin:10px 0 4px;line-height:1.3}
+  .sub{margin:0;color:var(--muted);font-size:.9rem}
+  .toolbar{margin:16px 0 4px}
+  button{font:inherit;font-weight:600;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:var(--brand);color:#fff}
+  section{background:#fff;border:1px solid #e8ecf1;border-radius:12px;padding:16px 18px;margin-top:12px}
+  section h2{font-size:.98rem;margin:0 0 8px}
+  ul{list-style:none;margin:0;padding:0}
+  li{display:flex;gap:9px;padding:7px 0;border-bottom:1px dashed #e5e7eb;font-size:.9rem}
+  li:last-child{border-bottom:0}
+  li .cb{flex:0 0 16px;height:16px;border:1.5px solid var(--line);border-radius:4px;margin-top:3px}
+  li span.txt b{display:block;font-weight:600}
+  li span.txt em{color:var(--muted);font-style:normal;font-size:.82rem}
+  .test{display:grid;grid-template-columns:1fr 120px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed #e5e7eb;font-size:.88rem}
+  .test .val{border-bottom:1px solid var(--line);height:24px}
+  .note{background:var(--soft);border-left:4px solid var(--brand);border-radius:0 10px 10px 0;padding:11px 13px;font-size:.86rem;margin-top:12px}
+  .danger{border-color:#fecdd3;background:#fff1f2}
+  .danger h2{color:#9f1239}
+  .danger li{border-bottom-color:#fecdd3}
+  footer{margin-top:18px;text-align:center;font-size:.76rem;color:var(--muted)}
+  @media(max-width:560px){.page{padding:16px 12px 48px}header,section{padding:15px;border-radius:10px}h1{font-size:1.15rem}.test{grid-template-columns:1fr}}
+  @media print{body{background:#fff;font-size:10.5pt}.page{max-width:none;padding:0}.toolbar{display:none}header,section{border-radius:0;break-inside:avoid}.danger{background:#fff}}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="brand"><i></i> Atelnyo Academy</div>
+    <h1>Tcheklis Validasyon Modèl Biznis</h1>
+    <p class="sub">Modil 5 — pa mande « èske modèl mwen bèl? » Mande « èske li kanpe? »</p>
+  </header>
+
+  <div class="toolbar">
+    <button type="button" onclick="window.print()">🖨️ Enprime / Sove an PDF</button>
+  </div>
+
+  <section>
+    <h2>A. 9 blòk yo ranpli (ak prèv)</h2>
+    <ul>
+      <li><span class="cb"></span><span class="txt"><b>1. Segman kliyan</b><em>Yon moun presi ak laj, zòn, bidjè — pa « tout moun »</em></span></li>
+      <li><span class="cb"></span><span class="txt"><b>2. Pwopozisyon valè</b><em>Yon sèl fraz ak yon prèv (delè, garanti, pri)</em></span></li>
+      <li><span class="cb"></span><span class="txt"><b>3. Kanal</b><em>2 kanal prensipal, kote kliyan an deja ye</em></span></li>
+      <li><span class="cb"></span><span class="txt"><b>4. Relasyon kliyan</b><em>Yon règ swivi, yon règ plent, yon règ rekòmandasyon</em></span></li>
+      <li><span class="cb"></span><span class="txt"><b>5. Sous revni</b><em>Pri, ritm, mwayen peman, revni pa mwa kalkile</em></span></li>
+      <li><span class="cb"></span><span class="txt"><b>6. Resous kle</b><em>Sa w genyen deja vs sa w manke (ak premye aksyon)</em></span></li>
+      <li><span class="cb"></span><span class="txt"><b>7. Aktivite kle</b><em>Ki jou, ki lè, ki moun — pou pwomès la kenbe</em></span></li>
+      <li><span class="cb"></span><span class="txt"><b>8. Patenarya kle</b><em>Founisè, transpò, kote — ak yon ranplasan pou chak</em></span></li>
+      <li><span class="cb"></span><span class="txt"><b>9. Estrikti kou</b><em>Kou pa inite, kou fiks pa mwa, maj kalkile</em></span></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>B. 6 tès chif yo</h2>
+    <div class="test"><span><b>Tès 1 — Demann:</b> ki prèv peman ou genyen? (pre-kòmand, vant, 10 entèvyou)</span><span class="val"></span></div>
+    <div class="test"><span><b>Tès 2 — Maj pa inite:</b> pri − kou varyab (dwe pozitif)</span><span class="val"></span></div>
+    <div class="test"><span><b>Tès 3 — Pwen mò:</b> kou fiks ÷ maj</span><span class="val"></span></div>
+    <div class="test"><span><b>Tès 4 — Kapasite:</b> konbyen ou ka pwodwi/sèvi pa jou?</span><span class="val"></span></div>
+    <div class="test"><span><b>Tès 5 — Kas:</b> kilè lajan soti vs kilè li antre</span><span class="val"></span></div>
+    <div class="test"><span><b>Tès 6 — Legal/risk:</b> ki dokiman ak ki risk ki ka fèmen w?</span><span class="val"></span></div>
+    <p class="note"><strong>Règ:</strong> si pwen mò (tès 3) pi wo pase kapasite w (tès 4), modèl la pa kanpe — menm si maj la pozitif.</p>
+  </section>
+
+  <section class="danger">
+    <h2>C. Siyal danje — tcheke si youn ladan yo egziste</h2>
+    <ul>
+      <li><span class="cb"></span><span class="txt"><b>Yon sèl kliyan</b><em>Plis pase 40% revni soti nan yon sèl moun</em></span></li>
+      <li><span class="cb"></span><span class="txt"><b>Yon sèl founisè</b><em>Si li fèmen, ou fèmen</em></span></li>
+      <li><span class="cb"></span><span class="txt"><b>Maj mwens pase 20%</b><em>Pa gen plas pou yon erè oswa yon rabè</em></span></li>
+      <li><span class="cb"></span><span class="txt"><b>Pri pi ba pase kou</b><em>Chak vant fè w pèdi lajan</em></span></li>
+      <li><span class="cb"></span><span class="txt"><b>Pwomès san aktivite</b><em>Ou pwomèt vitès men pèsonn pa la pou livre</em></span></li>
+      <li><span class="cb"></span><span class="txt"><b>Kanal ou pa kontwole</b><em>Yon sèl kont ki ka fèmen nenpòt lè</em></span></li>
+      <li><span class="cb"></span><span class="txt"><b>Kas negatif pandan 2 semèn</b><em>Pwofi sou papye, men ou pa ka achte materyèl</em></span></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>D. Desizyon</h2>
+    <div class="test"><span><b>Konbyen siyal danje ou jwenn?</b></span><span class="val"></span></div>
+    <div class="test"><span><b>Ki youn ki pi danjere, epi poukisa?</b></span><span class="val"></span></div>
+    <div class="test"><span><b>Ki aksyon w ap fè semèn sa a?</b></span><span class="val"></span></div>
+    <p class="note"><strong>0–1 siyal:</strong> ou ka kòmanse ti. <strong>2–3:</strong> korije anvan ou grandi. <strong>4 oswa plis:</strong> modèl la poko kanpe — retounen nan blòk ki fèb la (anjeneral segman oswa kou).</p>
+  </section>
+
+  <footer>Atelnyo Academy · Dokiman Modil 5 — Tcheklis Validasyon Modèl</footer>
+</div>
+</body>
+</html>
