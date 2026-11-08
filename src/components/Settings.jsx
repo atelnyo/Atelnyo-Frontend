@@ -7,7 +7,7 @@ const INSTALL_PROMPT_ENABLED =
   import.meta.env?.VITE_INSTALL_PROMPT_ENABLED === 'true';
 import ConfirmModal from './common/ConfirmModal';
 import useSafeNavigate from '../hooks/useSafeNavigate';
-import api, { authService, spotlightService } from '../services/api';
+import api, { authService, spotlightService, languagePreferenceService } from '../services/api';
 import { resizeImage } from '../utils/profileUtils';
 import { usePlanKreyatif } from '../utils/planKreyatif';
 import SpotlightThread from './SpotlightThread';
@@ -198,6 +198,26 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
     refresh();
     return () => document.removeEventListener('visibilitychange', refresh);
   }, []);
+
+  // Phase 3 — persist the user's explicit interface-language choice to the
+  // backend (cross-device) on top of the existing ``atelnyo_lang``
+  // localStorage + URL flow. This is called from the Settings language
+  // picker only (an authenticated, explicit user action), so we never
+  // silently overwrite a preference. A failed PATCH (offline / 5xx) is
+  // swallowed — the local UI switch still succeeds via ``onLangChange``.
+  const saveLanguagePrefs = useCallback(async (nextLang) => {
+    if (!user) { return; } // unauthenticated: the local/URL flow owns it
+    try {
+      await languagePreferenceService.patch({
+        interface_language: nextLang,
+      });
+    } catch (_) {
+      // Non-blocking: the local switch already happened; don't toast on
+      // every language pick (picks are frequent and the local result is
+      // what the user sees). The backend row simply stays stale until the
+      // next successful save.
+    }
+  }, [user, lang]);
 
   const saveNotifPrefs = useCallback(async (next) => {
     setDraftNotifPrefs(next);
@@ -1762,11 +1782,11 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
           {languages.map(l => (
             <div
               key={l.id}
-              onClick={() => onLangChange(l.id)}
+              onClick={() => { onLangChange(l.id); saveLanguagePrefs(l.id); }}
               className="settings-item"
               role="button"
               tabIndex={0}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onLangChange(l.id); } }}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onLangChange(l.id); saveLanguagePrefs(l.id); } }}
               aria-pressed={lang === l.id}
             >
               {/* icon box holds ONLY the icon — the label must be a

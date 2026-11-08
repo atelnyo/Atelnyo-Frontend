@@ -1408,6 +1408,37 @@ function App() {
       const favs = Array.isArray(fRes.data) ? fRes.data : (fRes.data?.results || []);
       setFavorites(favs.map(f => f?.course).filter(Boolean));
     }).catch(() => {});
+    // Phase 3 — restore backend-persisted language + accessibility prefs
+    // after login (cross-device truth). Non-blocking: a failed/missing
+    // restore must never prevent the user from landing in the app, and it
+    // must not touch progress / lessons / bookmarks / enrollment / purchases
+    // (the backend only writes to the UserLanguagePrefs OneToOne row).
+    //
+    // We call ``restore()`` (GET /api/me/ language_prefs → FE cache) so the
+    // Settings language section + Accessibility Center read the real
+    // cross-device values on the very next render, falling back to the FE
+    // platform defaults (markets DEFAULT_LANGUAGE) if the request fails.
+    // The existing ``atelnyo_lang`` localStorage + URL flow is unaffected
+    // and remains the mechanism for the *unauthenticated* experience.
+    languagePreferenceService
+      .restore()
+      .then((prefs) => {
+        // If the backend returned an explicit interface_language that the
+        // user has never chosen locally (no ``atelnyo_lang``), treat the
+        // backend row as the user's saved choice and apply it locally so the
+        // UI chrome is consistent with the persisted cross-device truth.
+        // This is a *restore*, not a new preference — it mirrors what the
+        // user saved on another device, analogous to how session/active_tab
+        // are restored above. We only apply when there is no explicit local
+        // ``atelnyo_lang`` already, so an in-flight local switch is never
+        // clobbered by a stale cached row.
+        if (prefs?.interface_language && !localStorage.getItem('atelnyo_lang')) {
+          try {
+            localStorage.setItem('atelnyo_lang', prefs.interface_language);
+          } catch (_) { /* private mode */ }
+        }
+      })
+      .catch(() => {});
     // ─── Register for web push notifications (lazy-loaded) ────────
     _loadFirebase().then(({ registerPushNotifications, sendTestPush }) => {
       registerPushNotifications((foregroundMsg) => {

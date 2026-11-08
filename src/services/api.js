@@ -627,6 +627,173 @@ export const languageProgramService = {
  * Helper: `applyTokenPair({access, refresh, user})` writes both tokens and
  * the user blob to localStorage in one go so callers can stay declarative.
  */
+/* ═══════════════════════════════════════════════════════════════════
+ * Phase 3 — user language + accessibility preferences (backend-persisted)
+ *
+ * These are the four *independent* user preferences the multilingual
+ * system exposes:
+ *   1. interface language        (UI chrome — matches the existing
+ *                                  ``atelnyo_lang`` flow; persisted here
+ *                                  cross-device after login).
+ *   2. preferred course language (what course/lesson content the user
+ *                                  wants to see, when translations exist).
+ *   3. preferred narration language (audio narration track to play).
+ *   4. preferred subtitle language (caption track to show).
+ *
+ * Plus an ``accessibility`` JSON blob (text_size, reduced_motion,
+ * contrast, captions_default_on, preferred_subtitle_language) so the
+ * Accessibility Center has a backend home (Phase 9) instead of living
+ * only in localStorage.
+ *
+ * Contract
+ * --------
+ * ``get()`` → ``{ interface_language, preferred_course_language,
+ *   preferred_narration_language, preferred_subtitle_language,
+ *   accessibility: { text_size, reduced_motion, contrast,
+ *   captions_default_on, preferred_subtitle_language } }``.
+ *   - The backend returns the FULL shape for every authenticated user
+ *     (new users get platform defaults), so the caller never has to
+ *     merge defaults client-side. Missing keys are therefore impossible
+ *     on the happy path — the backend guarantees the shape.
+ *   - Offline/failed-request gracefulness: ``get()`` returns the cached
+ *     localStorage snapshot when the network is unavailable, and never
+ *     throws — callers (App.jsx restore-after-login, Settings reads)
+ *     keep working offline. A failed/missing cached snapshot falls back
+ *     to the frontend platform defaults (markets-data.json DEFAULT_LANGUAGE
+ *     + accessibility defaults) so the UI still has a sensible shape.
+ *
+ * ``patch(partial)`` → persists only the keys the caller supplies
+ *   (partial PATCH semantics, exactly like ``notification_prefs`` above).
+ *   The backend normalizes + validates every language code against the
+ *   supported set and silently drops unsupported codes, so we never send
+ *   a code the backend cannot round-trip. Accessibility is shallow-merged
+ *   by the backend; passing ``accessibility: {...}`` replaces only the
+ *   keys you include.
+ *
+ * Storage contract (non-negotiable from the spec)
+ * ------------------------------------------------
+ * Important permanent user data (these language + accessibility prefs)
+ * is NOT persisted frontend-only. The FE writes its own fast/local cache
+ * to ``atelnyo_language_prefs`` for instant reads on next load, but that
+ * cache is a *copy* of what the backend said — never the source of truth.
+ * The existing ``atelnyo_lang`` localStorage key remains the mechanism for
+ * the *unauthenticated* interface-language experience + the URL/localStorage
+ * switcher flow; once the user is authenticated the backend row becomes the
+ * cross-device truth and the cached copy is refreshed from it.
+ *
+ * Invariant (verified by the backend Phase 3 work): patching these prefs
+ * does NOT touch progress / lessons / bookmarks / enrollment / purchases.
+ * The backend serializer's ``update()`` only writes to the
+ * UserLanguagePrefs OneToOne row (which did not exist before this feature).
+ * ═══════════════════════════════════════════════════════════════════ */
+
+export const languagePreferenceService = {
+  /**
+   * GET /api/me/ → current user, whose ``language_prefs`` key is the
+   * authoritative read of these preferences (backend-expanded with defaults).
+   */
+  get: () => api.get('me/').then((r) => r?.data?.language_prefs),
+
+  /**
+   * PATCH /api/me/ { language_prefs: {...} } — partial update.
+   * Only the keys you pass are applied server-side; unset keys are left
+   * untouched. Returns the fresh ``language_prefs`` shape on success.
+   */
+  patch: (payload) => api.patch('me/', { language_prefs: payload }).then((r) => r?.data?.language_prefs),
+
+  /**
+   * Idempotent restore from the backend after a login (or on any refresh
+   * of the authenticated session). Fills both the backend truth AND the FE
+   * fast-cache so subsequent UI reads are instant. Safe to call even when
+   * offline — it won't throw; it just won't refresh the cache from the
+   * server in that case.
+   */
+  restore: async () => {
+    try {
+      const prefs = await languagePreferenceService.get();
+      if (!prefs) { return null; }
+      _writeCache(prefs);
+      return prefs;
+    } catch (_) {
+      // Network / auth failure — keep the last known cached prefs if any,
+      // and fall back to platform defaults otherwise. Never throw from a
+      // restore path; a failed language restore must not block login.
+      return _readCache() || _platformDefaults();
+    }
+  },
+};
+
+// ─── Phase 3 FE cache for language + accessibility prefs ────────────────
+// A small, FAST local copy of the backend row, used for instant UI reads
+// (Settings language section, Accessibility Center) before / alongside any
+// async refresh. This is a *snapshot cache*, not a source of truth — it is
+// overwritten on every successful ``get()``/``patch()``/``restore()``.
+const LS_KEY = 'atelnyo_language_prefs';
+
+/**
+ * Public, read-only snapshot of the last backend-verified language +
+ * accessibility prefs. Components that need an instant read (Settings
+ * language section, Accessibility Center) read this instead of reaching
+ * into localStorage themselves, so there's a single cache write path.
+ * It is ``null`` until the first successful ``restore()``/``get()``/``patch()``.
+ */
+languagePreferenceService._cachedPrefs = null;
+
+function _readCache() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' && parsed !== null ? parsed : null;
+  } catch (_) { return null; }
+}
+
+function _writeCache(prefs) {
+  if (!prefs || typeof prefs !== 'object') { return; }
+  try { localStorage.setItem(LS_KEY, JSON.stringify(prefs)); } catch (_) { /* private mode */ }
+  // Keep the public snapshot in sync with the persisted cache so React
+  // consumers can read the latest backend-verified shape without another
+  // network round-trip.
+  languagePreferenceService._cachedPrefs = prefs;
+}
+
+function _platformDefaults() {
+  // Mirror the backend's LANGUAGE_PREFS_DEFAULTS shape so the frontend and
+  // backend agree on what "no explicit preference yet" looks like. The
+  // interface_language default comes from the markets config (the same
+  // source the backend uses), NOT from settings.LANGUAGE_CODE.
+  const { DEFAULT_LANGUAGE } = awaitImportMarkets();
+  return {
+    interface_language: DEFAULT_LANGUAGE,
+    preferred_course_language: '',
+    preferred_narration_language: '',
+    preferred_subtitle_language: '',
+    accessibility: {
+      text_size: null,
+      reduced_motion: null,
+      contrast: 'default',
+      captions_default_on: null,
+      preferred_subtitle_language: null,
+    },
+  };
+}
+
+let _marketsModule = null;
+async function awaitImportMarkets() {
+  if (_marketsModule) return _marketsModule;
+  try {
+    _marketsModule = await import('../config/markets');
+  } catch (_) {
+    _marketsModule = { DEFAULT_LANGUAGE: 'ht' };
+  }
+  return _marketsModule;
+}
+
+// Keep ``restore()`` out of the module-level init graph — it should never
+// run unless some component opts into it (App.jsx after login), and a
+// failed import of markets.js must not prevent the app from booting.
+
+
 export function applyTokenPair({ access, refresh, user }) {
   if (access) localStorage.setItem('access_token', access);
   if (refresh) localStorage.setItem('refresh_token', refresh);
