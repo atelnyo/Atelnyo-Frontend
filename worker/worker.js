@@ -599,7 +599,9 @@ export default {
     // Static files (js, css, images) go to assets; everything else
     // returns index.html so React Router handles the route.
     const ext = path.split('.').pop().toLowerCase();
-    const STATIC_EXTS = ['js','css','png','jpg','jpeg','gif','webp','svg','ico','woff','woff2','ttf','map','json'];
+    // 'html' is here so real downloaded documents (e.g. course worksheets in
+    // public/resources/) reach the asset handler instead of the SPA shell.
+    const STATIC_EXTS = ['js','css','png','jpg','jpeg','gif','webp','svg','ico','woff','woff2','ttf','map','json','html'];
     const isStaticFile = STATIC_EXTS.includes(ext) && ext !== 'json';
 
     // Static assets → pass through to Cloudflare asset handler

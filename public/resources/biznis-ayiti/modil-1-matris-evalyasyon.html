@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Matris Evalyasyon 3 Ide — Modil 1 · Atelnyo</title>
+<style>
+  :root{--brand:#d81b60;--soft:#fce4ec;--ink:#1f2937;--muted:#6b7280;--line:#d1d5db;--bg:#f8fafc}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.6}
+  .page{max-width:900px;margin:0 auto;padding:24px 18px 64px}
+  header{background:#fff;border-top:6px solid var(--brand);border-radius:12px;padding:20px 22px}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:700;color:var(--brand);font-size:.8rem;letter-spacing:.04em;text-transform:uppercase}
+  .brand i{width:10px;height:10px;border-radius:50%;background:var(--brand);display:block}
+  h1{font-size:1.4rem;margin:10px 0 4px;line-height:1.3}
+  .sub{margin:0;color:var(--muted);font-size:.9rem}
+  .toolbar{margin:16px 0 4px}
+  button{font:inherit;font-weight:600;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:var(--brand);color:#fff}
+  .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:14px;border-radius:12px;border:1px solid #e8ecf1;background:#fff}
+  table{width:100%;border-collapse:collapse;font-size:.9rem;min-width:620px}
+  th,td{border:1px solid var(--line);padding:9px 10px;text-align:center}
+  th{background:var(--soft);color:#7a1238}
+  th:first-child,td:first-child{text-align:left;width:30%}
+  td.crit{text-align:left;color:var(--ink)}
+  td.crit span{display:block;color:var(--muted);font-size:.78rem;font-weight:400}
+  tfoot td{font-weight:700;background:#f9fafb}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:.84rem;color:var(--muted)}
+  section{background:#fff;border:1px solid #e8ecf1;border-radius:12px;padding:18px 20px;margin-top:14px}
+  section h2{font-size:1rem;margin:0 0 8px}
+  .line{border-bottom:1px solid var(--line);height:24px;margin-top:14px}
+  .note{background:var(--soft);border-left:4px solid var(--brand);border-radius:0 10px 10px 0;padding:11px 13px;font-size:.86rem;margin-top:12px}
+  footer{margin-top:18px;text-align:center;font-size:.76rem;color:var(--muted)}
+  @media(max-width:520px){.page{padding:16px 12px 48px}header,section{padding:15px;border-radius:10px}h1{font-size:1.15rem}}
+  @media print{body{background:#fff;font-size:11pt}.page{max-width:none;padding:0}.toolbar,.legend{display:none}.scroll{overflow:visible;border:0}table{min-width:0}section,header{border-radius:0;break-inside:avoid}section{border-left:0;border-right:0}}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="brand"><i></i> Atelnyo Academy</div>
+    <h1>Matris Evalyasyon 3 Ide</h1>
+    <p class="sub">Modil 1, Leson 3 — bay chak ide yon nòt 1 a 5 pou chak kritè, epi chwazi.</p>
+  </header>
+
+  <div class="toolbar">
+    <button type="button" onclick="window.print()">🖨️ Enprime / Sove an PDF</button>
+  </div>
+
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Kritè</th>
+          <th>Ide 1</th>
+          <th>Ide 2</th>
+          <th>Ide 3</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="crit">Konpetans<span>Èske w konnen fè l?</span></td><td></td><td></td><td></td></tr>
+        <tr><td class="crit">Eksperyans<span>Èske w deja fè yon bagay ki sanble?</span></td><td></td><td></td><td></td></tr>
+        <tr><td class="crit">Kapital<span>Èske w gen lajan an jodi a?</span></td><td></td><td></td><td></td></tr>
+        <tr><td class="crit">Resous<span>Kote, zouti, kontak, materyèl.</span></td><td></td><td></td><td></td></tr>
+        <tr><td class="crit">Demann<span>Èske gen moun ki vle sa?</span></td><td></td><td></td><td></td></tr>
+        <tr><td class="crit">Konpetisyon<span>Èske w ka diferan? (5 = ou klè)</span></td><td></td><td></td><td></td></tr>
+        <tr><td class="crit">Risk<span>5 = risk ba; 1 = risk ki ka detwi w</span></td><td></td><td></td><td></td></tr>
+        <tr><td class="crit">Enterè<span>Èske w ap renmen l pandan 2–3 ane?</span></td><td></td><td></td><td></td></tr>
+      </tbody>
+      <tfoot>
+        <tr><td class="crit">TOTAL (sou 40)</td><td></td><td></td><td></td></tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <div class="legend">
+    <span><strong>5</strong> = ekselan pou ou</span>
+    <span><strong>3</strong> = mwayen</span>
+    <span><strong>1</strong> = fèb oswa ou pa gen anyen pou li</span>
+  </div>
+
+  <section>
+    <h2>Rezon pou chwa mwen</h2>
+    <p style="margin:0;color:var(--muted);font-size:.86rem">Ki ide ki gen pi gwo total? Ki sa ki fè l pi bon pou ou kounye a — menm si li pa gen pi gwo nòt la?</p>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+  </section>
+
+  <section>
+    <h2>Ide mwen chwazi a</h2>
+    <div class="line"></div>
+  </section>
+
+  <p class="note">
+    <strong>Sonje:</strong> yon ide ki gen 28/40 epi ou ka kòmanse l lendi a pi bon pase yon ide ki gen 34/40 ou pa ka kòmanse. Pa chwazi selon enpresyon — chwazi selon sa ou ka kòmanse ak sa ou genyen.
+  </p>
+
+  <footer>Atelnyo Academy · Dokiman Modil 1 — Matris Evalyasyon</footer>
+</div>
+</body>
+</html>

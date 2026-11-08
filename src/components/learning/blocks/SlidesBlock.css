@@ -1,0 +1,340 @@
+/* src/components/learning/blocks/SlidesBlock.css
+ *
+ * Styling for the slides deck block. Everything is driven by the app's
+ * design tokens so the deck inherits the Atelnyo theme, and every size
+ * is fluid (clamp) so one card fits a 320px phone and a desktop alike.
+ */
+
+.ls-slides-block {
+  --slides-bg: var(--surface-card, #ffffff);
+  --slides-ink: var(--text-primary, #1f2937);
+  --slides-muted: var(--text-secondary, #6b7280);
+  --slides-accent: var(--color-primary, #d81b60);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 16px;
+  background: var(--slides-bg);
+  color: var(--slides-ink);
+  padding: clamp(14px, 3vw, 22px);
+  outline: none;
+}
+
+.ls-slides-block:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--slides-accent) 35%, transparent);
+}
+
+.ls-slides--dark {
+  --slides-bg: #111827;
+  --slides-ink: #f9fafb;
+  --slides-muted: #cbd5e1;
+  --slides-accent: #ff6f9c;
+  border-color: #1f2937;
+}
+
+.ls-slides--light {
+  --slides-bg: #f8fafc;
+  --slides-ink: #111827;
+  --slides-muted: #4b5563;
+}
+
+.ls-slides-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.ls-slides-title {
+  margin: 0;
+  font-size: clamp(0.95rem, 2.4vw, 1.05rem);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.ls-slides-head-tools {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ls-slides-tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  background: transparent;
+  color: var(--slides-muted);
+  border-radius: 999px;
+  padding: 5px 11px;
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.ls-slides-tool[aria-pressed='true'] {
+  color: var(--slides-accent);
+  border-color: color-mix(in srgb, var(--slides-accent) 45%, transparent);
+  background: color-mix(in srgb, var(--slides-accent) 8%, transparent);
+}
+
+.ls-slides-stage {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--slides-accent) 5%, var(--slides-bg));
+  min-height: clamp(190px, 34vw, 300px);
+  display: flex;
+}
+
+.ls-slides-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  animation: ls-slides-in 0.34s ease both;
+}
+
+@keyframes ls-slides-in {
+  from { opacity: 0; transform: translate3d(14px, 0, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+.ls-slides-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 240px;
+  background: color-mix(in srgb, var(--slides-accent) 10%, transparent);
+  overflow: hidden;
+}
+
+.ls-slides-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: opacity 0.3s ease;
+}
+
+.ls-slides-skeleton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--slides-muted) 12%, transparent) 30%,
+    color-mix(in srgb, var(--slides-muted) 24%, transparent) 50%,
+    color-mix(in srgb, var(--slides-muted) 12%, transparent) 70%
+  );
+  background-size: 220% 100%;
+  animation: ls-slides-shimmer 1.4s infinite linear;
+}
+
+@keyframes ls-slides-shimmer {
+  from { background-position: 140% 0; }
+  to { background-position: -40% 0; }
+}
+
+.ls-slides-body {
+  padding: clamp(14px, 3vw, 22px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.ls-slides-card-title {
+  margin: 0 0 2px;
+  font-size: clamp(1.02rem, 3.1vw, 1.35rem);
+  line-height: 1.28;
+  font-weight: 700;
+}
+
+.ls-slides-text {
+  margin: 0;
+  font-size: clamp(0.88rem, 2.4vw, 0.98rem);
+  line-height: 1.65;
+  color: var(--slides-ink);
+}
+
+.ls-slides-list {
+  margin: 0;
+  padding-left: 1.1em;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: clamp(0.86rem, 2.4vw, 0.96rem);
+  line-height: 1.55;
+}
+
+.ls-slides-list--ol {
+  padding-left: 1.35em;
+}
+
+/* Element-level reveal — each bullet/paragraph enters in sequence.
+   Animation is `both`, so nothing is invisible if JS is slow. */
+.ls-slides-item {
+  animation: ls-slides-item-in 0.4s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+@keyframes ls-slides-item-in {
+  from { opacity: 0; transform: translate3d(0, 8px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+.ls-slides-list li::marker {
+  color: var(--slides-accent);
+  font-weight: 700;
+}
+
+.ls-slides-code {
+  background: color-mix(in srgb, var(--slides-muted) 16%, transparent);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.9em;
+}
+
+.ls-slides-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.ls-slides-nav {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  border: 1px solid var(--border-color, #e5e7eb);
+  background: transparent;
+  color: var(--slides-ink);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.18s ease, border-color 0.18s ease, opacity 0.18s ease;
+}
+
+.ls-slides-nav--next {
+  border-color: color-mix(in srgb, var(--slides-accent) 45%, transparent);
+  color: var(--slides-accent);
+}
+
+.ls-slides-nav:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--slides-accent) 10%, transparent);
+}
+
+.ls-slides-nav:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.ls-slides-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.ls-slides-dot {
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  border-radius: 999px;
+  border: 0;
+  background: color-mix(in srgb, var(--slides-muted) 35%, transparent);
+  cursor: pointer;
+  transition: width 0.22s ease, background 0.22s ease;
+}
+
+.ls-slides-dot.is-done {
+  background: color-mix(in srgb, var(--slides-accent) 45%, transparent);
+}
+
+.ls-slides-dot.is-active {
+  width: 22px;
+  background: var(--slides-accent);
+}
+
+.ls-slides-count {
+  font-size: 0.76rem;
+  color: var(--slides-muted);
+  font-variant-numeric: tabular-nums;
+  flex: 0 0 auto;
+}
+
+.ls-slides-done {
+  margin: 10px 0 0;
+  font-size: 0.8rem;
+  color: var(--slides-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ls-slides-done i {
+  color: var(--slides-accent);
+}
+
+.ls-slides--empty {
+  padding: 18px;
+  color: var(--text-secondary, #6b7280);
+  font-size: 0.88rem;
+}
+
+.ls-slides-audio {
+  display: none;
+}
+
+@media (min-width: 720px) {
+  .ls-slides-card {
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .ls-slides-media {
+    width: 44%;
+    max-height: none;
+    aspect-ratio: auto;
+    min-height: 220px;
+    flex: 0 0 44%;
+  }
+
+  .ls-slides-body {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 380px) {
+  .ls-slides-tool span {
+    display: none;
+  }
+
+  .ls-slides-count {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ls-slides-card {
+    animation: none;
+  }
+
+  .ls-slides-item {
+    animation: none;
+  }
+
+  .ls-slides-skeleton {
+    animation: none;
+  }
+
+  .ls-slides-dot,
+  .ls-slides-image,
+  .ls-slides-nav {
+    transition: none;
+  }
+}

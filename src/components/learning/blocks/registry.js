@@ -56,6 +56,7 @@ import ReflectionBlock from './ReflectionBlock';
 import ScenarioBlock from './ScenarioBlock';
 import CalculatorBlock from './CalculatorBlock';
 import CanvasBlock from './CanvasBlock';
+import SlidesBlock from './SlidesBlock';
 import TimelineBlock from './TimelineBlock';
 import ResourceBlock from './ResourceBlock';
 import MultipleChoiceBlock from './MultipleChoiceBlock';
@@ -425,6 +426,17 @@ export const BLOCK_TYPES = {
     validation: { required: [] },
     defaults: { sections: [] },
   },
+  slides: {
+    icon: 'fa-images', label: { en: 'Slide deck', ht: 'Diaporama' },
+    category: 'content', version: 1,
+    capabilities: [BLOCK_CAPABILITIES.CONTENT, BLOCK_CAPABILITIES.MEDIA, BLOCK_CAPABILITIES.INTERACTIVE, BLOCK_CAPABILITIES.PROGRESS],
+    layouts: [BLOCK_LAYOUT.WIDE, BLOCK_LAYOUT.FULL],
+    defaultLayout: BLOCK_LAYOUT.WIDE,
+    offlineMode: OFFLINE_MODE.READABLE,
+    description: { en: 'Animated slide deck with optional music', ht: 'Diaporama anime ak mizik ou pa vle' },
+    validation: { required: ['slides'] },
+    defaults: { slides: [], audioUrl: '', autoplaySeconds: 0, theme: 'brand' },
+  },
 
   // ─── §14-§19 — Question blocks (shared foundation) ────────────────
   multiple_choice: {
@@ -490,6 +502,7 @@ export const BLOCK_REGISTRY = {
   scenario:      ScenarioBlock,
   calculator:    CalculatorBlock,
   canvas:        CanvasBlock,
+  slides:        SlidesBlock,
   resource:      ResourceBlock,
   multiple_choice: MultipleChoiceBlock,
   multiple_answer: MultipleAnswerBlock,
@@ -739,6 +752,14 @@ export const BLOCK_ACCESSIBILITY = {
     supportsAccessibleName: true,
     supportsReducedMotion: true,
     validationRules: ['question_label_recommended'],
+  },
+  slides: {
+    keyboardSupport: true,
+    screenReaderSupport: true,
+    requiresAltText: true,
+    supportsAccessibleName: true,
+    supportsReducedMotion: true,
+    validationRules: ['slides_recommended', 'image_alt_recommended'],
   },
 };
 

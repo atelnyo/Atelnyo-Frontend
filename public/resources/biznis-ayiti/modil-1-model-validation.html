@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Modèl Validasyon Ide — Modil 1 · Atelnyo</title>
+<style>
+  :root{--brand:#d81b60;--soft:#fce4ec;--ink:#1f2937;--muted:#6b7280;--line:#d1d5db;--bg:#f8fafc;--warn:#fff7ed;--warnline:#f59e0b}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.6}
+  .page{max-width:880px;margin:0 auto;padding:24px 18px 64px}
+  header{background:#fff;border-top:6px solid var(--brand);border-radius:12px;padding:20px 22px}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:700;color:var(--brand);font-size:.8rem;letter-spacing:.04em;text-transform:uppercase}
+  .brand i{width:10px;height:10px;border-radius:50%;background:var(--brand);display:block}
+  h1{font-size:1.4rem;margin:10px 0 4px;line-height:1.3}
+  .sub{margin:0;color:var(--muted);font-size:.9rem}
+  .toolbar{margin:16px 0 4px}
+  button{font:inherit;font-weight:600;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:var(--brand);color:#fff}
+  section{background:#fff;border:1px solid #e8ecf1;border-radius:12px;padding:18px 20px;margin-top:14px}
+  section h2{font-size:1rem;margin:0 0 6px;display:flex;gap:8px}
+  section h2 .n{color:var(--brand)}
+  .lead{margin:0 0 10px;color:var(--muted);font-size:.88rem}
+  ul{margin:6px 0 0;padding-left:1.2em}
+  li{margin-bottom:6px;font-size:.92rem}
+  .cols{display:grid;gap:12px;grid-template-columns:1fr}
+  @media(min-width:680px){.cols{grid-template-columns:1fr 1fr}}
+  .card{border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:.9rem}
+  .card h3{margin:0 0 6px;font-size:.9rem}
+  .good{background:#f0fdf4;border-color:#86efac}
+  .bad{background:var(--warn);border-color:var(--warnline)}
+  .scroll{overflow-x:auto;margin-top:10px}
+  table{width:100%;border-collapse:collapse;font-size:.86rem;min-width:560px}
+  th,td{border:1px solid var(--line);padding:8px 9px;text-align:left;vertical-align:top}
+  th{background:var(--soft);color:#7a1238}
+  td.blank{height:44px;color:transparent}
+  .line{border-bottom:1px solid var(--line);height:24px;margin-top:14px}
+  .note{background:var(--soft);border-left:4px solid var(--brand);border-radius:0 10px 10px 0;padding:11px 13px;font-size:.86rem;margin-top:12px}
+  footer{margin-top:18px;text-align:center;font-size:.76rem;color:var(--muted)}
+  @media(max-width:520px){.page{padding:16px 12px 48px}header,section{padding:15px;border-radius:10px}h1{font-size:1.15rem}}
+  @media print{body{background:#fff;font-size:11pt}.page{max-width:none;padding:0}.toolbar{display:none}.scroll{overflow:visible}table{min-width:0}section,header{border-radius:0;break-inside:avoid}section{border-left:0;border-right:0}}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="brand"><i></i> Atelnyo Academy</div>
+    <h1>Modèl Validasyon Ide</h1>
+    <p class="sub">Modil 1, Leson 4 — verifye ak vrè kliyan anvan ou envesti.</p>
+  </header>
+
+  <div class="toolbar">
+    <button type="button" onclick="window.print()">🖨️ Enprime / Sove an PDF</button>
+  </div>
+
+  <section>
+    <h2><span class="n">1.</span> Gid entèvyou — kesyon yo</h2>
+    <p class="lead">Objektif: aprann, pa vann. Kite moun nan pale 80% tan an.</p>
+    <div class="cols">
+      <div class="card good">
+        <h3>✅ Bon kesyon (ouvè)</h3>
+        <ul>
+          <li>Kijan ou jere sitiyasyon sa a kounye a?</li>
+          <li>Ki sa ki pi difisil ladan l?</li>
+          <li>Kisa ou te eseye deja? Kisa ki pase?</li>
+          <li>Konbyen sa koute w jodi a (lajan ak tan)?</li>
+          <li>Ki sa ou ta renmen ki pi bon?</li>
+        </ul>
+      </div>
+      <div class="card bad">
+        <h3>⛔ Move kesyon</h3>
+        <ul>
+          <li>« Èske ou ta achte pwodwi mwen an? »</li>
+          <li>« Èske ou panse sa se yon bon ide? »</li>
+          <li>« Ou pa ta renmen yon solisyon pi bon? »</li>
+          <li>Nenpòt kesyon ki gen repons lan ladan l</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">2.</span> Tablo entèvyou (5 moun)</h2>
+    <p class="lead">Ekri sa moun nan di a egzakteman — pa rezime l nan bèl fraz.</p>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:16%">Moun</th>
+            <th style="width:22%">Kijan li jere l kounye a</th>
+            <th style="width:22%">Sa ki pi difisil</th>
+            <th style="width:18%">Sa li peye (lajan/tan)</th>
+            <th>Ta peye pou pi bon?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="blank">.</td><td class="blank">.</td><td class="blank">.</td><td class="blank">.</td><td class="blank">.</td></tr>
+          <tr><td class="blank">.</td><td class="blank">.</td><td class="blank">.</td><td class="blank">.</td><td class="blank">.</td></tr>
+          <tr><td class="blank">.</td><td class="blank">.</td><td class="blank">.</td><td class="blank">.</td><td class="blank">.</td></tr>
+          <tr><td class="blank">.</td><td class="blank">.</td><td class="blank">.</td><td class="blank">.</td><td class="blank">.</td></tr>
+          <tr><td class="blank">.</td><td class="blank">.</td><td class="blank">.</td><td class="blank">.</td><td class="blank">.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">3.</span> Sa mwen te panse vs sa mwen aprann</h2>
+    <p class="lead">Sa a se pati ki pi enpòtan nan dokiman an.</p>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+  </section>
+
+  <section>
+    <h2><span class="n">4.</span> Ti tès mwen pral fè (2 semèn)</h2>
+    <div class="scroll">
+      <table>
+        <thead><tr><th style="width:34%">Sa m ap teste</th><th style="width:26%">Kijan</th><th style="width:20%">Dat</th><th>Rezilta</th></tr></thead>
+        <tbody>
+          <tr><td class="blank">.</td><td class="blank">.</td><td class="blank">.</td><td class="blank">.</td></tr>
+          <tr><td class="blank">.</td><td class="blank">.</td><td class="blank">.</td><td class="blank">.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">
+      <strong>Règ la:</strong> pa achte gwo envantè, pa lwe gwo espas, pa enprime 5,000 kat anvan ou vann omwen yon fwa.
+    </p>
+  </section>
+
+  <footer>Atelnyo Academy · Dokiman Modil 1 — Validasyon Ide</footer>
+</div>
+</body>
+</html>
