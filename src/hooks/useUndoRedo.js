@@ -109,3 +109,6 @@ export default function useUndoRedo(initialState, { maxDepth = 50, pushDelay = 3
     historyDepth: pastRef.current.length,
   };
 }
+
+// Named export for consumers that use `import { useUndoRedo }`.
+export { useUndoRedo };

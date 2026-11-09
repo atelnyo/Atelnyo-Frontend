@@ -10,7 +10,7 @@
  *   block.autoplaySeconds — 0 = learner-driven
  *   block.theme           — 'brand' | 'light' | 'dark'
  */
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useUndoRedo } from '../../../hooks/useUndoRedo';
 import { useKeyboardShortcuts } from '../../../hooks/useKeyboardShortcuts';
 import styles from './editor.module.css';
@@ -167,6 +167,7 @@ export default function SlidesEditor({ block, onChange, lang = 'ht' }) {
               { ...defaultElement, type: elementType, id: Date.now().toString() + Math.random().toString(36).substr(2) },
             ],
           }
+        : s
     );
     patchSlides(next);
   }, [slides, patchSlides]);
@@ -179,6 +180,7 @@ export default function SlidesEditor({ block, onChange, lang = 'ht' }) {
             ...s,
             elements: s.elements.filter((_, idx) => idx !== elementIndex),
           }
+        : s
     );
     patchSlides(next);
   }, [slides, patchSlides]);
@@ -197,6 +199,7 @@ export default function SlidesEditor({ block, onChange, lang = 'ht' }) {
               ),
             ],
           }
+        : s
     );
     patchSlides(next);
   }, [slides, patchSlides]);
@@ -261,41 +264,71 @@ export default function SlidesEditor({ block, onChange, lang = 'ht' }) {
   }, [slides, patchSlides]);
 
   /* ─── Element keyboard shortcuts ──────────────────────────────── */
-  useKeyboardShortcuts({
+  useKeyboardShortcuts([
     // Ctrl+Z / Cmd+Z
-    undo: () => {
-      if (canUndo) {
-        undo();
-        pushHistory();
-      }
+    {
+      key: 'z',
+      ctrl: true,
+      action: () => {
+        if (canUndo) {
+          undo();
+          pushHistory();
+        }
+      },
     },
-    // Ctrl+Y / Cmd+Y / Ctrl+Shift+Z
-    redo: () => {
-      if (canRedo) {
-        redo();
-        pushHistory();
-      }
+    // Ctrl+Y / Cmd+Y
+    {
+      key: 'y',
+      ctrl: true,
+      action: () => {
+        if (canRedo) {
+          redo();
+          pushHistory();
+        }
+      },
+    },
+    // Ctrl+Shift+Z / Cmd+Shift+Z
+    {
+      key: 'z',
+      ctrl: true,
+      shift: true,
+      action: () => {
+        if (canRedo) {
+          redo();
+          pushHistory();
+        }
+      },
     },
     // Delete
-    delete: () => {
-      if (selectedElementIndex >= 0 && selectedSlideIndex >= 0) {
-        removeElement(selectedSlideIndex, selectedElementIndex);
-        pushHistory();
-      }
+    {
+      key: 'Delete',
+      action: () => {
+        if (selectedElementIndex >= 0 && selectedSlideIndex >= 0) {
+          removeElement(selectedSlideIndex, selectedElementIndex);
+          pushHistory();
+        }
+      },
     },
     // Ctrl+D / Cmd+D
-    duplicate: () => {
-      if (selectedElementIndex >= 0 && selectedSlideIndex >= 0) {
-        duplicateElement(selectedSlideIndex, selectedElementIndex);
-        pushHistory();
-      }
+    {
+      key: 'd',
+      ctrl: true,
+      action: () => {
+        if (selectedElementIndex >= 0 && selectedSlideIndex >= 0) {
+          duplicateElement(selectedSlideIndex, selectedElementIndex);
+          pushHistory();
+        }
+      },
     },
     // Escape
-    escape: () => {
-      setSelectedElementIndex(-1);
-      setSelectedSlideIndex(-1);
+    {
+      key: 'Escape',
+      action: () => {
+        setSelectedElementIndex(-1);
+        setSelectedSlideIndex(-1);
+      },
     },
-  });
+  ]);
 
   /* ─── Element change handlers ─────────────────────────────────── */
   const handleElementChange = useCallback((slideIndex, elementIndex, field, value) => {
@@ -352,7 +385,7 @@ export default function SlidesEditor({ block, onChange, lang = 'ht' }) {
     return (
       <div
         key={`slide-${slideIndex}`}
-        className=`slide-editor-slide ${selectedSlideIndex === slideIndex ? 'selected' : ''}`
+        className={`slide-editor-slide ${selectedSlideIndex === slideIndex ? 'selected' : ''}`}
         style={{ position: 'relative', width: '100%', minHeight: 200, border: '2px solid #dee2e6', borderRadius: 8, marginBottom: 16, background: '#f8f9fa' }}
         onClick={() => setSelectedSlideIndex(slideIndex)}
         role="button"
@@ -387,7 +420,7 @@ export default function SlidesEditor({ block, onChange, lang = 'ht' }) {
                 type="button"
                 onClick={() => setShowMusicModal(true)}
                 style={{ cursor: 'pointer', fontSize: '0.7rem' }}
-                title={t('Add background music', 'Ajoute mizik fon')
+                title={t('Add background music', 'Ajoute mizik fon')}
               >
                 <i className="fas fa-music" aria-hidden="true" />
               </button>
@@ -478,7 +511,7 @@ export default function SlidesEditor({ block, onChange, lang = 'ht' }) {
             return null;
           })}
 
-          {/* Elements ──────────────────────────────────────────────── */
+          {/* Elements ──────────────────────────────────────────────── */}
           {elements.map((element, elementIndex) => {
             const isSelected = selectedElementIndex === elementIndex && selectedSlideIndex === slideIndex;
             const isLocked = element.locked;
@@ -508,7 +541,7 @@ export default function SlidesEditor({ block, onChange, lang = 'ht' }) {
             return (
               <div
                 key={`element-${slideIndex}-${elementIndex}`}
-                className=`slide-editor-element ${isSelected ? 'selected' : ''} ${isLocked ? 'locked' : ''}`
+                className={`slide-editor-element ${isSelected ? 'selected' : ''} ${isLocked ? 'locked' : ''}`}
                 style={{ position: 'relative', cursor: isLocked ? 'not-allowed' : 'pointer' }}
                 onClick={() => {
                   if (!isLocked) {
@@ -872,7 +905,7 @@ export default function SlidesEditor({ block, onChange, lang = 'ht' }) {
                       type="button"
                       className="slide-editor-action-btn"
                       onClick={() => duplicateElement(slideIndex, elementIndex)}
-                      title={t('Duplicate', 'Kopyè')
+                      title={t('Duplicate', 'Kopyè')}
                       style={{ width: 28, height: 28, borderRadius: 50, background: '#e9ecef', color: '#495059', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem' }}
                     >
                       <i className="fas fa-copy" aria-hidden="true" />
@@ -945,11 +978,11 @@ export default function SlidesEditor({ block, onChange, lang = 'ht' }) {
             }}
           >
             {t('Add element', 'Ajoute elèv')}
-          </p>
+          </div>
           )}
         </div>
 
-        {/* Slide title editor ──────────────────────────────────────── */
+        {/* Slide title editor ──────────────────────────────────────── */}
         <div className="slide-editor-title-edit" style={{
           marginTop: 8,
           padding: 8,
@@ -1077,7 +1110,7 @@ const ElementIcon = {
 };
 
 /* ─── Theme modal ──────────────────────────────────────────────── */
-function ThemeModal({ show, onClose, onSelect }) {
+function ThemeModal({ show, onClose, onSelect, lang = 'en' }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
   const themes = [
@@ -1089,14 +1122,14 @@ function ThemeModal({ show, onClose, onSelect }) {
     <div className="modal-backdrop" onClick={() => onClose?.()} role="dialog" aria-modal="true" aria-label={t('Change theme', 'Change tem')}>
       <div className="modal-content" style={{ maxWidth: 300, padding: 20 }}>
         <h3 style={{ margin: '0 0 12px', fontSize: '1rem' }}>{t('Change theme', 'Change tem')}</h3>
-        {themes.map((t) => (
+        {themes.map((theme) => (
           <button
-            key={t.value}
+            key={theme.value}
             type="button"
-            onClick={() => onSelect(t.value).then(() => onClose?.())}
+            onClick={() => Promise.resolve(onSelect(theme.value)).then(() => onClose?.())}
             style={{ width: '100%', padding: '8px', margin: '4px 0', border: '1px solid #dee2e6', borderRadius: 4, fontSize: '0.85rem' }}
           >
-            {t(t.label)}
+            {theme.label}
           </button>
         ))}
         <button type="button" onClick={onClose} style={{ marginTop: '12px', width: '100%', padding: '8px', background: '#f8f9fa', border: '1px solid #ccc', borderRadius: 4 }}>{t('Cancel', 'Renmen')}</button>
@@ -1106,7 +1139,7 @@ function ThemeModal({ show, onClose, onSelect }) {
 }
 
 /* ─── Music modal ──────────────────────────────────────────────── */
-function MusicModal({ show, onClose, onSelect }) {
+function MusicModal({ show, onClose, onSelect, lang = 'en' }) {
   // Reuse AudioLibraryModal from existing code
   return <AudioLibraryModal lang={lang} onClose={onClose} onSelect={onSelect} />;
 }

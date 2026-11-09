@@ -1491,7 +1491,7 @@
   .ls-block-badge { font-size: 0.86rem; padding: 3px 12px; }
   .practiceBlock { padding: var(--sp-md); border-radius: var(--radius-md); margin: var(--sp-md) 0; }
   .practiceHeader { gap: 8px; }
-}  .practiceType { font-size: 0.65rem; padding: 2px var(--sp-md); }
+  .practiceType { font-size: 0.65rem; padding: 2px var(--sp-md); }
   .practicePhrase { font-size: 1rem; }
   .practiceChoice { padding: var(--sp-md) var(--sp-lg); min-height: 48px; font-size: 0.9rem; }
   .practiceInput { min-height: 48px; font-size: 0.95rem; }

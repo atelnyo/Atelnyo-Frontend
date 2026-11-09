@@ -46,7 +46,9 @@ export default function useKeyboardShortcuts(shortcuts = [], { enabled = true, t
         if (alt && !e.altKey) continue;
         if (!alt && e.altKey) continue;
         if (meta && !e.metaKey) continue;
-        if (!meta && e.metaKey) continue;
+        // ``ctrl`` already maps to Cmd on macOS (checked above), so don't
+        // reject a Cmd press just because ``meta`` wasn't requested too.
+        if (!meta && !ctrl && e.metaKey) continue;
 
         // Check key
         if (e.key.toLowerCase() !== key.toLowerCase()) continue;
@@ -65,3 +67,6 @@ export default function useKeyboardShortcuts(shortcuts = [], { enabled = true, t
     return () => el.removeEventListener('keydown', handler);
   }, [enabled, target]);
 }
+
+// Named export for consumers that use `import { useKeyboardShortcuts }`.
+export { useKeyboardShortcuts };
