@@ -20,6 +20,25 @@ export function getGoogleClientId() {
   } catch { return ''; }
 }
 
+/**
+ * True when the SPA is running inside an embedded WebView (the native
+ * Android app exposes ``window.AtelnyoAndroidBridge``; Android WebViews
+ * also append ``; wv)`` to the user agent).
+ *
+ * Google refuses OAuth inside embedded WebViews (``disallowed_useragent``),
+ * so GSI must not be initialized there — the popup dead-ends on
+ * accounts.google.com/gsi/transform and never returns a credential.
+ */
+export function isEmbeddedWebView() {
+  if (typeof window === 'undefined') return false;
+  try {
+    if (window.AtelnyoAndroidBridge) return true;
+  } catch { /* ignore */ }
+  try {
+    return /;\s*wv\)/i.test(navigator.userAgent || '');
+  } catch { return false; }
+}
+
 // One-Tap / auto-select dismissal cooldown (24h).
 const GSI_SKIP_KEY = 'atelnyo_gsi_skip_until';
 const GSI_SKIP_MS = 24 * 60 * 60 * 1000;

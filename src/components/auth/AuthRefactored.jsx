@@ -135,7 +135,7 @@ const Auth = ({
 
   // ─── Hooks ───────────────────────────────────────────────────────
   const {
-    googleClientId, googleRef, pendingGoogle,
+    googleClientId, embeddedWebView, googleRef, pendingGoogle,
     dismissPendingGoogle, triggerGooglePrompt,
   } = useGoogleAuth({ lang, onLoginSuccess, showToast, isLoading });
 
@@ -596,6 +596,16 @@ const Auth = ({
               <div ref={googleRef} className="auth-google-btn" />
             </div>
           </div>
+        )}
+
+        {/* GSI cannot complete inside a WebView — tell the user instead
+            of dropping them on accounts.google.com/gsi/transform. */}
+        {embeddedWebView && (mode === 'login' || mode === 'signup') && !showVerifyPrompt && (
+          <p className="auth-google-webview-note">
+            {lang === 'ht'
+              ? 'Koneksyon Google pa disponib andedan app Android la. Konekte ak imèl ou, oswa ouvri atelnyo.site nan Chrome pou itilize Google.'
+              : 'Google sign-in is unavailable inside the Android app. Use email, or open atelnyo.site in Chrome to sign in with Google.'}
+          </p>
         )}
 
         {/* Forgot password link (login only) */}

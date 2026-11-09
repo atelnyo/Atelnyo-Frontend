@@ -10,7 +10,7 @@ import { authService, applyTokenPair } from '../../services/api';
 import {
   getGoogleClientId, gsiPromptSkipped, rememberGsiSkipped,
   readPendingGoogle, writePendingGoogle, clearPendingGoogle,
-  isDarkTheme,
+  isDarkTheme, isEmbeddedWebView,
 } from './authUtils';
 
 export default function useGoogleAuth({ lang, onLoginSuccess, showToast, isLoading }) {
@@ -21,13 +21,20 @@ export default function useGoogleAuth({ lang, onLoginSuccess, showToast, isLoadi
   // credential event is routed through this ref instead of a stale
   // closure captured at first initialize.
   const handlerRef = useRef(null);
-  const [googleClientId, setGoogleClientId] = useState(() => getGoogleClientId());
+  // Google blocks OAuth in embedded WebViews (disallowed_useragent), where
+  // the flow dead-ends on accounts.google.com/gsi/transform. The native
+  // Android app renders this SPA in a WebView, so skip GSI there and let
+  // Auth surface the email/password path instead.
+  const [embeddedWebView] = useState(() => isEmbeddedWebView());
+  const [googleClientId, setGoogleClientId] = useState(
+    () => (embeddedWebView ? '' : getGoogleClientId()),
+  );
   const [pendingGoogle, setPendingGoogle] = useState(() => readPendingGoogle());
   const [googleLoading, setGoogleLoading] = useState(false);
 
   // Top up the client id from the public runtime config.
   useEffect(() => {
-    if (googleClientId) return undefined;
+    if (embeddedWebView || googleClientId) return undefined;
     let cancelled = false;
     import('../../services/api').then(({ default: api }) => {
       api.get('config/public/')
@@ -42,7 +49,7 @@ export default function useGoogleAuth({ lang, onLoginSuccess, showToast, isLoadi
         .catch(() => { /* runtime config is best-effort */ });
     });
     return () => { cancelled = true; };
-  }, [googleClientId]);
+  }, [googleClientId, embeddedWebView]);
 
   const handleGoogleCredential = useCallback(async (response) => {
     const idToken = response?.credential;
@@ -92,7 +99,7 @@ export default function useGoogleAuth({ lang, onLoginSuccess, showToast, isLoadi
 
   // Load GSI + render button + One-Tap
   useEffect(() => {
-    if (!googleClientId || typeof window === 'undefined') return undefined;
+    if (embeddedWebView || !googleClientId || typeof window === 'undefined') return undefined;
     let cancelled = false;
     handlerRef.current = handleGoogleCredential;
 
@@ -109,7 +116,13 @@ export default function useGoogleAuth({ lang, onLoginSuccess, showToast, isLoadi
             client_id: googleClientId,
             callback: (resp) => { handlerRef.current?.(resp); },
             auto_select: true,
-            itp_supported: true,
+            // ``itp_support`` (no trailing "d" in the option name) enables
+            // the upgraded One Tap UX on Safari/ITP browsers.
+            itp_support: true,
+            // FedCM for the button too: Chrome uses its native account
+            // chooser instead of the popup that passes through
+            // accounts.google.com/gsi/transform.
+            use_fedcm_for_button: true,
             // Opt in to FedCM (Chrome's new identity platform API) so
             // the One-Tap prompt keeps working once Google makes FedCM
             // mandatory; silences the GSI_LOGGER FedCM migration warning.
@@ -147,7 +160,7 @@ export default function useGoogleAuth({ lang, onLoginSuccess, showToast, isLoadi
     inject();
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [googleClientId, handleGoogleCredential, isLoading]);
+  }, [googleClientId, handleGoogleCredential, isLoading, embeddedWebView]);
 
   const dismissPendingGoogle = useCallback(() => {
     clearPendingGoogle();
@@ -160,6 +173,7 @@ export default function useGoogleAuth({ lang, onLoginSuccess, showToast, isLoadi
 
   return {
     googleClientId,
+    embeddedWebView,
     googleRef,
     pendingGoogle,
     googleLoading,

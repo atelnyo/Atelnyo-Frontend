@@ -6211,6 +6211,17 @@ body.dark-mode .auth-btn--secondary:hover:not(:disabled) {
   width: 100%;
 }
 
+/* Shown instead of the Google button inside the Android WebView, where
+   Google refuses OAuth (disallowed_useragent). */
+.auth-google-webview-note {
+  margin: 10px auto 0;
+  max-width: 280px;
+  text-align: center;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--text-secondary, #9ca3af);
+}
+
 /* Google's branded button is a GSI iframe — its internals can't be
    styled from the outside, so the "shine" lives on this wrapper: a soft
    Google-color halo behind the button plus a hover lift. The wrapper's
