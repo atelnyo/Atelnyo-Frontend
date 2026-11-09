@@ -382,17 +382,25 @@ export default function ModuleSession({
         {/* Duolingo-style hearts — mistakes left in this session. */}
         {gamification && Number(gamification.hearts_max) > 0 && (
           <span
-            className={`ls-session-hearts${Number(gamification.hearts) === 0 ? ' is-empty' : ''}`}
-            title={isHt ? 'Kè — erè ki rete' : 'Hearts — mistakes left'}
+            className={`ls-session-hearts${!gamification.hearts_unlimited && Number(gamification.hearts) === 0 ? ' is-empty' : ''}${gamification.hearts_unlimited ? ' is-unlimited' : ''}`}
+            title={gamification.hearts_unlimited
+              ? (isHt ? 'Kè san limit (plan peye)' : 'Unlimited hearts (paid plan)')
+              : (isHt ? 'Kè — erè ki rete' : 'Hearts — mistakes left')}
             role="status"
           >
-            {Array.from({ length: Number(gamification.hearts_max) }, (_, i) => (
-              <i
-                key={i}
-                className={`fas fa-heart ${i < Number(gamification.hearts) ? 'is-full' : 'is-lost'}`}
-                aria-hidden="true"
-              />
-            ))}
+            {gamification.hearts_unlimited ? (
+              <span aria-label={isHt ? 'Kè san limit' : 'Unlimited hearts'}>
+                <i className="fas fa-heart is-full" aria-hidden="true" /> <strong aria-hidden="true">∞</strong>
+              </span>
+            ) : (
+              Array.from({ length: Number(gamification.hearts_max) }, (_, i) => (
+                <i
+                  key={i}
+                  className={`fas fa-heart ${i < Number(gamification.hearts) ? 'is-full' : 'is-lost'}`}
+                  aria-hidden="true"
+                />
+              ))
+            )}
           </span>
         )}
       </header>

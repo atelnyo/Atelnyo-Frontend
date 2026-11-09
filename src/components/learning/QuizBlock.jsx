@@ -254,8 +254,9 @@ export default function QuizBlock({
               <div className={styles.quizQuestions}>
                 {questions.map((q, qi) => {
                   const qResult = res?.question_results?.[qi];
-                  const qType = q.question_type || 'multiple_choice';
+                  const qType = qResult?.question_type || q.question_type || 'multiple_choice';
                   const showResult = res && qResult;
+                  const reviewExplanation = qResult?.explanation || q.explanation;
                   return (
                     <div key={q.id || qi} className={`${styles.quizQuestionCard} ${showResult ? (qResult.correct ? styles.quizQuestionCorrect : styles.quizQuestionWrong) : ''}`}>
                       <p className={styles.quizQuestionText} id={`quiz-q-${quiz.id}-${qi}`}>
@@ -277,23 +278,24 @@ export default function QuizBlock({
                         >
                           {(Array.isArray(q.choices) ? q.choices : []).map((c, ci) => {
                             const selected = (answers[quiz.id] || [])[qi] === ci;
-                            const isCorrectChoice = showResult && qResult.correct;
-                            const isCorrectAnswer = showResult && !qResult.correct && ci === q.correct_index;
+                            const correctIndex = qResult?.correct_index ?? q.correct_index;
+                            const isCorrectAnswer = showResult && !qResult.correct && correctIndex === ci;
+                            const isCorrectSelected = showResult && qResult.correct && selected;
                             return (
                               <button
                                 key={ci}
                                 type="button"
-                                className={`${styles.quizOption} ${selected ? styles.quizOptionSelected : ''} ${isCorrectAnswer ? styles.quizOptionCorrectAnswer : ''} ${selected && showResult && !qResult.correct ? styles.quizOptionWrongSelected : ''}`}
+                                className={`${styles.quizOption} ${selected ? styles.quizOptionSelected : ''} ${(isCorrectAnswer || isCorrectSelected) ? styles.quizOptionCorrectAnswer : ''} ${selected && showResult && !qResult.correct ? styles.quizOptionWrongSelected : ''}`}
                                 onClick={() => !showResult && pick(quiz.id, qi, ci)}
                                 aria-pressed={selected}
                                 disabled={!!showResult}
                               >
                                 <span className={styles.quizOptionKey}>{String.fromCharCode(65 + ci)}</span>
                                 {c}
-                                {isCorrectAnswer && <span className={styles.quizOptionCorrectBadge}>✓</span>}
+                                {(isCorrectAnswer || isCorrectSelected) && <span className={styles.quizOptionCorrectBadge}>✓</span>}
                               </button>
                             );
-                          }                          )}
+                          })}
                         </fieldset>
                       )}
 
@@ -312,8 +314,8 @@ export default function QuizBlock({
                             disabled={!!showResult}
                             aria-labelledby={`quiz-q-${quiz.id}-${qi}`}
                           />
-                          {showResult && !qResult.correct && (
-                            <p className={styles.quizCorrectAnswer}>{t('Correct answer:', 'Bon repons:')} {q.correct_answer}</p>
+                          {showResult && !qResult.correct && (qResult.correct_answer ?? q.correct_answer) && (
+                            <p className={styles.quizCorrectAnswer}>{t('Correct answer:', 'Bon repons:')} {qResult.correct_answer ?? q.correct_answer}</p>
                           )}
                         </div>
                       )}
@@ -406,9 +408,19 @@ export default function QuizBlock({
                       )}
 
                       {/* Explanation after submit */}
-                      {showResult && q.explanation && (
+                      {showResult && reviewExplanation && (
                         <div className={`${styles.quizExplanation} ${qResult.correct ? styles.quizExplanationCorrect : styles.quizExplanationWrong}`}>
-                          <i className="fas fa-circle-info" /> {q.explanation}
+                          <i className="fas fa-circle-info" /> {reviewExplanation}
+                        </div>
+                      )}
+
+                      {/* Correct answer review for matching/ordering (big-platform style) */}
+                      {showResult && !qResult.correct && (qType === 'ordering' || qType === 'matching') && (Array.isArray(qResult.correct_order) || Array.isArray(qResult.matching_pairs)) && (
+                        <div className={styles.quizCorrectAnswer}>
+                          <strong>{t('Correct answer:', 'Bon repons:')}</strong>{' '}
+                          {qType === 'ordering'
+                            ? (qResult.correct_order || []).join(' → ')
+                            : (qResult.matching_pairs || []).map((p) => `${p?.left ?? ''} → ${p?.right ?? ''}`).join(', ')}
                         </div>
                       )}
                     </div>
@@ -433,10 +445,35 @@ export default function QuizBlock({
 
             {res && (
               <footer className={styles.quizResultNote}>
-                <i className={`fas ${res.passed ? 'fa-circle-check' : 'fa-circle-info'}`} aria-hidden="true" />
-                {res.passed
-                  ? t('Great — you passed this quiz. You can retake it to practice more.', 'Fò — ou pase kiz la. Ou ka fè l ankò pou pratike plis.')
-                  : t('You did not pass this time. Review the module and try again — practice is part of learning.', 'Ou pa t pase fwa sa a. Revize modil la epi eseye ankò — pratik se yon pati nan aprann.')}
+                <div>
+                  <i className={`fas ${res.passed ? 'fa-circle-check' : 'fa-circle-info'}`} aria-hidden="true" />{' '}
+                  {res.passed
+                    ? t('Great — you passed this quiz. You can retake it to practice more.', 'Fò — ou pase kiz la. Ou ka fè l ankò pou pratike plis.')
+                    : t('You did not pass this time. Review the correct answers, then try again — practice is part of learning.', 'Ou pa t pase fwa sa a. Revize bon repons yo, epi eseye ankò — pratik se yon pati nan aprann.')}
+                </div>
+                <button
+                  type="button"
+                  className={styles.quizSubmitBtn}
+                  onClick={() => {
+                    setResult((prev) => {
+                      const next = { ...prev };
+                      delete next[quiz.id];
+                      return next;
+                    });
+                    setAnswers((prev) => ({ ...prev, [quiz.id]: [] }));
+                    setShowHint((prev) => ({ ...prev, [quiz.id]: {} }));
+                    setStartTime((prev) => {
+                      const next = { ...prev };
+                      delete next[quiz.id];
+                      return next;
+                    });
+                    setErr('');
+                    clearQuizAnswers(courseId, moduleIndex);
+                  }}
+                  style={{ marginTop: 10 }}
+                >
+                  <i className="fas fa-rotate-right" aria-hidden="true" /> {t('Try again', 'Eseye ankò')}
+                </button>
               </footer>
             )}
           </div>

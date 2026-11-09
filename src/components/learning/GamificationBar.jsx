@@ -23,7 +23,8 @@ export default function GamificationBar({
   const [goalOpen, setGoalOpen] = useState(false);
   if (!stats) return null;
 
-  const hearts = Number(stats.hearts) || 0;
+  const heartsUnlimited = Boolean(stats.hearts_unlimited);
+  const hearts = heartsUnlimited ? (Number(stats.hearts_max) || 5) : (Number(stats.hearts) || 0);
   const heartsMax = Number(stats.hearts_max) || 5;
   const goal = Number(stats.daily_goal) || 20;
   const dailyXp = Number(stats.daily_xp) || 0;
@@ -61,17 +62,26 @@ export default function GamificationBar({
 
       {/* ─── Hearts ───────────────────────────────────────────── */}
       <div
-        className={`gami-chip gami-hearts${hearts === 0 ? ' is-empty' : ''}`}
-        title={isHt ? 'Kè — erè ki rete' : 'Hearts — mistakes left'}
+        className={`gami-chip gami-hearts${!heartsUnlimited && hearts === 0 ? ' is-empty' : ''}${heartsUnlimited ? ' is-unlimited' : ''}`}
+        title={heartsUnlimited
+          ? (isHt ? 'Kè san limit (plan peye)' : 'Unlimited hearts (paid plan)')
+          : (isHt ? 'Kè — erè ki rete' : 'Hearts — mistakes left')}
       >
-        {Array.from({ length: heartsMax }, (_, i) => (
-          <i
-            key={i}
-            className={`fas fa-heart ${i < hearts ? 'is-full' : 'is-lost'}`}
-            aria-hidden="true"
-          />
-        ))}
-        {hearts === 0 && (
+        {heartsUnlimited ? (
+          <span className="gami-hearts-unlimited" aria-label={isHt ? 'Kè san limit' : 'Unlimited hearts'}>
+            <i className="fas fa-heart is-full" aria-hidden="true" />
+            <strong aria-hidden="true">∞</strong>
+          </span>
+        ) : (
+          Array.from({ length: heartsMax }, (_, i) => (
+            <i
+              key={i}
+              className={`fas fa-heart ${i < hearts ? 'is-full' : 'is-lost'}`}
+              aria-hidden="true"
+            />
+          ))
+        )}
+        {!heartsUnlimited && hearts === 0 && (
           <button
             type="button"
             className="gami-refill-btn"
