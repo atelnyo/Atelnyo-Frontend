@@ -7456,7 +7456,7 @@ body.dark-mode .faq-accordion-answer {
 footer,
 .app-footer {
     background: var(--header-bg);
-    padding: 20px 20px 16px;
+    padding: 20px 20px 28px;
     text-align: center;
     margin-top: 32px;
     border-top: 1px solid var(--pink-light);
@@ -7552,7 +7552,7 @@ footer,
 @media (max-width: 600px) {
     footer,
     .app-footer {
-        padding: 16px 12px 12px;
+        padding: 16px 12px 20px;
         margin-top: 28px;
     }
     .app-footer-social {
