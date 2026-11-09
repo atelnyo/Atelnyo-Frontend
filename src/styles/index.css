@@ -16877,7 +16877,7 @@ body.dark-mode .badge[data-badge-type="draft"] { background: rgba(245, 158, 11, 
         z-index: 95;
         gap: 10px;
         margin: 0;
-        padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+        padding: 10px 16px calc(20px + env(safe-area-inset-bottom, 0px));
         background: var(--surface-card, #fff);
         border-top: 1px solid var(--border-color, rgba(216, 27, 96, 0.12));
         box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.08);

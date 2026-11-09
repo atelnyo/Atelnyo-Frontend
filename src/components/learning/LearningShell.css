@@ -2022,7 +2022,7 @@
 /* ─── §24 — Mobile Continue button: responsive, keyboard-aware ──── */
 @media (max-width: 599px) {
   .ls-session-footer {
-    padding-bottom: calc(var(--pr-size-4, 16px) + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(var(--pr-size-4, 16px) + 20px + env(safe-area-inset-bottom, 0px));
   }
 }
 
