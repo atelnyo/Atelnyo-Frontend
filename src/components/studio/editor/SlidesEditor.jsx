@@ -1123,7 +1123,8 @@ export default function SlidesEditor({ block, onChange, lang = 'ht' }) {
         <ThemeModal
           lang={lang}
           value={theme}
-          background={slides[selectedSlideIndex]?.backgroundColor || slides[0]?.backgroundColor || '#ffffff'}
+          background={(slides[selectedSlideIndex] ?? slides[0])?.backgroundColor || '#ffffff'}
+          imageUrl={(slides[selectedSlideIndex] ?? slides[0])?.imageUrl || ''}
           onClose={() => setShowThemeModal(false)}
           onSelect={applyTheme}
         />
@@ -1149,11 +1150,12 @@ const ElementIcon = {
 };
 
 /* ─── Theme modal ──────────────────────────────────────────────── */
-function ThemeModal({ onClose, onSelect, lang = 'en', value = 'brand', background = '#ffffff' }) {
+function ThemeModal({ onClose, onSelect, lang = 'en', value = 'brand', background = '#ffffff', imageUrl = '' }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
   const [selected, setSelected] = useState(value);
   const [hovered, setHovered] = useState(null);
+  const [imageFailed, setImageFailed] = useState(false);
   const previewValue = hovered || selected;
   const previewTheme = SLIDE_THEMES[previewValue] || SLIDE_THEMES.brand;
   const previewCanvas = previewTheme.canvas || background || '#ffffff';
@@ -1188,6 +1190,14 @@ function ThemeModal({ onClose, onSelect, lang = 'en', value = 'brand', backgroun
             background: previewCanvas, color: previewTheme.ink,
             display: 'flex', flexDirection: 'column', gap: 6,
           }}>
+            {imageUrl && !imageFailed && (
+              <img
+                src={imageUrl}
+                alt=""
+                onError={() => setImageFailed(true)}
+                style={{ width: '100%', height: 48, objectFit: 'cover', borderRadius: 6, display: 'block' }}
+              />
+            )}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span style={{ fontSize: '0.8rem', fontWeight: 700 }}>Aa</span>
               <span style={{ width: 18, height: 18, borderRadius: 999, background: previewTheme.accent }} />
