@@ -85,38 +85,64 @@ export default function SlidesEditor({ block, onChange, lang = 'ht' }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht || en : en);
 
-  const slides = useMemo(() => normalizeSlides(block?.slides), [block?.slides]);
+  const normalizedSlides = useMemo(() => normalizeSlides(block?.slides), [block?.slides]);
   const dragRef = useRef(null);
   const [dragOver, setDragOver] = useState(null);
   const [selectedSlideIndex, setSelectedSlideIndex] = useState(-1);
   const [selectedElementIndex, setSelectedElementIndex] = useState(-1);
-  const [elementsBySlide, setElementsBySlide] = useState(
-    slides.map(() => [defaultElement])
-  );
 
-  /* ─── Undo/Redo state for slide elements ──────────────────────── */
-  const initialState = slides.map((s) => s.elements || []);
-  const { state, setState, undo, redo, canUndo, canRedo, pushHistory, clearHistory } = useUndoRedo(initialState, { maxDepth: 100 });
+  /* ─── Undo/Redo over the full deck ─────────────────────────────── */
+  // History tracks the slides array itself, so undo/redo restores the
+  // exact deck the creator saw (elements, order, titles, theme).
+  const {
+    state: slides,
+    setState: setSlides,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+  } = useUndoRedo(normalizedSlides, { maxDepth: 100, pushDelay: 0 });
 
-  /* ─── Sync elements state with undo history ───────────────────── */
+  // Pick up external deck changes (parent swapped the block) without
+  // recording them as edits in the local history.
+  const incomingSlidesRef = useRef(normalizedSlides);
   useEffect(() => {
-    // Push current elements state to history on changes
-    const elementsArray = slides.map((s) => s.elements || []);
-    pushHistory();
-  }, [slides, pushHistory]);
+    if (incomingSlidesRef.current === normalizedSlides) return;
+    incomingSlidesRef.current = normalizedSlides;
+    setSlides(normalizedSlides, { pushToHistory: false });
+  }, [normalizedSlides, setSlides]);
 
   /* ─── Slide-level state ──────────────────────────────────────── */
-  const [showLibrary, setShowLibrary] = useState(false);
-  const [theme, setTheme] = useState('brand');
-  const [autoplaySeconds, setAutoplaySeconds] = useState(0);
+  const [theme, setTheme] = useState(block?.theme || 'brand');
+  const [showThemeModal, setShowThemeModal] = useState(false);
+  const [showMusicModal, setShowMusicModal] = useState(false);
 
   /* ─── Patch slides ───────────────────────────────────────────── */
   const patchSlides = useCallback((next) => {
+    setSlides(next);
     onChange({ ...block, slides: next });
-  }, [block, onChange]);
+  }, [block, onChange, setSlides]);
 
-  const patchDeck = useCallback((key, value) => {
-    onChange({ ...block, [key]: value });
+  const handleUndo = useCallback(() => {
+    const prev = undo();
+    if (prev !== undefined) onChange({ ...block, slides: prev });
+  }, [undo, block, onChange]);
+
+  const handleRedo = useCallback(() => {
+    const next = redo();
+    if (next !== undefined) onChange({ ...block, slides: next });
+  }, [redo, block, onChange]);
+
+  const applyTheme = useCallback((value) => {
+    setTheme(value);
+    const next = slides.map((s) => ({ ...s, theme: value }));
+    setSlides(next);
+    onChange({ ...block, theme: value, slides: next });
+  }, [slides, setSlides, block, onChange]);
+
+  const applyAudio = useCallback((item) => {
+    onChange({ ...block, audioUrl: item?.media_url || '' });
+    setShowMusicModal(false);
   }, [block, onChange]);
 
   const updateSlide = useCallback((slideIndex, field, value) => {
@@ -265,62 +291,26 @@ export default function SlidesEditor({ block, onChange, lang = 'ht' }) {
 
   /* ─── Element keyboard shortcuts ──────────────────────────────── */
   useKeyboardShortcuts([
-    // Ctrl+Z / Cmd+Z
-    {
-      key: 'z',
-      ctrl: true,
-      action: () => {
-        if (canUndo) {
-          undo();
-          pushHistory();
-        }
-      },
-    },
-    // Ctrl+Y / Cmd+Y
-    {
-      key: 'y',
-      ctrl: true,
-      action: () => {
-        if (canRedo) {
-          redo();
-          pushHistory();
-        }
-      },
-    },
-    // Ctrl+Shift+Z / Cmd+Shift+Z
-    {
-      key: 'z',
-      ctrl: true,
-      shift: true,
-      action: () => {
-        if (canRedo) {
-          redo();
-          pushHistory();
-        }
-      },
-    },
-    // Delete
+    { key: 'z', ctrl: true, action: handleUndo },              // Ctrl+Z / Cmd+Z
+    { key: 'y', ctrl: true, action: handleRedo },              // Ctrl+Y / Cmd+Y
+    { key: 'z', ctrl: true, shift: true, action: handleRedo }, // Ctrl+Shift+Z / Cmd+Shift+Z
     {
       key: 'Delete',
       action: () => {
         if (selectedElementIndex >= 0 && selectedSlideIndex >= 0) {
           removeElement(selectedSlideIndex, selectedElementIndex);
-          pushHistory();
         }
       },
     },
-    // Ctrl+D / Cmd+D
     {
       key: 'd',
       ctrl: true,
       action: () => {
         if (selectedElementIndex >= 0 && selectedSlideIndex >= 0) {
           duplicateElement(selectedSlideIndex, selectedElementIndex);
-          pushHistory();
         }
       },
     },
-    // Escape
     {
       key: 'Escape',
       action: () => {
@@ -342,10 +332,6 @@ export default function SlidesEditor({ block, onChange, lang = 'ht' }) {
   const handleSlideChange = useCallback((slideIndex, field, value) => {
     updateSlide(slideIndex, field, value);
   }, [updateSlide]);
-
-  /* ─── Slide-level state ──────────────────────────────────────── */
-  const [showThemeModal, setShowThemeModal] = useState(false);
-  const [showMusicModal, setShowMusicModal] = useState(false);
 
   /* ─── Render ──────────────────────────────────────────────────── */
   /* Element rendering constants */
@@ -646,14 +632,6 @@ export default function SlidesEditor({ block, onChange, lang = 'ht' }) {
                           placeholder="https://…"
                           aria-label={t('Image URL')}
                         />
-                        <button
-                          type="button"
-                          onClick={() => setShowLibrary(true)}
-                          style={{ marginLeft: 4, cursor: 'pointer' }}
-                        >
-                          <i className="fas fa-photo-video" aria-hidden="true" />
-                          {t('Library', 'Bibliyèk')}
-                        </button>
                       </div>
                     )}
 
@@ -1089,13 +1067,29 @@ export default function SlidesEditor({ block, onChange, lang = 'ht' }) {
         <button type="button" onClick={() => moveSlide(selectedSlideIndex, 1)} style={{ cursor: 'pointer', padding: '4px 8px', background: '#e9ecef', color: '#495059', border: 'none', borderRadius: 4, fontSize: '0.7rem' }}>{t('Move down', 'Desann')}</button>
         <button type="button" onClick={() => setShowThemeModal(true)} style={{ cursor: 'pointer', padding: '4px 8px', background: '#f8f9fa', border: '1px solid #ccc', borderRadius: 4, fontSize: '0.7rem' }}>{t('Theme', 'Tèm')}</button>
         <button type="button" onClick={() => setShowMusicModal(true)} style={{ cursor: 'pointer', padding: '4px 8px', background: '#f8f9fa', border: '1px solid #ccc', borderRadius: 4, fontSize: '0.7rem' }}>{t('Music', 'Mizik')}</button>
-        <button type="button" onClick={() => undo()} disabled={!canUndo} style={{ cursor: 'pointer', padding: '4px 8px', background: '#e9ecef', color: '#6c757d', border: 'none', borderRadius: 4, fontSize: '0.7rem' }}>{t('Undo', 'Undo')}</button>
-        <button type="button" onClick={() => redo()} disabled={!canRedo} style={{ cursor: 'pointer', padding: '4px 8px', background: '#e9ecef', color: '#6c757d', border: 'none', borderRadius: 4, fontSize: '0.7rem' }}>{t('Redo', 'Redo')}</button>
+        <button type="button" onClick={handleUndo} disabled={!canUndo} style={{ cursor: 'pointer', padding: '4px 8px', background: '#e9ecef', color: '#6c757d', border: 'none', borderRadius: 4, fontSize: '0.7rem' }}>{t('Undo', 'Undo')}</button>
+        <button type="button" onClick={handleRedo} disabled={!canRedo} style={{ cursor: 'pointer', padding: '4px 8px', background: '#e9ecef', color: '#6c757d', border: 'none', borderRadius: 4, fontSize: '0.7rem' }}>{t('Redo', 'Redo')}</button>
       </div>
 
       <div className="slides-editor-main">
         {slides.map((slide, slideIndex) => renderSlide(slide, slideIndex))}
       </div>
+
+      {showThemeModal && (
+        <ThemeModal
+          lang={lang}
+          value={theme}
+          onClose={() => setShowThemeModal(false)}
+          onSelect={applyTheme}
+        />
+      )}
+      {showMusicModal && (
+        <MusicModal
+          lang={lang}
+          onClose={() => setShowMusicModal(false)}
+          onSelect={applyAudio}
+        />
+      )}
     </div>
   );
 }
@@ -1110,7 +1104,7 @@ const ElementIcon = {
 };
 
 /* ─── Theme modal ──────────────────────────────────────────────── */
-function ThemeModal({ show, onClose, onSelect, lang = 'en' }) {
+function ThemeModal({ onClose, onSelect, lang = 'en', value = 'brand' }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
   const themes = [
@@ -1127,7 +1121,12 @@ function ThemeModal({ show, onClose, onSelect, lang = 'en' }) {
             key={theme.value}
             type="button"
             onClick={() => Promise.resolve(onSelect(theme.value)).then(() => onClose?.())}
-            style={{ width: '100%', padding: '8px', margin: '4px 0', border: '1px solid #dee2e6', borderRadius: 4, fontSize: '0.85rem' }}
+            style={{
+              width: '100%', padding: '8px', margin: '4px 0', borderRadius: 4,
+              fontSize: '0.85rem', cursor: 'pointer',
+              border: theme.value === value ? '2px solid var(--color-primary)' : '1px solid #dee2e6',
+              background: theme.value === value ? 'rgba(37, 99, 235, 0.08)' : '#fff',
+            }}
           >
             {theme.label}
           </button>
@@ -1139,7 +1138,7 @@ function ThemeModal({ show, onClose, onSelect, lang = 'en' }) {
 }
 
 /* ─── Music modal ──────────────────────────────────────────────── */
-function MusicModal({ show, onClose, onSelect, lang = 'en' }) {
+function MusicModal({ onClose, onSelect, lang = 'en' }) {
   // Reuse AudioLibraryModal from existing code
   return <AudioLibraryModal lang={lang} onClose={onClose} onSelect={onSelect} />;
 }
