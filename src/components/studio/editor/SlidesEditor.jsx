@@ -1151,31 +1151,81 @@ const ElementIcon = {
 function ThemeModal({ onClose, onSelect, lang = 'en', value = 'brand' }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
+  const [selected, setSelected] = useState(value);
+  const [hovered, setHovered] = useState(null);
+  const previewValue = hovered || selected;
+  const previewTheme = SLIDE_THEMES[previewValue] || SLIDE_THEMES.brand;
+  const previewCanvas = previewTheme.canvas || '#ffffff';
   const themes = [
     { value: 'brand', label: isHt ? 'Mak' : 'Brand' },
     { value: 'light', label: isHt ? 'Klè' : 'Light' },
     { value: 'dark', label: isHt ? 'Fonse' : 'Dark' },
   ];
+
   return (
-    <div className="modal-backdrop" onClick={() => onClose?.()} role="dialog" aria-modal="true" aria-label={t('Change theme', 'Change tem')}>
+    <div
+      className="modal-backdrop"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose?.(); }}
+      role="dialog"
+      aria-modal="true"
+      aria-label={t('Change theme', 'Change tem')}
+    >
       <div className="modal-content" style={{ maxWidth: 300, padding: 20 }}>
         <h3 style={{ margin: '0 0 12px', fontSize: '1rem' }}>{t('Change theme', 'Change tem')}</h3>
+
+        {/* Live mini preview of the highlighted theme */}
+        <div
+          aria-hidden="true"
+          style={{
+            marginBottom: 12, padding: 8, borderRadius: 10,
+            border: `1px solid ${previewTheme.border}`,
+            background: previewTheme.frame,
+          }}
+        >
+          <div style={{
+            minHeight: 86, padding: '10px 12px', borderRadius: 7,
+            background: previewCanvas, color: previewTheme.ink,
+            display: 'flex', flexDirection: 'column', gap: 6,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.8rem', fontWeight: 700 }}>Aa</span>
+              <span style={{ width: 18, height: 18, borderRadius: 999, background: previewTheme.accent }} />
+            </div>
+            <span style={{ height: 7, width: '62%', borderRadius: 999, background: previewTheme.ink, opacity: 0.85 }} />
+            <span style={{ height: 5, width: '94%', borderRadius: 999, background: previewTheme.muted, opacity: 0.55 }} />
+            <span style={{ height: 5, width: '76%', borderRadius: 999, background: previewTheme.muted, opacity: 0.45 }} />
+          </div>
+        </div>
+
         {themes.map((theme) => (
           <button
             key={theme.value}
             type="button"
-            onClick={() => Promise.resolve(onSelect(theme.value)).then(() => onClose?.())}
+            onClick={() => setSelected(theme.value)}
+            onMouseEnter={() => setHovered(theme.value)}
+            onMouseLeave={() => setHovered(null)}
+            onFocus={() => setHovered(theme.value)}
+            onBlur={() => setHovered(null)}
+            aria-pressed={selected === theme.value}
             style={{
               width: '100%', padding: '8px', margin: '4px 0', borderRadius: 4,
               fontSize: '0.85rem', cursor: 'pointer',
-              border: theme.value === value ? '2px solid var(--color-primary)' : '1px solid #dee2e6',
-              background: theme.value === value ? 'rgba(37, 99, 235, 0.08)' : '#fff',
+              border: theme.value === previewValue ? '2px solid var(--color-primary)' : '1px solid #dee2e6',
+              background: theme.value === previewValue ? 'rgba(37, 99, 235, 0.08)' : '#fff',
             }}
           >
             {theme.label}
           </button>
         ))}
-        <button type="button" onClick={onClose} style={{ marginTop: '12px', width: '100%', padding: '8px', background: '#f8f9fa', border: '1px solid #ccc', borderRadius: 4 }}>{t('Cancel', 'Renmen')}</button>
+
+        <button
+          type="button"
+          onClick={() => { onSelect(selected); onClose?.(); }}
+          style={{ marginTop: '12px', width: '100%', padding: '8px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}
+        >
+          {t('Apply', 'Aplike')}
+        </button>
+        <button type="button" onClick={onClose} style={{ marginTop: '6px', width: '100%', padding: '8px', background: '#f8f9fa', border: '1px solid #ccc', borderRadius: 4 }}>{t('Cancel', 'Renmen')}</button>
       </div>
     </div>
   );

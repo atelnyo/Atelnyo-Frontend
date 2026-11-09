@@ -93,7 +93,14 @@ export default function SlidesBlock({
     return cleaned;
   }, [block?.slides]);
 
-  const theme = block?.theme === 'dark' || block?.theme === 'light' ? block.theme : 'brand';
+  // Older decks may carry the theme on each slide without block.theme;
+  // fall back so the learner preview still matches what was authored.
+  const slideTheme = Array.isArray(block?.slides)
+    ? block.slides.find((s) => s?.theme === 'dark' || s?.theme === 'light')?.theme
+    : null;
+  const theme = block?.theme === 'dark' || block?.theme === 'light'
+    ? block.theme
+    : (slideTheme || 'brand');
   const autoplaySeconds = Number(block?.autoplaySeconds) || 0;
   const audioUrl = block?.audioUrl || '';
 
