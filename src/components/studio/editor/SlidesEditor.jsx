@@ -22,26 +22,60 @@ const Icon = ({ name, className, title }) => (
 );
 
 /* ─── Normalize slides raw data ─────────────────────────────────── */
-function normalizeSlides(raw) {
+function normalizeSlides(raw, fallbackTheme = 'brand') {
   if (!Array.isArray(raw) || raw.length === 0) {
-    return [{ title: '', body: '', imageUrl: '', alt: '', elements: [], backgroundColor: '#ffffff', theme: 'brand', autoplaySeconds: 0 }];
+    return [{ title: '', body: '', imageUrl: '', alt: '', elements: [], backgroundColor: '#ffffff', theme: fallbackTheme, autoplaySeconds: 0 }];
   }
   return raw.map((s) => {
-    if (!s) return { title: '', body: '', imageUrl: '', alt: '', elements: [], backgroundColor: '#ffffff', theme: 'brand', autoplaySeconds: 0 };
-    if (typeof s === 'string') return { title: '', body: s, imageUrl: '', alt: '', elements: [], backgroundColor: '#ffffff', theme: 'brand', autoplaySeconds: 0 };
+    if (!s) return { title: '', body: '', imageUrl: '', alt: '', elements: [], backgroundColor: '#ffffff', theme: fallbackTheme, autoplaySeconds: 0 };
+    if (typeof s === 'string') return { title: '', body: s, imageUrl: '', alt: '', elements: [], backgroundColor: '#ffffff', theme: fallbackTheme, autoplaySeconds: 0 };
     return {
       title: typeof s.title === 'string' ? s.title : '',
       body: typeof s.body === 'string' ? s.body : (Array.isArray(s.bullets) ? s.bullets.map((b) => `- ${b}`).join('\n') : ''),
       imageUrl: s.imageUrl || '',
       alt: s.alt || '',
       backgroundColor: s.backgroundColor || '#ffffff',
-      theme: s.theme || 'brand',
+      theme: s.theme || fallbackTheme,
       autoplaySeconds: Number(s.autoplaySeconds) || 0,
       // Preserve existing elements, add default empty ones if needed
       elements: Array.isArray(s.elements) ? s.elements : [],
     };
   });
 }
+
+/* ─── Deck themes ───────────────────────────────────────────────── */
+// Mirrors the learner deck (SlidesBlock.css): dark and light repaint the
+// slide canvas, while brand keeps the creator's own background and only
+// tints the frame + accents.
+const SLIDE_THEMES = {
+  brand: {
+    frame: '#fff7fa',
+    border: '#f3c6d8',
+    canvas: null,
+    ink: '#1f2937',
+    muted: '#6b7280',
+    headerBorder: '#f3d6e2',
+    accent: 'var(--color-primary, #d81b60)',
+  },
+  light: {
+    frame: '#eef2f7',
+    border: '#dbe3ec',
+    canvas: '#f8fafc',
+    ink: '#111827',
+    muted: '#4b5563',
+    headerBorder: '#e2e8f0',
+    accent: '#0f172a',
+  },
+  dark: {
+    frame: '#0b1220',
+    border: '#1f2937',
+    canvas: '#111827',
+    ink: '#f9fafb',
+    muted: '#cbd5e1',
+    headerBorder: '#1f2937',
+    accent: '#ff6f9c',
+  },
+};
 
 /* ─── Element types ─────────────────────────────────────────────── */
 const ELEMENT_TYPES = {
@@ -85,7 +119,10 @@ export default function SlidesEditor({ block, onChange, lang = 'ht' }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht || en : en);
 
-  const normalizedSlides = useMemo(() => normalizeSlides(block?.slides), [block?.slides]);
+  const normalizedSlides = useMemo(
+    () => normalizeSlides(block?.slides, block?.theme),
+    [block?.slides, block?.theme]
+  );
   const dragRef = useRef(null);
   const [dragOver, setDragOver] = useState(null);
   const [selectedSlideIndex, setSelectedSlideIndex] = useState(-1);
@@ -349,6 +386,8 @@ export default function SlidesEditor({ block, onChange, lang = 'ht' }) {
   /* ─── Render slide ────────────────────────────────────────────── */
   function renderSlide(slide, slideIndex) {
     const elements = slide.elements || [];
+    const slideTheme = SLIDE_THEMES[block?.theme] || SLIDE_THEMES[slide.theme] || SLIDE_THEMES.brand;
+    const canvasBackground = slideTheme.canvas || slide.backgroundColor || '#ffffff';
 
     /* ─── Calculate bouding box for snap guides ─────────────────── */
     const allElements = elements.filter((e) => !e.locked || e.selected);
@@ -372,24 +411,29 @@ export default function SlidesEditor({ block, onChange, lang = 'ht' }) {
       <div
         key={`slide-${slideIndex}`}
         className={`slide-editor-slide ${selectedSlideIndex === slideIndex ? 'selected' : ''}`}
-        style={{ position: 'relative', width: '100%', minHeight: 200, border: '2px solid #dee2e6', borderRadius: 8, marginBottom: 16, background: '#f8f9fa' }}
+        style={{
+          position: 'relative', width: '100%', minHeight: 200, borderRadius: 8, marginBottom: 16,
+          border: `2px solid ${selectedSlideIndex === slideIndex ? 'var(--color-primary)' : slideTheme.border}`,
+          background: slideTheme.frame,
+          color: slideTheme.ink,
+        }}
         onClick={() => setSelectedSlideIndex(slideIndex)}
         role="button"
         aria-label={t(`Slide ${slideIndex + 1}`)}
       >
-        <div className="slide-editor-canvas" style={{ position: 'relative', minHeight: 200, background: slide.backgroundColor || '#ffffff', padding: 24, color: '#495057' }}>
-          <header className="slide-editor-header" style={{ marginBottom: 16, paddingBottom: 8, borderBottom: '1px solid #e9ecef' }}>
+        <div className="slide-editor-canvas" style={{ position: 'relative', minHeight: 200, background: canvasBackground, padding: 24, color: slideTheme.ink }}>
+          <header className="slide-editor-header" style={{ marginBottom: 16, paddingBottom: 8, borderBottom: `1px solid ${slideTheme.headerBorder}` }}>
             <div className="slide-editor-header-left">
               <button
                 type="button"
                 onClick={() => setSelectedSlideIndex(slideIndex)}
-                style={{ cursor: 'pointer' }}
+                style={{ cursor: 'pointer', color: slideTheme.ink, background: 'transparent', border: 'none' }}
                 aria-label={t(`Select slide ${slideIndex + 1}`)}
               >
                 <i className="fas fa-grip-vertical" />
                 {t('Slide', 'Kat la')} {slideIndex + 1}
               </button>
-              <span className="slide-editor-title" style={{ marginLeft: 12, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <span className="slide-editor-title" style={{ marginLeft: 12, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: slideTheme.ink }}>
                 {slide.title || t('Untitled slide', 'Kat sans tit')}
               </span>
             </div>
@@ -397,7 +441,7 @@ export default function SlidesEditor({ block, onChange, lang = 'ht' }) {
               <button
                 type="button"
                 onClick={() => setShowThemeModal(true)}
-                style={{ cursor: 'pointer', fontSize: '0.7rem', marginRight: 4 }}
+                style={{ cursor: 'pointer', fontSize: '0.7rem', marginRight: 4, color: slideTheme.accent, background: 'transparent', border: 'none' }}
                 title={t('Change theme', 'Chanje tem')}
               >
                 <i className={`fas fa-palette${slide.theme === 'brand' ? '-active' : ''}` } aria-hidden="true" />
@@ -405,7 +449,7 @@ export default function SlidesEditor({ block, onChange, lang = 'ht' }) {
               <button
                 type="button"
                 onClick={() => setShowMusicModal(true)}
-                style={{ cursor: 'pointer', fontSize: '0.7rem' }}
+                style={{ cursor: 'pointer', fontSize: '0.7rem', color: slideTheme.muted, background: 'transparent', border: 'none' }}
                 title={t('Add background music', 'Ajoute mizik fon')}
               >
                 <i className="fas fa-music" aria-hidden="true" />
