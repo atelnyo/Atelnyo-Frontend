@@ -1123,6 +1123,7 @@ export default function SlidesEditor({ block, onChange, lang = 'ht' }) {
         <ThemeModal
           lang={lang}
           value={theme}
+          background={slides[selectedSlideIndex]?.backgroundColor || slides[0]?.backgroundColor || '#ffffff'}
           onClose={() => setShowThemeModal(false)}
           onSelect={applyTheme}
         />
@@ -1148,14 +1149,14 @@ const ElementIcon = {
 };
 
 /* ─── Theme modal ──────────────────────────────────────────────── */
-function ThemeModal({ onClose, onSelect, lang = 'en', value = 'brand' }) {
+function ThemeModal({ onClose, onSelect, lang = 'en', value = 'brand', background = '#ffffff' }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
   const [selected, setSelected] = useState(value);
   const [hovered, setHovered] = useState(null);
   const previewValue = hovered || selected;
   const previewTheme = SLIDE_THEMES[previewValue] || SLIDE_THEMES.brand;
-  const previewCanvas = previewTheme.canvas || '#ffffff';
+  const previewCanvas = previewTheme.canvas || background || '#ffffff';
   const themes = [
     { value: 'brand', label: isHt ? 'Mak' : 'Brand' },
     { value: 'light', label: isHt ? 'Klè' : 'Light' },
