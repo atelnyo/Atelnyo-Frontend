@@ -4,7 +4,7 @@
  * Drives the Printify import in the real Studio UI (Chromium). The API is
  * stubbed, so no backend or database is touched. Checks that:
  *   - the seller's field choice is sent with the import request
- *   - the imported draft appears in the products list without a page reload
+ *   - successful imports are reported without re-fetching the full Printify catalog
  */
 import { test, expect } from '@playwright/test';
 
@@ -27,8 +27,9 @@ const PRINTIFY_ITEM = {
   imported: false,
 };
 
-test('import sends chosen fields and the draft shows in the products list', async ({ page }) => {
+test('import sends chosen fields without re-fetching the Printify catalog', async ({ page }) => {
   let importBody: any = null;
+  let productFetches = 0;
   let productRows: any[] = [];
 
   await page.addInitScript((user) => {
@@ -45,6 +46,7 @@ test('import sends chosen fields and the draft shows in the products list', asyn
       return route.fulfill({ status: 200, json: { connected: true, shop_id: '42', shop_title: 'My Shop' } });
     }
     if (method === 'GET' && url.includes('/marketplace/printify/products/')) {
+      productFetches += 1;
       return route.fulfill({ status: 200, json: { results: [PRINTIFY_ITEM] } });
     }
     if (method === 'POST' && url.includes('/marketplace/printify/import/')) {
@@ -73,7 +75,7 @@ test('import sends chosen fields and the draft shows in the products list', asyn
 
   // Expand the Printify group, then load the shop's products.
   await page.getByRole('button', { name: /Printify/ }).click();
-  await page.getByRole('button', { name: /load printify products/i }).click();
+  await page.getByRole('button', { name: /load products/i }).click();
   await expect(page.getByLabel('Logo Tee')).toBeVisible();
 
   // Untick Stock, keep the rest, select the product and import.
@@ -85,5 +87,6 @@ test('import sends chosen fields and the draft shows in the products list', asyn
   expect(importBody.printify_product_ids).toEqual(['pf_1']);
   expect(importBody.fields).not.toContain('stock');
   expect(importBody.fields).toContain('images');
-  await expect(page.getByText('Imported as drafts:')).toBeVisible();
+  await expect(page.getByText(/Import complete:/)).toBeVisible();
+  expect(productFetches).toBe(1);
 });

@@ -578,6 +578,12 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
       )}
 
       {form.kind === 'physical' && (
+        <PropertyGroup icon="fa-print" label="Printify" labelHt="Printify" lang={lang}>
+          <PrintifyImportPanel isHt={isHt} showToast={showToast} onImported={onImported} onClose={onClose} />
+        </PropertyGroup>
+      )}
+
+      {form.kind === 'physical' && (
         <PropertyGroup icon="fa-boxes-stacked" label="Inventory" labelHt="Envantè" lang={lang}>
           <PropField
             label="Stock quantity"
@@ -599,12 +605,6 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
               ? 'Paj piblik la montre stock la — "0" parèt kòm pa gen stock. Acha a mande adrès livrezon nan checkout la.'
               : 'The public page shows stock — "0" renders as out of stock. Checkout requires a shipping address.'}
           </p>
-        </PropertyGroup>
-      )}
-
-      {form.kind === 'physical' && (
-        <PropertyGroup icon="fa-print" label="Printify" labelHt="Printify" lang={lang}>
-          <PrintifyImportPanel isHt={isHt} showToast={showToast} onImported={onImported} onClose={onClose} />
         </PropertyGroup>
       )}
 

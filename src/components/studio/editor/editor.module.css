@@ -724,6 +724,265 @@
   gap: var(--sp-xl);
 }
 
+.printifyPanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-md);
+}
+
+.printifyConnection {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+  margin: 0;
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+}
+
+.printifyConnection i {
+  color: var(--color-success, #10b981);
+}
+
+.printifyNotice,
+.printifyStatus,
+.printifyError {
+  margin: 0;
+  padding: var(--sp-md);
+  border: var(--border-w-sm) solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  background: var(--bg-highlight);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+.printifyStatus {
+  color: var(--text-primary);
+}
+
+.printifyError {
+  color: var(--color-error, #ef4444);
+  border-color: color-mix(in srgb, var(--color-error, #ef4444) 35%, transparent);
+  background: color-mix(in srgb, var(--color-error, #ef4444) 8%, transparent);
+}
+
+.printifyFields {
+  min-width: 0;
+  margin: 0;
+  padding: var(--sp-md);
+  border: var(--border-w-sm) solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.printifyFields legend {
+  padding: 0 var(--sp-xs);
+  color: var(--text-primary);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+.printifyFields > .propsHint {
+  margin: 0 0 var(--sp-sm);
+}
+
+.printifyFieldNote {
+  margin: var(--sp-sm) 0 0;
+  color: var(--text-tertiary);
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+.printifyFieldOptions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-xs) var(--sp-sm);
+}
+
+.printifyFieldOption {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-xs);
+  min-width: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+  cursor: pointer;
+}
+
+.printifyFieldOption input,
+.printifyProduct > input {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  accent-color: var(--color-primary);
+}
+
+.printifyProductsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--sp-sm);
+}
+
+.printifyProductsHeader h4 {
+  margin: 0 0 2px;
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+}
+
+.printifySearch {
+  width: 100%;
+  min-height: 40px;
+  padding: var(--sp-sm) var(--sp-md);
+  border: var(--border-w-sm) solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  background: var(--bg-input);
+  font: inherit;
+  font-size: var(--text-sm);
+}
+
+.printifySearch:focus-visible,
+.printifySecondaryButton:focus-visible,
+.printifyFieldOption input:focus-visible,
+.printifyProduct > input:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.printifySecondaryButton {
+  min-height: 38px;
+  padding: var(--sp-sm) var(--sp-md);
+  border: var(--border-w-sm) solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  background: var(--bg-input);
+  font: inherit;
+  font-size: var(--text-xs);
+  cursor: pointer;
+}
+
+.printifySecondaryButton:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  background: var(--bg-highlight);
+}
+
+.printifySecondaryButton:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.printifyProductList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-sm);
+  max-height: 300px;
+  overflow: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overscroll-behavior: contain;
+}
+
+.printifyProduct {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+  min-width: 0;
+  padding: var(--sp-sm);
+  border: var(--border-w-sm) solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+}
+
+.printifyProductImage,
+.printifyImagePlaceholder {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  border-radius: var(--radius-sm);
+}
+
+.printifyProductImage {
+  object-fit: cover;
+  background: var(--bg-highlight);
+}
+
+.printifyImagePlaceholder {
+  display: grid;
+  place-items: center;
+  color: var(--text-tertiary);
+  background: var(--bg-highlight);
+}
+
+.printifyProductInfo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  gap: 2px;
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+}
+
+.printifyProductInfo strong {
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.printifyImported {
+  flex: 0 0 auto;
+  padding: 3px 7px;
+  border-radius: 999px;
+  color: var(--color-success, #10b981);
+  background: color-mix(in srgb, var(--color-success, #10b981) 12%, transparent);
+  font-size: 0.65rem;
+  font-weight: var(--font-weight-semibold);
+}
+
+.printifyImportResult {
+  padding: var(--sp-md);
+  border: var(--border-w-sm) solid color-mix(in srgb, var(--color-success, #10b981) 35%, transparent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-success, #10b981) 8%, transparent);
+}
+
+.printifyImportResult p {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+.printifyImportResult p + p {
+  margin-top: var(--sp-xs);
+}
+
+.printifyTracking {
+  padding-top: var(--sp-sm);
+  border-top: var(--border-w-sm) solid var(--border-color);
+}
+
+.printifyTracking summary {
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.printifyTracking > .propsHint {
+  margin: var(--sp-sm) 0;
+}
+
+@media (max-width: 420px) {
+  .printifyFieldOptions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .propsField {
   display: flex;
   flex-direction: column;
