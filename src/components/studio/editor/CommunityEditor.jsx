@@ -66,6 +66,9 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'h
   const [newRule, setNewRule] = useState({ title: '', description: '' });
   const [errors, setErrors] = useState({});
   const [saveState, setSaveState] = useState('idle');
+  const [inviteUrl, setInviteUrl] = useState('');
+  const [inviteExpiresAt, setInviteExpiresAt] = useState('');
+  const [inviteBusy, setInviteBusy] = useState(false);
   const [dirty, setDirty] = useState(false);
   const dirtyRef = useRef(false);
   const savedIdRef = useRef(isEdit ? (item.slug || item.id) : null);
@@ -236,11 +239,61 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'h
     }
   }, [deleteArmed, isEdit, isHt, item, onClose, onSuccess, showToast]);
 
-  const communityUrl = (() => {
-    const slug = isEdit ? (item?.slug || item?.id) : savedIdRef.current;
-    if (!slug || typeof window === 'undefined') return '';
-    return `${window.location.origin}/community/${slug}`;
-  })();
+  const communityIdentifier = isEdit ? (item?.slug || item?.id) : savedIdRef.current;
+  const communityUrl = communityIdentifier && typeof window !== 'undefined'
+    ? `${window.location.origin}/community/${encodeURIComponent(communityIdentifier)}`
+    : '';
+
+  const createInviteLink = useCallback(async () => {
+    if (!communityIdentifier) return;
+    setInviteBusy(true);
+    try {
+      const response = await communitiesService.createInviteLink(communityIdentifier);
+      const token = response?.data?.token;
+      if (!token) throw new Error('The server did not return an invitation token.');
+      setInviteUrl(`${window.location.origin}/community/${encodeURIComponent(communityIdentifier)}/home#invite=${encodeURIComponent(token)}`);
+      setInviteExpiresAt(response.data.expires_at || '');
+      showToast?.(isHt ? 'Nouvo lyen envitasyon kreye.' : 'New invite link created.', 'check-circle');
+    } catch (error) {
+      showToast?.(
+        error?.response?.data?.detail || (isHt ? 'Pa t kapab kreye lyen an.' : 'Could not create the invite link.'),
+        'circle-exclamation',
+      );
+    } finally {
+      setInviteBusy(false);
+    }
+  }, [communityIdentifier, communityUrl, isHt, showToast]);
+
+  const revokeInviteLinks = useCallback(async () => {
+    if (!communityIdentifier) return;
+    if (!window.confirm(isHt
+      ? 'Anile tout lyen envitasyon ki poko ekspire?'
+      : 'Revoke all invitation links that have not expired?')) return;
+    setInviteBusy(true);
+    try {
+      await communitiesService.revokeInviteLinks(communityIdentifier);
+      setInviteUrl('');
+      setInviteExpiresAt('');
+      showToast?.(isHt ? 'Lyen envitasyon yo anile.' : 'Invite links revoked.', 'check-circle');
+    } catch (error) {
+      showToast?.(
+        error?.response?.data?.detail || (isHt ? 'Pa t kapab anile lyen yo.' : 'Could not revoke invite links.'),
+        'circle-exclamation',
+      );
+    } finally {
+      setInviteBusy(false);
+    }
+  }, [communityIdentifier, isHt, showToast]);
+
+  const copyInviteLink = useCallback(async () => {
+    if (!inviteUrl) return;
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      showToast?.(isHt ? 'Lyen envitasyon kopye!' : 'Invite link copied!', 'link');
+    } catch {
+      showToast?.(inviteUrl, 'link');
+    }
+  }, [inviteUrl, isHt, showToast]);
 
   const copyLink = useCallback(async () => {
     if (!communityUrl) return;
@@ -315,7 +368,7 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'h
           <select value={form.join_mode} onChange={(e) => handleChange('join_mode', e.target.value)} className={styles.select}>
             <option value="public">{isHt ? 'Piblik — nenpòt moun antre touswit' : 'Public — anyone joins instantly'}</option>
             <option value="approval">{isHt ? 'Apwobasyon — ou revize chak demann' : 'Approval — you review each request'}</option>
-            <option value="invite">{isHt ? 'Fèmen — pa gen antre dirèk' : 'Closed — no direct joins'}</option>
+            <option value="invite">{isHt ? 'Fèmen — lyen envitasyon obligatwa' : 'Invite-only — invitation link required'}</option>
           </select>
         </PropField>
         {form.join_mode === 'approval' && (
@@ -324,9 +377,48 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'h
           </p>
         )}
         {form.join_mode === 'invite' && (
-          <p style={{ fontSize: '0.75rem', color: '#b45309', margin: '4px 0 0' }}>
-            {isHt ? 'Mòd fèmen: bouton antre a pa mache pou pèsonn. Pataje kontni a ak manm ou fè konfyans dirèkteman.' : 'Closed mode: the join button works for nobody. Share content with trusted members directly.'}
-          </p>
+          <div style={{ marginTop: 8, display: 'grid', gap: 8 }}>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: 0 }}>
+              {isHt
+                ? 'Kreye yon lyen ki valab 7 jou pou jiska 10 moun. Yon nouvo lyen anile ansyen an.'
+                : 'Create a link valid for 7 days and up to 10 people. A new link replaces the previous one.'}
+            </p>
+            {communityIdentifier ? (
+              <>
+                <button type="button" onClick={createInviteLink} disabled={inviteBusy}
+                  style={{ border: '1px solid var(--border-color, #e5e7eb)', background: 'var(--surface-card, #fff)', borderRadius: 8, padding: '8px 10px', fontSize: '0.78rem', fontWeight: 600, cursor: inviteBusy ? 'wait' : 'pointer' }}>
+                  <i className={`fas ${inviteBusy ? 'fa-spinner fa-spin' : 'fa-link'}`} aria-hidden="true" style={{ marginRight: 6 }} />
+                  {inviteBusy ? (isHt ? 'Ap travay…' : 'Working…') : (isHt ? 'Kreye / ranplase lyen an' : 'Create / replace link')}
+                </button>
+                <button type="button" onClick={revokeInviteLinks} disabled={inviteBusy}
+                  style={{ border: '1px solid var(--border-color, #e5e7eb)', background: 'transparent', borderRadius: 8, padding: '7px 10px', fontSize: '0.75rem', fontWeight: 600, cursor: inviteBusy ? 'wait' : 'pointer' }}>
+                  {isHt ? 'Anile tout lyen envitasyon' : 'Revoke all invite links'}
+                </button>
+                {inviteUrl && (
+                  <div style={{ display: 'grid', gap: 6 }}>
+                    <input type="text" readOnly value={inviteUrl} aria-label={isHt ? 'Lyen envitasyon' : 'Invitation link'}
+                      style={{ width: '100%', minWidth: 0, border: '1px solid var(--border-color, #e5e7eb)', borderRadius: 8, padding: '7px 8px', fontSize: '0.72rem' }} />
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      <button type="button" onClick={copyInviteLink}
+                        style={{ border: '1px solid var(--border-color, #e5e7eb)', background: 'transparent', borderRadius: 8, padding: '5px 9px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}>
+                        <i className="fas fa-copy" aria-hidden="true" style={{ marginRight: 4 }} />
+                        {isHt ? 'Kopye lyen' : 'Copy link'}
+                      </button>
+                    </div>
+                    {inviteExpiresAt && (
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                        {isHt ? 'Ekspire:' : 'Expires:'} {new Date(inviteExpiresAt).toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </>
+            ) : (
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                {isHt ? 'Sove kominote a anvan ou kreye lyen an.' : 'Save the community before creating an invite link.'}
+              </span>
+            )}
+          </div>
         )}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0 0' }}>
           <div>

@@ -1427,9 +1427,11 @@ export const communitiesService = {
   update: (slug, data) => api.patch(`communities/${encodeURIComponent(slug)}/`, data),
   delete: (slug) => api.delete(`communities/${encodeURIComponent(slug)}/`),
   canCreate: () => api.get('communities/can_create/'),
-  join: (slug) => api.post(`communities/${encodeURIComponent(slug)}/join/`),
+  join: (slug, data = {}) => api.post(`communities/${encodeURIComponent(slug)}/join/`, data),
   leave: (slug) => api.post(`communities/${encodeURIComponent(slug)}/leave/`),
   members: (slug) => api.get(`communities/${encodeURIComponent(slug)}/members/`),
+  createInviteLink: (slug) => api.post(`communities/${encodeURIComponent(slug)}/invite-link/`),
+  revokeInviteLinks: (slug) => api.post(`communities/${encodeURIComponent(slug)}/invite-links/revoke/`),
   // Join-request moderation (approval-mode communities, founder/mod only):
   // list pending requests, then approve or reject per user_id.
   joinRequests: (slug) => api.get(`communities/${encodeURIComponent(slug)}/join_requests/`),

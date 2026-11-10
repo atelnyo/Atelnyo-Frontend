@@ -31,7 +31,7 @@
  */
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import SEOHead from './shared/SEOHead';
-import { useParams, NavLink, Outlet, useOutletContext, useNavigate } from 'react-router-dom';
+import { useParams, NavLink, Outlet, useOutletContext, useNavigate, useLocation } from 'react-router-dom';
 import { communitiesService, communityEventsService } from '../services/api';
 import useVirtualScroll from '../hooks/useVirtualScroll';
 import { t as t4 } from '../utils/i18n';
@@ -114,12 +114,25 @@ export function CommunityHome() {
   }, [community?.slug]);
 
   if (loading) return <LoadingLine lang={lang} />;
-  if (events.length === 0 && posts.length === 0) {
-    return <EmptyState icon="fa-house" lang={lang} ht="Pa gen aktivite ankò — tounen byento!" en="No activity yet — check back soon!" fr="Aucune activité pour le moment — revenez bientôt !" es="Sin actividad aún — ¡vuelve pronto!" />;
-  }
   const go = (tab) => navigate(`../${tab}`, { relative: 'path' });
   return (
     <div className="c-list c-list--gap12" data-testid="community-home">
+      <section className="c-home-post-cta" aria-label={t4(lang, 'Piblikasyon kominote a', 'Community posts', 'Publications de la communauté', 'Publicaciones de la comunidad')}>
+        <div className="c-home-post-cta-copy">
+          <span className="c-home-post-cta-icon" aria-hidden="true"><i className="fas fa-pen-to-square" /></span>
+          <div>
+            <h3>{t4(lang, 'Pataje yon bagay ak kominote a', 'Share something with the community', 'Partagez avec la communauté', 'Comparte algo con la comunidad')}</h3>
+            <p>{t4(lang, 'Kreye yon pòs piblik pou poze yon kesyon, pataje lide, oswa kòmanse yon diskisyon.', 'Write a community post to ask a question, share an idea, or start a discussion.', 'Publiez pour poser une question, partager une idée ou lancer une discussion.', 'Publica para hacer una pregunta, compartir una idea o iniciar una conversación.')}</p>
+          </div>
+        </div>
+        <button type="button" className="c-home-post-cta-button" onClick={() => go('posts')} data-testid="community-home-compose">
+          <i className="fas fa-pen" aria-hidden="true" />
+          {t4(lang, 'Kreye yon pòs', 'Write a post', 'Écrire une publication', 'Escribir una publicación')}
+        </button>
+      </section>
+      {events.length === 0 && posts.length === 0 && (
+        <EmptyState icon="fa-house" lang={lang} ht="Pa gen aktivite ankò — tounen byento!" en="No activity yet — check back soon!" fr="Aucune activité pour le moment — revenez bientôt !" es="Sin actividad aún — ¡vuelve pronto!" />
+      )}
       {events.length > 0 && (
         <section aria-label={t4(lang, 'Evènman', 'Events', 'Événements', 'Eventos')}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
@@ -832,7 +845,9 @@ export function CommunityCourses() {
 
 export default function CommunityDetail({ lang = 'ht', t = {}, showToast, user }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { slug } = useParams();
+  const inviteToken = new URLSearchParams(location.hash.slice(1)).get('invite') || '';
   const [community, setCommunity] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -881,16 +896,24 @@ export default function CommunityDetail({ lang = 'ht', t = {}, showToast, user }
 
   async function handleJoin() {
     if (!user) {
-      showToast?.(t.mwen_signin_required || (t4(lang, "Konekte pou w antre", "Sign in to join", "Connectez-vous pour rejoindre", "Inicia sesión para unirte")), 'user-lock');
+      navigate('/login', {
+        state: { from: `${location.pathname}${location.search}${location.hash}` },
+      });
       return;
     }
     setJoining(true);
     try {
-      const res = await communitiesService.join(slug);
+      const res = await communitiesService.join(
+        slug,
+        inviteToken ? { invite_token: inviteToken } : {},
+      );
       const joinedStatus = res?.data?.status || res?.data?.data?.status || 'active';
       setMyStatus(joinedStatus);
       setIsMember(joinedStatus === 'active');
       if (joinedStatus === 'active') setMemberCount((c) => c + 1);
+      if (inviteToken && joinedStatus === 'active') {
+        navigate(`${location.pathname}${location.search}`, { replace: true });
+      }
       showToast?.(
         joinedStatus === 'pending'
           ? (t4(lang, "Demann ou voye! Tann apwobasyon fondatè a.", "Request sent! Wait for the founder's approval.", "Demande envoyée ! Attendez l'approbation du fondateur.", "¡Solicitud enviada! Espera la aprobación del fundador."))
@@ -1060,9 +1083,20 @@ export default function CommunityDetail({ lang = 'ht', t = {}, showToast, user }
               type="button"
               className="c-banner-btn c-banner-btn--join"
               onClick={handleJoin}
-              disabled={joining}
+              disabled={joining || (community.join_mode === 'invite' && !inviteToken)}
+              title={community.join_mode === 'invite' && !inviteToken
+                ? t4(lang, "Mande fondatè a voye yon lyen envitasyon.", "Ask the founder for an invitation link.", "Demandez un lien d’invitation au fondateur.", "Pide un enlace de invitación al fundador.")
+                : undefined}
             >
-              {joining ? <i className="fas fa-spinner fa-spin" /> : (t4(lang, "Antre", "Join", "Rejoindre", "Unirse"))}
+              {joining
+                ? <i className="fas fa-spinner fa-spin" />
+                : community.join_mode === 'invite' && !inviteToken
+                  ? t4(lang, "Envitasyon sèlman", "Invite only", "Sur invitation", "Solo con invitación")
+                  : inviteToken
+                    ? t4(lang, "Aksepte envitasyon", "Accept invite", "Accepter l’invitation", "Aceptar invitación")
+                    : community.join_mode === 'approval'
+                      ? t4(lang, "Mande pou antre", "Request to join", "Demander à rejoindre", "Solicitar unirse")
+                      : t4(lang, "Antre", "Join", "Rejoindre", "Unirse")}
             </button>
           )}
         </div>

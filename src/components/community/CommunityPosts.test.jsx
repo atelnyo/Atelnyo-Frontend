@@ -21,10 +21,12 @@ vi.mock('../../services/api', () => ({
     createComment: vi.fn(),
     deleteComment: vi.fn(),
   },
+  communityEventsService: { list: vi.fn() },
 }));
 
-import { communitiesService } from '../../services/api';
+import { communitiesService, communityEventsService } from '../../services/api';
 import CommunityPosts from './CommunityPosts';
+import { CommunityHome } from '../CommunityDetail';
 
 function Harness({ community, user }) {
   return (
@@ -47,9 +49,36 @@ const USER = { id: 9, username: 'manm1' };
 beforeEach(() => {
   vi.clearAllMocks();
   communitiesService.posts.mockResolvedValue({ data: POSTS });
+  communityEventsService.list.mockResolvedValue({ data: [] });
 });
 
 describe('CommunityPosts', () => {
+  it('makes the post composer clear and easy to find from the community home', async () => {
+    render(
+      <MemoryRouter initialEntries={['/community/test/home']}>
+        <Routes>
+          <Route
+            path="/community/test/home"
+            element={<Outlet context={{ community: MEMBER_COMM, lang: 'en' }} />}
+          >
+            <Route index element={<CommunityHome />} />
+          </Route>
+          <Route path="/community/test/posts" element={<div>Posts feed</div>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(await screen.findByTestId('community-home-compose'));
+    expect(await screen.findByText('Posts feed')).toBeTruthy();
+  });
+
+  it('explains that members can publish persistent community posts', async () => {
+    render(<Harness community={MEMBER_COMM} user={USER} />);
+    expect(await screen.findByText('Pòs ak diskisyon')).toBeTruthy();
+    expect(screen.getByText('Kreye yon pòs')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Pibliye pòs' })).toBeTruthy();
+  });
+
   it('shows skeleton first, then posts with reaction state', async () => {
     render(<Harness community={MEMBER_COMM} user={USER} />);
     expect(screen.getByTestId('posts-skeleton')).toBeTruthy();

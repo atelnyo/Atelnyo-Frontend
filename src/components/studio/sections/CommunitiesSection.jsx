@@ -49,6 +49,7 @@ export default function CommunitiesSection({ lang, t, showToast, user, setShowCo
       transform: (d) => (Array.isArray(d) ? d : Array.isArray(d?.results) ? d.results : []),
     },
   );
+  const foundedKey = founded.map((c) => c.id).join(',');
 
   // Joined: the public catalog carries ``is_member`` per row for the
   // authenticated caller; intersect it with founded to avoid doubles.
@@ -61,6 +62,7 @@ export default function CommunitiesSection({ lang, t, showToast, user, setShowCo
         const foundedIds = new Set((founded || []).map((c) => c.id));
         return rows.filter((c) => c.is_member && !foundedIds.has(c.id));
       },
+      deps: [foundedKey],
     },
   );
 
@@ -75,7 +77,6 @@ export default function CommunitiesSection({ lang, t, showToast, user, setShowCo
   // join_requests is 403 for communities the user does not moderate,
   // so per-community failures just mean an empty queue.
   const [rejectTarget, setRejectTarget] = useState(null); // { community, membership }
-  const foundedKey = founded.map((c) => c.id).join(',');
   const { data: requestQueues, loading: loadingRequests, refetch: refetchRequests } = useFetch(
     () => Promise.all(
       founded.map((c) =>
@@ -92,7 +93,10 @@ export default function CommunitiesSection({ lang, t, showToast, user, setShowCo
 
   const handleApprove = useCallback(async (community, membership) => {
     try {
-      await communitiesService.approveJoinRequest(community.slug || community.id, membership.user ?? membership.id);
+      await communitiesService.approveJoinRequest(
+        community.slug || community.id,
+        membership.user_id ?? membership.user ?? membership.id,
+      );
       showToast?.(isHt ? `✅ ${membership.username} antre nan ${community.name}.` : `✅ ${membership.username} joined ${community.name}.`, 'check-circle');
       refetchRequests(); // queue shrinks; founded refetch updates member_count
       refetchFounded();
@@ -103,7 +107,10 @@ export default function CommunitiesSection({ lang, t, showToast, user, setShowCo
 
   const handleReject = useCallback(async (community, membership) => {
     try {
-      await communitiesService.rejectJoinRequest(community.slug || community.id, membership.user ?? membership.id);
+      await communitiesService.rejectJoinRequest(
+        community.slug || community.id,
+        membership.user_id ?? membership.user ?? membership.id,
+      );
       showToast?.(isHt ? 'Demann nan rejte.' : 'Request rejected.', 'check-circle');
       refetchRequests();
     } catch (err) {

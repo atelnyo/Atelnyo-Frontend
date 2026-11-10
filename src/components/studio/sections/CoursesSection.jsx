@@ -148,7 +148,7 @@ export default function CoursesSection({ lang, t, showToast, setShowCourseModal,
         />
       ) : (
         <div className={styles.list}>
-          {courses.slice(0, 10).map((course) => (
+          {courses.map((course) => (
             <div key={course.id} className={styles.listItem}>
               <img
                 className={styles.listThumb}

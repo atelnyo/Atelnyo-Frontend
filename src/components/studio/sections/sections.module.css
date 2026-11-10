@@ -2907,6 +2907,7 @@ tr:hover .statsBtn {
 
 .analyticsDone:hover {
   filter: brightness(1.08);
+}
 
 /* ─── Promotions (promo codes) ─────────────────────────────────── */
 .promoForm {
@@ -3006,7 +3007,6 @@ tr:hover .statsBtn {
 .promoStateScheduled{ background: rgba(245, 158, 11, 0.12); color: #b45309; }
 .promoStateExpired  { background: rgba(239, 68, 68, 0.1);  color: #dc2626; }
 .promoStateDisabled { background: rgba(100, 116, 139, 0.12); color: #64748b; }
-}
 
 /* ═══════════════════════════════════════════════════════════════════════
    COURSE OVERVIEW — Dashboard widget for course metrics

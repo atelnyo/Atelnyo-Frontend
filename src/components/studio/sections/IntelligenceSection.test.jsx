@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('../../../services/api', () => ({
   courseService: {
+    getById: vi.fn(),
     getMyCoursesCI: vi.fn(),
     getIntelligenceManaged: vi.fn(),
     unpublishIntelligenceManaged: vi.fn(),
@@ -37,6 +38,9 @@ describe('IntelligenceSection course actions', () => {
     vi.clearAllMocks();
     courseService.getMyCoursesCI.mockResolvedValue({
       data: { count: 1, courses: [COURSE] },
+    });
+    courseService.getById.mockResolvedValue({
+      data: { ...COURSE, description: 'Owner course data' },
     });
     courseService.getIntelligenceManaged.mockResolvedValue({
       data: { ...COURSE, description: 'Full course data' },
@@ -87,14 +91,21 @@ describe('IntelligenceSection course actions', () => {
     await waitFor(() => expect(courseService.getMyCoursesCI).toHaveBeenCalledTimes(2));
   });
 
-  it('hides edit and unpublish controls from users without the admin permission', async () => {
+  it('lets a creator edit their own course without granting admin actions', async () => {
     useRoleGate.mockReturnValue({ allowed: false, loading: false });
-    render(<IntelligenceSection lang="en" showToast={vi.fn()} />);
+    const onEdit = vi.fn();
+    render(<IntelligenceSection lang="en" showToast={vi.fn()} onEdit={onEdit} />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Content AI' }));
 
     expect(await screen.findByText('My course')).toBeTruthy();
-    expect(screen.queryByRole('button', { name: 'Edit' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    await waitFor(() => expect(courseService.getById).toHaveBeenCalledWith(12));
+    await waitFor(() => expect(onEdit).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 12, description: 'Owner course data' }),
+    ));
+    expect(onEdit.mock.calls[0][0]._intelligenceAdminManaged).toBeUndefined();
+    expect(courseService.getIntelligenceManaged).not.toHaveBeenCalled();
     expect(screen.queryByRole('button', { name: 'Move to draft' })).toBeNull();
     expect(screen.getByRole('button', { name: 'Process' })).toBeTruthy();
   });

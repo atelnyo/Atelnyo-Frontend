@@ -371,10 +371,9 @@ export default function CommunityPosts() {
       .catch(() => { /* silent — empty state covers failure */ })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [slug]);
+  }, [slug, search]);
 
   useEffect(() => load(), [load]);
-  useEffect(() => { if (slug) load(); }, [search]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleLoadMore() {
     if (loadingMore || !hasMore) return;
@@ -578,9 +577,23 @@ export default function CommunityPosts() {
 
   return (
     <div className="c-list c-list--gap12">
+      <header className="c-posts-intro">
+        <div>
+          <h2>{t4(lang, 'Pòs ak diskisyon', 'Posts & discussions', 'Publications et discussions', 'Publicaciones y debates')}</h2>
+          <p>{t4(lang, 'Pataje yon lide, poze yon kesyon, oswa reponn yon pòs. Se piblikasyon kominote a, se pa yon chat an dirèk.', 'Share an idea, ask a question, or reply to a post. These are community discussions, not live chat.', 'Partagez une idée, posez une question ou répondez à une publication. Ici, pas de chat en direct.', 'Comparte una idea, haz una pregunta o responde a una publicación. No es un chat en directo.')}</p>
+        </div>
+        <span className="c-posts-count">{totalCount} {t4(lang, 'pòs', 'posts', 'publications', 'publicaciones')}</span>
+      </header>
       {isMember && (
         <form className="c-post-composer c-post-composer--nice" onSubmit={handlePublish}
           style={{ border: '1px solid var(--border-color, #e2e8f0)', borderRadius: 12, padding: 12, background: 'var(--bg-soft, #fff)' }}>
+          <div className="c-post-composer-heading">
+            <i className="fas fa-pen-to-square" aria-hidden="true" />
+            <div>
+              <strong>{t4(lang, 'Kreye yon pòs', 'Write a post', 'Écrire une publication', 'Escribir una publicación')}</strong>
+              <span>{t4(lang, 'Pataje sa w ap panse ak tout manm yo.', 'Share what’s on your mind with the community.', 'Partagez vos idées avec la communauté.', 'Comparte tus ideas con la comunidad.')}</span>
+            </div>
+          </div>
           <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
             <span aria-hidden="true" style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#2d1b69,#d81b60)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, flexShrink: 0 }}>
               {((user?.username || '?')[0] || '?').toUpperCase()}
@@ -592,7 +605,7 @@ export default function CommunityPosts() {
               onChange={(e) => setDraft(e.target.value)}
               rows={3}
               maxLength={2000}
-              placeholder={t4(lang, 'Kisa w ap panse? Ekri tèks, kole link, oswa ajoute foto/videyo...', 'What\'s on your mind? Write text, paste a link, or add photo/video...', 'À quoi pensez-vous ? Écrivez, collez un lien ou ajoutez photo/vidéo...', '¿Qué piensas? Escribe, pega un enlace o añade foto/video...')}
+              placeholder={t4(lang, 'Ekri pòs ou la a… Pataje yon lide oswa poze yon kesyon.', 'Write your post here… Share an idea or ask a question.', 'Écrivez votre publication ici… Partagez une idée ou posez une question.', 'Escribe tu publicación aquí… Comparte una idea o haz una pregunta.')}
               aria-label={t4(lang, 'Nouvo pòs', 'New post', 'Nouvelle publication', 'Nueva publicación')}
               data-testid="post-composer-input"
               style={{ flex: 1, border: 'none', outline: 'none', resize: 'vertical', background: 'transparent' }}
@@ -709,8 +722,9 @@ export default function CommunityPosts() {
               </button>
             </span>
             <span className="c-post-composer-hint" style={{ marginLeft: 'auto', fontSize: '0.72rem', opacity: 0.65 }}>
-              {t4(lang, 'Manm sèlman ka wè pòs yo.', 'Members only can see posts.', 'Seuls les membres voient les publications.', 'Solo los miembros ven las publicaciones.')}
+              {t4(lang, 'Piblikasyon yo vizib pou tout moun.', 'Posts are visible to everyone.', 'Les publications sont visibles par tous.', 'Las publicaciones son visibles para todos.')}
             </span>
+            <span className="c-post-composer-length" aria-live="polite">{draft.length}/2000</span>
             <input ref={imageInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePickImage(f); e.target.value = ''; }} data-testid="post-composer-file" />
             <button
               type="submit"
@@ -721,10 +735,16 @@ export default function CommunityPosts() {
             >
               {publishing
                 ? <i className="fas fa-spinner fa-spin" aria-hidden="true" />
-                : <><i className="fas fa-paper-plane" aria-hidden="true" /> {t4(lang, 'Voye', 'Send', 'Envoyer', 'Enviar')}</>}
+                : <><i className="fas fa-paper-plane" aria-hidden="true" /> {t4(lang, 'Pibliye pòs', 'Publish post', 'Publier', 'Publicar')}</>}
             </button>
           </div>
         </form>
+      )}
+      {!isMember && (
+        <p className="c-posts-join-note">
+          <i className="fas fa-circle-info" aria-hidden="true" />
+          {t4(lang, 'Antre nan kominote a pou w pibliye epi patisipe nan diskisyon yo.', 'Join this community to publish posts and join discussions.', 'Rejoignez la communauté pour publier et participer aux discussions.', 'Únete a la comunidad para publicar y participar en las conversaciones.')}
+        </p>
       )}
 
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>

@@ -75,9 +75,18 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
   const handleEdit = useCallback(async (courseId) => {
     setEditingId(courseId);
     try {
-      const response = await courseService.getIntelligenceManaged(courseId);
+      // The list endpoint is already scoped to the creator's own courses
+      // unless they have the explicit course-content admin permission.
+      // Owners use the regular owner-protected course API; custom admins
+      // retain the separately permission-gated intelligence endpoint.
+      const response = canManageCourseContent
+        ? await courseService.getIntelligenceManaged(courseId)
+        : await courseService.getById(courseId);
       if (!response?.data?.id) throw new Error('Course details were not returned.');
-      onEdit?.({ ...response.data, _intelligenceAdminManaged: true });
+      onEdit?.({
+        ...response.data,
+        ...(canManageCourseContent ? { _intelligenceAdminManaged: true } : {}),
+      });
     } catch (err) {
       showToast?.(
         err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab louvri kou a.' : 'Could not open the course.'),
@@ -86,7 +95,7 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
     } finally {
       setEditingId(null);
     }
-  }, [lang, onEdit, showToast]);
+  }, [canManageCourseContent, lang, onEdit, showToast]);
 
   const handleUnpublish = useCallback(async (courseId) => {
     setUnpublishingId(courseId);
@@ -247,22 +256,23 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
                 )}
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'flex-end' }}>
+                <button
+                  type="button"
+                  onClick={() => handleEdit(course.id)}
+                  disabled={editingId === course.id}
+                  style={{
+                    padding: '6px 12px', borderRadius: 8, border: '1px solid #e5e7eb',
+                    background: editingId === course.id ? '#f9fafb' : '#fff',
+                    color: '#4f46e5', cursor: editingId === course.id ? 'wait' : 'pointer',
+                    fontSize: '0.8rem', fontWeight: 500, whiteSpace: 'nowrap',
+                  }}
+                  title={lang === 'ht' ? 'Modifye kou a' : 'Edit course'}
+                  aria-label={lang === 'ht' ? 'Modifye kou a' : 'Edit'}
+                >
+                  {editingId === course.id ? <i className="fas fa-spinner fa-spin" /> : <><i className="fas fa-pen" /> {lang === 'ht' ? 'Modifye' : 'Edit'}</>}
+                </button>
                 {canManageCourseContent === true && (
                   <>
-                    <button
-                      type="button"
-                      onClick={() => handleEdit(course.id)}
-                      disabled={editingId === course.id}
-                      style={{
-                        padding: '6px 12px', borderRadius: 8, border: '1px solid #e5e7eb',
-                        background: editingId === course.id ? '#f9fafb' : '#fff',
-                        color: '#4f46e5', cursor: editingId === course.id ? 'wait' : 'pointer',
-                        fontSize: '0.8rem', fontWeight: 500, whiteSpace: 'nowrap',
-                      }}
-                      title={lang === 'ht' ? 'Modifye kou a' : 'Edit course'}
-                    >
-                      {editingId === course.id ? <i className="fas fa-spinner fa-spin" /> : <><i className="fas fa-pen" /> {lang === 'ht' ? 'Modifye' : 'Edit'}</>}
-                    </button>
                     {course.status === 'published' && (
                       <button
                         type="button"
