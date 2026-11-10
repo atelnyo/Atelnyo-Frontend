@@ -70,7 +70,7 @@ const PAGE = {
         desc: 'Everything you need to create an account and find your way around Atelnyo.',
         paragraphs: [
           'Atelnyo is an international platform where creators teach online courses, share music, and sell products while learners discover new skills. Everything lives under one roof: the Explore catalog, creator profiles, and your personal library.',
-          'You can use Atelnyo in English, Haitian Creole, French, or Spanish — pick your language in Settings and the whole app follows.',
+          'You can use Atelnyo in English, Haitian Creole, or French — pick your language in Settings and the whole app follows.',
         ],
         guides: [
           {
@@ -100,7 +100,7 @@ const PAGE = {
           { q: 'How do I create an account?', a: "Open the Sign up page and register with email, Google, or phone — then verify your address and complete your profile." },
           { q: 'How do I set up my creator profile?', a: "Complete your profile, publish your first course, track, or product, and your creator tools unlock automatically in the studio." },
           { q: 'How do I switch between learner and creator mode?', a: "Every account starts as a learner. When you publish your first content, creator mode unlocks — switch anytime from your profile menu without losing data." },
-          { q: 'What languages does Atelnyo support?', a: "Atelnyo works in English, Haitian Creole, French, and Spanish — pick your language in Settings and the whole app follows." },
+          { q: 'What languages does Atelnyo support?', a: "Atelnyo works in English, Haitian Creole, and French — pick your language in Settings and the whole app follows." },
         ],
       },
       {
@@ -613,7 +613,7 @@ const PAGE = {
         desc: 'Tout sa ou bezwen pou kreye yon kont epi jwenn wozòf ou nan Atelnyo.',
         paragraphs: [
           'Atelnyo se yon platfòm entènasyonal kote kreyatè anseye kou sou entènèt, pataje mizik, epi vann pwodwi, pandan aprèyan ap dekouvri konpetans nouvo. Tout bagay anba yon sèl twati: katalog Explore a, pwofil kreyatè, ak bibliyotè pèsonèl ou.',
-          'Ou ka sèvi ak Atelnyo an anglè, kreyòl ayisyen, franse, oswa panyòl — chwazi lang ou nan Paramèt epi tout aplikasyon an swiv.',
+          'Ou ka sèvi ak Atelnyo an anglè, kreyòl ayisyen, oswa franse — chwazi lang ou nan Paramèt epi tout aplikasyon an swiv.',
         ],
         guides: [
           {
@@ -643,7 +643,7 @@ const PAGE = {
           { q: 'Kijan mwen kreye yon kont?', a: "Ouvri paj Enskripsyon an, chwazi imèl, Google, oswa telefòn — apre sa verifye adrès ou epi ranpli pwofil ou." },
           { q: 'Kijan mwen mete pwofil kreyatè mwen?', a: "Ranpli pwofil ou, pibliye premye kou, trake, oswa pwodwi ou, epi zouti kreyatè ou debloke otomatikman nan estidyo a." },
           { q: 'Kijan mwen chanje ant mòd aprantisaj ak kreyatè?', a: "Chak kont kòmanse kòm aprèyan. Lè w pibliye premye kontni ou, mòd kreyatè a debloke — chanje nenpòt lè depi meni pwofil ou san pèdi done." },
-          { q: 'Ki lang Atelnyo sipòte?', a: "Atelnyo mache an anglè, kreyòl ayisyen, franse, ak panyòl — chwazi lang ou nan Paramèt epi tout aplikasyon an swiv." },
+          { q: 'Ki lang Atelnyo sipòte?', a: "Atelnyo mache an anglè, kreyòl ayisyen, ak franse — chwazi lang ou nan Paramèt epi tout aplikasyon an swiv." },
         ],
       },
       {
@@ -1156,7 +1156,7 @@ const PAGE = {
         desc: 'Tout ce qu il faut pour créer un compte et vous repérer sur Atelnyo.',
         paragraphs: [
           'Atelnyo est une plateforme internationale où des créateurs enseignent des cours en ligne, partagent de la musique et vendent des produits, pendant que les apprenants découvrent de nouvelles compétences. Tout est réuni au même endroit: le catalogue Explore, les profils de créateurs et votre bibliothèque personnelle.',
-          "Vous pouvez utiliser Atelnyo en anglais, en créole haïtien, en français ou en espagnol — choisissez votre langue dans les Paramètres et toute l'application suit.",
+          "Vous pouvez utiliser Atelnyo en anglais, en créole haïtien ou en français — choisissez votre langue dans les Paramètres et toute l'application suit.",
         ],
         guides: [
           {
@@ -1186,7 +1186,7 @@ const PAGE = {
           { q: 'Comment créer un compte?', a: "Créez un compte gratuit avec email, Google ou téléphone, vérifiez votre adresse, puis complétez votre profil." },
           { q: 'Comment configurer mon profil créateur?', a: "Complétez votre profil et publiez votre premier cours, piste ou produit : vos outils créateurs s'activent automatiquement dans le studio." },
           { q: 'Comment basculer entre les modes apprenant et créateur?', a: "Chaque compte commence en mode apprenant. Dès votre première publication, le mode créateur se débloque — basculez quand vous voulez depuis le menu profil, sans perdre vos données." },
-          { q: 'Quelles langues Atelnyo supporte-t-il?', a: "Atelnyo est disponible en anglais, créole haïtien, français et espagnol — choisissez dans Paramètres et toute l'application suit." },
+          { q: 'Quelles langues Atelnyo supporte-t-il?', a: "Atelnyo est disponible en anglais, créole haïtien et français — choisissez dans Paramètres et toute l'application suit." },
         ],
       },
       {
@@ -1700,7 +1700,7 @@ const PAGE = {
         desc: 'Todo lo que necesitas para crear una cuenta y orientarte en Atelnyo.',
         paragraphs: [
           'Atelnyo es una plataforma internacional donde los creadores enseñan cursos en línea, comparten música y venden productos, mientras los estudiantes descubren nuevas habilidades. Todo está bajo un mismo techo: el catálogo Explore, los perfiles de creadores y tu biblioteca personal.',
-          'Puedes usar Atelnyo en inglés, criollo haitiano, francés o español — elige tu idioma en Configuración y toda la app lo sigue.',
+          'La interfaz de Atelnyo está disponible en inglés, criollo haitiano y francés — elige tu idioma en Configuración y toda la app lo sigue.',
         ],
         guides: [
           {
@@ -1730,7 +1730,7 @@ const PAGE = {
           { q: '¿Cómo creo una cuenta?', a: "Crea una cuenta gratis con email, Google o teléfono, verifica tu dirección y completa tu perfil." },
           { q: '¿Cómo configuro mi perfil de creador?', a: "Completa tu perfil y publica tu primer curso, pista o producto: tus herramientas de creador se activan automáticamente en el estudio." },
           { q: '¿Cómo cambio entre modo estudiante y creador?', a: "Cada cuenta empieza como estudiante. Al publicar tu primer contenido se desbloquea el modo creador — cambia cuando quieras desde el menú de perfil, sin perder datos." },
-          { q: '¿Qué idiomas soporta Atelnyo?', a: "Atelnyo funciona en inglés, criollo haitiano, francés y español — elige tu idioma en Configuración y toda la app te sigue." },
+          { q: '¿Qué idiomas soporta Atelnyo?', a: "Atelnyo funciona en inglés, criollo haitiano y francés — elige tu idioma en Configuración y toda la app te sigue." },
         ],
       },
       {

@@ -42,7 +42,7 @@ export function organizationSchema() {
       '@type': 'ContactPoint',
       contactType: 'customer support',
       email: 'support@atelnyo.site',
-      availableLanguage: ['English', 'Haitian Creole', 'French', 'Spanish'],
+      availableLanguage: ['English', 'Haitian Creole', 'French'],
     },
   };
 }

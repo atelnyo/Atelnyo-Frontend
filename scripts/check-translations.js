@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * scripts/check-translations.js
- * Verifies all 4 translation dictionaries have the same keys.
+ * Verifies the three supported UI translation dictionaries have the same keys.
  */
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
@@ -38,13 +38,12 @@ function extractKeys(name) {
 
 const ht = extractKeys('trans_ht');
 const en = extractKeys('trans_en');
-const es = extractKeys('trans_es');
 const fr = extractKeys('trans_fr');
 
-console.log(`\n📊 Key count: ht=${ht.length}, en=${en.length}, es=${es.length}, fr=${fr.length}`);
+console.log(`\n📊 Key count: ht=${ht.length}, en=${en.length}, fr=${fr.length}`);
 
 // Find missing keys in each language
-const allKeys = new Set([...ht, ...en, ...es, ...fr]);
+const allKeys = new Set([...ht, ...en, ...fr]);
 let missingCount = 0;
 const missingKeys = [];
 
@@ -52,7 +51,6 @@ for (const key of [...allKeys].sort()) {
   const missingIn = [];
   if (!ht.includes(key)) missingIn.push('ht');
   if (!en.includes(key)) missingIn.push('en');
-  if (!es.includes(key)) missingIn.push('es');
   if (!fr.includes(key)) missingIn.push('fr');
   if (missingIn.length > 0) {
     missingCount++;
@@ -61,7 +59,7 @@ for (const key of [...allKeys].sort()) {
 }
 
 if (missingCount === 0) {
-  console.log('\n✅ Tout kle yo egal nan tout 4 lang yo!');
+  console.log('\n✅ Tout kle yo egal nan twa lang yo!');
 } else {
   console.log(`\n⚠️  ${missingCount} kle ki manke:`);
   for (const { key, missingIn } of missingKeys) {
@@ -71,7 +69,7 @@ if (missingCount === 0) {
 
 // Check for empty values
 let emptyCount = 0;
-for (const [name, dict] of [['ht', ht], ['en', en], ['es', es], ['fr', fr]]) {
+for (const [name, dict] of [['ht', ht], ['en', en], ['fr', fr]]) {
   for (const key of dict) {
     // Extract the value for this key — match '' or "" (same-quote pairs only)
     const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -92,4 +90,4 @@ if (emptyCount > 0) {
 }
 
 console.log(`\n📈 Total kle: ${allKeys.size}`);
-console.log(`   ht: ${ht.length} | en: ${en.length} | es: ${es.length} | fr: ${fr.length}`);
+console.log(`   ht: ${ht.length} | en: ${en.length} | fr: ${fr.length}`);

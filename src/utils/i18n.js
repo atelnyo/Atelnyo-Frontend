@@ -5,7 +5,7 @@
  *   import { t2, t } from '../utils/i18n';
  *
  *   // Simple lookup (returns string):
- *   {t2(lang, { ht: 'Kou', fr: 'Cours', es: 'Curso', en: 'Courses' })}
+ *   {t2(lang, { ht: 'Kou', fr: 'Cours', en: 'Courses' })}
  *
  *   // React component-friendly (accepts 4 positional args):
  *   {t(lang, 'Kou', 'Courses', 'Cours', 'Curso')}
@@ -18,13 +18,20 @@
 
 /**
  * Map-based lookup. Pass an object keyed by language code.
- * @param {string} lang - Current language code ('ht', 'en', 'fr', 'es')
- * @param {Object} map  - { ht: '...', en: '...', fr: '...', es: '...' }
+ * @param {string} lang - Current supported language code ('ht', 'en', 'fr')
+ * @param {Object} map  - { ht: '...', en: '...', fr: '...' }
  * @returns {string}
  */
+export function normalizeSupportedLanguage(lang) {
+  const code = String(lang || '').trim().toLowerCase().split('-')[0];
+  if (code === 'es') return 'en';
+  return SUPPORTED_LANGUAGES.includes(code) ? code : null;
+}
+
 export function t2(lang, map) {
   if (!map) return '';
-  return map[lang] || map.en || Object.values(map)[0] || '';
+  const language = normalizeSupportedLanguage(lang);
+  return map[language] || map.en || map.ht || map.fr || Object.values(map)[0] || '';
 }
 
 /**
@@ -33,14 +40,13 @@ export function t2(lang, map) {
  * @param {string} ht  - Haitian Creole
  * @param {string} en  - English (fallback)
  * @param {string} [fr] - French
- * @param {string} [es] - Spanish
+ * @param {string} [_legacySpanish] - Ignored legacy positional argument.
  * @returns {string}
  */
-export function t(lang, ht, en, fr, es) {
-  switch (lang) {
+export function t(lang, ht, en, fr) {
+  switch (normalizeSupportedLanguage(lang)) {
     case 'ht': return ht || en || '';
     case 'fr': return fr || en || ht || '';
-    case 'es': return es || en || ht || '';
     default:   return en || ht || '';
   }
 }
@@ -60,7 +66,10 @@ export function isTranslationMap(val) {
  * Kept in sync with src/config/markets.js DEFAULT_LANGUAGE so the
  * frontend and the new backend language-preference defaults agree.
  */
-import { DEFAULT_LANGUAGE as _DEFAULT_LANGUAGE } from '../config/markets';
+import {
+  DEFAULT_LANGUAGE as _DEFAULT_LANGUAGE,
+  SUPPORTED_LANGUAGES,
+} from '../config/markets';
 export const DEFAULT_LANGUAGE = _DEFAULT_LANGUAGE;
 
 /**
@@ -109,6 +118,7 @@ export function translateKey(lang, key, translations, fallback) {
     return fallback != null ? String(fallback) : '';
   }
   const dict = translations && typeof translations === 'object' ? translations : null;
+  lang = normalizeSupportedLanguage(lang) || DEFAULT_LANGUAGE;
   if (!dict) {
     return fallback != null ? String(fallback) : key;
   }

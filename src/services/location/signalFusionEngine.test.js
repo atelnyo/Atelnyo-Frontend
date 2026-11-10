@@ -120,34 +120,34 @@ describe('LocaleService', () => {
 
     it('returns null when no browser language is supported', () => {
       setLocales(['de-DE', 'ja-JP']);
-      expect(getSupportedBrowserLanguage(['ht', 'en', 'fr', 'es'])).toBeNull();
+      expect(getSupportedBrowserLanguage(['ht', 'en', 'fr'])).toBeNull();
     });
 
     it('walks the FULL list — first supported preference wins', () => {
       // OS in an unsupported language, user added a supported one.
       setLocales(['de-DE', 'fr-FR', 'en-US']);
-      expect(getSupportedBrowserLanguage(['ht', 'en', 'fr', 'es'])).toBe('fr');
+      expect(getSupportedBrowserLanguage(['ht', 'en', 'fr'])).toBe('fr');
     });
 
     it('respects the ordering of navigator.languages (ht first)', () => {
       setLocales(['ht', 'fr-FR']);
-      expect(getSupportedBrowserLanguage(['ht', 'en', 'fr', 'es'])).toBe('ht');
+      expect(getSupportedBrowserLanguage(['ht', 'en', 'fr'])).toBe('ht');
     });
 
     it('matches bare language tags', () => {
       setLocales(['ht']);
-      expect(getSupportedBrowserLanguage(['ht', 'en', 'fr', 'es'])).toBe('ht');
+      expect(getSupportedBrowserLanguage(['ht', 'en', 'fr'])).toBe('ht');
     });
 
-    it('returns the primary language when no allowlist is given', () => {
+    it('returns the first supported language when no allowlist is given', () => {
       setLocales(['de-DE', 'fr-FR']);
-      expect(getSupportedBrowserLanguage()).toBe('de');
+      expect(getSupportedBrowserLanguage()).toBe('fr');
     });
 
     it('falls back to navigator.language when languages is empty', () => {
       setLocales([]);
       // jsdom's navigator.language ('en-US') is the documented fallback.
-      expect(getSupportedBrowserLanguage(['ht', 'en', 'fr', 'es'])).toBe('en');
+      expect(getSupportedBrowserLanguage(['ht', 'en', 'fr'])).toBe('en');
     });
 
     it('returns null when the browser exposes no locales at all', () => {

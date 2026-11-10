@@ -112,14 +112,13 @@ const PAGE = {
 
     /* ── Languages ── */
     languagesTitle: 'Supported Languages',
-    languagesBody: 'Atelnyo is a multilingual platform. The primary supported languages are:',
+    languagesBody: 'Atelnyo is available in Haitian Creole, English, and French:',
     languagesList: [
       { lang: 'Haitian Creole', code: 'ht', note: 'Primary language' },
       { lang: 'English', code: 'en', note: 'International default' },
       { lang: 'French', code: 'fr', note: 'Supported' },
-      { lang: 'Spanish', code: 'es', note: 'Supported' },
     ],
-    languagesNote: 'Atelnyo\'s architecture is designed to support additional languages as the platform grows. Course creators can create content in any language.',
+    languagesNote: 'Course creators can publish content in any language; these are the languages currently available for the platform interface.',
 
     /* ── Long-term Vision ── */
     longTermTitle: 'Long-Term Vision',
@@ -204,14 +203,13 @@ const PAGE = {
     accessibilityBody: 'Atelnyo fèt pou òt bezwen itilizatè ak divès kapasite. Platfòm la swiv pi bon pratik aksesibilite entènèt ki enkli HTML semantik, navigasyon ak kle, sipò lecteur ekran, kontras koulè adekwat, ak desen reponn pou mobil ak aparèl asistif.',
 
     languagesTitle: 'Lang ki Sipòte',
-    languagesBody: 'Atelnyo se yon platfòm multiling. Lang primè ki sipòte yo se:',
+    languagesBody: 'Atelnyo disponib an kreyòl ayisyen, anglè, ak franse:',
     languagesList: [
       { lang: 'Kreyòl Ayisyen', code: 'ht', note: 'Lang primè' },
       { lang: 'English', code: 'en', note: 'Defò entènasyonal' },
       { lang: 'Français', code: 'fr', note: 'Sipòte' },
-      { lang: 'Español', code: 'es', note: 'Sipòte' },
     ],
-    languagesNote: 'Achitekti Atelnyo fèt pou sipòte plis lang pandan platfòm la grandi. Kreyatè kou ka kreye kontni nan nenpòt lang.',
+    languagesNote: 'Kreyatè kou ka pibliye kontni nan nenpòt lang; lang sa yo se lang koòdone platfòm la disponib kounye a.',
 
     longTermTitle: 'Vizyon Lontèm',
     longTermBody: [
@@ -294,14 +292,13 @@ const PAGE = {
     accessibilityBody: 'Atelnyo est conçu pour être accessible aux utilisateurs capacités diverses. La plateforme suit les meilleures pratiques d\'accessibilité web.',
 
     languagesTitle: 'Langues supportées',
-    languagesBody: 'Atelnyo est une plateforme multilingue. Les principales langues supportées sont :',
+    languagesBody: 'Atelnyo est disponible en créole haïtien, anglais et français :',
     languagesList: [
       { lang: 'Créole haïtien', code: 'ht', note: 'Langue principale' },
       { lang: 'English', code: 'en', note: 'Défaut international' },
       { lang: 'Français', code: 'fr', note: 'Supporté' },
-      { lang: 'Español', code: 'es', note: 'Supporté' },
     ],
-    languagesNote: 'L\'architecture d\'Atelnyo est conçue pour supporter des langues supplémentaires à mesure que la plateforme grandit.',
+    languagesNote: 'Les créateurs de cours peuvent publier du contenu dans toutes les langues ; celles-ci sont les langues actuellement disponibles pour l’interface.',
 
     longTermTitle: 'Vision à long terme',
     longTermBody: [
@@ -338,7 +335,7 @@ const PAGE = {
     trustTitle: 'Confianza, seguridad y prácticas responsables', trustItems: ['Atelnyo se compromete a mantener un entorno seguro y respetuoso.','Las políticas de moderación garantizan que el contenido dañino sea identificado.','Las cuentas están protegidas por sistemas de autenticación y prevención de abuso.','Las transacciones de e-commerce están aseguradas por procesadores de pago establecidos.'],
     privacyTitle: 'Privacidad y principios de datos', privacyItems: ['Atelnyo solo recopila los datos necesarios.','Los datos de usuarios no se venden a terceros.','La plataforma proporciona herramientas de gestión de cuenta.','Atelnyo implementa medidas de seguridad estándar.'],
     accessibilityTitle: 'Accesibilidad', accessibilityBody: 'Atelnyo está diseñado para ser accesible a usuarios con diversas capacidades. La plataforma sigue las mejores prácticas de accesibilidad web.',
-    languagesTitle: 'Idiomas soportados', languagesBody: 'Atelnyo es una plataforma multilingüe:', languagesList: [{lang:'Criollo haitiano',code:'ht',note:'Idioma principal'},{lang:'English',code:'en',note:'Defecto internacional'},{lang:'Français',code:'fr',note:'Soportado'},{lang:'Español',code:'es',note:'Soportado'}], languagesNote: 'La arquitectura de Atelnyo está diseñada para soportar idiomas adicionales.',
+    languagesTitle: 'Idiomas soportados', languagesBody: 'La interfaz de Atelnyo está disponible en criollo haitiano, inglés y francés:', languagesList: [{lang:'Criollo haitiano',code:'ht',note:'Idioma principal'},{lang:'English',code:'en',note:'Idioma internacional'},{lang:'Français',code:'fr',note:'Disponible'}], languagesNote: 'Los creadores pueden publicar contenido de cursos en cualquier idioma.',
     longTermTitle: 'Visión a largo plazo', longTermBody: ['Atelnyo está construido para durar.','Nuestro objetivo es construir infraestructura que sirva a las comunidades por años.','Creemos en un crecimiento sostenible y prácticas transparentes.'],
     ctaTitle: '¿Quieres saber más?', ctaBody: 'Explora Atelnyo o contáctanos directamente.', ctaExplore: 'Explorar Atelnyo', ctaContact: 'Contáctanos',
   },

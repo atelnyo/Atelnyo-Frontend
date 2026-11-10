@@ -1,11 +1,10 @@
 {
-  "supportedLanguages": ["ht", "en", "es", "fr"],
+  "supportedLanguages": ["ht", "en", "fr"],
   "defaultMarket": "HT",
   "defaultLanguage": "ht",
   "languageLabels": {
     "ht": { "label": "Kreyòl", "native": "Kreyòl", "flag": "🇭🇹" },
     "en": { "label": "English", "native": "English", "flag": "🇬🇧" },
-    "es": { "label": "Español", "native": "Español", "flag": "🇪🇸" },
     "fr": { "label": "Français", "native": "Français", "flag": "🇫🇷" }
   },
   "marketLabels": {
@@ -26,21 +25,21 @@
   "markets": {
     "HT": {
       "defaultLanguage": "ht",
-      "supportedLanguages": ["ht", "fr"],
+      "supportedLanguages": ["ht", "en", "fr"],
       "currency": "USD",
       "timezone": "America/Port-au-Prince",
       "marketEnabled": true
     },
     "DO": {
-      "defaultLanguage": "es",
-      "supportedLanguages": ["es", "ht", "fr"],
+      "defaultLanguage": "en",
+      "supportedLanguages": ["ht", "en", "fr"],
       "currency": "DOP",
       "timezone": "America/Santo_Domingo",
       "marketEnabled": true
     },
     "CU": {
-      "defaultLanguage": "es",
-      "supportedLanguages": ["es", "ht", "fr"],
+      "defaultLanguage": "en",
+      "supportedLanguages": ["ht", "en", "fr"],
       "currency": "CUP",
       "timezone": "America/Havana",
       "marketEnabled": true
@@ -54,7 +53,7 @@
     },
     "US": {
       "defaultLanguage": "en",
-      "supportedLanguages": ["en", "ht", "fr", "es"],
+      "supportedLanguages": ["ht", "en", "fr"],
       "currency": "USD",
       "timezone": "America/New_York",
       "marketEnabled": true
@@ -68,7 +67,7 @@
     },
     "BS": {
       "defaultLanguage": "en",
-      "supportedLanguages": ["en", "ht"],
+      "supportedLanguages": ["en", "ht", "fr"],
       "currency": "BSD",
       "timezone": "America/Nassau",
       "marketEnabled": true
@@ -82,14 +81,14 @@
     },
     "GP": {
       "defaultLanguage": "fr",
-      "supportedLanguages": ["fr", "ht"],
+      "supportedLanguages": ["fr", "ht", "en"],
       "currency": "EUR",
       "timezone": "America/Guadeloupe",
       "marketEnabled": true
     },
     "MQ": {
       "defaultLanguage": "fr",
-      "supportedLanguages": ["fr", "ht"],
+      "supportedLanguages": ["fr", "ht", "en"],
       "currency": "EUR",
       "timezone": "America/Martinique",
       "marketEnabled": true

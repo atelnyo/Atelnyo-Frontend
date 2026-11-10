@@ -11,6 +11,7 @@ import {
   buildLocaleUrl,
   switchLocale,
 } from './localeUrl';
+import { MARKETS, SUPPORTED_LANGUAGES } from '../config/markets';
 
 describe('parseLocaleCountry', () => {
   it('parses a valid /ht-HT/ segment', () => {
@@ -51,11 +52,10 @@ describe('parseLocaleCountry', () => {
     expect(r.reason).toBe('not-localized');
   });
 
-  it('rejects /es-HT/ (unsupported language+market combo)', () => {
-    // HT.supportedLanguages = ['ht','fr'] — es is not supported there.
-    const r = parseLocaleCountry('/es-HT/explore');
+  it('rejects /es-DO/ because Spanish is no longer a supported UI locale', () => {
+    const r = parseLocaleCountry('/es-DO/explore');
     expect(r.valid).toBe(false);
-    expect(r.reason).toBe('unsupported-combo');
+    expect(r.reason).toBe('invalid-language');
   });
 
   it('rejects a non-locale plain path (root /explore)', () => {
@@ -101,8 +101,18 @@ describe('buildLocaleUrl', () => {
   });
 
   it('returns "" for an unsupported combo (no fake pages)', () => {
-    expect(buildLocaleUrl('es', 'HT')).toBe('');
+    expect(buildLocaleUrl('es', 'DO')).toBe('');
     expect(buildLocaleUrl('ht', 'XX')).toBe('');
+  });
+
+  describe('platform locale configuration', () => {
+    it('allows exactly HT, EN, and FR for every enabled market', () => {
+      expect(SUPPORTED_LANGUAGES).toEqual(['ht', 'en', 'fr']);
+      for (const market of Object.values(MARKETS).filter((entry) => entry.marketEnabled)) {
+        expect([...market.supportedLanguages].sort()).toEqual(['en', 'fr', 'ht']);
+        expect(market.defaultLanguage).not.toBe('es');
+      }
+    });
   });
 
   it('normalizes path slashes', () => {
@@ -131,7 +141,7 @@ describe('switchLocale — market switcher keeps language when supported (spec �
   });
 
   it('falls back to market default lang when unsupported: ht ∉ US.supported', () => {
-    // US.supportedLanguages = ['en','ht','fr','es'] — ht IS supported,
+    // US supports all platform UI languages, including ht,
     // so it stays ht. Use DO's unsupported 'fr'? DO supports fr. Use
     // a market where the current lang is NOT supported: HT lang 'ht'
     // → US supports ht, so keep. The true fallback case: switch to a

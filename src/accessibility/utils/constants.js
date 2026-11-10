@@ -202,40 +202,6 @@ export const A11Y_STRINGS = {
     accessibilityReview: 'Revue d\'accessibilité',
     accessibilityReady: 'Accessibilité prête',
   },
-  es: {
-    skipToMainContent: 'Ir al contenido principal',
-    closeDialog: 'Cerrar',
-    openNavigation: 'Abrir navegación',
-    loading: 'Cargando',
-    saving: 'Guardando',
-    saved: 'Guardado',
-    error: 'Error',
-    retry: 'Reintentar',
-    requiredField: 'requerido',
-    closeModal: 'Cerrar diálogo',
-    lessonCompleted: 'Lección completada',
-    progressText: (current, total) => `${current} de ${total} completados`,
-    notificationsCount: (count) => `${count} notificaciones nuevas`,
-    courseProgress: (pct) => `Progreso del curso: ${pct}%`,
-    lockedContent: 'Contenido bloqueado',
-    openMenu: 'Abrir menú',
-    closeMenu: 'Cerrar menú',
-    expandAccordion: 'Expandir',
-    collapseAccordion: 'Contraer',
-    previousTab: 'Pestaña anterior',
-    nextTab: 'Pestaña siguiente',
-    draggedToPosition: (position) => `Movido a la posición ${position}`,
-    focusModeOn: 'Modo enfoque activado',
-    focusModeOff: 'Modo enfoque desactivado',
-    navigationLandmark: 'Navegación principal',
-    contentLandmark: 'Contenido principal',
-    asideLandmark: 'Contenido suplementario',
-    footerLandmark: 'Pie de página',
-    announcementSave: 'Cambios guardados',
-    announcementError: 'Ocurrió un error',
-    accessibilityReview: 'Revisión de accesibilidad',
-    accessibilityReady: 'Accesibilidad lista',
-  },
 };
 
 /**
@@ -246,6 +212,7 @@ export const A11Y_STRINGS = {
  * @returns {string}
  */
 export function getA11yString(lang, key, ...args) {
+  if (lang === 'es') lang = 'en';
   const langStrings = A11Y_STRINGS[lang] || A11Y_STRINGS.en;
   const value = langStrings[key] || A11Y_STRINGS.en[key] || '';
   return typeof value === 'function' ? value(...args) : value;

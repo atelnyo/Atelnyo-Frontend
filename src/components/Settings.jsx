@@ -7,7 +7,7 @@ const INSTALL_PROMPT_ENABLED =
   import.meta.env?.VITE_INSTALL_PROMPT_ENABLED === 'true';
 import ConfirmModal from './common/ConfirmModal';
 import useSafeNavigate from '../hooks/useSafeNavigate';
-import api, { authService, spotlightService, languagePreferenceService } from '../services/api';
+import api, { authService, spotlightService } from '../services/api';
 import { resizeImage } from '../utils/profileUtils';
 import { usePlanKreyatif } from '../utils/planKreyatif';
 import SpotlightThread from './SpotlightThread';
@@ -25,7 +25,7 @@ import { ensureBrowserNotificationPermission, getNotificationPermission } from '
 // Phase 4 — market/country switcher options come from the SAME
 // centralized config (src/config/markets.js) that drives URL
 // validation — the switcher can never offer a disabled market.
-import { MARKET_OPTIONS } from '../config/markets';
+import { MARKET_OPTIONS, LANGUAGE_LABELS } from '../config/markets';
 import { fmtDate, premiumPlanLabel } from '../utils/formatMedia';
 
 /**
@@ -71,20 +71,20 @@ function extractApiErrorMessage(data) {
 // one tile per category; clicking a tile drills into that category's
 // settings with a back button ("subsystem click" → category page).
 const SETTINGS_CATEGORIES = [
-  { id: 'account',       icon: 'fa-user',         ht: 'Kont',                    en: 'Account',       fr: 'Compte',        es: 'Cuenta',                descHt: 'Pwofil, logout, abònman Premium',       descEn: 'Profile, sign out, Premium plan' },
-  { id: 'appearance',    icon: 'fa-palette',      ht: 'Aparans',                 en: 'Appearance',    fr: 'Apparence',     es: 'Apariencia',            descHt: 'Tèm, koulè, font, efè vizyèl',           descEn: 'Theme, color, font, visual effects' },
-  { id: 'language',      icon: 'fa-language',     ht: 'Lang',                    en: 'Language',      fr: 'Langue',        es: 'Idioma',                descHt: 'Kreyòl, English, Français, Español',      descEn: 'Haitian, English, French, Spanish' },
-  { id: 'notifications', icon: 'fa-bell',         ht: 'Notifikasyon',            en: 'Notifications', fr: 'Notifications', es: 'Notificaciones',        descHt: 'Son, imel, push, preview',                descEn: 'Sounds, email, push, preview' },
-  { id: 'location',      icon: 'fa-map-location-dot', ht: 'Lokalizasyon',         en: 'Location',      fr: 'Localisation',  es: 'Ubicación',            descHt: 'Peyi/region kont ou — deteksyon otomatik', descEn: 'Your account country/region — auto detection' },
-  { id: 'storage',       icon: 'fa-database',     ht: 'Depo & Enstalasyon',      en: 'Storage & Install', fr: 'Stockage & Installation', es: 'Almacenamiento e Instalación', descHt: 'Jere depo, enstalasyon PWA',               descEn: 'Manage storage, PWA install' },
-  { id: 'security',      icon: 'fa-shield-halved', ht: 'Sekirite & Kont',        en: 'Security',      fr: 'Sécurité',       es: 'Seguridad',             descHt: 'Verifikasyon 2 etap (2FA)',               descEn: 'Two-factor authentication (2FA)' },
-  { id: 'legal',         icon: 'fa-scale-balanced', ht: 'Legal & Konfidansyalite', en: 'Legal & Privacy', fr: 'Légal & Confidentialité', es: 'Legal y Privacidad', descHt: 'Kondisyon, politik, GDPR',                 descEn: 'Terms, policies, GDPR' },
-  { id: 'navigation',    icon: 'fa-compass',      ht: 'Navigasyon Sheet',        en: 'Sheet Navigation', fr: 'Navigation des feuilles', es: 'Navegación de hojas', descHt: 'Tout paj /sheet/ yo reyini',               descEn: 'All /sheet/ pages in one place' },
-  { id: 'creator',       icon: 'fa-crown',        ht: 'Kreyatè',                 en: 'Creator',       fr: 'Créateur',       es: 'Creador',               descHt: 'Plan Kreyatif, aplike kreyatè, Spotlight', descEn: 'Plan Kreyatif, creator apply, Spotlight' },
-  { id: 'atelier',       icon: 'fa-flask',        ht: 'Atelye Envantè',          en: 'Inventor\'s Atelier', fr: 'Atelier de l\'Inventeur', es: 'Atelier del Inventor', descHt: '5 envansyon ou pa jwenn okenn lòt kote',   descEn: '5 inventions found nowhere else' },
+  { id: 'account',       icon: 'fa-user',         ht: 'Kont',                    en: 'Account',       fr: 'Compte',        descHt: 'Pwofil, dekonekte, abònman Premium',       descEn: 'Profile, sign out, Premium plan', descFr: 'Profil, déconnexion, abonnement Premium' },
+  { id: 'appearance',    icon: 'fa-palette',      ht: 'Aparans',                 en: 'Appearance',    fr: 'Apparence',     descHt: 'Tèm, koulè, font, efè vizyèl',           descEn: 'Theme, color, font, visual effects', descFr: 'Thème, couleurs, police et effets visuels' },
+  { id: 'language',      icon: 'fa-language',     ht: 'Lang',                    en: 'Language',      fr: 'Langue',        descHt: 'Kreyòl, English, Français',      descEn: 'Haitian Creole, English, French', descFr: 'Créole haïtien, anglais, français' },
+  { id: 'notifications', icon: 'fa-bell',         ht: 'Notifikasyon',            en: 'Notifications', fr: 'Notifications', descHt: 'Son, imel, push, preview',                descEn: 'Sounds, email, push, preview', descFr: 'Sons, e-mail, notifications push, aperçu' },
+  { id: 'location',      icon: 'fa-map-location-dot', ht: 'Lokalizasyon',         en: 'Location',      fr: 'Localisation',  descHt: 'Peyi/region kont ou — deteksyon otomatik', descEn: 'Your account country/region — auto detection', descFr: 'Pays/région du compte — détection automatique' },
+  { id: 'storage',       icon: 'fa-database',     ht: 'Depo & Enstalasyon',      en: 'Storage & Install', fr: 'Stockage & Installation', descHt: 'Jere depo, enstalasyon PWA',               descEn: 'Manage storage, PWA install', descFr: 'Gérer le stockage et l’installation PWA' },
+  { id: 'security',      icon: 'fa-shield-halved', ht: 'Sekirite & Kont',        en: 'Security',      fr: 'Sécurité',       descHt: 'Verifikasyon 2 etap (2FA)',               descEn: 'Two-factor authentication (2FA)', descFr: 'Vérification en deux étapes (2FA)' },
+  { id: 'legal',         icon: 'fa-scale-balanced', ht: 'Legal & Konfidansyalite', en: 'Legal & Privacy', fr: 'Légal & Confidentialité', descHt: 'Kondisyon, politik, GDPR',                 descEn: 'Terms, policies, GDPR', descFr: 'Conditions, politiques et RGPD' },
+  { id: 'navigation',    icon: 'fa-compass',      ht: 'Navigasyon Sheet',        en: 'Sheet Navigation', fr: 'Navigation des feuilles', descHt: 'Tout paj /sheet/ yo reyini',               descEn: 'All /sheet/ pages in one place', descFr: 'Toutes les pages /sheet/ réunies' },
+  { id: 'creator',       icon: 'fa-crown',        ht: 'Kreyatè',                 en: 'Creator',       fr: 'Créateur',       descHt: 'Plan Kreyatif, aplike kreyatè, Spotlight', descEn: 'Plan Kreyatif, creator apply, Spotlight', descFr: 'Plan Kreyatif, candidature créateur, Spotlight' },
+  { id: 'atelier',       icon: 'fa-flask',        ht: 'Atelye Envantè',          en: 'Inventor\'s Atelier', fr: 'Atelier de l\'Inventeur', descHt: '5 envansyon ou pa jwenn okenn lòt kote',   descEn: '5 inventions found nowhere else', descFr: '5 inventions uniques à découvrir' },
 ];
-const categoryLabel = (cat, lang) => t2(lang, { ht: cat.ht, fr: cat.fr, es: cat.es, en: cat.en });
-const categoryDesc = (cat, lang) => t2(lang, { ht: cat.descHt, en: cat.descEn });
+const categoryLabel = (cat, lang) => t2(lang, { ht: cat.ht, fr: cat.fr, en: cat.en });
+const categoryDesc = (cat, lang) => t2(lang, { ht: cat.descHt, en: cat.descEn, fr: cat.descFr });
 
 const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onMarketChange, toggleTheme, darkMode, fontSize, setFontSize, user, onLogout, translations, showToast, onProfileUpdate, onOpenCheckout }) => {
   const t = translations[lang];
@@ -198,26 +198,6 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
     refresh();
     return () => document.removeEventListener('visibilitychange', refresh);
   }, []);
-
-  // Phase 3 — persist the user's explicit interface-language choice to the
-  // backend (cross-device) on top of the existing ``atelnyo_lang``
-  // localStorage + URL flow. This is called from the Settings language
-  // picker only (an authenticated, explicit user action), so we never
-  // silently overwrite a preference. A failed PATCH (offline / 5xx) is
-  // swallowed — the local UI switch still succeeds via ``onLangChange``.
-  const saveLanguagePrefs = useCallback(async (nextLang) => {
-    if (!user) { return; } // unauthenticated: the local/URL flow owns it
-    try {
-      await languagePreferenceService.patch({
-        interface_language: nextLang,
-      });
-    } catch (_) {
-      // Non-blocking: the local switch already happened; don't toast on
-      // every language pick (picks are frequent and the local result is
-      // what the user sees). The backend row simply stays stale until the
-      // next successful save.
-    }
-  }, [user, lang]);
 
   const saveNotifPrefs = useCallback(async (next) => {
     setDraftNotifPrefs(next);
@@ -1228,10 +1208,9 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
   };
 
   const languages = [
-    { id: 'ht', label: 'Kreyòl Ayisyen', icon: 'fa-language' },
-    { id: 'en', label: 'English', icon: 'fa-globe' },
-    { id: 'es', label: 'Español', icon: 'fa-globe-americas' },
-    { id: 'fr', label: 'Français', icon: 'fa-globe-europe' }
+    { id: 'ht', label: LANGUAGE_LABELS.ht.native, icon: 'fa-language' },
+    { id: 'en', label: LANGUAGE_LABELS.en.native, icon: 'fa-globe' },
+    { id: 'fr', label: LANGUAGE_LABELS.fr.native, icon: 'fa-globe-europe' },
   ];
 
   return (
@@ -1782,11 +1761,11 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
           {languages.map(l => (
             <div
               key={l.id}
-              onClick={() => { onLangChange(l.id); saveLanguagePrefs(l.id); }}
+              onClick={() => onLangChange(l.id)}
               className="settings-item"
               role="button"
               tabIndex={0}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onLangChange(l.id); saveLanguagePrefs(l.id); } }}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onLangChange(l.id); } }}
               aria-pressed={lang === l.id}
             >
               {/* icon box holds ONLY the icon — the label must be a

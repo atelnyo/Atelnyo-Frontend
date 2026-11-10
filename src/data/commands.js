@@ -197,15 +197,6 @@ export const buildCommands = ({
     keywords: ['language', 'french', 'francais', 'français', 'lang'],
   },
   {
-    id: 'act-lang-es',
-    label: t => t.palette_lang_es || 'Español · ES',
-    hint: t => t.palette_hint_action || 'Action',
-    icon: 'fa-globe',
-    category: 'action',
-    action: () => handleLangChange('es'),
-    keywords: ['language', 'spanish', 'espanol', 'español', 'lang'],
-  },
-  {
     id: 'act-search',
     label: t => t.palette_open_search || 'Open Global Search',
     hint: t => t.palette_hint_action || 'Action',

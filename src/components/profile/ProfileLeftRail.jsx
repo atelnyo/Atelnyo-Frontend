@@ -26,12 +26,12 @@ export default function LeftNavRail({ activeTab, onChange, lang, items }) {
             type="button"
             className={`csp-rail-item ${isActive ? 'csp-rail-item--active' : ''}`}
             onClick={() => onChange(item.id)}
-            aria-label={lang === 'ht' ? item.labelHt : item.label}
-            title={lang === 'ht' ? item.labelHt : item.label}
+            aria-label={lang === 'ht' ? item.labelHt : lang === 'fr' ? item.labelFr : item.label}
+            title={lang === 'ht' ? item.labelHt : lang === 'fr' ? item.labelFr : item.label}
           >
             <i className={item.icon.startsWith('fab ') ? item.icon : `fas ${item.icon}`} aria-hidden="true" />
             <span className="csp-rail-tooltip">
-              {lang === 'ht' ? item.labelHt : item.label}
+              {lang === 'ht' ? item.labelHt : lang === 'fr' ? item.labelFr : item.label}
             </span>
           </button>
         );

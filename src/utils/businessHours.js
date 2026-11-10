@@ -11,7 +11,7 @@ export const BUSINESS_DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
 /** Localized weekday label for a mon..sun key ("Monday", "Lendi"...). */
 export function businessDayLabel(key, lang = 'en') {
-  const locale = lang === 'ht' ? 'fr-HT' : (lang === 'fr' ? 'fr-FR' : (lang === 'es' ? 'es-ES' : 'en-US'));
+  const locale = lang === 'ht' ? 'fr-HT' : (lang === 'fr' ? 'fr-FR' : 'en-US');
   const index = BUSINESS_DAYS.indexOf(key);
   if (index < 0) return key;
   // 2024-01-01 was a Monday → index 0 = mon.

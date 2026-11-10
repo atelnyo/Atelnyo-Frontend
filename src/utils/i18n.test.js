@@ -1,18 +1,18 @@
 import { describe, it, expect } from 'vitest';
-import { translateKey, t2, t2Resolved, DEFAULT_LANGUAGE } from './i18n';
-import { DEFAULT_LANGUAGE as DEFAULT_LANG } from '../config/markets';
+import { translateKey, t2, t2Resolved, DEFAULT_LANGUAGE, normalizeSupportedLanguage, t } from './i18n';
+import { DEFAULT_LANGUAGE as DEFAULT_LANG, SUPPORTED_LANGUAGES } from '../config/markets';
+import { translations } from '../data/translations';
 
 describe('translateKey — never returns undefined', () => {
   const dict = {
     ht: { 'common.save': 'Sove', 'course.start': 'Kòmanse' },
     en: { 'common.save': 'Save' },
     fr: {},
-    es: { 'common.save': 'Guardar' },
   };
 
   it('returns the requested language value when present', () => {
     expect(translateKey('ht', 'common.save', dict)).toBe('Sove');
-    expect(translateKey('es', 'common.save', dict)).toBe('Guardar');
+    expect(translateKey('es', 'common.save', dict)).toBe('Save');
   });
 
   it('falls back to DEFAULT_LANGUAGE when the requested lang is missing', () => {
@@ -82,5 +82,29 @@ describe('t2Resolved — wraps t2 and may log missing keys in dev', () => {
 describe('DEFAULT_LANGUAGE export agrees with markets config', () => {
   it('matches src/config/markets.js DEFAULT_LANGUAGE', () => {
     expect(DEFAULT_LANGUAGE).toBe(DEFAULT_LANG);
+  });
+});
+
+describe('supported interface languages', () => {
+  it('exposes only Haitian Creole, English, and French', () => {
+    expect(SUPPORTED_LANGUAGES).toEqual(['ht', 'en', 'fr']);
+    expect(Object.keys(translations).sort()).toEqual(['en', 'fr', 'ht']);
+  });
+
+  it('normalizes legacy Spanish UI preferences to English', () => {
+    expect(normalizeSupportedLanguage('es')).toBe('en');
+    expect(normalizeSupportedLanguage('ES-es')).toBe('en');
+    expect(t2('es', { ht: 'Kreyòl', en: 'English', fr: 'Français', es: 'Español' })).toBe('English');
+    expect(t('es', 'Kreyòl', 'English', 'Français', 'Español')).toBe('English');
+  });
+
+  it('requires each supported dictionary to provide the same non-empty keys', () => {
+    const [reference, ...others] = Object.values(translations).map((dict) => Object.keys(dict).sort());
+    for (const keys of others) {
+      expect(keys).toEqual(reference);
+    }
+    for (const dict of Object.values(translations)) {
+      expect(Object.values(dict).every((value) => typeof value === 'string' && value.trim())).toBe(true);
+    }
   });
 });

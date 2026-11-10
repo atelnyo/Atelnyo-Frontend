@@ -24,7 +24,6 @@ const BottomNavBar = ({
 }) => {
   const navigate = useSafeNavigate();
   const location = useLocation();
-  const isHt = lang === 'ht';
 
   const handleTabClick = (tabId) => {
     if (onNavigate) {
@@ -38,7 +37,7 @@ const BottomNavBar = ({
     <nav
       className="bottom-nav-bar"
       role="navigation"
-      aria-label={isHt ? 'Navigasyon anba' : 'Bottom navigation'}
+      aria-label={t.nav_bottom || 'Bottom navigation'}
     >
       <button
         type="button"
@@ -59,10 +58,10 @@ const BottomNavBar = ({
           startTransition(() => navigate(SHEETS.LEARN));
         }}
         aria-current={location.pathname.startsWith('/sheet/learn') ? 'page' : undefined}
-        aria-label={isHt ? 'Aprann' : 'Learn'}
+        aria-label={t.tab_learn || 'Learn'}
       >
         <i className="fas fa-book-open" aria-hidden="true" />
-        <span>{isHt ? 'Aprann' : 'Learn'}</span>
+        <span>{t.tab_learn || 'Learn'}</span>
       </button>
 
       <button
@@ -71,10 +70,10 @@ const BottomNavBar = ({
         onClick={() => handleTabClick('mwen')}
         data-testid="mwen-nav-item"
         aria-current={activeTab === 'mwen' ? 'page' : undefined}
-        aria-label={t.tab_mwen || (isHt ? 'Mwen' : 'Mine')}
+        aria-label={t.tab_mwen || 'Mine'}
       >
         <i className="fas fa-bookmark" aria-hidden="true" />
-        <span>{t.tab_mwen || (isHt ? 'Mwen' : 'Mine')}</span>
+        <span>{t.tab_mwen || 'Mine'}</span>
       </button>
 
       {isStaff && (
@@ -86,10 +85,10 @@ const BottomNavBar = ({
             startTransition(() => navigate(SHEETS.ADMIN_DASHBOARD));
           }}
           aria-current={location.pathname.startsWith('/sheet/admin') ? 'page' : undefined}
-          aria-label="Admin Panel"
+          aria-label={t.tab_admin || 'Admin'}
         >
           <i className="fas fa-shield-alt" aria-hidden="true" />
-          <span>Admin</span>
+          <span>{t.tab_admin || 'Admin'}</span>
         </button>
       )}
 
@@ -102,10 +101,10 @@ const BottomNavBar = ({
             startTransition(() => navigate(SHEETS.SETTINGS));
           }}
           aria-current={location.pathname === SHEETS.SETTINGS ? 'page' : undefined}
-          aria-label={isHt ? 'Paramèt' : 'Settings'}
+          aria-label={t.tab_settings || 'Settings'}
         >
           <i className="fas fa-cog" aria-hidden="true" />
-          <span>{isHt ? 'Paramèt' : 'Settings'}</span>
+          <span>{t.tab_settings || 'Settings'}</span>
         </button>
       )}
     </nav>

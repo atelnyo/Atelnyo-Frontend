@@ -1,3 +1,5 @@
+import { normalizeSupportedLanguage } from '../../utils/i18n';
+
 /**
  * src/components/profile/profileConstants.js
  *
@@ -42,19 +44,19 @@ export const OG_IMAGE_FALLBACK = buildOGFallback();
 // Language-aware social banner: the slogan/logo image follows the app
 // language (atelnyo_lang). Falls back to the default (ht) banner.
 export function ogImageForLang(lang) {
-  const code = ['ht', 'en', 'es', 'fr'].includes(lang) ? lang : 'ht';
+  const code = normalizeSupportedLanguage(lang) || 'ht';
   return `${window.location.origin}/og-banner-${code}.svg`;
 }
 
 // Left navigation rail items (desktop only)
 export const RAIL_ITEMS = [
-  { id: 'dashboard',  icon: 'fa-th-large',  label: 'Overview',  labelHt: 'Apèsi' },
-  { id: 'picks',      icon: 'fa-bookmark',  label: 'Picks',      labelHt: 'Picks' },
-  { id: 'courses',    icon: 'fa-graduation-cap', label: 'Courses',   labelHt: 'Kou' },
-  { id: 'products',   icon: 'fa-cube',      label: 'Products',   labelHt: 'Pwodwi' },
-  { id: 'portfolio',  icon: 'fa-briefcase', label: 'Portfolio',  labelHt: 'Pòtfolyo' },
-  { id: 'reviews',    icon: 'fa-star',      label: 'Reviews',    labelHt: 'Revi' },
-  { id: 'about',      icon: 'fa-user',      label: 'About',      labelHt: 'Sou nou' },
+  { id: 'dashboard',  icon: 'fa-th-large',  label: 'Overview', labelHt: 'Apèsi', labelFr: 'Vue d’ensemble' },
+  { id: 'picks',      icon: 'fa-bookmark',  label: 'Picks', labelHt: 'Seleksyon', labelFr: 'Sélections' },
+  { id: 'courses',    icon: 'fa-graduation-cap', label: 'Courses', labelHt: 'Kou', labelFr: 'Cours' },
+  { id: 'products',   icon: 'fa-cube',      label: 'Products', labelHt: 'Pwodwi', labelFr: 'Produits' },
+  { id: 'portfolio',  icon: 'fa-briefcase', label: 'Portfolio', labelHt: 'Pòtfolyo', labelFr: 'Portfolio' },
+  { id: 'reviews',    icon: 'fa-star',      label: 'Reviews', labelHt: 'Revi', labelFr: 'Avis' },
+  { id: 'about',      icon: 'fa-user',      label: 'About', labelHt: 'Sou nou', labelFr: 'À propos' },
 ];
 
 // Profile tabs (also fed to the rail) — will be filtered by section_config

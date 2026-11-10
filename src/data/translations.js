@@ -64,7 +64,11 @@ const trans_ht = {
     'system_section': 'Sistèm',
     'about_atelnyo': 'Sou Atelnyo',
     'tab_explore': 'Eksplore',
+    'tab_learn': 'Aprann',
     'tab_mwen': 'Mwen',
+    'tab_admin': 'Administrasyon',
+    'tab_settings': 'Paramèt',
+    'nav_bottom': 'Navigasyon anba',
     'tab_registration': 'Enskripsyon',
     // Phase 10 — Explore page keys (multi-content feed)
     'explore_hero_title': 'Dekouvri Atelnyo',
@@ -458,7 +462,6 @@ const trans_ht = {
     'palette_lang_ht': 'Kreyòl · HT',
     'palette_lang_en': 'English · EN',
     'palette_lang_fr': 'Français · FR',
-    'palette_lang_es': 'Español · ES',
     'palette_open_search': 'Louvri rechèch global',
     'palette_demo_toast': 'Montre yon notifikasyon demo',
     // ── Checkout (Phase 32 + PayPal PRIMARY) ─────────────────────
@@ -1130,7 +1133,11 @@ const trans_en = {
     'system_section': 'System',
     'about_atelnyo': 'About Atelnyo',
     'tab_explore': 'Explore',
+    'tab_learn': 'Learn',
     'tab_mwen': 'Mine',
+    'tab_admin': 'Admin',
+    'tab_settings': 'Settings',
+    'nav_bottom': 'Bottom navigation',
     'tab_registration': 'Registration',
     // Phase 10 — Explore page keys (multi-content feed)
     'explore_hero_title': 'Discover Atelnyo',
@@ -1511,7 +1518,6 @@ const trans_en = {
     'palette_lang_ht': 'Kreyòl · HT',
     'palette_lang_en': 'English · EN',
     'palette_lang_fr': 'Français · FR',
-    'palette_lang_es': 'Español · ES',
     'palette_open_search': 'Open Global Search',
     'palette_demo_toast': 'Show demo toast',
     // ── Checkout (Phase 32 + PayPal PRIMARY) ─────────────────────
@@ -2174,7 +2180,11 @@ const trans_es = {
     'system_section': 'Sistema',
     'about_atelnyo': 'Sobre Atelnyo',
     'tab_explore': 'Explorar',
+    'tab_learn': 'Aprender',
     'tab_mwen': 'Mío',
+    'tab_admin': 'Administración',
+    'tab_settings': 'Ajustes',
+    'nav_bottom': 'Navegación inferior',
     'tab_registration': 'Inscripción',
     // Phase 10 — Explore page keys (multi-content feed)
     'explore_hero_title': 'Descubre Atelnyo',
@@ -2537,7 +2547,6 @@ const trans_es = {
     'palette_lang_ht': 'Kreyòl · HT',
     'palette_lang_en': 'English · EN',
     'palette_lang_fr': 'Français · FR',
-    'palette_lang_es': 'Español · ES',
     'palette_open_search': 'Abrir búsqueda global',
     'palette_demo_toast': 'Mostrar notificación de demostración',
     // ── Checkout (Phase 32 + PayPal PRIMARY) ─────────────────────
@@ -3217,7 +3226,11 @@ const trans_fr = {
     'system_section': 'Système',
     'about_atelnyo': 'À propos de Atelnyo',
     'tab_explore': 'Explorer',
+    'tab_learn': 'Apprendre',
     'tab_mwen': 'Mon espace',
+    'tab_admin': 'Administration',
+    'tab_settings': 'Paramètres',
+    'nav_bottom': 'Navigation inférieure',
     'tab_registration': 'Inscription',
     // Phase 10 — Explore page keys (multi-content feed)
     'explore_hero_title': 'Découvrez Atelnyo',
@@ -3580,7 +3593,6 @@ const trans_fr = {
     'palette_lang_ht': 'Kreyòl · HT',
     'palette_lang_en': 'English · EN',
     'palette_lang_fr': 'Français · FR',
-    'palette_lang_es': 'Español · ES',
     'palette_open_search': 'Ouvrir la recherche globale',
     'palette_demo_toast': 'Afficher une notification démo',
     // ── Checkout (Phase 32 + PayPal PRIMARY) ─────────────────────
@@ -4197,6 +4209,5 @@ const trans_fr = {
 export const translations = {
     'ht': trans_ht,
     'en': trans_en,
-    'es': trans_es,
     'fr': trans_fr
 };

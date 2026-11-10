@@ -296,7 +296,7 @@ describe('Constants', () => {
     expect(getA11yString('en', 'skipToMainContent')).toBe('Skip to main content');
     expect(getA11yString('ht', 'skipToMainContent')).toBe('Ale nan kontni prensipal la');
     expect(getA11yString('fr', 'skipToMainContent')).toBe('Aller au contenu principal');
-    expect(getA11yString('es', 'skipToMainContent')).toBe('Ir al contenido principal');
+    expect(getA11yString('es', 'skipToMainContent')).toBe('Skip to main content');
   });
 
   it('getA11yString falls back to English', () => {
@@ -312,6 +312,8 @@ describe('Constants', () => {
     expect(A11Y_STRINGS.en).toBeTruthy();
     expect(A11Y_STRINGS.ht).toBeTruthy();
     expect(A11Y_STRINGS.fr).toBeTruthy();
-    expect(A11Y_STRINGS.es).toBeTruthy();
+    expect(Object.keys(A11Y_STRINGS).sort()).toEqual(['en', 'fr', 'ht']);
+    expect(Object.keys(A11Y_STRINGS.en).sort()).toEqual(Object.keys(A11Y_STRINGS.ht).sort());
+    expect(Object.keys(A11Y_STRINGS.en).sort()).toEqual(Object.keys(A11Y_STRINGS.fr).sort());
   });
 });

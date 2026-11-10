@@ -55,7 +55,7 @@ const Explore = lazy(() => import('./components/Explore').then(m => ({ default: 
 import BottomNavBar from './components/BottomNavBar';
 const Mwen = lazy(() => import('./components/Mwen'));
 import ConnectionBanner from './components/common/ConnectionBanner';
-import { t2 } from './utils/i18n';
+import { t2, normalizeSupportedLanguage } from './utils/i18n';
 // Continuity UI — announces that the session was restored after a
 // relaunch (memory-kill / reload / browser restart / SW update).
 import RestoreBanner from './components/RestoreBanner';
@@ -352,7 +352,7 @@ const ActivityTimeline = lazy(() => import('./components/ActivityTimeline'));
 import { SHEETS, legacyProfileTarget } from './routes/sheets';
 import EmailVerificationRoute from './routes/EmailVerificationRoute';
 import { translations } from './data/translations';
-import api, { courseService, communitiesService, authService, sessionService, progressService, favoriteService, activityFeedService, proposalService, clearTokenPair, broadcastLogout, API_URL } from './services/api';
+import api, { courseService, communitiesService, authService, sessionService, progressService, favoriteService, activityFeedService, proposalService, languagePreferenceService, clearTokenPair, broadcastLogout, API_URL } from './services/api';
 import { useAuthStore } from './store/useAuthStore';
 import permissionManager from './pwa/permissions/PermissionManager';
 // firebase.js lazy-loaded — only needed for push notifications
@@ -952,32 +952,27 @@ function App() {
   // intent is the strongest signal); otherwise the existing
   // localStorage preference applies.
   //
-  // Phase 60.2/60.3 — INSTANT detection (sub-ms, no network):
-  //   1. cached geo result (previous visit) resolves synchronously from
-  //      localStorage — like a logo that appears before the API answers;
-  //   2. if no cache yet, the browser TIMEZONE (Intl — synchronous,
-  //      zero network) gives an instant country hint for the core
-  //      audience timezones (America/Port-au-Prince → ht, etc.), so a
-  //      first-time Haitian visitor never flashes the wrong language
-  //      while ipwho.is answers.
+  // Language preference priority: explicit locale URL, saved manual
+  // choice, then the browser's ordered supported language list.
   const [lang, setLang] = useState(() => {
     const p = parseLocaleCountry(
       typeof window !== 'undefined' ? window.location.pathname : '',
     );
     if (p.valid) return p.language;
     const stored = localStorage.getItem('atelnyo_lang');
-    if (stored) return stored;
-    // Signal 5 — location cache (synchronous, from a previous visit's
-    // server geo detection). The server hint is the platform's
-    // authoritative answer for this visitor, so it ranks ABOVE the
-    // browser-locale guess (spec Phase 60.2/60.3 + E8: a repeat
-    // visitor with a cached detection must NOT be flipped by their
-    // OS language).
-    const cached = locationCache.get();
-    if (cached?.suggestedLang && ['ht','en','es','fr'].includes(cached.suggestedLang)) {
-      return cached.suggestedLang;
+    const savedLanguage = normalizeSupportedLanguage(stored);
+    if (savedLanguage) {
+      // Upgrade legacy Spanish preference values in place.
+      if (savedLanguage !== stored) {
+        try { localStorage.setItem('atelnyo_lang', savedLanguage); } catch (_) {}
+      }
+      return savedLanguage;
     }
-    // Signal 6 — browser locale detection (synchronous, zero network).
+    if (stored) {
+      try { localStorage.removeItem('atelnyo_lang'); } catch (_) {}
+    }
+    // Browser language is the first-visit preference signal. Country
+    // detection is intentionally not used to select UI language.
     // navigator.languages gives the user's OS/browser language instantly.
     // The FULL ordered list is walked against the platform's supported
     // languages (markets-data.json) so an OS set to an unsupported
@@ -1348,9 +1343,14 @@ function App() {
     setCheckoutState({ type, meta: { ...meta, price } });
   };
 
-  const handleLangChange = (newLang) => {
+  const handleLangChange = (requestedLang) => {
+    const newLang = normalizeSupportedLanguage(requestedLang);
+    if (!newLang) return;
     setLang(newLang);
     localStorage.setItem('atelnyo_lang', newLang);
+    if (user) {
+      languagePreferenceService.patch({ interface_language: newLang }).catch(() => {});
+    }
     // Continuity restore point — keeps lang in the async restore point
     // too (localStorage is the primary; this is the resilience copy).
     continuityManager.saveRestorePoint({ lang: newLang });
@@ -1432,10 +1432,16 @@ function App() {
         // are restored above. We only apply when there is no explicit local
         // ``atelnyo_lang`` already, so an in-flight local switch is never
         // clobbered by a stale cached row.
-        if (prefs?.interface_language && !localStorage.getItem('atelnyo_lang')) {
+        const preferredLanguage = normalizeSupportedLanguage(prefs?.interface_language);
+        if (
+          preferredLanguage
+          && !localStorage.getItem('atelnyo_lang')
+          && !parseLocaleCountry(window.location.pathname).valid
+        ) {
           try {
-            localStorage.setItem('atelnyo_lang', prefs.interface_language);
+            localStorage.setItem('atelnyo_lang', preferredLanguage);
           } catch (_) { /* private mode */ }
+          setLang(preferredLanguage);
         }
       })
       .catch(() => {});
@@ -2044,15 +2050,8 @@ function App() {
             });
           } catch (_) { /* private mode / quota — in-memory still works */ }
         }
-        // Phase 60.2 — apply the detected language for EVERY first-time
-        // visitor (diaspora included) so the page never sits stuck in
-        // the default 'ht' while the toast waits for an answer. The
-        // browser-locale initializer above gave instant display; the
-        // authoritative server hint refines it here.
-        if (suggested_lang && ['ht','en','es','fr'].includes(suggested_lang)) {
-          setLang(suggested_lang);
-          try { localStorage.setItem('atelnyo_lang', suggested_lang); } catch (_) {}
-        }
+        // The geo hint refines country context only. Browser language
+        // preference (or a saved user choice) owns UI-language selection.
       })
       .catch(() => {});
   }, []);  

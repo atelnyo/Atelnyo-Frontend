@@ -20,6 +20,8 @@
  *
  * Privacy: pure browser introspection, no network, no storage.
  */
+import { SUPPORTED_LANGUAGES } from '../../config/markets';
+import { normalizeSupportedLanguage } from '../../utils/i18n';
 
 /**
  * Ordered browser locale list.
@@ -87,26 +89,31 @@ export function getLocaleRegion(locale = null) {
  * Walks the FULL ordered navigator.languages list (not just
  * navigator.language) so a user whose OS language is unsupported but
  * who listed a supported language second (e.g. ['de-DE', 'fr-FR'])
- * still gets their language. Falls back to the primary language when
- * no allowlist is given.
+ * still gets their language.
  *
  * @param {string[]} [supported] Allowlist of BCP-47 language codes
- *   (e.g. ['ht','en','fr','es'] from markets-data.json). Null/omitted
- *   = return the primary language unfiltered.
+ *   (e.g. ['ht','en','fr'] from markets-data.json). Null/omitted
+ *   = use the platform's supported UI-language list.
  * @returns {string|null} e.g. 'fr'. Null when no match / no locale.
  */
-export function getSupportedBrowserLanguage(supported = null) {
+export function getSupportedBrowserLanguage(supported = SUPPORTED_LANGUAGES) {
   const langs = getBrowserLocales()
-    .map((l) => getLocaleLanguage(l))
+    .map((locale) => getLocaleLanguage(locale))
     .filter(Boolean);
   if (!langs.length) return null;
-  if (Array.isArray(supported) && supported.length) {
+  const allowed = Array.isArray(supported)
+    ? supported.filter((language) => SUPPORTED_LANGUAGES.includes(language))
+    : SUPPORTED_LANGUAGES;
+  if (allowed.length) {
     for (const lang of langs) {
-      if (supported.includes(lang)) return lang;
+      if (allowed.includes(lang)) return lang;
+    }
+    if (langs.includes('es') && allowed.includes(normalizeSupportedLanguage('es'))) {
+      return normalizeSupportedLanguage('es');
     }
     return null;
   }
-  return langs[0];
+  return null;
 }
 
 /**

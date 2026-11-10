@@ -9,7 +9,7 @@
  * -------
  *  hashHue(seed) — deterministic 0-359 hue from a string
  *  resizeImage(file, maxW, maxH, quality) — JPEG downsampler
- *  PERSONA_LABELS — 4-language persona pill labels
+ *  PERSONA_LABELS — supported-language persona pill labels
  *  bucketRelativeTime(iso, lang) — human-friendly time strings
  *
  * Profile-related helpers (fieldVisibility, privacy) were removed in
@@ -81,14 +81,13 @@ export function resizeImage(file, maxW, maxH, quality = 0.85) {
 
 // ─── 3. PERSONA_LABELS ─────────────────────────────────────────────────────
 /**
- * 4-language label set for the persona pill toggle. Kept in the
+ * Three-language label set for the persona pill toggle. Kept in the
  * utils module so any future component (not just JadenWoz) can
  * show the same labels.
  */
 export const PERSONA_LABELS = {
   ht: { stranger: 'Nenpòt moun', friend: 'Zanmi Komen', you: 'Ou menm' },
   en: { stranger: 'Stranger',   friend: 'Mutual Friend', you: 'You' },
-  es: { stranger: 'Cualquiera', friend: 'Amigo en común', you: 'Tú' },
   fr: { stranger: 'Inconnu',    friend: 'Ami commun',   you: 'Vous' },
 };
 
@@ -105,7 +104,7 @@ export const PERSONA_LABELS = {
  *   bucketRelativeTime('2026-05-15T12:00:00Z', 'en') -> 'May 15'
  *
  * @param {string} iso  ISO-8601 timestamp
- * @param {string} lang  2-char language code (ht/en/es/fr)
+ * @param {string} lang  2-char language code (ht/en/fr)
  * @returns {string}
  */
 export function bucketRelativeTime(iso, lang = 'en') {

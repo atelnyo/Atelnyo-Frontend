@@ -6,7 +6,7 @@
  * and how to report issues.
  *
  * URL: /accessibility
- * Public, crawlable, multilingual (ht/en/fr/es).
+ * Public, crawlable, multilingual (ht/en/fr).
  */
 import React from 'react';
 import SEOHead from './shared/SEOHead';

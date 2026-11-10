@@ -20,13 +20,12 @@ import { creatorProfileService, enrollmentService } from '../services/api';
 import { SHEETS } from '../routes/sheets';
 import { getUserIdentity } from '../utils/userIdentity';
 import { t2 } from '../utils/i18n';
+import { LANGUAGE_LABELS } from '../config/markets';
 
-const LANGUAGES = [
-  { code: 'ht', label: 'Kreyòl' },
-  { code: 'en', label: 'English' },
-  { code: 'fr', label: 'Français' },
-  { code: 'es', label: 'Español' },
-];
+const LANGUAGES = ['ht', 'en', 'fr'].map((code) => ({
+  code,
+  label: LANGUAGE_LABELS[code].native,
+}));
 
 const Header = ({
   lang,

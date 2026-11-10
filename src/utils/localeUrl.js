@@ -5,7 +5,7 @@
  * routing (docs/LOCALE_MARKET_ROUTING.md §C.4).
  *
  * URL shape:  /{lang}-{COUNTRY}/<path>
- *   • lang    — 2-letter lowercase language code (ht, fr, en, es)
+ *   • lang    — 2-letter lowercase language code (ht, fr, en)
  *   • COUNTRY — 2-letter uppercase ISO-3166 market (HT, DO, CA, US, FR)
  *   • example: /ht-HT/explore, /fr-HT/courses, /en-US/creators
  *
@@ -123,7 +123,7 @@ export function stripLocale(pathname) {
 
 /**
  * Build a canonical locale URL.
- * @param {string} language  'ht' | 'fr' | 'en' | 'es'
+ * @param {string} language  'ht' | 'fr' | 'en'
  * @param {string} country   'HT' | 'DO' | 'CA' | 'US' | 'FR'
  * @param {string} [path]    '/explore' (default '')
  * @returns {string} '/ht-HT' or '/ht-HT/explore' ('' when invalid combo)
