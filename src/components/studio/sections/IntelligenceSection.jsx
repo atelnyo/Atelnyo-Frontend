@@ -11,6 +11,7 @@
  */
 import React, { useState, useCallback } from 'react';
 import { affiliateApi } from '../../../services/affiliateApi';
+import { useRoleGate } from '../../../hooks/useRoleGate';
 import useFetch from '../../../hooks/useFetch';
 import { courseService } from '../../../services/api';
 import { StudioSkeleton, EmptyState, fmtCount, fmtDate, classNames } from '../shared';
@@ -39,12 +40,15 @@ const CI_STATUS = {
   stale:         { bg: '#f3f4f6', text: '#6b7280', icon: 'fa-rotate',          label: 'Stale',        labelHt: 'Anile' },
 };
 
-function ContentIntelligenceTab({ lang, t, showToast }) {
+function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
+  const { allowed: canManageCourseContent } = useRoleGate('can_manage_course_content');
   const { data, loading, refetch } = useFetch(
     () => courseService.getMyCoursesCI(),
     { defaultValue: null, deps: [], transform: (d) => d?.data || d },
   );
   const [processing, setProcessing] = useState({});
+  const [editingId, setEditingId] = useState(null);
+  const [unpublishingId, setUnpublishingId] = useState(null);
 
   const handleProcess = useCallback(async (courseId) => {
     setProcessing((p) => ({ ...p, [courseId]: true }));
@@ -66,6 +70,41 @@ function ContentIntelligenceTab({ lang, t, showToast }) {
       setProcessing((p) => ({ ...p, [courseId]: false }));
     }
   }, [refetch, showToast, lang]);
+
+  const handleEdit = useCallback(async (courseId) => {
+    setEditingId(courseId);
+    try {
+      const response = await courseService.getIntelligenceManaged(courseId);
+      if (!response?.data?.id) throw new Error('Course details were not returned.');
+      onEdit?.({ ...response.data, _intelligenceAdminManaged: true });
+    } catch (err) {
+      showToast?.(
+        err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab louvri kou a.' : 'Could not open the course.'),
+        'exclamation-triangle',
+      );
+    } finally {
+      setEditingId(null);
+    }
+  }, [lang, onEdit, showToast]);
+
+  const handleUnpublish = useCallback(async (courseId) => {
+    setUnpublishingId(courseId);
+    try {
+      await courseService.unpublishIntelligenceManaged(courseId);
+      showToast?.(
+        lang === 'ht' ? 'Kou a retounen nan bouyon.' : 'Course moved back to draft.',
+        'check-circle',
+      );
+      refetch();
+    } catch (err) {
+      showToast?.(
+        err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab retire piblikasyon an.' : 'Could not unpublish the course.'),
+        'exclamation-triangle',
+      );
+    } finally {
+      setUnpublishingId(null);
+    }
+  }, [lang, refetch, showToast]);
 
   if (loading) return <StudioSkeleton rows={5} />;
   if (!data?.courses?.length) {
@@ -130,6 +169,18 @@ function ContentIntelligenceTab({ lang, t, showToast }) {
                     <i className={`fas ${st.icon}`} />
                     {lang === 'ht' ? st.labelHt : st.label}
                   </span>
+                  <span style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 4,
+                    padding: '2px 8px', borderRadius: 12,
+                    background: course.status === 'published' ? '#d1fae5' : '#f3f4f6',
+                    color: course.status === 'published' ? '#059669' : '#6b7280',
+                    fontSize: '0.75rem', fontWeight: 500,
+                  }}>
+                    <i className={`fas ${course.status === 'published' ? 'fa-globe' : 'fa-pen'}`} />
+                    {course.status === 'published'
+                      ? (lang === 'ht' ? 'Pibliye' : 'Published')
+                      : (lang === 'ht' ? 'Bouyon' : 'Draft')}
+                  </span>
                   {/* Feature indicators */}
                   {course.seo_ready && (
                     <span style={{ color: '#059669', fontSize: '0.75rem' }} title="SEO Ready">
@@ -171,27 +222,62 @@ function ContentIntelligenceTab({ lang, t, showToast }) {
                   </div>
                 )}
               </div>
-              {/* Action button */}
-              {course.status === 'published' && (
-                <button
-                  type="button"
-                  onClick={() => handleProcess(course.id)}
-                  disabled={processing[course.id]}
-                  style={{
-                    padding: '6px 12px', borderRadius: 8, border: '1px solid #e5e7eb',
-                    background: processing[course.id] ? '#f9fafb' : '#fff',
-                    color: '#6366f1', cursor: processing[course.id] ? 'wait' : 'pointer',
-                    fontSize: '0.8rem', fontWeight: 500, whiteSpace: 'nowrap',
-                  }}
-                  title={lang === 'ht' ? 'Retretman' : 'Re-process'}
-                >
-                  {processing[course.id] ? (
-                    <i className="fas fa-spinner fa-spin" />
-                  ) : (
-                    <><i className="fas fa-sync-alt" /> {lang === 'ht' ? 'Tretman' : 'Process'}</>
-                  )}
-                </button>
-              )}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'flex-end' }}>
+                {canManageCourseContent === true && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => handleEdit(course.id)}
+                      disabled={editingId === course.id}
+                      style={{
+                        padding: '6px 12px', borderRadius: 8, border: '1px solid #e5e7eb',
+                        background: editingId === course.id ? '#f9fafb' : '#fff',
+                        color: '#4f46e5', cursor: editingId === course.id ? 'wait' : 'pointer',
+                        fontSize: '0.8rem', fontWeight: 500, whiteSpace: 'nowrap',
+                      }}
+                      title={lang === 'ht' ? 'Modifye kou a' : 'Edit course'}
+                    >
+                      {editingId === course.id ? <i className="fas fa-spinner fa-spin" /> : <><i className="fas fa-pen" /> {lang === 'ht' ? 'Modifye' : 'Edit'}</>}
+                    </button>
+                    {course.status === 'published' && (
+                      <button
+                        type="button"
+                        onClick={() => handleUnpublish(course.id)}
+                        disabled={unpublishingId === course.id}
+                        style={{
+                          padding: '6px 12px', borderRadius: 8, border: '1px solid #e5e7eb',
+                          background: unpublishingId === course.id ? '#f9fafb' : '#fff',
+                          color: '#b45309', cursor: unpublishingId === course.id ? 'wait' : 'pointer',
+                          fontSize: '0.8rem', fontWeight: 500, whiteSpace: 'nowrap',
+                        }}
+                        title={lang === 'ht' ? 'Retire piblikasyon an epi mete kou a nan bouyon' : 'Unpublish and move course to draft'}
+                      >
+                        {unpublishingId === course.id ? <i className="fas fa-spinner fa-spin" /> : <><i className="fas fa-eye-slash" /> {lang === 'ht' ? 'Mete an bouyon' : 'Move to draft'}</>}
+                      </button>
+                    )}
+                  </>
+                )}
+                {course.status === 'published' && (
+                  <button
+                    type="button"
+                    onClick={() => handleProcess(course.id)}
+                    disabled={processing[course.id]}
+                    style={{
+                      padding: '6px 12px', borderRadius: 8, border: '1px solid #e5e7eb',
+                      background: processing[course.id] ? '#f9fafb' : '#fff',
+                      color: '#6366f1', cursor: processing[course.id] ? 'wait' : 'pointer',
+                      fontSize: '0.8rem', fontWeight: 500, whiteSpace: 'nowrap',
+                    }}
+                    title={lang === 'ht' ? 'Retretman' : 'Re-process'}
+                  >
+                    {processing[course.id] ? (
+                      <i className="fas fa-spinner fa-spin" />
+                    ) : (
+                      <><i className="fas fa-sync-alt" /> {lang === 'ht' ? 'Tretman' : 'Process'}</>
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
           );
         })}
@@ -543,12 +629,12 @@ function PrivacyTab({ lang, t, showToast }) {
 // Main IntelligenceSection
 // ═══════════════════════════════════════════════════════════════════════
 
-export default function IntelligenceSection({ lang, t, showToast }) {
+export default function IntelligenceSection({ lang, t, showToast, onEdit }) {
   const [activeTab, setActiveTab] = useState('insights');
 
   const renderTab = () => {
     switch (activeTab) {
-      case 'intelligence': return <ContentIntelligenceTab lang={lang} t={t} showToast={showToast} />;
+      case 'intelligence': return <ContentIntelligenceTab lang={lang} t={t} showToast={showToast} onEdit={onEdit} />;
       case 'insights':   return <InsightsTab lang={lang} t={t} showToast={showToast} />;
       case 'audience':   return <AudienceTab lang={lang} t={t} showToast={showToast} />;
       case 'best-times': return <BestTimesTab lang={lang} t={t} showToast={showToast} />;

@@ -69,6 +69,7 @@ import styles from './editor.module.css';
 
 export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'ht', showToast, user, item, deliveryType = 'online' }) {
   const isEdit = Boolean(item);
+  const adminManaged = item?._intelligenceAdminManaged === true;
   const isHt = lang === 'ht';
   const isPremium = !!(user?.premium?.is_premium);
   // Delivery model — where the learning actually happens.
@@ -128,6 +129,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'ht',
     saveState, setSaveState, setSaveError,
     setErrors,
     validate, isExternal, isHt, showToast, onSaved,
+    adminManaged,
   });
 
   // ─── Publish (draft → published, explicit + validated) ───────────────
@@ -929,7 +931,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'ht',
         </div>
 
         {/* Status transition buttons */}
-        {isEdit && (
+        {isEdit && !adminManaged && (
           <div className={styles.statusTransitions}>
             {courseStatus === 'draft' && (
               <button type="button" className={styles.statusTransitionBtn} onClick={async () => {
@@ -971,7 +973,11 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'ht',
         )}
 
         <p className={styles.propsHint}>
-          {isHt
+          {adminManaged
+            ? (isHt
+              ? 'W ap modifye kou a kòm administratè; jesyon piblikasyon rete nan Intelligence.'
+              : 'You are editing this course as an administrator; publication controls remain in Intelligence.')
+            : isHt
             ? isExternal
               ? 'Kou a kòmanse kòm bouyon. Klike “Pibliye” anlè a pou l vin piblik — Atelnyo prezante kou a epi pouse elèv yo ale aprann sou platfòm ekstèn lan (li klè sou paj piblik la).'
               : 'Kou a kòmanse kòm bouyon (kache pou vizitè yo). Klike “Pibliye” anlè a lè l pare — yo ka wè l nan Explore epi sou pwofil piblik ou.'
@@ -982,7 +988,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'ht',
       </PropertyGroup>
 
       {/* Collaboration Panel */}
-      {item?.id && (
+      {item?.id && !adminManaged && (
         <div style={{ marginTop: 12 }}>
           <CollaborationPanel
             courseId={item.id}
@@ -1016,9 +1022,9 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'ht',
       saveError={autosave.saveError || saveError}
       onBack={onClose}
       onPreview={handlePreview}
-      onVersionHistory={() => setShowVersionHistory(true)}
+      onVersionHistory={adminManaged ? undefined : () => setShowVersionHistory(true)}
       onSave={handleSave}
-      onPublish={handlePublish}
+      onPublish={adminManaged ? undefined : handlePublish}
       publishLabel={isHt ? 'Pibliye' : 'Publish'}
       saveLabel={hasSaved ? (isHt ? 'Sove' : 'Save') : (isHt ? 'Kreye Kou' : 'Create Course')}
       canSave

@@ -484,6 +484,13 @@ export const courseService = {
   // URL for external courses). Owner/staff only; 400 with {errors} when
   // the gate fails.
   publish: (id) => api.post(`courses/${id}/publish/`),
+  // Intelligence workspace admin routes are separately permission-gated
+  // so creator ownership elsewhere in Studio does not grant admin actions.
+  getIntelligenceManaged: (id) => api.get(`intelligence/admin-course/${id}/`),
+  updateIntelligenceManaged: (id, data) =>
+    api.patch(`intelligence/admin-course/${id}/`, data),
+  unpublishIntelligenceManaged: (id) =>
+    api.post(`intelligence/admin-course/${id}/unpublish/`),
   // Atelnyo Language Academy — official-program scope: fetch the full
   // curriculum of a program (all levels) with one ``program_id`` filter.
   getByProgram: (programId) =>

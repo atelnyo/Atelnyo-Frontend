@@ -515,7 +515,7 @@ export default function CreatorStudio({ lang = 'ht', showToast, user }) {
       case 'messages':  return <MessagesSection lang={lang} t={t} showToast={showToast} />;
       case 'settings':  return <SettingsSection lang={lang} t={t} showToast={showToast} user={user} setShowProfileModal={setShowProfileModal} setShowPasswordModal={setShowPasswordModal} setShowBrandingModal={setShowBrandingModal} setShowNotifModal={setShowNotifModal} setShowVerifModal={setShowVerifModal} />;      case 'affiliate':  return <AffiliateSection lang={lang} t={t} showToast={showToast} />;
       case 'promotions': return <PromotionsSection lang={lang} t={t} showToast={showToast} />;
-      case 'intelligence': return <IntelligenceSection lang={lang} t={t} showToast={showToast} />;
+      case 'intelligence': return <IntelligenceSection lang={lang} t={t} showToast={showToast} onEdit={(item) => handleEdit(item, 'course')} />;
       case 'profile_settings': return <ProfileSettingsSection lang={lang} t={t} showToast={showToast} user={user} />;
       default:          return <DashboardSection lang={lang} t={t} showToast={showToast} />;
     }

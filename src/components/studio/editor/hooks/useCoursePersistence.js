@@ -21,7 +21,14 @@ export function useCoursePersistence({
   saveState, setSaveState, setSaveError,
   setErrors,
   validate, isExternal, isHt, showToast, onSaved,
+  adminManaged = false,
 }) {
+  const updateCourse = useCallback((id, payload) => (
+    adminManaged
+      ? courseService.updateIntelligenceManaged(id, payload)
+      : courseService.update(id, payload)
+  ), [adminManaged]);
+
   // Debounce timer is owned here (the only place that reads it).
   const autoSaveTimer = useRef(null);
   const autosave = useAutosave({
@@ -30,7 +37,7 @@ export function useCoursePersistence({
     onSave: async (data) => {
       const payload = buildCoursePayload(data, { isExternal });
       if (savedIdRef.current) {
-        await courseService.update(savedIdRef.current, payload);
+        await updateCourse(savedIdRef.current, payload);
       } else {
         const res = await api.post('courses/', payload);
         if (res.data?.id) {
@@ -70,7 +77,7 @@ export function useCoursePersistence({
     try {
       let saved;
       if (savedIdRef.current) {
-        saved = await courseService.update(savedIdRef.current, payload);
+        saved = await updateCourse(savedIdRef.current, payload);
       } else {
         const res = await api.post('courses/', payload);
         saved = res.data;
@@ -96,7 +103,7 @@ export function useCoursePersistence({
       showToast?.(detail, 'circle-exclamation');
       return false;
     }
-  }, [form, validate, isHt, showToast, onSaved, isExternal,
+  }, [form, validate, isHt, showToast, onSaved, isExternal, updateCourse,
     savedIdRef, setSavedId, setHasSaved, clearDirty, setDirty,
     setSaveState, setSaveError, setErrors]);
 
