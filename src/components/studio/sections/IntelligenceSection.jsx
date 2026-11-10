@@ -49,6 +49,7 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
   const [processing, setProcessing] = useState({});
   const [editingId, setEditingId] = useState(null);
   const [unpublishingId, setUnpublishingId] = useState(null);
+  const [publishingId, setPublishingId] = useState(null);
 
   const handleProcess = useCallback(async (courseId) => {
     setProcessing((p) => ({ ...p, [courseId]: true }));
@@ -103,6 +104,29 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
       );
     } finally {
       setUnpublishingId(null);
+    }
+  }, [lang, refetch, showToast]);
+
+  const handlePublish = useCallback(async (courseId) => {
+    setPublishingId(courseId);
+    try {
+      await courseService.publishIntelligenceManaged(courseId);
+      showToast?.(
+        lang === 'ht' ? 'Kou a pibliye ankò.' : 'Course published again.',
+        'check-circle',
+      );
+      refetch();
+    } catch (err) {
+      const errors = err?.response?.data?.errors;
+      const detail = err?.response?.data?.detail;
+      const missing = errors && Object.values(errors).join(' · ');
+      showToast?.(
+        [detail, missing].filter(Boolean).join(' — ')
+          || (lang === 'ht' ? 'Pa t kapab pibliye kou a.' : 'Could not publish the course.'),
+        'exclamation-triangle',
+      );
+    } finally {
+      setPublishingId(null);
     }
   }, [lang, refetch, showToast]);
 
@@ -253,6 +277,22 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
                         title={lang === 'ht' ? 'Retire piblikasyon an epi mete kou a nan bouyon' : 'Unpublish and move course to draft'}
                       >
                         {unpublishingId === course.id ? <i className="fas fa-spinner fa-spin" /> : <><i className="fas fa-eye-slash" /> {lang === 'ht' ? 'Mete an bouyon' : 'Move to draft'}</>}
+                      </button>
+                    )}
+                    {course.status === 'draft' && (
+                      <button
+                        type="button"
+                        onClick={() => handlePublish(course.id)}
+                        disabled={publishingId === course.id}
+                        style={{
+                          padding: '6px 12px', borderRadius: 8, border: '1px solid #e5e7eb',
+                          background: publishingId === course.id ? '#f9fafb' : '#fff',
+                          color: '#047857', cursor: publishingId === course.id ? 'wait' : 'pointer',
+                          fontSize: '0.8rem', fontWeight: 500, whiteSpace: 'nowrap',
+                        }}
+                        title={lang === 'ht' ? 'Pibliye kou a ankò' : 'Publish the course again'}
+                      >
+                        {publishingId === course.id ? <i className="fas fa-spinner fa-spin" /> : <><i className="fas fa-rocket" /> {lang === 'ht' ? 'Pibliye' : 'Publish'}</>}
                       </button>
                     )}
                   </>

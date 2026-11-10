@@ -17600,16 +17600,91 @@ body.dark-mode .gami-chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  gap: 5px;
+  min-height: 28px;
   margin-left: 4px;
+  padding: 0 10px;
   border: none;
-  border-radius: 50%;
+  border-radius: 999px;
   color: #fff;
   background: var(--color-primary, #3b82f6);
   cursor: pointer;
   font-size: 0.7rem;
+  font-weight: 700;
 }
+.gami-refill-btn:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+.gami-hearts-empty-message,
+.gami-hearts-error {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 0.8rem;
+}
+.gami-hearts-empty-message {
+  color: var(--text-secondary, #6b7280);
+}
+.gami-hearts-error {
+  color: #dc2626;
+}
+.gami-rewarded-ad {
+  display: flex;
+  flex-basis: 100%;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.gami-rewarded-ad-info,
+.gami-rewarded-ad-success {
+  font-size: 0.8rem;
+}
+.gami-rewarded-ad-info {
+  color: var(--text-secondary, #6b7280);
+}
+.gami-rewarded-ad-success {
+  color: #15803d;
+  font-weight: 700;
+}
+.gami-ad-backdrop {
+  position: fixed;
+  z-index: 11000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(15, 23, 42, 0.78);
+}
+.gami-ad-dialog {
+  display: grid;
+  gap: 12px;
+  width: min(100%, 640px);
+  max-height: 90vh;
+  overflow: auto;
+  padding: 20px;
+  border-radius: 18px;
+  color: var(--text-primary, #111827);
+  background: var(--surface-card, #fff);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.3);
+}
+.gami-ad-dialog h3,
+.gami-ad-dialog p { margin: 0; }
+.gami-ad-dialog video {
+  width: 100%;
+  max-height: 55vh;
+  border-radius: 12px;
+  background: #000;
+}
+.gami-ad-close {
+  justify-self: end;
+  padding: 8px 14px;
+  border: 1px solid var(--border-color, #d1d5db);
+  border-radius: 999px;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+.gami-ad-close:disabled { opacity: 0.6; cursor: wait; }
 
 /* 🎯 daily goal ring */
 .gami-goal { position: relative; padding: 4px; }

@@ -36,7 +36,8 @@ vi.mock('../../services/api', () => ({
     deleteNote: vi.fn(),
   },
   masteryService: { overview: vi.fn() },
-  gamificationService: { stats: vi.fn(), refillHearts: vi.fn(), updateGoal: vi.fn() },
+  gamificationService: { stats: vi.fn(), updateGoal: vi.fn() },
+  rewardedAdService: { next: vi.fn(), start: vi.fn(), complete: vi.fn() },
   quizService: { list: vi.fn() },
   quizAttemptService: { submit: vi.fn() },
   speechSubmissionService: { create: vi.fn(), list: vi.fn() },
@@ -438,6 +439,7 @@ describe('LearningSpace render smoke', () => {
     // The session header shows the module title and step counter.
     expect(screen.getByText('Modil 1')).toBeInTheDocument();
     expect(screen.getByText('Etap 1 sou 3')).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Kontni leson' })).toHaveClass('is-session-active');
   });
 
   it('handles legacy course with empty modules gracefully', async () => {

@@ -491,6 +491,8 @@ export const courseService = {
     api.patch(`intelligence/admin-course/${id}/`, data),
   unpublishIntelligenceManaged: (id) =>
     api.post(`intelligence/admin-course/${id}/unpublish/`),
+  publishIntelligenceManaged: (id) =>
+    api.post(`intelligence/admin-course/${id}/publish/`),
   // Atelnyo Language Academy — official-program scope: fetch the full
   // curriculum of a program (all levels) with one ``program_id`` filter.
   getByProgram: (programId) =>
@@ -1113,8 +1115,19 @@ export const gamificationService = {
   stats: () => api.get('learning/stats/'),
   // PATCH /api/learning/stats/goal/ {daily_goal}
   updateGoal: (daily_goal) => api.patch('learning/stats/goal/', { daily_goal }),
-  // POST /api/learning/stats/refill-hearts/
-  refillHearts: () => api.post('learning/stats/refill-hearts/', {}),
+};
+
+export const learningPromotionService = {
+  list: () => api.get('learning/promotions/'),
+  create: (data) => api.post('learning/promotions/', data),
+  update: (id, data) => api.patch(`learning/promotions/${id}/`, data),
+  remove: (id) => api.delete(`learning/promotions/${id}/`),
+};
+
+export const rewardedAdService = {
+  next: () => api.get('learning/rewarded-ads/next/'),
+  start: (promotionId) => api.post('learning/rewarded-ads/start/', { promotion_id: promotionId }),
+  complete: (watchId) => api.post(`learning/rewarded-ads/${watchId}/complete/`, {}),
 };
 
 // ─── Reference audio upload (language-practice blocks) ───────────────

@@ -16,6 +16,7 @@ import React, { useState } from 'react';
 import { promoCodeService, courseService } from '../../../services/api';
 import useFetch from '../../../hooks/useFetch';
 import { StudioSkeleton, EmptyState, SectionHeader } from '../shared';
+import LearningAdsSection from './LearningAdsSection';
 import styles from './sections.module.css';
 
 // Module-level constant — the React Compiler rejects Date.now() inside
@@ -139,6 +140,8 @@ export default function PromotionsSection({ lang = 'ht', showToast, t = {} }) {
   if (loading && promos.length === 0) return <StudioSkeleton rows={3} />;
 
   return (
+    <>
+    <LearningAdsSection lang={lang} showToast={showToast} />
     <div className={styles.section}>
       <SectionHeader
         icon="fa-tags"
@@ -298,5 +301,6 @@ export default function PromotionsSection({ lang = 'ht', showToast, t = {} }) {
         </div>
       )}
     </div>
+    </>
   );
 }

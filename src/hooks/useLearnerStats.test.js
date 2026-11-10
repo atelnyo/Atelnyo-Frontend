@@ -14,7 +14,6 @@ const statsFixture = {
 const serviceMock = {
   stats: vi.fn().mockResolvedValue({ data: statsFixture }),
   updateGoal: vi.fn(),
-  refillHearts: vi.fn(),
 };
 
 vi.mock('../services/api', () => ({

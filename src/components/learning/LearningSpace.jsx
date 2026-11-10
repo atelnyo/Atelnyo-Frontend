@@ -229,7 +229,7 @@ export default function LearningSpace({
   // ─── Duolingo-style gamification (XP / level / daily streak / hearts /
   //     daily goal). Stats load once; every completion payload (progress,
   //     quiz) merges into the local state so the chips update live.
-  const { stats: gamiStats, applyGamification, refillHearts, updateGoal } =
+  const { stats: gamiStats, applyGamification, updateGoal } =
     useLearnerStats({ user });
   const [xpPopup, setXpPopup] = useState(null); // {id, amount} floating +N XP
 
@@ -1331,7 +1331,7 @@ export default function LearningSpace({
         <GamificationBar
           stats={gamiStats}
           lang={lang}
-          onRefillHearts={refillHearts}
+          onGamification={applyGamification}
           onUpdateGoal={updateGoal}
         />
       )}

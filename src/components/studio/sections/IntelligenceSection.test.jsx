@@ -7,6 +7,7 @@ vi.mock('../../../services/api', () => ({
     getMyCoursesCI: vi.fn(),
     getIntelligenceManaged: vi.fn(),
     unpublishIntelligenceManaged: vi.fn(),
+    publishIntelligenceManaged: vi.fn(),
   },
 }));
 
@@ -41,6 +42,7 @@ describe('IntelligenceSection course actions', () => {
       data: { ...COURSE, description: 'Full course data' },
     });
     courseService.unpublishIntelligenceManaged.mockResolvedValue({ data: { ...COURSE, status: 'draft' } });
+    courseService.publishIntelligenceManaged.mockResolvedValue({ data: { ...COURSE, status: 'published' } });
     affiliateApi.getIntelligenceMetrics.mockResolvedValue({ data: null });
     useRoleGate.mockReturnValue({ allowed: true, loading: false });
   });
@@ -69,6 +71,19 @@ describe('IntelligenceSection course actions', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Move to draft' }));
 
     await waitFor(() => expect(courseService.unpublishIntelligenceManaged).toHaveBeenCalledWith(12));
+    await waitFor(() => expect(courseService.getMyCoursesCI).toHaveBeenCalledTimes(2));
+  });
+
+  it('lets an admin republish a draft course and refreshes the list', async () => {
+    courseService.getMyCoursesCI.mockResolvedValue({
+      data: { count: 1, courses: [{ ...COURSE, status: 'draft' }] },
+    });
+    render(<IntelligenceSection lang="en" showToast={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Content AI' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Publish' }));
+
+    await waitFor(() => expect(courseService.publishIntelligenceManaged).toHaveBeenCalledWith(12));
     await waitFor(() => expect(courseService.getMyCoursesCI).toHaveBeenCalledTimes(2));
   });
 

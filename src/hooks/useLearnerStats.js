@@ -8,8 +8,7 @@
  *     ANY completion endpoint (progress complete_block, quiz attempt,
  *     review complete) into the local stats so the header chips update
  *     instantly without a refetch.
- *   • refillHearts() / updateGoal(goal) — thin wrappers that apply the
- *     returned stats too.
+ *   • updateGoal(goal) — a thin wrapper that applies the returned stats.
  *
  * Never throws; a failed stats fetch leaves stats null (chips simply
  * don't render) and the learning flow is unaffected.
@@ -46,17 +45,6 @@ export default function useLearnerStats({ user, enabled = true } = {}) {
     setStats((prev) => ({ ...(prev || {}), ...g }));
   }, []);
 
-  const refillHearts = useCallback(async () => {
-    try {
-      const res = await gamificationService.refillHearts();
-      const data = res?.data || null;
-      if (data) applyGamification(data);
-      return data;
-    } catch (_) {
-      return null;
-    }
-  }, [applyGamification]);
-
   const updateGoal = useCallback(async (goal) => {
     try {
       const res = await gamificationService.updateGoal(goal);
@@ -82,5 +70,5 @@ export default function useLearnerStats({ user, enabled = true } = {}) {
     refresh();
   }, [refresh, user?.id]);
 
-  return { stats, loading, refresh, applyGamification, refillHearts, updateGoal };
+  return { stats, loading, refresh, applyGamification, updateGoal };
 }

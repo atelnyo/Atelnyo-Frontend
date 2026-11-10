@@ -54,6 +54,7 @@ const NOTICE_ONLY = [
   ['spotlight_rejected', 'rejte'],
   ['spotlight_admin_message', 'admin'],
   ['spotlight_info_requested', 'enfòmasyon'],
+  ['course_temporarily_unavailable', 'Pwogrè ou sove'],
 ];
 
 describe('notification click coverage', () => {

@@ -13,11 +13,12 @@
  * nothing when stats aren't loaded yet.
  */
 import React, { useState } from 'react';
+import RewardedHeartOffer from './RewardedHeartOffer';
 
 const GOAL_OPTIONS = [10, 20, 30, 50];
 
 export default function GamificationBar({
-  stats, lang = 'ht', onRefillHearts, onUpdateGoal, compact = false,
+  stats, lang = 'ht', onGamification, onUpdateGoal, compact = false,
 }) {
   const isHt = lang === 'ht';
   const [goalOpen, setGoalOpen] = useState(false);
@@ -31,6 +32,7 @@ export default function GamificationBar({
   const goalPct = Math.min(100, Math.round((dailyXp / goal) * 100));
   const ringR = 15;
   const ringC = 2 * Math.PI * ringR;
+  const heartsEmpty = !heartsUnlimited && hearts === 0;
 
   return (
     <div className={`gami-bar${compact ? ' gami-bar--compact' : ''}`}>
@@ -62,7 +64,7 @@ export default function GamificationBar({
 
       {/* ─── Hearts ───────────────────────────────────────────── */}
       <div
-        className={`gami-chip gami-hearts${!heartsUnlimited && hearts === 0 ? ' is-empty' : ''}${heartsUnlimited ? ' is-unlimited' : ''}`}
+        className={`gami-chip gami-hearts${heartsEmpty ? ' is-empty' : ''}${heartsUnlimited ? ' is-unlimited' : ''}`}
         title={heartsUnlimited
           ? (isHt ? 'Kè san limit (plan peye)' : 'Unlimited hearts (paid plan)')
           : (isHt ? 'Kè — erè ki rete' : 'Hearts — mistakes left')}
@@ -81,17 +83,22 @@ export default function GamificationBar({
             />
           ))
         )}
-        {!heartsUnlimited && hearts === 0 && (
-          <button
-            type="button"
-            className="gami-refill-btn"
-            onClick={onRefillHearts}
-            title={isHt ? 'Ranpli kè yo' : 'Refill hearts'}
-          >
-            <i className="fas fa-plus" aria-hidden="true" />
-          </button>
-        )}
       </div>
+      {heartsEmpty && (
+        <p className="gami-hearts-empty-message" role="status">
+          {isHt
+            ? 'Ou pa gen kè ankò. Gade yon videyo pwomosyon pou jwenn 1 kè, oswa tann yo rejenerasyon.'
+            : 'You are out of hearts. Watch a promotional video to earn 1 heart, or wait for regeneration.'}
+        </p>
+      )}
+      {heartsEmpty && (
+        <RewardedHeartOffer
+          lang={lang}
+          hearts={hearts}
+          heartsUnlimited={heartsUnlimited}
+          onGamification={onGamification}
+        />
+      )}
 
       {/* ─── Daily goal ring ──────────────────────────────────── */}
       {!compact && (

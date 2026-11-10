@@ -2641,7 +2641,8 @@
     display: none;
   }
   /* Kontni pa dwe antre anba ba fiks la. */
-  .ls-lesson-area {
+  .ls-lesson-area,
+  .ls-shell-content.is-session-active {
     padding-bottom: 180px;
   }
 }

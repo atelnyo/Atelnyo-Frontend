@@ -140,7 +140,7 @@ export default function LearnerDashboard({ lang = 'ht', translations, user, show
   const [failed, setFailed] = useState(false);
 
   // Duolingo-style gamification (XP / level / streak / hearts / goal).
-  const { stats: gamiStats, refillHearts, updateGoal } = useLearnerStats({ user });
+  const { stats: gamiStats, applyGamification, updateGoal } = useLearnerStats({ user });
 
   const load = useCallback(() => {
     setFailed(false);
@@ -268,7 +268,7 @@ export default function LearnerDashboard({ lang = 'ht', translations, user, show
         <GamificationBar
           stats={gamiStats}
           lang={lang}
-          onRefillHearts={refillHearts}
+          onGamification={applyGamification}
           onUpdateGoal={updateGoal}
         />
       )}

@@ -163,7 +163,11 @@ export default function LearningShell({
         )}
 
         {/* ─── Main Content ─────────────────────────────────── */}
-        <div className="ls-shell-content" role="region" aria-label={isHt ? 'Kontni leson' : 'Lesson content'}>
+        <div
+          className={`ls-shell-content${isSessionActive ? ' is-session-active' : ''}`}
+          role="region"
+          aria-label={isHt ? 'Kontni leson' : 'Lesson content'}
+        >
           {children}
         </div>
       </div>

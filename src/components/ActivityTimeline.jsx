@@ -39,6 +39,7 @@ const EVENT_META = {
   // Learning reminders (backend stores title/body/route in data).
   continue_learning:      { icon: 'fa-play',             label_ht: 'Kontinye aprann',         label_en: 'Continue learning' },
   lesson_unlocked:        { icon: 'fa-book-open',        label_ht: 'Nouvo leson',             label_en: 'New lesson available' },
+  course_temporarily_unavailable: { icon: 'fa-clock',    label_ht: 'Kou tanporèman pa disponib', label_en: 'Course temporarily unavailable' },
   project_reminder:       { icon: 'fa-folder-open',      label_ht: 'Kontinye pwojè',           label_en: 'Continue your project' },
   project_completed:      { icon: 'fa-flag-checkered',   label_ht: 'Pwojè fini',              label_en: 'Project complete' },
   achievement_earned:     { icon: 'fa-award',            label_ht: 'Siksè debloke',            label_en: 'Achievement unlocked' },
@@ -154,7 +155,7 @@ const TYPE_ACCENTS = {
   community_member_banned: 'danger', community_member_unbanned: 'community',
   community_member_muted: 'community', community_member_unmuted: 'community',
   // Learning — purple
-  continue_learning: 'learn', lesson_unlocked: 'learn', project_reminder: 'learn',
+  continue_learning: 'learn', lesson_unlocked: 'learn', course_temporarily_unavailable: 'learn', project_reminder: 'learn',
   project_completed: 'learn', achievement_earned: 'learn',
   course_message: 'learn',
   // Legal & trust — slate (violation red), creator lifecycle — slate
@@ -333,6 +334,10 @@ function getEventRoute(event) {
 // with a route but missing data ids (e.g. job_posted without job_id)
 // fall through to the generic message.
 const NOTIFICATION_NOTICES = {
+  course_temporarily_unavailable: {
+    ht: 'Kou sa a pa disponib tanporèman. Pwogrè ou sove pou lè li repibliye.',
+    en: 'This course is temporarily unavailable. Your progress is saved for when it is republished.',
+  },
   community_member_banned: {
     ht: 'Ou te ban nan kominote sa a — ou pa gen aksè pou w vizite li.',
     en: 'You were banned from this community — you can no longer visit it.',
@@ -489,7 +494,8 @@ function EventRow({ event, lang, t, onMarkRead, onNavigate, onShowNotice, onAcce
   const actorInitial = actor?.username?.charAt(0)?.toUpperCase() || '?';
 
   let description = '';
-  if (data.job_title) description = data.job_title;
+  if (event.event_type === 'course_temporarily_unavailable' && data.body) description = data.body;
+  else if (data.job_title) description = data.job_title;
   // Combined course + lesson beats either one alone (lesson_unlocked).
   else if (data.course_title && data.lesson_title) description = `${data.course_title} · ${data.lesson_title}`;
   else if (data.course_title) description = data.course_title;
