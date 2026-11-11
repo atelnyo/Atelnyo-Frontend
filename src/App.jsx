@@ -628,17 +628,15 @@ function CourseDetailRoute({ lang, id: propId, user, showToast, onOpenCheckout, 
   const location = useLocation();
   const navigate = useNavigate();
   const id = propId ?? paramId;
-  const stateCourse = location.state?.course;
-  const [course, setCourse] = useState(stateCourse || null);
-  const [loading, setLoading] = useState(!stateCourse);
+  const [course, setCourse] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    if (stateCourse || !id) return;
+    if (!id) return;
     let cancelled = false;
-    // Intentional synchronous reset so an id change (legacy → canonical
-    // route swap, related-course nav) starts a clean fetch — matches the
-    // fetch-effect pattern used across App.jsx.
+    // The navigation state can be stale after a price edit or unpublish.
+    // Always use the API response as the authoritative course payload.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -648,7 +646,7 @@ function CourseDetailRoute({ lang, id: propId, user, showToast, onOpenCheckout, 
       .catch(() => { if (!cancelled) setFailed(true); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [id, stateCourse]);
+  }, [id]);
 
   // Canonical URL upgrade: legacy /sheet/course/:id → /{id}@{user}/course.
   useEffect(() => {
