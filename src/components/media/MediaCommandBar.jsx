@@ -49,7 +49,7 @@ const COMMAND_GROUPS = [
 
 export default function MediaCommandBar({
   media,
-  lang = 'ht',
+  lang = 'en',
   onCommand,
   stateByCommand = {},
   compact = false,

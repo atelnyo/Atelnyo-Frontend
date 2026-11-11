@@ -8,7 +8,7 @@
 import React from 'react';
 import MediaTimeline from '../MediaTimeline';
 
-export default function MediaTimelinePanel({ media, lang = 'ht' }) {
+export default function MediaTimelinePanel({ media, lang = 'en' }) {
   const item = media || {};
   const isHt = lang === 'ht';
   const timeline = Array.isArray(item.timeline) ? item.timeline : [];

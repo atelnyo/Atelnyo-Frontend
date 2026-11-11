@@ -25,7 +25,7 @@ const ITEM_LABELS = {
   event: { ht: 'Evènman', en: 'Event' },
 };
 
-export default function ProfileItemDetail({ lang = 'ht', type, contentId, user, showToast }) {
+export default function ProfileItemDetail({ lang = 'en', type, contentId, user, showToast }) {
   // ``id`` is the URL segment: the ``{id}`` from the canonical
   // ``/{id}@{user}/{type}`` key (contentId) or the legacy
   // ``/sheet/{type}/:id`` param.

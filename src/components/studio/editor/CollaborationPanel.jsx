@@ -30,7 +30,7 @@ const ROLE_DESCRIPTIONS = {
   instructor: { ht: 'Jere elèv ak pwogrè', en: 'Manage students and progress' },
 };
 
-export default function CollaborationPanel({ courseId, lang = 'ht', isOwner = false }) {
+export default function CollaborationPanel({ courseId, lang = 'en', isOwner = false }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
 

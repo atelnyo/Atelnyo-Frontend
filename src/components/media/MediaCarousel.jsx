@@ -19,7 +19,7 @@ export default function MediaCarousel({
   showDots = true,
   size = 'medium',
   onClick,
-  lang = 'ht',
+  lang = 'en',
   className = '',
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);

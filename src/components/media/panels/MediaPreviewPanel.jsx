@@ -11,7 +11,7 @@ import ImageViewer from '../ImageViewer';
 import AISuggestion from '../AISuggestion';
 import MediaTypeIcon from '../MediaIconography';
 
-export default function MediaPreviewPanel({ media, lang = 'ht', className = '' }) {
+export default function MediaPreviewPanel({ media, lang = 'en', className = '' }) {
   const item = media || {};
   const isHt = lang === 'ht';
   const mediaType = item.media_type || item.kind || '';

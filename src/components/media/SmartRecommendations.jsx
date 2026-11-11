@@ -175,7 +175,7 @@ export default function SmartRecommendations({
   media = [],
   maxItems = 8,
   onAction,
-  lang = 'ht',
+  lang = 'en',
   className = '',
 }) {
   const isHt = lang === 'ht';

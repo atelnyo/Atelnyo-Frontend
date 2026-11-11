@@ -20,7 +20,7 @@ export default function LessonIntroduction({
   introduction,
   objectives = [],
   estimatedTime,
-  lang = 'ht',
+  lang = 'en',
   className = '',
   hideTitle = false, // when the session header already shows the title
 }) {

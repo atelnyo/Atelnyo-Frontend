@@ -3,7 +3,7 @@ import { learningPromotionService } from '../../../services/api';
 import { EmptyState, SectionHeader } from '../shared';
 import styles from './sections.module.css';
 
-export default function LearningAdsSection({ lang = 'ht', showToast }) {
+export default function LearningAdsSection({ lang = 'en', showToast }) {
   const isHt = lang === 'ht';
   const tr = (en, ht) => (isHt ? ht : en);
   const [ads, setAds] = useState([]);

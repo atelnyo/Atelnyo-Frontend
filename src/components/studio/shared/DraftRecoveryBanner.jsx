@@ -16,7 +16,7 @@ export default function DraftRecoveryBanner({
   onRecover,
   onDiscard,
   timestamp,
-  lang = 'ht',
+  lang = 'en',
 }) {
   const isHt = lang === 'ht';
   const [visible, setVisible] = useState(true);

@@ -154,8 +154,8 @@ const KEY_MAP = {
 
 function tr(lang, key) {
   // Project i18n first (HT/EN/FR/ES) — matches every other component
-  // (e.g. ``const t = translations[lang] || translations.ht || {}``).
-  const map = (translations && translations[lang]) || translations?.ht || {};
+  // (e.g. ``const t = translations[lang] || translations.en || {}``).
+  const map = (translations && translations[lang]) || translations?.en || {};
   const dictKey = KEY_MAP[key] || key;
   const translated = map[dictKey];
   if (translated) {return translated;}
@@ -179,7 +179,7 @@ export default function CheckoutModal({
   onClose,
   type = 'order',          // 'order' | 'premium' | 'escrow'
   meta = {},
-  lang = 'ht',
+  lang = 'en',
   user = null,
   onAuthRequired,
   showToast,

@@ -203,7 +203,7 @@ import { historyBack, requireLogin } from './utils/history';
 // LocaleContext = the resolved AtelyonaContext {language, country,
 // market, tag, isLocalized} consumed by switchers + UI.
 import { parseLocaleCountry, switchLocale, buildLocaleUrl } from './utils/localeUrl';
-import { MARKETS, MARKET_OPTIONS, SUPPORTED_LANGUAGES, defaultLanguageFor, buildLocaleTag, DEFAULT_MARKET } from './config/markets';
+import { MARKETS, MARKET_OPTIONS, SUPPORTED_LANGUAGES, buildLocaleTag, DEFAULT_LANGUAGE, DEFAULT_MARKET } from './config/markets';
 import { locationCache } from './services/location/locationCache';
 import { getSupportedBrowserLanguage } from './services/location/localeService';
 import { TIMEZONE_TO_COUNTRY } from './services/location/timezoneService';
@@ -983,7 +983,7 @@ function App() {
     if (browserLang) {
       return browserLang;
     }
-    return 'ht';
+    return DEFAULT_LANGUAGE;
   });
   // Market (country context) — mirrors lang: URL wins, then the stored
   // preference. Persisted by the market switcher; empty = not chosen.
@@ -1435,6 +1435,7 @@ function App() {
         const preferredLanguage = normalizeSupportedLanguage(prefs?.interface_language);
         if (
           preferredLanguage
+          && prefs?.interface_language_explicit === true
           && !localStorage.getItem('atelnyo_lang')
           && !parseLocaleCountry(window.location.pathname).valid
         ) {
@@ -1991,23 +1992,20 @@ function App() {
     return () => { document.body.classList.remove('settings-open'); };
   }, [isSettingsOpen]);
 
-  // ─── Geo-hint: auto-apply language on first visit (Phase 46) ──────────
+  // ─── Geo-hint: cache market context on first visit (Phase 46) ────────
   // Fires ONCE on mount when the user has no atelnyo_lang key in
   // localStorage. Calls /api/geo/hint/ (anonymous, no auth required)
-  // and applies the suggested_lang. If the user already has a stored
-  // lang preference, the effect short-circuits — the override contract
-  // is that a user's explicit choice is NEVER silently overwritten.
+  // and caches the detected country. UI language is resolved separately
+  // from a saved choice, the browser's supported languages, or English.
   //
   // Phase 60.2 — INSTANT + NO REDIRECT + NO PRESUMPTUOUS PROMPT:
   //   * No URL redirect — the detected country/lang are applied in-app
   //     only (the bare URL stays put; the localized /en-US/ URLs remain
   //     available to visitors who arrive on them or use the switcher).
-  //   * The result is written to the LocationCache (localStorage), so
-  //     the NEXT visit resolves country + language synchronously at
-  //     boot — like a logo that appears before the API even answers.
-  //   * The detected language is applied for EVERY first-time visitor
-  //     (diaspora included) — no "Kreyòl Ayisyen?" toast: the platform
-  //     does not know who the visitor is, so it never assumes.
+  //   * The country result is written to the LocationCache (localStorage),
+  //     so the NEXT visit resolves market context synchronously at boot.
+  //   * Browser language selection is handled synchronously by the
+  //     initializer; this lookup never overrides it based on geography.
   useEffect(() => {
     if (localStorage.getItem('atelnyo_lang')) {return;} // Explicit choice already made
     // Localized URLs are an explicit context (spec §21/§30) — never
@@ -2045,7 +2043,7 @@ function App() {
               sources: ['geoip'],
               conflict: { detected: false, description: null },
               isDefault: is_default === true,
-              suggestedLang: suggested_lang || defaultLanguageFor(country),
+              suggestedLang: suggested_lang || DEFAULT_LANGUAGE,
               timestamp: Date.now(),
             });
           } catch (_) { /* private mode / quota — in-memory still works */ }

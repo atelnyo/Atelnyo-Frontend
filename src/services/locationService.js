@@ -16,10 +16,16 @@
  *   - Meaningful User-Agent header required
  *   - For heavy usage, run your own Nominatim instance
  */
+import { normalizeSupportedLanguage } from '../utils/i18n';
 
 const NOMINATIM_SEARCH_URL = 'https://nominatim.openstreetmap.org/search';
 const NOMINATIM_REVERSE_URL = 'https://nominatim.openstreetmap.org/reverse';
 const USER_AGENT = 'atelnyoApp/1.0 (location-service)';
+
+function getServiceLanguage(lang) {
+  const supportedLanguage = normalizeSupportedLanguage(lang) || 'en';
+  return supportedLanguage === 'en' ? 'en' : `${supportedLanguage},en`;
+}
 
 /**
  * Search cities/towns by query string.
@@ -29,7 +35,7 @@ const USER_AGENT = 'atelnyoApp/1.0 (location-service)';
  * @param {string}  [countryCodes]  Optional ISO 3166-1 alpha-2 filter, e.g. 'HT,US'
  * @returns {Promise<Array<{ city: string, country: string, displayName: string, lat: number, lon: number }>>}
  */
-export async function searchCities(query, countryCodes) {
+export async function searchCities(query, countryCodes, lang = 'en') {
   if (!query || query.trim().length < 2) return [];
 
   const url = new URL(NOMINATIM_SEARCH_URL);
@@ -38,7 +44,7 @@ export async function searchCities(query, countryCodes) {
   url.searchParams.set('addressdetails', '1');
   url.searchParams.set('limit', '8');
   url.searchParams.set('featuretype', 'city|town|village|municipality');
-  url.searchParams.set('accept-language', 'ht,fr,en');
+  url.searchParams.set('accept-language', getServiceLanguage(lang));
 
   if (countryCodes) {
     url.searchParams.set('countrycodes', countryCodes);
@@ -78,13 +84,13 @@ export async function searchCities(query, countryCodes) {
  * @param {number} lon
  * @returns {Promise<{ city: string, country: string, countryCode: string, state: string, displayName: string, postcode: string }>}
  */
-export async function reverseGeocode(lat, lon) {
+export async function reverseGeocode(lat, lon, lang = 'en') {
   const url = new URL(NOMINATIM_REVERSE_URL);
   url.searchParams.set('lat', String(lat));
   url.searchParams.set('lon', String(lon));
   url.searchParams.set('format', 'jsonv2');
   url.searchParams.set('addressdetails', '1');
-  url.searchParams.set('accept-language', 'ht,fr,en');
+  url.searchParams.set('accept-language', getServiceLanguage(lang));
 
   const res = await fetch(url.toString(), {
     headers: {

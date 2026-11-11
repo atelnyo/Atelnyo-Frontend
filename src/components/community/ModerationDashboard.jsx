@@ -336,7 +336,7 @@ function AutoModSettings({ settings, onSave, lang }) {
 
 // ─── Main Component ────────────────────────────────────────────────
 
-export default function ModerationDashboard({ community, lang = 'ht', showToast }) {
+export default function ModerationDashboard({ community, lang = 'en', showToast }) {
   const [activeTab, setActiveTab] = useState('queue');
   const [queue, setQueue] = useState([]);
   const [users, setUsers] = useState([]);

@@ -12,7 +12,7 @@ import { Link } from 'react-router-dom';
  *   - Trust score and reviews
  *   - Link to business profile
  */
-export default function BusinessSpotlightCard({ business, t = {}, lang = 'ht' }) {
+export default function BusinessSpotlightCard({ business, t = {}, lang = 'en' }) {
   const [expanded, setExpanded] = useState(false);
 
   if (!business) return null;

@@ -31,7 +31,7 @@ const STATUS_COLORS = {
   archived: '#94a3b8',
 };
 
-export default function BusinessCatalogSection({ lang = 'ht', t, showToast, profile }) {
+export default function BusinessCatalogSection({ lang = 'en', t, showToast, profile }) {
   const isHt = lang === 'ht';
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);

@@ -49,7 +49,7 @@ function SectionBlock({ title, icon, children }) {
   );
 }
 
-export default function AdvancedPanel({ media, mediaData, lang = 'ht', className = '' }) {
+export default function AdvancedPanel({ media, mediaData, lang = 'en', className = '' }) {
   const [isOpen, setIsOpen] = useState(false);
   const item = media || mediaData || {};
   const isHt = lang === 'ht';

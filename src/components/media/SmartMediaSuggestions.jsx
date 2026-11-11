@@ -21,7 +21,7 @@ const SUGGESTION_GROUPS = [
 export default function SmartMediaSuggestions({
   mediaItems = [],
   onSelect,
-  lang = 'ht',
+  lang = 'en',
   className = '',
 }) {
   const isHt = lang === 'ht';

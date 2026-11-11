@@ -44,8 +44,8 @@ const INSTALL_PROMPT_ENABLED =
   import.meta.env?.VITE_INSTALL_PROMPT_ENABLED === 'true';
 
 export default function InstallPrompt({ lang }) {
-  // Resolve lang from prop first, then localStorage, default to 'ht'
-  const resolvedLang = lang || (typeof window !== 'undefined' && localStorage.getItem('atelnyo_lang')) || 'ht';
+  // Resolve lang from prop first, then localStorage, default to English.
+  const resolvedLang = lang || (typeof window !== 'undefined' && localStorage.getItem('atelnyo_lang')) || 'en';
   const [snap, setSnap] = useState(() => installationManager.getState());
   // Local banner visibility. Atelnyo decides WHEN to offer install —
   // the offer predicate is read here (pure — no side effect, so React

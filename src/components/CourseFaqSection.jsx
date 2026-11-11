@@ -14,7 +14,7 @@ import { courseFaqService } from '../services/api';
 import { faqPageSchema } from './shared/SEOHead';
 import FAQ from './FAQ';
 
-export default function CourseFaqSection({ courseId, lang = 'ht', translations }) {
+export default function CourseFaqSection({ courseId, lang = 'en', translations }) {
   const isHt = lang === 'ht';
   const [faqs, setFaqs] = useState(null); // null = loading, [] = no FAQ
   const [search, setSearch] = useState('');

@@ -43,10 +43,10 @@ const S = {
   gap16: { gap: 16 } ,
 };
 
-export function TalentSheet({ lang = 'ht', showToast, user, contentId }) {
+export function TalentSheet({ lang = 'en', showToast, user, contentId }) {
   const location = useLocation();
   const navigate = useSafeNavigate();
-  const t = translations?.[lang] || translations?.ht || {};
+  const t = translations?.[lang] || translations?.en || {};
   const stateTalent = location.state?.talent;
   // Fallback id from the URL (contentId from the /{id}@{user}/talent
   // deep-link, or the legacy ?id= query) so a hard refresh (no router

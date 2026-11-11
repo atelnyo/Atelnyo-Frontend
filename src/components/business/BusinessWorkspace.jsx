@@ -38,7 +38,7 @@ function classNames(...parts) {
   return parts.filter(Boolean).join(' ');
 }
 
-export default function BusinessWorkspace({ lang = 'ht', showToast }) {
+export default function BusinessWorkspace({ lang = 'en', showToast }) {
   const { slug } = useParams();
   const t = translations[lang] || translations.en || {};
   const isHt = lang === 'ht';

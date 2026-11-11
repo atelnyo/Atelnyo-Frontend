@@ -128,7 +128,7 @@ function ProviderTrustBadge({ provider, lang }) {
   );
 }
 
-export default function MediaTrustCenter({ lang = 'ht', showToast, compact = false }) {
+export default function MediaTrustCenter({ lang = 'en', showToast, compact = false }) {
   const isHt = lang === 'ht';
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);

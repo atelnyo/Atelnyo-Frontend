@@ -23,7 +23,7 @@ function StatBox({ icon, label, value, color }) {
   );
 }
 
-export default function MediaGeneralPanel({ media, lang = 'ht' }) {
+export default function MediaGeneralPanel({ media, lang = 'en' }) {
   const item = media || {};
   const isHt = lang === 'ht';
   const url = item.media_url || item.public_url || '';

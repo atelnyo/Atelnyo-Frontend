@@ -65,7 +65,7 @@ async function _getEncKey() {
     const fp = [
       navigator.hardwareConcurrency || 4,
       navigator.deviceMemory || 4,
-      navigator.language || 'ht',
+      navigator.language || 'en',
     ].join('|');
     const keyMaterial = await crypto.subtle.importKey(
       'raw', enc.encode(fp), 'PBKDF2', false, ['deriveKey']

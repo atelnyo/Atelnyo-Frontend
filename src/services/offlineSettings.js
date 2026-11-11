@@ -23,7 +23,7 @@ const SETTINGS_DOMAIN = PRIVATE_DOMAINS.CACHE;
 // ─── Default settings ──────────────────────────────────────────────
 const DEFAULTS = {
   theme: 'light',
-  lang: 'ht',
+  lang: 'en',
   fontSize: 'md',
   pushNotifications: true,
   emailNotifications: true,

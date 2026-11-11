@@ -170,7 +170,7 @@ function ModeratorPerformance({ moderators, lang }) {
 
 // ─── Main Component ───────────────────────────────────────────────
 
-export default function ModerationAnalytics({ community, lang = 'ht' }) {
+export default function ModerationAnalytics({ community, lang = 'en' }) {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
   const [timeRange, setTimeRange] = useState('7d');

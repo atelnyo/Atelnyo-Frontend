@@ -21,7 +21,7 @@ import ConfirmModal from './common/ConfirmModal';
 import { historyBack, requireLogin } from '../utils/history';
 
 export default function NotificationsPage({
-  lang = 'ht',
+  lang = 'en',
   user,
   t = {},
   refreshToken,

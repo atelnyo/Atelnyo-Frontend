@@ -35,7 +35,7 @@ export default function MediaPreview({
   media,
   mediaId,
   className = '',
-  lang = 'ht',
+  lang = 'en',
 }) {
   const item = data || media || {};
   const [copied, setCopied] = useState(false);

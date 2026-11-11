@@ -50,7 +50,7 @@ const SECTION_TITLES = {
   community_discovery: 'Community Discovery',
 };
 
-const DEIEFeed = memo(function DEIEFeed({ user, lang = 'ht', limit = 6 }) {
+const DEIEFeed = memo(function DEIEFeed({ user, lang = 'en', limit = 6 }) {
   const navigate = useNavigate();
   const location = useLocation();
   const isHt = lang === 'ht';

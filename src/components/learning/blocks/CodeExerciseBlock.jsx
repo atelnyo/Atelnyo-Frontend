@@ -133,7 +133,7 @@ export function buildWebDoc(code, language, token = 'preview') {
     ? code
     : '<canvas id="demo" width="480" height="320"></canvas>' + open + code + close;
 
-  return `<!doctype html><html lang="ht"><head><meta charset="utf-8">
+  return `<!doctype html><html lang='en'><head><meta charset="utf-8">
 <style>
   html,body{margin:0;padding:12px;font-family:system-ui,sans-serif;background:#fff}
   canvas{display:block;max-width:100%;border-radius:8px;background:#f1f5f9}
@@ -210,7 +210,7 @@ function runWeb(code, language, setDoc) {
 // ─── CodeExerciseBlock Component ──────────────────────────────────────
 export default function CodeExerciseBlock({
   block,
-  lang = 'ht',
+  lang = 'en',
   index,
   courseId,
   moduleIndex,

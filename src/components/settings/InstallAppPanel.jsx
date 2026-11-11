@@ -95,7 +95,7 @@ function copy(lang, key) {
   return T[key]?.[lang] || T[key]?.en || '';
 }
 
-export default function InstallAppPanel({ lang = 'ht' }) {
+export default function InstallAppPanel({ lang = 'en' }) {
   const [snap, setSnap] = useState(() => installationManager.getState());
   const [busy, setBusy] = useState(false);
 

@@ -193,7 +193,7 @@ function GrowthChart({ data, height = 150 }) {
 
 // ─── Main Component ────────────────────────────────────────────────
 
-export default function AudienceInsights({ lang = 'ht', showToast, user }) {
+export default function AudienceInsights({ lang = 'en', showToast, user }) {
   const [audience, setAudience] = useState(null);
   const [activity, setActivity] = useState([]);
   const [growth, setGrowth] = useState([]);

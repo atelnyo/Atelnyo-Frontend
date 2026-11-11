@@ -17,7 +17,7 @@ const STATUS_DETAILS = {
   unknown:  { icon: 'fa-question-circle', color: '#94a3b8', labelEn: 'Unknown', labelHt: 'Enkoni', descEn: 'Status has not been determined yet.', descHt: 'Estati a poko detèmine.' },
 };
 
-export default function MediaStatus({ status, lastChecked, responseTimeMs, lang = 'ht', size = 'md', className = '' }) {
+export default function MediaStatus({ status, lastChecked, responseTimeMs, lang = 'en', size = 'md', className = '' }) {
   const meta = STATUS_DETAILS[status] || STATUS_DETAILS.unknown;
   const isHt = lang === 'ht';
 

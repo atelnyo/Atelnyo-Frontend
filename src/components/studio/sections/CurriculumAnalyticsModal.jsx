@@ -11,7 +11,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { courseService } from '../../../services/api';
 import styles from './sections.module.css';
 
-export default function CurriculumAnalyticsModal({ course, lang = 'ht', onClose }) {
+export default function CurriculumAnalyticsModal({ course, lang = 'en', onClose }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
   const [analytics, setAnalytics] = useState(null);

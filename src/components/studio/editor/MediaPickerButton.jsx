@@ -26,7 +26,7 @@ const TYPE_ICONS = {
 export default function MediaPickerButton({
   onSelect,
   mediaType = 'all',
-  lang = 'ht',
+  lang = 'en',
   label,
 }) {
   const [open, setOpen] = useState(false);

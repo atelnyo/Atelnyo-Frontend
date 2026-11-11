@@ -24,7 +24,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import { resolveVideoSource } from '../../modules/explore/utils/videoSource';
 import styles from './learning.module.css';
 
-export default function VideoBlock({ block, lang = 'ht', reportComplete }) {
+export default function VideoBlock({ block, lang = 'en', reportComplete }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
   const [watchDone, setWatchDone] = useState(false);

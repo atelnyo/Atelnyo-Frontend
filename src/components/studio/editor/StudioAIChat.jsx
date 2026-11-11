@@ -72,7 +72,7 @@ const SUGGESTIONS = {
 // ─── Component ────────────────────────────────────────────────────
 export default function StudioAIChat({
   courseForm = null,
-  lang = 'ht',
+  lang = 'en',
   onInsertContent = null, // callback(content) to insert AI output into form
   style = {},
 }) {

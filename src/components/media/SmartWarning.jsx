@@ -13,7 +13,7 @@ export default function SmartWarning({
   usages = [],
   onConfirm,
   onCancel,
-  lang = 'ht',
+  lang = 'en',
   className = '',
 }) {
   const isHt = lang === 'ht';

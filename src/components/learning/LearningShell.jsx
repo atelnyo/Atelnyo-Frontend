@@ -41,7 +41,7 @@ export default function LearningShell({
   syllabus = [],
   currentModule = null,
   isSessionActive = false,
-  lang = 'ht',
+  lang = 'en',
   user,
   onBack,
   onModuleSelect,

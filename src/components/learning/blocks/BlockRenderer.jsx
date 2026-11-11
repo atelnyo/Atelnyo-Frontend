@@ -87,7 +87,7 @@ const CATEGORY_MAP = {
 
 function BlockRendererInner({
   block,
-  lang = 'ht',
+  lang = 'en',
   index = 0,
   courseId,
   moduleIndex,

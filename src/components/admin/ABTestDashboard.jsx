@@ -250,7 +250,7 @@ function TestForm({ onSubmit, onCancel }) {
 }
 
 // ─── Main Dashboard ────────────────────────────────────────────────
-export default function ABTestDashboard({ t, lang = 'ht' }) {
+export default function ABTestDashboard({ t, lang = 'en' }) {
   const [tests, setTests] = useState([]);
   const [selectedTest, setSelectedTest] = useState(null);
   const [stats, setStats] = useState(null);

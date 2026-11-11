@@ -119,7 +119,7 @@ function t2f(lang, key) {
   return T[key]?.[lang] || T[key]?.en || '';
 }
 
-export default function TwoFactorSettings({ user, lang = 'ht', onUpdated }) {
+export default function TwoFactorSettings({ user, lang = 'en', onUpdated }) {
   const [status, setStatus] = useState('idle');
   const [isEnabled, setIsEnabled] = useState(() => !!(user && user.two_factor_enabled));
   const [pending, setPending] = useState(null);

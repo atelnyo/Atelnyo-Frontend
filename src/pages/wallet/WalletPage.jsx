@@ -10,7 +10,7 @@ import WalletSection from '../../components/studio/sections/WalletSection';
 import WithdrawModal from '../../components/studio/modals/WithdrawModal';
 import VerificationModal from '../../components/studio/modals/VerificationModal';
 
-export default function WalletPage({ lang = 'ht', t = {}, showToast, user }) {
+export default function WalletPage({ lang = 'en', t = {}, showToast, user }) {
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
 

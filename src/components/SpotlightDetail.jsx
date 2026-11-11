@@ -116,7 +116,7 @@ const S = {
   gap20: { gap: 20 } ,
 };
 
-export default function SpotlightDetail({ lang = 'ht', contentId, user, showToast }) {
+export default function SpotlightDetail({ lang = 'en', contentId, user, showToast }) {
   // ``id`` is the URL segment: the ``{id}`` from the canonical
   // ``/{id}@{user}/spotlight`` key (contentId), or the legacy
   // ``/sheet/spotlight/:id`` param — both accept pk-or-slug.
@@ -124,7 +124,7 @@ export default function SpotlightDetail({ lang = 'ht', contentId, user, showToas
   const location = useLocation();
   const navigate = useSafeNavigate();
   const id = contentId ?? urlId;
-  const t = (translations && translations[lang]) || translations.ht || {};
+  const t = (translations && translations[lang]) || translations.en || {};
 
   const [payload, setPayload] = useState(null);
   const [loading, setLoading] = useState(true);

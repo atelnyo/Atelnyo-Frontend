@@ -115,7 +115,7 @@ const defaultElement = {
 };
 
 /* ─── Slide editor component ─────────────────────────────────────── */
-export default function SlidesEditor({ block, onChange, lang = 'ht' }) {
+export default function SlidesEditor({ block, onChange, lang = 'en' }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht || en : en);
 

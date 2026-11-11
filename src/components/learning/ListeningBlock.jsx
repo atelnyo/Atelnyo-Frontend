@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { normalizeSpeechText } from '../../modules/learning/speech';
 import styles from './learning.module.css';
 
-export default function ListeningBlock({ block, lang = 'ht', reportComplete }) {
+export default function ListeningBlock({ block, lang = 'en', reportComplete }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
   const [typed, setTyped] = useState('');

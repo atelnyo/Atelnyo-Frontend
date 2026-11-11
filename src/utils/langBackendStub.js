@@ -74,13 +74,13 @@ const STRINGS = {
   ofTotal:             { en: 'of {n} total',          ht: 'nan {n} total' },
 };
 
-export function t(lang = 'ht', key, vars = {}) {
+export function t(lang = 'en', key, vars = {}) {
   const entry = STRINGS[key];
   if (!entry) return key;
-  const raw = entry[lang === 'en' ? 'en' : 'ht'] || entry.en || key;
+  const raw = entry[lang === 'ht' ? 'ht' : 'en'] || entry.en || key;
   return raw.replace(/\{(\w+)\}/g, (_, k) => (vars[k] != null ? String(vars[k]) : `{${k}}`));
 }
 
-export function makeT(lang = 'ht') {
+export function makeT(lang = 'en') {
   return (key, vars) => t(lang, key, vars);
 }

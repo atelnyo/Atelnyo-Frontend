@@ -51,7 +51,7 @@ const VARIANT_STYLES = {
 export default function ConfirmModal({
   title,
   message,
-  lang = 'ht',
+  lang = 'en',
   variant = 'danger',
   confirmText,
   cancelText,

@@ -47,10 +47,10 @@ const S = {
   flexRow: { display: 'flex', alignItems: 'center' },
 };
 
-export default function JobSheet({ lang = 'ht', showToast, user, contentId }) {
+export default function JobSheet({ lang = 'en', showToast, user, contentId }) {
   const location = useLocation();
   const navigate = useSafeNavigate();
-  const t = translations?.[lang] || translations?.ht || {};
+  const t = translations?.[lang] || translations?.en || {};
   const stateJob = location.state?.job;
   // Fallback id from the URL (contentId from the /{id}@{user}/job
   // deep-link, or the legacy ?id= query) so a hard refresh (no router

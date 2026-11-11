@@ -133,7 +133,7 @@ export default function LocationPicker({
       }
       setSearchingCity(true);
       try {
-        const results = await searchCities(query, selectedCountryCode);
+        const results = await searchCities(query, selectedCountryCode, lang);
         setSuggestions(results);
         setSuggestionsOpen(results.length > 0);
       } catch {
@@ -142,7 +142,7 @@ export default function LocationPicker({
         setSearchingCity(false);
       }
     }, 350),
-    [selectedCountryCode],
+    [lang, selectedCountryCode],
   );
 
   // ─── Geolocation result handler ────────────────────────────────

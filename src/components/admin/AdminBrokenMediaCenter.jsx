@@ -54,7 +54,7 @@ function TopList({ title, items, keyField, valueField, icon }) {
   );
 }
 
-export default function AdminBrokenMediaCenter({ lang = 'ht', showToast, user, onNavigate }) {
+export default function AdminBrokenMediaCenter({ lang = 'en', showToast, user, onNavigate }) {
   const isHt = lang === 'ht';
   const { isAdmin, loading: permsLoading } = useHasAdminAccess();
   const hasStaffAccess = (user?.is_staff === true || user?.is_superuser === true) || isAdmin === true;

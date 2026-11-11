@@ -11,7 +11,7 @@ import MediaPreview from './MediaPreview';
 
 export default function ContentPreview({
   formData = {},
-  lang = 'ht',
+  lang = 'en',
   className = '',
 }) {
   const isHt = lang === 'ht';

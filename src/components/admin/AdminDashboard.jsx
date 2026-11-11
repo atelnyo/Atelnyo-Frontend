@@ -389,7 +389,7 @@ function DashSkeleton() {
 
 // ─── Main Component ───────────────────────────────────────────────────
 
-export default function AdminDashboard({ lang = 'ht', showToast, user, onNavigate }) {
+export default function AdminDashboard({ lang = 'en', showToast, user, onNavigate }) {
   const [stats, setStats] = useState(null);
   const [health, setHealth] = useState(null);
   const [queue, setQueue] = useState(null);

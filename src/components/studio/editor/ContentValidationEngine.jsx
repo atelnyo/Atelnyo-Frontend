@@ -106,7 +106,7 @@ function IssueItem({ issue, type, onClick }) {
 export default function ContentValidationEngine({
   courseId,
   chapters: propChapters,
-  lang = 'ht',
+  lang = 'en',
   onNavigate,
   showToast,
 }) {

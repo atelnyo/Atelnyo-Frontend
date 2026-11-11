@@ -57,7 +57,7 @@ function setContinueBookmark(mediaId, fragment = '') {
 }
 
 export default function MediaContinueEditingPanel({
-  lang = 'ht',
+  lang = 'en',
   mediaList = [],
   searchFilter = '',
   showToast,

@@ -98,7 +98,7 @@ function CollapsibleSection({ id, title, isOpen, onToggle, locked, children }) {
   );
 }
 
-export default function MediaEntityPage({ lang = 'ht', user, media: mediaProp, showToast }) {
+export default function MediaEntityPage({ lang = 'en', user, media: mediaProp, showToast }) {
   const navigate = useSafeNavigate();
   const params = useParams();
   const location = useLocation();

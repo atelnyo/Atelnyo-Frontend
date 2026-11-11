@@ -18,7 +18,7 @@ function toLocalInput(iso) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-export default function EventEditor({ onClose, onSuccess, onSaved, lang = 'ht', showToast, user, item }) {
+export default function EventEditor({ onClose, onSuccess, onSaved, lang = 'en', showToast, user, item }) {
   const isHt = lang === 'ht';
   const isEdit = Boolean(item);
 

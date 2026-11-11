@@ -423,7 +423,7 @@ function StatsBar({ applications }) {
 
 // ─── Main Component ──────────────────────────────────────────────────
 
-export default function AdminSpotlightReview({ lang = 'ht', showToast, user, onNavigate }) {
+export default function AdminSpotlightReview({ lang = 'en', showToast, user, onNavigate }) {
   const [applications, setApplications] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

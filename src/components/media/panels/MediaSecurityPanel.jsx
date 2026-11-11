@@ -36,7 +36,7 @@ const FIELDS = [
   { key: 'security_score',   labelEn: 'Security Score', labelHt: 'Nòt Sekirite',        icon: 'fa-shield-alt',           backendPending: false, derive: (m) => m?.security_score != null ? `${m.security_score}%` : null },
 ];
 
-export default function MediaSecurityPanel({ media, security = null, lang = 'ht', isAdmin = false, className = '' }) {
+export default function MediaSecurityPanel({ media, security = null, lang = 'en', isAdmin = false, className = '' }) {
   const item = media || {};
   const isHt = lang === 'ht';
 

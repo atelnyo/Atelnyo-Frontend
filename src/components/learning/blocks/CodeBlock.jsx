@@ -9,7 +9,7 @@
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-export default function CodeBlock({ block, lang = 'ht', index, courseId, moduleIndex, onComplete, onViewed }) {
+export default function CodeBlock({ block, lang = 'en', index, courseId, moduleIndex, onComplete, onViewed }) {
   const isHt = lang === 'ht';
   const viewedRef = useRef(false);
   const [copied, setCopied] = useState(false);

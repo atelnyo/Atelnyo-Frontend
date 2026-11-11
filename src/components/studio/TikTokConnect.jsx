@@ -67,7 +67,7 @@ function tt(lang, key) {
   return entry[lang] || entry.en;
 }
 
-export default function TikTokConnect({ lang = 'ht', showToast }) {
+export default function TikTokConnect({ lang = 'en', showToast }) {
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState(false);

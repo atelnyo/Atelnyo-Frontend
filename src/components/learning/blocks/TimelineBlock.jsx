@@ -4,7 +4,7 @@
  */
 import React, { useState, useEffect } from 'react';
 
-export default function TimelineBlock({ block, lang = 'ht', onComplete }) {
+export default function TimelineBlock({ block, lang = 'en', onComplete }) {
   const isHt = lang === 'ht';
   const items = block?.items || block?.tasks || [];
   const [completed, setCompleted] = useState({});

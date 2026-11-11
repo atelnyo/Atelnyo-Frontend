@@ -34,7 +34,7 @@ function resolveSpeechLang(block, lang) {
   return { tag: 'en-US', fallback: false };
 }
 
-export default function SpeechPractice({ block, lang = 'ht', courseId, moduleIndex, reportComplete }) {
+export default function SpeechPractice({ block, lang = 'en', courseId, moduleIndex, reportComplete }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
   const speechLang = resolveSpeechLang(block, lang);

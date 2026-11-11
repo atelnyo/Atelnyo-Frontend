@@ -142,7 +142,7 @@ export default function ProfileContactModal({
   // The creator's USER id — only the tip mode needs it (real wallet
   // transfer via /api/tips/send/).
   creatorId = null,
-  lang = 'ht',
+  lang = 'en',
   t = {},
   showToast,
   onClose,

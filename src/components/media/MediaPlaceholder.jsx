@@ -19,7 +19,7 @@ export default function MediaPlaceholder({
   description,
   onChooseProvider,
   onReadDocs,
-  lang = 'ht',
+  lang = 'en',
   variant = 'library',
   className = '',
 }) {

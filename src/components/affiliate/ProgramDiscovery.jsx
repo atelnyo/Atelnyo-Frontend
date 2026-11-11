@@ -160,9 +160,9 @@ function ApplyModal({ program, lang, t, showToast, onClose, onApplied }) {
   );
 }
 
-export default function ProgramDiscovery({ lang = 'ht', showToast }) {
+export default function ProgramDiscovery({ lang = 'en', showToast }) {
   const navigate = useSafeNavigate();
-  const t = translations?.[lang] || translations?.ht || {};
+  const t = translations?.[lang] || translations?.en || {};
   const { data: programs, loading, refetch } = useFetch(
     () => affiliateApi.getPublicPrograms(),
     { defaultValue: [], deps: [] },

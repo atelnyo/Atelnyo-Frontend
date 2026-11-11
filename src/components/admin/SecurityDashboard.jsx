@@ -20,7 +20,7 @@ import api, { API_URL } from '../../services/api';
 
 // ═══════════════════════════════════════════════════════════════════
 
-export default function SecurityDashboard({ lang = 'ht' }) {
+export default function SecurityDashboard({ lang = 'en' }) {
   const isHt = lang === 'ht';
 
   const [alerts, setAlerts] = useState([]);

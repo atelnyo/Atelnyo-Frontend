@@ -287,7 +287,7 @@ function FilterBar({ filters, onFilterChange, stats, lang }) {
 
 // ─── Main Component ───────────────────────────────────────────────
 
-export default function ModerationQueue({ community, lang = 'ht', showToast }) {
+export default function ModerationQueue({ community, lang = 'en', showToast }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState(new Set());

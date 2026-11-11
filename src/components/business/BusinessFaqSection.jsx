@@ -25,7 +25,7 @@ const STATUS_LABELS = {
   archived: 'Archived',
 };
 
-export default function BusinessFaqSection({ lang = 'ht', t, showToast, profile }) {
+export default function BusinessFaqSection({ lang = 'en', t, showToast, profile }) {
   const isHt = lang === 'ht';
   const [faqs, setFaqs] = useState([]);
   const [loading, setLoading] = useState(true);

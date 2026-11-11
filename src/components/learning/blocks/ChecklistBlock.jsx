@@ -14,7 +14,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 
 export default function ChecklistBlock({
   block,
-  lang = 'ht',
+  lang = 'en',
   index = 0,
   courseId,
   moduleIndex,

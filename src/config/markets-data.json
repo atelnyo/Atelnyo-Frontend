@@ -1,7 +1,7 @@
 {
   "supportedLanguages": ["ht", "en", "fr"],
   "defaultMarket": "HT",
-  "defaultLanguage": "ht",
+  "defaultLanguage": "en",
   "languageLabels": {
     "ht": { "label": "Kreyòl", "native": "Kreyòl", "flag": "🇭🇹" },
     "en": { "label": "English", "native": "English", "flag": "🇬🇧" },

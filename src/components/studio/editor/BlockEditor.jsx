@@ -227,7 +227,7 @@ function newBlock(type) {
   };
 }
 
-export default function BlockEditor({ blocks = [], onBlocksChange, lang = 'ht', courseId, moduleIndex }) {
+export default function BlockEditor({ blocks = [], onBlocksChange, lang = 'en', courseId, moduleIndex }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
 

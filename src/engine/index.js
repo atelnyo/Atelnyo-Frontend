@@ -28,7 +28,7 @@ function truncate(str, max = 160) {
   return str.length > max ? str.slice(0, max - 3).trimEnd() + '...' : str;
 }
 
-function ogLocale(lang = 'ht') {
+function ogLocale(lang = 'en') {
   const map = { ht: 'ht_HT', en: 'en_US', fr: 'fr_FR', es: 'es_ES' };
   return map[lang] || 'en_US';
 }
@@ -70,7 +70,7 @@ export function buildCompanyUrl(slug) {
 export function resolveEntity(entityType, data, context = {}) {
   if (!data) return null;
 
-  const locale = context.locale || 'ht';
+  const locale = context.locale || 'en';
   const market = context.market || 'HT';
 
   // Look up adapter
@@ -349,7 +349,7 @@ function buildProfileSchema(data) {
  * Used by share buttons and Web Share API.
  */
 export function getShareUrl(entityType, data) {
-  const locale = data?.locale || 'ht';
+  const locale = data?.locale || 'en';
   const adapter = ADAPTERS[entityType];
   if (!adapter) return BASE_URL;
   const metadata = adapter(data, { locale });

@@ -21,7 +21,7 @@ function getTrustLevel(score) {
   return TRUST_LEVELS.find(l => score >= l.min && score <= l.max) || TRUST_LEVELS[0];
 }
 
-export default function TrustScoreBadge({ score = 0, size = 80, lang = 'ht' }) {
+export default function TrustScoreBadge({ score = 0, size = 80, lang = 'en' }) {
   const level = getTrustLevel(score);
   const radius = (size - 8) / 2;
   const circumference = 2 * Math.PI * radius;

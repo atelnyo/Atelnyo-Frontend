@@ -50,7 +50,7 @@ const FIELDS = [
   { key: 'audit_history', labelEn: 'Audit History', labelHt: 'Istwa Odit', derive: (m) => Array.isArray(m.audit_log) ? `${m.audit_log.length} events` : null },
 ];
 
-export default function MediaMetadataPanel({ media, lang = 'ht', className = '' }) {
+export default function MediaMetadataPanel({ media, lang = 'en', className = '' }) {
   const item = media || {};
   const isHt = lang === 'ht';
 

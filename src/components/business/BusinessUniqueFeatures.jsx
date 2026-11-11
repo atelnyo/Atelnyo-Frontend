@@ -36,7 +36,7 @@ const DAYS = [
 ];
 
 // ─── 1. Business Hours Editor ──────────────────────────────────────
-export function BusinessHoursEditor({ hours = {}, onChange, lang = 'ht' }) {
+export function BusinessHoursEditor({ hours = {}, onChange, lang = 'en' }) {
   const [editing, setEditing] = useState(false);
   const currentHours = { ...BUSINESS_HOURS_DEFAULT, ...hours };
 
@@ -178,7 +178,7 @@ export function BusinessHoursEditor({ hours = {}, onChange, lang = 'ht' }) {
 }
 
 // ─── 2. Service Catalog ────────────────────────────────────────────
-export function ServiceCatalogEditor({ services = [], onChange, lang = 'ht' }) {
+export function ServiceCatalogEditor({ services = [], onChange, lang = 'en' }) {
   const [adding, setAdding] = useState(false);
   const [newService, setNewService] = useState({ name: '', description: '', price: '', duration: '' });
 
@@ -373,7 +373,7 @@ export function ServiceCatalogEditor({ services = [], onChange, lang = 'ht' }) {
 }
 
 // ─── 3. Invoice Generator ──────────────────────────────────────────
-export function InvoiceGenerator({ businessName, lang = 'ht' }) {
+export function InvoiceGenerator({ businessName, lang = 'en' }) {
   const t = (ht, en) => lang === 'ht' ? ht : en;
 
   return (
@@ -421,7 +421,7 @@ export function InvoiceGenerator({ businessName, lang = 'ht' }) {
 }
 
 // ─── 4. Client Portal ──────────────────────────────────────────────
-export function ClientPortal({ lang = 'ht' }) {
+export function ClientPortal({ lang = 'en' }) {
   const t = (ht, en) => lang === 'ht' ? ht : en;
 
   return (

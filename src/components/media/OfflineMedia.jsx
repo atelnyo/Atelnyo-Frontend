@@ -15,7 +15,7 @@ export default function OfflineMedia({
   mediaType = 'image',
   title,
   onRetry,
-  lang = 'ht',
+  lang = 'en',
   className = '',
 }) {
   const [isOnline, setIsOnline] = useState(navigator.onLine);

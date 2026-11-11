@@ -49,7 +49,7 @@ const EMPTY_FORM = {
   is_featured: false,
 };
 
-export default function CourseFaqEditor({ courseId, modules = [], lang = 'ht', showToast }) {
+export default function CourseFaqEditor({ courseId, modules = [], lang = 'en', showToast }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
   const [faqs, setFaqs] = useState([]);

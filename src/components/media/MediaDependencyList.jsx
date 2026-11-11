@@ -25,7 +25,7 @@ import { computeDependencies } from '../../utils/mediaDependencies';
 import { makeT } from '../../utils/langBackendStub';
 
 export default function MediaDependencyList({
-  lang = 'ht',
+  lang = 'en',
   media,
   inline = false,
   showPendingChip = true,

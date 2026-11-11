@@ -234,7 +234,7 @@ function PostingRecommendations({ bestTimes, dayData }) {
 
 // ─── Main Component ────────────────────────────────────────────────
 
-export default function SchedulingAnalytics({ lang = 'ht', showToast, user }) {
+export default function SchedulingAnalytics({ lang = 'en', showToast, user }) {
   const [heatmapData, setHeatmapData] = useState([]);
   const [bestTimes, setBestTimes] = useState([]);
   const [dayData, setDayData] = useState([]);

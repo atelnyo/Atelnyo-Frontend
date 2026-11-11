@@ -117,7 +117,7 @@ function ConfigBar({ lang }) {
 // ═══════════════════════════════════════════════════════════════════════
 
 export default function CreatorPublicProfile({
-  lang = 'ht',
+  lang = 'en',
   showToast,
   currentUserId = null,
   editingMode = false,
@@ -144,7 +144,7 @@ export default function CreatorPublicProfile({
   // must be passed explicitly. The /creator/:username route works via
   // useParams() alone.
   const navigate = useSafeNavigate();
-  const t = translations?.[lang] || translations?.ht || {};
+  const t = translations?.[lang] || translations?.en || {};
 
   // ─── State ─────────────────────────────────────────────────────────
   const [profile, setProfile] = useState(null);

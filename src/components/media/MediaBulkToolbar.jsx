@@ -77,7 +77,7 @@ export default function MediaBulkToolbar({
   onClearSelection,
   collections = [],
   visibilities = VISIBILITY_PRESETS.map((v) => v.value),
-  lang = 'ht',
+  lang = 'en',
   className = '',
 }) {
   const isHt = lang === 'ht';

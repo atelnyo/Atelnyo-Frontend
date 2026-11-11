@@ -23,13 +23,13 @@ const RULE_TYPES = [
  * @param {Object} props
  * @param {Array} props.rules - current completion rules
  * @param {Function} props.onChange - (rules) => void
- * @param {string} [props.lang='ht']
+ * @param {string} [props.lang='en']
  * @param {Array} [props.blocks] - available blocks (for assessment selection)
  */
 export default function CompletionRulesEditor({
   rules = [],
   onChange,
-  lang = 'ht',
+  lang = 'en',
   blocks = [],
 }) {
   const isHt = lang === 'ht';

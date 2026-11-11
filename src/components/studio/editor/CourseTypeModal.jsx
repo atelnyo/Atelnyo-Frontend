@@ -14,7 +14,7 @@
 import React from 'react';
 import styles from './editor.module.css';
 
-export default function CourseTypeModal({ lang = 'ht', onClose, onSelect }) {
+export default function CourseTypeModal({ lang = 'en', onClose, onSelect }) {
   const isHt = lang === 'ht';
   return (
     <div

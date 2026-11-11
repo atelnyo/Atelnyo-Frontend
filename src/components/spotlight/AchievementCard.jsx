@@ -19,7 +19,7 @@ const ACHIEVEMENT_COLORS = {
   community_joined: '#6366f1',
 };
 
-function timeAgo(dateStr, lang = 'ht') {
+function timeAgo(dateStr, lang = 'en') {
   const now = new Date();
   const date = new Date(dateStr);
   const seconds = Math.floor((now - date) / 1000);
@@ -45,7 +45,7 @@ function timeAgo(dateStr, lang = 'ht') {
   });
 }
 
-export default function AchievementCard({ achievement, lang = 'ht' }) {
+export default function AchievementCard({ achievement, lang = 'en' }) {
   const {
     user,
     achievement_type,

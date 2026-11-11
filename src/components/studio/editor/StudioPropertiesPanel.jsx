@@ -19,7 +19,7 @@ import styles from './editor.module.css';
 /**
  * Properties panel frame — sticky header + accordion groups.
  */
-export default function StudioPropertiesPanel({ lang = 'ht', children, completionPct = null }) {
+export default function StudioPropertiesPanel({ lang = 'en', children, completionPct = null }) {
   const isHt = lang === 'ht';
   return (
     <>
@@ -52,7 +52,7 @@ export function PropertyGroup({
   icon = 'fa-circle-info',
   label,
   labelHt,
-  lang = 'ht',
+  lang = 'en',
   defaultOpen = false,
   accent = 'var(--color-primary, #3b82f6)',
   completionPct = null,
@@ -101,7 +101,7 @@ export function PropertyGroup({
 export function PropField({
   label,
   labelHt,
-  lang = 'ht',
+  lang = 'en',
   required = false,
   error,
   hint,
@@ -200,7 +200,7 @@ export function PropSelect(props) {
 /**
  * Toggle — on/off switch.
  */
-export function PropToggle({ checked, onChange, label, labelHt, lang = 'ht' }) {
+export function PropToggle({ checked, onChange, label, labelHt, lang = 'en' }) {
   const isHt = lang === 'ht';
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 0' }}>

@@ -39,7 +39,7 @@ function ProgressBar({ value, max, label, color }) {
   );
 }
 
-export default function MediaAnalyticsDashboard({ lang = 'ht' }) {
+export default function MediaAnalyticsDashboard({ lang = 'en' }) {
   const isHt = lang === 'ht';
   const [summary, setSummary] = useState(null);
   const [healthSummary, setHealthSummary] = useState(null);

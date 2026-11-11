@@ -100,7 +100,7 @@ const ERROR_TOAST = {
   title_too_long: 'titleTooLong',
 };
 
-export default function TikTokPublishModal({ onClose, lang = 'ht', showToast, onPosted }) {
+export default function TikTokPublishModal({ onClose, lang = 'en', showToast, onPosted }) {
   const [info, setInfo] = useState(null);
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true); // true: mount-fetch runs immediately

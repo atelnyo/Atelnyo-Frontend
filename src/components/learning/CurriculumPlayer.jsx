@@ -132,7 +132,7 @@ const base = {
 
 export default function CurriculumPlayer({
   courseId,
-  lang = 'ht',
+  lang = 'en',
   progress: progressProp,
   onBlockComplete,
   onLessonComplete,

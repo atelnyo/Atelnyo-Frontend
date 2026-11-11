@@ -67,7 +67,7 @@ import CompletionRulesEditor from './CompletionRulesEditor';
 import StudioAIChat from './StudioAIChat';
 import styles from './editor.module.css';
 
-export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'ht', showToast, user, item, deliveryType = 'online' }) {
+export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en', showToast, user, item, deliveryType = 'online' }) {
   const isEdit = Boolean(item);
   const adminManaged = item?._intelligenceAdminManaged === true;
   const isHt = lang === 'ht';

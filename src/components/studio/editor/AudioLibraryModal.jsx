@@ -15,7 +15,7 @@ import { mediaLibraryService } from '../../../services/api';
 import AudioPlayer from '../../learning/AudioPlayer';
 import styles from './editor.module.css';
 
-export default function AudioLibraryModal({ lang = 'ht', onSelect, onClose }) {
+export default function AudioLibraryModal({ lang = 'en', onSelect, onClose }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
   const [items, setItems] = useState(null); // null = loading

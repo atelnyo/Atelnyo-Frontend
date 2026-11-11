@@ -256,7 +256,7 @@ function formatPostTime(iso, lang) {
 }
 
 export default function CommunityPosts() {
-  const { community, lang = 'ht', user, showToast } = useOutletContext();
+  const { community, lang = 'en', user, showToast } = useOutletContext();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState('');
@@ -747,20 +747,21 @@ export default function CommunityPosts() {
         </p>
       )}
 
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <div style={{ position: 'relative', flex: 1 }}>
-          <i className="fas fa-search" aria-hidden="true" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} />
+      <div className="c-post-search" role="search">
+        <div className="c-post-search-field">
+          <i className="fas fa-search c-post-search-icon" aria-hidden="true" />
           <input
+            type="search"
+            className="c-post-search-input"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder={t4(lang, 'Chache yon pòs... (tèks oswa @user)', 'Search posts... (text or @user)', 'Rechercher... (texte ou @user)', 'Buscar... (texto o @usuario)')}
             aria-label={t4(lang, 'Chache pòs', 'Search posts', 'Rechercher', 'Buscar')}
             data-testid="posts-search-input"
-            style={{ width: '100%', border: '1px solid var(--border-color, #cbd5e1)', borderRadius: 20, padding: '8px 32px 8px 32px' }}
           />
           {searchInput && (
             <button type="button" onClick={() => setSearchInput('')} aria-label="Clear" data-testid="posts-search-clear"
-              style={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'transparent', cursor: 'pointer', opacity: 0.6 }}>
+              className="c-post-search-clear">
               <i className="fas fa-times" aria-hidden="true" />
             </button>
           )}
@@ -776,11 +777,13 @@ export default function CommunityPosts() {
         <div className="c-state">
           <i className="fas fa-comments c-state-icon" aria-hidden="true" />
           <p className="c-state-text">
-            {isMember
+            {search
+              ? t4(lang, `Pa gen pòs ki koresponn ak "${search}".`, `No posts match "${search}".`, `Aucune publication ne correspond à « ${search} ».`, `Ninguna publicación coincide con « ${search} ».`)
+              : isMember
               ? t4(lang, 'Pa gen pòs ankò — se premye moun ki pibliye!', 'No posts yet — be the first to publish!', 'Aucune publication — soyez le premier !', '¡Sin publicaciones — sé el primero!')
               : t4(lang, 'Pa gen pòs ankò.', 'No posts yet.', 'Aucune publication.', 'Sin publicaciones.')}
           </p>
-          {!isMember && (
+          {!search && !isMember && (
             <p className="c-state-text">
               {t4(lang, 'Antre nan kominote a pou w patisipe.', 'Join the community to take part.', 'Rejoignez la communauté pour participer.', 'Únete a la comunidad para participar.')}
             </p>

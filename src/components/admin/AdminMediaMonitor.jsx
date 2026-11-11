@@ -39,7 +39,7 @@ function StatCard({ icon, label, value, color, subtitle }) {
   );
 }
 
-export default function AdminMediaMonitor({ lang = 'ht', showToast }) {
+export default function AdminMediaMonitor({ lang = 'en', showToast }) {
   const isHt = lang === 'ht';
   const [validationStats, setValidationStats] = useState(null);
   const [providers, setProviders] = useState([]);

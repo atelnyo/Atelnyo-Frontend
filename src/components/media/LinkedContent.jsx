@@ -38,7 +38,7 @@ const MODULE_LABELS = {
   other: { en: 'Other', ht: 'Lòt' },
 };
 
-export default function LinkedContent({ usages = [], lang = 'ht', className = '' }) {
+export default function LinkedContent({ usages = [], lang = 'en', className = '' }) {
   const isHt = lang === 'ht';
 
   if (!usages || usages.length === 0) {

@@ -146,7 +146,7 @@ export function extractOtpCode(text) {
 }
 
 // ─── Error message extraction ────────────────────────────────────────
-export function extractError(err, lang = 'ht') {
+export function extractError(err, lang = 'en') {
   const msg = err?.response?.data?.error || err?.response?.data?.detail
     || (lang === 'ht' ? 'Gen yon erè ki fèt.' : 'An error occurred.');
   return typeof msg === 'string' ? msg : JSON.stringify(msg);
@@ -204,7 +204,7 @@ export function scorePassword(password) {
 // ─── Pre-submit form validation ──────────────────────────────────────
 // Returns { field: message } keyed by form field name; empty object when
 // the form is valid. Bilingual (ht/en) to match the Auth component.
-export function validateSignupFields({ email, password, confirmPassword }, lang = 'ht') {
+export function validateSignupFields({ email, password, confirmPassword }, lang = 'en') {
   const errors = {};
   const ht = lang === 'ht';
   if (!isValidEmail(email)) {
@@ -225,7 +225,7 @@ export function validateSignupFields({ email, password, confirmPassword }, lang 
   return errors;
 }
 
-export function validateLoginFields({ email, password }, lang = 'ht') {
+export function validateLoginFields({ email, password }, lang = 'en') {
   const errors = {};
   const ht = lang === 'ht';
   if (!email || !email.trim()) {

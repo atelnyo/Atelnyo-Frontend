@@ -11,7 +11,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import { courseService } from '../../../services/api';
 import styles from './sections.module.css';
 
-export default function CourseExportImportModal({ course, lang = 'ht', onClose, onImportSuccess }) {
+export default function CourseExportImportModal({ course, lang = 'en', onClose, onImportSuccess }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
   const [mode, setMode] = useState(course ? 'export' : 'import'); // 'export' | 'import'

@@ -144,7 +144,7 @@ function ProductFallback({ title }) {
 /* ══════════════════════════════════════════════════════════════════
    MAIN COMPONENT
    ══════════════════════════════════════════════════════════════════ */
-export default function ProductDetail({ lang = 'ht', product: propProduct, onBack, onOpenCheckout, contentId, user, showToast }) {
+export default function ProductDetail({ lang = 'en', product: propProduct, onBack, onOpenCheckout, contentId, user, showToast }) {
   // ``id`` is the raw URL segment: the ``{id}`` from the canonical
   // ``/{id}@{user}/product`` key (contentId), a numeric pk, or a
   // unique slug (legacy /marketplace/:id links). All are resolved
@@ -153,7 +153,7 @@ export default function ProductDetail({ lang = 'ht', product: propProduct, onBac
   const location = useLocation();
   const navigate = useSafeNavigate();
   const id = contentId ?? urlId;
-  const t = (translations && translations[lang]) || translations.ht || {};
+  const t = (translations && translations[lang]) || translations.en || {};
 
   // Phase PayPal — Buy now routes through the unified CheckoutModal
   // (PayPal PRIMARY). Free digital products keep the direct download.

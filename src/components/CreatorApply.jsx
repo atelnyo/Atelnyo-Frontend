@@ -932,7 +932,7 @@ function StatusDashboard({ app, lang, onResume }) {
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════
 
-export default function CreatorApply({ lang = 'ht', showToast, user, onClose }) {
+export default function CreatorApply({ lang = 'en', showToast, user, onClose }) {
   const navigate = useSafeNavigate();
   const isHt = lang === 'ht';
   const { loading: gateLoading } = useRoleGate('apply_creator');

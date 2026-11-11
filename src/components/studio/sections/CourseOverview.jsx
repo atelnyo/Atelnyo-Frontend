@@ -12,7 +12,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { courseService } from '../../../services/api';
 import styles from './sections.module.css';
 
-export default function CourseOverview({ lang = 'ht', onNavigate }) {
+export default function CourseOverview({ lang = 'en', onNavigate }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
 

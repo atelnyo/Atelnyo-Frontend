@@ -118,7 +118,7 @@ function detectCompletedSteps(profileData, coursesCount = 0, portfolioCount = 0)
 // ═══════════════════════════════════════════════════════════════════════
 
 export default function WelcomeChecklist({
-  lang = 'ht',
+  lang = 'en',
   profileData,
   coursesCount = 0,
   portfolioCount = 0,

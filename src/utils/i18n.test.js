@@ -16,8 +16,8 @@ describe('translateKey — never returns undefined', () => {
   });
 
   it('falls back to DEFAULT_LANGUAGE when the requested lang is missing', () => {
-    // DEFAULT_LANGUAGE is 'ht' and ht has 'common.save'
-    expect(translateKey('fr', 'common.save', dict)).toBe('Sove');
+    // DEFAULT_LANGUAGE is English and en has 'common.save'.
+    expect(translateKey('fr', 'common.save', dict)).toBe('Save');
   });
 
   it('falls back to explicit fallback when no dict value exists', () => {
@@ -48,7 +48,7 @@ describe('translateKey — never returns undefined', () => {
 
   it('does not treat the default language as a fallback when it is the requested lang', () => {
     // When DEFAULT_LANGUAGE === requested lang, do not double-resolve.
-    expect(translateKey(DEFAULT_LANG, 'common.save', dict)).toBe('Sove');
+    expect(translateKey(DEFAULT_LANG, 'common.save', dict)).toBe('Save');
   });
 });
 
@@ -82,6 +82,7 @@ describe('t2Resolved — wraps t2 and may log missing keys in dev', () => {
 describe('DEFAULT_LANGUAGE export agrees with markets config', () => {
   it('matches src/config/markets.js DEFAULT_LANGUAGE', () => {
     expect(DEFAULT_LANGUAGE).toBe(DEFAULT_LANG);
+    expect(DEFAULT_LANGUAGE).toBe('en');
   });
 });
 

@@ -30,7 +30,7 @@ const DISCOUNT_TYPES = [
   { id: 'full', label: { ht: '100% (gratis)', en: '100% (free)' } },
 ];
 
-export default function PromotionsSection({ lang = 'ht', showToast, t = {} }) {
+export default function PromotionsSection({ lang = 'en', showToast, t = {} }) {
   const isHt = lang === 'ht';
   const tr = (en, ht) => (isHt ? ht : en);
   const [showForm, setShowForm] = useState(false);

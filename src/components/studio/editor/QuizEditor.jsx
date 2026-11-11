@@ -18,7 +18,7 @@ import React, { useState, useCallback } from 'react';
 import { quizService, quizQuestionService } from '../../../services/api';
 import styles from './editor.module.css';
 
-export default function QuizEditor({ courseId, moduleIndex, lang = 'ht' }) {
+export default function QuizEditor({ courseId, moduleIndex, lang = 'en' }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
   const [quizzes, setQuizzes] = useState(null); // null = not loaded

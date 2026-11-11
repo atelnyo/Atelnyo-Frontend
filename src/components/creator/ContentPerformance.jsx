@@ -153,7 +153,7 @@ function PerformanceSummary({ data }) {
 
 // ─── Main Component ────────────────────────────────────────────────
 
-export default function ContentPerformance({ lang = 'ht', showToast, user }) {
+export default function ContentPerformance({ lang = 'en', showToast, user }) {
   const [content, setContent] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

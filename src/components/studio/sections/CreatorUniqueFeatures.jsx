@@ -13,7 +13,7 @@
 import React, { useState } from 'react';
 
 // ─── 1. Content Calendar ───────────────────────────────────────────
-export function ContentCalendar({ lang = 'ht', scheduledContent = [] }) {
+export function ContentCalendar({ lang = 'en', scheduledContent = [] }) {
   const [view, setView] = useState('week');
   const t = (ht, en) => lang === 'ht' ? ht : en;
 
@@ -133,7 +133,7 @@ export function ContentCalendar({ lang = 'ht', scheduledContent = [] }) {
 }
 
 // ─── 2. Achievement Showcase ────────────────────────────────────────
-export function AchievementShowcase({ achievements = [], lang = 'ht' }) {
+export function AchievementShowcase({ achievements = [], lang = 'en' }) {
   const t = (ht, en) => lang === 'ht' ? ht : en;
 
   const ACHIEVEMENT_TYPES = [
@@ -221,7 +221,7 @@ export function AchievementShowcase({ achievements = [], lang = 'ht' }) {
 }
 
 // ─── 3. Collaboration Hub ───────────────────────────────────────────
-export function CollaborationHub({ lang = 'ht', collaborators = [] }) {
+export function CollaborationHub({ lang = 'en', collaborators = [] }) {
   const t = (ht, en) => lang === 'ht' ? ht : en;
 
   return (
@@ -318,7 +318,7 @@ export function CollaborationHub({ lang = 'ht', collaborators = [] }) {
 }
 
 // ─── 4. Learning Path Builder ───────────────────────────────────────
-export function LearningPathBuilder({ lang = 'ht', courses = [] }) {
+export function LearningPathBuilder({ lang = 'en', courses = [] }) {
   const t = (ht, en) => lang === 'ht' ? ht : en;
 
   return (
@@ -441,7 +441,7 @@ export function LearningPathBuilder({ lang = 'ht', courses = [] }) {
 }
 
 // ─── 5. Community Builder ───────────────────────────────────────────
-export function CommunityBuilder({ lang = 'ht', stats = {} }) {
+export function CommunityBuilder({ lang = 'en', stats = {} }) {
   const t = (ht, en) => lang === 'ht' ? ht : en;
 
   return (

@@ -83,7 +83,7 @@ const T = {
 };
 
 /* eslint-disable react/prop-types -- the codebase defines no PropTypes anywhere; props-only component (same as FileRow) */
-export default function RestoreBanner({ lang = 'ht' }) {
+export default function RestoreBanner({ lang = 'en' }) {
   const [summary, setSummary] = useState(null);
   // One-session dismissal — the banner never re-appears after either
   // action until the next relaunch (module state survives HMR, fine).

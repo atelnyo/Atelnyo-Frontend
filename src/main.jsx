@@ -71,7 +71,7 @@ class AppErrorBoundary extends React.Component {
   };
   render() {
     if (this.state.hasError) {
-      const isHt = (localStorage.getItem('atelnyo_lang') || 'ht') === 'ht';
+      const isHt = (localStorage.getItem('atelnyo_lang') || 'en') === 'ht';
       return (
         <div role="alert" style={{
           minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',

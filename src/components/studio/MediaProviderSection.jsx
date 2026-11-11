@@ -1500,7 +1500,7 @@ function URLValidation({ t }) {
           validationResult={result}
           onEditUrl={handleEditUrl}
           onSave={handleSave}
-          lang="ht"
+          lang='en'
         />
       )}
     </div>
@@ -1511,7 +1511,7 @@ function URLValidation({ t }) {
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════
 
-export default function MediaProviderSection({ lang = 'ht', showToast }) {
+export default function MediaProviderSection({ lang = 'en', showToast }) {
   const t = useCallback((key, vars) => {
     let val = tLabel(key, lang);
     if (vars) {

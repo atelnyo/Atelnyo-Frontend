@@ -20,7 +20,7 @@ import React, { useEffect, useState } from 'react';
 import { businessProfileService } from '../../services/api';
 
 export default function BusinessSellerSection({
-  lang = 'ht', t = {}, showToast, profile,
+  lang = 'en', t = {}, showToast, profile,
 }) {
   const isHt = lang === 'ht';
   const [seller, setSeller] = useState(null);

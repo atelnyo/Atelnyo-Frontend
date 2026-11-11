@@ -25,7 +25,7 @@ import { t2 } from '../../../utils/i18n';
 
 export default function ContentStructureView({
   chapters = [],
-  lang = 'ht',
+  lang = 'en',
   courseTitle = '',
   className = '',
 }) {

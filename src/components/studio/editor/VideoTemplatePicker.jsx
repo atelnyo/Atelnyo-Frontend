@@ -168,10 +168,10 @@ const templates = [
   },
 ];
 
-export default function VideoTemplatePicker({ 
-  lang = 'ht', 
+export default function VideoTemplatePicker({
+  lang = 'en',
   onSelect,
-  show = true 
+  show = true,
 }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht || en : en);

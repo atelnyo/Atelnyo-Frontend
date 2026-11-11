@@ -65,12 +65,12 @@ const ERROR_MESSAGES = {
 /**
  * @param {object} [options]
  * @param {number}  [options.timeout=10000]  Geolocation timeout in ms
- * @param {string}  [options.lang='ht']        Language for error messages
+ * @param {string}  [options.lang='en']        Language for error messages
  * @returns {{ detectPosition: () => Promise<void>, detectState: DetectState, location: GeoLocation, error: string | null }}
  */
 export default function useGeolocation(options = {}) {
-  const { timeout = 10000, lang = 'ht' } = options;
-  const msg = ERROR_MESSAGES[lang] || ERROR_MESSAGES.ht;
+  const { timeout = 10000, lang = 'en' } = options;
+  const msg = ERROR_MESSAGES[lang] || ERROR_MESSAGES.en;
 
   const [detectState, setDetectState] = useState(/** @type {DetectState} */('idle'));
   const [location, setLocation] = useState(/** @type {GeoLocation} */ (null));
@@ -112,7 +112,7 @@ export default function useGeolocation(options = {}) {
       const { latitude, longitude } = pos.coords;
       setDetectState('geocoding');
 
-      const geo = await reverseGeocode(latitude, longitude);
+      const geo = await reverseGeocode(latitude, longitude, lang);
 
       if (abortRef.current) return;
 
@@ -142,7 +142,7 @@ export default function useGeolocation(options = {}) {
         setError(msg.generic);
       }
     }
-  }, [timeout, msg]);
+  }, [lang, timeout, msg]);
 
   return { detectPosition, detectState, location, error };
 }

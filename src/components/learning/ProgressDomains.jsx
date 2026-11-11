@@ -18,14 +18,14 @@ import React from 'react';
  * @param {Array} props.blocks - all blocks in the module/course
  * @param {Set|Array} props.completedBlocks - completed block IDs
  * @param {Object} [props.assessmentResults] - { id: { passed, score } }
- * @param {string} [props.lang='ht']
+ * @param {string} [props.lang='en']
  * @param {boolean} [props.compact=false]
  */
 export default function ProgressDomains({
   blocks = [],
   completedBlocks,
   assessmentResults = {},
-  lang = 'ht',
+  lang = 'en',
   compact = false,
 }) {
   const isHt = lang === 'ht';

@@ -23,7 +23,7 @@ export default function ActionDrawer({
   title = '',
   actions = [],
   onClose,
-  lang = 'ht',
+  lang = 'en',
   // 'bottom' = mobile slide-up (default)
   // 'right'  = desktop slide-from-right
   position = 'bottom',

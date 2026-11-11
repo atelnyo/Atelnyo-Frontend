@@ -843,7 +843,7 @@ export function CommunityCourses() {
 
 // ── Parent layout ───────────────────────────────────────────────────────
 
-export default function CommunityDetail({ lang = 'ht', t = {}, showToast, user }) {
+export default function CommunityDetail({ lang = 'en', t = {}, showToast, user }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { slug } = useParams();

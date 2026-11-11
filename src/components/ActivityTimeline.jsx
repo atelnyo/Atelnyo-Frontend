@@ -628,7 +628,7 @@ function EventRow({ event, lang, t, onMarkRead, onNavigate, onShowNotice, onAcce
 
 // ─── Main component ─────────────────────────────────────────────────────
 
-export function ActivityTimeline({ lang = 'ht', userId, t, onMarkRead, onMarkAllRead, onNavigate, onAcceptProposal, onRejectProposal, onAcceptRequest, onRejectRequest, refreshToken, showMarkAllRead = false }) {
+export function ActivityTimeline({ lang = 'en', userId, t, onMarkRead, onMarkAllRead, onNavigate, onAcceptProposal, onRejectProposal, onAcceptRequest, onRejectRequest, refreshToken, showMarkAllRead = false }) {
   const [events, setEvents] = useState([]);
   const [loadingInitial, setLoadingInitial] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);

@@ -52,7 +52,7 @@ export default function SaveStatusIndicator({
   lastSaved,
   error,
   onRetry,
-  lang = 'ht',
+  lang = 'en',
   compact = false,
 }) {
   const config = STATUS_CONFIG[status] || STATUS_CONFIG.idle;

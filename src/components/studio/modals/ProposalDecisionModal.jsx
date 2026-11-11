@@ -36,7 +36,7 @@ const formatDate = (iso) => {
 export default function ProposalDecisionModal({
   proposal,
   mode = 'accept', // 'accept' | 'reject'
-  lang = 'ht',
+  lang = 'en',
   onClose,
   onDone,
   // Multi-hire: remaining slots on the job (positions - hired). When this

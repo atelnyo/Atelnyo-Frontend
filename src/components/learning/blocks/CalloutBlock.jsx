@@ -25,7 +25,7 @@ const VARIANT_CONFIG = {
   info:      { icon: 'fa-circle-info', label: { en: 'Info', ht: 'Enfòmasyon' } },
 };
 
-export default function CalloutBlock({ block, lang = 'ht', index, courseId, moduleIndex, onComplete, onViewed }) {
+export default function CalloutBlock({ block, lang = 'en', index, courseId, moduleIndex, onComplete, onViewed }) {
   const isHt = lang === 'ht';
   const viewedRef = useRef(false);
 

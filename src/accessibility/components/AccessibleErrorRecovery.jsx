@@ -28,7 +28,7 @@ export default function AccessibleErrorRecovery({
   title,
   description,
   actions = [],
-  lang = 'ht',
+  lang = 'en',
   icon = 'fa-triangle-exclamation',
   className = '',
   saved = false,

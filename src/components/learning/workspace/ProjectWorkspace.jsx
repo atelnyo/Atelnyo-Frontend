@@ -20,7 +20,7 @@ import './ProjectWorkspace.css';
 
 export default function ProjectWorkspace({
   courseId,
-  lang = 'ht',
+  lang = 'en',
   user,
   showToast,
   // §15 — Return context: which lesson the student came from

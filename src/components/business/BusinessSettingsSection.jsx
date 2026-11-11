@@ -14,7 +14,7 @@ import React, { useState } from 'react';
 import { businessProfileService } from '../../services/api';
 import { BUSINESS_DAYS, businessDayLabel } from '../../utils/businessHours';
 
-export default function BusinessSettingsSection({ lang = 'ht', t, showToast, profile, onSaved }) {
+export default function BusinessSettingsSection({ lang = 'en', t, showToast, profile, onSaved }) {
   const isHt = lang === 'ht';
 
   // Phase 9 — public contact & information fields.

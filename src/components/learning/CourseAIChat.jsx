@@ -38,7 +38,7 @@ export default function CourseAIChat({
   moduleTitle = '',
   lessonTitle = '',
   blockContent = '',
-  lang = 'ht',
+  lang = 'en',
   style = {},
 }) {
   const isHt = lang === 'ht';

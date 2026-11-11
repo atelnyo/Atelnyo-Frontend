@@ -56,7 +56,7 @@ const JOIN_MODES = [
   },
 ];
 
-export default function CreateCommunityModal({ lang = 'ht', t, showToast, onClose, onCreated }) {
+export default function CreateCommunityModal({ lang = 'en', t, showToast, onClose, onCreated }) {
   const isHt = lang === 'ht';
   const [form, setForm] = useState({
     name: '',

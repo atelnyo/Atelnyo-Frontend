@@ -58,7 +58,7 @@ const Newsletter = ({ lang, t }) => {
     },
   };
 
-  const t2 = translations[lang] || translations.ht;
+  const t2 = translations[lang] || translations.en;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -75,7 +75,7 @@ const Newsletter = ({ lang, t }) => {
     try {
       const res = await api.post('/newsletter/subscribe/', {
         email: trimmed,
-        lang: lang || 'ht',
+        lang: lang || 'en',
         source: 'explore_page',
       });
 

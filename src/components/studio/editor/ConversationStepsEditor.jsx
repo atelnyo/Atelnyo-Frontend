@@ -23,7 +23,7 @@ function newStep(speaker1, speaker2, index) {
   return { speaker, prompt: '', audio: '' };
 }
 
-export default function ConversationStepsEditor({ block, onChange, lang = 'ht' }) {
+export default function ConversationStepsEditor({ block, onChange, lang = 'en' }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
   const defaults = DEFAULT_SPEAKER_LABELS[isHt ? 'ht' : 'en'];

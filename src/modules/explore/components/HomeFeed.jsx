@@ -249,7 +249,7 @@ function GuestWelcomeCard({ lang, t, onSignUp }) {
 // ─── HomeFeed Component ─────────────────────────────────────────────────
 
 export default function HomeFeed({
-  lang = 'ht',
+  lang = 'en',
   translations,
   user,
   // true → request the DEIE smart feed (engine=deie on /api/feed/home/)
@@ -277,7 +277,7 @@ export default function HomeFeed({
   // just-followed account drops out of the next suggestion rail).
   refreshSignal = 0,
 }) {
-  const t = translations?.[lang] || translations?.ht || {};
+  const t = translations?.[lang] || translations?.en || {};
   // Route hook — declared at the top so the hook order stays stable
   // across the early returns below (loading/error/empty states).
   const navigate = useNavigate();

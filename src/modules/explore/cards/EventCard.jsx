@@ -81,7 +81,7 @@ function downloadICS(ev) {
   return true;
 }
 
-export default function EventCard({ event, t, lang = 'ht', onOpenCheckout, showToast, user, onRSVPSuccess, saveCount = null }) {
+export default function EventCard({ event, t, lang = 'en', onOpenCheckout, showToast, user, onRSVPSuccess, saveCount = null }) {
   const [rsvping, setRsvping] = useState(false);
   const [rsvped, setRsvped] = useState(event?.has_ticket || false);
   const [imgLoaded, setImgLoaded] = useState(false);

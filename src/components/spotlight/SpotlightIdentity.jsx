@@ -32,7 +32,7 @@ const ACHIEVEMENT_FILTERS = [
   { value: 'creator_verified', labelHt: 'Verifye', labelEn: 'Verified' },
 ];
 
-export default function SpotlightIdentity({ lang = 'ht' }) {
+export default function SpotlightIdentity({ lang = 'en' }) {
   const { username } = useParams();
   const [identity, setIdentity] = useState(null);
   const [achievements, setAchievements] = useState([]);

@@ -36,7 +36,7 @@ import {
 
 // ─── SEO meta tags (only on dedicated /login or /signup routes) ──────
 function AuthSeoMeta({ lang, mode }) {
-  const t = translations[lang] || translations.ht || {};
+  const t = translations[lang] || translations.en || {};
   const siteName = 'Atelnyo';
   const isLogin = mode === 'login' || mode === '2fa';
   const title = isLogin

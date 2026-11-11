@@ -24,7 +24,7 @@ function classNames(...parts) {
   return parts.filter(Boolean).join(' ');
 }
 
-export default function BusinessHub({ lang = 'ht', showToast }) {
+export default function BusinessHub({ lang = 'en', showToast }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const t = translations[lang] || translations.en || {};

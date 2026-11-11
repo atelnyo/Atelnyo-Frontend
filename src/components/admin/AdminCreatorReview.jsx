@@ -644,7 +644,7 @@ const FILTER_OPTIONS = [
   { value: 'suspended',    label: 'Suspended',    icon: 'fa-ban' },
 ];
 
-export default function AdminCreatorReview({ lang = 'ht', showToast, user, onNavigate }) {
+export default function AdminCreatorReview({ lang = 'en', showToast, user, onNavigate }) {
   const [applications, setApplications] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

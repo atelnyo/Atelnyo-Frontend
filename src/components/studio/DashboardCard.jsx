@@ -23,7 +23,7 @@ export default function DashboardCard({
   subtitle = null,
   backendPending = false,
   endpoint = null,
-  lang = 'ht',
+  lang = 'en',
   onClick = null,
   size = 'md', // 'sm' | 'md' | 'lg'
   tone = 'neutral', // 'neutral' | 'accent' | 'success' | 'warning' | 'danger'

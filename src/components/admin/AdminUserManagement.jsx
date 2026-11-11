@@ -1208,7 +1208,7 @@ const FILTER_OPTIONS = [
   { value: 'auto_renew:false', label: 'Not Renewing', icon: 'fa-hourglass-half' },
 ];
 
-export default function AdminUserManagement({ lang = 'ht', showToast, user, onNavigate }) {
+export default function AdminUserManagement({ lang = 'en', showToast, user, onNavigate }) {
   const isHt = lang === 'ht';
 
   // ─── Billing permission gate ───────────────────────────────────

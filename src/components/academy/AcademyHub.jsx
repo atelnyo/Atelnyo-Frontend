@@ -50,9 +50,9 @@ function AcademyEmpty({ isHt, onBack }) {
   );
 }
 
-export default function AcademyHub({ lang = 'ht', translations, onOpenCourse, onBack, showToast }) {
+export default function AcademyHub({ lang = 'en', translations, onOpenCourse, onBack, showToast }) {
   const isHt = lang === 'ht';
-  const t = translations?.[lang] || translations?.ht || {};
+  const t = translations?.[lang] || translations?.en || {};
 
   const [programs, setPrograms] = useState(null);
   const [failed, setFailed] = useState(false);

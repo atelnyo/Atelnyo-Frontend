@@ -26,7 +26,7 @@ import React from 'react';
 import { makeT } from '../../utils/langBackendStub';
 
 export default function BackendPendingChip({
-  lang = 'ht',
+  lang = 'en',
   endpoint = null,
   inline = false,
 }) {

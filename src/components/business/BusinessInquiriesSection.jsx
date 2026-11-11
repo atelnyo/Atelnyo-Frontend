@@ -29,7 +29,7 @@ const TOPIC_ICONS = {
   support: 'fa-life-ring',
 };
 
-export default function BusinessInquiriesSection({ lang = 'ht', t = {}, showToast, profile }) {
+export default function BusinessInquiriesSection({ lang = 'en', t = {}, showToast, profile }) {
   const isHt = lang === 'ht';
   const [loading, setLoading] = useState(true);
   const [inquiries, setInquiries] = useState([]);

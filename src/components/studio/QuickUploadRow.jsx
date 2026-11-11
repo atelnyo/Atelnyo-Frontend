@@ -16,7 +16,7 @@ import BackendPendingChip from '../media/BackendPendingChip';
 import { makeT } from '../../utils/langBackendStub';
 
 export default function QuickUploadRow({
-  lang = 'ht',
+  lang = 'en',
   onSearch,
   onSearchClear,
   onUpload, // optional — calls (url) => Promise; if absent, uses placeholder toast

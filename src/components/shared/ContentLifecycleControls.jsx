@@ -61,10 +61,10 @@ export default function ContentLifecycleControls({
   contentType,
   objectId,
   initialState = null,
-  lang = 'ht',
+  lang = 'en',
   onChanged,
 }) {
-  const copy = COPY[lang] || COPY.ht;
+  const copy = COPY[lang] || COPY.en;
   const [state, setState] = useState(initialState);
   const [busy, setBusy] = useState('');
   const [scheduleAt, setScheduleAt] = useState('');

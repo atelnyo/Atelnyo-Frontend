@@ -31,7 +31,7 @@ function classNames(...parts) {
   return parts.filter(Boolean).join(' ');
 }
 
-export default function CompanySection({ lang = 'ht', t, showToast }) {
+export default function CompanySection({ lang = 'en', t, showToast }) {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);   // null = no profile yet
   const [saving, setSaving] = useState(false);

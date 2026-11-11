@@ -18,7 +18,7 @@ export default function SmartMigrationWizard({
   media = {},
   onComplete,
   onCancel,
-  lang = 'ht',
+  lang = 'en',
   className = '',
 }) {
   const isHt = lang === 'ht';

@@ -28,7 +28,7 @@ function asList(value) {
   return [];
 }
 
-export default function ProjectBlock({ block, lang = 'ht', index, courseId, moduleIndex, onComplete, onViewed }) {
+export default function ProjectBlock({ block, lang = 'en', index, courseId, moduleIndex, onComplete, onViewed }) {
   const isHt = lang === 'ht';
   const viewedRef = useRef(false);
   const [showSubmit, setShowSubmit] = useState(false);

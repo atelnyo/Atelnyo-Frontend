@@ -33,7 +33,7 @@ export default function MediaInspector({
   onReplace,
   onArchive,
   onDelete,
-  lang = 'ht',
+  lang = 'en',
 }) {
   const item = media || mediaData || {};
   const isHt = lang === 'ht';

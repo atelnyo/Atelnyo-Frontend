@@ -49,7 +49,7 @@ function formatTimestamp(iso) {
   return d.toLocaleDateString();
 }
 
-export default function VersionHistoryModal({ courseId, lang = 'ht', onClose, onRestored }) {
+export default function VersionHistoryModal({ courseId, lang = 'en', onClose, onRestored }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
   const labels = FIELD_LABELS[lang] || FIELD_LABELS.en;

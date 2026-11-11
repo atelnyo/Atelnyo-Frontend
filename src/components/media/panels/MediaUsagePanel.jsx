@@ -8,7 +8,7 @@
 import React from 'react';
 import LinkedContent from '../LinkedContent';
 
-export default function MediaUsagePanel({ media, lang = 'ht' }) {
+export default function MediaUsagePanel({ media, lang = 'en' }) {
   const item = media || {};
   const isHt = lang === 'ht';
   const usages = Array.isArray(item.usages) ? item.usages : [];

@@ -21,7 +21,7 @@ function formatDate(value, lang) {
   });
 }
 
-export default function CreatorPostPage({ lang = 'ht' }) {
+export default function CreatorPostPage({ lang = 'en' }) {
   const { username = '', slug = '' } = useParams();
   const isHt = lang === 'ht';
   const [post, setPost] = useState(null);

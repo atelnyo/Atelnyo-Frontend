@@ -100,7 +100,7 @@ const COURSE_DIRECTIONS = [
 // Without this, every failed fetch shows the opaque "Network Error"
 // string — the user has no idea whether the server is down, the
 // connection is blocked, or the request timed out.
-function describeFetchError(err, fallbackMsg, lang = 'ht') {
+function describeFetchError(err, fallbackMsg, lang = 'en') {
   // CORS preflight failure: browser blocks the response, err.response
   // is undefined and err.message is "Network Error".
   if (!err?.response && (err?.message === 'Network Error' || err?.code === 'ERR_NETWORK')) {
@@ -139,8 +139,8 @@ function describeFetchError(err, fallbackMsg, lang = 'ht') {
 }
 
 function getChipLabel(chip, lang) {
-  const langKey = ['en', 'fr', 'es'].includes(lang) ? lang : 'ht';
-  return chip[langKey] || chip.ht;
+  const langKey = ['ht', 'en', 'fr'].includes(lang) ? lang : 'en';
+  return chip[langKey] || chip.en;
 }
 
 // ─── Recommended-rail card wrapper (Phase 37 negative feedback) ─────────
@@ -245,7 +245,7 @@ const VISIBLE_COUNT_TYPES = {
 
 export function Explore({
   user,
-  lang = 'ht',
+  lang = 'en',
   // Phase 4/§29 — resolved market context (URL locale segment or the
   // user's stored atelnyo_market choice). Empty string = no explicit
   // market → the backend returns the GLOBAL catalog (markets=[] rows
@@ -261,7 +261,7 @@ export function Explore({
   onOpenCheckout,         // Phase 32 — marketplace + escrow checkout wiring
   showToast,
 }) {
-  const t = translations?.[lang] || translations?.ht || {};
+  const t = translations?.[lang] || translations?.en || {};
   // Current path — drives the self-canonical (Explore mounts at /,
   // /explore AND /sheet/explore; each must canonicalize to itself).
   const { pathname } = useLocation();

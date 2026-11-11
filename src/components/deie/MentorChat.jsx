@@ -19,7 +19,7 @@ const QUICK_ACTIONS = [
   { key: 'skills', icon: 'fa-tools', label: { en: 'Skill Gaps', ht: 'Konpetans ki manke' }, action: 'skill-gaps' },
 ];
 
-export default function MentorChat({ lang = 'ht', className = '' }) {
+export default function MentorChat({ lang = 'en', className = '' }) {
   const isHt = lang === 'ht';
   const [messages, setMessages] = useState([
     { role: 'mentor', text: isHt ? 'Bonjou! Mwen se mentò ou. Poze m yon kesyon oswa chwazi yon aksyon rapid.' : 'Hello! I am your AI mentor. Ask me a question or choose a quick action.' },

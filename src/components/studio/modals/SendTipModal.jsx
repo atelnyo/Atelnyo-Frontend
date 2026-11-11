@@ -9,7 +9,7 @@ import api, { walletService } from '../../../services/api';
 
 const MIN_TIP = 0.50;
 
-export default function SendTipModal({ lang = 'ht', showToast, onClose, creatorId, creatorName }) {
+export default function SendTipModal({ lang = 'en', showToast, onClose, creatorId, creatorName }) {
   const isHt = lang === 'ht';
   const [amount, setAmount] = useState('');
   const [message, setMessage] = useState('');

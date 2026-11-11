@@ -209,7 +209,7 @@ function ProgramCourses({ program, lang, onOpenCourse }) {
   );
 }
 
-export default function AdminLanguageAcademy({ lang = 'ht', showToast, user, onNavigate }) {
+export default function AdminLanguageAcademy({ lang = 'en', showToast, user, onNavigate }) {
   const isHt = lang === 'ht';
   const [programs, setPrograms] = useState(null);
   const [failed, setFailed] = useState(false);

@@ -29,7 +29,7 @@ const apiCat = {
 
 const EMPTY_FORM = { question: '', answer: '', category: '', is_featured: false };
 
-export default function AdminPlatformFAQ({ lang = 'ht', showToast, onNavigate }) {
+export default function AdminPlatformFAQ({ lang = 'en', showToast, onNavigate }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
 

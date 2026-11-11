@@ -88,6 +88,26 @@ describe('CommunityPosts', () => {
     expect(screen.getByTestId('post-react-1-❤️')).toHaveAttribute('aria-pressed', 'true');
   });
 
+  it('searches posts in this community and renders the matching results', async () => {
+    const result = { ...POSTS[0], id: 2, content: 'Rezilta rechèch la' };
+    communitiesService.posts.mockImplementation((_slug, params) => Promise.resolve({
+      data: params.search ? [result] : POSTS,
+    }));
+    render(<Harness community={MEMBER_COMM} user={USER} />);
+
+    fireEvent.change(await screen.findByTestId('posts-search-input'), {
+      target: { value: 'rechèch' },
+    });
+
+    await waitFor(() => {
+      expect(communitiesService.posts).toHaveBeenLastCalledWith('test', {
+        page: 1,
+        search: 'rechèch',
+      });
+    });
+    expect(await screen.findByText('Rezilta rechèch la')).toBeTruthy();
+  });
+
   it('publishes through the composer and prepends the post', async () => {
     communitiesService.createPost.mockResolvedValue({
       data: { ...POSTS[0], id: 2, content: 'Nouvo pòs!' },

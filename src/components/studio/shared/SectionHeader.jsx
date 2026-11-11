@@ -19,7 +19,7 @@ export default function SectionHeader({
   title,
   help,
   tip,
-  lang = 'ht',
+  lang = 'en',
   action,
 }) {
   return (

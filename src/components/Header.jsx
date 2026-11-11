@@ -42,7 +42,7 @@ const Header = ({
 }) => {
   const navigate = useSafeNavigate();
   const location = useLocation();
-  const t = translations[lang] || translations?.ht || {};
+  const t = translations[lang] || translations?.en || {};
   const identity = getUserIdentity(user);
 
   // ─── Learner flag: graduation cap shows only for enrolled learners ─

@@ -345,11 +345,11 @@ function HeroContent({ payload, t, lang }) {
   );
 }
 
-export default function BusinessPublicPage({ lang = 'ht', showToast }) {
+export default function BusinessPublicPage({ lang = 'en', showToast }) {
   const { slug } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const t = translations?.[lang] || translations?.ht || {};
+  const t = translations?.[lang] || translations?.en || {};
   const isHt = lang === 'ht';
   const { user } = useAuth();
 

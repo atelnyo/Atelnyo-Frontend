@@ -58,7 +58,7 @@ _cap.fileSystemAccess = typeof window !== 'undefined' && ('showOpenFilePicker' i
 _cap.deviceMemory       = navigator.deviceMemory || 4;
 _cap.hardwareConcurrency = navigator.hardwareConcurrency || 4;
 _cap.maxTouchPoints     = navigator.maxTouchPoints || 0;
-_cap.language           = navigator.language || 'ht';
+_cap.language           = navigator.language || 'en';
 _cap.userAgent          = navigator.userAgent;
 
 // ── Platform flags ─────────────────────────────────────────────

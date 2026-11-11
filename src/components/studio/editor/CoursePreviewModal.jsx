@@ -14,7 +14,7 @@ import React, { useState } from 'react';
 import { BlockRenderer } from '../../learning/blocks';
 import { getBlockMeta } from '../../learning/blocks/registry';
 
-export default function CoursePreviewModal({ course, lang = 'ht', onClose }) {
+export default function CoursePreviewModal({ course, lang = 'en', onClose }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
   const modules = Array.isArray(course?.modules) ? course.modules : [];

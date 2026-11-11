@@ -932,7 +932,7 @@ function CopyButton({ text, lang }) {
   );
 }
 
-const Chatbot = React.memo(({ lang = 'ht', translations }) => {
+const Chatbot = React.memo(({ lang = 'en', translations }) => {
   const t = translations?.[lang] || translations?.['ht'] || {};
   const isHt = lang === 'ht';
 

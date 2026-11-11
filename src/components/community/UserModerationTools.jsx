@@ -234,7 +234,7 @@ function WarningDialog({ user, warningLevel, onConfirm, onCancel, lang }) {
 
 // ─── Main Component ───────────────────────────────────────────────
 
-export default function UserModerationTools({ community, user, lang = 'ht', showToast, onUpdate }) {
+export default function UserModerationTools({ community, user, lang = 'en', showToast, onUpdate }) {
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState(null);
   const [activities, setActivities] = useState([]);

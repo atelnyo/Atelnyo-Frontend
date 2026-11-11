@@ -136,7 +136,7 @@ function QuickUploadGuide({ lang, onChooseProvider, onReadDocs }) {
 
 // ─── Main MediaHub ────────────────────────────────────────────────────
 
-export default function MediaHub({ lang = 'ht', showToast, user, onNavigateToProvider, onNavigateToLibrary }) {
+export default function MediaHub({ lang = 'en', showToast, user, onNavigateToProvider, onNavigateToLibrary }) {
   const isHt = lang === 'ht';
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState([]);

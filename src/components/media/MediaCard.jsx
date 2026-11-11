@@ -98,7 +98,7 @@ export default function MediaCard({
   onEdit,            // legacy; routes into Inspect slot if onInspect absent
   onDelete,          // legacy; routes into Delete Reference slot
   onRename,          // callback for parent state sync after quick rename
-  lang = 'ht',
+  lang = 'en',
 }) {
   const [imageError, setImageError] = useState(false);
   const [copied, setCopied] = useState(false);

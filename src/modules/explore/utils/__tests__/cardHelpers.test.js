@@ -59,10 +59,10 @@ describe('formatEventDate', () => {
 
 describe('getChipLabel', () => {
   const chip = { ht: 'Kreyòl', en: 'English', fr: 'Français' };
-  it('picks the requested language with ht fallback', () => {
+  it('picks the requested language with English fallback', () => {
     expect(getChipLabel(chip, 'en')).toBe('English');
     expect(getChipLabel(chip, 'ht')).toBe('Kreyòl');
-    expect(getChipLabel(chip, 'unknown')).toBe('Kreyòl');
+    expect(getChipLabel(chip, 'unknown')).toBe('English');
   });
 });
 

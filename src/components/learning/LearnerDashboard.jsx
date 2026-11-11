@@ -127,9 +127,9 @@ function GoalEditor({ goals, lang, onSave }) {
   );
 }
 
-export default function LearnerDashboard({ lang = 'ht', translations, user, showToast, onBack, onOpenLearning, onOpenCourse, onOpenCourseById }) {
+export default function LearnerDashboard({ lang = 'en', translations, user, showToast, onBack, onOpenLearning, onOpenCourse, onOpenCourseById }) {
   const isHt = lang === 'ht';
-  const t = translations?.[lang] || translations?.ht || {};
+  const t = translations?.[lang] || translations?.en || {};
 
   const [dash, setDash] = useState(null);
   const [saved, setSaved] = useState(null);

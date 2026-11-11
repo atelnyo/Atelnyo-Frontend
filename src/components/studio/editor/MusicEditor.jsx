@@ -147,7 +147,7 @@ function probeYouTubeDuration(url) {
   });
 }
 
-export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'ht', showToast, user, item }) {
+export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'en', showToast, user, item }) {
   const isPremium = !!(user?.premium?.is_premium);
   const isEdit = Boolean(item);
   const navigate = useSafeNavigate();

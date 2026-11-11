@@ -240,7 +240,7 @@ function PollCreator({ onSubmit, onCancel, lang }) {
 
 // ─── Main Poll Component ──────────────────────────────────────────
 
-export function DiscussionPoll({ poll, onVote, onDelete, currentUserId, lang = 'ht' }) {
+export function DiscussionPoll({ poll, onVote, onDelete, currentUserId, lang = 'en' }) {
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [hasVoted, setHasVoted] = useState(false);
   const [showResults, setShowResults] = useState(false);
@@ -373,7 +373,7 @@ export function DiscussionPoll({ poll, onVote, onDelete, currentUserId, lang = '
 
 // ─── Poll List (for displaying multiple polls in a discussion) ────
 
-export function DiscussionPolls({ polls, community, discussionId, onPollCreated, onPollDeleted, currentUserId, lang = 'ht', showToast }) {
+export function DiscussionPolls({ polls, community, discussionId, onPollCreated, onPollDeleted, currentUserId, lang = 'en', showToast }) {
   const [showCreator, setShowCreator] = useState(false);
 
   const handleCreatePoll = async (pollData) => {
@@ -448,7 +448,7 @@ export function DiscussionPolls({ polls, community, discussionId, onPollCreated,
 
 // ─── Standalone Poll Display (for feed cards) ─────────────────────
 
-export function PollPreview({ poll, lang = 'ht' }) {
+export function PollPreview({ poll, lang = 'en' }) {
   const totalVotes = (poll.options || []).reduce((sum, opt) => sum + (opt.votes || 0), 0);
   const topOption = (poll.options || []).reduce((max, opt) =>
     (opt.votes || 0) > (max.votes || 0) ? opt : max, { votes: 0 });

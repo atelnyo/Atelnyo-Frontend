@@ -39,7 +39,7 @@ import StudioPropertiesPanel, { PropertyGroup, PropField, PropInput } from './St
 import { ImageUrlField } from '../modals/shared';
 import styles from './editor.module.css';
 
-export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'ht', showToast, user, item }) {
+export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'en', showToast, user, item }) {
   const isHt = lang === 'ht';
   const isEdit = Boolean(item);
 

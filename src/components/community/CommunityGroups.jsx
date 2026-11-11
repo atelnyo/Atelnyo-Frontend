@@ -292,7 +292,7 @@ function GroupDetail({ group, onBack, onJoin, onLeave, lang, user }) {
 
 // ─── Main Component ────────────────────────────────────────────────
 
-export default function CommunityGroups({ community, lang = 'ht', showToast, user }) {
+export default function CommunityGroups({ community, lang = 'en', showToast, user }) {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);

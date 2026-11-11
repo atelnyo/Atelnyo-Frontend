@@ -49,7 +49,7 @@ const KINDS = [
   },
 ];
 
-export default function ProductTypeModal({ lang = 'ht', onClose, onSelect }) {
+export default function ProductTypeModal({ lang = 'en', onClose, onSelect }) {
   const isHt = lang === 'ht';
   return (
     <div

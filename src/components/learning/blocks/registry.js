@@ -814,7 +814,7 @@ export function getBlockTypesByCategory() {
 }
 
 /** Get human-readable label for a block type. */
-export function blockTypeLabel(type, lang = 'ht') {
+export function blockTypeLabel(type, lang = 'en') {
   const meta = BLOCK_TYPES[type];
   if (!meta) return type;
   return meta.label[lang] || meta.label.en || type;

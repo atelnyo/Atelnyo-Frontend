@@ -41,7 +41,7 @@ function MusicFallback({ title, isHt }) {
   );
 }
 
-export default function MusicCard({ track, onOpen, showToast, t, isSaved, onSaveToggle, saveCount = null, lang = 'ht' }) {
+export default function MusicCard({ track, onOpen, showToast, t, isSaved, onSaveToggle, saveCount = null, lang = 'en' }) {
   const [previewing, setPreviewing] = useState(false);
   const [progressPct, setProgressPct] = useState(0);
   const [imgFailed, setImgFailed] = useState(false);
@@ -239,7 +239,7 @@ export default function MusicCard({ track, onOpen, showToast, t, isSaved, onSave
         {Number(track?._score?.trending) > 10 && (
           <TrendingVelocity
             score={track._score.trending}
-            lang={lang || 'ht'}
+            lang={lang || 'en'}
             size="sm"
           />
         )}

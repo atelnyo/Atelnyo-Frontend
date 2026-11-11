@@ -11,7 +11,7 @@
 import React, { useState, useCallback, useRef } from 'react';
 import styles from './editor.module.css';
 
-export default function MatchingPairsEditor({ block, onChange, lang = 'ht' }) {
+export default function MatchingPairsEditor({ block, onChange, lang = 'en' }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
 

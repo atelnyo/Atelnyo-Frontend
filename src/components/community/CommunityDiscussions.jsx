@@ -340,7 +340,7 @@ function DiscussionDetail({ discussion, onBack, onReply, onVote, lang }) {
 
 // ─── Main Component ────────────────────────────────────────────────
 
-export default function CommunityDiscussions({ community, lang = 'ht', showToast }) {
+export default function CommunityDiscussions({ community, lang = 'en', showToast }) {
   const [discussions, setDiscussions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);

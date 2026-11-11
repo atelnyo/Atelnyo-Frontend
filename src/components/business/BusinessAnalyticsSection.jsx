@@ -57,7 +57,7 @@ function monthShort(monthStr, isHt) {
 }
 
 export default function BusinessAnalyticsSection({
-  lang = 'ht', t = {}, showToast, profile,
+  lang = 'en', t = {}, showToast, profile,
 }) {
   const isHt = lang === 'ht';
   const [data, setData] = useState(null);

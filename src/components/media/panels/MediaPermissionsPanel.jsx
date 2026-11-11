@@ -15,7 +15,7 @@
 import React from 'react';
 import { VISIBILITY_LABELS, moduleLabel } from '../../../constants/media';
 
-export default function MediaPermissionsPanel({ media, lang = 'ht' }) {
+export default function MediaPermissionsPanel({ media, lang = 'en' }) {
   const item = media || {};
   const isHt = lang === 'ht';
   const visibility = item.visibility || 'public';

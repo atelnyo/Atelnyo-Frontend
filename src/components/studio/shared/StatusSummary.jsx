@@ -30,7 +30,7 @@ function toArray(d) {
   return [];
 }
 
-export default function StatusSummary({ lang = 'ht', onNavigate }) {
+export default function StatusSummary({ lang = 'en', onNavigate }) {
   const isHt = lang === 'ht';
   const [data, setData] = useState(null);
 

@@ -1229,6 +1229,60 @@ select.cm-input {
 }
 .community-detail .c-posts-join-note i { color: var(--color-primary); margin-top: 2px; }
 
+.community-detail .c-post-search {
+  width: 100%;
+  min-width: 0;
+}
+.community-detail .c-post-search-field {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+.community-detail .c-post-search-icon {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+.community-detail .c-post-search-input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 9px 38px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  color: var(--text-primary);
+  background: var(--surface-card);
+  font: inherit;
+}
+.community-detail .c-post-search-input:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.community-detail .c-post-search-clear {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 50%;
+  color: var(--text-secondary);
+  background: transparent;
+  cursor: pointer;
+}
+.community-detail .c-post-search-clear:hover {
+  color: var(--text-primary);
+  background: var(--surface-highlight);
+}
+
 @media (max-width: 600px) {
   .community-detail .c-home-post-cta {
     align-items: stretch;

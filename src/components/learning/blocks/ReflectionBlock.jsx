@@ -12,7 +12,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import useAutosave from '../../../hooks/useAutosave';
 
-export default function ReflectionBlock({ block, lang = 'ht', courseId, moduleIndex, onComplete, reportComplete, registerBlock }) {
+export default function ReflectionBlock({ block, lang = 'en', courseId, moduleIndex, onComplete, reportComplete, registerBlock }) {
   const isHt = lang === 'ht';
 
   // §12 — Reflection mode: private | optional | saved | required

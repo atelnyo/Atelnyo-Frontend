@@ -430,7 +430,7 @@ function EmptyLibrary({ lang, onAddMedia }) {
 
 // ─── Main MediaLibrary Component ────────────────────────────────────────────
 
-export default function MediaLibrary({ lang = 'ht', showToast, user }) {
+export default function MediaLibrary({ lang = 'en', showToast, user }) {
   const isHt = lang === 'ht';
 
   // State

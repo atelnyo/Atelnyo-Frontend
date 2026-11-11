@@ -38,7 +38,7 @@ export default function MediaGallery({
   onClick,
   onEdit,
   onDelete,
-  lang = 'ht',
+  lang = 'en',
   className = '',
 }) {
   const isHt = lang === 'ht';

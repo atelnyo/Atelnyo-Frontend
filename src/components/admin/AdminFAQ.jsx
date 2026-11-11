@@ -241,12 +241,12 @@ function FAQItem({ item, isOpen, onToggle, lang }) {
   );
 }
 
-export default function AdminFAQ({ lang = 'ht', onNavigate }) {
+export default function AdminFAQ({ lang = 'en', onNavigate }) {
   const isHt = lang === 'ht';
   const [openKey, setOpenKey] = useState(null);
   const [search, setSearch] = useState('');
 
-  const faqs = ADMIN_FAQS[lang] || ADMIN_FAQS.ht;
+  const faqs = ADMIN_FAQS[lang] || ADMIN_FAQS.en;
 
   const toggle = useCallback((catIdx, itemIdx) => {
     const key = `${catIdx}-${itemIdx}`;

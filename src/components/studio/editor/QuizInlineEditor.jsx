@@ -18,7 +18,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { quizService } from '../../../services/api';
 import styles from './editor.module.css';
 
-export default function QuizInlineEditor({ block, onChange, lang = 'ht', courseId, moduleIndex }) {
+export default function QuizInlineEditor({ block, onChange, lang = 'en', courseId, moduleIndex }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
 

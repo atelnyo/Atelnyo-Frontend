@@ -42,9 +42,9 @@ function buildOGFallback() {
 export const OG_IMAGE_FALLBACK = buildOGFallback();
 
 // Language-aware social banner: the slogan/logo image follows the app
-// language (atelnyo_lang). Falls back to the default (ht) banner.
+// language (atelnyo_lang). Falls back to the default English banner.
 export function ogImageForLang(lang) {
-  const code = normalizeSupportedLanguage(lang) || 'ht';
+  const code = normalizeSupportedLanguage(lang) || 'en';
   return `${window.location.origin}/og-banner-${code}.svg`;
 }
 

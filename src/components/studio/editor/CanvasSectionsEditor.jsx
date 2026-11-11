@@ -18,10 +18,10 @@ import styles from './editor.module.css';
 import { DEFAULT_SECTIONS } from '../../learning/blocks/CanvasBlock';
 
 /** Turn whatever is stored into `{ key, title, hint }` strings. */
-export function toEditableSections(raw, lang = 'ht') {
+export function toEditableSections(raw, lang = 'en') {
   const pick = (value) => {
     if (!value) return '';
-    if (typeof value === 'object') return value[lang] || value.ht || value.en || '';
+    if (typeof value === 'object') return value[lang] || value.en || value.ht || '';
     return String(value);
   };
 
@@ -52,7 +52,7 @@ function newKey() {
   return `section-${Date.now().toString(36)}-${keySeq}`;
 }
 
-export default function CanvasSectionsEditor({ block, onChange, lang = 'ht' }) {
+export default function CanvasSectionsEditor({ block, onChange, lang = 'en' }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
 

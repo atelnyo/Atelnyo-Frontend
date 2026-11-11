@@ -16,7 +16,7 @@ const RESOURCE_TYPES = [
   { key: 'embed', label: '💻 Embed', accept: '' },
 ];
 
-export default function ResourceLibrary({ lang = 'ht', courseId, onInsert }) {
+export default function ResourceLibrary({ lang = 'en', courseId, onInsert }) {
   const isHt = lang === 'ht';
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);

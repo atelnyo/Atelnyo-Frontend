@@ -46,7 +46,7 @@ const COPY = {
   },
 };
 
-export default function SessionExpiredModal({ open, lang = 'ht', onLogin, onDismiss }) {
+export default function SessionExpiredModal({ open, lang = 'en', onLogin, onDismiss }) {
   const copy = COPY[lang] || COPY.en;
 
   const handleKeyDown = useCallback((e) => {

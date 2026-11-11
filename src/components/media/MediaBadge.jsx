@@ -15,6 +15,6 @@ import MediaStatusBadge from './MediaStatusBadge';
 /** @deprecated Use MediaStatusBadge directly. Kept as alias for back-compat. */
 export { getStatusMeta, STATUS_META, isValidStatus } from './MediaStatusEngine';
 
-export default function MediaBadge({ status, size = 'sm', lang = 'ht', className = '' }) {
+export default function MediaBadge({ status, size = 'sm', lang = 'en', className = '' }) {
   return <MediaStatusBadge status={status} size={size} lang={lang} className={className} />;
 }

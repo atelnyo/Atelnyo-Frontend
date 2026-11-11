@@ -35,7 +35,7 @@ const EVENT = 'atelnyo:media-delete:open';
 const DELETED_EVENT = 'atelnyo:media-deleted';
 
 export default function MediaDeleteConfirmModal({
-  lang = 'ht',
+  lang = 'en',
   mediaList = [],
   showToast,
   onDeleted,

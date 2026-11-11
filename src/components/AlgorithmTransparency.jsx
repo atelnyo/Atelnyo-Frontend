@@ -65,7 +65,7 @@ const REASON_ICONS = {
   fresh: 'fa-clock',
 };
 
-function ScoreBreakdown({ item, lang = 'ht' }) {
+function ScoreBreakdown({ item, lang = 'en' }) {
   const scores = item?._score;
   if (!scores) return null;
 
@@ -162,7 +162,7 @@ function ScoreBreakdown({ item, lang = 'ht' }) {
   );
 }
 
-export default function AlgorithmTransparency({ item, lang = 'ht', onFeedback, onClose }) {
+export default function AlgorithmTransparency({ item, lang = 'en', onFeedback, onClose }) {
   const [showDetails, setShowDetails] = useState(false);
   const [feedbackGiven, setFeedbackGiven] = useState(false);
 

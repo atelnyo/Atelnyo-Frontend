@@ -20,7 +20,7 @@ import { SHEETS } from '../../routes/sheets';
 export default function MediaBreadcrumbs({
   media,
   collection = null,
-  lang = 'ht',
+  lang = 'en',
   onCrumbClick,
 }) {
   const navigate = useSafeNavigate();

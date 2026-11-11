@@ -42,7 +42,7 @@ function growthLabel(pct) {
   return `+${n}%`;
 }
 
-export default function TrendingHashtags({ lang = 'ht', limit = 8, onSearch }) {
+export default function TrendingHashtags({ lang = 'en', limit = 8, onSearch }) {
   // Seed state from a fresh cache snapshot (instant paint on revisits).
   // ``isFresh`` alone gates the fetch — an EMPTY trending result (e.g. a
   // fresh install with no interactions) is a valid answer that must also

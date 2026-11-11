@@ -22,7 +22,7 @@ function shuffleArray(arr) {
 
 export default function MatchingBlock({
   block,
-  lang = 'ht',
+  lang = 'en',
   index = 0,
   courseId,
   moduleIndex,

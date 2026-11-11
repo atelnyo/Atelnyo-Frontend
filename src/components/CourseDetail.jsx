@@ -24,7 +24,7 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
   const [scrolled, setScrolled] = useState(false);
   const [expandedWeeks, setExpandedWeeks] = useState(new Set());
   const headerRef = useRef(null);
-  const t = translations?.[lang] || translations?.ht || {};
+  const t = translations?.[lang] || translations?.en || {};
   const isHt = lang === 'ht';
 
   // ─── Content Intelligence SEO data ─────────────────────────────

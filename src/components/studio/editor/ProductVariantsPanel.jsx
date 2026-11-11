@@ -20,7 +20,7 @@ import React, { useEffect, useState } from 'react';
 import ConfirmModal from '../../common/ConfirmModal';
 import styles from './editor.module.css';
 
-export default function ProductVariantsPanel({ lang = 'ht', variants = [], canEdit, onAdd, onUpdate, onRemove, onRemoveMany }) {
+export default function ProductVariantsPanel({ lang = 'en', variants = [], canEdit, onAdd, onUpdate, onRemove, onRemoveMany }) {
   const isHt = lang === 'ht';
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState({ name: '', price: '', stock: '', sku: '' });

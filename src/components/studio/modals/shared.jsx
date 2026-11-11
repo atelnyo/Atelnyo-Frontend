@@ -141,10 +141,10 @@ export function FormField({ label, error, children, required, hint }) {
  * form clutter-free while still teaching the creator why a format
  * matters (see HELP_COPY above for the shared copy bank).
  */
-export function HelpTip({ help, lang = 'ht' }) {
+export function HelpTip({ help, lang = 'en' }) {
   const [open, setOpen] = useState(false);
   if (!help) return null;
-  const text = typeof help === 'string' ? help : (help[lang] || help.ht || help.en || '');
+  const text = typeof help === 'string' ? help : (help[lang] || help.en || help.ht || '');
   if (!text) return null;
   return (
     <div className={styles.helpTipWrap}>
@@ -203,7 +203,7 @@ export function MediaUrlField({
   placeholder,
   hint,
   help,
-  lang = 'ht',
+  lang = 'en',
   disabled,
   kind = 'auto',
   onDuration,

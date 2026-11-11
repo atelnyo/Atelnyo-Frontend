@@ -41,7 +41,7 @@ export function resolveRecognitionLang(block, lang) {
   return { tag: 'en-US', fallback: false };
 }
 
-export default function ExerciseBlock({ block, lang = 'ht', courseId, moduleIndex, onComplete, onPortfolioSave, registerBlock }) {
+export default function ExerciseBlock({ block, lang = 'en', courseId, moduleIndex, onComplete, onPortfolioSave, registerBlock }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
   const { markComplete } = useCompletionContract({

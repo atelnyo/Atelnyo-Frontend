@@ -12,7 +12,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { exactMatch } from '../../modules/learning/speech';
 import styles from './learning.module.css';
 
-export default function VocabularyBlock({ block, lang = 'ht', reportComplete }) {
+export default function VocabularyBlock({ block, lang = 'en', reportComplete }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
   const [typed, setTyped] = useState('');

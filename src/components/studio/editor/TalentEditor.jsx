@@ -12,7 +12,7 @@ import StudioPropertiesPanel, {
 import { ImageUrlField, MediaUrlField, HelpTip } from '../modals/shared';
 import styles from './editor.module.css';
 
-export default function TalentEditor({ onClose, onSuccess, onSaved, lang = 'ht', showToast, user, item }) {
+export default function TalentEditor({ onClose, onSuccess, onSaved, lang = 'en', showToast, user, item }) {
   const isHt = lang === 'ht';
   const isEdit = Boolean(item);
 

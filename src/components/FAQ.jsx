@@ -51,10 +51,10 @@ const FAQS_BY_LANG = {
 };
 
 export default function FAQ({ lang, translations, courseId }) {
-  const t = translations?.[lang] || translations?.ht || {};
+  const t = translations?.[lang] || translations?.en || {};
   const [openIndex, setOpenIndex] = useState(null);
 
-  const faqs = FAQS_BY_LANG[lang] || FAQS_BY_LANG.ht;
+  const faqs = FAQS_BY_LANG[lang] || FAQS_BY_LANG.en;
   const titleSuffix = courseId ? ` ${t.faq_course_suffix || ''}` : '';
 
   const toggleFaq = useCallback((index) => {

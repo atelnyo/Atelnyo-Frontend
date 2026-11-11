@@ -15,7 +15,7 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 
-export default function ScenarioBlock({ block, lang = 'ht', onComplete }) {
+export default function ScenarioBlock({ block, lang = 'en', onComplete }) {
   const isHt = lang === 'ht';
   const [selected, setSelected] = useState(null);
   const [submitted, setSubmitted] = useState(false);

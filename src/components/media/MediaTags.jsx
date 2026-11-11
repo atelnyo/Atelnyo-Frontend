@@ -40,7 +40,7 @@ export default function MediaTags({
   customLabels = [],
   priority = '',
   onChange,
-  lang = 'ht',
+  lang = 'en',
   className = '',
 }) {
   const isHt = lang === 'ht';

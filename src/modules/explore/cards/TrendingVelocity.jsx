@@ -33,7 +33,7 @@ function getVelocityTier(score) {
   return { min: 0, label: {}, icon: '', color: '', bgColor: '', score: 0 };
 }
 
-export default function TrendingVelocity({ score, lang = 'ht', size = 'sm', showLabel = false }) {
+export default function TrendingVelocity({ score, lang = 'en', size = 'sm', showLabel = false }) {
   const numScore = Number(score) || 0;
   if (numScore <= 0) return null;
 
@@ -67,7 +67,7 @@ export default function TrendingVelocity({ score, lang = 'ht', size = 'sm', show
  * Mini sparkline for velocity trend (optional — renders a tiny inline chart).
  * Used in detail sheets, not on cards (too small).
  */
-export function VelocitySparkline({ score, history, lang = 'ht', width = 60, height = 20 }) {
+export function VelocitySparkline({ score, history, lang = 'en', width = 60, height = 20 }) {
   const numScore = Number(score) || 0;
   if (numScore <= 0 || !history?.length) return null;
 

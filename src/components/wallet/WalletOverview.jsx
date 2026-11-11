@@ -42,7 +42,7 @@ export default function WalletOverview({
   onWithdraw,
   onManagePayouts,
   onViewTransactions,
-  lang = 'ht',
+  lang = 'en',
   className = '',
 }) {
   const isHt = lang === 'ht';

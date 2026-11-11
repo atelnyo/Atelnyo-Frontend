@@ -35,7 +35,7 @@ function readFavorites() {
 }
 
 export default function FavoriteCollectionsStrip({
-  lang = 'ht',
+  lang = 'en',
   collections = [],
   onSelect,
 }) {

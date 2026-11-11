@@ -18,7 +18,7 @@ const TIER_CONFIG = {
   evolution_master: { icon: 'fa-gem', color: '#ffd700', min: 951, max: 1000 },
 };
 
-export default function EvolutionBadge({ lang = 'ht', showDetails = true, onRefresh }) {
+export default function EvolutionBadge({ lang = 'en', showDetails = true, onRefresh }) {
   const isHt = lang === 'ht';
   const [score, setScore] = useState(null);
   const [loading, setLoading] = useState(true);

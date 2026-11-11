@@ -50,7 +50,7 @@ const detectMediaType = (url) => {
   return 'image';
 };
 
-export default function PortfolioEditor({ onClose, onSuccess, onSaved, lang = 'ht', showToast, user, item }) {
+export default function PortfolioEditor({ onClose, onSuccess, onSaved, lang = 'en', showToast, user, item }) {
   const isHt = lang === 'ht';
   const isEdit = Boolean(item);
 

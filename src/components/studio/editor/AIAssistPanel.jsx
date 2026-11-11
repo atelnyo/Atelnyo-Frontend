@@ -74,7 +74,7 @@ const LANGUAGES = [
   { code: 'ht', label: 'Kreyòl' },
 ];
 
-export default function AIAssistPanel({ lang = 'ht', onInsertContent, currentContent = '' }) {
+export default function AIAssistPanel({ lang = 'en', onInsertContent, currentContent = '' }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
 

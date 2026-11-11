@@ -232,7 +232,7 @@ function TransactionTable({ transactions }) {
 
 // ─── Main Component ────────────────────────────────────────────────
 
-export default function RevenueAnalytics({ lang = 'ht', showToast, user }) {
+export default function RevenueAnalytics({ lang = 'en', showToast, user }) {
   const [summary, setSummary] = useState(null);
   const [trend, setTrend] = useState([]);
   const [byType, setByType] = useState([]);

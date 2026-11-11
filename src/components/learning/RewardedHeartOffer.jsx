@@ -13,7 +13,7 @@ function messageFor(reason, isHt) {
   return '';
 }
 
-export default function RewardedHeartOffer({ lang = 'ht', hearts, heartsUnlimited, onGamification }) {
+export default function RewardedHeartOffer({ lang = 'en', hearts, heartsUnlimited, onGamification }) {
   const isHt = lang === 'ht';
   const empty = !heartsUnlimited && Number(hearts) === 0;
   const [offer, setOffer] = useState(null);

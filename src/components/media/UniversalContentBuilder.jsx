@@ -56,7 +56,7 @@ export default function UniversalContentBuilder({
   mediaItems = [],
   onSubmit,
   onCancel,
-  lang = 'ht',
+  lang = 'en',
   className = '',
 }) {
   const isHt = lang === 'ht';
@@ -74,7 +74,7 @@ export default function UniversalContentBuilder({
     ogImage: fields.ogImage || '',
     media: fields.media || [],
     featuredMedia: fields.featuredMedia || null,
-    language: fields.language || 'ht',
+    language: fields.language || 'en',
   });
   const [showMediaPicker, setShowMediaPicker] = useState(false);
   const [publishing, setPublishing] = useState(false);

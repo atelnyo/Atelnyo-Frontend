@@ -102,7 +102,7 @@ function formatDate(iso, lang) {
   } catch (_) { return ''; }
 }
 
-export default function ItemPreviewModal({ type, id, data, lang = 'ht', onClose }) {
+export default function ItemPreviewModal({ type, id, data, lang = 'en', onClose }) {
   const navigate = useNavigate();
   const [item, setItem] = useState(data || null);
   const [loading, setLoading] = useState(!data);

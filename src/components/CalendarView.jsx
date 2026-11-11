@@ -35,7 +35,7 @@ function getDayNames(lang) {
   return lang === 'ht' ? DAY_NAMES : DAY_NAMES_EN;
 }
 
-export default function CalendarView({ lang = 'ht', t, showToast }) {
+export default function CalendarView({ lang = 'en', t, showToast }) {
   const today = useMemo(() => new Date(), []);
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth()); // 0-indexed

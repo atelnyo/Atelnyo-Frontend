@@ -35,7 +35,7 @@ function label(lang, status) {
   return entry ? (entry[lang] || entry.en) : status;
 }
 
-export default function TikTokPostStatus({ post, lang = 'ht', onUpdate }) {
+export default function TikTokPostStatus({ post, lang = 'en', onUpdate }) {
   const timerRef = useRef(null);
   const stoppedRef = useRef(false);
 

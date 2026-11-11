@@ -18,7 +18,7 @@ const T = (obj, lang, fallback) => {
   return obj[lang] || obj.en || fallback || '';
 };
 
-export default function PremiumPreview({ isOpen, onClose, lang = 'ht', user, onOpenCheckout }) {
+export default function PremiumPreview({ isOpen, onClose, lang = 'en', user, onOpenCheckout }) {
   const overlayRef = useRef(null);
   const contentRef = useRef(null);
   const [notified, setNotified] = useState(false);

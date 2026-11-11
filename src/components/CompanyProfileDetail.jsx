@@ -201,10 +201,10 @@ function HeroContent({ payload, t, lang }) {
 
 /* ─── Main component ────────────────────────────────────────────── */
 
-export default function CompanyProfileDetail({ lang = 'ht', showToast }) {
+export default function CompanyProfileDetail({ lang = 'en', showToast }) {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const t = translations?.[lang] || translations?.ht || {};
+  const t = translations?.[lang] || translations?.en || {};
 
   const [payload, setPayload] = useState(null);
   const [loading, setLoading] = useState(true);

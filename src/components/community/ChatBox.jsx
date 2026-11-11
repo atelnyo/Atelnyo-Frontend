@@ -169,7 +169,7 @@ function DateSeparator({ date }) {
 export default function ChatBox({
   roomId,
   roomType = 'group',
-  lang = 'ht',
+  lang = 'en',
   user,
   onClose,
   isMuted = false,

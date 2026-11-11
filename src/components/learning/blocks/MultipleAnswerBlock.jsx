@@ -14,7 +14,7 @@
 import React from 'react';
 import QuestionBase from './QuestionBase';
 
-export default function MultipleAnswerBlock({ block, lang = 'ht', reportComplete }) {
+export default function MultipleAnswerBlock({ block, lang = 'en', reportComplete }) {
   const content = block.content || block;
   const options = (content.options || []).map((opt, i) => ({
     id: String(i),

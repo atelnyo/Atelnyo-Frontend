@@ -4,7 +4,7 @@
  */
 import React, { useState, useEffect } from 'react';
 
-export default function CalculatorBlock({ block, lang = 'ht', onComplete, onPortfolioSave }) {
+export default function CalculatorBlock({ block, lang = 'en', onComplete, onPortfolioSave }) {
   const isHt = lang === 'ht';
   const fields = block?.fields || [];
   const formula = block?.formula || '';

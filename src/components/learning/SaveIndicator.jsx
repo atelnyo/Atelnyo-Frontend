@@ -17,10 +17,10 @@ import React from 'react';
  *
  * @param {Object} props
  * @param {string} props.saveState — 'idle' | 'saving' | 'saved' | 'failed' | 'local_only' | 'changed'
- * @param {string} [props.lang='ht'] — language
+ * @param {string} [props.lang='en'] — language
  * @param {string} [props.className] — additional CSS class
  */
-export default function SaveIndicator({ saveState, lang = 'ht', className = '' }) {
+export default function SaveIndicator({ saveState, lang = 'en', className = '' }) {
   // §13 — Don't show anything for idle state (calm, no noise)
   if (!saveState || saveState === 'idle') return null;
 

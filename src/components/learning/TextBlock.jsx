@@ -197,7 +197,7 @@ function ParagraphBlock({ text, index }) {
   );
 }
 
-export default function TextBlock({ block, lang = 'ht', reportComplete }) {
+export default function TextBlock({ block, lang = 'en', reportComplete }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
   const [readDone, setReadDone] = useState(false);

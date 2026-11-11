@@ -389,7 +389,7 @@ function BlockCard({ block, index, isActive, onSelect, onUpdate, onDelete, onMov
 let _clipboard = null; // In-memory clipboard for block copy/paste
 
 /* ─── Main LessonEditor ───────────────────────────────────────────── */
-export default function LessonEditor({ lesson, lang = 'ht', onUpdate, showToast }) {
+export default function LessonEditor({ lesson, lang = 'en', onUpdate, showToast }) {
   const isHt = lang === 'ht';
 
   // Undo/Redo managed via useUndoRedo — blocks state tracks full history

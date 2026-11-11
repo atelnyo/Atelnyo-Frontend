@@ -70,7 +70,7 @@ const SUGGESTIONS = {
   },
 };
 
-export default function AISuggestion({ error, statusCode, errorMessage, provider, onRetry, lang = 'ht', className = '' }) {
+export default function AISuggestion({ error, statusCode, errorMessage, provider, onRetry, lang = 'en', className = '' }) {
   const isHt = lang === 'ht';
 
   if (!error && !statusCode && !errorMessage) return null;

@@ -6,7 +6,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../../../services/api';
 import './TemplatePicker.css';
 
-export default function TemplatePicker({ lang = 'ht', onSelect }) {
+export default function TemplatePicker({ lang = 'en', onSelect }) {
   const isHt = lang === 'ht';
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);

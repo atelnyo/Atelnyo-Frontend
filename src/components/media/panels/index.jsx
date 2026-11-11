@@ -45,7 +45,7 @@ import MediaPermissionsPanel from './MediaPermissionsPanel';
  *
  *   <MediaPanel kind="metadata" media={m} lang={lang} />
  */
-export default function MediaPanel({ kind, media, analytics, security, isAdmin = false, lang = 'ht' }) {
+export default function MediaPanel({ kind, media, analytics, security, isAdmin = false, lang = 'en' }) {
   switch (kind) {
     case 'general':
       return <MediaGeneralPanel media={media} lang={lang} />;

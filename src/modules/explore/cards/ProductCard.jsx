@@ -78,7 +78,7 @@ function ProductRating({ product, t }) {
   );
 }
 
-export default function ProductCard({ product, t, onOpen, onOpenCheckout, showToast, saveCount = null, lang = 'ht' }) {
+export default function ProductCard({ product, t, onOpen, onOpenCheckout, showToast, saveCount = null, lang = 'en' }) {
   const [imgFailed, setImgFailed] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
   const hasImage = Boolean(product.image_url);
@@ -142,7 +142,7 @@ export default function ProductCard({ product, t, onOpen, onOpenCheckout, showTo
         {Number(product?._score?.trending) > 10 && (
           <TrendingVelocity
             score={product._score.trending}
-            lang={lang || 'ht'}
+            lang={lang || 'en'}
             size="sm"
           />
         )}

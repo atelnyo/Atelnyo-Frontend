@@ -15,7 +15,7 @@ import { getStatusMeta, isValidStatus } from './MediaStatusEngine';
 export default function MediaStatusBadge({
   status,
   size = 'sm',
-  lang = 'ht',
+  lang = 'en',
   className = '',
   showTooltip = true,
 }) {

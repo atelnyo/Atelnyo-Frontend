@@ -16,7 +16,7 @@ const BUSINESS_TYPES = [
   { value: 'other', labelHt: 'Lòt', labelEn: 'Other' },
 ];
 
-export default function BusinessKYCForm({ businessId, lang = 'ht', onStatusChange }) {
+export default function BusinessKYCForm({ businessId, lang = 'en', onStatusChange }) {
   const t = (ht, en) => lang === 'ht' ? ht : en;
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);

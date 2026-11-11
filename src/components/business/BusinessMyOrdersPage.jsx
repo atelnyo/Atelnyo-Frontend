@@ -60,7 +60,7 @@ function money(n, lang) {
   });
 }
 
-export default function BusinessMyOrdersPage({ lang = 'ht', showToast }) {
+export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
   const navigate = useNavigate();
   const t = translations[lang] || translations.en || {};
   const isHt = lang === 'ht';

@@ -55,11 +55,11 @@ export function normalizeSections(raw, isHt = true) {
         // Fall back to the other language rather than showing an empty
         // heading when only one translation was filled in.
         title: typeof title === 'object'
-          ? (title[isHt ? 'ht' : 'en'] || title.ht || title.en || '')
+          ? (title[isHt ? 'ht' : 'en'] || title[isHt ? 'en' : 'ht'] || '')
           : String(title),
         hint: section.hint
           ? (typeof section.hint === 'object'
-            ? (section.hint[isHt ? 'ht' : 'en'] || section.hint.ht || section.hint.en || '')
+            ? (section.hint[isHt ? 'ht' : 'en'] || section.hint[isHt ? 'en' : 'ht'] || '')
             : String(section.hint))
           : '',
         content: content || '',
@@ -76,7 +76,7 @@ function storageKey(courseId, blockId) {
 
 export default function CanvasBlock({
   block,
-  lang = 'ht',
+  lang = 'en',
   index,
   courseId,
   moduleIndex,

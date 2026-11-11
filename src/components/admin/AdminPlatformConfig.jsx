@@ -151,7 +151,7 @@ const CONFIG_GROUPS = [
 
 const VALUE_TYPES = ['str', 'int', 'float', 'bool', 'json'];
 
-export default function AdminPlatformConfig({ lang = 'ht', showToast }) {
+export default function AdminPlatformConfig({ lang = 'en', showToast }) {
   const isHt = lang === 'ht';
   // Memoized so useCallback deps below (`handleSave`) stay stable.
   const t = useCallback((en, ht) => (isHt ? (ht || en) : en), [isHt]);

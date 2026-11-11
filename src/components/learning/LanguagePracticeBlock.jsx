@@ -48,7 +48,7 @@ const TYPE_META = {
   video:         { icon: 'fa-video',         label: { en: 'Video Lesson',    ht: 'Leson Videyo' } },
 };
 
-export default function LanguagePracticeBlock({ block, lang = 'ht', index, courseId, moduleIndex, onComplete, onViewed }) {
+export default function LanguagePracticeBlock({ block, lang = 'en', index, courseId, moduleIndex, onComplete, onViewed }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
   const meta = TYPE_META[block.type] || TYPE_META.repeat;

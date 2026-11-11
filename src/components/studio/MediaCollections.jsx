@@ -24,7 +24,7 @@ const PREDEFINED_COLLECTIONS = [
   { id: 'certificates', icon: 'fa-certificate', en: 'Certificates', ht: 'Sètifika' },
 ];
 
-export default function MediaCollections({ lang = 'ht', showToast, onBack }) {
+export default function MediaCollections({ lang = 'en', showToast, onBack }) {
   const isHt = lang === 'ht';
   const [collections, setCollections] = useState(
     PREDEFINED_COLLECTIONS.map((c) => ({ ...c, items: [], expanded: false })),

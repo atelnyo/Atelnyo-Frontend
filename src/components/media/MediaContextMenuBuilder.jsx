@@ -27,7 +27,7 @@ import { t as makeT } from './langFallback';
 
 export function buildMediaContextMenu({
   media = {},
-  lang = 'ht',
+  lang = 'en',
   collections = [],
   visibleOptions = ['public', 'unlisted', 'private'],
   onOpen,

@@ -125,7 +125,7 @@ function PortfolioFallback({ title }) {
 /* ══════════════════════════════════════════════════════════════════
    MAIN COMPONENT
    ══════════════════════════════════════════════════════════════════ */
-export default function PortfolioDetail({ lang = 'ht', project: propProject, onBack, contentId, showToast, user }) {
+export default function PortfolioDetail({ lang = 'en', project: propProject, onBack, contentId, showToast, user }) {
   // ``id`` is the URL segment: the ``{id}`` from the canonical
   // ``/{id}@{user}/portfolio`` key (contentId) or the legacy
   // ``/portfolio/:id`` param — both accept pk-or-slug.
@@ -133,7 +133,7 @@ export default function PortfolioDetail({ lang = 'ht', project: propProject, onB
   const location = useLocation();
   const navigate = useSafeNavigate();
   const id = contentId ?? urlId;
-  const t = (translations && translations[lang]) || translations.ht || {};
+  const t = (translations && translations[lang]) || translations.en || {};
 
   const [project, setProject] = useState(propProject || null);
   const [loading, setLoading] = useState(!propProject);

@@ -105,7 +105,7 @@ function inferEventsForMedia(m) {
 }
 
 export default function MediaRecentActivityPanel({
-  lang = 'ht',
+  lang = 'en',
   mediaList = [],
   searchFilter = '',
   onOpenMedia,

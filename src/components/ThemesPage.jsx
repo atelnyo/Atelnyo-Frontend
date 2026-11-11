@@ -211,7 +211,7 @@ const s = {
   },
 };
 
-const ThemesPage = ({ lang = 'ht', translations, showToast }) => {
+const ThemesPage = ({ lang = 'en', translations, showToast }) => {
   const navigate = useSafeNavigate();
   const t = translations?.[lang] || {};
   const {

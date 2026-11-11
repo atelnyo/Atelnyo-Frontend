@@ -9,7 +9,7 @@ import { Helmet } from 'react-helmet-async';
 import { useLocation } from 'react-router-dom';
 import { API_URL } from '../services/api';
 
-export default function FAQPage({ lang = 'ht' }) {
+export default function FAQPage({ lang = 'en' }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
   const location = useLocation();

@@ -261,7 +261,7 @@ function BulkActionsBar({ selectedCount, onBulkAction, onClear, lang }) {
 
 // ─── Main Component ───────────────────────────────────────────────
 
-export default function ReportManager({ community, lang = 'ht', showToast }) {
+export default function ReportManager({ community, lang = 'en', showToast }) {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState(new Set());

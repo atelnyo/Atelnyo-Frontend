@@ -40,7 +40,7 @@ const HELP_CONTENT = {
   },
 };
 
-export default function MediaHelp({ context = 'library', lang = 'ht', className = '' }) {
+export default function MediaHelp({ context = 'library', lang = 'en', className = '' }) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('tutorial');
   const isHt = lang === 'ht';

@@ -31,7 +31,7 @@ function ColorDot({ hex, selected, onClick, label }) {
 }
 
 export default function MediaProjectFormModal({
-  lang = 'ht',
+  lang = 'en',
   onClose,
   onSubmit,
   showToast,

@@ -59,7 +59,7 @@ export default function MediaList({
   sortBy = 'date',
   sortDir = 'desc',
   onSortChange,     // (key) => void   single-key sort toggle
-  lang = 'ht',
+  lang = 'en',
   className = '',
 }) {
   const isHt = lang === 'ht';

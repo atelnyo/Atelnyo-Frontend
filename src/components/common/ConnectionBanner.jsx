@@ -14,7 +14,7 @@ import React, { useEffect, useState } from 'react';
 import useConnectionMonitor from '../../hooks/useConnectionMonitor';
 import offlineQueue from '../../services/offlineQueue';
 
-export default function ConnectionBanner({ lang = 'ht' }) {
+export default function ConnectionBanner({ lang = 'en' }) {
   const conn = useConnectionMonitor();
   const isHt = lang === 'ht';
   const [queueSize, setQueueSize] = useState(0);

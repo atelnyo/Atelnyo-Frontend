@@ -93,7 +93,7 @@ const SAVE_LABELS = {
 export default function StudioEditorShell({
   title = 'Editor',
   icon = 'fa-pen',
-  lang = 'ht',
+  lang = 'en',
   docTitle = '',
   isNew = false,
   dirty = false,

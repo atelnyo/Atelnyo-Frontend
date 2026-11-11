@@ -15,7 +15,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { blockSubmissionService } from '../../../services/api';
 
-export default function AssignmentBlock({ block, lang = 'ht', index, courseId, moduleIndex, onComplete, onViewed }) {
+export default function AssignmentBlock({ block, lang = 'en', index, courseId, moduleIndex, onComplete, onViewed }) {
   const isHt = lang === 'ht';
   const viewedRef = useRef(false);
   const [submission, setSubmission] = useState('');

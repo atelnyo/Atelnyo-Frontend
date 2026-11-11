@@ -40,7 +40,7 @@ const METRICS = [
   { key: 'creator_insights', labelEn: 'Creator Insights', labelHt: 'Ide Kreyatè',     icon: 'fa-lightbulb',          backendPending: true, list: true },
 ];
 
-export default function MediaAnalyticsPanel({ media, analytics = null, lang = 'ht', className = '' }) {
+export default function MediaAnalyticsPanel({ media, analytics = null, lang = 'en', className = '' }) {
   const item = media || {};
   const isHt = lang === 'ht';
 

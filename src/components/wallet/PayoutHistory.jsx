@@ -38,7 +38,7 @@ export default function PayoutHistory({
   payouts = [],
   loading = false,
   onRefresh,
-  lang = 'ht',
+  lang = 'en',
   className = '',
 }) {
   const isHt = lang === 'ht';

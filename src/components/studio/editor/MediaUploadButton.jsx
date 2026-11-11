@@ -130,7 +130,7 @@ export default function MediaUploadButton({
   accept,
   required = false,
   error = '',
-  lang = 'ht',
+  lang = 'en',
 }) {
   const isHt = lang === 'ht';
   const fileInputRef = useRef(null);

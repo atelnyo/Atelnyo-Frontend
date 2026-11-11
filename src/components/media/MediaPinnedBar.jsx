@@ -49,7 +49,7 @@ function writePinnedIds(ids) {
 }
 
 export default function MediaPinnedBar({
-  lang = 'ht',
+  lang = 'en',
   mediaList = [], // full media array (now from backend pinned endpoint)
   showToast,
   onOpenAll,

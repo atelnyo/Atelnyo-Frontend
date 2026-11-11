@@ -24,14 +24,14 @@ import React from 'react';
  * @param {Array} props.blocks - block definitions
  * @param {Set|Array} props.completedBlocks - completed block IDs
  * @param {Object} [props.blockRequirements] - { blockId: 'required' | 'optional' | 'informational' }
- * @param {string} [props.lang='ht'] - language
+ * @param {string} [props.lang='en'] - language
  * @param {boolean} [props.compact=false] - show minimal version
  */
 export default function ProgressExplanation({
   blocks = [],
   completedBlocks,
   blockRequirements = {},
-  lang = 'ht',
+  lang = 'en',
   compact = false,
 }) {
   const isHt = lang === 'ht';

@@ -31,11 +31,11 @@ const STRINGS = {
   private:        { en: 'Private',           ht: 'Prive' },
 };
 
-export function t(lang = 'ht', key) {
+export function t(lang = 'en', key) {
   if (!STRINGS[key]) return key;
-  return STRINGS[key][lang === 'en' ? 'en' : 'ht'] || STRINGS[key].en;
+  return STRINGS[key][lang === 'ht' ? 'ht' : 'en'] || STRINGS[key].en;
 }
 
-export function makeT(lang = 'ht') {
+export function makeT(lang = 'en') {
   return (key) => t(lang, key);
 }

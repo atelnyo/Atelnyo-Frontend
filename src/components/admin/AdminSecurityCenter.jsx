@@ -77,7 +77,7 @@ function EventRow({ event, lang }) {
   );
 }
 
-export default function AdminSecurityCenter({ lang = 'ht', showToast, user, onNavigate }) {
+export default function AdminSecurityCenter({ lang = 'en', showToast, user, onNavigate }) {
   const isHt = lang === 'ht';
   const { isAdmin, loading: permsLoading } = useHasAdminAccess();
   const hasStaffAccess = (user?.is_staff === true || user?.is_superuser === true) || isAdmin === true;

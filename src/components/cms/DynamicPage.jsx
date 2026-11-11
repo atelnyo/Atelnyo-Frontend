@@ -4,7 +4,7 @@
  * DynamicPage — rann yon paj dinamik soti nan CMS la.
  *
  * Itilizasyon:
- *   <DynamicPage slug="about" lang="ht" />
+ *   <DynamicPage slug="about" lang='en' />
  *
  * Li chaje paj la nan `/api/pages/<slug>/render/` epi li rann
  * chak seksyon atravè ComponentRegistry la.
@@ -38,7 +38,7 @@ const styles = {
 // error instead.
 const PAGE_FETCH_TIMEOUT_MS = 12_000;
 
-export default function DynamicPage({ slug, lang = 'ht', showToast }) {
+export default function DynamicPage({ slug, lang = 'en', showToast }) {
   const [pageData, setPageData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -153,7 +153,7 @@ export default function DynamicPage({ slug, lang = 'ht', showToast }) {
  *   <Route path="/sheet/page/:slug" element={<DynamicPageSheet lang={lang} showToast={showToast} />} />
  * (Ansyen /page/:slug redirecte nan fòm sa a — T093.)
  */
-export function DynamicPageSheet({ lang = 'ht', showToast }) {
+export function DynamicPageSheet({ lang = 'en', showToast }) {
   // Sèvi ak useParams() olye de window.location (bon pou React Router)
   const { slug } = useParams();
   return <DynamicPage slug={slug} lang={lang} showToast={showToast} />;

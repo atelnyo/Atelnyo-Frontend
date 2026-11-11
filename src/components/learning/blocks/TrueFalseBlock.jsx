@@ -13,7 +13,7 @@
 import React from 'react';
 import QuestionBase from './QuestionBase';
 
-export default function TrueFalseBlock({ block, lang = 'ht', reportComplete }) {
+export default function TrueFalseBlock({ block, lang = 'en', reportComplete }) {
   const content = block.content || block;
   const isTrueCorrect = content.correct === true;
 

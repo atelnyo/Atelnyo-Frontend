@@ -27,7 +27,7 @@ import projectStore from '../../utils/mediaProjectStore';
 import { makeT } from '../../utils/langBackendStub';
 
 export default function MediaProjectsPanel({
-  lang = 'ht',
+  lang = 'en',
   mediaList = [],
   showToast,
   onNavigate,

@@ -22,7 +22,7 @@ function formatTime(sec) {
 
 const RATES = [1, 1.25, 1.5, 0.75];
 
-export default function AudioPlayer({ src, label, lang = 'ht', compact }) {
+export default function AudioPlayer({ src, label, lang = 'en', compact }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
   const audioRef = useRef(null);

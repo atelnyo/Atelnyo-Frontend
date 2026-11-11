@@ -102,7 +102,7 @@ function validateBlock(b) {
   return errs;
 }
 
-export default function LanguagePracticeEditor({ blocks = [], onBlocksChange, lang = 'ht' }) {
+export default function LanguagePracticeEditor({ blocks = [], onBlocksChange, lang = 'en' }) {
   const isHt = lang === 'ht';
   const [choosing, setChoosing] = useState(false);
   const [editingId, setEditingId] = useState(null); // null = add new draft

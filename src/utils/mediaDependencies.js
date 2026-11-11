@@ -44,7 +44,7 @@ const MODULE_DEFINITIONS = [
  * @param {string} lang   'ht' or 'en'.
  * @returns {array}       [{ moduleId, label, count, hasData }, ...]
  */
-export function computeDependencies(media, lang = 'ht') {
+export function computeDependencies(media, lang = 'en') {
   if (!media) return [];
   const explicit = media.usage_breakdown || media.dependencies || null;
 
@@ -101,7 +101,7 @@ export function totalDependencies(media) {
   return list.reduce((sum, row) => sum + row.count, 0);
 }
 
-export function renderDependencySentence(media, lang = 'ht') {
+export function renderDependencySentence(media, lang = 'en') {
   const list = computeDependencies(media, lang);
   if (list.length === 0) {
     return lang === 'en' ? 'Not used anywhere yet.' : 'Poko itilize okenn kote.';

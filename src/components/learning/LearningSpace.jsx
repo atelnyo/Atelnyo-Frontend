@@ -155,7 +155,7 @@ function blockTypeLabel(type, isHt) {
 
 export default function LearningSpace({
   courseId,
-  lang = 'ht',
+  lang = 'en',
   translations,
   user,
   showToast,
@@ -166,7 +166,7 @@ export default function LearningSpace({
   initialModule = null,
 }) {
   const isHt = lang === 'ht';
-  const t = translations?.[lang] || translations?.ht || {};
+  const t = translations?.[lang] || translations?.en || {};
 
   const [course, setCourse] = useState(null);
   const [loadFailed, setLoadFailed] = useState(false);

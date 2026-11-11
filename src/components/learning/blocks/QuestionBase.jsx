@@ -43,7 +43,7 @@ import { saveDraft, restoreDraft } from '../../../services/learningDraftManager'
  * @param {string} [props.completionRule='answered'] — 'answered' | 'correct' | 'passed'
  * @param {number} [props.passThreshold=1] — for 'passed' rule: min correct count
  * @param {Function} props.onComplete — (result: { answered, correct, passed, attempts, answer }) => void
- * @param {string} [props.lang='ht'] — language
+ * @param {string} [props.lang='en'] — language
  */
 export default function QuestionBase({
   question,
@@ -57,7 +57,7 @@ export default function QuestionBase({
   completionRule = 'answered',
   passThreshold = 1,
   onComplete,
-  lang = 'ht',
+  lang = 'en',
 }) {
   const isHt = lang === 'ht';
 

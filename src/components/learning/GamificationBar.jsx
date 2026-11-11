@@ -18,7 +18,7 @@ import RewardedHeartOffer from './RewardedHeartOffer';
 const GOAL_OPTIONS = [10, 20, 30, 50];
 
 export default function GamificationBar({
-  stats, lang = 'ht', onGamification, onUpdateGoal, compact = false,
+  stats, lang = 'en', onGamification, onUpdateGoal, compact = false,
 }) {
   const isHt = lang === 'ht';
   const [goalOpen, setGoalOpen] = useState(false);

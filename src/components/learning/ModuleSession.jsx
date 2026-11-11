@@ -49,7 +49,7 @@ export default function ModuleSession({
   courseId,
   moduleIndex,
   item,
-  lang = 'ht',
+  lang = 'en',
   translations,
   progress,
   completedBlocksMap,

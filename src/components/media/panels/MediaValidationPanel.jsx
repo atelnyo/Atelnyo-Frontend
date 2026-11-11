@@ -21,7 +21,7 @@ function MetaItem({ label, value }) {
   );
 }
 
-export default function MediaValidationPanel({ media, lang = 'ht' }) {
+export default function MediaValidationPanel({ media, lang = 'en' }) {
   const item = media || {};
   const isHt = lang === 'ht';
   const status = item.health_status || item.status || 'unknown';

@@ -28,10 +28,10 @@ function formatPlays(n) {
   return String(n);
 }
 
-export function MusicSheet({ lang = 'ht', showToast, user, contentId, track: initialTrack, onBack }) {
+export function MusicSheet({ lang = 'en', showToast, user, contentId, track: initialTrack, onBack }) {
   const location = useLocation();
   const navigate = useSafeNavigate();
-  const t = translations?.[lang] || translations?.ht || {};
+  const t = translations?.[lang] || translations?.en || {};
   const stateTrack = location.state?.track;
   // Fallback id from the URL (contentId from the /{id}@{user}/music
   // deep-link, or the legacy ?id= query) so a hard refresh / pasted

@@ -262,7 +262,7 @@ function ValidationLogRow({ log }) {
 
 // ─── Main Component ───────────────────────────────────────────────────
 
-export default function AdminMediaManager({ lang = 'ht', showToast, user, onNavigate }) {
+export default function AdminMediaManager({ lang = 'en', showToast, user, onNavigate }) {
   const { isAdmin, loading: permsLoading } = useHasAdminAccess();
   const hasStaffAccess = (user?.is_staff === true || user?.is_superuser === true) || isAdmin === true;
 

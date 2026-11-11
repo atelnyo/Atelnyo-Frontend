@@ -48,7 +48,7 @@ import styles from './editor.module.css';
 const linesToList = (text) =>
   text.split('\n').map((line) => line.trim()).filter(Boolean);
 
-export default function ProductEditor({ onClose, onSuccess, onImported, onSaved, lang = 'ht', showToast, user, item, kind = 'digital' }) {
+export default function ProductEditor({ onClose, onSuccess, onImported, onSaved, lang = 'en', showToast, user, item, kind = 'digital' }) {
   const isEdit = Boolean(item);
   const navigate = useSafeNavigate();
   const isHt = lang === 'ht';

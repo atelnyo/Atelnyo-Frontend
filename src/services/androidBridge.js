@@ -48,12 +48,12 @@ class AndroidBridgeService {
    * Get active language from Android preferences.
    */
   getLanguage() {
-    if (!this.isAndroid()) return 'ht';
+    if (!this.isAndroid()) return 'en';
     try {
-      return this.bridge.getLanguage() || 'ht';
+      return this.bridge.getLanguage() || 'en';
     } catch (e) {
       console.error('[AndroidBridge] Error getting language:', e);
-      return 'ht';
+      return 'en';
     }
   }
 

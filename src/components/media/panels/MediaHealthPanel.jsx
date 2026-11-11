@@ -19,7 +19,7 @@ function StatBox({ icon, label, value, color }) {
   );
 }
 
-export default function MediaHealthPanel({ media, lang = 'ht' }) {
+export default function MediaHealthPanel({ media, lang = 'en' }) {
   const item = media || {};
   const isHt = lang === 'ht';
   const healthScore = item.health_score ?? item.score ?? null;

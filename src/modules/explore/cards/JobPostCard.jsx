@@ -35,7 +35,7 @@ function JobFallback({ title }) {
   );
 }
 
-export default function JobPostCard({ job, t, showToast, onOpenSheet, saveCount = null, lang = 'ht' }) {
+export default function JobPostCard({ job, t, showToast, onOpenSheet, saveCount = null, lang = 'en' }) {
   // Cover image state — same pattern as CourseCard/ProductCard: the
   // image starts at opacity 0 and fades in via ``--loaded`` on load;
   // a broken URL hides the whole cover block instead of showing a
@@ -97,7 +97,7 @@ export default function JobPostCard({ job, t, showToast, onOpenSheet, saveCount 
         {Number(job?._score?.trending) > 10 && (
           <TrendingVelocity
             score={job._score.trending}
-            lang={lang || 'ht'}
+            lang={lang || 'en'}
             size="sm"
           />
         )}

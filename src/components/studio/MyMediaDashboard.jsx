@@ -49,7 +49,7 @@ import { getUserIdentity } from '../../utils/userIdentity';
 import { cacheMedia } from '../../utils/mediaCache';
 
 export default function MyMediaDashboard({
-  lang = 'ht',
+  lang = 'en',
   user = null,
   mediaList = [],
   collections = [],

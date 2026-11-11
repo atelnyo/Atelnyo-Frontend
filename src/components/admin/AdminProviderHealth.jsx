@@ -213,7 +213,7 @@ function ProviderDetail({ provider, onBack }) {
   );
 }
 
-export default function AdminProviderHealth({ lang = 'ht', showToast }) {
+export default function AdminProviderHealth({ lang = 'en', showToast }) {
   const [providers, setProviders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

@@ -402,14 +402,14 @@ function formatSavedItemSubtitle(type, item, lang, t) {
 
 export function Mwen({
   user,
-  lang = 'ht',
+  lang = 'en',
   translations,
   showToast,
   onOpenTalentSheet,
   onOpenMusicSheet,
   onOpenExplore,
 }) {
-  const t = translations?.[lang] || translations?.ht || {};
+  const t = translations?.[lang] || translations?.en || {};
   const navigate = useSafeNavigate();
   const location = useLocation();
   const identity = getUserIdentity(user);

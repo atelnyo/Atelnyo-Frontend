@@ -463,9 +463,9 @@ function ProfileTab({ lang, showToast }) {
 // Main Dashboard Component
 // ═══════════════════════════════════════════════════════════════════════
 
-export default function AffiliateDashboard({ lang = 'ht', showToast }) {
+export default function AffiliateDashboard({ lang = 'en', showToast }) {
   const navigate = useSafeNavigate();
-  const t = translations?.[lang] || translations?.ht || {};
+  const t = translations?.[lang] || translations?.en || {};
   const [activeTab, setActiveTab] = useState('overview');
 
   return (

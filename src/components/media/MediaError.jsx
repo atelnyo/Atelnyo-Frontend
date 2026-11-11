@@ -132,7 +132,7 @@ export default function MediaError({
   statusCode,
   message,
   onRetry,
-  lang = 'ht',
+  lang = 'en',
   variant = 'inline',
   className = '',
 }) {

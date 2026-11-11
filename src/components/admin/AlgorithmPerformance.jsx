@@ -235,7 +235,7 @@ function RealtimeFeed({ events }) {
 
 // ─── Main Component ────────────────────────────────────────────────
 
-export default function AlgorithmPerformance({ lang = 'ht', showToast }) {
+export default function AlgorithmPerformance({ lang = 'en', showToast }) {
   const [metrics, setMetrics] = useState(null);
   const [contentTypeData, setContentTypeData] = useState([]);
   const [healthStatus, setHealthStatus] = useState([]);

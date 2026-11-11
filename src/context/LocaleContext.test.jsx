@@ -78,7 +78,7 @@ describe('LocaleProvider — user preference beats detection on bare paths', () 
   it('falls back to defaults when nothing is set (provider sees no signals → detection source)', () => {
     render(<LocaleProvider pathname="/"><Probe /></LocaleProvider>);
     const el = screen.getByTestId('ctx');
-    expect(el).toHaveTextContent('"language":"ht"');
+    expect(el).toHaveTextContent('"language":"en"');
     expect(el).toHaveTextContent('"country":"HT"');
     expect(el).toHaveTextContent('"source":"detection"');
   });
@@ -101,7 +101,7 @@ describe('useLocaleContext — safe fallback outside a provider', () => {
   it('returns defaults instead of throwing', () => {
     render(<Probe />);
     const el = screen.getByTestId('ctx');
-    expect(el).toHaveTextContent('"language":"ht"');
+    expect(el).toHaveTextContent('"language":"en"');
     expect(el).toHaveTextContent('"isLocalized":false');
   });
 });

@@ -53,7 +53,7 @@ function isSafeUrl(url) {
   }
 }
 
-export default function ResourceBlock({ block, lang = 'ht', reportComplete, onComplete }) {
+export default function ResourceBlock({ block, lang = 'en', reportComplete, onComplete }) {
   const isHt = lang === 'ht';
   const [confirmedExternal, setConfirmedExternal] = useState(null); // URL waiting for confirmation
 

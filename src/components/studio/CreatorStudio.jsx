@@ -190,9 +190,9 @@ function writeStudioNav(nav) {
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════
 
-export default function CreatorStudio({ lang = 'ht', showToast, user }) {
+export default function CreatorStudio({ lang = 'en', showToast, user }) {
   const navigate = useSafeNavigate();
-  const t = translations?.[lang] || translations?.ht || {};
+  const t = translations?.[lang] || translations?.en || {};
   const identity = getUserIdentity(user);
   // Deep-link support: /sheet/studio?section=public_profile (used by the
   // "Edit profile" button on the public page and the Profile Settings CTA

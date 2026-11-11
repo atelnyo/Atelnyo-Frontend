@@ -232,7 +232,7 @@ export default function StableVideoPlayer({
   onError,
   onLoad,
   className = '',
-  lang = 'ht',
+  lang = 'en',
 }) {
   const source = useMemo(() => detectVideoSource(url), [url]);
 

@@ -30,7 +30,7 @@ export default function TipsInbox({
   tipsSent = [],
   loading = false,
   onRefresh,
-  lang = 'ht',
+  lang = 'en',
   className = '',
   currentUserId,
   showToast,

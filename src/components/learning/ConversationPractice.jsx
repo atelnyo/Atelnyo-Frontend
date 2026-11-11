@@ -20,7 +20,7 @@ import AudioPlayer from './AudioPlayer';
 import SpeechRecorder from './SpeechRecorder';
 import styles from './learning.module.css';
 
-export default function ConversationPractice({ block, lang = 'ht', courseId, moduleIndex, reportComplete }) {
+export default function ConversationPractice({ block, lang = 'en', courseId, moduleIndex, reportComplete }) {
   const isHt = lang === 'ht';
   const t = (en, ht) => (isHt ? ht : en);
   const steps = Array.isArray(block.steps) ? block.steps : [];

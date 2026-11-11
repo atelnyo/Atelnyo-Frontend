@@ -57,7 +57,7 @@ const STATUS_COLORS = {
   hidden:  { color: 'var(--text-secondary, #64748b)',  bg: 'var(--state-neutral-bg, rgba(100,116,139,0.09))' },
 };
 
-export default function AdminContentModeration({ lang = 'ht', showToast, user, onNavigate }) {
+export default function AdminContentModeration({ lang = 'en', showToast, user, onNavigate }) {
   const isHt = lang === 'ht';
   const { isAdmin, loading: permsLoading } = useHasAdminAccess();
   const hasStaffAccess = (user?.is_staff === true || user?.is_superuser === true) || isAdmin === true;

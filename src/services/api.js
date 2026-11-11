@@ -766,14 +766,15 @@ function _writeCache(prefs) {
   languagePreferenceService._cachedPrefs = prefs;
 }
 
-function _platformDefaults() {
+async function _platformDefaults() {
   // Mirror the backend's LANGUAGE_PREFS_DEFAULTS shape so the frontend and
   // backend agree on what "no explicit preference yet" looks like. The
   // interface_language default comes from the markets config (the same
   // source the backend uses), NOT from settings.LANGUAGE_CODE.
-  const { DEFAULT_LANGUAGE } = awaitImportMarkets();
+  const { DEFAULT_LANGUAGE } = await awaitImportMarkets();
   return {
     interface_language: DEFAULT_LANGUAGE,
+    interface_language_explicit: false,
     preferred_course_language: '',
     preferred_narration_language: '',
     preferred_subtitle_language: '',
@@ -793,7 +794,7 @@ async function awaitImportMarkets() {
   try {
     _marketsModule = await import('../config/markets');
   } catch (_) {
-    _marketsModule = { DEFAULT_LANGUAGE: 'ht' };
+    _marketsModule = { DEFAULT_LANGUAGE: 'en' };
   }
   return _marketsModule;
 }
@@ -1179,7 +1180,7 @@ export const aiService = {
   // Speech practice — learner-tapped pronunciation coach for a missed word.
   // Called only on explicit tap (never automatically) to bound AI cost;
   // the AI explains HOW to say it, the speech score stays the judge.
-  pronunciationHelp: ({ target_word, heard = '', target_phrase = '', lang = 'ht' } = {}) =>
+  pronunciationHelp: ({ target_word, heard = '', target_phrase = '', lang = 'en' } = {}) =>
     api.post('ai/pronunciation_help/', { target_word, heard, target_phrase, lang }),
   improveText: (text, goal = 'clearer') =>
     api.post('ai/improve_text/', { text, goal }),

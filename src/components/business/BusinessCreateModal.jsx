@@ -15,7 +15,7 @@
 import React, { useState } from 'react';
 import { businessProfileService } from '../../services/api';
 
-export default function BusinessCreateModal({ lang = 'ht', t, showToast, onClose, onCreated }) {
+export default function BusinessCreateModal({ lang = 'en', t, showToast, onClose, onCreated }) {
   const isHt = lang === 'ht';
   const [form, setForm] = useState({ name: '', tagline: '', logo_url: '', description: '' });
   const [saving, setSaving] = useState(false);

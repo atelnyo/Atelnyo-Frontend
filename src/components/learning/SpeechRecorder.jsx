@@ -40,7 +40,7 @@ function formatDuration(totalSec) {
 }
 
 export default function SpeechRecorder({
-  lang = 'ht',
+  lang = 'en',
   onRecorded,          // (blobUrl, blob, durationSec) => void
   onStart,             // () => void — fired when recording actually begins
   recordLabel,

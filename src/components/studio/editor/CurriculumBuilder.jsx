@@ -296,7 +296,7 @@ function ChapterCard({
 }
 
 /* ─── Main CurriculumBuilder ──────────────────────────────────────── */
-export default function CurriculumBuilder({ courseId, lang = 'ht', onSelectLesson, selectedLessonId, showToast }) {
+export default function CurriculumBuilder({ courseId, lang = 'en', onSelectLesson, selectedLessonId, showToast }) {
   const isHt = lang === 'ht';
 
   const [chapters, setChapters] = useState([]);

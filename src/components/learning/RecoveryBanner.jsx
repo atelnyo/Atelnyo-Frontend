@@ -19,11 +19,11 @@ import React, { useState } from 'react';
  *
  * @param {Object} props
  * @param {'restored' | 'sync_pending' | 'sync_failed' | 'offline'} props.type
- * @param {string} [props.lang='ht']
+ * @param {string} [props.lang='en']
  * @param {Function} [props.onDismiss]
  * @param {Function} [props.onRetry] — for sync_failed
  */
-export default function RecoveryBanner({ type, lang = 'ht', onDismiss, onRetry }) {
+export default function RecoveryBanner({ type, lang = 'en', onDismiss, onRetry }) {
   const [visible, setVisible] = useState(true);
 
   if (!visible || !type) return null;

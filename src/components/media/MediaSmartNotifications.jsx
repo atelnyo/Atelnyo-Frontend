@@ -68,7 +68,7 @@ export default function MediaSmartNotifications({
   onNotificationClick,
   onDismiss,
   onDismissAll,
-  lang = 'ht',
+  lang = 'en',
   className = '',
 }) {
   const isHt = lang === 'ht';

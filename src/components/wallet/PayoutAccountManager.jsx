@@ -27,7 +27,7 @@ export default function PayoutAccountManager({
   onDelete,
   onSetDefault,
   loading = false,
-  lang = 'ht',
+  lang = 'en',
   className = '',
 }) {
   const isHt = lang === 'ht';

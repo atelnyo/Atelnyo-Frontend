@@ -43,7 +43,7 @@ function fmtRelative(dateLike) {
   return `${Math.floor(diff / 86400)}d`;
 }
 
-export default function AdminValidationQueue({ lang = 'ht', showToast, user, onNavigate }) {
+export default function AdminValidationQueue({ lang = 'en', showToast, user, onNavigate }) {
   const isHt = lang === 'ht';
   const { isAdmin, loading: permsLoading } = useHasAdminAccess();
   const hasStaffAccess = (user?.is_staff === true || user?.is_superuser === true) || isAdmin === true;

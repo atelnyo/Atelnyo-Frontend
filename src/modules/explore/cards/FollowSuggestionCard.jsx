@@ -33,7 +33,7 @@ function FollowAvatarFallback({ name, lang }) {
 export default function FollowSuggestionCard({
   item,
   t,
-  lang = 'ht',
+  lang = 'en',
   user,
   showToast,
   onFollowed,

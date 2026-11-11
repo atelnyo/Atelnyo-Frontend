@@ -23,7 +23,7 @@
  */
 import React, { useCallback, useRef, useState } from 'react';
 
-export default function ImageBlock({ block, lang = 'ht', index, courseId, moduleIndex, onComplete, onViewed }) {
+export default function ImageBlock({ block, lang = 'en', index, courseId, moduleIndex, onComplete, onViewed }) {
   const isHt = lang === 'ht';
   const viewedRef = useRef(false);
   const [loadState, setLoadState] = useState('idle'); // idle | loading | loaded | error

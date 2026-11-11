@@ -94,7 +94,7 @@ export default function MediaRenderer({
   title = '',
   alt = '',
   fallbackText = '',
-  lang = 'ht',
+  lang = 'en',
   className = '',
   style = {},
   onLoad,

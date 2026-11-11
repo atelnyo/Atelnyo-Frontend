@@ -83,7 +83,7 @@ function FilterChip({ option, isActive, onClick, lang }) {
 export default function SmartFilters({
   filters = {},
   onFilterChange,
-  lang = 'ht',
+  lang = 'en',
   className = '',
 }) {
   const isHt = lang === 'ht';

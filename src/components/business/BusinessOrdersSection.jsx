@@ -20,7 +20,7 @@ import { businessOrderService } from '../../services/api';
 const STATUS_FLOW = ['new', 'contacted', 'fulfilled', 'cancelled'];
 
 export default function BusinessOrdersSection({
-  lang = 'ht', t = {}, showToast, profile,
+  lang = 'en', t = {}, showToast, profile,
 }) {
   const isHt = lang === 'ht';
   const [orders, setOrders] = useState([]);

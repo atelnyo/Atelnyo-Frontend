@@ -36,7 +36,7 @@ function toEmbedUrl(url) {
 
 export default function EmbedBlock({
   block,
-  lang = 'ht',
+  lang = 'en',
   index = 0,
   courseId,
   moduleIndex,

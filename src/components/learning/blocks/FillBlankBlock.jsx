@@ -14,7 +14,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 
 export default function FillBlankBlock({
   block,
-  lang = 'ht',
+  lang = 'en',
   index = 0,
   courseId,
   moduleIndex,

@@ -6,7 +6,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 const STORAGE_KEY = 'atelnyo_bookmarks';
 
-export default function CourseBookmarks({ courseId, lang = 'ht', onNavigate }) {
+export default function CourseBookmarks({ courseId, lang = 'en', onNavigate }) {
   const isHt = lang === 'ht';
   const [bookmarks, setBookmarks] = useState([]);
 

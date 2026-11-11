@@ -66,7 +66,7 @@ export function parseSlideBody(body) {
 
 export default function SlidesBlock({
   block,
-  lang = 'ht',
+  lang = 'en',
   index,
   courseId,
   moduleIndex,

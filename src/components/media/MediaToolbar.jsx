@@ -53,7 +53,7 @@ export default function MediaToolbar({
   onRefresh,
   total = 0,
   filtered = 0,
-  lang = 'ht',
+  lang = 'en',
   className = '',
 }) {
   const isHt = lang === 'ht';

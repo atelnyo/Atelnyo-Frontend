@@ -21,7 +21,7 @@ export default function MediaPicker({
   onCancel,
   mediaType = 'all',
   multiSelect = false,
-  lang = 'ht',
+  lang = 'en',
   className = '',
 }) {
   const [items, setItems] = useState([]);

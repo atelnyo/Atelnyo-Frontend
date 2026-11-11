@@ -48,7 +48,7 @@ const TIMELINE_COLORS = {
   smart_replaced: 'var(--pr-color-violet-500, #8b5cf6)',
 };
 
-export default function MediaTimeline({ events = [], lang = 'ht', className = '' }) {
+export default function MediaTimeline({ events = [], lang = 'en', className = '' }) {
   const isHt = lang === 'ht';
 
   if (!events || events.length === 0) {

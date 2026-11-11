@@ -23,7 +23,7 @@ import React from 'react';
 export default function AccessibleLockedContent({
   children,
   reason,
-  lang = 'ht',
+  lang = 'en',
   className = '',
 }) {
   const isHt = lang === 'ht';

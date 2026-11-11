@@ -15,7 +15,7 @@ import { creatorProfileService } from '../../services/api';
 import { SHEETS } from '../../routes/sheets';
 import { requireLogin } from '../../utils/history';
 
-const DEIECard = memo(function DEIECard({ item, sectionType = 'for_you', lang = 'ht', user }) {
+const DEIECard = memo(function DEIECard({ item, sectionType = 'for_you', lang = 'en', user }) {
   const navigate = useNavigate();
   const location = useLocation();
   const isHt = lang === 'ht';

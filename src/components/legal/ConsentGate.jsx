@@ -205,7 +205,7 @@ const POLICIES = {
  * @param {function} props.onAccept — called when user clicks "Accept & Continue"
  * @param {function} props.onSkip   — called when user clicks "Continue without..."
  */
-export default function ConsentGate({ lang = 'ht', onAccept, onSkip }) {
+export default function ConsentGate({ lang = 'en', onAccept, onSkip }) {
   const isHt = lang === 'ht';
   const isFr = lang === 'fr';
   const isEs = lang === 'es';

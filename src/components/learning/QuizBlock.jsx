@@ -64,7 +64,7 @@ function clearQuizAnswers(courseId, moduleIndex) {
 }
 
 export default function QuizBlock({
-  courseId, moduleIndex, lang = 'ht', onComplete, cachedQuizzes, onQuizzesLoaded,
+  courseId, moduleIndex, lang = 'en', onComplete, cachedQuizzes, onQuizzesLoaded,
   gamification = null, onGamification = null,
 }) {
   const isHt = lang === 'ht';

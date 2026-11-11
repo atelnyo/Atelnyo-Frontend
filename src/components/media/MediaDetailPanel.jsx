@@ -47,7 +47,7 @@ export default function MediaDetailPanel({
   onArchive,
   onDelete,
   onCopyUrl,
-  lang = 'ht',
+  lang = 'en',
   className = '',
 }) {
   const item = media || mediaData || {};

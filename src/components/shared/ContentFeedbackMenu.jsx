@@ -30,10 +30,10 @@ const COPY = {
 export default function ContentFeedbackMenu({
   contentType,
   contentId,
-  lang = 'ht',
+  lang = 'en',
   onDone,
 }) {
-  const copy = COPY[lang] || COPY.ht;
+  const copy = COPY[lang] || COPY.en;
   const [open, setOpen] = useState(false);
 
   if (!contentType || !contentId) {

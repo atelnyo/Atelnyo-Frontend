@@ -17,7 +17,7 @@ import React from 'react';
 import { BlockRenderer } from '../../learning/blocks';
 import styles from './editor.module.css';
 
-export default function BlockPreview({ block, lang = 'ht', courseId, moduleIndex }) {
+export default function BlockPreview({ block, lang = 'en', courseId, moduleIndex }) {
   if (!block) {
     return (
       <div className={styles.blockPreviewEmpty}>

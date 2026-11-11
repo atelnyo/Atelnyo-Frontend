@@ -30,7 +30,7 @@ export default function MediaGrid({
   onRename,
   filter,
   sortBy,
-  lang = 'ht',
+  lang = 'en',
   className = '',
   onRetry,
 }) {
