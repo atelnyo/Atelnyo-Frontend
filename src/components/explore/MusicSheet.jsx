@@ -14,6 +14,7 @@ import SaveHeartButton from '../SaveHeartButton';
 import { translations } from '../../data/translations';
 import { buildContentUrl, buildContentShareUrl, isLegacyContentUrl } from '../../utils/contentUrl';
 import { resolveVideoSource, coverWithFallback } from '../../modules/explore/utils/videoSource';
+import VideoEmbedFrame from '../media/VideoEmbedFrame';
 import SEOHead, { musicSchema } from '../shared/SEOHead';
 import { t2 } from '../../utils/i18n';
 
@@ -461,21 +462,16 @@ export function MusicSheet({ lang = 'en', showToast, user, contentId, track: ini
                 {t.explore_video_title || 'Music Video'}
               </h2>
               {video.kind === 'embed' ? (
-                <div style={{
-                  position: 'relative', paddingBottom: '56.25%', height: 0,
-                  overflow: 'hidden', borderRadius: 12,
-                  background: '#000',
-                  boxShadow: 'var(--cd-shadow-lg, 0 10px 25px rgba(0,0,0,0.08))',
-                }}>
-                  <iframe
-                    src={video.src}
-                    title={track.title || 'Music video'}
-                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    loading="lazy"
-                  />
-                </div>
+                <VideoEmbedFrame
+                  src={video.src}
+                  title={track.title || 'Music video'}
+                  lang={lang}
+                  style={{
+                    borderRadius: 12,
+                    boxShadow: 'var(--cd-shadow-lg, 0 10px 25px rgba(0,0,0,0.08))',
+                  }}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                />
               ) : (
                 <video
                   src={video.src}

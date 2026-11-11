@@ -14,6 +14,7 @@ import { useOutletContext } from 'react-router-dom';
 import api, { communitiesService } from '../../services/api';
 import { t as t4 } from '../../utils/i18n';
 import { resolveVideoSource, youtubeThumbnail } from '../../modules/explore/utils/videoSource';
+import VideoEmbedFrame from '../media/VideoEmbedFrame';
 
 /** First playable video URL inside a post body (YouTube/Vimeo/direct file), or '' — same resolver as Music. */
 function firstVideoUrl(text) {
@@ -831,9 +832,13 @@ export default function CommunityPosts() {
                 {vidUrl && <VideoTitleLink url={vidUrl} />}
                 {video && (
                   video.kind === 'embed' ? (
-                    <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: 8, background: '#000', marginTop: 8 }}>
-                      <iframe src={video.src} title="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen loading="lazy" />
-                    </div>
+                    <VideoEmbedFrame
+                      src={video.src}
+                      title="Post video"
+                      lang={lang}
+                      style={{ borderRadius: 8, marginTop: 8 }}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    />
                   ) : (
                     <video src={video.src} controls preload="metadata" playsInline poster={img || undefined} style={{ width: '100%', borderRadius: 8, background: '#000', marginTop: 8, display: 'block' }} />
                   )

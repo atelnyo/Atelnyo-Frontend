@@ -5,6 +5,7 @@ import useSavedItem from '../hooks/useSavedItem';
 import SaveHeartButton from './SaveHeartButton';
 import { progressService, courseCheckoutService, courseService } from '../services/api';
 import { resolveVideoSource } from '../modules/explore/utils/videoSource';
+import VideoEmbedFrame from './media/VideoEmbedFrame';
 import LanguagePracticeBlock from './learning/LanguagePracticeBlock';
 import QuizBlock from './learning/QuizBlock';
 import SEOHead, { courseSchema } from './shared/SEOHead';
@@ -626,21 +627,16 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
                 {t.explore_video_title || (isHt ? 'Videyo Prezantasyon' : 'Promo Video')}
               </h2>
               {promoVideo.kind === 'embed' ? (
-                <div style={{
-                  position: 'relative', paddingBottom: '56.25%', height: 0,
-                  overflow: 'hidden', borderRadius: 12,
-                  background: '#000',
-                  boxShadow: 'var(--cd-shadow-lg, 0 10px 25px rgba(0,0,0,0.08))',
-                }}>
-                  <iframe
-                    src={promoVideo.src}
-                    title={course.title || 'Promo video'}
-                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    loading="lazy"
-                  />
-                </div>
+                <VideoEmbedFrame
+                  src={promoVideo.src}
+                  title={course.title || 'Promo video'}
+                  lang={lang}
+                  style={{
+                    borderRadius: 12,
+                    boxShadow: 'var(--cd-shadow-lg, 0 10px 25px rgba(0,0,0,0.08))',
+                  }}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                />
               ) : (
                 <video
                   src={promoVideo.src}

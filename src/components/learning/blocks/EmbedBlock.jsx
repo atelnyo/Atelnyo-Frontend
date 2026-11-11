@@ -12,6 +12,7 @@
  *   - Google Docs → preview
  */
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import VideoEmbedFrame from '../../media/VideoEmbedFrame';
 
 function toEmbedUrl(url) {
   if (!url) return '';
@@ -90,17 +91,14 @@ export default function EmbedBlock({
             paddingBottom: height ? undefined : '56.25%',
             height: height || 0,
           }}>
-            <iframe
+            <VideoEmbedFrame
               src={embedUrl}
               title={block.title || 'Embedded content'}
-              style={{
-                position: 'absolute', top: 0, left: 0,
-                width: '100%', height: '100%',
-                border: 'none',
-              }}
+              lang={lang}
+              loadingText={isHt ? 'Ap chaje kontni entegre a...' : 'Loading embedded content...'}
+              style={{ position: 'absolute', inset: 0, aspectRatio: 'auto' }}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
-              loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
             />
           </div>

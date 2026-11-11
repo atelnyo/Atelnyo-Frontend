@@ -47,11 +47,13 @@ function AudioPreviewInline({ url }) {
 function VideoPreviewInline({ url }) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
+  const [thumbnailState, setThumbnailState] = useState({ url: '', status: 'loading' });
 
   // Detect YouTube/Vimeo
   const isYouTube = /(?:youtube\.com|youtu\.be)/.test(url);
   const isVimeo = /vimeo\.com/.test(url);
   const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  const thumbnailStatus = thumbnailState.url === url ? thumbnailState.status : 'loading';
 
   if (isYouTube && ytMatch) {
     return (
@@ -61,7 +63,14 @@ function VideoPreviewInline({ url }) {
           alt=""
           className="mu-preview-img"
           loading="lazy"
+          onLoad={() => setThumbnailState({ url, status: 'loaded' })}
+          onError={() => setThumbnailState({ url, status: 'error' })}
         />
+        {thumbnailStatus === 'loading' && (
+          <div className="mu-preview-loading" role="status" aria-label="Loading video preview">
+            <i className="fas fa-spinner fa-spin" aria-hidden="true" />
+          </div>
+        )}
         <div className="mu-preview-play-icon"><i className="fab fa-youtube" /></div>
       </div>
     );

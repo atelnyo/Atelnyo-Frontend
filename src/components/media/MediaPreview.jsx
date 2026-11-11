@@ -14,6 +14,7 @@
 import React, { useState } from 'react';
 import MediaBadge from './MediaBadge';
 import ImageViewer from './ImageViewer';
+import VideoEmbedFrame from './VideoEmbedFrame';
 
 function fmtFileSize(bytes) {
   if (bytes == null) return '—';
@@ -79,15 +80,14 @@ export default function MediaPreview({
         {mediaType === 'image' ? (
           <ImageViewer mediaData={item} className="media-preview-image" />
         ) : mediaType === 'video' ? (
-          <div className="media-preview-video">
-            <iframe
-              src={item.preview_url || url}
-              title={item.title || 'Video preview'}
-              className="media-preview-iframe"
-              allow="autoplay; fullscreen"
-              allowFullScreen
-            />
-          </div>
+          <VideoEmbedFrame
+            src={item.preview_url || url}
+            title={item.title || 'Video preview'}
+            lang={lang}
+            className="media-preview-video"
+            frameClassName="media-preview-iframe"
+            allow="autoplay; fullscreen"
+          />
         ) : mediaType === 'audio' ? (
           <div className="media-preview-audio">
             <div className="media-preview-audio-icon">

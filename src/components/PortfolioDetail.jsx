@@ -22,6 +22,7 @@ import { buildContentUrl, buildContentShareUrl, isLegacyContentUrl } from '../ut
 import { historyBack } from '../utils/history';
 import { resolvePortfolioVideo } from '../modules/explore/utils/cardHelpers';
 import { resolveVideoSource } from '../modules/explore/utils/videoSource';
+import VideoEmbedFrame from './media/VideoEmbedFrame';
 
 /* ─── Constants ────────────────────────────────────────────────── */
 function buildOGFallback() {
@@ -421,19 +422,13 @@ export default function PortfolioDetail({ lang = 'en', project: propProject, onB
                       {lang === 'ht' ? 'Videyo Demo' : 'Demo Video'}
                     </h2>
                     {demo.kind === 'embed' ? (
-                      <div style={{
-                        position: 'relative', paddingBottom: '56.25%', height: 0,
-                        overflow: 'hidden', borderRadius: 12, background: '#000',
-                      }}>
-                        <iframe
-                          src={demo.src}
-                          title={project.title || 'Demo video'}
-                          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }}
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                          loading="lazy"
-                        />
-                      </div>
+                      <VideoEmbedFrame
+                        src={demo.src}
+                        title={project.title || 'Demo video'}
+                        lang={lang}
+                        style={{ borderRadius: 12 }}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      />
                     ) : (
                       <video
                         src={demo.src}

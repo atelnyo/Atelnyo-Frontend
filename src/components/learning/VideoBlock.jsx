@@ -32,17 +32,19 @@ export default function VideoBlock({ block, lang = 'en', reportComplete }) {
   const playbackRateRef = useRef(1);
   playbackRateRef.current = playbackRate;
   const videoRef = useRef(null);
-  const [loadError, setLoadError] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [loadState, setLoadState] = useState({ url: '', status: 'loading' });
+  const videoUrl = block.videoUrl;
+  const isLoaded = loadState.url === videoUrl && loadState.status === 'loaded';
+  const loadError = loadState.url === videoUrl && loadState.status === 'error';
 
   // Declared before the early returns below: a hook called after a
   // conditional return breaks the Rules of Hooks (hook order changes
   // between renders).
   const handleVideoError = useCallback(() => {
-    setLoadError(true);
-  }, []);
+    setLoadState({ url: videoUrl, status: 'error' });
+  }, [videoUrl]);
 
-  const v = resolveVideoSource(block.videoUrl);
+  const v = resolveVideoSource(videoUrl);
   if (!v) {
     return (
       <div className="ls-block-media-empty" role="status" style={{
@@ -72,13 +74,6 @@ export default function VideoBlock({ block, lang = 'en', reportComplete }) {
 
   return (
     <div className={styles.practiceContent}>
-      {/* Accessible loading announcement */}
-      {!isLoaded && !loadError && (
-        <div role="status" aria-live="polite" className="sr-only">
-          {t('Loading video...', 'Ap chaje videyo...')}
-        </div>
-      )}
-
       {/* Aspect-ratio container */}
       <div className="ls-block-video-wrapper" style={{
         position: 'relative', width: '100%',
@@ -86,6 +81,21 @@ export default function VideoBlock({ block, lang = 'en', reportComplete }) {
         borderRadius: 10, overflow: 'hidden',
         background: 'var(--surface-card-alt, #f1f5f9)',
       }}>
+        {!isLoaded && !loadError && (
+          <div
+            role="status"
+            aria-live="polite"
+            style={{
+              position: 'absolute', inset: 0, zIndex: 1,
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center', gap: 10,
+              color: '#fff', background: 'rgba(15, 23, 42, 0.88)',
+            }}
+          >
+            <i className="fas fa-spinner fa-spin" aria-hidden="true" />
+            <span>{t('Loading video...', 'Ap chaje videyo...')}</span>
+          </div>
+        )}
         {v.kind === 'embed' ? (
           <iframe
             src={v.src}
@@ -95,7 +105,7 @@ export default function VideoBlock({ block, lang = 'en', reportComplete }) {
             allowFullScreen
             loading="lazy"
             onError={handleVideoError}
-            onLoad={() => setIsLoaded(true)}
+            onLoad={() => setLoadState({ url: videoUrl, status: 'loaded' })}
             style={{
               position: 'absolute', top: 0, left: 0,
               width: '100%', height: '100%', border: 'none',
@@ -109,7 +119,7 @@ export default function VideoBlock({ block, lang = 'en', reportComplete }) {
             playsInline
             poster={block.posterUrl || undefined}
             onError={handleVideoError}
-            onLoadedData={() => setIsLoaded(true)}
+            onLoadedData={() => setLoadState({ url: videoUrl, status: 'loaded' })}
             // Phase 10: accessible label for the video player
             aria-label={videoTitle}
             style={{

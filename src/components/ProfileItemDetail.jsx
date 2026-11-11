@@ -17,6 +17,7 @@ import useSavedItem from '../hooks/useSavedItem';
 import SaveHeartButton from './SaveHeartButton';
 import { buildContentUrl, buildContentShareUrl, isLegacyContentUrl } from '../utils/contentUrl';
 import { resolveVideoSource } from '../modules/explore/utils/videoSource';
+import VideoEmbedFrame from './media/VideoEmbedFrame';
 
 const ITEM_LABELS = {
   course: { ht: 'Kou', en: 'Course' },
@@ -165,16 +166,13 @@ export default function ProfileItemDetail({ lang = 'en', type, contentId, user, 
             return (
               <div style={{ marginBottom: 16 }}>
                 {trailer.kind === 'embed' ? (
-                  <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: 12, background: '#000' }}>
-                    <iframe
-                      src={trailer.src}
-                      title={item.title || 'Event trailer'}
-                      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      loading="lazy"
-                    />
-                  </div>
+                  <VideoEmbedFrame
+                    src={trailer.src}
+                    title={item.title || 'Event trailer'}
+                    lang={lang}
+                    style={{ borderRadius: 12, marginBottom: 16 }}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  />
                 ) : (
                   <video
                     src={trailer.src}

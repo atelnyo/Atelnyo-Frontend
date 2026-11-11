@@ -14,6 +14,7 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { hoverEmbedSrc } from '../utils/videoSource';
+import VideoEmbedFrame from '../../../components/media/VideoEmbedFrame';
 
 export default function HoverVideoPreview({ videoSrc, title = '', onFail }) {
   const videoRef = useRef(null);
@@ -60,13 +61,15 @@ export default function HoverVideoPreview({ videoSrc, title = '', onFail }) {
   // provider's error UI muted inside the card while hovering —
   // unavoidable without the player JS API (the sheets behave the same).
   return (
-    <iframe
+    <VideoEmbedFrame
       className="explore-card-hover-video explore-card-hover-embed"
       src={hoverEmbedSrc(videoSrc)}
       title={title || 'Video preview'}
-      allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-      aria-hidden="true"
+      ariaHidden
       tabIndex={-1}
+      loading="eager"
+      style={{ position: 'absolute', inset: 0, aspectRatio: 'auto', zIndex: 1, pointerEvents: 'none' }}
+      allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
     />
   );
 }

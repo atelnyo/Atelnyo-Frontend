@@ -15,6 +15,7 @@
  */
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import MediaGrid from './MediaGrid';
+import VideoEmbedFrame from './VideoEmbedFrame';
 import '../../styles/media-gallery.css';
 
 /** Extract a usable image URL from any item shape (media_url, public_url, url, thumbnail_url). */
@@ -335,14 +336,13 @@ export default function MediaGallery({
                 />
               </div>
             ) : selType === 'video' ? (
-              <div className="media-gallery-video-wrapper">
-                <iframe
-                  src={selected.preview_url || selUrl}
-                  title={selTitle || 'Video'}
-                  allow="autoplay; fullscreen"
-                  allowFullScreen
-                />
-              </div>
+              <VideoEmbedFrame
+                src={selected.preview_url || selUrl}
+                title={selTitle || 'Video'}
+                lang={lang}
+                className="media-gallery-video-wrapper"
+                allow="autoplay; fullscreen"
+              />
             ) : (
               <div className="media-gallery-file">
                 <i className={`fas fa-${selType === 'audio' ? 'music' : 'file'}`} aria-hidden="true" />

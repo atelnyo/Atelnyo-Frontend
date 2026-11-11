@@ -210,8 +210,10 @@ export function MediaUrlField({
   inputProps = {},
 }) {
   const [previewFailed, setPreviewFailed] = useState(false);
+  const [videoLoadState, setVideoLoadState] = useState({ url: '', status: 'loading' });
   const trimmed = (value || '').trim();
   const isHttp = /^https?:\/\//i.test(trimmed);
+  const videoStatus = videoLoadState.url === trimmed ? videoLoadState.status : 'loading';
 
   const isImageUrl = () => {
     if (!isHttp) return false;
@@ -286,8 +288,22 @@ export function MediaUrlField({
               height="100%"
               light={false}
               playing={false}
+              onReady={() => setVideoLoadState({ url: trimmed, status: 'ready' })}
+              onError={() => setVideoLoadState({ url: trimmed, status: 'error' })}
               onDuration={onDuration}
             />
+            {videoStatus === 'loading' && (
+              <div className={styles.videoPreviewLoading} role="status" aria-live="polite">
+                <i className="fas fa-spinner fa-spin" aria-hidden="true" />
+                <span>{lang === 'ht' ? 'Ap chaje videyo a...' : 'Loading video...'}</span>
+              </div>
+            )}
+            {videoStatus === 'error' && (
+              <div className={styles.videoPreviewLoading} role="alert">
+                <i className="fas fa-triangle-exclamation" aria-hidden="true" />
+                <span>{lang === 'ht' ? 'Videyo sa a pa t kapab chaje.' : 'This video could not be loaded.'}</span>
+              </div>
+            )}
           </Suspense>
         </div>
       )}

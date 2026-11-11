@@ -14,6 +14,7 @@
  * FallbackSection.
  */
 import React from 'react';
+import VideoEmbedFrame from '../media/VideoEmbedFrame';
 
 // ─── Seksyon Senp — Tèks / Rich Text ──────────────────────────────────
 
@@ -355,10 +356,10 @@ function VideoSection({ section }) {
       <div className="cms-video-container">
         {section.title && <h2 className="cms-section-title">{section.title}</h2>}
         <div className="cms-video-wrapper">
-          <iframe
+          <VideoEmbedFrame
             src={embedUrl}
             title={section.title || 'Video'}
-            allowFullScreen
+            style={{ position: 'absolute', inset: 0, aspectRatio: 'auto' }}
           />
         </div>
       </div>

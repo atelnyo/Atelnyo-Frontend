@@ -10,6 +10,7 @@ import React from 'react';
 import ImageViewer from '../ImageViewer';
 import AISuggestion from '../AISuggestion';
 import MediaTypeIcon from '../MediaIconography';
+import VideoEmbedFrame from '../VideoEmbedFrame';
 
 export default function MediaPreviewPanel({ media, lang = 'en', className = '' }) {
   const item = media || {};
@@ -35,15 +36,14 @@ export default function MediaPreviewPanel({ media, lang = 'en', className = '' }
           <ImageViewer mediaData={item} className="inspector-preview-img" />
         )}
         {mediaType === 'video' && (
-          <div className="inspector-preview-video">
-            <iframe
-              src={previewUrl}
-              title={item.title || 'Video'}
-              className="inspector-preview-iframe"
-              allowFullScreen
-              allow="autoplay; encrypted-media"
-            />
-          </div>
+          <VideoEmbedFrame
+            src={previewUrl}
+            title={item.title || 'Video'}
+            lang={lang}
+            className="inspector-preview-video"
+            frameClassName="inspector-preview-iframe"
+            allow="autoplay; encrypted-media"
+          />
         )}
         {mediaType === 'audio' && (
           <div className="inspector-preview-audio">

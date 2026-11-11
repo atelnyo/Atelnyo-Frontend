@@ -23,6 +23,7 @@ import LinkedContent from './LinkedContent';
 import SmartWarning from './SmartWarning';
 import AISuggestion from './AISuggestion';
 import MediaHelp from './MediaHelp';
+import VideoEmbedFrame from './VideoEmbedFrame';
 
 function fmtFileSize(bytes) {
   if (bytes == null) return '—';
@@ -150,15 +151,14 @@ export default function MediaDetailPanel({
                 {mediaType === 'image' ? (
                   <ImageViewer mediaData={item} className="detail-preview-image" />
                 ) : mediaType === 'video' ? (
-                  <div className="detail-preview-video">
-                    <iframe
-                      src={item.preview_url || url}
-                      title={item.title || 'Video'}
-                      className="detail-preview-iframe"
-                      allow="autoplay; fullscreen"
-                      allowFullScreen
-                    />
-                  </div>
+                  <VideoEmbedFrame
+                    src={item.preview_url || url}
+                    title={item.title || 'Video'}
+                    lang={lang}
+                    className="detail-preview-video"
+                    frameClassName="detail-preview-iframe"
+                    allow="autoplay; fullscreen"
+                  />
                 ) : mediaType === 'audio' ? (
                   <div className="detail-preview-audio">
                     <div className="detail-preview-audio-icon">
