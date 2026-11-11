@@ -34,7 +34,7 @@ const CI_STATUS = {
   not_processed: { bg: '#f3f4f6', text: '#6b7280', icon: 'fa-circle-question', label: 'Not Processed', labelHt: 'Pa Treté' },
   queued:        { bg: '#fef3c7', text: '#d97706', icon: 'fa-clock',           label: 'Queued',       labelHt: ' nan Fil' },
   processing:    { bg: '#dbeafe', text: '#2563eb', icon: 'fa-spinner',         label: 'Processing',   labelHt: 'Tretman' },
-  ready:         { bg: '#d1fae5', text: '#059669', icon: 'fa-check-circle',    label: 'Ready',        labelHt: 'Pare' },
+  ready:         { bg: '#d1fae5', text: '#059669', icon: 'fa-check-circle',    label: 'AI Ready',     labelHt: 'Entèlijans pare' },
   partial:       { bg: '#fef3c7', text: '#d97706', icon: 'fa-triangle-exclamation', label: 'Partial',  labelHt: 'Pasyèl' },
   failed:        { bg: '#fee2e2', text: '#dc2626', icon: 'fa-xmark-circle',    label: 'Failed',       labelHt: 'Echèk' },
   stale:         { bg: '#f3f4f6', text: '#6b7280', icon: 'fa-rotate',          label: 'Stale',        labelHt: 'Anile' },
@@ -50,6 +50,7 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
   const [editingId, setEditingId] = useState(null);
   const [unpublishingId, setUnpublishingId] = useState(null);
   const [publishingId, setPublishingId] = useState(null);
+  const [courseStatusOverrides, setCourseStatusOverrides] = useState({});
 
   const handleProcess = useCallback(async (courseId) => {
     setProcessing((p) => ({ ...p, [courseId]: true }));
@@ -100,7 +101,11 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
   const handleUnpublish = useCallback(async (courseId) => {
     setUnpublishingId(courseId);
     try {
-      await courseService.unpublishIntelligenceManaged(courseId);
+      const response = await courseService.unpublishIntelligenceManaged(courseId);
+      setCourseStatusOverrides((current) => ({
+        ...current,
+        [courseId]: response?.data?.status || 'draft',
+      }));
       showToast?.(
         lang === 'ht' ? 'Kou a retounen nan bouyon.' : 'Course moved back to draft.',
         'check-circle',
@@ -119,7 +124,11 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
   const handlePublish = useCallback(async (courseId) => {
     setPublishingId(courseId);
     try {
-      await courseService.publishIntelligenceManaged(courseId);
+      const response = await courseService.publishIntelligenceManaged(courseId);
+      setCourseStatusOverrides((current) => ({
+        ...current,
+        [courseId]: response?.data?.status || 'published',
+      }));
       showToast?.(
         lang === 'ht' ? 'Kou a pibliye ankò.' : 'Course published again.',
         'check-circle',
@@ -164,7 +173,7 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
         </div>
         <div className={styles.affiliateStatCard}>
           <div className={styles.affiliateStatValue} style={{ color: '#059669' }}>{ready}</div>
-          <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Pare' : 'Intelligence Ready'}</div>
+          <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Entèlijans pare' : 'Intelligence Ready'}</div>
         </div>
         <div className={styles.affiliateStatCard}>
           <div className={styles.affiliateStatValue} style={{ color: notProcessed > 0 ? '#d97706' : '#059669' }}>{notProcessed}</div>
@@ -181,6 +190,7 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
       <div className={styles.list}>
         {courses.map((course) => {
           const st = CI_STATUS[course.intelligence_status] || CI_STATUS.not_processed;
+          const courseStatus = courseStatusOverrides[course.id] ?? course.status;
           return (
             <div key={course.id} className={styles.listItem}>
               <div className={styles.listAvatar}>
@@ -205,12 +215,12 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
                   <span style={{
                     display: 'inline-flex', alignItems: 'center', gap: 4,
                     padding: '2px 8px', borderRadius: 12,
-                    background: course.status === 'published' ? '#d1fae5' : '#f3f4f6',
-                    color: course.status === 'published' ? '#059669' : '#6b7280',
+                    background: courseStatus === 'published' ? '#d1fae5' : '#f3f4f6',
+                    color: courseStatus === 'published' ? '#059669' : '#6b7280',
                     fontSize: '0.75rem', fontWeight: 500,
                   }}>
-                    <i className={`fas ${course.status === 'published' ? 'fa-globe' : 'fa-pen'}`} />
-                    {course.status === 'published'
+                    <i className={`fas ${courseStatus === 'published' ? 'fa-globe' : 'fa-pen'}`} />
+                    {courseStatus === 'published'
                       ? (lang === 'ht' ? 'Pibliye' : 'Published')
                       : (lang === 'ht' ? 'Bouyon' : 'Draft')}
                   </span>
@@ -273,7 +283,7 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
                 </button>
                 {canManageCourseContent === true && (
                   <>
-                    {course.status === 'published' && (
+                    {courseStatus === 'published' && (
                       <button
                         type="button"
                         onClick={() => handleUnpublish(course.id)}
@@ -289,7 +299,7 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
                         {unpublishingId === course.id ? <i className="fas fa-spinner fa-spin" /> : <><i className="fas fa-eye-slash" /> {lang === 'ht' ? 'Mete an bouyon' : 'Move to draft'}</>}
                       </button>
                     )}
-                    {course.status === 'draft' && (
+                    {courseStatus === 'draft' && (
                       <button
                         type="button"
                         onClick={() => handlePublish(course.id)}
@@ -307,7 +317,7 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
                     )}
                   </>
                 )}
-                {course.status === 'published' && (
+                {courseStatus === 'published' && (
                   <button
                     type="button"
                     onClick={() => handleProcess(course.id)}

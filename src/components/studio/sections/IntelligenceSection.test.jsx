@@ -76,6 +76,9 @@ describe('IntelligenceSection course actions', () => {
 
     await waitFor(() => expect(courseService.unpublishIntelligenceManaged).toHaveBeenCalledWith(12));
     await waitFor(() => expect(courseService.getMyCoursesCI).toHaveBeenCalledTimes(2));
+    expect(screen.getByText('Draft')).toBeInTheDocument();
+    expect(screen.queryByText('Published')).not.toBeInTheDocument();
+    expect(screen.getByText('AI Ready')).toBeInTheDocument();
   });
 
   it('lets an admin republish a draft course and refreshes the list', async () => {
