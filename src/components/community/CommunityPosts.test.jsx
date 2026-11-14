@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryRouter, Routes, Route, Outlet } from 'react-router-dom';
 
@@ -20,13 +20,15 @@ vi.mock('../../services/api', () => ({
     postComments: vi.fn(),
     createComment: vi.fn(),
     deleteComment: vi.fn(),
+    announcements: vi.fn(),
   },
   communityEventsService: { list: vi.fn() },
+  eventsService: { ticket: vi.fn(), cancelRSVP: vi.fn() },
 }));
 
-import { communitiesService, communityEventsService } from '../../services/api';
+import { communitiesService, communityEventsService, eventsService } from '../../services/api';
 import CommunityPosts from './CommunityPosts';
-import { CommunityHome } from '../CommunityDetail';
+import { CommunityEvents, CommunityHome } from '../CommunityDetail';
 
 function Harness({ community, user }) {
   return (
@@ -50,9 +52,12 @@ beforeEach(() => {
   vi.clearAllMocks();
   communitiesService.posts.mockResolvedValue({ data: POSTS });
   communityEventsService.list.mockResolvedValue({ data: [] });
+  eventsService.ticket.mockResolvedValue({ data: { id: 21, status: 'confirmed' } });
+  eventsService.cancelRSVP.mockResolvedValue({ data: { attendee_count: 4 } });
+  communitiesService.announcements.mockResolvedValue({ data: [] });
 });
 
-describe('CommunityPosts', () => {
+describe('Community surfaces', () => {
   it('makes the post composer clear and easy to find from the community home', async () => {
     render(
       <MemoryRouter initialEntries={['/community/test/home']}>
@@ -70,6 +75,184 @@ describe('CommunityPosts', () => {
 
     fireEvent.click(await screen.findByTestId('community-home-compose'));
     expect(await screen.findByText('Posts feed')).toBeTruthy();
+  });
+
+  it('lets visitors join from the home CTA instead of sending them to a hidden composer', async () => {
+    const onJoin = vi.fn();
+    render(
+      <MemoryRouter initialEntries={['/community/test/home']}>
+        <Routes>
+          <Route
+            path="/community/test/home"
+            element={<Outlet context={{
+              community: { slug: 'test', is_member: false, join_mode: 'open' },
+              lang: 'ht',
+              onJoin,
+              canJoin: true,
+            }} />}
+          >
+            <Route index element={<CommunityHome />} />
+          </Route>
+          <Route path="/community/test/posts" element={<div>Posts feed</div>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    const joinButton = await screen.findByTestId('community-home-compose');
+    expect(joinButton).toHaveTextContent('Antre pou pibliye');
+    fireEvent.click(joinButton);
+    expect(onJoin).toHaveBeenCalledOnce();
+    expect(screen.queryByText('Posts feed')).toBeNull();
+  });
+
+  it('previews pinned community announcements and links to the full list', async () => {
+    communitiesService.announcements.mockResolvedValue({
+      data: [
+        { id: 1, title: 'Règ nouvo yo', content: 'Tanpri li règ kominote a.', is_pinned: false },
+        { id: 2, title: 'Byenveni!', content: 'Nou kontan wè nou la.', is_pinned: true },
+        { id: 3, title: 'Lòt anons', content: 'Sa a pa bezwen parèt sou akèy la.', is_pinned: false },
+      ],
+    });
+    render(
+      <MemoryRouter initialEntries={['/community/test/home']}>
+        <Routes>
+          <Route
+            path="/community/test/home"
+            element={<Outlet context={{ community: MEMBER_COMM, lang: 'ht' }} />}
+          >
+            <Route index element={<CommunityHome />} />
+          </Route>
+          <Route path="/community/test/announcements" element={<div>Anons yo</div>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByTestId('community-home-announcement-2')).toBeTruthy();
+    expect(screen.getByTestId('community-home-announcement-1')).toBeTruthy();
+    expect(screen.queryByTestId('community-home-announcement-3')).toBeNull();
+    fireEvent.click(within(screen.getByRole('region', { name: 'Anons kominote a' }))
+      .getByRole('button', { name: /Wè tout/ }));
+    expect(await screen.findByText('Anons yo')).toBeTruthy();
+  });
+
+  it('lets members RSVP to a free event and updates the attendee count', async () => {
+    communityEventsService.list.mockResolvedValue({
+      data: [{
+        id: 21,
+        title: 'Atelye Konpa',
+        status: 'published',
+        start_time: '2027-01-15T18:00:00Z',
+        end_time: '2027-01-15T20:00:00Z',
+        is_free: true,
+        price: 0,
+        attendee_count: 4,
+        max_attendees: 20,
+        has_ticket: false,
+      }],
+    });
+    const showToast = vi.fn();
+    render(
+      <MemoryRouter initialEntries={['/community/test/events']}>
+        <Routes>
+          <Route
+            path="/community/test/events"
+            element={<Outlet context={{
+              community: MEMBER_COMM,
+              lang: 'ht',
+              user: USER,
+              showToast,
+            }} />}
+          >
+            <Route index element={<CommunityEvents />} />
+          </Route>
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Reponn' }));
+    await waitFor(() => expect(eventsService.ticket).toHaveBeenCalledWith(21, 1));
+    expect(await screen.findByText('Ap vini')).toBeTruthy();
+    expect(screen.getByTestId('community-event-attendees-21')).toHaveTextContent('5');
+    expect(showToast).toHaveBeenCalledWith(expect.stringContaining('Ou reponn'), 'check-circle');
+  });
+
+  it('lets members cancel a free RSVP and updates the attendee count', async () => {
+    communityEventsService.list.mockResolvedValue({
+      data: [{
+        id: 23,
+        title: 'Reyinyon kominote',
+        status: 'published',
+        start_time: '2027-01-15T18:00:00Z',
+        end_time: '2027-01-15T20:00:00Z',
+        is_free: true,
+        price: 0,
+        attendee_count: 5,
+        has_ticket: true,
+      }],
+    });
+    const showToast = vi.fn();
+    render(
+      <MemoryRouter initialEntries={['/community/test/events']}>
+        <Routes>
+          <Route
+            path="/community/test/events"
+            element={<Outlet context={{
+              community: MEMBER_COMM,
+              lang: 'ht',
+              user: USER,
+              showToast,
+            }} />}
+          >
+            <Route index element={<CommunityEvents />} />
+          </Route>
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText('Ap vini')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Anile prezans' }));
+    await waitFor(() => expect(eventsService.cancelRSVP).toHaveBeenCalledWith(23));
+    expect(await screen.findByRole('button', { name: 'Reponn' })).toBeTruthy();
+    expect(screen.getByTestId('community-event-attendees-23')).toHaveTextContent('4');
+    expect(showToast).toHaveBeenCalledWith('Ou anile prezans ou.', 'check-circle');
+  });
+
+  it('asks visitors to join before RSVP and does not create a ticket', async () => {
+    communityEventsService.list.mockResolvedValue({
+      data: [{
+        id: 22,
+        title: 'Reyinyon kominote',
+        status: 'published',
+        start_time: '2027-01-15T18:00:00Z',
+        end_time: '2027-01-15T20:00:00Z',
+        is_free: true,
+        price: 0,
+        attendee_count: 2,
+        has_ticket: false,
+      }],
+    });
+    const onJoin = vi.fn();
+    render(
+      <MemoryRouter initialEntries={['/community/test/events']}>
+        <Routes>
+          <Route
+            path="/community/test/events"
+            element={<Outlet context={{
+              community: { slug: 'test', is_member: false, join_mode: 'public' },
+              lang: 'ht',
+              onJoin,
+              canJoin: true,
+            }} />}
+          >
+            <Route index element={<CommunityEvents />} />
+          </Route>
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Antre pou reponn' }));
+    expect(onJoin).toHaveBeenCalledOnce();
+    expect(eventsService.ticket).not.toHaveBeenCalled();
   });
 
   it('explains that members can publish persistent community posts', async () => {

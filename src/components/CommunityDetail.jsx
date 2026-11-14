@@ -32,7 +32,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import SEOHead from './shared/SEOHead';
 import { useParams, NavLink, Outlet, useOutletContext, useNavigate, useLocation } from 'react-router-dom';
-import { communitiesService, communityEventsService } from '../services/api';
+import { communitiesService, communityEventsService, eventsService } from '../services/api';
 import useVirtualScroll from '../hooks/useVirtualScroll';
 import { t as t4 } from '../utils/i18n';
 
@@ -85,10 +85,11 @@ function EmptyState({ icon, lang, ht, en, fr, es }) {
  * ak bouton "Wè tout" pou ale sou onglè konplè yo.
  */
 export function CommunityHome() {
-  const { community, lang } = useOutletContext();
+  const { community, lang, onJoin, joining, myStatus, canJoin } = useOutletContext();
   const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [posts, setPosts] = useState([]);
+  const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -100,14 +101,21 @@ export function CommunityHome() {
     Promise.allSettled([
       communityEventsService.list({ community: slug }),
       communitiesService.posts(slug),
-    ]).then(([evRes, postRes]) => {
+      communitiesService.announcements(slug),
+    ]).then(([evRes, postRes, announcementRes]) => {
       if (cancelled) return;
       const evData = evRes.status === 'fulfilled'
         ? (Array.isArray(evRes.value?.data) ? evRes.value.data : (evRes.value?.data?.results || [])) : [];
       const postData = postRes.status === 'fulfilled'
         ? (Array.isArray(postRes.value?.data) ? postRes.value.data : (postRes.value?.data?.results || [])) : [];
+      const announcementData = announcementRes.status === 'fulfilled'
+        ? (Array.isArray(announcementRes.value?.data) ? announcementRes.value.data : (announcementRes.value?.data?.results || [])) : [];
       setEvents(evData.filter((ev) => ['published', 'completed'].includes(ev.status)).slice(0, 3));
       setPosts(postData.slice(0, 4));
+      setAnnouncements(announcementData
+        .slice()
+        .sort((a, b) => Number(Boolean(b.is_pinned)) - Number(Boolean(a.is_pinned)))
+        .slice(0, 2));
       setLoading(false);
     });
     return () => { cancelled = true; };
@@ -115,71 +123,132 @@ export function CommunityHome() {
 
   if (loading) return <LoadingLine lang={lang} />;
   const go = (tab) => navigate(`../${tab}`, { relative: 'path' });
+  const isMember = Boolean(community?.is_member);
+  const joinPending = myStatus === 'pending';
+  const inviteOnly = !isMember && !joinPending && community?.join_mode === 'invite' && !canJoin;
   return (
     <div className="c-list c-list--gap12" data-testid="community-home">
       <section className="c-home-post-cta" aria-label={t4(lang, 'Piblikasyon kominote a', 'Community posts', 'Publications de la communauté', 'Publicaciones de la comunidad')}>
         <div className="c-home-post-cta-copy">
-          <span className="c-home-post-cta-icon" aria-hidden="true"><i className="fas fa-pen-to-square" /></span>
+          <span className="c-home-post-cta-icon" aria-hidden="true">
+            <i className={`fas ${isMember ? 'fa-pen-to-square' : 'fa-users'}`} />
+          </span>
           <div>
-            <h3>{t4(lang, 'Pataje yon bagay ak kominote a', 'Share something with the community', 'Partagez avec la communauté', 'Comparte algo con la comunidad')}</h3>
-            <p>{t4(lang, 'Kreye yon pòs piblik pou poze yon kesyon, pataje lide, oswa kòmanse yon diskisyon.', 'Write a community post to ask a question, share an idea, or start a discussion.', 'Publiez pour poser une question, partager une idée ou lancer une discussion.', 'Publica para hacer una pregunta, compartir una idea o iniciar una conversación.')}</p>
+            <h3>
+              {isMember
+                ? t4(lang, 'Pataje yon bagay ak kominote a', 'Share something with the community', 'Partagez avec la communauté', 'Comparte algo con la comunidad')
+                : t4(lang, 'Vin fè pati konvèsasyon an', 'Join the conversation', 'Rejoignez la conversation', 'Únete a la conversación')}
+            </h3>
+            <p>
+              {isMember
+                ? t4(lang, 'Kreye yon pòs piblik pou poze yon kesyon, pataje lide, oswa kòmanse yon diskisyon.', 'Write a community post to ask a question, share an idea, or start a discussion.', 'Publiez pour poser une question, partager une idée ou lancer une discussion.', 'Publica para hacer una pregunta, compartir una idea o iniciar una conversación.')
+                : joinPending
+                  ? t4(lang, 'Demann ou pou antre a ap tann apwobasyon.', 'Your request to join is waiting for approval.', 'Votre demande d’adhésion est en attente.', 'Tu solicitud para unirte está pendiente de aprobación.')
+                  : inviteOnly
+                    ? t4(lang, 'Mande fondatè a voye yon lyen envitasyon pou ou.', 'Ask the founder to send you an invitation link.', 'Demandez au fondateur de vous envoyer un lien d’invitation.', 'Pide al fundador que te envíe un enlace de invitación.')
+                    : t4(lang, 'Antre nan kominote a pou pataje lide ak poze kesyon.', 'Join this community to share ideas and ask questions.', 'Rejoignez cette communauté pour partager vos idées et poser des questions.', 'Únete a esta comunidad para compartir ideas y hacer preguntas.')}
+            </p>
           </div>
         </div>
-        <button type="button" className="c-home-post-cta-button" onClick={() => go('posts')} data-testid="community-home-compose">
-          <i className="fas fa-pen" aria-hidden="true" />
-          {t4(lang, 'Kreye yon pòs', 'Write a post', 'Écrire une publication', 'Escribir una publicación')}
+        <button
+          type="button"
+          className="c-home-post-cta-button"
+          onClick={isMember ? () => go('posts') : onJoin}
+          disabled={!isMember && (joining || joinPending || inviteOnly || !canJoin || !onJoin)}
+          data-testid="community-home-compose"
+        >
+          <i className={`fas ${isMember ? 'fa-pen' : joining ? 'fa-spinner fa-spin' : joinPending ? 'fa-clock' : inviteOnly ? 'fa-lock' : 'fa-user-plus'}`} aria-hidden="true" />
+          {isMember
+            ? t4(lang, 'Kreye yon pòs', 'Write a post', 'Écrire une publication', 'Escribir una publicación')
+            : joinPending
+              ? t4(lang, 'Demann voye', 'Request sent', 'Demande envoyée', 'Solicitud enviada')
+              : inviteOnly
+                ? t4(lang, 'Envitasyon sèlman', 'Invite only', 'Sur invitation', 'Solo con invitación')
+                : joining
+                  ? t4(lang, 'Ap tann...', 'Please wait...', 'Patientez...', 'Espera...')
+                  : t4(lang, 'Antre pou pibliye', 'Join to post', 'Rejoindre pour publier', 'Únete para publicar')}
         </button>
       </section>
-      {events.length === 0 && posts.length === 0 && (
-        <EmptyState icon="fa-house" lang={lang} ht="Pa gen aktivite ankò — tounen byento!" en="No activity yet — check back soon!" fr="Aucune activité pour le moment — revenez bientôt !" es="Sin actividad aún — ¡vuelve pronto!" />
-      )}
-      {events.length > 0 && (
-        <section aria-label={t4(lang, 'Evènman', 'Events', 'Événements', 'Eventos')}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="c-title c-title--sm"><i className="fas fa-calendar-alt" aria-hidden="true" /> {t4(lang, 'Evènman yo', 'Events', 'Événements', 'Eventos')}</h3>
-            <button type="button" className="c-tab c-tab--active" style={{ border: 'none', background: 'transparent', cursor: 'pointer' }} onClick={() => go('events')}>
+      {announcements.length > 0 && (
+        <section aria-label={t4(lang, 'Anons kominote a', 'Community announcements', 'Annonces de la communauté', 'Anuncios de la comunidad')}>
+          <div className="c-home-section-heading">
+            <h3 className="c-title c-title--sm"><i className="fas fa-bullhorn" aria-hidden="true" /> {t4(lang, 'Anons enpòtan', 'Community announcements', 'Annonces importantes', 'Anuncios importantes')}</h3>
+            <button type="button" className="c-tab c-tab--active" onClick={() => go('announcements')}>
               {t4(lang, 'Wè tout →', 'See all →', 'Tout voir →', 'Ver todo →')}
             </button>
           </div>
           <div className="c-list c-list--gap10">
-            {events.map((ev) => (
-              <div key={ev.id} className="c-row-card">
-                <div className="c-date-badge">
-                  <span className="c-date-badge-day">{ev.start_time ? new Date(ev.start_time).getDate() : '?'}</span>
-                  <span>{ev.start_time ? new Date(ev.start_time).toLocaleDateString(undefined, { month: 'short' }) : ''}</span>
+            {announcements.map((announcement) => (
+              <article key={announcement.id} className={`c-ann-card c-home-announcement${announcement.is_pinned ? ' c-ann-card--pinned' : ''}`} data-testid={`community-home-announcement-${announcement.id}`}>
+                <div className="c-ann-header">
+                  {announcement.is_pinned && <i className="fas fa-thumbtack c-ann-pin-icon" aria-hidden="true" />}
+                  <span className="c-title c-title--sm">{announcement.title}</span>
+                  {announcement.created_by_username && (
+                    <span className="c-ann-author">
+                      {t4(lang, 'pa', 'by', 'par', 'por')} {announcement.created_by_username}
+                    </span>
+                  )}
                 </div>
-                <div className="c-info">
-                  <div className="c-title c-title--sm">{ev.title}</div>
-                  <div className="c-subtitle">{ev.start_time ? new Date(ev.start_time).toLocaleString() : ''}{ev.location ? ` · ${ev.location}` : ''}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-      {posts.length > 0 && (
-        <section aria-label={t4(lang, 'Pòs yo', 'Posts', 'Publications', 'Publicaciones')}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <h3 className="c-title c-title--sm"><i className="fas fa-comments" aria-hidden="true" /> {t4(lang, 'Dènye piblikasyon', 'Latest posts', 'Dernières publications', 'Últimas publicaciones')}</h3>
-            <button type="button" className="c-tab c-tab--active" style={{ border: 'none', background: 'transparent', cursor: 'pointer' }} onClick={() => go('posts')}>
-              {t4(lang, 'Wè tout →', 'See all →', 'Tout voir →', 'Ver todo →')}
-            </button>
-          </div>
-          <div className="c-list c-list--gap10">
-            {posts.map((p) => (
-              <article key={p.id} className="c-post-card" data-testid={`community-home-post-${p.id}`}>
-                <div className="c-post-header">
-                  <span className="c-post-avatar" aria-hidden="true">{(p.author_username || '?')[0].toUpperCase()}</span>
-                  <div className="c-post-meta">
-                    <span className="c-title c-title--xs">@{p.author_username}</span>
-                  </div>
-                </div>
-                <p className="c-post-content">{String(p.content || '').slice(0, 220)}{String(p.content || '').length > 220 ? '…' : ''}</p>
-                {p.image_url && <img className="c-post-image" src={p.image_url} alt="" loading="lazy" />}
+                <p className="c-ann-content">{announcement.content}</p>
               </article>
             ))}
           </div>
         </section>
+      )}
+      {events.length === 0 && posts.length === 0 && announcements.length === 0 && (
+        <EmptyState icon="fa-house" lang={lang} ht="Pa gen aktivite ankò — tounen byento!" en="No activity yet — check back soon!" fr="Aucune activité pour le moment — revenez bientôt !" es="Sin actividad aún — ¡vuelve pronto!" />
+      )}
+      {(events.length > 0 || posts.length > 0) && (
+        <div className="c-home-preview-grid">
+          {events.length > 0 && (
+            <section aria-label={t4(lang, 'Evènman', 'Events', 'Événements', 'Eventos')}>
+              <div className="c-home-section-heading">
+                <h3 className="c-title c-title--sm"><i className="fas fa-calendar-alt" aria-hidden="true" /> {t4(lang, 'Evènman yo', 'Events', 'Événements', 'Eventos')}</h3>
+                <button type="button" className="c-tab c-tab--active" onClick={() => go('events')}>
+                  {t4(lang, 'Wè tout →', 'See all →', 'Tout voir →', 'Ver todo →')}
+                </button>
+              </div>
+              <div className="c-list c-list--gap10">
+                {events.map((ev) => (
+                  <div key={ev.id} className="c-row-card">
+                    <div className="c-date-badge">
+                      <span className="c-date-badge-day">{ev.start_time ? new Date(ev.start_time).getDate() : '?'}</span>
+                      <span>{ev.start_time ? new Date(ev.start_time).toLocaleDateString(undefined, { month: 'short' }) : ''}</span>
+                    </div>
+                    <div className="c-info">
+                      <div className="c-title c-title--sm">{ev.title}</div>
+                      <div className="c-subtitle">{ev.start_time ? new Date(ev.start_time).toLocaleString() : ''}{ev.location ? ` · ${ev.location}` : ''}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+          {posts.length > 0 && (
+            <section aria-label={t4(lang, 'Pòs yo', 'Posts', 'Publications', 'Publicaciones')}>
+              <div className="c-home-section-heading">
+                <h3 className="c-title c-title--sm"><i className="fas fa-comments" aria-hidden="true" /> {t4(lang, 'Dènye piblikasyon', 'Latest posts', 'Dernières publications', 'Últimas publicaciones')}</h3>
+                <button type="button" className="c-tab c-tab--active" onClick={() => go('posts')}>
+                  {t4(lang, 'Wè tout →', 'See all →', 'Tout voir →', 'Ver todo →')}
+                </button>
+              </div>
+              <div className="c-list c-list--gap10">
+                {posts.map((p) => (
+                  <article key={p.id} className="c-post-card" data-testid={`community-home-post-${p.id}`}>
+                    <div className="c-post-header">
+                      <span className="c-post-avatar" aria-hidden="true">{(p.author_username || '?')[0].toUpperCase()}</span>
+                      <div className="c-post-meta">
+                        <span className="c-title c-title--xs">@{p.author_username}</span>
+                      </div>
+                    </div>
+                    <p className="c-post-content">{String(p.content || '').slice(0, 220)}{String(p.content || '').length > 220 ? '…' : ''}</p>
+                    {p.image_url && <img className="c-post-image" src={p.image_url} alt="" loading="lazy" />}
+                  </article>
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
       )}
     </div>
   );
@@ -189,9 +258,12 @@ export function CommunityHome() {
  * /events — list of community events.
  */
 export function CommunityEvents() {
-  const { community, lang } = useOutletContext();
+  const { community, lang, user, showToast, t = {}, onJoin, canJoin, myStatus, joining: joiningCommunity } = useOutletContext();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [busyEventId, setBusyEventId] = useState(null);
 
   useEffect(() => {
     const slug = community?.slug;
@@ -212,35 +284,168 @@ export function CommunityEvents() {
     return () => { cancelled = true; };
   }, [community?.slug]);
 
+  const handleRSVP = async (event) => {
+    if (!community?.is_member) {
+      onJoin?.();
+      return;
+    }
+    if (!user) {
+      navigate('/login', {
+        state: { from: `${location.pathname}${location.search}${location.hash}` },
+      });
+      return;
+    }
+    if (busyEventId === event.id || event.has_ticket) return;
+
+    setBusyEventId(event.id);
+    try {
+      await eventsService.ticket(event.id, 1);
+      setList((current) => current.map((item) => item.id === event.id
+        ? { ...item, has_ticket: true, ticket_status: 'confirmed', attendee_count: (item.attendee_count || 0) + 1 }
+        : item));
+      showToast?.(
+        t.explore_event_rsvped || t4(lang, 'Ou reponn! N ap tann ou.', 'RSVP confirmed! See you there.', 'Votre présence est confirmée !', '¡Asistencia confirmada!'),
+        'check-circle',
+      );
+    } catch (err) {
+      if (err?.response?.status === 409) {
+        setList((current) => current.map((item) => item.id === event.id
+          ? { ...item, has_ticket: true, ticket_status: 'confirmed' }
+          : item));
+        showToast?.(
+          t.explore_event_rsvped || t4(lang, 'Ou deja reponn.', 'You are already going.', 'Votre présence est déjà confirmée.', 'Ya confirmaste tu asistencia.'),
+          'check-circle',
+        );
+        return;
+      }
+      showToast?.(
+        err?.response?.data?.detail || t.explore_event_rsvp_error || t4(lang, 'Pa t kapab reponn. Eseye ankò.', 'Could not RSVP. Try again.', 'Impossible de confirmer. Réessayez.', 'No se pudo confirmar. Inténtalo de nuevo.'),
+        'circle-exclamation',
+      );
+    } finally {
+      setBusyEventId(null);
+    }
+  };
+
+  const handleCancelRSVP = async (event) => {
+    if (!user) {
+      navigate('/login', {
+        state: { from: `${location.pathname}${location.search}${location.hash}` },
+      });
+      return;
+    }
+    if (busyEventId === event.id) return;
+
+    setBusyEventId(event.id);
+    try {
+      const response = await eventsService.cancelRSVP(event.id);
+      setList((current) => current.map((item) => item.id === event.id
+        ? {
+          ...item,
+          has_ticket: false,
+          ticket_status: 'cancelled',
+          attendee_count: response?.data?.attendee_count ?? Math.max(0, (item.attendee_count || 0) - 1),
+        }
+        : item));
+      showToast?.(
+        t4(lang, 'Ou anile prezans ou.', 'Your RSVP was cancelled.', 'Votre présence a été annulée.', 'Cancelaste tu asistencia.'),
+        'check-circle',
+      );
+    } catch (err) {
+      showToast?.(
+        err?.response?.data?.detail || t4(lang, 'Pa t kapab anile prezans lan. Eseye ankò.', 'Could not cancel your RSVP. Try again.', 'Impossible d’annuler votre présence. Réessayez.', 'No se pudo cancelar la asistencia. Inténtalo de nuevo.'),
+        'circle-exclamation',
+      );
+    } finally {
+      setBusyEventId(null);
+    }
+  };
+
   if (loading) return <LoadingLine lang={lang} />;
   if (list.length === 0) return <EmptyState icon="fa-calendar-alt" lang={lang} ht="Pa gen evènman ankò" en="No events yet" fr="Aucun événement pour le moment" es="Aún no hay eventos" />;
 
   return (
     <div className="c-list c-list--gap10">
-      {list.map((ev) => (
-        <div key={ev.id} className="c-row-card">
-          <div className="c-date-badge">
-            <span className="c-date-badge-day">
-              {ev.start_time ? new Date(ev.start_time).getDate() : '?'}
-            </span>
-            <span>
-              {ev.start_time
-                ? new Date(ev.start_time).toLocaleDateString(undefined, { month: 'short' })
-                : ''}
-            </span>
-          </div>
-          <div className="c-info">
-            <div className="c-title c-title--sm">{ev.title}</div>
-            <div className="c-subtitle">
-              {ev.start_time ? new Date(ev.start_time).toLocaleString() : ''}
-              {ev.location && ` · ${ev.location}`}
+      {list.map((ev) => {
+        const isFree = ev.is_free || Number(ev.price) <= 0;
+        const isFull = Boolean(ev.max_attendees && ev.attendee_count >= ev.max_attendees);
+        const hasEnded = ev.status === 'completed' || Boolean(ev.end_time && new Date(ev.end_time) <= new Date());
+        const hasStarted = Boolean(ev.start_time && new Date(ev.start_time) <= new Date());
+        const inviteOnly = !community?.is_member && community?.join_mode === 'invite' && !canJoin;
+        return (
+          <div key={ev.id} className="c-row-card c-event-row">
+            <div className="c-date-badge">
+              <span className="c-date-badge-day">
+                {ev.start_time ? new Date(ev.start_time).getDate() : '?'}
+              </span>
+              <span>
+                {ev.start_time
+                  ? new Date(ev.start_time).toLocaleDateString(undefined, { month: 'short' })
+                  : ''}
+              </span>
             </div>
+            <div className="c-info">
+              <div className="c-title c-title--sm">{ev.title}</div>
+              <div className="c-subtitle">
+                {ev.start_time ? new Date(ev.start_time).toLocaleString() : ''}
+                {ev.location && ` · ${ev.location}`}
+              </div>
+            </div>
+            <span className="c-event-attendee-count" data-testid={`community-event-attendees-${ev.id}`}>
+              <i className="fas fa-users" aria-hidden="true" />
+              {ev.attendee_count || 0}
+            </span>
+            <span className={`c-badge-price ${isFree ? 'c-badge-price--free' : 'c-badge-price--paid'}`}>
+              {isFree ? t4(lang, 'Gratis', 'Free', 'Gratuit', 'Gratis') : `$${ev.price}`}
+            </span>
+            {isFree && ev.has_ticket ? (
+              <>
+                <span className="c-event-status c-event-status--going" role="status" aria-live="polite">
+                  <i className="fas fa-check-circle" aria-hidden="true" />
+                  {t.explore_event_rsvped_short || t4(lang, 'Ap vini', 'Going', 'Je participe', 'Asistiré')}
+                </span>
+                {!hasStarted && !hasEnded && (
+                  <button
+                    type="button"
+                    className="c-event-cancel"
+                    onClick={() => handleCancelRSVP(ev)}
+                    disabled={busyEventId === ev.id}
+                  >
+                    {busyEventId === ev.id
+                      ? <i className="fas fa-spinner fa-spin" aria-hidden="true" />
+                      : null}
+                    {t4(lang, 'Anile prezans', 'Cancel RSVP', 'Annuler', 'Cancelar asistencia')}
+                  </button>
+                )}
+              </>
+            ) : isFull ? (
+              <span className="c-event-status">{t4(lang, 'Konplè', 'Full', 'Complet', 'Completo')}</span>
+            ) : hasEnded ? (
+              <span className="c-event-status">{t4(lang, 'Fini', 'Ended', 'Terminé', 'Finalizado')}</span>
+            ) : isFree && myStatus === 'pending' ? (
+              <span className="c-event-status">{t4(lang, 'Demann voye', 'Request sent', 'Demande envoyée', 'Solicitud enviada')}</span>
+            ) : isFree ? (
+              <button
+                type="button"
+                className="c-event-rsvp"
+                onClick={() => handleRSVP(ev)}
+                disabled={busyEventId === ev.id || joiningCommunity || inviteOnly || (!community?.is_member && !canJoin)}
+              >
+                {busyEventId === ev.id
+                  ? <i className="fas fa-spinner fa-spin" aria-hidden="true" />
+                  : <i className={`fas ${community?.is_member ? 'fa-check' : inviteOnly ? 'fa-lock' : 'fa-user-plus'}`} aria-hidden="true" />}
+                {community?.is_member
+                  ? (t.explore_event_rsvp || t4(lang, 'Reponn', 'RSVP', 'Répondre', 'Confirmar'))
+                  : inviteOnly
+                    ? t4(lang, 'Envitasyon sèlman', 'Invite only', 'Sur invitation', 'Solo con invitación')
+                    : t4(lang, 'Antre pou reponn', 'Join to RSVP', 'Rejoindre pour confirmer', 'Únete para confirmar')}
+              </button>
+            ) : (
+              <span className="c-event-status">{t4(lang, 'Tikè peye', 'Ticketed', 'Billet payant', 'Con entrada')}</span>
+            )}
           </div>
-          <span className={`c-badge-price ${ev.is_free ? 'c-badge-price--free' : 'c-badge-price--paid'}`}>
-            {ev.is_free ? (t4(lang, "Gratis", "Free", "Gratuit", "Gratis")) : `$${ev.price}`}
-          </span>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -894,7 +1099,7 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user }
     return () => { cancelled = true; };
   }, [community?.id]);
 
-  async function handleJoin() {
+  const handleJoin = useCallback(async () => {
     if (!user) {
       navigate('/login', {
         state: { from: `${location.pathname}${location.search}${location.hash}` },
@@ -925,7 +1130,7 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user }
     } finally {
       setJoining(false);
     }
-  }
+  }, [user, navigate, location.pathname, location.search, location.hash, slug, inviteToken, showToast, t, lang]);
 
   async function handleLeave() {
     setJoining(true);
@@ -973,8 +1178,18 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user }
   }), [lang]);
 
   const outletContext = useMemo(
-    () => ({ community: { ...community, slug }, lang, t, user, showToast }),
-    [community, slug, lang, t, user, showToast],
+    () => ({
+      community: { ...community, slug, is_member: isMember },
+      lang,
+      t,
+      user,
+      showToast,
+      onJoin: handleJoin,
+      joining,
+      myStatus,
+      canJoin: community?.join_mode !== 'invite' || Boolean(inviteToken),
+    }),
+    [community, slug, lang, t, user, showToast, isMember, handleJoin, joining, myStatus, inviteToken],
   );
 
   if (loading) {

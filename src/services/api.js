@@ -1753,6 +1753,8 @@ export const eventsService = {
   upcoming: (params) => api.get('community-events/upcoming/', { params }),
   ticket: (eventId, quantity = 1) =>
     api.post('event-tickets/', { event: eventId, quantity }),
+  cancelRSVP: (eventId) =>
+    api.post('event-tickets/cancel/', { event: eventId }),
 };
 
 // ─── Activity feed (Phase 30 + Phase 58 read tracking) ────────────────────
