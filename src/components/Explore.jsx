@@ -648,12 +648,9 @@ export function Explore({
     }
   }, [navigate]);
 
-  // Phase 24 — Community card click: navigate via the canonical
-  // /{slug}@{user}/community deep-link. CommunityKeyRoute resolves the
-  // slug and redirects (replace) to the tabbed /community/:slug
-  // page, so every category now shares the id@user/content URL shape.
-  // The payload rides along in location.state so the redirect hops to
-  // the canonical page without an extra fetch on the common path.
+  // Community cards go directly to the canonical /community/:slug page.
+  // The payload rides along in location.state for the shared community
+  // route; CommunityKeyRoute remains available for older deep links.
   const handleOpenCommunity = useCallback((community) => {
     if (community?.slug || community?.id) {
       startTransition(() => {

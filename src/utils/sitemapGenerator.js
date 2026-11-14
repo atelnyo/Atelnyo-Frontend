@@ -92,7 +92,9 @@ export async function generateSitemap() {
     for (const item of items) {
       const slug = item.slug || item.id;
       const userKey = item.user_key || item.created_by_username || item.linked_username || 'Atelnyo';
-      const path = `/${slug}/by/${userKey}/${type}`;
+      const path = type === 'community'
+        ? `/community/${encodeURIComponent(slug)}`
+        : `/${slug}/by/${userKey}/${type}`;
 
       urls.push({
         loc: wrapUrl(path),

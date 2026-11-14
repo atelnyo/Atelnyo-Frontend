@@ -15,7 +15,7 @@
  *   /konpase-dijital/by/alex/product
  *   /python-avanse/by/rose/course
  *   /fèt-mizik/by/paulo/event
- *   /kominote-mizik/by/louis/community
+ *   /community/kominote-mizik
  *
  * ``{slug}`` is the content's unique slug (title-derived) — the
  * resolvable key on every detail endpoint (the backend's
@@ -115,7 +115,7 @@ export function contentUserKey(item) {
   );
 }
 
-/** Build ``/{slug}/by/{user}/{type}`` from a content payload. */
+/** Build the canonical detail URL from a content payload. */
 export function buildContentUrl(type, item) {
   const t = normalizeContentType(type) || type;
   // Every canonical type is slug-keyed (SLUG_KEY_TYPES) — prefer the
@@ -123,14 +123,15 @@ export function buildContentUrl(type, item) {
   // empty-string slug falls back to the numeric id instead of emitting
   // a broken ``/by/user/{type}`` key that parseContentUrl can't match.
   const key = item && (SLUG_KEY_TYPES[t] ? (item.slug || item.id) : (item.id || item.slug));
+  if (t === 'community') return `/community/${encodeURIComponent(key)}`;
   const user = contentUserKey(item);
   return `/${key}/by/${user}/${t}`;
 }
 
 /**
  * Absolute canonical share URL — ``window.location.origin`` + the
- * ``/{id}@{user}/{type}`` path. This is the link the Share buttons
- * copy / hand to ``navigator.share``, so recipients always land on the
+ * canonical content path. This is the link the Share buttons copy /
+ * hand to ``navigator.share``, so recipients always land on the
  * canonical deep-link (never a legacy or in-app path). Falls back to
  * the relative path in non-browser environments (unit tests / SSR).
  */
