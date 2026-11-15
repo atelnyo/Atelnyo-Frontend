@@ -1456,6 +1456,21 @@ export const communitiesService = {
   // — the nested communities/<slug>/…/ paths returned 404.
   announcements: (slug) =>
     api.get('community-announcements/', { params: { community: slug } }),
+  // Announcement writes: create is scoped by ?community=<slug>, while
+  // pin/delete address the row by id. Manager-only server-side.
+  createAnnouncement: (slug, data) =>
+    api.post(`community-announcements/?community=${encodeURIComponent(slug)}`, data),
+  updateAnnouncement: (id, data) => api.patch(`community-announcements/${id}/`, data),
+  deleteAnnouncement: (id) => api.delete(`community-announcements/${id}/`),
+  // Shared files + linked courses — create is scoped by ?community=<slug>,
+  // delete/update address the row by id. Manager-only server-side.
+  createFile: (slug, data) =>
+    api.post(`community-files/?community=${encodeURIComponent(slug)}`, data),
+  deleteFile: (id) => api.delete(`community-files/${id}/`),
+  linkCourse: (slug, data) =>
+    api.post(`community-courses/?community=${encodeURIComponent(slug)}`, data),
+  updateLinkedCourse: (id, data) => api.patch(`community-courses/${id}/`, data),
+  unlinkCourse: (id) => api.delete(`community-courses/${id}/`),
   files: (slug) => api.get('community-files/', { params: { community: slug } }),
   linkedCourses: (slug) =>
     api.get('community-courses/', { params: { community: slug } }),
@@ -1465,6 +1480,8 @@ export const communitiesService = {
     api.get('community-posts/', { params: { community: slug, page_size: 20, ...params } }),
   createPost: (slug, data) =>
     api.post(`community-posts/?community=${encodeURIComponent(slug)}`, data),
+  // PATCH is manager-only for is_pinned (authors may edit their own text).
+  updatePost: (id, data) => api.patch(`community-posts/${id}/`, data),
   deletePost: (id) => api.delete(`community-posts/${id}/`),
   reactToPost: (id, emoji) => api.post(`community-posts/${id}/react/`, { emoji }),
   votePoll: (id, option_indices) => api.post(`community-posts/${id}/poll-vote/`, { option_indices }),
@@ -1482,6 +1499,7 @@ export const communityEventsService = {
   get: (id) => api.get(`community-events/${id}/`),
   create: (data) => api.post('community-events/', data),
   update: (id, data) => api.patch(`community-events/${id}/`, data),
+  cancel: (id) => api.post(`community-events/${id}/cancel/`),
   delete: (id) => api.delete(`community-events/${id}/`),
   // Guest list — moderator/owner only (backend 403s everyone else).
   // Returns confirmed + reserved tickets with user info.

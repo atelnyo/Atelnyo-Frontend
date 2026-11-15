@@ -36,8 +36,14 @@ const categoryToSlug = (raw) => {
 };
 import StudioEditorShell from './StudioEditorShell';
 import StudioPropertiesPanel, { PropertyGroup, PropField, PropInput } from './StudioPropertiesPanel';
+import CommunityFounderOverview from './CommunityFounderOverview';
+import CommunityMembersPanel from './CommunityMembersPanel';
+import CommunityPostsPanel from './CommunityPostsPanel';
+import CommunityEventsPanel from './CommunityEventsPanel';
+import CommunityFilesPanel from './CommunityFilesPanel';
+import CommunityAnnouncementsPanel from './CommunityAnnouncementsPanel';
 import { ImageUrlField } from '../modals/shared';
-import styles from './editor.module.css';
+import panelStyles from './communityEditor.module.css';
 
 export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'en', showToast, user, item }) {
   const isHt = lang === 'ht';
@@ -70,6 +76,10 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'e
   const [inviteExpiresAt, setInviteExpiresAt] = useState('');
   const [inviteBusy, setInviteBusy] = useState(false);
   const [dirty, setDirty] = useState(false);
+  // Founder workspace tab — overview is the landing tab for an existing
+  // community; a brand-new one starts on the profile form (management
+  // tabs need a persisted slug).
+  const [tab, setTab] = useState(isEdit ? 'overview' : 'profile');
   const dirtyRef = useRef(false);
   const savedIdRef = useRef(isEdit ? (item.slug || item.id) : null);
   // Gallery upload — avatar + banner accept URL paste OR file picker.
@@ -308,20 +318,88 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'e
   const validationList = [];
   if (!form.name.trim()) validationList.push({ id: 'name', label: isHt ? 'Non obligatwa' : 'Name required', zone: 'editor' });
 
-  const editorContent = (
-    <div className={styles.editorMain} style={{ padding: 24, maxWidth: 800, margin: '0 auto', width: '100%' }}>
-      {errors._api && <div className={styles.apiError} role="alert" style={{ marginBottom: 16 }}>{errors._api}</div>}
-      <div className={styles.formSection}>
-        <h3 className={styles.sectionTitle}><i className="fas fa-users" /> {isHt ? 'Enfòmasyon Kominote' : 'Community Info'}</h3>
+  // ─── Founder workspace tabs ─────────────────────────────────────
+  // Management surfaces (overview/members/announcements) need a saved
+  // community; before the first save only the profile form exists.
+  const canManage = Boolean(communityIdentifier);
+  const tabs = [
+    ...(canManage ? [{ id: 'overview', icon: 'fa-chart-simple', label: isHt ? 'Apèsi' : 'Overview' }] : []),
+    { id: 'profile', icon: 'fa-id-card', label: isHt ? 'Pwofil' : 'Profile' },
+    ...(canManage ? [
+      { id: 'members', icon: 'fa-users-gear', label: isHt ? 'Manm' : 'Members' },
+      { id: 'posts', icon: 'fa-comments', label: isHt ? 'Pòs' : 'Posts' },
+      { id: 'events', icon: 'fa-calendar-days', label: isHt ? 'Evènman' : 'Events' },
+      { id: 'resources', icon: 'fa-folder-open', label: isHt ? 'Fichye & Kou' : 'Files & Courses' },
+      { id: 'announcements', icon: 'fa-bullhorn', label: isHt ? 'Anons' : 'Announcements' },
+    ] : []),
+  ];
+  const activeTab = tabs.some((t) => t.id === tab) ? tab : 'profile';
+  const isOwner = (item?.current_user_role || 'owner') === 'owner';
+  const canModerate = isOwner || ['admin', 'moderator'].includes(item?.current_user_role);
+  // Counts come from the community row itself — no extra request, and
+  // they give the tab bar the live-feeling badges of a real dashboard.
+  const tabCounts = {
+    members: item?.member_count,
+    events: item?.event_count,
+  };
+
+  const onTabKeyDown = (event, index) => {
+    const { key } = event;
+    if (!['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(key)) return;
+    event.preventDefault();
+    let next = index;
+    if (key === 'ArrowRight') next = (index + 1) % tabs.length;
+    if (key === 'ArrowLeft') next = (index - 1 + tabs.length) % tabs.length;
+    if (key === 'Home') next = 0;
+    if (key === 'End') next = tabs.length - 1;
+    setTab(tabs[next].id);
+    document.getElementById(`community-tab-${tabs[next].id}`)?.focus();
+  };
+
+  const tabBar = (
+    <div className={panelStyles.tabBar} role="tablist" aria-label={isHt ? 'Zòn jesyon kominote' : 'Community workspace'}>
+      {tabs.map((t, index) => (
+        <button
+          key={t.id}
+          type="button"
+          role="tab"
+          id={`community-tab-${t.id}`}
+          aria-selected={activeTab === t.id}
+          aria-controls="community-tabpanel"
+          tabIndex={activeTab === t.id ? 0 : -1}
+          className={`${panelStyles.tab} ${activeTab === t.id ? panelStyles.tabActive : ''}`}
+          onClick={() => setTab(t.id)}
+          onKeyDown={(event) => onTabKeyDown(event, index)}
+        >
+          <i className={`fas ${t.icon}`} aria-hidden="true" />
+          {t.label}
+          {typeof tabCounts[t.id] === 'number' && tabCounts[t.id] > 0 && (
+            <span className={panelStyles.tabCount}>{tabCounts[t.id]}</span>
+          )}
+        </button>
+      ))}
+    </div>
+  );
+
+  const profileContent = (
+    <>
+      {errors._api && <div className={panelStyles.apiError} role="alert" style={{ marginBottom: 16 }}>{errors._api}</div>}
+      <div className={panelStyles.formSection}>
+        <h3 className={panelStyles.formTitle}><i className="fas fa-users" aria-hidden="true" /> {isHt ? 'Enfòmasyon Kominote' : 'Community Info'}</h3>
+        <p className={panelStyles.hint} style={{ marginTop: -6 }}>
+          {isHt
+            ? 'Se sa moun wè sou paj piblik kominote a. Non an obligatwa anvan ou sove.'
+            : 'This is what people see on the public community page. The name is required before saving.'}
+        </p>
         <div style={{ display: 'grid', gap: 16 }}>
           <PropField label={isHt ? 'Non Kominote' : 'Community Name'} required error={errors.name}>
             <PropInput value={form.name} onChange={(e) => handleChange('name', e.target.value)} placeholder={isHt ? 'Non kominote a' : 'Community name'} />
           </PropField>
           <PropField label={isHt ? 'Deskripsyon' : 'Description'}>
-            <textarea value={form.description} onChange={(e) => handleChange('description', e.target.value)} className={styles.textarea} rows={4} placeholder={isHt ? 'Dekri kominote a...' : 'Describe the community...'} />
+            <textarea value={form.description} onChange={(e) => handleChange('description', e.target.value)} className={panelStyles.textarea} rows={4} placeholder={isHt ? 'Dekri kominote a...' : 'Describe the community...'} />
           </PropField>
           <PropField label={isHt ? 'Kategori' : 'Category'}>
-            <select value={form.category} onChange={(e) => handleChange('category', e.target.value)} className={styles.select}>
+            <select value={form.category} onChange={(e) => handleChange('category', e.target.value)} className={panelStyles.input}>
               {CATEGORY_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>{isHt ? o.ht : o.en}</option>
               ))}
@@ -332,32 +410,79 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'e
           </PropField>
         </div>
       </div>
-      <div className={styles.formSection} style={{ marginTop: 24 }}>
-        <h3 className={styles.sectionTitle}><i className="fas fa-image" /> {isHt ? 'Imaj' : 'Images'}</h3>
+      <div className={panelStyles.formSection} style={{ marginTop: 20 }}>
+        <h3 className={panelStyles.formTitle}><i className="fas fa-image" aria-hidden="true" /> {isHt ? 'Imaj' : 'Images'}</h3>
         <div style={{ display: 'grid', gap: 16 }}>
           <div>
             <ImageUrlField label={isHt ? 'URL Avatè' : 'Avatar URL'} value={form.avatar_url} onChange={(v) => handleChange('avatar_url', v)} lang={lang} />
             <input ref={avatarInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImageFile(f, 'avatar_url'); e.target.value = ''; }} />
             <button type="button" onClick={() => avatarInputRef.current?.click()} disabled={uploadingAvatar}
-              style={{ marginTop: 8, border: '1px dashed var(--border-color, #cbd5e1)', background: 'transparent', borderRadius: 8, padding: '6px 12px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}>
-              <i className={`fas ${uploadingAvatar ? 'fa-spinner fa-spin' : 'fa-images'}`} aria-hidden="true" style={{ marginRight: 6 }} />
+              className={panelStyles.secondaryBtn} style={{ marginTop: 8 }}>
+              <i className={`fas ${uploadingAvatar ? 'fa-spinner fa-spin' : 'fa-images'}`} aria-hidden="true" />
               {uploadingAvatar ? (isHt ? 'Ap telechaje...' : 'Uploading...') : (isHt ? 'Chwazi nan galri' : 'Choose from gallery')}
             </button>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: 4 }}>{isHt ? 'Kole yon URL oswa pran yon foto nan galri telefòn ou.' : 'Paste a URL or pick a photo from your gallery.'}</div>
+            <div className={panelStyles.hint} style={{ margin: '6px 0 0' }}>{isHt ? 'Kole yon URL oswa pran yon foto nan galri telefòn ou.' : 'Paste a URL or pick a photo from your gallery.'}</div>
           </div>
           <div>
             <ImageUrlField label={isHt ? 'URL Banner' : 'Banner URL'} value={form.banner_url} onChange={(v) => handleChange('banner_url', v)} lang={lang} />
             <input ref={bannerInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImageFile(f, 'banner_url'); e.target.value = ''; }} />
             <button type="button" onClick={() => bannerInputRef.current?.click()} disabled={uploadingBanner}
-              style={{ marginTop: 8, border: '1px dashed var(--border-color, #cbd5e1)', background: 'transparent', borderRadius: 8, padding: '6px 12px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}>
-              <i className={`fas ${uploadingBanner ? 'fa-spinner fa-spin' : 'fa-images'}`} aria-hidden="true" style={{ marginRight: 6 }} />
+              className={panelStyles.secondaryBtn} style={{ marginTop: 8 }}>
+              <i className={`fas ${uploadingBanner ? 'fa-spinner fa-spin' : 'fa-images'}`} aria-hidden="true" />
               {uploadingBanner ? (isHt ? 'Ap telechaje...' : 'Uploading...') : (isHt ? 'Chwazi nan galri' : 'Choose from gallery')}
             </button>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: 4 }}>{isHt ? 'Kole yon URL oswa pran yon foto nan galri telefòn ou.' : 'Paste a URL or pick a photo from your gallery.'}</div>
+            <div className={panelStyles.hint} style={{ margin: '6px 0 0' }}>{isHt ? 'Kole yon URL oswa pran yon foto nan galri telefòn ou.' : 'Paste a URL or pick a photo from your gallery.'}</div>
           </div>
         </div>
       </div>
+    </>
+  );
 
+  const editorContent = (
+    <div className={panelStyles.workspace} id="community-tabpanel" role="tabpanel" aria-labelledby={`community-tab-${activeTab}`}>
+      {tabBar}
+      {activeTab === 'overview' && (
+        <CommunityFounderOverview community={item} slug={communityIdentifier} lang={lang} onOpenTab={setTab} />
+      )}
+      {activeTab === 'profile' && profileContent}
+      {activeTab === 'members' && (
+        <CommunityMembersPanel
+          slug={communityIdentifier}
+          lang={lang}
+          showToast={showToast}
+          isOwner={isOwner}
+          canModerate={canModerate}
+          currentUserId={user?.id}
+        />
+      )}
+      {activeTab === 'posts' && (
+        <CommunityPostsPanel
+          slug={communityIdentifier}
+          lang={lang}
+          showToast={showToast}
+          canModerate={canModerate}
+        />
+      )}
+      {activeTab === 'events' && (
+        <CommunityEventsPanel
+          slug={communityIdentifier}
+          communityId={item?.id}
+          lang={lang}
+          showToast={showToast}
+          canModerate={canModerate}
+        />
+      )}
+      {activeTab === 'resources' && (
+        <CommunityFilesPanel
+          slug={communityIdentifier}
+          lang={lang}
+          showToast={showToast}
+          canModerate={canModerate}
+        />
+      )}
+      {activeTab === 'announcements' && (
+        <CommunityAnnouncementsPanel slug={communityIdentifier} lang={lang} showToast={showToast} />
+      )}
     </div>
   );
 
@@ -365,7 +490,7 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'e
     <StudioPropertiesPanel>
       <PropertyGroup title={isHt ? 'Aksè' : 'Access'} defaultOpen>
         <PropField label={isHt ? 'Fason antre' : 'Join Mode'}>
-          <select value={form.join_mode} onChange={(e) => handleChange('join_mode', e.target.value)} className={styles.select}>
+          <select value={form.join_mode} onChange={(e) => handleChange('join_mode', e.target.value)} className={panelStyles.input}>
             <option value="public">{isHt ? 'Piblik — nenpòt moun antre touswit' : 'Public — anyone joins instantly'}</option>
             <option value="approval">{isHt ? 'Apwobasyon — ou revize chak demann' : 'Approval — you review each request'}</option>
             <option value="invite">{isHt ? 'Fèmen — lyen envitasyon obligatwa' : 'Invite-only — invitation link required'}</option>
@@ -373,7 +498,7 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'e
         </PropField>
         {form.join_mode === 'approval' && (
           <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: '4px 0 0' }}>
-            {isHt ? 'Demann yo tann nan Studio → Kominote jiskaske ou apwouve oswa rejte yo.' : 'Requests wait in Studio → Communities until you approve or reject them.'}
+            {isHt ? 'Demann yo tann nan onglet Manm jiskaske ou apwouve oswa rejte yo.' : 'Requests wait in the Members tab until you approve or reject them.'}
           </p>
         )}
         {form.join_mode === 'invite' && (
@@ -434,6 +559,12 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'e
       </PropertyGroup>
       <PropertyGroup title={isHt ? 'Enfo' : 'Info'} defaultOpen>
         <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
+          {item?.created_by_username && (
+            <div>
+              <i className="fas fa-crown" aria-hidden="true" style={{ color: '#f59e0b', marginRight: 6 }} />
+              {isHt ? 'Fondatè' : 'Founder'}: @{item.created_by_username}
+            </div>
+          )}
           <div>👥 {item?.member_count ?? 0} {isHt ? 'manm' : 'members'} · 📅 {item?.event_count ?? 0} {isHt ? 'evènman' : 'events'}</div>
           {communityUrl ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{communityUrl}</span>
@@ -507,6 +638,12 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'e
     <StudioEditorShell
       title={isHt ? 'Editè Kominote' : 'Community Editor'}
       icon="fa-users"
+      badge={isEdit ? (
+        <span className={panelStyles.badge}>
+          <i className="fas fa-crown" aria-hidden="true" />
+          {isHt ? 'Fondatè' : 'Founder'}
+        </span>
+      ) : null}
       lang={lang}
       docTitle={form.name || (isHt ? 'Kominote san tit' : 'Untitled community')}
       isNew={!isEdit}
