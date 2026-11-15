@@ -14,7 +14,7 @@
  * CommunityLinkedCourseViewSet); uploads by plain members are still
  * allowed through the public community page.
  */
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useFetch from '../../../hooks/useFetch';
 import api, { communitiesService, courseService } from '../../../services/api';
 import ConfirmModal from '../../common/ConfirmModal';
@@ -24,6 +24,7 @@ import PanelSkeleton, {
 import styles from './communityEditor.module.css';
 
 const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
+const FILES_PAGE_SIZE = 20;
 
 const asArray = (data) => (Array.isArray(data) ? data : (data?.results || []));
 
@@ -32,6 +33,21 @@ const fmtBytes = (bytes) => {
   if (n < 1024) return `${n} B`;
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
   return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+const fileIcon = (file) => {
+  const mime = (file?.mime_type || '').toLowerCase();
+  const name = (file?.name || '').toLowerCase();
+  if (mime.startsWith('image/') || /\.(png|jpe?g|gif|webp|svg|bmp)$/.test(name)) return 'fa-file-image';
+  if (mime.includes('pdf') || name.endsWith('.pdf')) return 'fa-file-pdf';
+  if (mime.includes('zip') || mime.includes('compressed') || /\.(zip|rar|7z|tar|gz)$/.test(name)) return 'fa-file-zipper';
+  if (mime.includes('spreadsheet') || mime.includes('excel') || /\.(xls|xlsx|csv)$/.test(name)) return 'fa-file-excel';
+  if (mime.includes('presentation') || mime.includes('powerpoint') || /\.(ppt|pptx)$/.test(name)) return 'fa-file-powerpoint';
+  if (mime.includes('word') || /\.(doc|docx)$/.test(name)) return 'fa-file-word';
+  if (mime.startsWith('video/') || /\.(mp4|mov|avi|mkv|webm)$/.test(name)) return 'fa-file-video';
+  if (mime.startsWith('audio/') || /\.(mp3|wav|ogg|m4a)$/.test(name)) return 'fa-file-audio';
+  if (mime.startsWith('text/') || /\.(txt|md)$/.test(name)) return 'fa-file-lines';
+  return 'fa-file';
 };
 
 const readAsDataUrl = (file) => new Promise((resolve, reject) => {
@@ -53,18 +69,122 @@ export default function CommunityFilesPanel({
   const [courseId, setCourseId] = useState('');
   const fileInputRef = useRef(null);
 
-  const {
-    data: files, loading: loadingFiles, error: filesError, refetch: refetchFiles,
-  } = useFetch(
-    () => communitiesService.files(slug),
-    { defaultValue: [], transform: asArray, deps: [slug] },
-  );
-  const {
-    data: linked, loading: loadingLinked, error: linkedError, refetch: refetchLinked,
-  } = useFetch(
-    () => communitiesService.linkedCourses(slug),
-    { defaultValue: [], transform: asArray, deps: [slug] },
-  );
+  const [files, setFiles] = useState([]);
+  const [filesTotal, setFilesTotal] = useState(null);
+  const [filesPage, setFilesPage] = useState(1);
+  const [filesHasMore, setFilesHasMore] = useState(false);
+  const [loadingFiles, setLoadingFiles] = useState(true);
+  const [loadingMoreFiles, setLoadingMoreFiles] = useState(false);
+  const [filesError, setFilesError] = useState(null);
+  const [filesLoadedOnce, setFilesLoadedOnce] = useState(false);
+  const filesReqRef = useRef(0);
+
+  const fetchFilesPage = useCallback(async (pageToLoad, { append = false } = {}) => {
+    const requestId = ++filesReqRef.current;
+    if (append) setLoadingMoreFiles(true); else setLoadingFiles(true);
+    setFilesError(null);
+    try {
+      const res = await communitiesService.files(slug, { page: pageToLoad, page_size: FILES_PAGE_SIZE });
+      if (requestId !== filesReqRef.current) return;
+      const data = res?.data;
+      const list = asArray(data);
+      const count = Array.isArray(data) ? list.length : (typeof data?.count === 'number' ? data.count : null);
+      const more = Array.isArray(data)
+        ? false
+        : (typeof data?.next === 'string' ? Boolean(data.next) : list.length === FILES_PAGE_SIZE);
+      setFiles((prev) => (append ? [...prev, ...list] : list));
+      setFilesTotal(count);
+      setFilesPage(pageToLoad);
+      setFilesHasMore(more);
+      setFilesLoadedOnce(true);
+    } catch (err) {
+      if (requestId !== filesReqRef.current) return;
+      if (!append) setFiles([]);
+      setFilesError(err);
+    } finally {
+      if (requestId === filesReqRef.current) {
+        setLoadingFiles(false);
+        setLoadingMoreFiles(false);
+      }
+    }
+  }, [slug]);
+
+  useEffect(() => {
+    setFiles([]);
+    setFilesTotal(null);
+    setFilesPage(1);
+    setFilesHasMore(false);
+    setFilesLoadedOnce(false);
+    fetchFilesPage(1, { append: false });
+  }, [slug, fetchFilesPage]);
+
+  const refetchFiles = useCallback(() => {
+    fetchFilesPage(1, { append: false });
+  }, [fetchFilesPage]);
+
+  const loadMoreFiles = useCallback(() => {
+    if (loadingMoreFiles || loadingFiles || !filesHasMore) return;
+    fetchFilesPage(filesPage + 1, { append: true });
+  }, [fetchFilesPage, filesHasMore, filesPage, loadingFiles, loadingMoreFiles]);
+
+  const [linked, setLinked] = useState([]);
+  const [linkedTotal, setLinkedTotal] = useState(null);
+  const [linkedPage, setLinkedPage] = useState(1);
+  const [linkedHasMore, setLinkedHasMore] = useState(false);
+  const [loadingLinked, setLoadingLinked] = useState(true);
+  const [loadingMoreLinked, setLoadingMoreLinked] = useState(false);
+  const [linkedError, setLinkedError] = useState(null);
+  const [linkedLoadedOnce, setLinkedLoadedOnce] = useState(false);
+  const linkedReqRef = useRef(0);
+
+  const fetchLinkedPage = useCallback(async (pageToLoad, { append = false } = {}) => {
+    const requestId = ++linkedReqRef.current;
+    if (append) setLoadingMoreLinked(true); else setLoadingLinked(true);
+    setLinkedError(null);
+    try {
+      const res = await communitiesService.linkedCourses(slug, { page: pageToLoad, page_size: FILES_PAGE_SIZE });
+      if (requestId !== linkedReqRef.current) return;
+      const data = res?.data;
+      const list = asArray(data);
+      const count = Array.isArray(data) ? list.length : (typeof data?.count === 'number' ? data.count : null);
+      const more = Array.isArray(data)
+        ? false
+        : (typeof data?.next === 'string' ? Boolean(data.next) : list.length === FILES_PAGE_SIZE);
+      setLinked((prev) => (append ? [...prev, ...list] : list));
+      setLinkedTotal(count);
+      setLinkedPage(pageToLoad);
+      setLinkedHasMore(more);
+      setLinkedLoadedOnce(true);
+    } catch (err) {
+      if (requestId !== linkedReqRef.current) return;
+      if (!append) setLinked([]);
+      setLinkedError(err);
+    } finally {
+      if (requestId === linkedReqRef.current) {
+        setLoadingLinked(false);
+        setLoadingMoreLinked(false);
+      }
+    }
+  }, [slug]);
+
+  useEffect(() => {
+    setLinked([]);
+    setLinkedTotal(null);
+    setLinkedPage(1);
+    setLinkedHasMore(false);
+    setLinkedLoadedOnce(false);
+    fetchLinkedPage(1, { append: false });
+  }, [slug, fetchLinkedPage]);
+
+  const refetchLinked = useCallback(() => {
+    fetchLinkedPage(1, { append: false });
+  }, [fetchLinkedPage]);
+
+  const loadMoreLinked = useCallback(() => {
+    if (loadingMoreLinked || loadingLinked || !linkedHasMore) return;
+    fetchLinkedPage(linkedPage + 1, { append: true });
+  }, [fetchLinkedPage, linkedHasMore, linkedPage, loadingLinked, loadingMoreLinked]);
+
   const { data: myCourses } = useFetch(
     () => courseService.getMyCoursesCI(),
     {
@@ -74,7 +194,7 @@ export default function CommunityFilesPanel({
   );
 
   const loading = loadingFiles || loadingLinked;
-  const initialLoading = useInitialLoading(loading);
+  const initialLoading = (loadingFiles && !filesLoadedOnce) || (loadingLinked && !linkedLoadedOnce);
   const refreshAll = () => {
     refetchFiles();
     refetchLinked();
@@ -186,11 +306,11 @@ export default function CommunityFilesPanel({
       <PanelHeader
         icon="fa-folder-open"
         title={isHt ? 'Fichye pataje' : 'Shared files'}
-        count={files.length}
+        count={typeof filesTotal === 'number' ? filesTotal : files.length}
         subtitle={isHt
           ? 'Dokiman, gid ak resous pou manm yo. Maks 50 MB pa fichye.'
           : 'Documents, guides and resources for members. 50 MB max per file.'}
-        refreshing={loadingFiles}
+        refreshing={loadingFiles && filesLoadedOnce}
         onRefresh={refetchFiles}
         refreshLabel={isHt ? 'Rafrechi fichye yo' : 'Refresh files'}
       >
@@ -237,11 +357,12 @@ export default function CommunityFilesPanel({
             : 'Upload a guide, template or document your members can use.'}
         />
       ) : (
+        <>
         <div className={styles.list}>
           {files.map((file) => (
             <div key={file.id} className={styles.row}>
               <div className={styles.avatar} aria-hidden="true" style={{ background: '#0ea5e9' }}>
-                <i className="fas fa-file" />
+                <i className={`fas ${fileIcon(file)}`} />
               </div>
               <div className={styles.rowBody}>
                 <div className={styles.rowName}>{file.name}</div>
@@ -276,6 +397,21 @@ export default function CommunityFilesPanel({
             </div>
           ))}
         </div>
+        {filesHasMore && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 14 }}>
+            <button
+              type="button"
+              className={styles.actionButton}
+              onClick={loadMoreFiles}
+              disabled={loadingMoreFiles}
+            >
+              {loadingMoreFiles
+                ? (isHt ? 'Ap chaje…' : 'Loading…')
+                : (isHt ? 'Chaje plis fichye' : 'Load more files')}
+            </button>
+          </div>
+        )}
+        </>
       )}
 
       {/* ── Linked courses ───────────────────────────────────── */}
@@ -283,11 +419,11 @@ export default function CommunityFilesPanel({
         <PanelHeader
           icon="fa-graduation-cap"
           title={isHt ? 'Kou ki lye' : 'Linked courses'}
-          count={linked.length}
+          count={typeof linkedTotal === 'number' ? linkedTotal : linked.length}
           subtitle={isHt
             ? 'Kou ou yo ki parèt dirèkteman nan kominote a.'
             : 'Your courses surfaced directly inside the community.'}
-          refreshing={loadingLinked}
+          refreshing={loadingLinked && linkedLoadedOnce}
           onRefresh={refetchLinked}
           refreshLabel={isHt ? 'Rafrechi kou yo' : 'Refresh courses'}
         />
@@ -348,6 +484,7 @@ export default function CommunityFilesPanel({
             : 'Link one of your courses so members can start learning right away.'}
         />
       ) : (
+        <>
         <div className={styles.list}>
           {linked.map((row) => (
             <div key={row.id} className={styles.row}>
@@ -394,6 +531,21 @@ export default function CommunityFilesPanel({
             </div>
           ))}
         </div>
+        {linkedHasMore && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 14 }}>
+            <button
+              type="button"
+              className={styles.actionButton}
+              onClick={loadMoreLinked}
+              disabled={loadingMoreLinked}
+            >
+              {loadingMoreLinked
+                ? (isHt ? 'Ap chaje…' : 'Loading…')
+                : (isHt ? 'Chaje plis kou' : 'Load more courses')}
+            </button>
+          </div>
+        )}
+        </>
       )}
 
       {removeTarget && (

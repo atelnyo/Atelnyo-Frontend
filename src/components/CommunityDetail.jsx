@@ -126,6 +126,11 @@ export function CommunityHome() {
   const isMember = Boolean(community?.is_member);
   const joinPending = myStatus === 'pending';
   const inviteOnly = !isMember && !joinPending && community?.join_mode === 'invite' && !canJoin;
+  const rules = Array.isArray(community?.rules) ? community.rules : [];
+  const previewRules = rules.slice(0, 3);
+  const hasLink = (text) => /https?:\/\//i.test(text || '');
+  const hasVideo = (text) => /(youtube\.com|youtu\.be|vimeo\.com|facebook\.com\/.+\/videos|tiktok\.com)/i.test(text || '');
+
   return (
     <div className="c-list c-list--gap12" data-testid="community-home">
       <section className="c-home-post-cta" aria-label={t4(lang, 'Piblikasyon kominote a', 'Community posts', 'Publications de la communauté', 'Publicaciones de la comunidad')}>
@@ -141,12 +146,12 @@ export function CommunityHome() {
             </h3>
             <p>
               {isMember
-                ? t4(lang, 'Kreye yon pòs piblik pou poze yon kesyon, pataje lide, oswa kòmanse yon diskisyon.', 'Write a community post to ask a question, share an idea, or start a discussion.', 'Publiez pour poser une question, partager une idée ou lancer une discussion.', 'Publica para hacer una pregunta, compartir una idea o iniciar una conversación.')
+                ? t4(lang, 'Ekri yon pòs, pataje yon lyen (YouTube, WhatsApp, Facebook, sit wèb), imaj oswa sondaj pou kòmanse diskisyon an.', 'Write a post, share a link (YouTube, WhatsApp, Facebook, website), image, or poll to start the discussion.', 'Publiez un texte, un lien (YouTube, WhatsApp, Facebook, site web), une image ou un sondage.', 'Publica texto, un enlace (YouTube, WhatsApp, Facebook, web), imagen o encuesta.')
                 : joinPending
                   ? t4(lang, 'Demann ou pou antre a ap tann apwobasyon.', 'Your request to join is waiting for approval.', 'Votre demande d’adhésion est en attente.', 'Tu solicitud para unirte está pendiente de aprobación.')
                   : inviteOnly
                     ? t4(lang, 'Mande fondatè a voye yon lyen envitasyon pou ou.', 'Ask the founder to send you an invitation link.', 'Demandez au fondateur de vous envoyer un lien d’invitation.', 'Pide al fundador que te envíe un enlace de invitación.')
-                    : t4(lang, 'Antre nan kominote a pou pataje lide ak poze kesyon.', 'Join this community to share ideas and ask questions.', 'Rejoignez cette communauté pour partager vos idées et poser des questions.', 'Únete a esta comunidad para compartir ideas y hacer preguntas.')}
+                    : t4(lang, 'Antre nan kominote a pou pataje lide, lyen ak kesyon.', 'Join this community to share ideas, links, and questions.', 'Rejoignez cette communauté pour partager vos idées et liens.', 'Únete a esta comunidad para compartir ideas y enlaces.')}
             </p>
           </div>
         </div>
@@ -169,6 +174,50 @@ export function CommunityHome() {
                   : t4(lang, 'Antre pou pibliye', 'Join to post', 'Rejoindre pour publier', 'Únete para publicar')}
         </button>
       </section>
+
+      <section className="c-home-stats" aria-label={t4(lang, 'Rezime kominote a', 'Community snapshot', 'Aperçu de la communauté', 'Resumen de la comunidad')}>
+        <button type="button" className="c-home-stat" onClick={() => go('members')}>
+          <i className="fas fa-users" aria-hidden="true" />
+          <strong>{community?.member_count ?? 0}</strong>
+          <span>{t4(lang, 'Manm', 'Members', 'Membres', 'Miembros')}</span>
+        </button>
+        <button type="button" className="c-home-stat" onClick={() => go('events')}>
+          <i className="fas fa-calendar-days" aria-hidden="true" />
+          <strong>{community?.event_count ?? events.length}</strong>
+          <span>{t4(lang, 'Evènman', 'Events', 'Événements', 'Eventos')}</span>
+        </button>
+        <button type="button" className="c-home-stat" onClick={() => go('posts')}>
+          <i className="fas fa-comments" aria-hidden="true" />
+          <strong>{posts.length}</strong>
+          <span>{t4(lang, 'Dènye pòs', 'Recent posts', 'Publications', 'Publicaciones')}</span>
+        </button>
+        <div className="c-home-stat" aria-label={t4(lang, 'Aksè', 'Access', 'Accès', 'Acceso')}>
+          <i className="fas fa-shield-halved" aria-hidden="true" />
+          <strong>{(community?.join_mode || 'public')}</strong>
+          <span>{t4(lang, 'Aksè', 'Access', 'Accès', 'Acceso')}</span>
+        </div>
+      </section>
+
+      {previewRules.length > 0 && (
+        <section className="c-card c-card--padded" aria-label={t4(lang, 'Règleman', 'Rules', 'Règles', 'Reglas')}>
+          <div className="c-home-section-heading">
+            <h3 className="c-title c-title--sm"><i className="fas fa-gavel" aria-hidden="true" /> {t4(lang, 'Règleman kominote a', 'Community rules', 'Règles de la communauté', 'Reglas de la comunidad')}</h3>
+          </div>
+          <ol style={{ margin: '8px 0 0', paddingLeft: 18, display: 'grid', gap: 6 }}>
+            {previewRules.map((rule, idx) => (
+              <li key={rule.id || idx}>
+                <strong>{rule.title || rule}</strong>
+                {rule.description ? <div className="c-subtitle" style={{ marginTop: 2 }}>{rule.description}</div> : null}
+              </li>
+            ))}
+          </ol>
+          {rules.length > previewRules.length && (
+            <div className="c-subtitle" style={{ marginTop: 8 }}>
+              +{rules.length - previewRules.length} {t4(lang, 'lòt règ', 'more rules', 'autres règles', 'más reglas')}
+            </div>
+          )}
+        </section>
+      )}
       {announcements.length > 0 && (
         <section aria-label={t4(lang, 'Anons kominote a', 'Community announcements', 'Annonces de la communauté', 'Anuncios de la comunidad')}>
           <div className="c-home-section-heading">
@@ -233,18 +282,46 @@ export function CommunityHome() {
                 </button>
               </div>
               <div className="c-list c-list--gap10">
-                {posts.map((p) => (
-                  <article key={p.id} className="c-post-card" data-testid={`community-home-post-${p.id}`}>
-                    <div className="c-post-header">
-                      <span className="c-post-avatar" aria-hidden="true">{(p.author_username || '?')[0].toUpperCase()}</span>
-                      <div className="c-post-meta">
-                        <span className="c-title c-title--xs">@{p.author_username}</span>
+                {posts.map((p) => {
+                  const text = String(p.content || '');
+                  const link = hasLink(text);
+                  const video = hasVideo(text);
+                  return (
+                    <article
+                      key={p.id}
+                      className="c-post-card"
+                      data-testid={`community-home-post-${p.id}`}
+                      onClick={() => go('posts')}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go('posts'); } }}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <div className="c-post-header">
+                        <span className="c-post-avatar" aria-hidden="true">{(p.author_username || '?')[0].toUpperCase()}</span>
+                        <div className="c-post-meta" style={{ flex: 1, minWidth: 0 }}>
+                          <span className="c-title c-title--xs">@{p.author_username}</span>
+                          <span className="c-post-time">
+                            {p.created_at ? new Date(p.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : ''}
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', gap: 6, fontSize: '0.75rem', opacity: 0.75 }}>
+                          {p.image_url ? <i className="fas fa-image" title={t4(lang, 'Imaj', 'Image', 'Image', 'Imagen')} aria-hidden="true" /> : null}
+                          {video ? <i className="fas fa-video" title="Video" aria-hidden="true" /> : null}
+                          {p.poll_question ? <i className="fas fa-chart-simple" title={t4(lang, 'Sondaj', 'Poll', 'Sondage', 'Encuesta')} aria-hidden="true" /> : null}
+                          {link && !video ? <i className="fas fa-link" title={t4(lang, 'Lyen', 'Link', 'Lien', 'Enlace')} aria-hidden="true" /> : null}
+                        </div>
                       </div>
-                    </div>
-                    <p className="c-post-content">{String(p.content || '').slice(0, 220)}{String(p.content || '').length > 220 ? '…' : ''}</p>
-                    {p.image_url && <img className="c-post-image" src={p.image_url} alt="" loading="lazy" />}
-                  </article>
-                ))}
+                      <p className="c-post-content">{text.slice(0, 220)}{text.length > 220 ? '…' : ''}</p>
+                      {p.image_url && <img className="c-post-image" src={p.image_url} alt="" loading="lazy" />}
+                      <div className="c-post-foot" style={{ marginTop: 6, fontSize: '0.78rem', opacity: 0.8 }}>
+                        <span><i className="fas fa-heart" aria-hidden="true" /> {p.reaction_count ?? 0}</span>
+                        <span style={{ marginLeft: 10 }}><i className="fas fa-comment" aria-hidden="true" /> {p.comment_count ?? 0}</span>
+                        <span style={{ marginLeft: 10, color: 'var(--primary, #2563eb)', fontWeight: 600 }}>{t4(lang, 'Wè pòs la →', 'View post →', 'Voir →', 'Ver →')}</span>
+                      </div>
+                    </article>
+                  );
+                })}
               </div>
             </section>
           )}
@@ -925,23 +1002,22 @@ export function CommunityAnnouncements() {
   }, [community?.slug]);
 
   if (loading) return <LoadingLine lang={lang} />;
-  if (list.length === 0) return <EmptyState icon="fa-bullhorn" lang={lang} ht="Pa gen anons" en="No announcements" fr="Aucune annonce" es="Ningún anuncio" />;
+  if (list.length === 0) return <EmptyState icon="fa-bullhorn" lang={lang} ht="Pa gen anons ankò" en="No announcements yet" fr="Aucune annonce" es="Ningún anuncio" />;
 
   return (
     <div className="c-list c-list--gap12">
       {list.map((a) => (
-        <div key={a.id} className={`c-ann-card${a.is_pinned ? ' c-ann-card--pinned' : ''}`}>
+        <article key={a.id} className={`c-ann-card${a.is_pinned ? ' c-ann-card--pinned' : ''}`} data-testid={`community-announcement-${a.id}`}>
           <div className="c-ann-header">
-            {a.is_pinned && <i className="fas fa-thumbtack c-ann-pin-icon" />}
+            {a.is_pinned && <i className="fas fa-thumbtack c-ann-pin-icon" aria-hidden="true" />}
             <span className="c-title c-title--sm">{a.title}</span>
-            {a.created_by_username && (
-              <span className="c-ann-author">
-                {t4(lang, "pa", "by", "par", "por")} {a.created_by_username}
-              </span>
-            )}
+            <span className="c-ann-author">
+              {a.created_by_username ? `${t4(lang, "pa", "by", "par", "por")} ${a.created_by_username}` : ''}
+              {a.created_at ? `${a.created_by_username ? ' · ' : ''}${new Date(a.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}` : ''}
+            </span>
           </div>
-          <p className="c-ann-content">{a.content}</p>
-        </div>
+          <p className="c-ann-content" style={{ whiteSpace: 'pre-wrap' }}>{a.content}</p>
+        </article>
       ))}
     </div>
   );
@@ -972,8 +1048,31 @@ export function CommunityFiles() {
     return () => { cancelled = true; };
   }, [community?.slug]);
 
+  const fileIcon = (file) => {
+    const mime = (file?.mime_type || '').toLowerCase();
+    const name = (file?.name || '').toLowerCase();
+    if (mime.startsWith('image/') || /\.(png|jpe?g|gif|webp|svg|bmp)$/.test(name)) return 'fa-file-image';
+    if (mime.includes('pdf') || name.endsWith('.pdf')) return 'fa-file-pdf';
+    if (mime.includes('zip') || mime.includes('compressed') || /\.(zip|rar|7z|tar|gz)$/.test(name)) return 'fa-file-zipper';
+    if (mime.includes('spreadsheet') || mime.includes('excel') || /\.(xls|xlsx|csv)$/.test(name)) return 'fa-file-excel';
+    if (mime.includes('presentation') || mime.includes('powerpoint') || /\.(ppt|pptx)$/.test(name)) return 'fa-file-powerpoint';
+    if (mime.includes('word') || /\.(doc|docx)$/.test(name)) return 'fa-file-word';
+    if (mime.startsWith('video/') || /\.(mp4|mov|avi|mkv|webm)$/.test(name)) return 'fa-file-video';
+    if (mime.startsWith('audio/') || /\.(mp3|wav|ogg|m4a)$/.test(name)) return 'fa-file-audio';
+    if (mime.startsWith('text/') || /\.(txt|md)$/.test(name)) return 'fa-file-lines';
+    return 'fa-file';
+  };
+
+  const fmtSize = (size) => {
+    const n = Number(size) || 0;
+    if (!n) return '';
+    if (n < 1024) return `${n} B`;
+    if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+    return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
   if (loading) return <LoadingLine lang={lang} />;
-  if (list.length === 0) return <EmptyState icon="fa-file" lang={lang} ht="Pa gen fichye" en="No files" fr="Aucun fichier" es="Ningún archivo" />;
+  if (list.length === 0) return <EmptyState icon="fa-folder-open" lang={lang} ht="Pa gen fichye pataje ankò" en="No shared files yet" fr="Aucun fichier partagé" es="No hay archivos compartidos" />;
 
   return (
     <div className="c-files-grid">
@@ -984,15 +1083,19 @@ export function CommunityFiles() {
           target="_blank"
           rel="noopener noreferrer"
           className="c-file-card"
+          title={f.description || f.name}
         >
-          <i className="fas fa-file c-file-icon" />
-          <div>
+          <i className={`fas ${fileIcon(f)} c-file-icon`} aria-hidden="true" />
+          <div style={{ minWidth: 0, flex: 1 }}>
             <div className="c-file-name">{f.name}</div>
+            {f.description ? <div className="c-file-meta" style={{ marginTop: 2 }}>{f.description}</div> : null}
             <div className="c-file-meta">
-              {f.size ? `${(f.size / 1024).toFixed(1)} KB` : ''}
-              {f.uploaded_by_username && ` · ${f.uploaded_by_username}`}
+              {fmtSize(f.size)}
+              {f.uploaded_by_username && `${fmtSize(f.size) ? ' · ' : ''}${f.uploaded_by_username}`}
+              {f.created_at ? ` · ${new Date(f.created_at).toLocaleDateString()}` : ''}
             </div>
           </div>
+          <i className="fas fa-arrow-up-right-from-square" aria-hidden="true" style={{ opacity: 0.55, fontSize: '0.75rem' }} />
         </a>
       ))}
     </div>

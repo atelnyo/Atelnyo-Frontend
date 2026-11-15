@@ -34,10 +34,10 @@ export default function CommunityFounderOverview({ community, slug, lang = 'en',
   const isHt = lang === 'ht';
 
   const {
-    data: members, loading: loadingMembers, error: membersError, refetch: refetchMembers,
+    data: membersPage, loading: loadingMembers, error: membersError, refetch: refetchMembers,
   } = useFetch(
-    () => communitiesService.members(slug),
-    { defaultValue: [], transform: asArray, deps: [slug] },
+    () => communitiesService.members(slug, { page: 1, page_size: 50 }),
+    { defaultValue: { count: 0, results: [] }, deps: [slug] },
   );
   const {
     data: requests, loading: loadingRequests, refetch: refetchRequests,
@@ -46,10 +46,10 @@ export default function CommunityFounderOverview({ community, slug, lang = 'en',
     { defaultValue: [], transform: asArray, deps: [slug] },
   );
   const {
-    data: announcements, loading: loadingAnnouncements, refetch: refetchAnnouncements,
+    data: announcementsPage, loading: loadingAnnouncements, refetch: refetchAnnouncements,
   } = useFetch(
-    () => communitiesService.announcements(slug),
-    { defaultValue: [], transform: asArray, deps: [slug] },
+    () => communitiesService.announcements(slug, { page: 1, page_size: 1 }),
+    { defaultValue: { count: 0, results: [] }, deps: [slug] },
   );
   const {
     data: postCount, loading: loadingPosts, refetch: refetchPosts,
@@ -71,13 +71,19 @@ export default function CommunityFounderOverview({ community, slug, lang = 'en',
     refetchPosts();
   };
 
+  const memberRows = asArray(membersPage?.results ?? membersPage);
+  const memberCount = typeof membersPage?.count === 'number' ? membersPage.count : memberRows.length;
+  const announcementCount = typeof announcementsPage?.count === 'number'
+    ? announcementsPage.count
+    : asArray(announcementsPage?.results ?? announcementsPage).length;
+
   const newMembers = useMemo(() => {
     const cutoff = Date.now() - THIRTY_DAYS_MS;
-    return (members || []).filter((m) => {
+    return memberRows.filter((m) => {
       const joined = m?.joined_at ? new Date(m.joined_at).getTime() : NaN;
       return Number.isFinite(joined) && joined >= cutoff;
     }).length;
-  }, [members]);
+  }, [memberRows]);
 
   const founderName = community?.created_by_username || '';
   const role = community?.current_user_role || 'owner';
@@ -117,35 +123,133 @@ export default function CommunityFounderOverview({ community, slug, lang = 'en',
 
       {/* ── Numbers ──────────────────────────────────────────── */}
       <div className={styles.statGrid}>
-        <StatCard icon="fa-users" label={isHt ? 'Manm' : 'Members'} value={members.length} accent="primary" />
+        <StatCard icon="fa-users" label={isHt ? 'Manm' : 'Members'} value={memberCount} accent="primary" onClick={() => onOpenTab?.('members')} />
         <StatCard
           icon="fa-user-plus"
           label={isHt ? 'Nouvo (30 jou)' : 'New (30 days)'}
           value={newMembers}
-          subtitle={isHt ? 'Antre nan dènye mwa a' : 'Joined this month'}
+          subtitle={isHt ? 'Sou 50 dènye manm chaje yo' : 'From the latest 50 loaded members'}
         />
         <StatCard
           icon="fa-user-clock"
           label={isHt ? 'Demann annatant' : 'Pending requests'}
           value={requests.length}
           accent={requests.length > 0 ? 'warning' : 'default'}
-          onClick={requests.length > 0 ? () => onOpenTab?.('members') : undefined}
+          onClick={() => onOpenTab?.('members')}
         />
         <StatCard
           icon="fa-bullhorn"
           label={isHt ? 'Anons' : 'Announcements'}
-          value={announcements.length}
+          value={announcementCount}
           onClick={() => onOpenTab?.('announcements')}
         />
-        <StatCard icon="fa-comments" label={isHt ? 'Pòs' : 'Posts'} value={postCount} />
-        <StatCard icon="fa-calendar-days" label={isHt ? 'Evènman' : 'Events'} value={community?.event_count ?? 0} />
+        <StatCard icon="fa-comments" label={isHt ? 'Pòs' : 'Posts'} value={postCount} onClick={() => onOpenTab?.('posts')} />
+        <StatCard icon="fa-calendar-days" label={isHt ? 'Evènman' : 'Events'} value={community?.event_count ?? 0} onClick={() => onOpenTab?.('events')} />
       </div>
 
-      {/* ── Shortcut ─────────────────────────────────────────── */}
+      {/* ── Status & checklist ───────────────────────────────── */}
+      {(() => {
+        const staffCount = memberRows.filter((m) => ['owner', 'admin', 'moderator'].includes(m.role)).length;
+        const mutedCount = memberRows.filter((m) => m.is_muted).length;
+        return (
+          <div className={styles.founderCard} style={{ marginBottom: 12 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div className={styles.rowName}>
+                <span className={`${styles.pill} ${styles.pillStaff}`}>{community?.join_mode || 'public'}</span>
+                <span className={`${styles.pill} ${community?.is_active === false ? styles.pillMuted : styles.pillOwner}`}>
+                  {community?.is_active === false ? (isHt ? 'Achive' : 'Archived') : (isHt ? 'Aktif' : 'Active')}
+                </span>
+                {requests.length > 0 && (
+                  <span className={`${styles.pill} ${styles.pillOwner}`}>
+                    {requests.length} {isHt ? 'demand annatant' : 'pending'}
+                  </span>
+                )}
+              </div>
+              <div className={styles.founderMeta}>
+                {isHt
+                  ? `Ekip: ${staffCount} · Silans: ${mutedCount} · Estati ak aksè nan Paramèt.`
+                  : `Staff: ${staffCount} · Muted: ${mutedCount} · Status and access in Settings.`}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {(() => {
+        const checklist = [
+          {
+            done: Boolean(community?.description),
+            label: isHt ? 'Ajoute yon deskripsyon kominote a' : 'Add a community description',
+            tab: 'profile',
+          },
+          {
+            done: (community?.rules?.length || 0) > 0,
+            label: isHt ? 'Defini règleman kominote a' : 'Set community rules',
+            tab: 'settings',
+          },
+          {
+            done: announcementCount > 0,
+            label: isHt ? 'Pibliye yon premye anons' : 'Publish a first announcement',
+            tab: 'announcements',
+          },
+          {
+            done: (community?.event_count ?? 0) > 0,
+            label: isHt ? 'Planifye premye evènman an' : 'Plan your first event',
+            tab: 'events',
+          },
+          {
+            done: memberCount > 1,
+            label: isHt ? 'Envite premye manm yo' : 'Invite your first members',
+            tab: 'members',
+          },
+        ];
+        const doneCount = checklist.filter((i) => i.done).length;
+        if (doneCount === checklist.length) return null;
+        return (
+          <div className={styles.founderCard} style={{ marginBottom: 12, display: 'block' }}>
+            <div className={styles.rowName} style={{ marginBottom: 6 }}>
+              <i className="fas fa-list-check" aria-hidden="true" />
+              {isHt ? 'Lis preparasyon' : 'Setup checklist'}
+              <span className={styles.pill}>{doneCount}/{checklist.length}</span>
+            </div>
+            <div style={{ display: 'grid', gap: 6 }}>
+              {checklist.map((item) => (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={() => !item.done && onOpenTab?.(item.tab)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    textAlign: 'left',
+                    border: '1px solid var(--border-color, #e5e7eb)',
+                    borderRadius: 10,
+                    padding: '8px 10px',
+                    background: item.done ? 'rgba(22,163,74,0.06)' : 'var(--surface-card, #fff)',
+                    color: item.done ? 'var(--text-secondary, #64748b)' : 'var(--text-primary, #1e293b)',
+                    cursor: item.done ? 'default' : 'pointer',
+                    font: 'inherit',
+                  }}
+                >
+                  <i className={`fas ${item.done ? 'fa-circle-check' : 'fa-circle'}`} aria-hidden="true" style={{ color: item.done ? '#16a34a' : 'var(--text-secondary, #64748b)' }} />
+                  <span style={{ flex: 1, textDecoration: item.done ? 'line-through' : 'none' }}>{item.label}</span>
+                  {!item.done && <i className="fas fa-chevron-right" aria-hidden="true" style={{ fontSize: '0.7rem', opacity: 0.7 }} />}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
         <button type="button" className={styles.primaryBtn} onClick={() => onOpenTab?.('members')}>
           <i className="fas fa-users-gear" aria-hidden="true" />
           {isHt ? 'Jere manm yo' : 'Manage members'}
+        </button>
+        <button type="button" className={styles.secondaryBtn} onClick={() => onOpenTab?.('posts')}>
+          <i className="fas fa-comments" aria-hidden="true" />
+          {isHt ? 'Modere pòs' : 'Moderate posts'}
         </button>
         <button type="button" className={styles.secondaryBtn} onClick={() => onOpenTab?.('announcements')}>
           <i className="fas fa-bullhorn" aria-hidden="true" />
@@ -158,6 +262,10 @@ export default function CommunityFounderOverview({ community, slug, lang = 'en',
         <button type="button" className={styles.secondaryBtn} onClick={() => onOpenTab?.('resources')}>
           <i className="fas fa-folder-plus" aria-hidden="true" />
           {isHt ? 'Pataje resous' : 'Share resources'}
+        </button>
+        <button type="button" className={styles.secondaryBtn} onClick={() => onOpenTab?.('settings')}>
+          <i className="fas fa-sliders" aria-hidden="true" />
+          {isHt ? 'Paramèt' : 'Settings'}
         </button>
       </div>
     </div>

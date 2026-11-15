@@ -13,16 +13,17 @@
  * The server re-checks every hierarchy gate (ROLE_RANK in the viewset),
  * so the client-side gating here is progressive disclosure, not security.
  */
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useFetch from '../../../hooks/useFetch';
 import { communitiesService } from '../../../services/api';
 import ConfirmModal from '../../common/ConfirmModal';
 import PanelSkeleton, {
-  PanelEmpty, PanelError, PanelHeader, useInitialLoading,
+  PanelEmpty, PanelError, PanelHeader,
 } from './communityPanelUI';
 import styles from './communityEditor.module.css';
 
 const asArray = (data) => (Array.isArray(data) ? data : (data?.results || []));
+const PAGE_SIZE = 30;
 
 const fmtDate = (value) => {
   if (!value) return '';
@@ -53,12 +54,64 @@ export default function CommunityMembersPanel({
   const [banTarget, setBanTarget] = useState(null);
   const [query, setQuery] = useState('');
 
-  const {
-    data: members, loading, error, refetch: refetchMembers,
-  } = useFetch(
-    () => communitiesService.members(slug),
-    { defaultValue: [], transform: asArray, deps: [slug] },
-  );
+  const [members, setMembers] = useState([]);
+  const [totalCount, setTotalCount] = useState(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [error, setError] = useState(null);
+  const [loadedOnce, setLoadedOnce] = useState(false);
+  const requestIdRef = useRef(0);
+
+  const fetchMembersPage = useCallback(async (pageToLoad, { append = false } = {}) => {
+    const requestId = ++requestIdRef.current;
+    if (append) setLoadingMore(true); else setLoading(true);
+    setError(null);
+    try {
+      const res = await communitiesService.members(slug, { page: pageToLoad, page_size: PAGE_SIZE });
+      if (requestId !== requestIdRef.current) return;
+      const data = res?.data;
+      const list = asArray(data);
+      const count = Array.isArray(data) ? list.length : (typeof data?.count === 'number' ? data.count : null);
+      const more = Array.isArray(data)
+        ? false
+        : (typeof data?.next === 'string' ? Boolean(data.next) : list.length === PAGE_SIZE);
+      setMembers((prev) => (append ? [...prev, ...list] : list));
+      setTotalCount(count);
+      setPage(pageToLoad);
+      setHasMore(more);
+      setLoadedOnce(true);
+    } catch (err) {
+      if (requestId !== requestIdRef.current) return;
+      if (!append) setMembers([]);
+      setError(err);
+    } finally {
+      if (requestId === requestIdRef.current) {
+        setLoading(false);
+        setLoadingMore(false);
+      }
+    }
+  }, [slug]);
+
+  useEffect(() => {
+    setMembers([]);
+    setTotalCount(null);
+    setPage(1);
+    setHasMore(false);
+    setLoadedOnce(false);
+    fetchMembersPage(1, { append: false });
+  }, [slug, fetchMembersPage]);
+
+  const refetchMembers = useCallback(() => {
+    fetchMembersPage(1, { append: false });
+  }, [fetchMembersPage]);
+
+  const loadMoreMembers = useCallback(() => {
+    if (loadingMore || loading || !hasMore) return;
+    fetchMembersPage(page + 1, { append: true });
+  }, [fetchMembersPage, hasMore, loading, loadingMore, page]);
+
   const { data: requests, refetch: refetchRequests } = useFetch(
     () => communitiesService.joinRequests(slug).catch(() => ({ data: [] })),
     { defaultValue: [], transform: asArray, deps: [slug] },
@@ -135,7 +188,7 @@ export default function CommunityMembersPanel({
     isHt ? `@${m.username} debloke.` : `@${m.username} unbanned.`,
   );
 
-  const initialLoading = useInitialLoading(loading);
+  const initialLoading = loading && !loadedOnce;
   if (initialLoading) return <PanelSkeleton rows={4} label={isHt ? 'Ap chaje manm yo' : 'Loading members'} />;
 
   const needle = query.trim().toLowerCase();
@@ -240,11 +293,11 @@ export default function CommunityMembersPanel({
       <PanelHeader
         icon="fa-users-gear"
         title={isHt ? 'Jesyon manm' : 'Member management'}
-        count={members.length}
+        count={typeof totalCount === 'number' ? totalCount : members.length}
         subtitle={isHt
           ? 'Pwomote yon nivo alafwa. Silans bloke pòs 24 èdtan; blokaj retire aksè nèt.'
           : 'Promote one rank at a time. Mute blocks posting for 24h; a ban removes access entirely.'}
-        refreshing={loading}
+        refreshing={loading && loadedOnce}
         onRefresh={refreshAll}
         refreshLabel={isHt ? 'Rafrechi manm yo' : 'Refresh members'}
       />
@@ -329,17 +382,49 @@ export default function CommunityMembersPanel({
         {isHt ? 'Manm' : 'Members'} ({plainMembers.length})
       </h4>
       {plainMembers.length === 0 ? (
-        <PanelEmpty
-          icon={needle ? 'fa-magnifying-glass' : 'fa-user-group'}
-          title={needle
-            ? (isHt ? 'Pa gen manm ki koresponn.' : 'No members match your search.')
-            : (isHt ? 'Poko gen manm òdinè.' : 'No regular members yet.')}
-          description={needle
-            ? undefined
-            : (isHt ? 'Pataje lyen envitasyon an pou fè moun rantre.' : 'Share the invite link to bring people in.')}
-        />
+        <>
+          <PanelEmpty
+            icon={needle ? 'fa-magnifying-glass' : 'fa-user-group'}
+            title={needle
+              ? (isHt ? 'Pa gen manm ki koresponn.' : 'No members match your search.')
+              : (isHt ? 'Poko gen manm òdinè.' : 'No regular members yet.')}
+            description={needle
+              ? undefined
+              : (isHt ? 'Pataje lyen envitasyon an pou fè moun rantre.' : 'Share the invite link to bring people in.')}
+          />
+          {!needle && hasMore && (
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 14 }}>
+              <button
+                type="button"
+                className={styles.actionButton}
+                onClick={loadMoreMembers}
+                disabled={loadingMore}
+              >
+                {loadingMore
+                  ? (isHt ? 'Ap chaje…' : 'Loading…')
+                  : (isHt ? 'Chaje plis manm' : 'Load more members')}
+              </button>
+            </div>
+          )}
+        </>
       ) : (
-        <div className={styles.list}>{plainMembers.map(renderMemberRow)}</div>
+        <>
+          <div className={styles.list}>{plainMembers.map(renderMemberRow)}</div>
+          {!needle && hasMore && (
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 14 }}>
+              <button
+                type="button"
+                className={styles.actionButton}
+                onClick={loadMoreMembers}
+                disabled={loadingMore}
+              >
+                {loadingMore
+                  ? (isHt ? 'Ap chaje…' : 'Loading…')
+                  : (isHt ? 'Chaje plis manm' : 'Load more members')}
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {isOwner && visibleBanned.length > 0 && (

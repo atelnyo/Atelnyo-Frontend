@@ -12,16 +12,16 @@
  *   DELETE    community-announcements/<id>/
  * Writes are manager-only — enforced server-side in the viewset.
  */
-import React, { useCallback, useState } from 'react';
-import useFetch from '../../../hooks/useFetch';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { communitiesService } from '../../../services/api';
 import ConfirmModal from '../../common/ConfirmModal';
 import PanelSkeleton, {
-  ExpandableText, PanelEmpty, PanelError, PanelHeader, useInitialLoading,
+  ExpandableText, PanelEmpty, PanelError, PanelHeader,
 } from './communityPanelUI';
 import styles from './communityEditor.module.css';
 
 const asArray = (data) => (Array.isArray(data) ? data : (data?.results || []));
+const PAGE_SIZE = 20;
 
 const fmtDate = (value) => {
   if (!value) return '';
@@ -33,24 +33,130 @@ const fmtDate = (value) => {
 const PREVIEW_LENGTH = 220;
 const EMPTY_FORM = { title: '', content: '', is_pinned: false };
 
+const ANNOUNCEMENT_TEMPLATES = [
+  {
+    id: 'welcome',
+    icon: 'fa-hand-sparkles',
+    label: { en: 'Welcome', ht: 'Byenvini' },
+    title: { en: 'Welcome to our community!', ht: 'Byenvini nan kominote nou an!' },
+    content: {
+      en: 'We are glad to have you here.\n\n• Introduce yourself in the feed\n• Read the community rules\n• Explore upcoming events and shared resources\n\nIf you have questions, reach out to a moderator.',
+      ht: 'Nou kontan wè ou la.\n\n• Prezante tèt ou nan fil la\n• Li règ kominote a\n• Dekouvri evènman ak resous nou pataje\n\nSi w gen kesyon, pale ak yon moderatè.',
+    },
+    is_pinned: true,
+  },
+  {
+    id: 'weekly',
+    icon: 'fa-calendar-week',
+    label: { en: 'Weekly update', ht: 'Mizajou chak semèn' },
+    title: { en: 'Weekly update', ht: 'Mizajou semèn sa a' },
+    content: {
+      en: 'Here is what is happening this week:\n\n• Highlights:\n• Upcoming events:\n• What members should do next:',
+      ht: 'Men sa k ap pase semèn sa a:\n\n• Pwen enpòtan:\n• Evènman k ap vini:\n• Sa manm yo ka fè kounye a:',
+    },
+    is_pinned: false,
+  },
+  {
+    id: 'event',
+    icon: 'fa-calendar-day',
+    label: { en: 'Event reminder', ht: 'Rapèl evènman' },
+    title: { en: 'Event reminder', ht: 'Rapèl evènman' },
+    content: {
+      en: 'Join us for our upcoming event.\n\n• Date & time:\n• Where / link:\n• What to bring or prepare:',
+      ht: 'Vin patisipe nan evènman nou an.\n\n• Dat ak lè:\n• Kote / lyen:\n• Sa pou w pote oswa prepare:',
+    },
+    is_pinned: false,
+  },
+  {
+    id: 'rules',
+    icon: 'fa-shield-halved',
+    label: { en: 'Rules reminder', ht: 'Rapèl règ' },
+    title: { en: 'Community guidelines reminder', ht: 'Rapèl sou règ kominote a' },
+    content: {
+      en: 'Please keep our community safe and helpful:\n\n• Be respectful\n• Stay on topic\n• No spam or harmful content\n\nPosts or comments that break the rules may be removed.',
+      ht: 'Tanpri ede nou kenbe kominote a an sekirite epi itil:\n\n• Respekte tout moun\n• Rete nan sijè a\n• Pa voye spam oswa kontni ki ka fè mal\n\nPòs oswa kòmantè ki vyole règ yo ka efase.',
+    },
+    is_pinned: true,
+  },
+];
+
 export default function CommunityAnnouncementsPanel({ slug, lang = 'en', showToast }) {
   const isHt = lang === 'ht';
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState(null);
   const [busy, setBusy] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);  const [announcements, setAnnouncements] = useState([]);
+  const [totalCount, setTotalCount] = useState(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [error, setError] = useState(null);
+  const [loadedOnce, setLoadedOnce] = useState(false);
+  const requestIdRef = useRef(0);
 
-  const {
-    data: announcements, loading, error, refetch,
-  } = useFetch(
-    () => communitiesService.announcements(slug),
-    { defaultValue: [], transform: asArray, deps: [slug] },
-  );
+  const fetchPage = useCallback(async (pageToLoad, { append = false } = {}) => {
+    const requestId = ++requestIdRef.current;
+    if (append) setLoadingMore(true); else setLoading(true);
+    setError(null);
+    try {
+      const res = await communitiesService.announcements(slug, { page: pageToLoad, page_size: PAGE_SIZE });
+      if (requestId !== requestIdRef.current) return;
+      const data = res?.data;
+      const list = asArray(data);
+      const count = Array.isArray(data) ? list.length : (typeof data?.count === 'number' ? data.count : null);
+      const more = Array.isArray(data)
+        ? false
+        : (typeof data?.next === 'string' ? Boolean(data.next) : list.length === PAGE_SIZE);
+      setAnnouncements((prev) => (append ? [...prev, ...list] : list));
+      setTotalCount(count);
+      setPage(pageToLoad);
+      setHasMore(more);
+      setLoadedOnce(true);
+    } catch (err) {
+      if (requestId !== requestIdRef.current) return;
+      if (!append) setAnnouncements([]);
+      setError(err);
+    } finally {
+      if (requestId === requestIdRef.current) {
+        setLoading(false);
+        setLoadingMore(false);
+      }
+    }
+  }, [slug]);
 
-  const initialLoading = useInitialLoading(loading);
+  useEffect(() => {
+    setAnnouncements([]);
+    setTotalCount(null);
+    setPage(1);
+    setHasMore(false);
+    setLoadedOnce(false);
+    fetchPage(1, { append: false });
+  }, [slug, fetchPage]);
+
+  const refetch = useCallback(() => {
+    fetchPage(1, { append: false });
+  }, [fetchPage]);
+
+  const loadMore = useCallback(() => {
+    if (loadingMore || loading || !hasMore) return;
+    fetchPage(page + 1, { append: true });
+  }, [fetchPage, hasMore, loading, loadingMore, page]);
+
+  const initialLoading = loading && !loadedOnce;
 
   const resetComposer = () => {
     setForm(EMPTY_FORM);
+    setEditingId(null);
+  };
+
+  const applyTemplate = (tpl) => {
+    const key = isHt ? 'ht' : 'en';
+    setForm({
+      title: tpl.title[key] || tpl.title.en || '',
+      content: tpl.content[key] || tpl.content.en || '',
+      is_pinned: Boolean(tpl.is_pinned),
+    });
     setEditingId(null);
   };
 
@@ -154,11 +260,11 @@ export default function CommunityAnnouncementsPanel({ slug, lang = 'en', showToa
       <PanelHeader
         icon="fa-bullhorn"
         title={isHt ? 'Anons kominote a' : 'Community announcements'}
-        count={announcements.length}
+        count={typeof totalCount === 'number' ? totalCount : announcements.length}
         subtitle={isHt
           ? 'Anons parèt sou paj akèy kominote a. Kloure youn pou l rete anlè.'
           : 'Announcements appear on the community home page. Pin one to keep it on top.'}
-        refreshing={loading}
+        refreshing={loading && loadedOnce}
         onRefresh={refetch}
         refreshLabel={isHt ? 'Rafrechi anons yo' : 'Refresh announcements'}
       />
@@ -191,6 +297,27 @@ export default function CommunityAnnouncementsPanel({ slug, lang = 'en', showToa
             </button>
           )}
         </div>
+        {!editingId && (
+          <div style={{ marginBottom: 10 }}>
+            <div className={styles.fieldLabel} style={{ marginBottom: 6 }}>
+              {isHt ? 'Modèl rapid' : 'Quick templates'}
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {ANNOUNCEMENT_TEMPLATES.map((tpl) => (
+                <button
+                  key={tpl.id}
+                  type="button"
+                  className={styles.secondaryBtn}
+                  onClick={() => applyTemplate(tpl)}
+                  title={isHt ? 'Ranpli fòm lan ak modèl sa a' : 'Fill the form with this template'}
+                >
+                  <i className={`fas ${tpl.icon}`} aria-hidden="true" />
+                  {isHt ? tpl.label.ht : tpl.label.en}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         <input
           type="text"
           className={styles.input}
@@ -242,6 +369,7 @@ export default function CommunityAnnouncementsPanel({ slug, lang = 'en', showToa
             : 'Write the first one above — members will see it on the community page.'}
         />
       ) : (
+        <>
         <div className={styles.list}>
           {announcements.map((a) => {
             const content = a.content || '';
@@ -312,6 +440,21 @@ export default function CommunityAnnouncementsPanel({ slug, lang = 'en', showToa
             );
           })}
         </div>
+        {hasMore && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 14 }}>
+            <button
+              type="button"
+              className={styles.actionButton}
+              onClick={loadMore}
+              disabled={loadingMore}
+            >
+              {loadingMore
+                ? (isHt ? 'Ap chaje…' : 'Loading…')
+                : (isHt ? 'Chaje plis anons' : 'Load more announcements')}
+            </button>
+          </div>
+        )}
+        </>
       )}
 
       {deleteTarget && (

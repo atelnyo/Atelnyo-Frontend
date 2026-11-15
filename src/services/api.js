@@ -1430,7 +1430,7 @@ export const communitiesService = {
   canCreate: () => api.get('communities/can_create/'),
   join: (slug, data = {}) => api.post(`communities/${encodeURIComponent(slug)}/join/`, data),
   leave: (slug) => api.post(`communities/${encodeURIComponent(slug)}/leave/`),
-  members: (slug) => api.get(`communities/${encodeURIComponent(slug)}/members/`),
+  members: (slug, params = {}) => api.get(`communities/${encodeURIComponent(slug)}/members/`, { params }),
   createInviteLink: (slug) => api.post(`communities/${encodeURIComponent(slug)}/invite-link/`),
   revokeInviteLinks: (slug) => api.post(`communities/${encodeURIComponent(slug)}/invite-links/revoke/`),
   // Join-request moderation (approval-mode communities, founder/mod only):
@@ -1454,8 +1454,8 @@ export const communitiesService = {
   bannedMembers: (slug) => api.get(`communities/${encodeURIComponent(slug)}/banned_members/`),
   // These three live on their OWN flat routes, scoped by ?community=<slug>
   // — the nested communities/<slug>/…/ paths returned 404.
-  announcements: (slug) =>
-    api.get('community-announcements/', { params: { community: slug } }),
+  announcements: (slug, params = {}) =>
+    api.get('community-announcements/', { params: { community: slug, ...params } }),
   // Announcement writes: create is scoped by ?community=<slug>, while
   // pin/delete address the row by id. Manager-only server-side.
   createAnnouncement: (slug, data) =>
@@ -1471,9 +1471,9 @@ export const communitiesService = {
     api.post(`community-courses/?community=${encodeURIComponent(slug)}`, data),
   updateLinkedCourse: (id, data) => api.patch(`community-courses/${id}/`, data),
   unlinkCourse: (id) => api.delete(`community-courses/${id}/`),
-  files: (slug) => api.get('community-files/', { params: { community: slug } }),
-  linkedCourses: (slug) =>
-    api.get('community-courses/', { params: { community: slug } }),
+  files: (slug, params = {}) => api.get('community-files/', { params: { community: slug, ...params } }),
+  linkedCourses: (slug, params = {}) =>
+    api.get('community-courses/', { params: { community: slug, ...params } }),
   // Member posts live on their OWN flat route, scoped by ?community=<slug>
   // — same shape as announcements/files/courses.
   posts: (slug, params = {}) =>

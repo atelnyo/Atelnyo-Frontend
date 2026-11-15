@@ -13,16 +13,16 @@
  * Endpoints: /api/community-events/ (community is sent as the numeric
  * id on create — same contract as EventFormModal).
  */
-import React, { useCallback, useRef, useState } from 'react';
-import useFetch from '../../../hooks/useFetch';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { communityEventsService } from '../../../services/api';
 import ConfirmModal from '../../common/ConfirmModal';
 import PanelSkeleton, {
-  ExpandableText, PanelEmpty, PanelError, PanelHeader, useInitialLoading,
+  ExpandableText, PanelEmpty, PanelError, PanelHeader,
 } from './communityPanelUI';
 import styles from './communityEditor.module.css';
 
 const asArray = (data) => (Array.isArray(data) ? data : (data?.results || []));
+const PAGE_SIZE = 20;
 
 const STATUS_LABELS = {
   draft: { ht: 'Bouyon', en: 'Draft' },
@@ -43,6 +43,45 @@ const EMPTY_FORM = {
   is_free: true,
   price: '',
 };
+
+const EVENT_TEMPLATES = [
+  {
+    id: 'meetup',
+    icon: 'fa-users',
+    label: { en: 'Meetup', ht: 'Rankont' },
+    title: { en: 'Community meetup', ht: 'Rankont kominote a' },
+    description: {
+      en: 'Come meet other members, share ideas, and connect.\n\nAgenda:\n• Welcome & introductions\n• Discussion / activity\n• Next steps',
+      ht: 'Vin rankontre lòt manm yo, pataje lide, epi konekte.\n\nPwogram:\n• Byenvini ak prezantasyon\n• Diskisyon / aktivite\n• Pwochen etap',
+    },
+    is_online: false,
+    is_free: true,
+  },
+  {
+    id: 'workshop',
+    icon: 'fa-chalkboard-user',
+    label: { en: 'Workshop', ht: 'Atelye' },
+    title: { en: 'Hands-on workshop', ht: 'Atelye pratik' },
+    description: {
+      en: 'A practical session where members learn by doing.\n\nWhat we will cover:\n• \n• \n\nWho should join:',
+      ht: 'Yon sesyon pratik kote manm yo aprann pandan y ap fè.\n\nSa nou pral kouvri:\n• \n• \n\nKiyès ki ta dwe patisipe:',
+    },
+    is_online: false,
+    is_free: true,
+  },
+  {
+    id: 'qa',
+    icon: 'fa-circle-question',
+    label: { en: 'Live Q&A', ht: 'Kesyon-repons' },
+    title: { en: 'Live Q&A session', ht: 'Sesyon kesyon-repons an dirèk' },
+    description: {
+      en: 'Bring your questions and get answers live.\n\nTopics:\n• \n\nHow to participate:',
+      ht: 'Pote kesyon ou yo epi jwenn repons an dirèk.\n\nSijè:\n• \n\nKijan pou patisipe:',
+    },
+    is_online: true,
+    is_free: true,
+  },
+];
 
 function toLocalInput(iso) {
   if (!iso) return '';
@@ -79,17 +118,75 @@ export default function CommunityEventsPanel({
   const [attendees, setAttendees] = useState([]);
   const [attendeesLoading, setAttendeesLoading] = useState(false);
   const [attendeesError, setAttendeesError] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   // Guards against a slow response for a previous event overwriting the
   // guest list of the event the founder is now looking at.
   const attendeesForRef = useRef(null);
 
-  const {
-    data: events, loading, error, refetch,
-  } = useFetch(
-    () => communityEventsService.list({ community: slug, limit: 50 }),
-    { defaultValue: [], transform: asArray, deps: [slug] },
-  );
-  const initialLoading = useInitialLoading(loading);
+  const [events, setEvents] = useState([]);
+  const [totalCount, setTotalCount] = useState(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [error, setError] = useState(null);
+  const [loadedOnce, setLoadedOnce] = useState(false);
+  const requestIdRef = useRef(0);
+
+  const fetchPage = useCallback(async (pageToLoad, { append = false } = {}) => {
+    const requestId = ++requestIdRef.current;
+    if (append) setLoadingMore(true); else setLoading(true);
+    setError(null);
+    try {
+      const res = await communityEventsService.list({
+        community: slug,
+        page: pageToLoad,
+        page_size: PAGE_SIZE,
+        limit: PAGE_SIZE,
+      });
+      if (requestId !== requestIdRef.current) return;
+      const data = res?.data;
+      const list = asArray(data);
+      const count = Array.isArray(data) ? list.length : (typeof data?.count === 'number' ? data.count : null);
+      const more = Array.isArray(data)
+        ? false
+        : (typeof data?.next === 'string' ? Boolean(data.next) : list.length === PAGE_SIZE);
+      setEvents((prev) => (append ? [...prev, ...list] : list));
+      setTotalCount(count);
+      setPage(pageToLoad);
+      setHasMore(more);
+      setLoadedOnce(true);
+    } catch (err) {
+      if (requestId !== requestIdRef.current) return;
+      if (!append) setEvents([]);
+      setError(err);
+    } finally {
+      if (requestId === requestIdRef.current) {
+        setLoading(false);
+        setLoadingMore(false);
+      }
+    }
+  }, [slug]);
+
+  useEffect(() => {
+    setEvents([]);
+    setTotalCount(null);
+    setPage(1);
+    setHasMore(false);
+    setLoadedOnce(false);
+    fetchPage(1, { append: false });
+  }, [slug, fetchPage]);
+
+  const refetch = useCallback(() => {
+    fetchPage(1, { append: false });
+  }, [fetchPage]);
+
+  const loadMore = useCallback(() => {
+    if (loadingMore || loading || !hasMore) return;
+    fetchPage(page + 1, { append: true });
+  }, [fetchPage, hasMore, loading, loadingMore, page]);
+
+  const initialLoading = loading && !loadedOnce;
 
   const change = useCallback((field, value) => {
     setForm((f) => ({ ...f, [field]: value }));
@@ -99,6 +196,20 @@ export default function CommunityEventsPanel({
     setEditingId(null);
     setForm(EMPTY_FORM);
     setComposerOpen(true);
+  };
+
+  const applyEventTemplate = (tpl) => {
+    const key = isHt ? 'ht' : 'en';
+    setEditingId(null);
+    setForm((f) => ({
+      ...EMPTY_FORM,
+      title: tpl.title[key] || tpl.title.en || '',
+      description: tpl.description[key] || tpl.description.en || '',
+      is_online: Boolean(tpl.is_online),
+      is_free: tpl.is_free !== false,
+      start_time: f.start_time || '',
+      end_time: f.end_time || '',
+    }));
   };
 
   const openEdit = (ev) => {
@@ -280,16 +391,27 @@ export default function CommunityEventsPanel({
     return <PanelSkeleton rows={3} label={isHt ? 'Ap chaje evènman yo' : 'Loading events'} />;
   }
 
+  const visibleEvents = statusFilter === 'all'
+    ? events
+    : events.filter((ev) => (ev.status || 'draft') === statusFilter);
+  const filterOptions = [
+    { id: 'all', label: isHt ? 'Tout' : 'All' },
+    { id: 'draft', label: isHt ? 'Bouyon' : 'Draft' },
+    { id: 'published', label: isHt ? 'Pibliye' : 'Published' },
+    { id: 'cancelled', label: isHt ? 'Anile' : 'Cancelled' },
+    { id: 'completed', label: isHt ? 'Fini' : 'Completed' },
+  ];
+
   return (
     <div>
       <PanelHeader
         icon="fa-calendar-days"
         title={isHt ? 'Evènman kominote a' : 'Community events'}
-        count={events.length}
+        count={typeof totalCount === 'number' ? totalCount : events.length}
         subtitle={isHt
           ? 'Evènman pibliye yo parèt sou paj kominote a. Bouyon rete prive jiskaske ou pibliye yo.'
           : 'Published events appear on the community page. Drafts stay private until you publish them.'}
-        refreshing={loading}
+        refreshing={loading && loadedOnce}
         onRefresh={refetch}
         refreshLabel={isHt ? 'Rafrechi evènman yo' : 'Refresh events'}
       >
@@ -309,8 +431,46 @@ export default function CommunityEventsPanel({
         />
       )}
 
+      {events.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+          {filterOptions.map((opt) => (
+            <button
+              key={opt.id}
+              type="button"
+              className={statusFilter === opt.id ? styles.primaryBtn : styles.secondaryBtn}
+              onClick={() => setStatusFilter(opt.id)}
+              aria-pressed={statusFilter === opt.id}
+              style={{ padding: '5px 10px', fontSize: '0.75rem' }}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+
       {composerOpen && (
         <div className={styles.composer}>
+          {!editingId && (
+            <div style={{ marginBottom: 10 }}>
+              <div className={styles.fieldLabel} style={{ marginBottom: 6 }}>
+                {isHt ? 'Modèl rapid' : 'Quick templates'}
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {EVENT_TEMPLATES.map((tpl) => (
+                  <button
+                    key={tpl.id}
+                    type="button"
+                    className={styles.secondaryBtn}
+                    onClick={() => applyEventTemplate(tpl)}
+                    title={isHt ? 'Ranpli fòm lan ak modèl sa a' : 'Fill the form with this template'}
+                  >
+                    <i className={`fas ${tpl.icon}`} aria-hidden="true" />
+                    {isHt ? tpl.label.ht : tpl.label.en}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           <div className={styles.formGrid}>
             <label className={styles.field} style={{ gridColumn: '1 / -1' }}>
               <span className={styles.fieldLabel}>{isHt ? 'Tit' : 'Title'}</span>
@@ -429,14 +589,18 @@ export default function CommunityEventsPanel({
         </div>
       )}
 
-      {events.length === 0 ? (
+      {visibleEvents.length === 0 ? (
         <PanelEmpty
-          icon="fa-calendar-plus"
-          title={isHt ? 'Poko gen evènman.' : 'No events yet.'}
-          description={isHt
-            ? 'Planifye yon rankont, yon atelye oswa yon fèt pou rasanble manm yo.'
-            : 'Plan a meetup, workshop or celebration to gather your members.'}
-          action={canModerate ? (
+          icon={events.length === 0 ? 'fa-calendar-plus' : 'fa-filter'}
+          title={events.length === 0
+            ? (isHt ? 'Poko gen evènman.' : 'No events yet.')
+            : (isHt ? 'Pa gen evènman pou filtè sa a.' : 'No events match this filter.')}
+          description={events.length === 0
+            ? (isHt
+              ? 'Planifye yon rankont, yon atelye oswa yon fèt pou rasanble manm yo.'
+              : 'Plan a meetup, workshop or celebration to gather your members.')
+            : (isHt ? 'Chanje filtè a pou wè lòt evènman.' : 'Change the filter to see other events.')}
+          action={events.length === 0 && canModerate ? (
             <button type="button" className={styles.secondaryBtn} onClick={openCreate}>
               <i className="fas fa-plus" aria-hidden="true" />
               {isHt ? 'Kreye premye evènman an' : 'Create your first event'}
@@ -444,8 +608,9 @@ export default function CommunityEventsPanel({
           ) : undefined}
         />
       ) : (
+        <>
         <div className={styles.list}>
-          {events.map((ev) => {
+          {visibleEvents.map((ev) => {
             const status = ev.status || 'draft';
             const label = STATUS_LABELS[status] || STATUS_LABELS.draft;
             return (
@@ -605,6 +770,21 @@ export default function CommunityEventsPanel({
             );
           })}
         </div>
+        {hasMore && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 14 }}>
+            <button
+              type="button"
+              className={styles.actionButton}
+              onClick={loadMore}
+              disabled={loadingMore}
+            >
+              {loadingMore
+                ? (isHt ? 'Ap chaje…' : 'Loading…')
+                : (isHt ? 'Chaje plis evènman' : 'Load more events')}
+            </button>
+          </div>
+        )}
+        </>
       )}
 
       {cancelTarget && (

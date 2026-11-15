@@ -42,8 +42,23 @@ import CommunityPostsPanel from './CommunityPostsPanel';
 import CommunityEventsPanel from './CommunityEventsPanel';
 import CommunityFilesPanel from './CommunityFilesPanel';
 import CommunityAnnouncementsPanel from './CommunityAnnouncementsPanel';
+import { PanelHeader } from './communityPanelUI';
 import { ImageUrlField } from '../modals/shared';
 import panelStyles from './communityEditor.module.css';
+
+const RULE_TEMPLATES = {
+  starter: [
+    { title: { en: 'Be respectful', ht: 'Respekte tout moun' }, description: { en: 'Treat every member with kindness. No harassment, hate speech, or personal attacks.', ht: 'Trete chak manm ak respè. Pa gen arasman, diskou rayisman, oswa atak pèsonèl.' } },
+    { title: { en: 'Stay on topic', ht: 'Rete nan sijè a' }, description: { en: 'Share content that is relevant to this community and its goals.', ht: 'Pataje kontni ki gen rapò ak kominote sa a ak objektif li yo.' } },
+    { title: { en: 'No spam or scams', ht: 'Pa gen spam oswa magouy' }, description: { en: 'Do not post repetitive promotions, misleading links, or fraudulent offers.', ht: 'Pa afiche pwomosyon repetitif, lyen twonpe, oswa òf fo.' } },
+    { title: { en: 'Protect privacy', ht: 'Pwoteje vi prive' }, description: { en: 'Do not share someone else’s private information without permission.', ht: 'Pa pataje enfòmasyon prive lòt moun san pèmisyon.' } },
+  ],
+  learning: [
+    { title: { en: 'Help others learn', ht: 'Ede lòt moun aprann' }, description: { en: 'Share knowledge clearly and support members at different levels.', ht: 'Pataje konesans klèman epi sipòte manm yo nan tout nivo.' } },
+    { title: { en: 'Give constructive feedback', ht: 'Bay fidbak konstriktif' }, description: { en: 'Critique ideas, not people. Offer suggestions that help improve work.', ht: 'Kritike lide, pa moun. Bay sijesyon ki ka amelyore travay la.' } },
+    { title: { en: 'Use appropriate channels', ht: 'Sèvi ak bon espas yo' }, description: { en: 'Post questions, resources, and announcements in the right place.', ht: 'Mete kesyon, resous, ak anons nan bon kote a.' } },
+  ],
+};
 
 export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'en', showToast, user, item }) {
   const isHt = lang === 'ht';
@@ -155,6 +170,17 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'e
     setNewRule({ title: '', description: '' });
     markDirty();
   }, [newRule, markDirty]);
+
+  const applyRuleTemplate = useCallback((templateKey) => {
+    const tpl = RULE_TEMPLATES[templateKey] || [];
+    const key = isHt ? 'ht' : 'en';
+    const mapped = tpl.map((r) => ({
+      title: r.title[key] || r.title.en || '',
+      description: r.description[key] || r.description.en || '',
+    }));
+    setForm((f) => ({ ...f, rules: mapped }));
+    markDirty();
+  }, [isHt, markDirty]);
 
   const removeRule = useCallback((index) => {
     setForm((f) => ({ ...f, rules: (f.rules || []).filter((_, i) => i !== index) }));
@@ -331,6 +357,7 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'e
       { id: 'events', icon: 'fa-calendar-days', label: isHt ? 'Evènman' : 'Events' },
       { id: 'resources', icon: 'fa-folder-open', label: isHt ? 'Fichye & Kou' : 'Files & Courses' },
       { id: 'announcements', icon: 'fa-bullhorn', label: isHt ? 'Anons' : 'Announcements' },
+      { id: 'settings', icon: 'fa-sliders', label: isHt ? 'Paramèt' : 'Settings' },
     ] : []),
   ];
   const activeTab = tabs.some((t) => t.id === tab) ? tab : 'profile';
@@ -438,56 +465,8 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'e
     </>
   );
 
-  const editorContent = (
-    <div className={panelStyles.workspace} id="community-tabpanel" role="tabpanel" aria-labelledby={`community-tab-${activeTab}`}>
-      {tabBar}
-      {activeTab === 'overview' && (
-        <CommunityFounderOverview community={item} slug={communityIdentifier} lang={lang} onOpenTab={setTab} />
-      )}
-      {activeTab === 'profile' && profileContent}
-      {activeTab === 'members' && (
-        <CommunityMembersPanel
-          slug={communityIdentifier}
-          lang={lang}
-          showToast={showToast}
-          isOwner={isOwner}
-          canModerate={canModerate}
-          currentUserId={user?.id}
-        />
-      )}
-      {activeTab === 'posts' && (
-        <CommunityPostsPanel
-          slug={communityIdentifier}
-          lang={lang}
-          showToast={showToast}
-          canModerate={canModerate}
-        />
-      )}
-      {activeTab === 'events' && (
-        <CommunityEventsPanel
-          slug={communityIdentifier}
-          communityId={item?.id}
-          lang={lang}
-          showToast={showToast}
-          canModerate={canModerate}
-        />
-      )}
-      {activeTab === 'resources' && (
-        <CommunityFilesPanel
-          slug={communityIdentifier}
-          lang={lang}
-          showToast={showToast}
-          canModerate={canModerate}
-        />
-      )}
-      {activeTab === 'announcements' && (
-        <CommunityAnnouncementsPanel slug={communityIdentifier} lang={lang} showToast={showToast} />
-      )}
-    </div>
-  );
-
-  const propertiesContent = (
-    <StudioPropertiesPanel>
+  const settingsGroups = (
+    <>
       <PropertyGroup title={isHt ? 'Aksè' : 'Access'} defaultOpen>
         <PropField label={isHt ? 'Fason antre' : 'Join Mode'}>
           <select value={form.join_mode} onChange={(e) => handleChange('join_mode', e.target.value)} className={panelStyles.input}>
@@ -598,6 +577,24 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'e
         </PropertyGroup>
       )}
       <PropertyGroup title={isHt ? 'Règleman' : 'House rules'} defaultOpen>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
+          <button
+            type="button"
+            onClick={() => applyRuleTemplate('starter')}
+            style={{ border: '1px solid var(--border-color, #e5e7eb)', background: 'transparent', borderRadius: 8, padding: '5px 10px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}
+          >
+            <i className="fas fa-wand-magic-sparkles" aria-hidden="true" style={{ marginRight: 6 }} />
+            {isHt ? 'Modèl baz' : 'Starter template'}
+          </button>
+          <button
+            type="button"
+            onClick={() => applyRuleTemplate('learning')}
+            style={{ border: '1px solid var(--border-color, #e5e7eb)', background: 'transparent', borderRadius: 8, padding: '5px 10px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}
+          >
+            <i className="fas fa-graduation-cap" aria-hidden="true" style={{ marginRight: 6 }} />
+            {isHt ? 'Modèl aprantisaj' : 'Learning template'}
+          </button>
+        </div>
         {(form.rules || []).map((r, i) => (
           <div key={i} style={{ border: '1px solid var(--border-color, #e5e7eb)', borderRadius: 8, padding: 8, marginBottom: 8 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 6 }}>
@@ -631,6 +628,72 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'e
           </button>
         </div>
       </PropertyGroup>
+    </>
+  );
+
+  const editorContent = (
+    <div className={panelStyles.workspace} id="community-tabpanel" role="tabpanel" aria-labelledby={`community-tab-${activeTab}`}>
+      {tabBar}
+      {activeTab === 'overview' && (
+        <CommunityFounderOverview community={item} slug={communityIdentifier} lang={lang} onOpenTab={setTab} />
+      )}
+      {activeTab === 'profile' && profileContent}
+      {activeTab === 'members' && (
+        <CommunityMembersPanel
+          slug={communityIdentifier}
+          lang={lang}
+          showToast={showToast}
+          isOwner={isOwner}
+          canModerate={canModerate}
+          currentUserId={user?.id}
+        />
+      )}
+      {activeTab === 'posts' && (
+        <CommunityPostsPanel
+          slug={communityIdentifier}
+          lang={lang}
+          showToast={showToast}
+          canModerate={canModerate}
+        />
+      )}
+      {activeTab === 'events' && (
+        <CommunityEventsPanel
+          slug={communityIdentifier}
+          communityId={item?.id}
+          lang={lang}
+          showToast={showToast}
+          canModerate={canModerate}
+        />
+      )}
+      {activeTab === 'resources' && (
+        <CommunityFilesPanel
+          slug={communityIdentifier}
+          lang={lang}
+          showToast={showToast}
+          canModerate={canModerate}
+        />
+      )}
+      {activeTab === 'announcements' && (
+        <CommunityAnnouncementsPanel slug={communityIdentifier} lang={lang} showToast={showToast} />
+      )}
+      {activeTab === 'settings' && (
+        <div className={panelStyles.panel} style={{ display: 'grid', gap: 16 }}>
+          <PanelHeader
+            icon="fa-sliders"
+            title={isHt ? 'Paramèt kominote a' : 'Community settings'}
+            subtitle={isHt
+              ? 'Jere aksè, lyen envitasyon, règleman ak zòn danje nan yon sèl kote.'
+              : 'Manage access, invite links, rules, and danger zone in one place.'}
+          />
+          {settingsGroups}
+        </div>
+      )}
+    </div>
+  );
+
+  const propertiesContent = (
+    <StudioPropertiesPanel>
+      {settingsGroups}
     </StudioPropertiesPanel>
   );
 
