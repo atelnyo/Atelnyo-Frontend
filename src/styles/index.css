@@ -15566,6 +15566,93 @@ body.dark-mode .explore-hero {
     radial-gradient(130px 110px at 88% 12%, rgba(56, 189, 248, 0.18), transparent 70%);
 }
 
+/* ─── Explore hero — discovery template polish ────────────────────────
+   The original hero was just an h1 + one line of copy. Give it a clear
+   editorial hierarchy (eyebrow → headline → promise → live inventory)
+   without adding fake metrics: the pills are fed by the real section
+   arrays and only render once a section has data. */
+.explore-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  padding: clamp(8px, 2vw, 16px) clamp(10px, 3vw, 24px) 18px;
+  margin-bottom: 20px;
+}
+.explore-hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 11px;
+  border: 1px solid rgba(216, 27, 96, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--pink-primary, #d81b60);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.045em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+.explore-hero-eyebrow i { font-size: 0.68rem; }
+.explore-hero-title {
+  max-width: 760px;
+  margin: 0;
+  font-size: clamp(1.7rem, 4.2vw, 2.35rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+.explore-hero-desc {
+  max-width: 620px;
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+.explore-hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.explore-hero-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 11px;
+  border: 1px solid var(--border-color, rgba(15, 23, 42, 0.08));
+  border-radius: 999px;
+  background: var(--card-bg, #fff);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+  color: var(--text-main, #222);
+  font-size: 0.78rem;
+  line-height: 1.2;
+}
+.explore-hero-stat i { color: var(--pink-primary, #d81b60); font-size: 0.72rem; }
+.explore-hero-stat strong { font-size: 0.86rem; font-weight: 800; }
+.explore-hero-stat span { color: var(--text-secondary, #6b7280); }
+body.dark-mode .explore-hero-eyebrow {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(216, 27, 96, 0.14);
+}
+body.dark-mode .explore-hero-stat {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: var(--card-bg, #1e1e24);
+  box-shadow: none;
+}
+@media (max-width: 640px) {
+  .explore-hero { gap: 8px; padding-bottom: 14px; margin-bottom: 14px; }
+  .explore-hero-title { font-size: clamp(1.55rem, 7.4vw, 1.9rem); }
+  .explore-hero-desc { font-size: 0.89rem; }
+  .explore-hero-stat { padding: 6px 9px; font-size: 0.74rem; }
+  .explore-hero-stat:nth-child(n + 4) { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .explore-hero-eyebrow, .explore-hero-stat { animation: none !important; opacity: 1 !important; }
+}
+
 /* Chips — snap scrolling so the active chip lands centered */
 .explore-chips {
   scroll-snap-type: x proximity;

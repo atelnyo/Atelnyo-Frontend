@@ -51,6 +51,7 @@ const Stats = lazy(() => import('./components/Stats'));
 const DashboardPreview = lazy(() => import('./components/DashboardPreview'));
 import NotFound from './components/NotFound';
 import SkeletonCard from './components/SkeletonCard';
+import HomePageSkeleton from './components/home/HomePageSkeleton';
 const Explore = lazy(() => import('./components/Explore').then(m => ({ default: m.Explore })));
 import BottomNavBar from './components/BottomNavBar';
 const Mwen = lazy(() => import('./components/Mwen'));
@@ -945,6 +946,16 @@ function unwrapList(data) {
 // with a null selectedCourse/selectedProduct.
 const SAFE_RESTORE_TABS = ['explore', 'commerce', 'mwen', 'rules'];
 
+/**
+ * HomeContentReady — calls onReady only after the lazy home subtree has
+ * actually mounted. App uses that signal to keep the footer out of the first
+ * loading frame (the footer is a sibling of the Suspense boundary).
+ */
+function HomeContentReady({ onReady, children }) {
+  useEffect(() => { onReady?.(); }, [onReady]);
+  return children;
+}
+
 function App() {
   // Phase 4 — lang initializer: an explicit localized URL (/fr-HT/…)
   // wins over the stored preference on cold load (spec §30 — URL
@@ -1027,6 +1038,10 @@ function App() {
   }, [location.pathname]);
 
   const [activeTab, setActiveTab] = useState('explore');
+  // False until the lazy root page mounts; prevents the footer from being
+  // painted alone beneath the first-load skeleton.
+  const [homeContentReady, setHomeContentReady] = useState(false);
+  const markHomeContentReady = useCallback(() => setHomeContentReady(true), []);
   const [courses, setCourses] = useState([]);
   const [userProgress, setUserProgress] = useState([]);
   const [favorites, setFavorites] = useState([]);
@@ -2528,7 +2543,12 @@ function App() {
           it: <Routes> mounts after this block, so the footer would appear
           above the page. */}
       {!isStoreRoute && rendersInContentContainer && <div className="container" role="presentation">
-        <main id="a11y-main-content" tabIndex="-1" aria-label={getA11yString(lang, 'contentLandmark')}>
+        <main
+          id="a11y-main-content"
+          tabIndex={-1}
+          aria-label={getA11yString(lang, 'contentLandmark')}
+          aria-busy={effectivePathname === '/' && !homeContentReady ? 'true' : undefined}
+        >
           {/* Skip the chrome-rendered Explore when the URL is under /sheet/* —
               the sheet-routed <Explore> already covers /sheet/explore, and
               mounting both would double-fetch the catalog + double-register
@@ -2553,16 +2573,13 @@ function App() {
                NOTE: the 404 NotFound is also rendered here (via
                notFoundPath state) so it appears inside <main>, not
                at the bottom of the DOM tree. */
-            <Suspense fallback={
-              <div style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                padding: '80px 0', minHeight: '40vh',
-              }}>
-                <i className="fas fa-spinner fa-pulse fa-2x" style={{ color: 'var(--pink-primary, #d81b60)' }} aria-hidden="true" />
-              </div>
-            }>
-              {renderContent()}
-            </Suspense>
+            <ChunkLoadErrorBoundary>
+              <Suspense fallback={<HomePageSkeleton lang={lang} />}>
+                <HomeContentReady onReady={markHomeContentReady}>
+                  {renderContent()}
+                </HomeContentReady>
+              </Suspense>
+            </ChunkLoadErrorBoundary>
           )}
           {/* 404: render inside <main> so it appears in the content area,
               not at the bottom of the DOM tree after Footer + modals.
@@ -2573,7 +2590,14 @@ function App() {
           )}
         </main>
 
-        <Footer lang={lang} translations={translations} />
+        {(effectivePathname !== '/' || homeContentReady) && (
+          /* Footer is lazy too. Without its own boundary, the first mount
+             would suspend against the route-level Suspense (which is a
+             sibling, not an ancestor) and crash the root. */
+          <Suspense fallback={null}>
+            <Footer lang={lang} translations={translations} />
+          </Suspense>
+        )}
       </div>}
 
       {/* Cookie Consent Banner — GDPR/CCPA compliant consent management */}

@@ -27,6 +27,9 @@
 // chunks (no duplicate downloads, no extra bundle bytes).
 const WARM_ROUTES = [
   { name: 'explore', load: () => import('../components/Explore') },
+  // Global chrome: the footer mounts on every public page, so warming it
+  // here removes the extra lazy-import stall after the home content lands.
+  { name: 'footer', load: () => import('../components/Footer') },
   { name: 'mwen', load: () => import('../components/Mwen') },
   { name: 'settings', load: () => import('../components/Settings') },
   { name: 'studio', load: () => import('../components/studio/CreatorStudio') },

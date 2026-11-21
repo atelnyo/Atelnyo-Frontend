@@ -243,6 +243,80 @@
         touch-action: manipulation;
       }
     </style>
+    <!-- ─── First-paint skeleton (before React mounts) ────────────────
+         The app bundle is a module; on slow networks the user would see
+         only the ambient background until React rendered. This static
+         shell paints immediately and is replaced by createRoot().render. -->
+    <style id="boot-skeleton-style">
+      .boot-home-shell {
+        min-height: 100vh;
+        min-height: 100dvh;
+        padding: 16px;
+        box-sizing: border-box;
+        background: #fff6fa;
+      }
+      .boot-home-header {
+        max-width: 1000px;
+        height: 54px;
+        margin: 0 auto 16px;
+        border-radius: 18px;
+        background: #fff;
+      }
+      .boot-home-panel {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: clamp(20px, 4vw, 40px);
+        box-sizing: border-box;
+        border-radius: 16px;
+        background: #fff;
+      }
+      .boot-home-line, .boot-home-search, .boot-home-chip,
+      .boot-home-icon, .boot-home-media {
+        background: linear-gradient(90deg, #eef1f5 25%, #e0e5eb 50%, #eef1f5 75%);
+        background-size: 200% 100%;
+        animation: boot-home-shimmer 1.4s ease-in-out infinite;
+      }
+      .boot-home-line { display: block; border-radius: 8px; }
+      .boot-home-kicker { width: 132px; height: 12px; border-radius: 999px; margin-bottom: 14px; }
+      .boot-home-title { width: min(78%, 540px); height: clamp(30px, 4vw, 44px); border-radius: 12px; margin-bottom: 10px; }
+      .boot-home-title-short { width: min(52%, 340px); height: clamp(22px, 3vw, 32px); border-radius: 12px; margin-bottom: 14px; }
+      .boot-home-search { height: 50px; border-radius: 999px; margin: 18px 0 14px; }
+      .boot-home-filters { display: flex; flex-wrap: wrap; gap: 8px; }
+      .boot-home-chip { width: 76px; height: 30px; border-radius: 999px; }
+      .boot-home-section { margin-top: 28px; }
+      .boot-home-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+      .boot-home-icon { width: 32px; height: 32px; border-radius: 10px; }
+      .boot-home-heading-line { width: 190px; height: 18px; }
+      .boot-home-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+      .boot-home-card { padding: 10px; border: 1px solid rgba(15,23,42,0.08); border-radius: 16px; background: #fff; }
+      .boot-home-media { width: 100%; aspect-ratio: 16/10; border-radius: 12px; margin-bottom: 10px; }
+      .boot-home-card-line { width: 88%; height: 12px; margin-top: 8px; }
+      .boot-home-card-line.short { width: 56%; height: 10px; }
+      @keyframes boot-home-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+      body.dark-mode .boot-home-shell { background: #0b0c18; }
+      body.dark-mode .boot-home-header, body.dark-mode .boot-home-panel, body.dark-mode .boot-home-card { background: #171a2b; }
+      body.dark-mode .boot-home-card { border-color: #2a2f45; }
+      body.dark-mode .boot-home-line, body.dark-mode .boot-home-search, body.dark-mode .boot-home-chip,
+      body.dark-mode .boot-home-icon, body.dark-mode .boot-home-media {
+        background: linear-gradient(90deg, #24283d 25%, #2f3450 50%, #24283d 75%);
+        background-size: 200% 100%;
+      }
+      @media (max-width: 900px) { .boot-home-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+      @media (max-width: 600px) {
+        .boot-home-shell { padding: 8px; }
+        .boot-home-header { height: 48px; margin-bottom: 8px; }
+        .boot-home-panel { padding: 20px 14px; }
+        .boot-home-title { width: 92%; }
+        .boot-home-title-short { width: 68%; }
+        .boot-home-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+        .boot-home-card { padding: 8px; border-radius: 12px; }
+        .boot-home-section:nth-of-type(2) { display: none; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .boot-home-line, .boot-home-search, .boot-home-chip,
+        .boot-home-icon, .boot-home-media { animation: none; background: #eef1f5; }
+      }
+    </style>
   </head>
   <body>
     <!-- ─── Atelnyo storage migration (runs before ANY module) ────────
@@ -316,7 +390,38 @@
     </div>
     <canvas id="matrix-canvas"></canvas>
 
-    <div id="root"></div>
+    <div id="root">
+      <!-- Replaced by React on mount; gives the first paint a real app
+           shape instead of an empty background while the module boots. -->
+      <div class="boot-home-shell" role="status" aria-live="polite" aria-label="Loading Atelnyo">
+        <div class="boot-home-header" aria-hidden="true"></div>
+        <div class="boot-home-panel" aria-hidden="true">
+          <span class="boot-home-line boot-home-kicker"></span>
+          <span class="boot-home-line boot-home-title"></span>
+          <span class="boot-home-line boot-home-title-short"></span>
+          <div class="boot-home-search"></div>
+          <div class="boot-home-filters">
+            <span class="boot-home-chip"></span>
+            <span class="boot-home-chip"></span>
+            <span class="boot-home-chip"></span>
+            <span class="boot-home-chip"></span>
+            <span class="boot-home-chip"></span>
+          </div>
+          <div class="boot-home-section">
+            <div class="boot-home-heading">
+              <span class="boot-home-icon"></span>
+              <span class="boot-home-line boot-home-heading-line"></span>
+            </div>
+            <div class="boot-home-grid">
+              <div class="boot-home-card"><div class="boot-home-media"></div><div class="boot-home-line boot-home-card-line"></div><div class="boot-home-line boot-home-card-line short"></div></div>
+              <div class="boot-home-card"><div class="boot-home-media"></div><div class="boot-home-line boot-home-card-line"></div><div class="boot-home-line boot-home-card-line short"></div></div>
+              <div class="boot-home-card"><div class="boot-home-media"></div><div class="boot-home-line boot-home-card-line"></div><div class="boot-home-line boot-home-card-line short"></div></div>
+              <div class="boot-home-card"><div class="boot-home-media"></div><div class="boot-home-line boot-home-card-line"></div><div class="boot-home-line boot-home-card-line short"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
 
     <!-- ─── PWA Service Worker Registration ─────────────────────────── -->

@@ -72,6 +72,8 @@ const trans_ht = {
     'tab_registration': 'Enskripsyon',
     // Phase 10 — Explore page keys (multi-content feed)
     'explore_hero_title': 'Dekouvri Atelnyo',
+    'explore_hero_eyebrow': 'Kreyatè Ayisyen & Karayib',
+    'explore_hero_stats_label': 'Sa k ap viv sou Atelnyo',
     'explore_hero_desc': 'Kou, mizik, talan, ak plis ankò — tout nan yon sèl kote.',
     'explore_search_placeholder': 'Chèche kou, mizik, talan…',
     'explore_section_featured': 'Rekòmande',
@@ -1141,6 +1143,8 @@ const trans_en = {
     'tab_registration': 'Registration',
     // Phase 10 — Explore page keys (multi-content feed)
     'explore_hero_title': 'Discover Atelnyo',
+    'explore_hero_eyebrow': 'Haitian & Caribbean creators',
+    'explore_hero_stats_label': 'Live on Atelnyo',
     'explore_hero_desc': 'Courses, music, talents, and more — all in one place.',
     'explore_search_placeholder': 'Search courses, music, talents…',
     'explore_section_featured': 'Featured',
@@ -2188,6 +2192,8 @@ const trans_es = {
     'tab_registration': 'Inscripción',
     // Phase 10 — Explore page keys (multi-content feed)
     'explore_hero_title': 'Descubre Atelnyo',
+    'explore_hero_eyebrow': 'Creadores haitianos y caribeños',
+    'explore_hero_stats_label': 'Lo que vive en Atelnyo',
     'explore_hero_desc': 'Cursos, música, talentos y más, todo en un solo lugar.',
     'explore_search_placeholder': 'Busca cursos, música, talentos…',
     'explore_section_featured': 'Destacado',
@@ -3234,6 +3240,8 @@ const trans_fr = {
     'tab_registration': 'Inscription',
     // Phase 10 — Explore page keys (multi-content feed)
     'explore_hero_title': 'Découvrez Atelnyo',
+    'explore_hero_eyebrow': 'Créateurs haïtiens et caribéens',
+    'explore_hero_stats_label': 'Ce qui vit sur Atelnyo',
     'explore_hero_desc': 'Cours, musique, talents et plus, le tout en un seul endroit.',
     'explore_search_placeholder': 'Rechercher cours, musique, talents…',
     'explore_section_featured': 'En vedette',

@@ -1943,6 +1943,20 @@ export function Explore({
     es: 'Descubre cursos, música, talento, productos, empleos y comunidades en Atelnyo. Creadores haitianos y caribeños compartiendo conocimiento y creatividad.',
   };
 
+  // Real inventory counts for the hero — no seeded or fabricated numbers.
+  // Pills only appear once the corresponding API section actually has data.
+  const heroStats = [
+    { key: 'courses', icon: 'fa-graduation-cap', count: courses.length },
+    { key: 'music', icon: 'fa-music', count: apiMusic.length },
+    { key: 'talents', icon: 'fa-star', count: apiTalents.length },
+    { key: 'communities', icon: 'fa-users', count: apiCommunities.length },
+  ]
+    .filter((stat) => stat.count > 0)
+    .map((stat) => ({
+      ...stat,
+      label: getChipLabel(CHIPS.find((chip) => chip.id === stat.key) || CHIPS[0], lang),
+    }));
+
   return (
     <>
     <SEOHead
@@ -1964,9 +1978,28 @@ export function Explore({
     <main className={classNames('explore-page', hasMounted && 'is-mounted')} onClick={() => { /* close any open popovers */ }}>
       {/* Hero — semantic <header> with <h1> for page heading hierarchy */}
       <header className="explore-hero">
-        <h1 className="explore-hero-title">{t.hero_title || 'Atelnyo'}</h1>
+        <span className="explore-hero-eyebrow">
+          <i className="fas fa-sparkles" aria-hidden="true" />
+          {t.explore_hero_eyebrow || 'Kreyatè Ayisyen & Karayib'}
+        </span>
+        <h1 className="explore-hero-title">{t.explore_hero_title || t.hero_title || 'Atelnyo'}</h1>
         <p className="explore-hero-desc">
-          {t.explore_hero_desc || 'Dekouvri kou, mizik, talan, ak plis ankò.'}        </p>
+          {t.explore_hero_desc || 'Dekouvri kou, mizik, talan, ak plis ankò.'}
+        </p>
+        {heroStats.length > 0 && (
+          <ul
+            className="explore-hero-stats"
+            aria-label={t.explore_hero_stats_label || 'Sa k ap viv sou Atelnyo'}
+          >
+            {heroStats.map((stat) => (
+              <li key={stat.key} className="explore-hero-stat">
+                <i className={`fas ${stat.icon}`} aria-hidden="true" />
+                <strong>{stat.count.toLocaleString(lang)}</strong>
+                <span>{stat.label}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </header>
 
       {/* Sticky search — semantic <nav> with role="search" for crawlers */}

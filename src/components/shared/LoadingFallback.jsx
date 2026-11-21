@@ -17,6 +17,10 @@
  *   </Suspense>
  */
 import React, { useEffect, useState } from 'react';
+import styles from './LoadingFallback.module.css';
+
+const FULL_PAGE_CARDS = Array.from({ length: 8 }, (_, index) => index);
+const SECTION_CARDS = Array.from({ length: 3 }, (_, index) => index);
 
 const COPY = {
   en: {
@@ -101,20 +105,66 @@ export default function LoadingFallback({
 
   return (
     <div
+      className={`${styles.root} ${fullPage ? styles.fullPage : styles.compact}`}
       role="status"
       aria-live="polite"
-      style={{
-        ...(fullPage ? { position: 'fixed', inset: 0, zIndex: 9999, background: 'var(--surface-page, var(--bg-page, #ffdae9))' } : null),
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 16,
-        padding: fullPage ? 0 : '60px 0',
-      }}
+      aria-busy="true"
+      style={{ '--fallback-accent': color }}
     >
-      <i className="fas fa-spinner fa-pulse fa-2x" style={{ color }} aria-hidden="true" />
-      <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #64748b)' }}>{t.loading}</span>
+      <div className={styles.frame}>
+        {fullPage && (
+          <div className={styles.chrome} aria-hidden="true">
+            <span className={`${styles.shimmer} ${styles.brand}`} />
+            <span className={styles.chromeSpacer} />
+            <span className={`${styles.shimmer} ${styles.navPill}`} />
+            <span className={`${styles.shimmer} ${styles.navPill}`} />
+            <span className={`${styles.shimmer} ${styles.navPill}`} />
+          </div>
+        )}
+
+        {fullPage ? (
+          <div className={styles.page} aria-hidden="true">
+            <div className={styles.hero}>
+              <span className={`${styles.shimmer} ${styles.kicker}`} />
+              <span className={`${styles.shimmer} ${styles.title}`} />
+              <span className={`${styles.shimmer} ${styles.desc}`} />
+            </div>
+            <div className={`${styles.shimmer} ${styles.search}`} />
+            <div className={styles.section}>
+              <div className={styles.sectionHead}>
+                <span className={`${styles.shimmer} ${styles.sectionIcon}`} />
+                <span className={`${styles.shimmer} ${styles.sectionTitle}`} />
+              </div>
+              <div className={styles.grid}>
+                {FULL_PAGE_CARDS.map((card) => (
+                  <article key={card} className={styles.card}>
+                    <span className={`${styles.shimmer} ${styles.media}`} />
+                    <span className={`${styles.shimmer} ${styles.line}`} />
+                    <span className={`${styles.shimmer} ${styles.lineShort}`} />
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className={styles.section} aria-hidden="true">
+            <div className={styles.sectionHead}>
+              <span className={`${styles.shimmer} ${styles.sectionIcon}`} />
+              <span className={`${styles.shimmer} ${styles.sectionTitle}`} />
+            </div>
+            <div className={styles.grid}>
+              {SECTION_CARDS.map((card) => (
+                <article key={card} className={styles.card}>
+                  <span className={`${styles.shimmer} ${styles.media}`} />
+                  <span className={`${styles.shimmer} ${styles.line}`} />
+                  <span className={`${styles.shimmer} ${styles.lineShort}`} />
+                </article>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+      <span className={styles.label}>{t.loading}</span>
     </div>
   );
 }
