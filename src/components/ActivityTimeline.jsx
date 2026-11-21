@@ -36,6 +36,8 @@ const EVENT_META = {
   community_joined:       { icon: 'fa-users',           label_ht: 'Antre nan kominote',      label_en: 'Joined community' },
   event_created:          { icon: 'fa-calendar-plus',   label_ht: 'Evènman kreye',           label_en: 'Event created' },
   event_published:        { icon: 'fa-calendar-check',  label_ht: 'Evènman pibliye',         label_en: 'Event published' },
+  event_cancelled:        { icon: 'fa-calendar-xmark',  label_ht: 'Evènman anile',           label_en: 'Event cancelled' },
+  event_rescheduled:      { icon: 'fa-calendar-day',     label_ht: 'Evènman chanje dat',      label_en: 'Event rescheduled' },
   // Learning reminders (backend stores title/body/route in data).
   continue_learning:      { icon: 'fa-play',             label_ht: 'Kontinye aprann',         label_en: 'Continue learning' },
   lesson_unlocked:        { icon: 'fa-book-open',        label_ht: 'Nouvo leson',             label_en: 'New lesson available' },
@@ -151,6 +153,7 @@ const TYPE_ACCENTS = {
   profile_request_rejected: 'social',
   // Community — teal (moderation notices red)
   community_joined: 'community', event_created: 'community', event_published: 'community',
+  event_cancelled: 'community', event_rescheduled: 'community',
   community_post_comment: 'community', community_post_reaction: 'community',
   community_member_banned: 'danger', community_member_unbanned: 'community',
   community_member_muted: 'community', community_member_unmuted: 'community',
@@ -172,7 +175,7 @@ const TYPE_ACCENTS = {
   profile_tip: 'money', referral_commission: 'money', points_awarded: 'money',
   // Creative — amber
   project_published: 'create', new_content: 'create', product_listed: 'create',
-  announcement_posted: 'create', live_room_joined: 'create',
+  announcement_posted: 'community', live_room_joined: 'create',
   // Account — slate
   profile_updated: 'account', affiliate_approved: 'account', affiliate_rejected: 'account',
   story_created: 'create',
@@ -219,6 +222,10 @@ const NOTIFICATION_ROUTES = {
   event_created:          (d) => d?.community_slug ? `/community/${d.community_slug}` : (d?.event_id ? `/sheet/event/${d.event_id}` : null),
   // Publish announcements go to every member — deep-link the event itself.
   event_published:        (d) => (d?.event_id ? `/sheet/event/${d.event_id}` : null),
+  // A cancelled event is no longer readable by members, so land on the
+  // community home instead of a dead detail page.
+  event_cancelled:        (d) => (d?.community_slug ? `/community/${d.community_slug}` : null),
+  event_rescheduled:      (d) => (d?.event_id ? `/sheet/event/${d.event_id}` : (d?.community_slug ? `/community/${d.community_slug}` : null)),
   // Learning reminders + achievements.
   continue_learning:      (d) => (d?.course_id ? `/sheet/course/${d.course_id}` : null),
   lesson_unlocked:        (d) => (d?.course_id ? `/sheet/course/${d.course_id}` : null),
@@ -501,6 +508,9 @@ function EventRow({ event, lang, t, onMarkRead, onNavigate, onShowNotice, onAcce
   else if (data.course_title) description = data.course_title;
   // An event announcement names the EVENT, not just the community.
   else if (data.event_title) description = data.event_title;
+  // Community announcements name the post itself before falling back
+  // to the community. Titles are already sanitized server-side.
+  else if (data.announcement_title) description = data.announcement_title;
   else if (data.community_name) description = data.community_name;
   else if (data.skill_name) description = `${data.skill_name} · ${data.endorser_name || ''}`;
   else if (data.achievement_name) description = data.achievement_name;
@@ -628,7 +638,17 @@ function EventRow({ event, lang, t, onMarkRead, onNavigate, onShowNotice, onAcce
 
 // ─── Main component ─────────────────────────────────────────────────────
 
-export function ActivityTimeline({ lang = 'en', userId, t, onMarkRead, onMarkAllRead, onNavigate, onAcceptProposal, onRejectProposal, onAcceptRequest, onRejectRequest, refreshToken, showMarkAllRead = false }) {
+const COMMUNITY_EVENT_TYPES = new Set([
+  'announcement_posted', 'event_created', 'event_published',
+  'event_cancelled', 'event_rescheduled', 'ticket_purchased',
+]);
+
+function isCommunityNotification(event) {
+  const type = event?.event_type || '';
+  return type.startsWith('community_') || COMMUNITY_EVENT_TYPES.has(type);
+}
+
+export function ActivityTimeline({ lang = 'en', userId, t, onMarkRead, onMarkAllRead, onMarkCommunityRead, onNavigate, onAcceptProposal, onRejectProposal, onAcceptRequest, onRejectRequest, refreshToken, showMarkAllRead = false }) {
   const [events, setEvents] = useState([]);
   const [loadingInitial, setLoadingInitial] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -671,6 +691,18 @@ export function ActivityTimeline({ lang = 'en', userId, t, onMarkRead, onMarkAll
       // best-effort
     }
   }, [onMarkAllRead]);
+
+  const markCommunityRead = useCallback(async () => {
+    try {
+      const res = await activityFeedService.markCommunityRead();
+      setEvents((prev) => prev.map((e) => (
+        isCommunityNotification(e) ? { ...e, read: true } : e
+      )));
+      onMarkCommunityRead?.(res?.data?.updated || 0);
+    } catch {
+      // best-effort
+    }
+  }, [onMarkCommunityRead]);
 
   // Initial load — refreshToken bumps re-fetch the list (e.g. a new
   // real-time notification arrived while the dropdown was open).
@@ -781,6 +813,9 @@ export function ActivityTimeline({ lang = 'en', userId, t, onMarkRead, onMarkAll
   }
 
   const unreadCount = events.filter((e) => !e.read).length;
+  const unreadCommunityCount = events.filter(
+    (e) => !e.read && isCommunityNotification(e),
+  ).length;
   const pendingCount = events.filter(isActionable).length;
 
   return (
@@ -821,13 +856,24 @@ export function ActivityTimeline({ lang = 'en', userId, t, onMarkRead, onMarkAll
             <i className="fas fa-circle" aria-hidden="true" style={{ fontSize: 8, color: 'var(--color-primary, #d81b60)', marginRight: 6 }} />
             {unreadCount} {lang === 'ht' ? 'nouvo' : 'new'}
           </span>
-          <button
-            type="button"
-            className="notif-page-mark-all"
-            onClick={markAllRead}
-          >
-            <i className="fas fa-check-double" aria-hidden="true" /> {lang === 'ht' ? 'Make tout nouvo yo' : 'Mark all read'}
-          </button>
+          <div className="notif-page-toolbar-actions">
+            {unreadCommunityCount > 0 && (
+              <button
+                type="button"
+                className="notif-page-mark-all"
+                onClick={markCommunityRead}
+              >
+                <i className="fas fa-users" aria-hidden="true" /> {lang === 'ht' ? 'Make notifikasyon kominote yo' : 'Mark community read'}
+              </button>
+            )}
+            <button
+              type="button"
+              className="notif-page-mark-all"
+              onClick={markAllRead}
+            >
+              <i className="fas fa-check-double" aria-hidden="true" /> {lang === 'ht' ? 'Make tout nouvo yo' : 'Mark all read'}
+            </button>
+          </div>
         </div>
       )}
       {groupOrder.map((grp) => {

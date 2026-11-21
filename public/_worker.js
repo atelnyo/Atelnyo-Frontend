@@ -121,6 +121,14 @@ const SSR_MAP = [
   { re: /^\/terms\/?$/,       api: () => '/api/ssr/terms/' },
   // Legal policy pages: /legal/terms-of-service, /legal/privacy-policy, ...
   { re: /^\/legal\/([^/?#]+)\/?$/, api: (m) => `/api/ssr/legal/${m[1]}/` },
+  // Community pages + individual post permalinks. The post rule MUST
+  // come first: /community/<slug>/posts/<id> also looks like a
+  // community path to a looser matcher.
+  { re: /^\/community\/([^/?#]+)\/posts\/(\d+)\/?$/, api: (m) => `/api/ssr/community-post/${m[1]}/${m[2]}/` },
+  // Tab URLs (posts/events/courses/...) share the community's preview
+  // instead of falling back to the generic platform banner.
+  { re: /^\/community\/([^/?#]+)\/(?:home|events|posts|members|announcements|files|courses)\/?$/, api: (m) => `/api/ssr/community/${m[1]}/` },
+  { re: /^\/community\/([^/?#]+)\/?$/, api: (m) => `/api/ssr/community/${m[1]}/` },
   { re: /^\/courses\/([^/?#]+)\/?$/, api: (m) => `/api/ssr/course/${m[1]}/` },
   // New content-path URLs: /<slug>/by/<user>/course
   { re: /^\/([^/?#]+)\/by\/[^/?#]+\/course\/?$/, api: (m) => `/api/ssr/course/${m[1]}/` },

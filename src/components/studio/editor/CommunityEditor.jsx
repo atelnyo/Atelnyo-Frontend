@@ -42,6 +42,9 @@ import CommunityPostsPanel from './CommunityPostsPanel';
 import CommunityEventsPanel from './CommunityEventsPanel';
 import CommunityFilesPanel from './CommunityFilesPanel';
 import CommunityAnnouncementsPanel from './CommunityAnnouncementsPanel';
+import CommunityStarterTemplates from './CommunityStarterTemplates';
+import CommunityPreviewCard from './CommunityPreviewCard';
+import { buildTemplateDraft } from './communityTemplates';
 import { PanelHeader } from './communityPanelUI';
 import { ImageUrlField } from '../modals/shared';
 import panelStyles from './communityEditor.module.css';
@@ -85,6 +88,9 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'e
       : [],
   });
   const [newRule, setNewRule] = useState({ title: '', description: '' });
+  // Which starter template was last applied — purely visual (a check on
+  // the card). The form fields remain the source of truth afterwards.
+  const [appliedTemplate, setAppliedTemplate] = useState('');
   const [errors, setErrors] = useState({});
   const [saveState, setSaveState] = useState('idle');
   const [inviteUrl, setInviteUrl] = useState('');
@@ -181,6 +187,38 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'e
     setForm((f) => ({ ...f, rules: mapped }));
     markDirty();
   }, [isHt, markDirty]);
+
+  // Starter templates own only the descriptive fields + the first set
+  // of rules. The name, images, and visibility stay the founder's, so
+  // applying a template never overwrites an upload or a half-typed name.
+  // Existing hand-written rules are kept too — replacing them silently
+  // would throw away work (remove them first to take the template's).
+  const applyTemplate = useCallback((template) => {
+    const draft = buildTemplateDraft(template, lang);
+    if (!draft) return;
+    const keepsRules = (form.rules || []).length > 0;
+    setForm((f) => ({
+      ...f,
+      description: draft.description,
+      category: draft.category,
+      hashtags: draft.hashtags,
+      join_mode: draft.join_mode,
+      rules: (f.rules || []).length > 0 ? f.rules : draft.rules,
+    }));
+    setAppliedTemplate(template.id);
+    setErrors((e) => ({ ...e, _api: null }));
+    markDirty();
+    showToast?.(
+      keepsRules
+        ? (isHt
+          ? `Modèl « ${template.title.ht} » aplike. Règleman w yo kenbe — efase yo pou pran sa modèl la.`
+          : `“${template.title.en}” template applied. Your rules were kept — clear them to use the template's.`)
+        : (isHt
+          ? `Modèl « ${template.title.ht} » aplike. Ou ka chanje tout bagay.`
+          : `“${template.title.en}” template applied. Everything is editable.`),
+      'wand-magic-sparkles',
+    );
+  }, [lang, isHt, form.rules, markDirty, showToast]);
 
   const removeRule = useCallback((index) => {
     setForm((f) => ({ ...f, rules: (f.rules || []).filter((_, i) => i !== index) }));
@@ -411,56 +449,69 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'e
   const profileContent = (
     <>
       {errors._api && <div className={panelStyles.apiError} role="alert" style={{ marginBottom: 16 }}>{errors._api}</div>}
-      <div className={panelStyles.formSection}>
-        <h3 className={panelStyles.formTitle}><i className="fas fa-users" aria-hidden="true" /> {isHt ? 'Enfòmasyon Kominote' : 'Community Info'}</h3>
-        <p className={panelStyles.hint} style={{ marginTop: -6 }}>
-          {isHt
-            ? 'Se sa moun wè sou paj piblik kominote a. Non an obligatwa anvan ou sove.'
-            : 'This is what people see on the public community page. The name is required before saving.'}
-        </p>
-        <div style={{ display: 'grid', gap: 16 }}>
-          <PropField label={isHt ? 'Non Kominote' : 'Community Name'} required error={errors.name}>
-            <PropInput value={form.name} onChange={(e) => handleChange('name', e.target.value)} placeholder={isHt ? 'Non kominote a' : 'Community name'} />
-          </PropField>
-          <PropField label={isHt ? 'Deskripsyon' : 'Description'}>
-            <textarea value={form.description} onChange={(e) => handleChange('description', e.target.value)} className={panelStyles.textarea} rows={4} placeholder={isHt ? 'Dekri kominote a...' : 'Describe the community...'} />
-          </PropField>
-          <PropField label={isHt ? 'Kategori' : 'Category'}>
-            <select value={form.category} onChange={(e) => handleChange('category', e.target.value)} className={panelStyles.input}>
-              {CATEGORY_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>{isHt ? o.ht : o.en}</option>
-              ))}
-            </select>
-          </PropField>
-          <PropField label={isHt ? 'Hashtags' : 'Hashtags'}>
-            <PropInput value={form.hashtags} onChange={(e) => handleChange('hashtags', e.target.value)} placeholder="#teknoloji #ayiti" />
-          </PropField>
-        </div>
-      </div>
-      <div className={panelStyles.formSection} style={{ marginTop: 20 }}>
-        <h3 className={panelStyles.formTitle}><i className="fas fa-image" aria-hidden="true" /> {isHt ? 'Imaj' : 'Images'}</h3>
-        <div style={{ display: 'grid', gap: 16 }}>
-          <div>
-            <ImageUrlField label={isHt ? 'URL Avatè' : 'Avatar URL'} value={form.avatar_url} onChange={(v) => handleChange('avatar_url', v)} lang={lang} />
-            <input ref={avatarInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImageFile(f, 'avatar_url'); e.target.value = ''; }} />
-            <button type="button" onClick={() => avatarInputRef.current?.click()} disabled={uploadingAvatar}
-              className={panelStyles.secondaryBtn} style={{ marginTop: 8 }}>
-              <i className={`fas ${uploadingAvatar ? 'fa-spinner fa-spin' : 'fa-images'}`} aria-hidden="true" />
-              {uploadingAvatar ? (isHt ? 'Ap telechaje...' : 'Uploading...') : (isHt ? 'Chwazi nan galri' : 'Choose from gallery')}
-            </button>
-            <div className={panelStyles.hint} style={{ margin: '6px 0 0' }}>{isHt ? 'Kole yon URL oswa pran yon foto nan galri telefòn ou.' : 'Paste a URL or pick a photo from your gallery.'}</div>
+      {!canManage && (
+        <CommunityStarterTemplates lang={lang} appliedId={appliedTemplate} onApply={applyTemplate} />
+      )}
+      <div className={panelStyles.profileGrid}>
+        <div className={panelStyles.profileColumn}>
+          <div className={panelStyles.formSection}>
+            <h3 className={panelStyles.formTitle}><i className="fas fa-users" aria-hidden="true" /> {isHt ? 'Enfòmasyon Kominote' : 'Community Info'}</h3>
+            <p className={panelStyles.hint} style={{ marginTop: -6 }}>
+              {isHt
+                ? 'Se sa moun wè sou paj piblik kominote a. Non an obligatwa anvan ou sove.'
+                : 'This is what people see on the public community page. The name is required before saving.'}
+            </p>
+            <div style={{ display: 'grid', gap: 16 }}>
+              <PropField label={isHt ? 'Non Kominote' : 'Community Name'} required error={errors.name}>
+                <PropInput value={form.name} onChange={(e) => handleChange('name', e.target.value)} placeholder={isHt ? 'Non kominote a' : 'Community name'} />
+              </PropField>
+              <PropField label={isHt ? 'Deskripsyon' : 'Description'}>
+                <textarea value={form.description} onChange={(e) => handleChange('description', e.target.value)} className={panelStyles.textarea} rows={4} placeholder={isHt ? 'Dekri kominote a...' : 'Describe the community...'} />
+              </PropField>
+              <PropField label={isHt ? 'Kategori' : 'Category'}>
+                <select value={form.category} onChange={(e) => handleChange('category', e.target.value)} className={panelStyles.input}>
+                  {CATEGORY_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>{isHt ? o.ht : o.en}</option>
+                  ))}
+                </select>
+              </PropField>
+              <PropField label={isHt ? 'Hashtags' : 'Hashtags'}>
+                <PropInput value={form.hashtags} onChange={(e) => handleChange('hashtags', e.target.value)} placeholder="#teknoloji #ayiti" />
+              </PropField>
+            </div>
           </div>
-          <div>
-            <ImageUrlField label={isHt ? 'URL Banner' : 'Banner URL'} value={form.banner_url} onChange={(v) => handleChange('banner_url', v)} lang={lang} />
-            <input ref={bannerInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImageFile(f, 'banner_url'); e.target.value = ''; }} />
-            <button type="button" onClick={() => bannerInputRef.current?.click()} disabled={uploadingBanner}
-              className={panelStyles.secondaryBtn} style={{ marginTop: 8 }}>
-              <i className={`fas ${uploadingBanner ? 'fa-spinner fa-spin' : 'fa-images'}`} aria-hidden="true" />
-              {uploadingBanner ? (isHt ? 'Ap telechaje...' : 'Uploading...') : (isHt ? 'Chwazi nan galri' : 'Choose from gallery')}
-            </button>
-            <div className={panelStyles.hint} style={{ margin: '6px 0 0' }}>{isHt ? 'Kole yon URL oswa pran yon foto nan galri telefòn ou.' : 'Paste a URL or pick a photo from your gallery.'}</div>
+          <div className={panelStyles.formSection}>
+            <h3 className={panelStyles.formTitle}><i className="fas fa-image" aria-hidden="true" /> {isHt ? 'Imaj' : 'Images'}</h3>
+            <div style={{ display: 'grid', gap: 16 }}>
+              <div>
+                <ImageUrlField label={isHt ? 'URL Avatè' : 'Avatar URL'} value={form.avatar_url} onChange={(v) => handleChange('avatar_url', v)} lang={lang} />
+                <input ref={avatarInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImageFile(f, 'avatar_url'); e.target.value = ''; }} />
+                <button type="button" onClick={() => avatarInputRef.current?.click()} disabled={uploadingAvatar}
+                  className={panelStyles.secondaryBtn} style={{ marginTop: 8 }}>
+                  <i className={`fas ${uploadingAvatar ? 'fa-spinner fa-spin' : 'fa-images'}`} aria-hidden="true" />
+                  {uploadingAvatar ? (isHt ? 'Ap telechaje...' : 'Uploading...') : (isHt ? 'Chwazi nan galri' : 'Choose from gallery')}
+                </button>
+                <div className={panelStyles.hint} style={{ margin: '6px 0 0' }}>{isHt ? 'Kole yon URL oswa pran yon foto nan galri telefòn ou.' : 'Paste a URL or pick a photo from your gallery.'}</div>
+              </div>
+              <div>
+                <ImageUrlField label={isHt ? 'URL Banner' : 'Banner URL'} value={form.banner_url} onChange={(v) => handleChange('banner_url', v)} lang={lang} />
+                <input ref={bannerInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImageFile(f, 'banner_url'); e.target.value = ''; }} />
+                <button type="button" onClick={() => bannerInputRef.current?.click()} disabled={uploadingBanner}
+                  className={panelStyles.secondaryBtn} style={{ marginTop: 8 }}>
+                  <i className={`fas ${uploadingBanner ? 'fa-spinner fa-spin' : 'fa-images'}`} aria-hidden="true" />
+                  {uploadingBanner ? (isHt ? 'Ap telechaje...' : 'Uploading...') : (isHt ? 'Chwazi nan galri' : 'Choose from gallery')}
+                </button>
+                <div className={panelStyles.hint} style={{ margin: '6px 0 0' }}>{isHt ? 'Kole yon URL oswa pran yon foto nan galri telefòn ou.' : 'Paste a URL or pick a photo from your gallery.'}</div>
+              </div>
+            </div>
           </div>
         </div>
+        <CommunityPreviewCard
+          lang={lang}
+          value={form}
+          rules={form.rules}
+          memberCount={item?.member_count ?? 0}
+        />
       </div>
     </>
   );

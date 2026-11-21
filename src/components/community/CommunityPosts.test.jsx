@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryRouter, Routes, Route, Outlet } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 
 const POSTS = [
   {
@@ -14,6 +15,7 @@ const POSTS = [
 vi.mock('../../services/api', () => ({
   communitiesService: {
     posts: vi.fn(),
+    getPost: vi.fn(),
     createPost: vi.fn(),
     deletePost: vi.fn(),
     reactToPost: vi.fn(),
@@ -30,9 +32,9 @@ import { communitiesService, communityEventsService, eventsService } from '../..
 import CommunityPosts from './CommunityPosts';
 import { CommunityEvents, CommunityHome } from '../CommunityDetail';
 
-function Harness({ community, user }) {
+function Harness({ community, user, entry = '/community/test/posts' }) {
   return (
-    <MemoryRouter initialEntries={['/community/test/posts']}>
+    <MemoryRouter initialEntries={[entry]}>
       <Routes>
         <Route
           path="/community/:slug/posts"
@@ -58,6 +60,15 @@ beforeEach(() => {
 });
 
 describe('Community surfaces', () => {
+  it('prefills a first-post draft when the welcome checklist says introduce yourself', async () => {
+    render(<Harness community={MEMBER_COMM} user={USER} entry="/community/test/posts?compose=intro" />);
+
+    const input = await screen.findByTestId('post-composer-input');
+    await waitFor(() => expect(input.value).toContain('manm1'));
+    expect(input.value).toContain('Bonjou tout moun');
+    expect(input.value).toContain('• Sa m vin chèche isit la:');
+  });
+
   it('makes the post composer clear and easy to find from the community home', async () => {
     render(
       <MemoryRouter initialEntries={['/community/test/home']}>
@@ -174,6 +185,93 @@ describe('Community surfaces', () => {
     expect(await screen.findByText('Ap vini')).toBeTruthy();
     expect(screen.getByTestId('community-event-attendees-21')).toHaveTextContent('5');
     expect(showToast).toHaveBeenCalledWith(expect.stringContaining('Ou reponn'), 'check-circle');
+  });
+
+  it('routes paid event tickets through the checkout modal instead of the RSVP endpoint', async () => {
+    communityEventsService.list.mockResolvedValue({
+      data: [{
+        id: 31,
+        title: 'Konsè peye',
+        status: 'published',
+        start_time: '2027-02-01T18:00:00Z',
+        end_time: '2027-02-01T20:00:00Z',
+        is_free: false,
+        price: 25,
+        currency: 'USD',
+        attendee_count: 3,
+        has_ticket: false,
+      }],
+    });
+    const onOpenCheckout = vi.fn();
+    render(
+      <MemoryRouter initialEntries={['/community/test/events']}>
+        <Routes>
+          <Route
+            path="/community/test/events"
+            element={<Outlet context={{
+              community: MEMBER_COMM,
+              lang: 'en',
+              user: USER,
+              showToast: vi.fn(),
+              onOpenCheckout,
+            }} />}
+          >
+            <Route index element={<CommunityEvents />} />
+          </Route>
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Buy ticket — $25.00' }));
+    expect(onOpenCheckout).toHaveBeenCalledWith('event', 25, expect.objectContaining({
+      event_id: 31,
+      title: 'Konsè peye',
+    }));
+    // Paid tickets are rejected with 402 on the direct endpoint — the
+    // checkout creates the RESERVED ticket server-side instead.
+    expect(eventsService.ticket).not.toHaveBeenCalled();
+  });
+
+  it('asks visitors to join before buying a paid ticket', async () => {
+    communityEventsService.list.mockResolvedValue({
+      data: [{
+        id: 32,
+        title: 'Konsè peye',
+        status: 'published',
+        start_time: '2027-02-01T18:00:00Z',
+        end_time: '2027-02-01T20:00:00Z',
+        is_free: false,
+        price: 25,
+        attendee_count: 0,
+        has_ticket: false,
+      }],
+    });
+    const onJoin = vi.fn();
+    const onOpenCheckout = vi.fn();
+    render(
+      <MemoryRouter initialEntries={['/community/test/events']}>
+        <Routes>
+          <Route
+            path="/community/test/events"
+            element={<Outlet context={{
+              community: { ...MEMBER_COMM, is_member: false, join_mode: 'public' },
+              lang: 'en',
+              user: null,
+              showToast: vi.fn(),
+              onJoin,
+              canJoin: true,
+              onOpenCheckout,
+            }} />}
+          >
+            <Route index element={<CommunityEvents />} />
+          </Route>
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Join to buy' }));
+    expect(onJoin).toHaveBeenCalledOnce();
+    expect(onOpenCheckout).not.toHaveBeenCalled();
   });
 
   it('lets members cancel a free RSVP and updates the attendee count', async () => {
@@ -349,5 +447,82 @@ describe('Community surfaces', () => {
     communitiesService.posts.mockResolvedValue({ data: withCount });
     render(<Harness community={MEMBER_COMM} user={USER} />);
     expect(await screen.findByTestId('post-comments-toggle-1')).toHaveTextContent('3');
+  });
+
+  it('serves a shared post permalink with its own tags and hides the composer', async () => {
+    const shared = {
+      ...POSTS[0], id: 2, content: 'Pòs pataje a', image_url: 'https://cdn.example.com/p2.jpg',
+      community_slug: 'test', community_name: 'Kominote Test',
+    };
+    communitiesService.getPost.mockResolvedValue({ data: shared });
+
+    render(
+      <HelmetProvider>
+        <MemoryRouter initialEntries={['/community/test/posts/2']}>
+          <Routes>
+            <Route
+              path="/community/:slug/posts/:postId"
+              element={<Outlet context={{ community: { ...MEMBER_COMM, name: 'Kominote Test' }, lang: 'ht', user: USER, showToast: vi.fn() }} />}
+            >
+              <Route index element={<CommunityPosts />} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      </HelmetProvider>,
+    );
+
+    expect(await screen.findByText('Pòs pataje a')).toBeTruthy();
+    expect(communitiesService.getPost).toHaveBeenCalledWith(2);
+    expect(screen.getByText('Tout pòs yo')).toBeTruthy();
+    expect(screen.queryByTestId('post-composer-input')).toBeNull();
+    await waitFor(() => {
+      expect(document.querySelector('meta[property="og:image"]')?.getAttribute('content'))
+        .toBe('https://cdn.example.com/p2.jpg');
+      expect(document.querySelector('link[rel="canonical"]')?.getAttribute('href'))
+        .toBe('https://atelnyo.site/community/test/posts/2');
+    });
+  });
+
+  it('walks a just-joined member from the welcome checklist to a prefilled intro post', async () => {
+    const onWelcomeStep = vi.fn();
+    const comm = {
+      ...MEMBER_COMM,
+      name: 'Atelye Test',
+      rules: [{ title: 'Règleman 1' }, { title: 'Règleman 2' }],
+    };
+    render(
+      <MemoryRouter initialEntries={['/community/test/home']}>
+        <Routes>
+          <Route
+            path="/community/test/home"
+            element={<Outlet context={{
+              community: comm,
+              lang: 'ht',
+              user: USER,
+              justJoined: true,
+              welcomeDone: [],
+              onWelcomeStep,
+              showToast: vi.fn(),
+            }} />}
+          >
+            <Route index element={<CommunityHome />} />
+          </Route>
+          <Route
+            path="/community/test/posts"
+            element={<Outlet context={{ community: comm, lang: 'ht', user: USER, showToast: vi.fn() }} />}
+          >
+            <Route index element={<CommunityPosts />} />
+          </Route>
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByTestId('welcome-step-rules')).toBeTruthy();
+    expect(screen.getByText('0/4 fèt')).toBeTruthy();
+
+    fireEvent.click(screen.getByTestId('welcome-step-intro'));
+    expect(onWelcomeStep).toHaveBeenCalledWith('intro');
+    const input = await screen.findByTestId('post-composer-input');
+    await waitFor(() => expect(input.value).toContain('Atelye Test'));
   });
 });

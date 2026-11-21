@@ -19,7 +19,9 @@
 import api from '../services/api';
 
 const BASE_URL = 'https://atelnyo.site';
-const CACHE_KEY = 'atelnyo_sitemap_cache';
+// v2: community covers are now emitted in image:image — invalidate the
+// cached v1 sitemap so existing clients pick the fix up immediately.
+const CACHE_KEY = 'atelnyo_sitemap_cache_v2';
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
 function wrapUrl(path) {
@@ -90,6 +92,9 @@ export async function generateSitemap() {
       : Array.isArray(data) ? data : [];
 
     for (const item of items) {
+      // Staff calls can see deactivated communities — never publish them
+      // in the sitemap (crawlers only get the active public catalog).
+      if (type === 'community' && item.is_active === false) continue;
       const slug = item.slug || item.id;
       const userKey = item.user_key || item.created_by_username || item.linked_username || 'Atelnyo';
       const path = type === 'community'
@@ -101,7 +106,9 @@ export async function generateSitemap() {
         lastmod: formatDate(item.updated_at || item.created_at),
         changefreq,
         priority,
-        image: item.image_url || undefined,
+        image: (type === 'community'
+          ? (item.banner_url || item.avatar_url)
+          : item.image_url) || undefined,
       });
     }
   }

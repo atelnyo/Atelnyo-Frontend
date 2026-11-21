@@ -1478,6 +1478,8 @@ export const communitiesService = {
   // — same shape as announcements/files/courses.
   posts: (slug, params = {}) =>
     api.get('community-posts/', { params: { community: slug, page_size: 20, ...params } }),
+  // Direct post lookup for permalinks (/community/:slug/posts/:id).
+  getPost: (id) => api.get(`community-posts/${id}/`),
   createPost: (slug, data) =>
     api.post(`community-posts/?community=${encodeURIComponent(slug)}`, data),
   // PATCH is manager-only for is_pinned (authors may edit their own text).
@@ -1784,6 +1786,8 @@ export const activityFeedService = {
     api.post('activity/feed/mark_read/', { id: eventId }),
   markAllRead: () =>
     api.post('activity/feed/mark_all_read/'),
+  markCommunityRead: () =>
+    api.post('activity/feed/mark_community_read/'),
   // Phase 59 — creator decides on a profile invitation (hire / collab /
   // book). Accepting auto-opens the DM thread with the requester.
   respond: (eventId, decision) =>

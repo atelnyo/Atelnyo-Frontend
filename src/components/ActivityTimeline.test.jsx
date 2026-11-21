@@ -5,6 +5,7 @@ vi.mock('../services/api', () => ({
     list: vi.fn(),
     markRead: vi.fn(),
     markAllRead: vi.fn(),
+    markCommunityRead: vi.fn(),
   },
 }));
 
@@ -16,6 +17,8 @@ import { getEventRoute, getEventNotice, NOTIFICATION_ROUTES } from './ActivityTi
 const ROUTABLE = [
   // [event_type, data, expectedRoute]
   ['event_published', { event_id: 7, event_title: 'Sware Mizik' }, '/sheet/event/7'],
+  ['event_rescheduled', { event_id: 7, community_slug: 'mizik' }, '/sheet/event/7'],
+  ['event_cancelled', { event_id: 7, community_slug: 'mizik' }, '/community/mizik'],
   ['continue_learning', { course_id: 3, course_title: 'Kreyòl' }, '/sheet/course/3'],
   ['lesson_unlocked', { course_id: 3, course_title: 'Kreyòl', lesson_title: 'L1' }, '/sheet/course/3'],
   ['project_reminder', { course_id: 5 }, '/sheet/course/5'],
@@ -38,6 +41,7 @@ const ROUTABLE = [
   // Pre-existing coverage must not regress.
   ['job_posted', { job_id: 11 }, '/sheet/explore/job?id=11'],
   ['community_post_comment', { community_slug: 'mizik' }, '/community/mizik/posts'],
+  ['announcement_posted', { community_slug: 'mizik' }, '/community/mizik'],
   ['ticket_purchased', { community_slug: 'mizik' }, '/community/mizik'],
   ['order_paid', { business_slug: 'boutik' }, '/business/boutik/workspace'],
   ['new_follower', { follower_username: 'jan' }, '/c/jan'],

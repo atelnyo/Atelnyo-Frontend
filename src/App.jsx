@@ -3037,11 +3037,16 @@ function App() {
           </AuthGate>
           </LearnerRouteErrorBoundary>
         } />
-        <Route path="/community/:slug" element={<CommunityDetail lang={lang} showToast={showToast} user={user} />}>
+        <Route path="/community/:slug" element={<CommunityDetail lang={lang} showToast={showToast} user={user} onOpenCheckout={(type, price, meta) => handleOpenCheckout(type, price, meta)} />}>
           <Route index element={<Navigate to="home" replace />} />
           <Route path="home" element={<CommunityHome />} />
           <Route path="events" element={<CommunityEvents />} />
           <Route path="posts" element={<CommunityPosts />} />
+          {/* Shareable per-post URL — same feed component, which pins
+              the post at the top, highlights it, and emits its own OG
+              tags (the parent layout suppresses its community-level
+              SEOHead while this route is active). */}
+          <Route path="posts/:postId" element={<CommunityPosts />} />
           <Route path="members" element={<CommunityMembers />} />
           <Route path="banned" element={<CommunityBannedMembers />} />
           <Route path="announcements" element={<CommunityAnnouncements />} />
@@ -3388,6 +3393,11 @@ function App() {
               onMarkAllRead={() => {
                 notifCountRef.current = 0;
                 setUnreadNotifCount(0);
+              }}
+              onMarkCommunityRead={(updated) => {
+                const next = Math.max(0, notifCountRef.current - (updated || 0));
+                notifCountRef.current = next;
+                setUnreadNotifCount(next);
               }}
             />
           </AuthGate>

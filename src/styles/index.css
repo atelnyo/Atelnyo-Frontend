@@ -1148,6 +1148,13 @@ body.dark-mode .notifications-page__back:hover {
     font-weight: 700;
     color: var(--text-secondary);
 }
+.notif-page-toolbar-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 2px;
+}
 .notif-page-mark-all {
     background: transparent;
     border: none;

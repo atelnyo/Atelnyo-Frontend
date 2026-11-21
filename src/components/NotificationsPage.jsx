@@ -27,6 +27,7 @@ export default function NotificationsPage({
   refreshToken,
   onMarkRead,
   onMarkAllRead,
+  onMarkCommunityRead,
 }) {
   const navigate = useSafeNavigate();
   const location = useLocation();
@@ -195,6 +196,7 @@ export default function NotificationsPage({
           showMarkAllRead
           onMarkRead={onMarkRead}
           onMarkAllRead={onMarkAllRead}
+          onMarkCommunityRead={onMarkCommunityRead}
           onNavigate={navigate}
           onAcceptProposal={handleAcceptProposal}
           onRejectProposal={handleRejectProposal}

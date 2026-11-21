@@ -10,11 +10,13 @@
  * the UI never waits on a refetch.
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { NavLink, useOutletContext, useParams, useSearchParams } from 'react-router-dom';
+import SEOHead from '../shared/SEOHead';
 import api, { communitiesService } from '../../services/api';
 import { t as t4 } from '../../utils/i18n';
 import { resolveVideoSource, youtubeThumbnail } from '../../modules/explore/utils/videoSource';
 import VideoEmbedFrame from '../media/VideoEmbedFrame';
+import { buildIntroDraft } from './communityOnboarding';
 
 /** First playable video URL inside a post body (YouTube/Vimeo/direct file), or '' — same resolver as Music. */
 function firstVideoUrl(text) {
@@ -258,6 +260,14 @@ function formatPostTime(iso, lang) {
 
 export default function CommunityPosts() {
   const { community, lang = 'en', user, showToast } = useOutletContext();
+  // /community/:slug/posts/:postId — the same feed serves as the post
+  // permalink: the requested post is pinned to the top, highlighted and
+  // gets its own OG/canonical tags.
+  const { postId } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const permalinkId = /^\d+$/.test(postId || '') ? Number(postId) : null;
+  const [focusedPost, setFocusedPost] = useState(null);
+  const [focusMissing, setFocusMissing] = useState(false);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState('');
@@ -339,6 +349,24 @@ export default function CommunityPosts() {
   const myRole = community?.current_user_role;
   const canModerate = ['owner', 'admin', 'moderator'].includes(myRole);
 
+  // The welcome checklist sends new members here with ?compose=intro:
+  // rather than facing an empty box, they get a three-question draft they
+  // can rewrite. The param is consumed so a reload does not refill a
+  // draft they already edited or cleared.
+  useEffect(() => {
+    if (!isMember || searchParams.get('compose') !== 'intro') return undefined;
+    setDraft((current) => current || buildIntroDraft(community, user, lang));
+    const focusTimer = setTimeout(() => { try { draftInputRef.current?.focus(); } catch { /* noop */ } }, 60);
+    const next = new URLSearchParams(searchParams);
+    next.delete('compose');
+    setSearchParams(next, { replace: true });
+    showToast?.(
+      t4(lang, 'Nou mete yon kòmansman pou ou — chanje l jan w vle.', 'We drafted a starting point — edit it however you like.', 'Nous avons préparé un brouillon — modifiez-le librement.'),
+      'wand-magic-sparkles',
+    );
+    return () => clearTimeout(focusTimer);
+  }, [searchParams, isMember, community, user, lang, setSearchParams, showToast]);
+
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
@@ -358,13 +386,35 @@ export default function CommunityPosts() {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- sync skeleton flip on slug change is intentional
     setLoading(true);
     setPage(1);
-    communitiesService.posts(slug, { page: 1, ...(search ? { search } : {}) })
-      .then((r) => {
+    setFocusMissing(false);
+    // A permalink can point at an old post that isn't on page 1, so fetch
+    // it directly and merge it into the list instead of hoping it appears.
+    const focusReq = permalinkId
+      ? communitiesService.getPost(permalinkId).catch((err) => {
+        if (!cancelled && err?.response?.status === 404) setFocusMissing(true);
+        return null;
+      })
+      : Promise.resolve(null);
+    Promise.all([
+      communitiesService.posts(slug, { page: 1, ...(search ? { search } : {}) }),
+      focusReq,
+    ])
+      .then(([r, focusRes]) => {
         if (cancelled) return;
         const data = Array.isArray(r?.data) ? r.data : (r?.data?.results || []);
         const count = Array.isArray(r?.data) ? r.data.length : (r?.data?.count ?? data.length);
         const next = Array.isArray(r?.data) ? null : (r?.data?.next || null);
-        setPosts(data);
+        const focusData = focusRes?.data;
+        const focusPost = focusData && String(focusData.community_slug) === String(slug)
+          ? focusData
+          : null;
+        // A post from another community must never render under this
+        // slug, even if someone hand-crafts the URL.
+        if (focusData && !focusPost) setFocusMissing(true);
+        setFocusedPost(focusPost);
+        setPosts(focusPost
+          ? [focusPost, ...data.filter((p) => p.id !== focusPost.id)]
+          : data);
         setTotalCount(count);
         // next URL from DRF, or heuristic: full page => probably more.
         setHasMore(Boolean(next) || data.length >= 20);
@@ -372,7 +422,38 @@ export default function CommunityPosts() {
       .catch(() => { /* silent — empty state covers failure */ })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [slug, search]);
+  }, [slug, search, permalinkId]);
+
+  // Bring the shared post into view once it is actually painted.
+  useEffect(() => {
+    if (!permalinkId || loading) return;
+    const el = document.querySelector(`[data-testid="community-post-${permalinkId}"]`);
+    try { el?.scrollIntoView?.({ behavior: 'smooth', block: 'start' }); } catch { /* jsdom */ }
+  }, [permalinkId, loading, posts.length]);
+
+  async function handleShare(post) {
+    const url = `${window.location.origin}/community/${encodeURIComponent(slug)}/posts/${post.id}`;
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        // Clipboard API needs HTTPS; the local/dev HTTP build still
+        // needs a working share button.
+        const ta = document.createElement('textarea');
+        ta.value = url;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+      showToast?.(t4(lang, 'Lyen pòs la kopye.', 'Post link copied.', 'Lien de la publication copié.', 'Enlace de la publicación copiado.'), 'link');
+    } catch {
+      showToast?.(t4(lang, 'Pa t kapab kopye lyen an.', 'Could not copy the link.', 'Impossible de copier le lien.', 'No se pudo copiar el enlace.'), 'circle-exclamation');
+    }
+  }
 
   useEffect(() => load(), [load]);
 
@@ -578,6 +659,37 @@ export default function CommunityPosts() {
 
   return (
     <div className="c-list c-list--gap12">
+      {focusedPost && (
+        <SEOHead
+          title={`Post by @${focusedPost.author_username || 'member'} in ${community?.name || 'community'}`}
+          description={focusedPost.content}
+          image={focusedPost.image_url || community?.banner_url || community?.avatar_url}
+          url={`/community/${slug}/posts/${focusedPost.id}`}
+          type="article"
+          lang={lang}
+          author={focusedPost.author_username}
+          publishedTime={focusedPost.created_at}
+          breadcrumbs={[
+            { label: 'Home', url: '/' },
+            { label: community?.name || 'Community', url: `/community/${slug}` },
+            { label: `Post by @${focusedPost.author_username || 'member'}`, url: `/community/${slug}/posts/${focusedPost.id}` },
+          ]}
+        />
+      )}
+      {permalinkId && (
+        <div className="c-post-permalink-bar">
+          <NavLink to={`/community/${slug}/posts`} className="c-post-permalink-back">
+            <i className="fas fa-arrow-left" aria-hidden="true" /> {t4(lang, 'Tout pòs yo', 'All posts', 'Toutes les publications', 'Todas las publicaciones')}
+          </NavLink>
+          <span>{community?.name}</span>
+        </div>
+      )}
+      {focusMissing && (
+        <p className="c-post-missing" role="status">
+          <i className="fas fa-link-slash" aria-hidden="true" /> {t4(lang, 'Pòs sa a pa egziste ankò oswa li pa disponib.', 'This post no longer exists or is unavailable.', 'Cette publication n\u2019existe plus ou n\u2019est pas disponible.', 'Esta publicación ya no existe o no está disponible.')}
+        </p>
+      )}
+      {!permalinkId && (
       <header className="c-posts-intro">
         <div>
           <h2>{t4(lang, 'Pòs ak diskisyon', 'Posts & discussions', 'Publications et discussions', 'Publicaciones y debates')}</h2>
@@ -585,7 +697,8 @@ export default function CommunityPosts() {
         </div>
         <span className="c-posts-count">{totalCount} {t4(lang, 'pòs', 'posts', 'publications', 'publicaciones')}</span>
       </header>
-      {isMember && (
+      )}
+      {!permalinkId && isMember && (
         <form className="c-post-composer c-post-composer--nice" onSubmit={handlePublish}
           style={{ border: '1px solid var(--border-color, #e2e8f0)', borderRadius: 12, padding: 12, background: 'var(--bg-soft, #fff)' }}>
           <div className="c-post-composer-heading">
@@ -741,13 +854,15 @@ export default function CommunityPosts() {
           </div>
         </form>
       )}
-      {!isMember && (
+      {!permalinkId && !isMember && (
         <p className="c-posts-join-note">
           <i className="fas fa-circle-info" aria-hidden="true" />
           {t4(lang, 'Antre nan kominote a pou w pibliye epi patisipe nan diskisyon yo.', 'Join this community to publish posts and join discussions.', 'Rejoignez la communauté pour publier et participer aux discussions.', 'Únete a la comunidad para publicar y participar en las conversaciones.')}
         </p>
       )}
 
+      {!permalinkId && (
+      <>
       <div className="c-post-search" role="search">
         <div className="c-post-search-field">
           <i className="fas fa-search c-post-search-icon" aria-hidden="true" />
@@ -773,6 +888,8 @@ export default function CommunityPosts() {
           {t4(lang, `Rezilta pou "${search}" — ${totalCount}`, `Results for "${search}" — ${totalCount}`, `Résultats pour "${search}" — ${totalCount}`, `Resultados para "${search}" — ${totalCount}`)}
         </p>
       )}
+      </>
+      )}
 
       {posts.length === 0 ? (
         <div className="c-state">
@@ -791,7 +908,7 @@ export default function CommunityPosts() {
           )}
         </div>
       ) : posts.map((post) => (
-        <article key={post.id} className={`c-post-card${post.is_pinned ? ' c-post-card--pinned' : ''}`} data-testid={`community-post-${post.id}`}>
+        <article key={post.id} className={`c-post-card${post.is_pinned ? ' c-post-card--pinned' : ''}${permalinkId === post.id ? ' c-post-card--focus' : ''}`} data-testid={`community-post-${post.id}`}>
           <div className="c-post-header">
             <span className="c-post-avatar" aria-hidden="true">
               {(post.author_username || '?')[0].toUpperCase()}
@@ -852,6 +969,16 @@ export default function CommunityPosts() {
             );
           })()}
           <div className="c-post-foot">
+            <button
+              type="button"
+              className="c-post-share"
+              onClick={() => handleShare(post)}
+              title={t4(lang, 'Kopye lyen pòs la', 'Copy post link', 'Copier le lien', 'Copiar enlace')}
+              aria-label={t4(lang, 'Pataje pòs', 'Share post', 'Partager la publication', 'Compartir publicación')}
+              data-testid={`post-share-${post.id}`}
+            >
+              <i className="fas fa-link" aria-hidden="true" /> {t4(lang, 'Pataje', 'Share', 'Partager', 'Compartir')}
+            </button>
             <button
               type="button"
               className={`c-comment-toggle${openComments[post.id] ? ' c-comment-toggle--open' : ''}`}

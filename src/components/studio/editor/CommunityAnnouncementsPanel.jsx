@@ -196,7 +196,7 @@ export default function CommunityAnnouncementsPanel({ slug, lang = 'en', showToa
       showToast?.(
         editingId
           ? (isHt ? '✅ Anons lan mete ajou.' : '✅ Announcement updated.')
-          : (isHt ? '✅ Anons pibliye.' : '✅ Announcement published.'),
+          : (isHt ? '✅ Anons pibliye — manm yo notifye.' : '✅ Announcement published — members notified.'),
         'check-circle',
       );
     } catch (err) {

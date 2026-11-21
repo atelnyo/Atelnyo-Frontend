@@ -31,14 +31,26 @@
  */
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import SEOHead from './shared/SEOHead';
-import { useParams, NavLink, Outlet, useOutletContext, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useMatch, NavLink, Outlet, useOutletContext, useNavigate, useLocation } from 'react-router-dom';
 import { communitiesService, communityEventsService, eventsService } from '../services/api';
+import CommunityPageSkeleton from './community/CommunityPageSkeleton';
+import CommunityJoinExplainer from './community/CommunityJoinExplainer';
+import { welcomeSteps, nextEvent } from './community/communityOnboarding';
 import useVirtualScroll from '../hooks/useVirtualScroll';
 import { t as t4 } from '../utils/i18n';
 
 const TAB_KEYS = ['home', 'events', 'posts', 'members', 'banned', 'announcements', 'files', 'courses'];
 // The banned list is a moderation surface — only owner/admin see the tab.
 const MOD_ONLY_TABS = ['banned'];
+
+// Paid community events settle through CheckoutModal (PayPal primary /
+// Stripe secondary). Keep the currency mapping in sync with EventCard.
+const CURRENCY_SYMBOLS = { USD: '$', HTG: 'G', EUR: '€', GBP: '£', CAD: 'CA$', DOP: 'RD$' };
+function formatEventPrice(event) {
+  const currency = String(event?.currency || 'USD').toUpperCase();
+  const symbol = CURRENCY_SYMBOLS[currency] || `${currency} `;
+  return `${symbol}${Number(event?.price || 0).toFixed(2)}`;
+}
 
 // ── Shared helpers (used by both layout + tab sub-components) ───────────
 
@@ -85,7 +97,10 @@ function EmptyState({ icon, lang, ht, en, fr, es }) {
  * ak bouton "Wè tout" pou ale sou onglè konplè yo.
  */
 export function CommunityHome() {
-  const { community, lang, onJoin, joining, myStatus, canJoin } = useOutletContext();
+  const {
+    community, lang, onJoin, joining, myStatus, canJoin,
+    showToast, justJoined, onDismissWelcome, welcomeDone, onWelcomeStep,
+  } = useOutletContext();
   const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [posts, setPosts] = useState([]);
@@ -130,9 +145,116 @@ export function CommunityHome() {
   const previewRules = rules.slice(0, 3);
   const hasLink = (text) => /https?:\/\//i.test(text || '');
   const hasVideo = (text) => /(youtube\.com|youtu\.be|vimeo\.com|facebook\.com\/.+\/videos|tiktok\.com)/i.test(text || '');
+  const scrollToRules = () => {
+    document.getElementById('community-rules')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  const copyCommunityLink = async () => {
+    const url = `${window.location.origin}/community/${encodeURIComponent(community?.slug || '')}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      showToast?.(t4(lang, 'Lyen kominote a kopye!', 'Community link copied!', 'Lien de la communauté copié !', '¡Enlace de la comunidad copiado!'), 'link');
+    } catch {
+      showToast?.(url, 'link');
+    }
+  };
+
+  // First-visit checklist. Progress lives on the parent so it survives a
+  // trip to the posts tab and back (the “introduce yourself” step sends
+  // the member straight to a prefilled composer).
+  const steps = isMember && justJoined ? welcomeSteps(community, lang, nextEvent(events)) : [];
+  const doneSteps = Array.isArray(welcomeDone) ? welcomeDone : [];
+  const doneCount = steps.filter((step) => doneSteps.includes(step.key)).length;
+  const runStep = (step) => {
+    onWelcomeStep?.(step.key);
+    if (step.action === 'intro') {
+      navigate('../posts?compose=intro', { relative: 'path' });
+      return;
+    }
+    if (step.action === 'rules') {
+      scrollToRules();
+      return;
+    }
+    if (step.action === 'events') {
+      go('events');
+      return;
+    }
+    if (step.action === 'invite') copyCommunityLink();
+  };
 
   return (
     <div className="c-list c-list--gap12" data-testid="community-home">
+      {isMember && justJoined && (
+        <section className="c-join-welcome" aria-label={t4(lang, 'Byenveni', 'Welcome', 'Bienvenue', 'Bienvenido')} data-testid="community-join-welcome">
+          <div className="c-join-welcome-head">
+            <span className="c-join-welcome-icon" aria-hidden="true">
+              <i className="fas fa-hand-sparkles" />
+            </span>
+            <div className="c-join-welcome-copy">
+              <h3>
+                {t4(lang, 'Byenveni nan', 'Welcome to', 'Bienvenue dans', 'Bienvenido a')} {community?.name}
+              </h3>
+              <p>
+                {t4(lang, 'Ou fèk antre — se yon manm ou kounye a. Men kèk etap pou kòmanse byen.', 'You just joined — you are a member now. Here are a few steps to start well.', 'Vous venez de rejoindre — vous êtes membre. Voici quelques étapes pour bien démarrer.', 'Acabas de unirte — ya eres miembro. Estos pasos te ayudarán a empezar.')}
+              </p>
+            </div>
+            <button
+              type="button"
+              className="c-join-welcome-close"
+              onClick={onDismissWelcome}
+              aria-label={t4(lang, 'Fèmen', 'Dismiss', 'Fermer', 'Cerrar')}
+            >
+              <i className="fas fa-xmark" aria-hidden="true" />
+            </button>
+          </div>
+          {steps.length > 1 && (
+            <div className="c-join-welcome-progress-wrap">
+              <div
+                className="c-join-welcome-progress"
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={steps.length}
+                aria-valuenow={doneCount}
+                aria-label={t4(lang, 'Pwogrè entwodiksyon', 'Onboarding progress', 'Progression d’intégration', 'Progreso de integración')}
+              >
+                <span style={{ width: `${Math.round((doneCount / steps.length) * 100)}%` }} />
+              </div>
+              <span className="c-join-welcome-progress-label">
+                {t4(lang, `${doneCount}/${steps.length} fèt`, `${doneCount}/${steps.length} done`, `${doneCount}/${steps.length} fait`, `${doneCount}/${steps.length} hecho`)}
+              </span>
+            </div>
+          )}
+          <div className="c-join-welcome-steps">
+            {steps.map((step) => {
+              const done = doneSteps.includes(step.key);
+              return (
+                <button
+                  key={step.key}
+                  type="button"
+                  className={done ? 'is-done' : ''}
+                  aria-pressed={done}
+                  onClick={() => runStep(step)}
+                  data-testid={`welcome-step-${step.key}`}
+                >
+                  <i className={`fas ${done ? 'fa-circle-check' : step.icon}`} aria-hidden="true" />
+                  <span className="c-join-welcome-step-copy">
+                    <strong>{step.label}</strong>
+                    <small>{step.hint}</small>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
+      {joinPending && (
+        <CommunityJoinExplainer
+          community={community}
+          lang={lang}
+          pending
+          onJoin={onJoin}
+        />
+      )}
+
       <section className="c-home-post-cta" aria-label={t4(lang, 'Piblikasyon kominote a', 'Community posts', 'Publications de la communauté', 'Publicaciones de la comunidad')}>
         <div className="c-home-post-cta-copy">
           <span className="c-home-post-cta-icon" aria-hidden="true">
@@ -174,6 +296,16 @@ export function CommunityHome() {
                   : t4(lang, 'Antre pou pibliye', 'Join to post', 'Rejoindre pour publier', 'Únete para publicar')}
         </button>
       </section>
+
+      {!isMember && !joinPending && (
+        <CommunityJoinExplainer
+          community={community}
+          lang={lang}
+          joining={joining}
+          canJoin={canJoin}
+          onJoin={onJoin}
+        />
+      )}
 
       <section className="c-home-stats" aria-label={t4(lang, 'Rezime kominote a', 'Community snapshot', 'Aperçu de la communauté', 'Resumen de la comunidad')}>
         <button type="button" className="c-home-stat" onClick={() => go('members')}>
@@ -291,10 +423,10 @@ export function CommunityHome() {
                       key={p.id}
                       className="c-post-card"
                       data-testid={`community-home-post-${p.id}`}
-                      onClick={() => go('posts')}
+                      onClick={() => navigate(`../posts/${p.id}`, { relative: 'path' })}
                       role="button"
                       tabIndex={0}
-                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go('posts'); } }}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`../posts/${p.id}`, { relative: 'path' }); } }}
                       style={{ cursor: 'pointer' }}
                     >
                       <div className="c-post-header">
@@ -335,7 +467,7 @@ export function CommunityHome() {
  * /events — list of community events.
  */
 export function CommunityEvents() {
-  const { community, lang, user, showToast, t = {}, onJoin, canJoin, myStatus, joining: joiningCommunity } = useOutletContext();
+  const { community, lang, user, showToast, t = {}, onJoin, canJoin, myStatus, onOpenCheckout, joining: joiningCommunity } = useOutletContext();
   const navigate = useNavigate();
   const location = useLocation();
   const [list, setList] = useState([]);
@@ -359,6 +491,20 @@ export function CommunityEvents() {
       .catch(() => { /* silent */ })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
+  }, [community?.slug]);
+
+  // Re-read the list after a paid checkout is confirmed: the ticket moves
+  // from RESERVED to CONFIRMED server-side, so the button flips to "Going"
+  // without a full page reload.
+  const refreshList = useCallback(() => {
+    const slug = community?.slug;
+    if (!slug) return;
+    communityEventsService.list({ community: slug })
+      .then((r) => {
+        const data = Array.isArray(r?.data) ? r.data : (r?.data?.results || []);
+        setList(data.filter((ev) => ['published', 'completed'].includes(ev.status)));
+      })
+      .catch(() => { /* silent — keep the current list */ });
   }, [community?.slug]);
 
   const handleRSVP = async (event) => {
@@ -438,6 +584,27 @@ export function CommunityEvents() {
     }
   };
 
+  const handleBuyTicket = (event) => {
+    if (!community?.is_member) {
+      onJoin?.();
+      return;
+    }
+    if (!user) {
+      navigate('/login', {
+        state: { from: `${location.pathname}${location.search}${location.hash}` },
+      });
+      return;
+    }
+    if (!onOpenCheckout) return;
+    // The backend creates a RESERVED ticket and the payment capture/webhook
+    // confirms it. Direct RSVP for a paid event is rejected with 402.
+    onOpenCheckout('event', Number(event.price || 0), {
+      event_id: event.id,
+      title: event.title,
+      onSuccess: refreshList,
+    });
+  };
+
   if (loading) return <LoadingLine lang={lang} />;
   if (list.length === 0) return <EmptyState icon="fa-calendar-alt" lang={lang} ht="Pa gen evènman ankò" en="No events yet" fr="Aucun événement pour le moment" es="Aún no hay eventos" />;
 
@@ -473,15 +640,17 @@ export function CommunityEvents() {
               {ev.attendee_count || 0}
             </span>
             <span className={`c-badge-price ${isFree ? 'c-badge-price--free' : 'c-badge-price--paid'}`}>
-              {isFree ? t4(lang, 'Gratis', 'Free', 'Gratuit', 'Gratis') : `$${ev.price}`}
+              {isFree ? t4(lang, 'Gratis', 'Free', 'Gratuit', 'Gratis') : formatEventPrice(ev)}
             </span>
-            {isFree && ev.has_ticket ? (
+            {ev.has_ticket ? (
               <>
                 <span className="c-event-status c-event-status--going" role="status" aria-live="polite">
-                  <i className="fas fa-check-circle" aria-hidden="true" />
-                  {t.explore_event_rsvped_short || t4(lang, 'Ap vini', 'Going', 'Je participe', 'Asistiré')}
+                  <i className={`fas ${ev.ticket_status === 'reserved' ? 'fa-clock' : 'fa-check-circle'}`} aria-hidden="true" />
+                  {ev.ticket_status === 'reserved'
+                    ? t4(lang, 'Ap tann peman', 'Payment pending', 'Paiement en attente', 'Pago pendiente')
+                    : (t.explore_event_rsvped_short || t4(lang, 'Ap vini', 'Going', 'Je participe', 'Asistiré'))}
                 </span>
-                {!hasStarted && !hasEnded && (
+                {isFree && !hasStarted && !hasEnded && (
                   <button
                     type="button"
                     className="c-event-cancel"
@@ -499,7 +668,7 @@ export function CommunityEvents() {
               <span className="c-event-status">{t4(lang, 'Konplè', 'Full', 'Complet', 'Completo')}</span>
             ) : hasEnded ? (
               <span className="c-event-status">{t4(lang, 'Fini', 'Ended', 'Terminé', 'Finalizado')}</span>
-            ) : isFree && myStatus === 'pending' ? (
+            ) : myStatus === 'pending' ? (
               <span className="c-event-status">{t4(lang, 'Demann voye', 'Request sent', 'Demande envoyée', 'Solicitud enviada')}</span>
             ) : isFree ? (
               <button
@@ -516,6 +685,23 @@ export function CommunityEvents() {
                   : inviteOnly
                     ? t4(lang, 'Envitasyon sèlman', 'Invite only', 'Sur invitation', 'Solo con invitación')
                     : t4(lang, 'Antre pou reponn', 'Join to RSVP', 'Rejoindre pour confirmer', 'Únete para confirmar')}
+              </button>
+            ) : onOpenCheckout ? (
+              <button
+                type="button"
+                className="c-event-rsvp c-event-rsvp--buy"
+                onClick={() => handleBuyTicket(ev)}
+                disabled={joiningCommunity || inviteOnly || (!community?.is_member && !canJoin)}
+                title={inviteOnly
+                  ? t4(lang, "Envitasyon obligatwa pou achte tikè.", "An invitation is required to buy a ticket.", "Une invitation est requise pour acheter un billet.", "Se requiere invitación para comprar una entrada.")
+                  : undefined}
+              >
+                <i className={`fas ${community?.is_member ? 'fa-ticket' : inviteOnly ? 'fa-lock' : 'fa-user-plus'}`} aria-hidden="true" />
+                {community?.is_member
+                  ? t4(lang, `Achte tikè — ${formatEventPrice(ev)}`, `Buy ticket — ${formatEventPrice(ev)}`, `Acheter — ${formatEventPrice(ev)}`, `Comprar — ${formatEventPrice(ev)}`)
+                  : inviteOnly
+                    ? t4(lang, 'Envitasyon sèlman', 'Invite only', 'Sur invitation', 'Solo con invitación')
+                    : t4(lang, 'Antre pou achte', 'Join to buy', 'Rejoindre pour acheter', 'Únete para comprar')}
               </button>
             ) : (
               <span className="c-event-status">{t4(lang, 'Tikè peye', 'Ticketed', 'Billet payant', 'Con entrada')}</span>
@@ -1151,10 +1337,14 @@ export function CommunityCourses() {
 
 // ── Parent layout ───────────────────────────────────────────────────────
 
-export default function CommunityDetail({ lang = 'en', t = {}, showToast, user }) {
+export default function CommunityDetail({ lang = 'en', t = {}, showToast, user, onOpenCheckout }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { slug } = useParams();
+  // A post permalink owns its own SEOHead (post title/image/canonical),
+  // so the community-level one must not render alongside it.
+  const postPermalinkMatch = useMatch('/community/:slug/posts/:postId');
+  const hasPostPermalink = Boolean(postPermalinkMatch && /^\d+$/.test(postPermalinkMatch.params.postId || ''));
   const inviteToken = new URLSearchParams(location.hash.slice(1)).get('invite') || '';
   const [community, setCommunity] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -1162,6 +1352,17 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user }
   const [joining, setJoining] = useState(false);
   const [isMember, setIsMember] = useState(false);
   const [myStatus, setMyStatus] = useState(null); // 'active' | 'pending' | null
+  // True only for the join that just happened in this session — drives
+  // the welcome panel on Home. It resets when the page is reloaded, so
+  // the panel never nags an established member on every visit.
+  const [justJoined, setJustJoined] = useState(false);
+  // Keys of the welcome checklist steps the member has opened. Session
+  // state on purpose: it is a first-visit aid, not a task list.
+  const [welcomeDone, setWelcomeDone] = useState([]);
+  const markWelcomeStep = useCallback((key) => {
+    if (!key) return;
+    setWelcomeDone((list) => (list.includes(key) ? list : [...list, key]));
+  }, []);
   const [memberCount, setMemberCount] = useState(0);
 
   useEffect(() => {
@@ -1177,6 +1378,7 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user }
         setIsMember(Boolean(comm?.is_member));
         setMyStatus(comm?.my_status ?? (comm?.is_member ? 'active' : null));
         setMemberCount(comm?.member_count || 0);
+        setWelcomeDone([]);
         setError(null);
       })
       .catch((err) => {
@@ -1218,6 +1420,7 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user }
       const joinedStatus = res?.data?.status || res?.data?.data?.status || 'active';
       setMyStatus(joinedStatus);
       setIsMember(joinedStatus === 'active');
+      setJustJoined(joinedStatus === 'active');
       if (joinedStatus === 'active') setMemberCount((c) => c + 1);
       if (inviteToken && joinedStatus === 'active') {
         navigate(`${location.pathname}${location.search}`, { replace: true });
@@ -1288,20 +1491,20 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user }
       user,
       showToast,
       onJoin: handleJoin,
+      onOpenCheckout,
       joining,
       myStatus,
+      justJoined,
+      welcomeDone,
+      onWelcomeStep: markWelcomeStep,
+      onDismissWelcome: () => { setJustJoined(false); setWelcomeDone([]); },
       canJoin: community?.join_mode !== 'invite' || Boolean(inviteToken),
     }),
-    [community, slug, lang, t, user, showToast, isMember, handleJoin, joining, myStatus, inviteToken],
+    [community, slug, lang, t, user, showToast, isMember, handleJoin, onOpenCheckout, joining, myStatus, inviteToken, justJoined, welcomeDone, markWelcomeStep],
   );
 
   if (loading) {
-    return (
-      <div className="c-state">
-        <i className="fas fa-spinner fa-spin c-state-spinner" />
-        <p>{t4(lang, "Ap chaje...", "Loading...", "Chargement...", "Cargando...")}</p>
-      </div>
-    );
+    return <CommunityPageSkeleton lang={lang} />;
   }
 
   if (error || !community) {
@@ -1315,15 +1518,17 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user }
 
   return (
     <div className="community-detail" data-testid="community-detail-sheet">
-      <SEOHead
-        title={ciSeo?.title || community.name}
-        description={ciSeo?.description || community.description}
-        image={ciSeo?.og_image || community.banner_url}
-        url={`/community/${slug}`}
-        type="website"
-        lang={lang}
-        keywords={[...(ciSeo?.keywords || []), community.name].filter(Boolean)}
-      />
+      {!hasPostPermalink && (
+        <SEOHead
+          title={ciSeo?.title || community.name}
+          description={ciSeo?.description || community.description}
+          image={ciSeo?.og_image || community.banner_url}
+          url={`/community/${slug}`}
+          type="website"
+          lang={lang}
+          keywords={[...(ciSeo?.keywords || []), community.name].filter(Boolean)}
+        />
+      )}
       {/* Banner — minimal inline style for dynamic background URL/gradient only */}
       <div
         className="c-banner"
@@ -1427,7 +1632,7 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user }
 
       {/* House rules — read-only, set by managers in Creator Studio */}
       {Array.isArray(community.rules) && community.rules.length > 0 && (
-        <div className="c-rules">
+        <div className="c-rules" id="community-rules">
           <h3 className="c-rules-title">
             <i className="fas fa-scroll" aria-hidden="true" />{' '}
             {t4(lang, 'Règleman', 'House rules', 'Règles', 'Reglas')}
