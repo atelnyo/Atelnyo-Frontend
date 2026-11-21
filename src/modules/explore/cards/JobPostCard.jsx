@@ -5,6 +5,7 @@
  */
 import React, { useState } from 'react';
 import ContentFeedbackMenu from '../../../components/shared/ContentFeedbackMenu';
+import CardOpenButton from './CardOpenButton';
 import SaveCountChip from './SaveCountChip';
 import TrendingVelocity from './TrendingVelocity';
 
@@ -72,14 +73,11 @@ export default function JobPostCard({ job, t, showToast, onOpenSheet, saveCount 
   }
   return (
     <div
-      className="explore-card explore-card-job"
-      onClick={handleClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } }}
+      className="explore-card explore-card-job explore-card--overlay"
       data-testid="job-card"
       data-job-id={job.id}
     >
+      <CardOpenButton label={job.title} onClick={handleClick} />
       <div className="explore-card-image-wrap explore-card-image-square">
         {hasCover ? (
           <img

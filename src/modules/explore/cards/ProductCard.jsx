@@ -5,6 +5,7 @@
  */
 import React, { useState, useId } from 'react';
 import ContentFeedbackMenu from '../../../components/shared/ContentFeedbackMenu';
+import CardOpenButton from './CardOpenButton';
 import SaveCountChip from './SaveCountChip';
 import TrendingVelocity from './TrendingVelocity';
 
@@ -113,13 +114,8 @@ export default function ProductCard({ product, t, onOpen, onOpenCheckout, showTo
   }
 
   return (
-    <div
-      className="explore-card explore-card-product"
-      role="button"
-      tabIndex={0}
-      onClick={handleOpen}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpen(); } }}
-    >
+    <div className="explore-card explore-card-product explore-card--overlay">
+      <CardOpenButton label={product.title} onClick={handleOpen} />
       <div className="explore-card-image-wrap">
         {hasImage && !imgFailed ? (
           <img

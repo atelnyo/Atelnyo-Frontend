@@ -18,7 +18,9 @@ import { countWithUnit } from '../../utils/plural';
 import { resolveVideoSource, youtubeThumbnail } from '../../modules/explore/utils/videoSource';
 import VideoEmbedFrame from '../media/VideoEmbedFrame';
 import ContentFeedbackMenu from '../shared/ContentFeedbackMenu';
+import CommentListSkeleton from './CommentListSkeleton';
 import { buildIntroDraft } from './communityOnboarding';
+import { POST_MAX_LENGTH, countPostChars } from './postRules';
 
 const POST_FORMS = {
   ht: { one: 'pòs', many: 'pòs' },
@@ -35,7 +37,7 @@ const COMMENT_FORMS = {
 
 // Compose limits mirror CommunityPostSerializer.validate_content:
 // 2000 code points, not UTF-16 units (an emoji must count as one).
-const DRAFT_MAX = 2000;
+const DRAFT_MAX = POST_MAX_LENGTH;
 const POST_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const POST_IMAGE_MAX_BYTES = 10 * 1024 * 1024;
 // The backend's magic-byte validator accepts MP4 video only (not WebM/MOV),
@@ -43,10 +45,6 @@ const POST_IMAGE_MAX_BYTES = 10 * 1024 * 1024;
 const POST_VIDEO_TYPES = ['video/mp4'];
 const POST_VIDEO_MAX_BYTES = 50 * 1024 * 1024;
 const DRAFT_MAX_HEIGHT = 220;
-
-function unicodeLength(value) {
-  return Array.from(value || '').length;
-}
 
 /** Only http(s) links with a hostname — blocks javascript:, data:, etc. */
 function normalizeHttpUrl(raw) {
@@ -470,7 +468,7 @@ export default function CommunityPosts() {
   const [editingId, setEditingId] = useState(null);
   const [editDraft, setEditDraft] = useState('');
   const [editSaving, setEditSaving] = useState(false);
-  const draftLength = unicodeLength(draft);
+  const draftLength = countPostChars(draft);
 
   function focusDraft() { try { draftInputRef.current?.focus(); } catch { /* noop */ } }
 
@@ -491,7 +489,7 @@ export default function CommunityPosts() {
       const next = current && !current.endsWith('\n')
         ? `${current}\n${url}`
         : `${current || ''}${url}`;
-      return unicodeLength(next) <= DRAFT_MAX ? next : current;
+      return countPostChars(next) <= DRAFT_MAX ? next : current;
     });
     setLinkValue('');
     setShowLinkInput(false);
@@ -503,7 +501,7 @@ export default function CommunityPosts() {
     const start = input?.selectionStart ?? draft.length;
     const end = input?.selectionEnd ?? draft.length;
     const next = `${draft.slice(0, start)}${emoji}${draft.slice(end)}`;
-    if (unicodeLength(next) > DRAFT_MAX) return;
+    if (countPostChars(next) > DRAFT_MAX) return;
     setDraft(next);
     setShowEmoji(false);
     requestAnimationFrame(() => {
@@ -1070,7 +1068,7 @@ export default function CommunityPosts() {
     const content = editDraft.trim();
     const hasMedia = Boolean(post.image_url || post.video_url || post.poll_question);
     if ((!content && !hasMedia) || editSaving) return;
-    if (unicodeLength(content) > DRAFT_MAX) return;
+    if (countPostChars(content) > DRAFT_MAX) return;
     setEditSaving(true);
     try {
       const res = await communitiesService.updatePost(post.id, { content });
@@ -1180,7 +1178,14 @@ export default function CommunityPosts() {
 
   if (loading) {
     return (
-      <div className="c-list c-list--gap12" data-testid="posts-skeleton">
+      <div
+        className="c-list c-list--gap12"
+        data-testid="posts-skeleton"
+        role="status"
+        aria-live="polite"
+        aria-busy="true"
+        aria-label={t4(lang, 'Ap chaje pòs yo…', 'Loading posts…', 'Chargement des publications…', 'Cargando publicaciones…')}
+      >
         <PostSkeleton />
         <PostSkeleton />
         <PostSkeleton />
@@ -1258,7 +1263,7 @@ export default function CommunityPosts() {
               value={draft}
               onChange={(event) => {
                 const next = event.target.value;
-                if (unicodeLength(next) > DRAFT_MAX) {
+                if (countPostChars(next) > DRAFT_MAX) {
                   setDraft(Array.from(next).slice(0, DRAFT_MAX).join(''));
                   setDraftError(t4(
                     lang,
@@ -1651,7 +1656,7 @@ export default function CommunityPosts() {
                 value={editDraft}
                 onChange={(event) => {
                   const next = event.target.value;
-                  if (unicodeLength(next) <= DRAFT_MAX) setEditDraft(next);
+                  if (countPostChars(next) <= DRAFT_MAX) setEditDraft(next);
                 }}
                 rows={3}
                 aria-label={t4(lang, 'Modifye pòs', 'Edit post', 'Modifier la publication', 'Editar publicación')}
@@ -1745,9 +1750,7 @@ export default function CommunityPosts() {
           {openComments[post.id] && (
             <div className="c-comments" data-testid={`post-comments-${post.id}`}>
               {commentsLoading[post.id] ? (
-                <div className="c-comments-loading">
-                  <i className="fas fa-spinner fa-spin" aria-hidden="true" />
-                </div>
+                <CommentListSkeleton lang={lang} />
               ) : (commentLists[post.id] || []).length === 0 ? (
                 <p className="c-comments-empty">
                   {t4(lang, 'Pa gen kòmantè ankò — kòmanse diskisyon an!', 'No comments yet — start the discussion!', 'Aucun commentaire — lancez la discussion !', '¡Sin comentarios — inicia la discusión!')}

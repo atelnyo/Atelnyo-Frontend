@@ -48,6 +48,23 @@ export function SkeletonTalentCard() {
   );
 }
 
+/* Creator/community post cards are text-first: the real card pairs a
+   short cover with a three-line body, so the loading card mirrors that
+   rhythm instead of a course-height cover. */
+export function SkeletonPostCard() {
+  return (
+    <div className="explore-card explore-card-post explore-skeleton" aria-hidden="true">
+      <div className="explore-card-image-wrap" />
+      <div className="explore-card-body">
+        <div className="explore-skel-line explore-skel-line--sub" />
+        <div className="explore-skel-line explore-skel-line--sub" />
+        <div className="explore-skel-line explore-skel-line--sub" style={{ width: '68%' }} />
+        <div className="explore-skel-line explore-skel-line--meta" />
+      </div>
+    </div>
+  );
+}
+
 /* Event cards have their own template (cover frame + date block + meta +
    action column), so the loading rail uses the real explore-card-event
    class — same width and same zones, no jump when the feed lands. */

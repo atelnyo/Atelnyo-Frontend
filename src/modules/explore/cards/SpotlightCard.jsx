@@ -12,6 +12,7 @@
 import React, { useState, useMemo } from 'react';
 import useSafeNavigate from '../../../hooks/useSafeNavigate';
 import { buildContentUrl } from '../../../utils/contentUrl';
+import CardOpenButton from './CardOpenButton';
 import SaveCountChip from './SaveCountChip';
 
 const CATEGORY_CFG = {
@@ -81,19 +82,10 @@ export default function SpotlightCard({ item, t, lang, onOpen, saveCount = null 
 
   return (
     <div
-      className="explore-card explore-card-spotlight"
+      className="explore-card explore-card-spotlight explore-card--overlay"
       data-category={catKey}
       data-testid="spotlight-card"
       data-spotlight-id={item.id}
-      role="button"
-      tabIndex={0}
-      onClick={handleClick}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          handleClick();
-        }
-      }}
       style={
         {
           '--spotlight-border': cfg.border,
@@ -102,6 +94,10 @@ export default function SpotlightCard({ item, t, lang, onOpen, saveCount = null 
         }
       }
     >
+      <CardOpenButton
+        label={title || displayName || username || (t.explore_spotlight || 'Spotlight')}
+        onClick={handleClick}
+      />
       {/* ─── Hero area: gradient + avatar ───────────────────── */}
       <div className="spotlight-hero-wrap" style={{ background: cfg.bg }}>
         {/* Shine overlay */}

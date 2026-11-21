@@ -10,6 +10,7 @@ import { coverWithFallback } from '../utils/videoSource';
 import { useHoverVideoPreview } from '../hooks/useHoverVideoPreview';
 import HoverVideoPreview from '../components/HoverVideoPreview';
 import ContentFeedbackMenu from '../../../components/shared/ContentFeedbackMenu';
+import CardOpenButton from './CardOpenButton';
 import SaveCountChip from './SaveCountChip';
 import TrendingVelocity from './TrendingVelocity';
 
@@ -112,16 +113,6 @@ export default function MusicCard({ track, onOpen, showToast, t, isSaved, onSave
     disabled: previewDisabled,
   });
 
-  function handleClick(e) {
-    if (e.target.closest('.explore-card-preview-bar')) return;
-    if (e.target.closest('.explore-card-save-overlay')) return;
-    if (onOpen) {
-      onOpen(track);
-    } else if (!hasPreview) {
-      return;
-    }
-  }
-
   async function togglePreview(e) {
     e.stopPropagation();
     // No audio preview but a video exists → open the full sheet where
@@ -167,16 +158,13 @@ export default function MusicCard({ track, onOpen, showToast, t, isSaved, onSave
 
   return (
     <div
-      className={`explore-card explore-card-music${showPreview ? ' is-video-previewing' : ''}`}
-      onClick={handleClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(e); } }}
+      className={`explore-card explore-card-music explore-card--overlay${showPreview ? ' is-video-previewing' : ''}`}
       onMouseEnter={bind.onMouseEnter}
       onMouseLeave={bind.onMouseLeave}
       data-testid="music-card"
       data-music-id={track.id}
     >
+      <CardOpenButton label={track.title} onClick={() => onOpen?.(track)} />
       <div className="explore-card-image-wrap explore-card-image-square">
         {hasCover && !imgFailed ? (
           <img

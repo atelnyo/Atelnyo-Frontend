@@ -5,6 +5,7 @@
  */
 import React, { useState } from 'react';
 import { classNames } from '../utils/cardHelpers';
+import CardOpenButton from './CardOpenButton';
 import SaveCountChip from './SaveCountChip';
 import TrendingVelocity from './TrendingVelocity';
 
@@ -53,14 +54,11 @@ export default function TalentCard({ talent, onOpenSheet, showToast, t, isSaved,
   }
   return (
     <div
-      className={classNames('explore-card explore-card-talent', talent.is_new && 'explore-card-new')}
-      onClick={handleClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(e); } }}
+      className={classNames('explore-card explore-card-talent explore-card--overlay', talent.is_new && 'explore-card-new')}
       data-testid="talent-card"
       data-talent-id={talent.id}
     >
+      <CardOpenButton label={talent.name} onClick={handleClick} />
       <div className="explore-card-image-wrap">
         {hasAvatar && !imgFailed ? (
           <img

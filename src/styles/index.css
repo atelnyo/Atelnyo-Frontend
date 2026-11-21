@@ -14334,6 +14334,35 @@ body.dark-mode .related-spotlight-card:hover {
    auto margins would split the free space — the chip simply sits
    inline after the preceding element in every card. */
 
+/* ─── Per-card feedback menu (shared by every Explore rail) ───────────
+   The panel itself is portalled to <body> and inline-styled (see
+   ContentFeedbackMenu.jsx), so the theme-aware surface/text colours
+   come from tokens there. Only the row states live in CSS. */
+.content-feedback-item {
+  background: transparent;
+  border-radius: 6px;
+  font-size: inherit;
+  line-height: 1.5;
+  color: inherit;
+  text-align: left;
+}
+.content-feedback-item:hover,
+.content-feedback-item:focus-visible {
+  background: rgba(148, 163, 184, 0.16);
+  outline: none;
+}
+.content-feedback-item:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--brand-primary, #d81b60);
+}
+.content-feedback-item:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+body.dark-mode .content-feedback-item:hover,
+body.dark-mode .content-feedback-item:focus-visible {
+  background: rgba(255, 255, 255, 0.08);
+}
+
 /* ─── Hero ────────────────────────────────────────────── */
 .pd-hero {
   position: relative;
@@ -15710,6 +15739,66 @@ body.dark-mode .explore-hero-stat {
   width: 260px;
   min-width: 240px;
   max-width: 260px;
+}
+/* ─── Shared card open overlay ────────────────────────────────────────
+   Every Explore card is a plain container with ONE real <button>
+   covering it (CardOpenButton). That gives keyboard users a single tab
+   stop and removes the invalid nested-button markup. The card's own
+   save / play / buy / menu controls are re-enabled above the overlay
+   below, so they keep working. */
+.explore-card--overlay {
+  position: relative;
+}
+.explore-card-open {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: inherit;
+  cursor: pointer;
+}
+.explore-card-open:focus-visible {
+  outline: 2px solid var(--pink-primary, #d81b60);
+  outline-offset: -2px;
+  box-shadow: inset 0 0 0 2px rgba(216, 27, 96, 0.18);
+}
+/* Let clicks fall through to the overlay; interactive controls
+   re-capture pointer events and sit above it. Text selection on card
+   bodies is not a goal — they are clamped. */
+.explore-card--overlay > :not(.explore-card-open) {
+  pointer-events: none;
+}
+.explore-card--overlay .content-feedback,
+.explore-card--overlay .explore-talent-actions,
+.explore-card--overlay .explore-product-buy-btn,
+.explore-card--overlay .explore-card-meta-right,
+.explore-card--overlay .explore-event-action,
+.explore-card--overlay .explore-event-card-tools,
+.explore-card--overlay .explore-follow-actions,
+.explore-card--overlay .spotlight-card-actions,
+.explore-card--overlay .explore-card-play-overlay,
+.explore-card--overlay .explore-card-save-overlay,
+.explore-card--overlay .explore-card-preview-bar {
+  pointer-events: auto;
+}
+.explore-card--overlay .content-feedback,
+.explore-card--overlay .explore-talent-actions,
+.explore-card--overlay .explore-card-meta-right,
+.explore-card--overlay .explore-event-action,
+.explore-card--overlay .explore-event-card-tools,
+.explore-card--overlay .explore-follow-actions,
+.explore-card--overlay .spotlight-card-actions {
+  position: relative;
+  z-index: 2;
+}
+.explore-card--overlay .explore-product-buy-btn,
+.explore-card--overlay .explore-card-play-overlay,
+.explore-card--overlay .explore-card-save-overlay,
+.explore-card--overlay .explore-card-preview-bar {
+  z-index: 2;
 }
 .explore-card-post .explore-card-body { min-height: 118px; }
 .explore-card-post .explore-card-post-body {

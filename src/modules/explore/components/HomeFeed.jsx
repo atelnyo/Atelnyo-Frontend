@@ -21,8 +21,9 @@ import {
   FollowSuggestionCard, PostCard,
   SectionLabel, PremiumEmpty,
   SkeletonCourseCard, SkeletonMusicCard, SkeletonTalentCard,
-  SkeletonSpotlightCard,
+  SkeletonSpotlightCard, SkeletonPostCard,
 } from '../cards';
+import CardOpenButton from '../cards/CardOpenButton';
 
 // ─── Home-feed localStorage cache (second-visit zero-request) ─────────
 // Anonymous visitors all receive the IDENTICAL cold-start feed, so the
@@ -210,19 +211,8 @@ function GuestWelcomeCard({ lang, t, onSignUp }) {
   const cta = t.feed_guest_cta || (isHt ? 'Kreye yon kont gratis' : 'Create a free account');
 
   return (
-    <div
-      className="explore-card explore-card-course feed-guest-card"
-      role="button"
-      tabIndex={0}
-      aria-label={title}
-      onClick={onSignUp}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onSignUp();
-        }
-      }}
-    >
+    <div className="explore-card explore-card-course feed-guest-card explore-card--overlay">
+      <CardOpenButton label={title} onClick={onSignUp} />
       <div className="explore-card-image-wrap feed-guest-card__image">
         <div className="feed-guest-card__badge" aria-hidden="true">
           <i className="fas fa-hand-sparkles" />
@@ -379,8 +369,22 @@ export default function HomeFeed({
   // circle-avatar talent rows. (Before, the whole screen showed 4 course
   // skeletons, then jumped to 5-8 real rails once data arrived.)
   if (loading) {
+    const loadingLabel = lang === 'ht'
+      ? 'Ap chaje flux la…'
+      : lang === 'fr'
+        ? 'Chargement de votre flux…'
+        : lang === 'es'
+          ? 'Cargando tu feed…'
+          : 'Loading your feed…';
     return (
-      <div className="feed-container">
+      <div
+        className="feed-container"
+        data-testid="home-feed-skeleton"
+        role="status"
+        aria-live="polite"
+        aria-busy="true"
+        aria-label={loadingLabel}
+      >
         <SectionLabel icon={t.explore_recommended_icon || 'fa-star'}>
           {t.explore_recommended || (lang === 'ht' ? 'Rekòmande pou ou' : 'Recommended For You')}
         </SectionLabel>
@@ -407,7 +411,19 @@ export default function HomeFeed({
         <div className="explore-hscroll" aria-hidden="true">
           {Array.from({ length: 3 }).map((_, i) => <SkeletonSpotlightCard key={`spotlight-${i}`} />)}
         </div>
-        <div className="feed-loading-more" role="status">
+        <SectionLabel icon="fa-pen-nib">
+          {lang === 'ht'
+            ? 'Pòs'
+            : lang === 'fr'
+              ? 'Publications'
+              : lang === 'es'
+                ? 'Publicaciones'
+                : 'Posts'}
+        </SectionLabel>
+        <div className="explore-hscroll" aria-hidden="true">
+          {Array.from({ length: 4 }).map((_, i) => <SkeletonPostCard key={`post-${i}`} />)}
+        </div>
+        <div className="feed-loading-more" aria-hidden="true">
           <i className="fas fa-spinner fa-spin" aria-hidden="true" />
           <span>{t.explore_loading || (lang === 'ht' ? 'Ap chaje...' : 'Loading...')}</span>
         </div>

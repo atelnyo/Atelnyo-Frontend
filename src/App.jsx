@@ -52,6 +52,7 @@ const DashboardPreview = lazy(() => import('./components/DashboardPreview'));
 import NotFound from './components/NotFound';
 import SkeletonCard from './components/SkeletonCard';
 import HomePageSkeleton from './components/home/HomePageSkeleton';
+import CourseDetailSkeleton from './components/CourseDetailSkeleton';
 const Explore = lazy(() => import('./components/Explore').then(m => ({ default: m.Explore })));
 import BottomNavBar from './components/BottomNavBar';
 const Mwen = lazy(() => import('./components/Mwen'));
@@ -658,11 +659,7 @@ function CourseDetailRoute({ lang, id: propId, user, showToast, onOpenCheckout, 
   }, [course?.id, location.pathname, navigate]);
 
   if (loading) {
-    return (
-      <div className="cd-page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-        <i className="fas fa-spinner fa-spin" style={{ fontSize: '2rem', color: 'var(--cd-primary, #2563eb)' }} />
-      </div>
-    );
+    return <CourseDetailSkeleton lang={lang} />;
   }
   if (failed || !course) {
     return <NotFound lang={lang} onBack={() => navigate('/')} />;

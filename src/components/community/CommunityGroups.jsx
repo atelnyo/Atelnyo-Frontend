@@ -13,7 +13,10 @@
  */
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
+import { t as t4 } from '../../utils/i18n';
 import ChatBox from './ChatBox';
+import { POST_MAX_LENGTH, countPostChars, validatePostDraft } from './postRules';
+import './CommunityGroups.css';
 
 // ─── Helpers ───────────────────────────────────────────────────────
 
@@ -153,11 +156,25 @@ function CreateGroupForm({ onSubmit, onCancel, lang }) {
 
 // ─── Group Detail ──────────────────────────────────────────────────
 
-function GroupDetail({ group, onBack, onJoin, onLeave, lang, user }) {
+function GroupPostSkeleton() {
+  return (
+    <div className="group-post group-post-skeleton" aria-hidden="true">
+      <div className="group-skel-line group-skel-line--meta" />
+      <div className="group-skel-line" />
+      <div className="group-skel-line group-skel-line--short" />
+    </div>
+  );
+}
+
+function GroupDetail({ group, onBack, onJoin, onLeave, lang, user, showToast }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [newPost, setNewPost] = useState('');
+  const [posting, setPosting] = useState(false);
+  const [postError, setPostError] = useState('');
   const [showChat, setShowChat] = useState(false);
+  const draftLength = countPostChars(newPost);
 
   useEffect(() => {
     fetchPosts();
@@ -166,10 +183,18 @@ function GroupDetail({ group, onBack, onJoin, onLeave, lang, user }) {
   const fetchPosts = async () => {
     try {
       setLoading(true);
+      setLoadError('');
       const res = await api.get(`/communities/groups/${group.id}/posts/`);
       setPosts(Array.isArray(res.data) ? res.data : (res.data?.results || []));
     } catch (err) {
       console.error('Failed to fetch posts:', err);
+      setLoadError(t4(
+        lang,
+        'Nou pa ka chaje pòs gwoup la. Eseye ankò.',
+        'Could not load the group posts. Try again.',
+        'Impossible de charger les publications du groupe. Réessayez.',
+        'No se pudieron cargar las publicaciones del grupo. Inténtalo de nuevo.',
+      ));
     } finally {
       setLoading(false);
     }
@@ -177,16 +202,35 @@ function GroupDetail({ group, onBack, onJoin, onLeave, lang, user }) {
 
   const handlePost = async (e) => {
     e.preventDefault();
-    if (!newPost.trim()) return;
-
+    if (posting) return;
+    const check = validatePostDraft(newPost);
+    if (!check.ok) {
+      setPostError(check.reason === 'too_long'
+        ? t4(lang, `Maksimòm ${POST_MAX_LENGTH} karaktè.`, `Maximum ${POST_MAX_LENGTH} characters.`, `Maximum ${POST_MAX_LENGTH} caractères.`, `Máximo ${POST_MAX_LENGTH} caracteres.`)
+        : t4(lang, 'Ekri yon mesaj anvan w pibliye.', 'Write a message before publishing.', 'Écrivez un message avant de publier.', 'Escribe un mensaje antes de publicar.'));
+      return;
+    }
+    setPosting(true);
+    setPostError('');
     try {
-      await api.post(`/communities/groups/${group.id}/posts/`, {
-        content: newPost.trim(),
+      const res = await api.post(`/communities/groups/${group.id}/posts/`, {
+        content: check.text,
       });
+      const created = res?.data?.id ? res.data : null;
+      if (created) {
+        setPosts((prev) => [created, ...prev.filter((post) => post.id !== created.id)]);
+      } else {
+        await fetchPosts();
+      }
       setNewPost('');
-      fetchPosts();
+      showToast?.(t4(lang, 'Pòs pibliye!', 'Post published!', 'Publication réussie !', '¡Publicación exitosa!'), 'check-circle');
     } catch (err) {
-      console.error('Failed to post:', err);
+      setPostError(
+        err?.response?.data?.detail
+        || t4(lang, 'Nou pa ka pibliye pòs la.', 'Could not publish the post.', 'Impossible de publier la publication.', 'No se pudo publicar.'),
+      );
+    } finally {
+      setPosting(false);
     }
   };
 
@@ -235,15 +279,41 @@ function GroupDetail({ group, onBack, onJoin, onLeave, lang, user }) {
       </div>
 
       {group.is_member && (
-        <form className="group-post-form" onSubmit={handlePost}>
+        <form className="group-post-form" onSubmit={handlePost} aria-busy={posting || undefined}>
           <textarea
             value={newPost}
-            onChange={(e) => setNewPost(e.target.value)}
-            placeholder={lang === 'ht' ? 'Ekri yon mesaj...' : 'Write a message...'}
+            onChange={(e) => {
+              const next = e.target.value;
+              if (countPostChars(next) > POST_MAX_LENGTH) {
+                setNewPost(Array.from(next).slice(0, POST_MAX_LENGTH).join(''));
+                setPostError(t4(lang, `Maksimòm ${POST_MAX_LENGTH} karaktè. Tèks la koupe.`, `Maximum ${POST_MAX_LENGTH} characters. The text was shortened.`, `Maximum ${POST_MAX_LENGTH} caractères. Le texte a été raccourci.`, `Máximo ${POST_MAX_LENGTH} caracteres. El texto se acortó.`));
+                return;
+              }
+              setNewPost(next);
+              if (postError) setPostError('');
+            }}
+            placeholder={t4(lang, 'Ekri yon mesaj...', 'Write a message...', 'Écrivez un message...', 'Escribe un mensaje...')}
             rows={3}
+            aria-invalid={postError ? 'true' : undefined}
+            aria-describedby={postError ? 'group-post-error' : undefined}
           />
-          <button type="submit" className="group-btn group-btn-primary">
-            <i className="fas fa-paper-plane" /> {lang === 'ht' ? 'Pibliye' : 'Post'}
+          <div className="group-post-meta">
+            <span>{t4(lang, 'Pataje ak gwoup la', 'Share with the group', 'Partager avec le groupe', 'Compartir con el grupo')}</span>
+            <span>{draftLength}/{POST_MAX_LENGTH}</span>
+          </div>
+          {postError && (
+            <p className="group-post-error" id="group-post-error" role="alert">{postError}</p>
+          )}
+          <button
+            type="submit"
+            className="group-btn group-btn-primary"
+            disabled={posting || !newPost.trim()}
+            aria-busy={posting || undefined}
+          >
+            <i className={`fas ${posting ? 'fa-spinner fa-spin' : 'fa-paper-plane'}`} aria-hidden="true" />{' '}
+            {posting
+              ? t4(lang, 'Ap pibliye...', 'Publishing...', 'Publication...', 'Publicando...')
+              : t4(lang, 'Pibliye', 'Post', 'Publier', 'Publicar')}
           </button>
         </form>
       )}
@@ -264,13 +334,29 @@ function GroupDetail({ group, onBack, onJoin, onLeave, lang, user }) {
         <h3>{lang === 'ht' ? 'Pòs' : 'Posts'}</h3>
 
         {loading ? (
-          <div className="group-loading">
-            <i className="fas fa-spinner fa-spin" /> Loading posts...
+          <div
+            className="group-posts-list"
+            role="status"
+            aria-live="polite"
+            aria-busy="true"
+            aria-label={t4(lang, 'Ap chaje pòs gwoup la…', 'Loading group posts…', 'Chargement des publications du groupe…', 'Cargando publicaciones del grupo…')}
+          >
+            <GroupPostSkeleton />
+            <GroupPostSkeleton />
+            <GroupPostSkeleton />
+          </div>
+        ) : loadError ? (
+          <div className="group-empty group-empty-error" role="alert">
+            <i className="fas fa-triangle-exclamation" />
+            <p>{loadError}</p>
+            <button type="button" className="group-btn group-btn-secondary" onClick={fetchPosts}>
+              {t4(lang, 'Eseye ankò', 'Try again', 'Réessayer', 'Inténtalo de nuevo')}
+            </button>
           </div>
         ) : posts.length === 0 ? (
           <div className="group-empty">
             <i className="fas fa-comment-slash" />
-            <p>{lang === 'ht' ? 'Pa gen pòs ankò' : 'No posts yet'}</p>
+            <p>{t4(lang, 'Pa gen pòs ankò', 'No posts yet', 'Aucune publication pour le moment', 'Aún no hay publicaciones')}</p>
           </div>
         ) : (
           <div className="group-posts-list">
@@ -359,6 +445,7 @@ export default function CommunityGroups({ community, lang = 'en', showToast, use
         onLeave={handleLeaveGroup}
         lang={lang}
         user={user}
+        showToast={showToast}
       />
     );
   }

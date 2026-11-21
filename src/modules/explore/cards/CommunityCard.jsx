@@ -5,6 +5,7 @@
  */
 import React, { useState } from 'react';
 import ContentFeedbackMenu from '../../../components/shared/ContentFeedbackMenu';
+import CardOpenButton from './CardOpenButton';
 
 /** SVG fallback — community-themed gradient */
 function CommunityFallback({ name }) {
@@ -65,13 +66,8 @@ export default function CommunityCard({ community, onOpen, t, lang }) {
       : null;
 
   return (
-    <div
-      className="explore-card explore-card-community"
-      onClick={() => onOpen?.(community)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen?.(community); } }}
-    >
+    <div className="explore-card explore-card-community explore-card--overlay">
+      <CardOpenButton label={displayName} onClick={() => onOpen?.(community)} />
       <div className="explore-card-image-wrap">
         {hasImage && !imgFailed ? (
           <img

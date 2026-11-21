@@ -22,6 +22,8 @@ import ConfirmModal from '../../common/ConfirmModal';
 import PanelSkeleton, {
   PanelEmpty, PanelError, PanelHeader,
 } from './communityPanelUI';
+import { POST_MAX_LENGTH, countPostChars, validatePostDraft } from '../../community/postRules';
+import CommentListSkeleton from '../../community/CommentListSkeleton';
 import styles from './communityEditor.module.css';
 
 const asArray = (data) => (Array.isArray(data) ? data : (data?.results || []));
@@ -349,8 +351,9 @@ export default function CommunityPostsPanel({
   }, []);
 
   const publishPost = useCallback(async () => {
-    const content = draft.trim();
-    if (!content || publishing) return;
+    const check = validatePostDraft(draft);
+    if (!check.ok || publishing) return;
+    const content = check.text;
     const cleanPollOptions = pollOptions.map((o) => o.trim()).filter(Boolean).slice(0, 10);
     if (showPoll && pollQuestion.trim() && cleanPollOptions.length < 2) {
       showToast?.(isHt ? 'Sondaj la bezwen omwen 2 opsyon.' : 'A poll needs at least 2 options.', 'circle-exclamation');
@@ -534,7 +537,7 @@ export default function CommunityPostsPanel({
             placeholder={isHt
               ? 'Ekri sa w vle pataje… Kole yon lyen YouTube, WhatsApp, Facebook oswa sit wèb, li ap vin klike ak aperçu.'
               : 'Share an update… Paste a YouTube, WhatsApp, Facebook, or website link to make it clickable with a preview.'}
-            maxLength={2000}
+            maxLength={POST_MAX_LENGTH}
             aria-label={isHt ? 'Kontni pòs la' : 'Post content'}
           />
 
@@ -552,7 +555,7 @@ export default function CommunityPostsPanel({
           {draftGenericLink && <LinkPreviewCard url={draftGenericLink} compact />}
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #64748b)' }}>{draft.length}/2000</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #64748b)' }}>{countPostChars(draft)}/{POST_MAX_LENGTH}</div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               <input
                 ref={fileInputRef}
@@ -849,10 +852,7 @@ export default function CommunityPostsPanel({
                       </span>
                     </div>
                     {commentsLoading ? (
-                      <div className={styles.subEmpty}>
-                        <i className="fas fa-spinner fa-spin" aria-hidden="true" />{' '}
-                        {isHt ? 'Ap chaje kòmantè yo…' : 'Loading comments…'}
-                      </div>
+                      <CommentListSkeleton lang={lang} rows={2} />
                     ) : commentsError ? (
                       <div className={styles.subError}>
                         <span>{commentsError}</span>

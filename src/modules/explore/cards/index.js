@@ -36,6 +36,7 @@ import {
   SkeletonTalentCard,
   SkeletonEventCard,
   SkeletonSpotlightCard,
+  SkeletonPostCard,
 } from './skeleton/SkeletonCards';
 
 const CourseCard = React.memo(_CourseCard);
@@ -62,7 +63,7 @@ export const CardRegistry = {
   event:     { component: EventCard,     skeleton: 'event' },
   job:       { component: JobPostCard,   skeleton: 'course' },
   spotlight: { component: SpotlightCard, skeleton: 'spotlight' },
-  post:      { component: PostCard,      skeleton: 'course' },
+  post:      { component: PostCard,      skeleton: 'post' },
   creator:   { component: FollowSuggestionCard, skeleton: 'talent' },
 };
 
@@ -73,6 +74,7 @@ export const SkeletonMap = {
   talent:    SkeletonTalentCard,
   event:     SkeletonEventCard,
   spotlight: SkeletonSpotlightCard,
+  post:      SkeletonPostCard,
 };
 
 export {
@@ -96,4 +98,5 @@ export {
   SkeletonTalentCard,
   SkeletonEventCard,
   SkeletonSpotlightCard,
+  SkeletonPostCard,
 };

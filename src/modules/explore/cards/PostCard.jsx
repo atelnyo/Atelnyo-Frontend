@@ -5,6 +5,11 @@
  * ``trending_post`` rails render. Posts are always public and have no
  * standalone route yet, so the card opens the author's profile where the
  * post list lives (``/c/{username}``).
+ *
+ * Accessibility: the card is a single real <button> overlay rather than
+ * a div with role=button, so keyboard users get one tab stop and the
+ * feedback menu trigger is a sibling control instead of a button nested
+ * inside a button. The overlay's accessible name is the post body.
  */
 import React, { useState } from 'react';
 import ContentFeedbackMenu from '../../../components/shared/ContentFeedbackMenu';
@@ -37,7 +42,15 @@ function PostFallback({ label }) {
   );
 }
 
-export default function PostCard({ post, onOpen, t, feedbackType }) {
+/** Accessible name for the overlay: the post text, trimmed to keep the
+ *  name short for screen readers, falling back to the author handle. */
+function openLabelFor(body, author) {
+  const text = typeof body === 'string' ? body.trim() : '';
+  if (text) return text.length > 120 ? `${text.slice(0, 119)}…` : text;
+  return author ? `@${author}` : 'Post';
+}
+
+export default function PostCard({ post, onOpen, t, feedbackType, lang = 'en' }) {
   const [imgFailed, setImgFailed] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
   const body = post.body || post.description || post.title || '';
@@ -47,18 +60,13 @@ export default function PostCard({ post, onOpen, t, feedbackType }) {
   const open = () => onOpen?.(post);
 
   return (
-    <div
-      className="explore-card explore-card-post"
-      onClick={open}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          open();
-        }
-      }}
-    >
+    <div className="explore-card explore-card-post explore-card--overlay">
+      <button
+        type="button"
+        className="explore-card-open"
+        aria-label={openLabelFor(body, author)}
+        onClick={open}
+      />
       <div className="explore-card-image-wrap">
         {image && !imgFailed ? (
           <img
@@ -83,10 +91,15 @@ export default function PostCard({ post, onOpen, t, feedbackType }) {
             <span className="explore-card-tag">
               <i className="fas fa-at" aria-hidden="true" /> {author}
             </span>
-          )}            {/* Community-post rail rows report their own type so hide /
-                mute stays scoped to community posts (no id collision
-                with creator posts). Defaults to 'post' for legacy rows. */}
-            <ContentFeedbackMenu contentType={feedbackType || 'post'} contentId={post.id} />
+          )}
+          {/* Community-post rail rows report their own type so hide /
+              mute stays scoped to community posts (no id collision
+              with creator posts). Defaults to 'post' for legacy rows. */}
+          <ContentFeedbackMenu
+            contentType={feedbackType || 'post'}
+            contentId={post.id}
+            lang={lang}
+          />
           <span className="explore-card-cta" aria-hidden="true" style={{ marginLeft: 'auto' }}>
             <i className="fas fa-arrow-right" />
           </span>

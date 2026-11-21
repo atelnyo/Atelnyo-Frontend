@@ -8,6 +8,7 @@ import { eventsService } from '../../../services/api';
 import { formatEventDate } from '../utils/cardHelpers';
 import { useHoverVideoPreview } from '../hooks/useHoverVideoPreview';
 import HoverVideoPreview from '../components/HoverVideoPreview';
+import CardOpenButton from './CardOpenButton';
 import SaveCountChip from './SaveCountChip';
 import TrendingVelocity from './TrendingVelocity';
 
@@ -166,16 +167,16 @@ export default function EventCard({ event, t, lang = 'en', onOpenCheckout, showT
 
   return (
     <div
-      className="explore-card explore-card-event"
-      role="button"
-      tabIndex={0}
-      onClick={() => window.open(`/community/${event.community_slug || ''}`, '_self')}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); } }}
+      className="explore-card explore-card-event explore-card--overlay"
       onMouseEnter={bind.onMouseEnter}
       onMouseLeave={bind.onMouseLeave}
       data-testid="event-card"
       data-event-id={event.id}
     >
+      <CardOpenButton
+        label={event.title}
+        onClick={() => window.open(`/community/${event.community_slug || ''}`, '_self')}
+      />
       {/* Always reserve the 130px cover frame, even without a cover: this
           card used to drop the whole block, so a coverless event rendered
           half the height of every neighbour in the list. The SVG fallback

@@ -1,0 +1,76 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 10px;
+  background: var(--card-bg, #fff);
+}
+
+.avatar {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border-radius: 50%;
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 7px;
+  padding-top: 2px;
+}
+
+.name {
+  width: 96px;
+  height: 9px;
+  border-radius: 5px;
+}
+
+.line {
+  width: 88%;
+  height: 11px;
+  border-radius: 6px;
+}
+
+.lineShort {
+  width: 56%;
+  height: 11px;
+  border-radius: 6px;
+}
+
+.shimmer {
+  display: block;
+  background: linear-gradient(90deg, #eef1f5 25%, #e0e5eb 50%, #eef1f5 75%);
+  background-size: 200% 100%;
+  animation: commentSkeletonShimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes commentSkeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+body.dark-mode .row {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: var(--card-bg, #1e1e24);
+}
+
+body.dark-mode .shimmer {
+  background: linear-gradient(90deg, #24283d 25%, #2f3450 50%, #24283d 75%);
+  background-size: 200% 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer { animation: none; background: #eef1f5; }
+}

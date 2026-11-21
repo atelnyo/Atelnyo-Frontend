@@ -46,6 +46,46 @@ describe('ContentFeedbackMenu', () => {
     expect(onParentClick).not.toHaveBeenCalled();
   });
 
+  it('renders Spanish copy and portals the panel to the body', async () => {
+    render(
+      <ContentFeedbackMenu contentType="post" contentId={7} lang="es" />,
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: /más opciones/i }));
+    const panel = screen.getByRole('menu', { name: /más opciones/i });
+
+    expect(panel.parentElement).toBe(document.body);
+    expect(screen.getByRole('menuitem', { name: /no me interesa/i })).toBeTruthy();
+  });
+
+  it('closes on Escape and on an outside click', async () => {
+    render(
+      <ContentFeedbackMenu contentType="post" contentId={8} lang="en" />,
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: /more options/i }));
+    await userEvent.keyboard('{Escape}');
+    expect(screen.queryByRole('menu')).toBeNull();
+
+    await userEvent.click(screen.getByRole('button', { name: /more options/i }));
+    expect(screen.getByRole('menu')).toBeTruthy();
+    await userEvent.click(document.body);
+    expect(screen.queryByRole('menu')).toBeNull();
+  });
+
+  it('uses theme surface and text tokens for the panel', async () => {
+    render(
+      <ContentFeedbackMenu contentType="post" contentId={9} lang="en" />,
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: /more options/i }));
+    const style = screen.getByRole('menu').getAttribute('style') || '';
+
+    expect(style).toContain('var(--card-bg');
+    expect(style).toContain('var(--text-main');
+    expect(style).toContain('overflow-y: auto');
+  });
+
   it('reports with the generic reason by default', async () => {
     contentFeedbackService.report.mockResolvedValue({ data: {} });
     render(

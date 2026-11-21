@@ -9,6 +9,7 @@ import { useHoverVideoPreview } from '../hooks/useHoverVideoPreview';
 import HoverVideoPreview from '../components/HoverVideoPreview';
 import { resolvePortfolioVideo } from '../utils/cardHelpers';
 import ContentFeedbackMenu from '../../../components/shared/ContentFeedbackMenu';
+import CardOpenButton from './CardOpenButton';
 import SaveCountChip from './SaveCountChip';
 
 /** Inline SVG fallback — bèl ilistrasyon lè pa gen imaj oswa imaj kase */
@@ -59,14 +60,11 @@ export default function PortfolioCard({ project, t, showToast, onOpen, saveCount
 
   return (
     <div
-      className="explore-card explore-card-course explore-card-portfolio"
-      onClick={handleClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } }}
+      className="explore-card explore-card-course explore-card-portfolio explore-card--overlay"
       onMouseEnter={bind.onMouseEnter}
       onMouseLeave={bind.onMouseLeave}
     >
+      <CardOpenButton label={project.title} onClick={handleClick} />
       <div className="explore-card-image-wrap">
         {hasImage && !imgFailed ? (
           <img

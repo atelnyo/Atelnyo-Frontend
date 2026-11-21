@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { useHoverVideoPreview } from '../hooks/useHoverVideoPreview';
 import HoverVideoPreview from '../components/HoverVideoPreview';
 import ContentFeedbackMenu from '../../../components/shared/ContentFeedbackMenu';
+import CardOpenButton from './CardOpenButton';
 import SaveCountChip from './SaveCountChip';
 import TrendingVelocity from './TrendingVelocity';
 
@@ -70,14 +71,11 @@ export default function CourseCard({ course, onOpen, lang, t, saveCount = null, 
 
   return (
     <div
-      className="explore-card explore-card-course"
-      onClick={() => onOpen?.(course)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen?.(course); } }}
+      className="explore-card explore-card-course explore-card--overlay"
       onMouseEnter={bind.onMouseEnter}
       onMouseLeave={bind.onMouseLeave}
     >
+      <CardOpenButton label={course.title} onClick={() => onOpen?.(course)} />
       <div className="explore-card-image-wrap">
         {hasImage && !imgFailed ? (
           <img

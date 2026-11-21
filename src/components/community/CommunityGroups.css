@@ -422,3 +422,68 @@
 .group-empty p {
   margin: 0 0 16px 0;
 }
+
+.group-empty-error i {
+  color: #dc2626;
+}
+
+.group-post-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  color: #6b7280;
+  font-size: 0.75rem;
+}
+
+.group-post-error {
+  width: 100%;
+  margin: 0;
+  color: #b91c1c;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.group-post-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.group-skel-line {
+  display: block;
+  width: 92%;
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #eef1f5 25%, #e0e5eb 50%, #eef1f5 75%);
+  background-size: 200% 100%;
+  animation: group-skel-shimmer 1.4s ease-in-out infinite;
+}
+
+.group-skel-line--meta {
+  width: 42%;
+  height: 9px;
+}
+
+.group-skel-line--short {
+  width: 68%;
+}
+
+@keyframes group-skel-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+body.dark-mode .group-post {
+  background: var(--card-bg, #1e1e24);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .group-skel-line {
+  background: linear-gradient(90deg, #24283d 25%, #2f3450 50%, #24283d 75%);
+  background-size: 200% 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .group-skel-line { animation: none; background: #eef1f5; }
+}

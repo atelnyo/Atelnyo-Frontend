@@ -65,10 +65,8 @@ describe('CommunityCard pre-click info', () => {
   it('still opens the community on click', () => {
     const onOpen = vi.fn();
     render(<CommunityCard community={BASE} t={{}} lang="ht" onOpen={onOpen} />);
-    // The name appears twice (title + SVG fallback text) — target the title.
-    fireEvent.click(
-      screen.getByText('Kominote Mizik', { selector: '.explore-card-title' }),
-    );
+    // One overlay button owns the click now (no div role=button).
+    fireEvent.click(screen.getByRole('button', { name: 'Kominote Mizik' }));
     expect(onOpen).toHaveBeenCalledWith(BASE);
   });
 });

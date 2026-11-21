@@ -20,6 +20,7 @@
 import React, { useState } from 'react';
 import { creatorProfileService } from '../../../services/api';
 import { classNames } from '../utils/cardHelpers';
+import CardOpenButton from './CardOpenButton';
 
 /** Simple SVG avatar fallback so a missing image never breaks the rail. */
 function FollowAvatarFallback({ name, lang }) {
@@ -91,14 +92,11 @@ export default function FollowSuggestionCard({
 
   return (
     <div
-      className={classNames('explore-card', 'explore-card-follow', following && 'is-following')}
-      onClick={handleOpen}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpen(); } }}
+      className={classNames('explore-card', 'explore-card-follow', 'explore-card--overlay', following && 'is-following')}
       data-testid="follow-suggestion-card"
       data-creator-id={item.content_id}
     >
+      <CardOpenButton label={name} onClick={handleOpen} />
       <div className="explore-card-image-wrap explore-follow-avatar-wrap">
         {avatar && !imgFailed ? (
           <img

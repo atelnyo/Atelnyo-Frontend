@@ -435,7 +435,10 @@ describe('Community surfaces', () => {
 
   it('shows skeleton first, then posts with reaction state', async () => {
     render(<Harness community={MEMBER_COMM} user={USER} />);
-    expect(screen.getByTestId('posts-skeleton')).toBeTruthy();
+    const skeleton = screen.getByTestId('posts-skeleton');
+    expect(skeleton).toHaveAttribute('role', 'status');
+    expect(skeleton).toHaveAttribute('aria-busy', 'true');
+    expect(skeleton).toHaveAttribute('aria-label', 'Ap chaje pòs yo…');
     expect(await screen.findByText('Bonjou tout moun!')).toBeTruthy();
     expect(screen.queryByTestId('posts-skeleton')).toBeNull();
     // Active reaction button is pressed.
