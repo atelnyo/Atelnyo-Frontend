@@ -16,6 +16,8 @@ vi.mock('../../services/api', () => ({
   communitiesService: {
     posts: vi.fn(),
     getPost: vi.fn(),
+    get: vi.fn(),
+    getSEO: vi.fn(),
     createPost: vi.fn(),
     deletePost: vi.fn(),
     reactToPost: vi.fn(),
@@ -30,7 +32,9 @@ vi.mock('../../services/api', () => ({
 
 import { communitiesService, communityEventsService, eventsService } from '../../services/api';
 import CommunityPosts from './CommunityPosts';
-import { CommunityEvents, CommunityHome, CommunityRulesTab } from '../CommunityDetail';
+import CommunityDetail, {
+  CommunityDescription, CommunityEvents, CommunityHome, CommunityRulesTab,
+} from '../CommunityDetail';
 
 function Harness({ community, user, entry = '/community/test/posts' }) {
   return (
@@ -52,6 +56,14 @@ const USER = { id: 9, username: 'manm1' };
 
 beforeEach(() => {
   vi.clearAllMocks();
+  communitiesService.get.mockResolvedValue({
+    data: {
+      id: 1, slug: 'test', name: 'Test community', description: 'Short description.',
+      member_count: 1, is_member: true, current_user_role: 'member',
+      join_mode: 'public', rules: [],
+    },
+  });
+  communitiesService.getSEO.mockResolvedValue({ data: { status: 'not_ready' } });
   communitiesService.posts.mockResolvedValue({ data: POSTS });
   communityEventsService.list.mockResolvedValue({ data: [] });
   eventsService.ticket.mockResolvedValue({ data: { id: 21, status: 'confirmed' } });
@@ -582,5 +594,71 @@ describe('Community surfaces', () => {
     expect(onWelcomeStep).toHaveBeenCalledWith('intro');
     const input = await screen.findByTestId('post-composer-input');
     await waitFor(() => expect(input.value).toContain('Atelye Test'));
+  });
+
+  it('marks exactly one route-driven tab active and updates it on navigation', async () => {
+    render(
+      <HelmetProvider>
+        <MemoryRouter initialEntries={['/community/test/events']}>
+          <Routes>
+            <Route
+              path="/community/:slug"
+              element={<CommunityDetail lang="en" user={{ id: 1 }} />}
+            >
+              <Route path="home" element={<div>Home view</div>} />
+              <Route path="events" element={<div>Events view</div>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      </HelmetProvider>,
+    );
+
+    expect(await screen.findByText('Events view')).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Events' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getAllByRole('link').filter((link) => link.getAttribute('aria-current') === 'page'))
+      .toHaveLength(1);
+
+    fireEvent.click(screen.getByRole('link', { name: 'Home' }));
+
+    expect(await screen.findByText('Home view')).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Home' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getAllByRole('link').filter((link) => link.getAttribute('aria-current') === 'page'))
+      .toHaveLength(1);
+  });
+
+  describe('Community description', () => {
+    it('keeps short descriptions compact without a toggle', () => {
+      render(<CommunityDescription text="A short description." lang="en" />);
+      expect(screen.queryByRole('button', { name: /Read more/ })).toBeNull();
+      expect(screen.queryByRole('button', { name: /Show less/ })).toBeNull();
+    });
+
+    it('clamps long descriptions and expands/collapses without losing text', async () => {
+      const originalScroll = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'scrollHeight');
+      const originalClient = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'clientHeight');
+      Object.defineProperty(HTMLElement.prototype, 'scrollHeight', { configurable: true, get: () => 120 });
+      Object.defineProperty(HTMLElement.prototype, 'clientHeight', { configurable: true, get: () => 60 });
+
+      try {
+        const longText = 'Long description text. '.repeat(80);
+        const { container } = render(<CommunityDescription text={longText} lang="en" />);
+        const paragraph = container.querySelector('.c-desc');
+
+        expect(paragraph.className).toContain('c-desc--clamped');
+        const more = await screen.findByRole('button', { name: /Read more/ });
+        expect(more).toHaveAttribute('aria-expanded', 'false');
+
+        fireEvent.click(more);
+
+        expect(paragraph.className).not.toContain('c-desc--clamped');
+        expect(screen.getByRole('button', { name: /Show less/ })).toHaveAttribute('aria-expanded', 'true');
+        expect(paragraph.textContent).toContain('Long description text.');
+      } finally {
+        if (originalScroll) Object.defineProperty(HTMLElement.prototype, 'scrollHeight', originalScroll);
+        else delete HTMLElement.prototype.scrollHeight;
+        if (originalClient) Object.defineProperty(HTMLElement.prototype, 'clientHeight', originalClient);
+        else delete HTMLElement.prototype.clientHeight;
+      }
+    });
   });
 });

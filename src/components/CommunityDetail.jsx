@@ -29,7 +29,7 @@
  * independent (no parent re-render on tab change, no shared
  * ``tabLoading`` map).
  */
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useLayoutEffect, useId, useRef, useState, useMemo, useCallback } from 'react';
 import SEOHead from './shared/SEOHead';
 import { useParams, useMatch, NavLink, Outlet, useOutletContext, useNavigate, useLocation } from 'react-router-dom';
 import { communitiesService, communityEventsService, eventsService } from '../services/api';
@@ -77,6 +77,63 @@ function formatEventPrice(event) {
 // ── Shared helpers (used by both layout + tab sub-components) ───────────
 
 /** Translates a role slug into the localized label shown in the Members tab. */
+/**
+ * User-generated descriptions can be any length. The collapsed state is
+ * clamped to three lines on every viewport; the toggle only appears when
+ * the rendered text actually overflows (measured, not guessed from a
+ * character count, so a short paragraph on a wide screen stays compact).
+ */
+export function CommunityDescription({ text, lang }) {
+  const descriptionId = useId();
+  const textRef = useRef(null);
+  const [expanded, setExpanded] = useState(false);
+  const [canExpand, setCanExpand] = useState(false);
+
+  useLayoutEffect(() => {
+    const el = textRef.current;
+    if (!el || expanded) return undefined;
+    const measure = () => {
+      if (!el) return;
+      const next = el.scrollHeight > el.clientHeight + 1;
+      // Only flip when the value changes: a ResizeObserver here used to
+      // call setState on every layout notification, which produced a
+      // flood of "ResizeObserver loop completed" errors on click/layout
+      // changes. A direct measure + window resize covers the responsive
+      // cases without observing the element that the state affects.
+      setCanExpand((prev) => (prev === next ? prev : next));
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [text, expanded]);
+
+  return (
+    <div className="c-desc-block">
+      <p
+        id={descriptionId}
+        ref={textRef}
+        className={`c-desc${expanded ? '' : ' c-desc--clamped'}`}
+      >
+        {text}
+      </p>
+      {canExpand && (
+        <button
+          type="button"
+          className="c-desc-toggle"
+          onClick={() => setExpanded((open) => !open)}
+          aria-expanded={expanded}
+          aria-controls={descriptionId}
+        >
+          {expanded
+            ? t4(lang, 'Mwens', 'Show less', 'Afficher moins', 'Mostrar menos')
+            : t4(lang, 'Li plis', 'Read more', 'Lire la suite', 'Leer más')}
+          <i className={`fas ${expanded ? 'fa-chevron-up' : 'fa-chevron-down'}`} aria-hidden="true" />
+        </button>
+      )}
+    </div>
+  );
+}
+
 function roleLabel(role, lang) {
   switch (role) {
     case 'owner':     return t4(lang, "Fondatè", "Owner", "Fondateur", "Fundador");
@@ -1590,6 +1647,7 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user, 
     setWelcomeDone((list) => (list.includes(key) ? list : [...list, key]));
   }, []);
   const [memberCount, setMemberCount] = useState(0);
+  const tabsRef = useRef(null);
   // A broken avatar/cover URL falls back to the branded default instead
   // of leaving an empty box (the API only stores external URLs).
   const [avatarBroken, setAvatarBroken] = useState(false);
@@ -1706,6 +1764,29 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user, 
     document.body.classList.add('community-detail-page');
     return () => document.body.classList.remove('community-detail-page');
   }, []);
+
+  // Keep the selected tab visible in the horizontally scrolling mobile
+  // strip. Only scrolls when the strip actually overflows, and respects
+  // reduced-motion preferences.
+  useEffect(() => {
+    const nav = tabsRef.current;
+    if (!nav) return;
+    const active = nav.querySelector('.c-tab--active');
+    if (!active || nav.scrollWidth <= nav.clientWidth) return;
+    if (typeof active.scrollIntoView !== 'function') return;
+    const reduceMotion = typeof window.matchMedia === 'function'
+      && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    try {
+      active.scrollIntoView({
+        behavior: reduceMotion ? 'auto' : 'smooth',
+        block: 'nearest',
+        inline: 'nearest',
+      });
+    } catch {
+      // Some Android WebViews reject the options object. Scrolling the
+      // active tab into view is an enhancement, never a click failure.
+    }
+  }, [location.pathname, community?.slug]);
 
   // Hooks must run unconditionally — tabLabels/outletContext useMemo
   // calls were MOVED ABOVE the early returns (they used to sit after
@@ -1866,15 +1947,23 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user, 
         </div>
       </div>
 
-      {/* Description */}
+      {/* Description — outside the header so long text never distorts it. */}
       {community.description && (
-        <p className="c-desc">{community.description}</p>
+        <CommunityDescription
+          key={`${community.slug}:${community.description}`}
+          text={community.description}
+          lang={lang}
+        />
       )}
 
       {/* Tabs — URL-driven via NavLink. The banned tab renders only for
           owner/admin (moderation surface); others never see it and a
           direct URL still 403s server-side. */}
-      <nav className="c-tabs" aria-label={t4(lang, 'Seksyon kominote a', 'Community sections', 'Sections de la communauté', 'Secciones de la comunidad')}>
+      <nav
+        ref={tabsRef}
+        className="c-tabs"
+        aria-label={t4(lang, 'Seksyon kominote a', 'Community sections', 'Sections de la communauté', 'Secciones de la comunidad')}
+      >
         {TAB_KEYS.filter((key) => (
           (!MOD_ONLY_TABS.includes(key) || ['owner', 'admin'].includes(community?.current_user_role))
           // The rules tab only exists when the community actually has rules;
@@ -1884,7 +1973,7 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user, 
           <NavLink
             key={key}
             to={key}
-            className={({ isActive }) => `c-tab${isActive ? ' c-tab--active' : ''}`}
+            className={({ isActive }) => `c-tab c-tab--nav${isActive ? ' c-tab--active' : ''}`}
           >
             {tabLabels[key]}
           </NavLink>
