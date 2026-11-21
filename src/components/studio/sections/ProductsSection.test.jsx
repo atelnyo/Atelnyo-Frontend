@@ -22,11 +22,11 @@ import { marketplaceService } from '../../../services/api';
 
 const products = [
   {
-    id: 1, title: 'Alpha Kit', kind: 'digital', price: '12.00',
+    id: 1, title: 'Alpha Kit', slug: 'alpha-kit', kind: 'digital', price: '12.00',
     sales_count: 4, is_active: true,
   },
   {
-    id: 2, title: 'Beta Pack', kind: 'physical', price: '25.00',
+    id: 2, title: 'Beta Pack', slug: 'beta-pack', kind: 'physical', price: '25.00',
     sales_count: 1, is_active: false,
   },
 ];
@@ -48,6 +48,30 @@ beforeEach(() => {
 });
 
 describe('ProductsSection management controls', () => {
+  it('shows an error state and recovers with Try again', async () => {
+    marketplaceService.list
+      .mockRejectedValueOnce(new Error('offline'))
+      .mockResolvedValueOnce({ data: { results: products } });
+
+    renderSection();
+    expect(await screen.findByText('Products could not be loaded.')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
+    expect(await screen.findByText('Alpha Kit')).toBeInTheDocument();
+    expect(marketplaceService.list).toHaveBeenCalledTimes(2);
+  });
+
+  it('links published products to their public store page, never drafts', async () => {
+    renderSection();
+    await screen.findByText('Alpha Kit');
+
+    const link = screen.getByRole('link', { name: 'Alpha Kit' });
+    expect(link.getAttribute('href')).toBe('/store/products/alpha-kit');
+    expect(link.getAttribute('target')).toBe('_blank');
+    expect(link.getAttribute('rel')).toContain('noopener');
+    expect(screen.queryByRole('link', { name: 'Beta Pack' })).toBeNull();
+  });
+
   it('filters instantly by search and status, then recovers with Clear filters', async () => {
     renderSection();
     await screen.findByText('Alpha Kit');

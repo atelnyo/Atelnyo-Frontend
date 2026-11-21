@@ -242,8 +242,8 @@ const SEO_ROUTES = {
     indexable: true,
     breadcrumbs: [{ label: 'Home', url: '/' }, { label: 'Help', url: '/help' }],
   },
-  // Canonical product detail URL: /marketplace/<slug>
-  '/marketplace/': {
+  // Canonical product detail URL: /store/products/<slug>
+  '/store/products/': {
     title: 'Product',
     description: DESCRIPTIONS.product,
     robots: 'index,follow',
@@ -252,7 +252,7 @@ const SEO_ROUTES = {
     indexable: true,
     breadcrumbs: [
       { label: 'Home', url: '/' },
-      { label: 'Products', url: '/products' },
+      { label: 'Store', url: '/store' },
     ],
   },
 
@@ -492,7 +492,7 @@ export function matchSEOConfig(pathname) {
 
   // Content detail URLs: /<slug>/by/<user>/product and /<slug>/by/<user>/course
   if (/^\/[^/]+\/by\/[^/]+\/product\/?$/.test(pathname)) {
-    return { route: SEO_ROUTES['/marketplace/'], matchedPath: pathname };
+    return { route: SEO_ROUTES['/store/products/'], matchedPath: pathname };
   }
   if (/^\/[^/]+\/by\/[^/]+\/course\/?$/.test(pathname)) {
     return { route: SEO_ROUTES['/courses/'], matchedPath: pathname };

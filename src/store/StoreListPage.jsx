@@ -12,11 +12,21 @@ const SORT_OPTIONS = [
   { value: '-price', label: 'Price: high to low' },
 ];
 
+const KIND_OPTIONS = [
+  { value: '', label: 'All types' },
+  { value: 'digital', label: 'Digital' },
+  { value: 'physical', label: 'Physical' },
+  { value: 'service', label: 'Services' },
+  { value: 'subscription', label: 'Subscriptions' },
+];
+
 export default function StoreListPage() {
   const { categorySlug = '' } = useParams();
   const [params, setParams] = useSearchParams();
   const q = (params.get('q') || '').trim();
   const ordering = SORT_OPTIONS.some((o) => o.value === params.get('ordering')) ? params.get('ordering') : '';
+  const kindParam = params.get('kind') || '';
+  const kind = KIND_OPTIONS.some((o) => o.value === kindParam) ? kindParam : '';
   const parsedPage = Number.parseInt(params.get('page') || '1', 10);
   const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
 
@@ -31,58 +41,43 @@ export default function StoreListPage() {
     };
   }, []);
 
-  const [categories, setCategories] = useState([]);
+  // One category fetch powers both the nav and the category-page lookup.
+  // null means "still loading"; [] means the request finished empty/failed.
+  const [categories, setCategories] = useState(null);
   useEffect(() => {
     let cancelled = false;
-    storeService.listCategories()
+    const controller = new AbortController();
+    storeService.listCategories(controller.signal)
       .then(({ data }) => {
         if (!cancelled) {
           setCategories(Array.isArray(data) ? data : data?.results || []);
         }
       })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  // Category page: resolve the slug to a real category id. Results are keyed
-  // by slug so a stale result for a previous slug is ignored (treated as loading).
-  const [category, setCategory] = useState({ slug: '', status: 'none', id: null });
-
-  useEffect(() => {
-    if (!categorySlug) {
-      return undefined;
-    }
-    let cancelled = false;
-    storeService.listCategories()
-      .then(({ data }) => {
-        if (cancelled) {
-          return;
-        }
-        const list = Array.isArray(data) ? data : data?.results || [];
-        const hit = list.find((c) => c.slug === categorySlug);
-        setCategory({ slug: categorySlug, status: hit ? 'found' : 'missing', id: hit ? hit.id : null });
-      })
       .catch(() => {
-        if (!cancelled) {
-          setCategory({ slug: categorySlug, status: 'missing', id: null });
-        }
+        if (!cancelled) setCategories([]);
       });
     return () => {
       cancelled = true;
+      controller.abort();
     };
-  }, [categorySlug]);
+  }, []);
 
+  const categoryList = categories || [];
+  const categoryHit = categorySlug
+    ? categoryList.find((c) => c.slug === categorySlug)
+    : null;
   const catStatus = !categorySlug
     ? 'none'
-    : category.slug === categorySlug
-      ? category.status
-      : 'loading';
-  const catId = catStatus === 'found' ? category.id : null;
+    : categories === null
+      ? 'loading'
+      : categoryHit ? 'found' : 'missing';
+  const catId = categoryHit ? categoryHit.id : null;
+  const categoryName = categoryHit?.name
+    || (categorySlug ? categorySlug.replace(/-/g, ' ') : '');
 
   // Products are keyed by their inputs so a stale result is never shown.
-  const requestKey = `${q}|${catStatus}|${catId ?? ''}|${ordering}|${page}`;
+  const [retryTick, setRetryTick] = useState(0);
+  const requestKey = `${q}|${catStatus}|${catId ?? ''}|${kind}|${ordering}|${page}|${retryTick}`;
   const [products, setProducts] = useState({ key: '', status: 'loading', items: [], count: null, hasNext: false });
 
   useEffect(() => {
@@ -96,6 +91,9 @@ export default function StoreListPage() {
     }
     if (catStatus === 'found') {
       query.category_id = catId;
+    }
+    if (kind) {
+      query.kind = kind;
     }
     if (ordering) {
       query.ordering = ordering;
@@ -126,7 +124,7 @@ export default function StoreListPage() {
     return () => {
       cancelled = true;
     };
-  }, [q, catStatus, catId, ordering, page, requestKey]);
+  }, [q, catStatus, catId, kind, ordering, page, retryTick, requestKey]);
 
   const updateParams = (changes) => {
     const next = new URLSearchParams(params);
@@ -150,20 +148,23 @@ export default function StoreListPage() {
     );
   }
 
-  const heading = categorySlug && catStatus === 'found'
-    ? categorySlug.replace(/-/g, ' ')
-    : q ? `Results for "${q}"` : 'Atelnyo Store - Shop Digital Products & Creator Goods';
+  const categoryHeading = categorySlug && catStatus === 'found'
+    ? categoryName
+    : '';
+  const heading = q
+    ? (categoryHeading ? `Results for "${q}" in ${categoryHeading}` : `Results for "${q}"`)
+    : categoryHeading || 'Atelnyo Store - Shop Digital Products & Creator Goods';
 
   const current = products.key === requestKey ? products : { status: 'loading', items: [], count: null, hasNext: false };
 
   const seoTitle = categorySlug && catStatus === 'found'
-    ? `${categorySlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} | Atelnyo Store`
+    ? `${categoryName.replace(/\b\w/g, l => l.toUpperCase())} | Atelnyo Store`
     : q
     ? `Search: ${q} | Atelnyo Store`
     : 'Atelnyo Store - Buy Digital Products, Courses & Creator Goods Online';
 
   const seoDesc = categorySlug && catStatus === 'found'
-    ? `Shop ${categorySlug.replace(/-/g, ' ')} products from creators on Atelnyo Store. Buy digital downloads, courses, and more.`
+    ? `Shop ${categoryName} products from creators on Atelnyo Store. Buy digital downloads, courses, and more.`
     : q
     ? `Search results for "${q}" on Atelnyo Store. Discover digital products and creator goods.`
     : 'Shop the Atelnyo Store for digital products, online courses, music, and creator goods. Secure checkout with instant access to digital downloads.';
@@ -175,18 +176,18 @@ export default function StoreListPage() {
         description={seoDesc}
         url={categorySlug ? `/store/categories/${categorySlug}` : q ? '/store/search' : '/store'}
         image="https://atelnyo.site/icon-store.png"
-        noindex={Boolean(q)}
+        noindex={Boolean(q) || Boolean(kind)}
       />
       <h1 id="store-listing-title" className={categorySlug || q ? 'store-title' : 'store-listing__title'}>
         {heading}
       </h1>
 
-      {categories.length > 0 && (
+      {categoryList.length > 0 && (
         <nav className="store-categories" aria-label="Categories">
           <Link to="/store" className={!categorySlug ? 'is-active' : ''} aria-current={!categorySlug ? 'page' : undefined}>
             All
           </Link>
-          {categories.map((c) => (
+          {categoryList.map((c) => (
             <Link
               key={c.id}
               to={`/store/categories/${encodeURIComponent(c.slug)}`}
@@ -200,9 +201,47 @@ export default function StoreListPage() {
       )}
 
       <div className="store-toolbar">
+        <form
+          className="store-toolbar__search"
+          role="search"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const value = new FormData(e.currentTarget).get('q');
+            updateParams({ q: String(value || '').trim(), page: '' });
+          }}
+        >
+          <label className="store-sr-only" htmlFor="store-search">Search products</label>
+          <input
+            key={q}
+            id="store-search"
+            name="q"
+            type="search"
+            defaultValue={q}
+            placeholder="Search products"
+            autoComplete="off"
+          />
+          <button type="submit" className="store-btn">Search</button>
+          {q && (
+            <button
+              type="button"
+              className="store-btn store-btn--ghost"
+              onClick={() => updateParams({ q: '', page: '' })}
+            >
+              Clear
+            </button>
+          )}
+        </form>
         {current.count != null && (
           <p className="store-toolbar__count" aria-live="polite">{current.count} products</p>
         )}
+        <label className="store-toolbar__kind">
+          <span>Type</span>
+          <select value={kind} onChange={(e) => updateParams({ kind: e.target.value, page: '' })}>
+            {KIND_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+        </label>
         <label className="store-toolbar__sort">
           <span>Sort by</span>
           <select value={ordering} onChange={(e) => updateParams({ ordering: e.target.value, page: '' })}>
@@ -248,11 +287,33 @@ export default function StoreListPage() {
         </ul>
       )}
       {current.status === 'error' && (
-        <p className="store-state store-state--error" role="alert">
-          Products could not be loaded. Please try again later.
-        </p>
+        <div className="store-state store-state--error">
+          <p role="alert">Products could not be loaded. Please try again later.</p>
+          <button type="button" className="store-btn store-btn--ghost" onClick={() => setRetryTick((n) => n + 1)}>
+            Try again
+          </button>
+        </div>
       )}
-      {current.status === 'empty' && <p className="store-state">No products found.</p>}
+      {current.status === 'empty' && (
+        <div className="store-state" role="status">
+          <p>No products found.</p>
+          {(q || kind || categorySlug) && (
+            <div className="store-state__actions">
+              {q && (
+                <button type="button" className="store-btn store-btn--ghost" onClick={() => updateParams({ q: '', page: '' })}>
+                  Clear search
+                </button>
+              )}
+              {kind && (
+                <button type="button" className="store-btn store-btn--ghost" onClick={() => updateParams({ kind: '', page: '' })}>
+                  Clear type filter
+                </button>
+              )}
+              {!q && categorySlug && <Link to="/store" className="store-btn store-btn--ghost">Browse all products</Link>}
+            </div>
+          )}
+        </div>
+      )}
 
       {current.status === 'ready' && (
         <ul className="store-grid">

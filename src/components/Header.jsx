@@ -163,6 +163,18 @@ const Header = ({
 
       {/* Right: actions */}
       <div className="app-header__actions">
+        {/* Public Store entry — the isolated storefront keeps its own
+            header, but visitors must be able to reach it from the main
+            platform (atelnyo.site → /store). */}
+        <button
+          className="icon-btn header-btn header-store-btn"
+          onClick={() => startTransition(() => navigate('/store'))}
+          title={t2(lang, { ht: 'Boutik', fr: 'Boutique', es: 'Tienda', en: 'Store' })}
+          aria-label={t2(lang, { ht: 'Louvri Boutik la', fr: 'Ouvrir la boutique', es: 'Abrir la tienda', en: 'Open the Store' })}
+        >
+          <i className="fas fa-store" aria-hidden="true" />
+        </button>
+
         {/* Creator shortcut */}
         {user?.is_creator && (
           <button

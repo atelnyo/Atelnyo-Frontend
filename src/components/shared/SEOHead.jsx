@@ -474,7 +474,7 @@ export function profileSchema(profile, { courses = [], products = [], portfolio 
             name: p.title || `${displayName}'s product`,
             ...(p.description && { description: truncate(p.description, 200) }),
             ...(p.image_url && { image: p.image_url }),
-            url: p.slug ? `${BASE_URL}/marketplace/${p.slug}` : undefined,
+            url: p.slug ? `${BASE_URL}/store/products/${p.slug}` : undefined,
             ...(p.price != null && {
               offers: {
                 '@type': 'Offer',

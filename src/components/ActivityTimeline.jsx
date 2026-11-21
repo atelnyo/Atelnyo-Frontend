@@ -261,8 +261,8 @@ const NOTIFICATION_ROUTES = {
   rule_notification:           () => null,
   rule_custom_action:          () => null,
   points_awarded:              () => null,
-  review_received:        (d) => d?.product_id ? `/marketplace/${d.product_id}` : null,
-  order_placed:           (d) => d?.product_id ? `/marketplace/${d.product_id}` : null,
+  review_received:        (d) => d?.product_id ? `/store/products/${encodeURIComponent(d.product_id)}` : null,
+  order_placed:           (d) => d?.product_id ? `/store/products/${encodeURIComponent(d.product_id)}` : null,
   tip_received:           () => '/sheet/wallet',
   tip_sent:               () => '/sheet/wallet',
   // A message to the creator opens the Studio inbox; a REPLY opens the

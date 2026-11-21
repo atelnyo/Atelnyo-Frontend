@@ -54,6 +54,7 @@ export default function StoreProductPage() {
   const [favBusy, setFavBusy] = useState(false);
   const [related, setRelated] = useState({ status: 'idle', items: [] });
   const [relatedRetry, setRelatedRetry] = useState(0);
+  const [productRetry, setProductRetry] = useState(0);
   const [descOpen, setDescOpen] = useState(false);
   const [review, setReview] = useState({ rating: 0, title: '', body: '' });
   const [reviewBusy, setReviewBusy] = useState(false);
@@ -87,7 +88,7 @@ export default function StoreProductPage() {
     return () => {
       cancelled = true;
     };
-  }, [slug]);
+  }, [slug, productRetry]);
 
   // Local-only browsing history; never sent to the server.
   useEffect(() => {
@@ -192,7 +193,21 @@ export default function StoreProductPage() {
     );
   }
   if (state.status === 'error') {
-    return <p className="store-state store-state--error" role="alert">This product could not be loaded.</p>;
+    return (
+      <section className="store-state store-state--error">
+        <p role="alert">This product could not be loaded.</p>
+        <button
+          type="button"
+          className="store-btn store-btn--ghost"
+          onClick={() => {
+            setState({ status: 'loading', product: null });
+            setProductRetry((n) => n + 1);
+          }}
+        >
+          Try again
+        </button>
+      </section>
+    );
   }
 
   const p = state.product;
@@ -312,7 +327,7 @@ export default function StoreProductPage() {
         title={`${p.title} | Atelnyo Store`}
         description={productDesc || `Buy ${p.title} on Atelnyo Store. Digital products from creators.`}
         image={p.image_url || undefined}
-        url={`/store/products/${p.slug || p.id}`}
+        url={`/store/products/${encodeURIComponent(p.slug || p.id)}`}
         type="product"
       />
 

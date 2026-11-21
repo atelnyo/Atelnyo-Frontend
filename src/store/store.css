@@ -61,13 +61,30 @@
 .store-categories a.is-active { background: var(--store-navy); border-color: var(--store-navy); color: #fff; }
 .store-toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin: 0 0 16px; }
 .store-toolbar__count { margin: 0; font-size: 0.9rem; }
-.store-toolbar__sort { display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; }
-.store-toolbar__sort select { min-width: 160px; height: 36px; padding: 6px 10px; border: 1px solid #cfd6e0; border-radius: 4px; background: #fff; color: #1b2a4a; font: inherit; -webkit-appearance: menulist; appearance: auto; }
-.store-toolbar__sort select option { background: #fff; color: #1b2a4a; }
-.store-toolbar__sort span { color: #1b2a4a; }
+.store-toolbar__sort, .store-toolbar__kind { display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; }
+.store-toolbar__sort select, .store-toolbar__kind select { min-width: 160px; height: 36px; padding: 6px 10px; border: 1px solid #cfd6e0; border-radius: 4px; background: #fff; color: #1b2a4a; font: inherit; -webkit-appearance: menulist; appearance: auto; }
+.store-toolbar__sort select option, .store-toolbar__kind select option { background: #fff; color: #1b2a4a; }
+.store-toolbar__sort span, .store-toolbar__kind span { color: #1b2a4a; }
+.store-toolbar__kind select { min-width: 140px; }
+.store-toolbar__search {
+  display: flex; align-items: center; gap: 8px;
+  flex: 1 1 280px; min-width: 0;
+}
+.store-root .store-toolbar__search input {
+  flex: 1; min-width: 0; height: 36px; padding: 6px 12px;
+  border: 1px solid #cfd6e0; border-radius: 4px;
+  background: #fff; color: #1b2a4a; font: inherit;
+}
+.store-toolbar__search .store-btn { height: 36px; padding: 0 14px; white-space: nowrap; }
+@media (max-width: 640px) {
+  .store-toolbar__search { flex-basis: 100%; }
+}
 .store-pager { display: flex; justify-content: center; align-items: center; gap: 16px; margin: 24px 0; }
 .store-state { color: var(--store-muted); }
 .store-state--error { color: var(--store-danger); }
+.store-state > .store-btn { margin-top: 8px; }
+.store-state__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 10px; }
+.store-state__actions .store-btn { margin-top: 0; text-decoration: none; }
 
 .store-auth { display: flex; align-items: flex-start; justify-content: center; min-height: 100vh; padding: 24px 16px; }
 .store-auth__card, .store-account {

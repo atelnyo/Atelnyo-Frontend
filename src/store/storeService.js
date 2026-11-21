@@ -11,7 +11,10 @@ function guestHeaders(guestToken) {
 
 export const storeService = {
   listProducts: (params) => api.get('marketplace/products/', { params }),
-  listCategories: () => api.get('categories/', { params: { scope: 'product' } }),
+  listCategories: (signal) => api.get('categories/', {
+    params: { scope: 'product' },
+    ...(signal ? { signal } : {}),
+  }),
   getProduct: (slugOrId) => api.get(`marketplace/products/${encodeURIComponent(slugOrId)}/`),
   // Up to 8 live products related by category (seller fallback).
   listRelated: (id) => api.get(`marketplace/products/${encodeURIComponent(id)}/related/`),

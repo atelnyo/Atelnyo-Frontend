@@ -536,7 +536,7 @@ export default function CompanyProfileDetail({ lang = 'en', showToast }) {
                         {linkedProducts.map((p) => (
                           <LinkedCard
                             key={p.id}
-                            href={`/marketplace/${p.slug}`}
+                            href={`/store/products/${encodeURIComponent(p.slug || p.id)}`}
                             title={p.title}
                             sub={`${p.currency || 'USD'} ${p.price}`}
                             image={p.image_url}

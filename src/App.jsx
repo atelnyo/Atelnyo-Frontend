@@ -199,6 +199,7 @@ import { captureAffiliateToken } from './utils/affiliateAttribution';
 // for that shape; each detail page auto-upgrades legacy URLs to it.
 import { buildContentUrl, isContentRoutePath, isLegacyContentUrl, normalizeContentType, parseContentUrl } from './utils/contentUrl';
 import { historyBack, requireLogin } from './utils/history';
+import LegacyProductRedirect from './store/LegacyProductRedirect';
 // ─── Global Locale & Market Routing (Phases 3–4) ────────────────
 // markets.js = single source of truth for language/market combos;
 // localeUrl.js = URL parser/validation + switcher URL rewriting;
@@ -355,6 +356,7 @@ const ActivityTimeline = lazy(() => import('./components/ActivityTimeline'));
 import { SHEETS, legacyProfileTarget } from './routes/sheets';
 import EmailVerificationRoute from './routes/EmailVerificationRoute';
 import { translations } from './data/translations';
+import { storeProductPath } from './store/routing';
 import api, { courseService, communitiesService, authService, sessionService, progressService, favoriteService, activityFeedService, proposalService, languagePreferenceService, clearTokenPair, broadcastLogout, API_URL } from './services/api';
 import { useAuthStore } from './store/useAuthStore';
 import permissionManager from './pwa/permissions/PermissionManager';
@@ -2109,6 +2111,12 @@ function App() {
     }
   }, []);  
 
+  // Product cards in Explore/HomeFeed belong to the one public Store detail.
+  // Rows without a slug/id (older cached payloads) fall back to the catalog.
+  const openStoreProduct = (product) => {
+    navigateRR(storeProductPath(product) || '/store');
+  };
+
   // Routing / View Logic
   const renderContent = () => {
     switch (activeTab) {
@@ -2239,7 +2247,7 @@ function App() {
             onOpenMusicSheet={(track) => navigateRR(buildContentUrl('music', track), { state: { track } })}
             onOpenTalentSheet={(talent) => navigateRR(buildContentUrl('talent', talent), { state: { talent } })}
             onOpenJobSheet={(job) => navigateRR(buildContentUrl('job', job), { state: { job } })}
-            onOpenProduct={(product) => { setSelectedProduct(product); navigateRR(buildContentUrl('product', product)); }}
+            onOpenProduct={openStoreProduct}
             onOpenPortfolio={(project) => navigateRR(buildContentUrl('portfolio', project), { state: { project } })}
             onOpenCheckout={(type, price, meta) => handleOpenCheckout(type, price, meta)}
             showToast={showToast}
@@ -2859,7 +2867,7 @@ function App() {
             onOpenMusicSheet={(track) => navigateRR(buildContentUrl('music', track), { state: { track } })}
             onOpenTalentSheet={(talent) => navigateRR(buildContentUrl('talent', talent), { state: { talent } })}
             onOpenJobSheet={(job) => navigateRR(buildContentUrl('job', job), { state: { job } })}
-            onOpenProduct={(product) => { setSelectedProduct(product); navigateRR(buildContentUrl('product', product)); }}
+            onOpenProduct={openStoreProduct}
             onOpenPortfolio={(project) => navigateRR(buildContentUrl('portfolio', project), { state: { project } })}
             onOpenCheckout={(type, price, meta) => handleOpenCheckout(type, price, meta)}
             showToast={showToast}
@@ -2875,7 +2883,7 @@ function App() {
             onOpenMusicSheet={(track) => navigateRR(buildContentUrl('music', track), { state: { track } })}
             onOpenTalentSheet={(talent) => navigateRR(buildContentUrl('talent', talent), { state: { talent } })}
             onOpenJobSheet={(job) => navigateRR(buildContentUrl('job', job), { state: { job } })}
-            onOpenProduct={(product) => { setSelectedProduct(product); navigateRR(buildContentUrl('product', product)); }}
+            onOpenProduct={openStoreProduct}
             onOpenPortfolio={(project) => navigateRR(buildContentUrl('portfolio', project), { state: { project } })}
             onOpenCheckout={(type, price, meta) => handleOpenCheckout(type, price, meta)}
             showToast={showToast}
@@ -3668,14 +3676,8 @@ function App() {
             onAuthOpen={() => setIsAuthOpen(true)}
           />
         } />
-        <Route path="/marketplace/:id" element={
-          <ProductDetail
-            lang={lang}
-            onOpenCheckout={(type, price, meta) => handleOpenCheckout(type, price, meta)}
-            showToast={showToast}
-            user={user}
-          />
-        } />
+        {/* Legacy product URL — one Store detail owns the product now. */}
+        <Route path="/marketplace/:id" element={<LegacyProductRedirect />} />
         {/* /store — isolated Store namespace (static routes; must stay above /:key/:type). */}
         {/* Account page uses the store template (header, search, cart, footer). */}
         <Route path="/account" element={<StoreLayout />}>
@@ -3716,6 +3718,11 @@ function App() {
             onAuthRequired={() => setIsAuthOpen(true)}
           />
         } />
+        {/* Legacy product content URLs (old canonical + id@user shape)
+            redirect to the single Store product detail. These specific
+            routes must stay above the generic content routes. */}
+        <Route path="/:slug/by/:user/product" element={<LegacyProductRedirect />} />
+        <Route path="/:key/product" element={<LegacyProductRedirect />} />
         {/* NEW canonical format — /{slug}/by/{user}/{type} (4 segments). */}
         <Route path="/:slug/by/:user/:type" element={
           <ContentKeyRoute

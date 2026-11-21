@@ -2,9 +2,12 @@
  * src/utils/contentUrl.js
  *
  * Content deep-link URL helpers — the canonical shareable URL shape for
- * every Explore content category:
+ * Explore content:
  *
  *   /{slug}/by/{user}/{type}
+ *
+ * Products are the one commerce exception: they use /store/products/{slug}
+ * so the feed, search, sitemap and checkout all share one detail page.
  *
  * Examples:
  *   /lanmou-sou-do-kay/by/johndoe/music
@@ -12,7 +15,7 @@
  *   /devweb-haïti/by/pierre/job
  *   /solèy-leve/by/jean/spotlight
  *   /sit-web-mireille/by/mireille/portfolio
- *   /konpase-dijital/by/alex/product
+ *   /store/products/konpase-dijital   (the one commerce exception)
  *   /python-avanse/by/rose/course
  *   /fèt-mizik/by/paulo/event
  *   /community/kominote-mizik
@@ -33,6 +36,8 @@
  * auto-redirects (replace) to the canonical URL once the payload loads
  * (see ``isLegacyContentUrl``).
  */
+
+import { storeProductPath } from '../store/routing';
 
 export const CONTENT_TYPES = [
   'music', 'talent', 'job', 'spotlight', 'portfolio', 'product', 'course', 'event',
@@ -118,6 +123,9 @@ export function contentUserKey(item) {
 /** Build the canonical detail URL from a content payload. */
 export function buildContentUrl(type, item) {
   const t = normalizeContentType(type) || type;
+  // Product detail lives in the Store shell; every other type keeps the
+  // content-key canonical route.
+  if (t === 'product') return storeProductPath(item) || '/store';
   // Every canonical type is slug-keyed (SLUG_KEY_TYPES) — prefer the
   // slug so the URL reads like the title. ``||`` (not ``??``) so an
   // empty-string slug falls back to the numeric id instead of emitting

@@ -313,7 +313,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
     };
 
     if (savedIdRef.current && form.is_active !== false) {
-      navigate(`/marketplace/${savedIdRef.current}`);
+      navigate(`/store/products/${encodeURIComponent(savedIdRef.current)}`);
       return;
     }
 

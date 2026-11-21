@@ -78,6 +78,19 @@ describe('StoreProductPage', () => {
     removeFavorite.mockReset();
   });
 
+  it('retries when the product request fails', async () => {
+    getProduct
+      .mockRejectedValueOnce(new Error('offline'))
+      .mockResolvedValueOnce({ data: product });
+
+    renderPage();
+    expect(await screen.findByText('This product could not be loaded.')).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
+    expect(await screen.findByRole('button', { name: 'Add to cart' })).toBeTruthy();
+    expect(getProduct).toHaveBeenCalledTimes(2);
+  });
+
   it('records the viewed product in the local recently-viewed history', async () => {
     renderPage();
     await screen.findByRole('button', { name: 'Add to cart' });

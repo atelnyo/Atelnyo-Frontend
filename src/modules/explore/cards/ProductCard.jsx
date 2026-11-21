@@ -103,6 +103,12 @@ export default function ProductCard({ product, t, onOpen, onOpenCheckout, showTo
   const shortDescription = (product.description || '').trim();
 
   function handleBuy() {
+    // Commerce now lives on the Store product page. The legacy checkout
+    // callback remains a fallback for callers that do not provide onOpen.
+    if (onOpen) {
+      onOpen(product);
+      return;
+    }
     if (!onOpenCheckout) {
       return;
     }

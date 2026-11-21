@@ -7,6 +7,11 @@ describe('buildContentUrl', () => {
       .toBe('/community/konpa-lovers');
   });
 
+  it('uses the Store route for products', () => {
+    expect(buildContentUrl('product', { slug: 'konpa-tee', user_key: 'founder' }))
+      .toBe('/store/products/konpa-tee');
+  });
+
   it('keeps content-key routes for other public content', () => {
     expect(buildContentUrl('event', { slug: 'konpa-night', user_key: 'founder' }))
       .toBe('/konpa-night/by/founder/event');

@@ -85,6 +85,7 @@ export default function StoreLayout() {
           <ul id="store-menu" className={`store-header__menu${menuOpen ? ' is-open' : ''}`}>
             <li><Link to="/store" onClick={() => setMenuOpen(false)}>All products</Link></li>
             <li><Link to="/store/favorites" onClick={() => setMenuOpen(false)}>Favorites</Link></li>
+            <li><Link to="/" onClick={() => setMenuOpen(false)}>Back to Atelnyo</Link></li>
             <li>
               <Link to={user ? '/account' : '/store/login'} onClick={() => setMenuOpen(false)}>
                 {user ? 'Account' : 'Sign in'}
@@ -115,6 +116,7 @@ export default function StoreLayout() {
           <Link to="/store">All products</Link>
           <Link to="/store/cart">Cart</Link>
           <Link to="/store/favorites">Favorites</Link>
+          <Link to="/">Back to Atelnyo</Link>
           <Link to="/contact">Contact</Link>
           <Link to="/legal/terms-of-service">Terms</Link>
           <Link to="/legal/privacy-policy">Privacy</Link>

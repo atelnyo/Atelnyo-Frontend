@@ -198,7 +198,7 @@ function getContentUrl(contentType, contentId) {
     community: `/community/${contentId}`,
     event: `/sheet/event/${contentId}`,
     job: `/job/${contentId}`,
-    product: `/marketplace/${contentId}`,
+    product: `/store/products/${encodeURIComponent(contentId)}`,
     portfolio: `/portfolio/${contentId}`,
   };
   return urls[contentType] || null;

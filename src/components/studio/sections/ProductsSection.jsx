@@ -64,6 +64,27 @@ function ProductsTableSkeleton({ lang, t }) {
   );
 }
 
+function ProductThumb({ product }) {
+  const [failed, setFailed] = useState(false);
+  if (!product.image_url || failed) {
+    return (
+      <span className={styles.productThumbFallback} aria-hidden="true">
+        <i className="fas fa-cube" />
+      </span>
+    );
+  }
+  return (
+    <img
+      className={styles.productThumb}
+      src={product.image_url}
+      alt=""
+      loading="lazy"
+      decoding="async"
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
 export default function ProductsSection({ lang, t, showToast, setShowProductModal, onEdit }) {
   const [confirm, setConfirm] = useState(null);
   const [confirmBusy, setConfirmBusy] = useState(false);
@@ -78,7 +99,7 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
   // freshly imported draft is always on the first page — with limit: 10
   // new imports beyond the first page were invisible until a full reload.
   const {
-    data: products = [], loading, refetch, removeLocal, updateLocal,
+    data: products = [], loading, error, refetch, removeLocal, updateLocal,
     hasMore, loadingMore, loadMore, loadMoreError,
   } = useFetch(
     (signal, page) => marketplaceService.list({ page, page_size: 100, mine: true }, signal),
@@ -365,6 +386,7 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
 
   const isEmpty = products.length === 0;
   const showSkeleton = loading && isEmpty;
+  const showError = Boolean(error) && isEmpty && !loading;
   const resultLabel = lang === 'ht'
     ? `${filteredProducts.length} sou ${products.length} pwodwi`
     : `${filteredProducts.length} of ${products.length} products`;
@@ -392,6 +414,14 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
       />
       {showSkeleton ? (
         <ProductsTableSkeleton lang={lang} t={t} />
+      ) : showError ? (
+        <div className={styles.loadError} role="alert">
+          <i className="fas fa-circle-exclamation" aria-hidden="true" />
+          <p>{lang === 'ht' ? 'Pa t kapab chaje pwodwi yo.' : 'Products could not be loaded.'}</p>
+          <button type="button" className={styles.loadMoreBtn} onClick={refetch}>
+            {lang === 'ht' ? 'Eseye ankò' : 'Try again'}
+          </button>
+        </div>
       ) : isEmpty ? (
         <EmptyState
           icon="fa-cube"
@@ -571,10 +601,27 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
                           />
                         </td>
                         <td className={styles.cellName}>
-                          {p.title}
-                          <span className={styles.cellSub}>
-                            <i className="fas fa-cube" aria-hidden="true" /> {kindLabel}
-                          </span>
+                          <div className={styles.productIdentity}>
+                            <ProductThumb product={p} />
+                            <div className={styles.productBody}>
+                              {isLive && p.slug ? (
+                                <a
+                                  className={styles.productTitleLink}
+                                  href={`/store/products/${encodeURIComponent(p.slug)}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  title={lang === 'ht' ? 'Wè nan Store' : 'View in Store'}
+                                >
+                                  {p.title}
+                                </a>
+                              ) : (
+                                <span className={styles.productTitleText}>{p.title}</span>
+                              )}
+                              <span className={styles.cellSub}>
+                                <i className="fas fa-cube" aria-hidden="true" /> {kindLabel}
+                              </span>
+                            </div>
+                          </div>
                         </td>
                         <td>{fmtCurrency(p.price)}</td>
                         <td>{fmtCount(p.sales_count || 0)}</td>
