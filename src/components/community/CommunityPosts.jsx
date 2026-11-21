@@ -14,9 +14,24 @@ import { NavLink, useOutletContext, useParams, useSearchParams } from 'react-rou
 import SEOHead from '../shared/SEOHead';
 import api, { communitiesService } from '../../services/api';
 import { t as t4 } from '../../utils/i18n';
+import { countWithUnit } from '../../utils/plural';
 import { resolveVideoSource, youtubeThumbnail } from '../../modules/explore/utils/videoSource';
 import VideoEmbedFrame from '../media/VideoEmbedFrame';
+import ContentFeedbackMenu from '../shared/ContentFeedbackMenu';
 import { buildIntroDraft } from './communityOnboarding';
+
+const POST_FORMS = {
+  ht: { one: 'pòs', many: 'pòs' },
+  en: { one: 'post', many: 'posts' },
+  fr: { one: 'publication', many: 'publications' },
+  es: { one: 'publicación', many: 'publicaciones' },
+};
+const COMMENT_FORMS = {
+  ht: { one: 'kòmantè', many: 'kòmantè' },
+  en: { one: 'comment', many: 'comments' },
+  fr: { one: 'commentaire', many: 'commentaires' },
+  es: { one: 'comentario', many: 'comentarios' },
+};
 
 /** First playable video URL inside a post body (YouTube/Vimeo/direct file), or '' — same resolver as Music. */
 function firstVideoUrl(text) {
@@ -251,8 +266,9 @@ function formatPostTime(iso, lang) {
   if (!iso) return '';
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '';
+  const locale = lang === 'ht' ? 'fr-HT' : lang === 'fr' ? 'fr' : lang === 'es' ? 'es' : 'en';
   try {
-    return d.toLocaleString(lang === 'ht' ? 'fr-HT' : undefined, {
+    return d.toLocaleString(locale, {
       month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
     });
   } catch { return ''; }
@@ -370,6 +386,7 @@ export default function CommunityPosts() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
+  const [deletingId, setDeletingId] = useState(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
@@ -555,8 +572,10 @@ export default function CommunityPosts() {
   }
 
   async function handleDelete(post) {
+    if (deletingId) return;
     if (!window.confirm(t4(lang, 'Efase pòs sa a?', 'Delete this post?', 'Supprimer cette publication ?', '¿Eliminar esta publicación?'))) return;
     const prev = posts;
+    setDeletingId(post.id);
     setPosts((list) => list.filter((p) => p.id !== post.id));
     try {
       await communitiesService.deletePost(post.id);
@@ -564,6 +583,8 @@ export default function CommunityPosts() {
     } catch (err) {
       setPosts(prev);
       showToast?.(err?.response?.data?.detail || t4(lang, 'Pa t kapab efase.', 'Could not delete.', 'Suppression impossible.', 'No se pudo eliminar.'), 'circle-exclamation');
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -693,9 +714,9 @@ export default function CommunityPosts() {
       <header className="c-posts-intro">
         <div>
           <h2>{t4(lang, 'Pòs ak diskisyon', 'Posts & discussions', 'Publications et discussions', 'Publicaciones y debates')}</h2>
-          <p>{t4(lang, 'Pataje yon lide, poze yon kesyon, oswa reponn yon pòs. Se piblikasyon kominote a, se pa yon chat an dirèk.', 'Share an idea, ask a question, or reply to a post. These are community discussions, not live chat.', 'Partagez une idée, posez une question ou répondez à une publication. Ici, pas de chat en direct.', 'Comparte una idea, haz una pregunta o responde a una publicación. No es un chat en directo.')}</p>
+          <p>{t4(lang, 'Pataje yon lide, poze yon kesyon oswa reponn yon pòs — se piblikasyon ak kòmantè ki fè kominote a grandi.', 'Share an idea, ask a question, or reply to a post — this community grows through posts and comments.', 'Partagez vos idées, posez vos questions et échangez avec les membres à travers les publications et les commentaires.', 'Comparte ideas, haz preguntas y conversa con los miembros mediante publicaciones y comentarios.')}</p>
         </div>
-        <span className="c-posts-count">{totalCount} {t4(lang, 'pòs', 'posts', 'publications', 'publicaciones')}</span>
+        <span className="c-posts-count">{countWithUnit(lang, totalCount, POST_FORMS)}</span>
       </header>
       )}
       {!permalinkId && isMember && (
@@ -922,11 +943,16 @@ export default function CommunityPosts() {
                 <i className="fas fa-thumbtack" aria-hidden="true" />
               </span>
             )}
+            {/* Reporting reuses the platform-wide content report endpoint
+                (/api/content/reports/) — no community-only report store. */}
+            <ContentFeedbackMenu contentType="community_post" contentId={post.id} lang={lang} />
             {canDelete(post) && (
               <button
                 type="button"
                 className="c-post-delete"
                 onClick={() => handleDelete(post)}
+                disabled={deletingId === post.id}
+                aria-busy={deletingId === post.id || undefined}
                 title={t4(lang, 'Efase', 'Delete', 'Supprimer', 'Eliminar')}
                 aria-label={t4(lang, 'Efase pòs', 'Delete post', 'Supprimer', 'Eliminar')}
                 data-testid={`post-delete-${post.id}`}
@@ -986,7 +1012,7 @@ export default function CommunityPosts() {
               aria-expanded={Boolean(openComments[post.id])}
               data-testid={`post-comments-toggle-${post.id}`}
             >
-              <i className="fas fa-comment" aria-hidden="true" /> {post.comment_count || 0} {t4(lang, 'kòmantè', 'comments', 'commentaires', 'comentarios')}
+              <i className="fas fa-comment" aria-hidden="true" /> {countWithUnit(lang, post.comment_count || 0, COMMENT_FORMS)}
             </button>
           </div>
           {openComments[post.id] && (

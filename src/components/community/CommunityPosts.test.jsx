@@ -30,7 +30,7 @@ vi.mock('../../services/api', () => ({
 
 import { communitiesService, communityEventsService, eventsService } from '../../services/api';
 import CommunityPosts from './CommunityPosts';
-import { CommunityEvents, CommunityHome } from '../CommunityDetail';
+import { CommunityEvents, CommunityHome, CommunityRulesTab } from '../CommunityDetail';
 
 function Harness({ community, user, entry = '/community/test/posts' }) {
   return (
@@ -88,7 +88,60 @@ describe('Community surfaces', () => {
     expect(await screen.findByText('Posts feed')).toBeTruthy();
   });
 
-  it('lets visitors join from the home CTA instead of sending them to a hidden composer', async () => {
+  it('keeps the home rules preview and the full rules tab on one ordered source', async () => {
+    const community = {
+      ...MEMBER_COMM,
+      rules: [
+        { id: 1, order: 2, title: 'Third rule' },
+        { id: 2, order: 0, title: 'First rule', description: 'Start here.' },
+        { id: 3, order: 1, title: 'Second rule' },
+        { id: 4, order: 3, title: 'Fourth rule' },
+      ],
+    };
+
+    render(
+      <MemoryRouter initialEntries={['/community/test/home']}>
+        <Routes>
+          <Route
+            path="/community/test/home"
+            element={<Outlet context={{ community, lang: 'en' }} />}
+          >
+            <Route index element={<CommunityHome />} />
+          </Route>
+          <Route
+            path="/community/test/rules"
+            element={<Outlet context={{ community, lang: 'en' }} />}
+          >
+            <Route index element={<CommunityRulesTab />} />
+          </Route>
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    const preview = await screen.findByTestId('community-rules-preview');
+    const previewItems = within(preview).getAllByRole('listitem');
+    expect(previewItems).toHaveLength(3);
+    expect(previewItems[0]).toHaveTextContent('First rule');
+    expect(previewItems[1]).toHaveTextContent('Second rule');
+    expect(previewItems[2]).toHaveTextContent('Third rule');
+    // Exactly one rule remains: localized singular, not "+1 more rules".
+    expect(within(preview).getByRole('button', { name: '+1 rule' })).toBeTruthy();
+
+    fireEvent.click(within(preview).getByRole('button', { name: /View all rules/ }));
+
+    const full = await screen.findByTestId('community-rules-full');
+    expect(full).toHaveTextContent('4 rules');
+    const fullItems = within(full).getAllByRole('listitem');
+    expect(fullItems).toHaveLength(4);
+    expect(fullItems.map((item) => item.textContent)).toEqual([
+      expect.stringContaining('First rule'),
+      expect.stringContaining('Second rule'),
+      expect.stringContaining('Third rule'),
+      expect.stringContaining('Fourth rule'),
+    ]);
+  });
+
+  it('shows visitors one contextual explainer without duplicating the header join action', async () => {
     const onJoin = vi.fn();
     render(
       <MemoryRouter initialEntries={['/community/test/home']}>
@@ -109,10 +162,15 @@ describe('Community surfaces', () => {
       </MemoryRouter>,
     );
 
-    const joinButton = await screen.findByTestId('community-home-compose');
-    expect(joinButton).toHaveTextContent('Antre pou pibliye');
-    fireEvent.click(joinButton);
-    expect(onJoin).toHaveBeenCalledOnce();
+    const explainer = await screen.findByTestId('community-join-explainer');
+    expect(within(explainer).getByTestId('community-join-explainer-status'))
+      .toHaveTextContent('Antre ak bouton anwo a');
+
+    // The header owns the single Join action; Home explains what joining
+    // unlocks instead of rendering a second, competing Join button.
+    expect(screen.queryByTestId('community-home-compose')).toBeNull();
+    expect(screen.queryByTestId('community-join-explainer-cta')).toBeNull();
+    expect(onJoin).not.toHaveBeenCalled();
     expect(screen.queryByText('Posts feed')).toBeNull();
   });
 

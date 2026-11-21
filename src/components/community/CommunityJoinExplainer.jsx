@@ -13,7 +13,7 @@ import { t } from '../../utils/i18n';
 import { joinPlan, communityUnlocks } from './communityOnboarding';
 
 export default function CommunityJoinExplainer({
-  community, lang = 'en', pending = false, joining = false, canJoin = true, onJoin,
+  community, lang = 'en', pending = false, joining = false, canJoin = true, onJoin, showCta = true,
 }) {
   const plan = joinPlan(community?.join_mode, lang, { pending });
   const unlocks = communityUnlocks(lang);
@@ -82,7 +82,7 @@ export default function CommunityJoinExplainer({
           <span className="c-join-explainer-status" data-testid="community-join-explainer-status">
             <i className="fas fa-clock" aria-hidden="true" /> {plan.cta}
           </span>
-        ) : (
+        ) : showCta ? (
           <button
             type="button"
             className="c-join-explainer-cta"
@@ -93,6 +93,13 @@ export default function CommunityJoinExplainer({
             <i className={`fas ${joining ? 'fa-spinner fa-spin' : plan.mode === 'invite' ? 'fa-lock' : 'fa-user-plus'}`} aria-hidden="true" />
             {joining ? t(lang, 'Ap tann...', 'Please wait...', 'Patientez...') : plan.cta}
           </button>
+        ) : (
+          <span className="c-join-explainer-status" data-testid="community-join-explainer-status">
+            <i className={`fas ${plan.mode === 'invite' ? 'fa-lock' : 'fa-arrow-up'}`} aria-hidden="true" />
+            {plan.mode === 'invite'
+              ? t(lang, 'Envitasyon sèlman', 'Invite only', 'Sur invitation')
+              : t(lang, 'Antre ak bouton anwo a', 'Use the Join button above', 'Utilisez « Rejoindre » ci-dessus')}
+          </span>
         )}
       </div>
     </section>

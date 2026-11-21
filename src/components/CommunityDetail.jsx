@@ -36,10 +36,32 @@ import { communitiesService, communityEventsService, eventsService } from '../se
 import CommunityPageSkeleton from './community/CommunityPageSkeleton';
 import CommunityJoinExplainer from './community/CommunityJoinExplainer';
 import { welcomeSteps, nextEvent } from './community/communityOnboarding';
+import { localizedCategoryLabel } from './community/communityCategories';
+import { countWithUnit } from '../utils/plural';
 import useVirtualScroll from '../hooks/useVirtualScroll';
 import { t as t4 } from '../utils/i18n';
 
-const TAB_KEYS = ['home', 'events', 'posts', 'members', 'banned', 'announcements', 'files', 'courses'];
+const RULE_FORMS = {
+  ht: { one: 'règ', many: 'règ' },
+  en: { one: 'rule', many: 'rules' },
+  fr: { one: 'règle', many: 'règles' },
+  es: { one: 'regla', many: 'reglas' },
+};
+const MEMBER_FORMS = {
+  ht: { one: 'manm', many: 'manm' },
+  en: { one: 'member', many: 'members' },
+  fr: { one: 'membre', many: 'membres' },
+  es: { one: 'miembro', many: 'miembros' },
+};
+
+function localeFor(lang) {
+  if (lang === 'ht') return 'fr-HT';
+  if (lang === 'fr') return 'fr';
+  if (lang === 'es') return 'es';
+  return 'en';
+}
+
+const TAB_KEYS = ['home', 'events', 'posts', 'members', 'rules', 'banned', 'announcements', 'files', 'courses'];
 // The banned list is a moderation surface — only owner/admin see the tab.
 const MOD_ONLY_TABS = ['banned'];
 
@@ -142,12 +164,34 @@ export function CommunityHome() {
   const joinPending = myStatus === 'pending';
   const inviteOnly = !isMember && !joinPending && community?.join_mode === 'invite' && !canJoin;
   const rules = Array.isArray(community?.rules) ? community.rules : [];
-  const previewRules = rules.slice(0, 3);
+  const joinPolicyLabel = community?.join_mode === 'approval'
+    ? t4(lang, 'Sou apwobasyon', 'Approval required', 'Sur approbation', 'Con aprobación')
+    : community?.join_mode === 'invite'
+      ? t4(lang, 'Sou envitasyon', 'Invite only', 'Sur invitation', 'Solo invitación')
+      : t4(lang, 'Ouvè', 'Open', 'Ouvert', 'Abierto');
+  const membershipStateLabel = myStatus === 'pending'
+    ? t4(lang, 'Demann ann atant', 'Request pending', 'Demande en attente', 'Solicitud pendiente')
+    : community?.current_user_role === 'owner'
+      ? t4(lang, 'Fondatè', 'Owner', 'Fondateur', 'Fundador')
+      : community?.current_user_role === 'admin'
+        ? t4(lang, 'Admin', 'Admin', 'Admin', 'Admin')
+        : community?.current_user_role === 'moderator'
+          ? t4(lang, 'Moderatè', 'Moderator', 'Modérateur', 'Moderador')
+          : isMember
+            ? t4(lang, 'Manm', 'Member', 'Membre', 'Miembro')
+            : t4(lang, 'Vizitè', 'Visitor', 'Visiteur', 'Visitante');
+  const ownerHandle = community?.created_by_username ? `@${community.created_by_username}` : '';
+  const createdLabel = community?.created_at
+    ? new Date(community.created_at).toLocaleDateString(
+      localeFor(lang),
+      { year: 'numeric', month: 'short', day: 'numeric' },
+    )
+    : '';
+  const previewRules = [...rules]
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+    .slice(0, 3);
   const hasLink = (text) => /https?:\/\//i.test(text || '');
   const hasVideo = (text) => /(youtube\.com|youtu\.be|vimeo\.com|facebook\.com\/.+\/videos|tiktok\.com)/i.test(text || '');
-  const scrollToRules = () => {
-    document.getElementById('community-rules')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
   const copyCommunityLink = async () => {
     const url = `${window.location.origin}/community/${encodeURIComponent(community?.slug || '')}`;
     try {
@@ -171,7 +215,7 @@ export function CommunityHome() {
       return;
     }
     if (step.action === 'rules') {
-      scrollToRules();
+      go('rules');
       return;
     }
     if (step.action === 'events') {
@@ -255,6 +299,7 @@ export function CommunityHome() {
         />
       )}
 
+      {isMember && (
       <section className="c-home-post-cta" aria-label={t4(lang, 'Piblikasyon kominote a', 'Community posts', 'Publications de la communauté', 'Publicaciones de la comunidad')}>
         <div className="c-home-post-cta-copy">
           <span className="c-home-post-cta-icon" aria-hidden="true">
@@ -296,6 +341,7 @@ export function CommunityHome() {
                   : t4(lang, 'Antre pou pibliye', 'Join to post', 'Rejoindre pour publier', 'Únete para publicar')}
         </button>
       </section>
+      )}
 
       {!isMember && !joinPending && (
         <CommunityJoinExplainer
@@ -304,6 +350,7 @@ export function CommunityHome() {
           joining={joining}
           canJoin={canJoin}
           onJoin={onJoin}
+          showCta={false}
         />
       )}
 
@@ -320,33 +367,78 @@ export function CommunityHome() {
         </button>
         <button type="button" className="c-home-stat" onClick={() => go('posts')}>
           <i className="fas fa-comments" aria-hidden="true" />
-          <strong>{posts.length}</strong>
-          <span>{t4(lang, 'Dènye pòs', 'Recent posts', 'Publications', 'Publicaciones')}</span>
+          <strong>{community?.post_count ?? posts.length}</strong>
+          <span>{t4(lang, 'Piblikasyon', 'Posts', 'Publications', 'Publicaciones')}</span>
         </button>
-        <div className="c-home-stat" aria-label={t4(lang, 'Aksè', 'Access', 'Accès', 'Acceso')}>
-          <i className="fas fa-shield-halved" aria-hidden="true" />
-          <strong>{(community?.join_mode || 'public')}</strong>
-          <span>{t4(lang, 'Aksè', 'Access', 'Accès', 'Acceso')}</span>
-        </div>
+      </section>
+
+      {/* Information + access — visibility, join policy and the viewer's
+          own status are separate facts and must be labelled separately. */}
+      <section className="c-about-card" aria-labelledby="community-about-title">
+        <h3 className="c-title c-title--sm" id="community-about-title">
+          <i className="fas fa-circle-info" aria-hidden="true" />{' '}
+          {t4(lang, 'Konsènan kominote a', 'About this community', 'À propos de cette communauté', 'Acerca de esta comunidad')}
+        </h3>
+        <dl className="c-about-grid">
+          {community?.category && (
+            <div>
+              <dt>{t4(lang, 'Kategori', 'Category', 'Catégorie', 'Categoría')}</dt>
+              <dd>{localizedCategoryLabel(community.category, lang)}</dd>
+            </div>
+          )}
+          <div>
+            <dt>{t4(lang, 'Vizibilite', 'Visibility', 'Visibilité', 'Visibilidad')}</dt>
+            <dd>
+              <i className="fas fa-eye" aria-hidden="true" />{' '}
+              {t4(lang, 'Paj piblik', 'Public page', 'Page publique', 'Página pública')}
+            </dd>
+          </div>
+          <div>
+            <dt>{t4(lang, 'Politik antre', 'Join policy', 'Politique d’adhésion', 'Política de ingreso')}</dt>
+            <dd>{joinPolicyLabel}</dd>
+          </div>
+          <div>
+            <dt>{t4(lang, 'Aksè w', 'Your access', 'Votre accès', 'Tu acceso')}</dt>
+            <dd>{membershipStateLabel}</dd>
+          </div>
+          {ownerHandle && (
+            <div>
+              <dt>{t4(lang, 'Fondatè', 'Owner', 'Fondateur', 'Fundador')}</dt>
+              <dd>{ownerHandle}</dd>
+            </div>
+          )}
+          {createdLabel && (
+            <div>
+              <dt>{t4(lang, 'Kreye', 'Created', 'Créée', 'Creada')}</dt>
+              <dd>{createdLabel}</dd>
+            </div>
+          )}
+        </dl>
       </section>
 
       {previewRules.length > 0 && (
-        <section className="c-card c-card--padded" aria-label={t4(lang, 'Règleman', 'Rules', 'Règles', 'Reglas')}>
-          <div className="c-home-section-heading">
+        <section className="c-rules-card" aria-label={t4(lang, 'Règleman', 'Rules', 'Règles', 'Reglas')} data-testid="community-rules-preview">
+          <div className="c-rules-head">
             <h3 className="c-title c-title--sm"><i className="fas fa-gavel" aria-hidden="true" /> {t4(lang, 'Règleman kominote a', 'Community rules', 'Règles de la communauté', 'Reglas de la comunidad')}</h3>
+            <button type="button" className="c-rules-link" onClick={() => go('rules')}>
+              {t4(lang, 'Wè tout règ yo →', 'View all rules →', 'Toutes les règles →', 'Ver todas las reglas →')}
+            </button>
           </div>
-          <ol style={{ margin: '8px 0 0', paddingLeft: 18, display: 'grid', gap: 6 }}>
+          <ol className="c-rules-list c-rules-list--compact">
             {previewRules.map((rule, idx) => (
-              <li key={rule.id || idx}>
-                <strong>{rule.title || rule}</strong>
-                {rule.description ? <div className="c-subtitle" style={{ marginTop: 2 }}>{rule.description}</div> : null}
+              <li key={rule.id ?? `preview-rule-${idx}`} className="c-rules-item">
+                <span className="c-rules-number" aria-hidden="true">{idx + 1}</span>
+                <div className="c-rules-copy">
+                  <strong className="c-rules-item-title">{rule.title}</strong>
+                  {rule.description ? <p className="c-rules-desc">{rule.description}</p> : null}
+                </div>
               </li>
             ))}
           </ol>
           {rules.length > previewRules.length && (
-            <div className="c-subtitle" style={{ marginTop: 8 }}>
-              +{rules.length - previewRules.length} {t4(lang, 'lòt règ', 'more rules', 'autres règles', 'más reglas')}
-            </div>
+            <button type="button" className="c-rules-more" onClick={() => go('rules')}>
+              +{countWithUnit(lang, rules.length - previewRules.length, RULE_FORMS)}
+            </button>
           )}
         </section>
       )}
@@ -394,11 +486,11 @@ export function CommunityHome() {
                   <div key={ev.id} className="c-row-card">
                     <div className="c-date-badge">
                       <span className="c-date-badge-day">{ev.start_time ? new Date(ev.start_time).getDate() : '?'}</span>
-                      <span>{ev.start_time ? new Date(ev.start_time).toLocaleDateString(undefined, { month: 'short' }) : ''}</span>
+                      <span>{ev.start_time ? new Date(ev.start_time).toLocaleDateString(localeFor(lang), { month: 'short' }) : ''}</span>
                     </div>
                     <div className="c-info">
                       <div className="c-title c-title--sm">{ev.title}</div>
-                      <div className="c-subtitle">{ev.start_time ? new Date(ev.start_time).toLocaleString() : ''}{ev.location ? ` · ${ev.location}` : ''}</div>
+                      <div className="c-subtitle">{ev.start_time ? new Date(ev.start_time).toLocaleString(localeFor(lang)) : ''}{ev.location ? ` · ${ev.location}` : ''}</div>
                     </div>
                   </div>
                 ))}
@@ -606,7 +698,33 @@ export function CommunityEvents() {
   };
 
   if (loading) return <LoadingLine lang={lang} />;
-  if (list.length === 0) return <EmptyState icon="fa-calendar-alt" lang={lang} ht="Pa gen evènman ankò" en="No events yet" fr="Aucun événement pour le moment" es="Aún no hay eventos" />;
+  if (list.length === 0) {
+    const canManageEvents = ['owner', 'admin', 'moderator'].includes(community?.current_user_role);
+    return (
+      <div className="c-state c-state--action">
+        <i className="fas fa-calendar-alt c-state-icon" aria-hidden="true" />
+        <p className="c-state-text">
+          {t4(
+            lang,
+            'Pa gen evènman ki pwograme nan kominote sa a pou kounye a.',
+            'No upcoming events in this community yet.',
+            'Aucun événement à venir dans cette communauté pour le moment.',
+            'Aún no hay próximos eventos en esta comunidad.',
+          )}
+        </p>
+        {canManageEvents && (
+          <button
+            type="button"
+            className="c-empty-action"
+            onClick={() => navigate('/sheet/studio?section=communities')}
+          >
+            <i className="fas fa-plus" aria-hidden="true" />{' '}
+            {t4(lang, 'Kreye yon evènman', 'Create an event', 'Créer un événement', 'Crear un evento')}
+          </button>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="c-list c-list--gap10">
@@ -624,14 +742,14 @@ export function CommunityEvents() {
               </span>
               <span>
                 {ev.start_time
-                  ? new Date(ev.start_time).toLocaleDateString(undefined, { month: 'short' })
+                  ? new Date(ev.start_time).toLocaleDateString(localeFor(lang), { month: 'short' })
                   : ''}
               </span>
             </div>
             <div className="c-info">
               <div className="c-title c-title--sm">{ev.title}</div>
               <div className="c-subtitle">
-                {ev.start_time ? new Date(ev.start_time).toLocaleString() : ''}
+                {ev.start_time ? new Date(ev.start_time).toLocaleString(localeFor(lang)) : ''}
                 {ev.location && ` · ${ev.location}`}
               </div>
             </div>
@@ -733,6 +851,7 @@ export function CommunityMembers() {
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState(null);
+  const [query, setQuery] = useState('');
   // Ban-reason dialog state: the member row being banned (null = closed).
   const [banTarget, setBanTarget] = useState(null);
   const [banReason, setBanReason] = useState('');
@@ -910,11 +1029,45 @@ export function CommunityMembers() {
     return () => { cancelled = true; };
   }, [community?.slug]);
 
-  // Virtualize only once the list is large enough to matter; short lists
-  // keep the plain map so row layout stays identical.
-  const virtualized = list.length > 60;
+  const normalizedQuery = query.trim().toLowerCase();
+  const filteredList = normalizedQuery
+    ? list.filter((member) => {
+      const username = String(member.username || '').toLowerCase();
+      return username.includes(normalizedQuery)
+        || `@${username}`.includes(normalizedQuery)
+        || roleLabel(member.role, lang).toLowerCase().includes(normalizedQuery);
+    })
+    : list;
+
+  const searchBar = (
+    <div className="c-member-search">
+      <i className="fas fa-magnifying-glass c-member-search-icon" aria-hidden="true" />
+      <input
+        type="search"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        className="c-member-search-input"
+        placeholder={t4(lang, 'Chache yon manm...', 'Search members...', 'Rechercher un membre...', 'Buscar miembros...')}
+        aria-label={t4(lang, 'Chache manm kominote a', 'Search community members', 'Rechercher des membres', 'Buscar miembros')}
+      />
+      {query && (
+        <button
+          type="button"
+          className="c-member-search-clear"
+          onClick={() => setQuery('')}
+          aria-label={t4(lang, 'Efase rechèch la', 'Clear search', 'Effacer la recherche', 'Borrar búsqueda')}
+        >
+          <i className="fas fa-xmark" aria-hidden="true" />
+        </button>
+      )}
+    </div>
+  );
+
+  // Virtualize only once the filtered list is large enough to matter;
+  // short lists keep the plain map so row layout stays identical.
+  const virtualized = filteredList.length > 60;
   const { visibleItems, containerRef, totalHeight } = useVirtualScroll({
-    items: virtualized ? list : [],
+    items: virtualized ? filteredList : [],
     itemHeight: MEMBER_ROW_HEIGHT,
     overscan: 6,
     containerHeight: 480,
@@ -922,6 +1075,21 @@ export function CommunityMembers() {
 
   if (loading) return <LoadingLine lang={lang} />;
   if (list.length === 0) return <EmptyState icon="fa-user" lang={lang} ht="Pa gen manm ankò" en="No members yet" fr="Aucun membre pour le moment" es="Aún no hay miembros" />;
+  if (filteredList.length === 0 && normalizedQuery) {
+    return (
+      <>
+        {searchBar}
+        <EmptyState
+          icon="fa-user-slash"
+          lang={lang}
+          ht={`Pa gen manm ki koresponn ak "${query.trim()}".`}
+          en={`No members match "${query.trim()}".`}
+          fr={`Aucun membre ne correspond à « ${query.trim()} ».`}
+          es={`Ningún miembro coincide con "${query.trim()}".`}
+        />
+      </>
+    );
+  }
 
   const renderRow = (m, style) => (
     <div key={m.id} className="c-row-card" style={style}>
@@ -1018,6 +1186,7 @@ export function CommunityMembers() {
   if (virtualized) {
     return (
       <>
+        {searchBar}
         <div ref={containerRef} className="c-list c-list--gap8" style={{ height: 480, overflow: 'auto' }}>
           <div style={{ height: totalHeight, position: 'relative' }}>
             {visibleItems.map((m) => renderRow(m, {
@@ -1033,8 +1202,14 @@ export function CommunityMembers() {
 
   return (
     <>
+      {searchBar}
+      <p className="c-member-search-count" role="status">
+        {normalizedQuery
+          ? t4(lang, `${filteredList.length} rezilta`, `${filteredList.length} results`, `${filteredList.length} résultats`, `${filteredList.length} resultados`)
+          : t4(lang, `${list.length} manm`, `${list.length} members`, `${list.length} membres`, `${list.length} miembros`)}
+      </p>
       <div className="c-list c-list--gap8">
-        {list.map((m) => renderRow(m, undefined))}
+        {filteredList.map((m) => renderRow(m, undefined))}
       </div>
       {renderBanDialog()}
     </>
@@ -1335,6 +1510,57 @@ export function CommunityCourses() {
   );
 }
 
+/**
+ * /rules — the full, ordered rules list.
+ *
+ * One component owns the presentation and reads ``community.rules`` (the
+ * same nested payload the Home preview slices), so editing a rule in the
+ * studio can never leave the preview and the full view disagreeing.
+ */
+export function CommunityRulesTab() {
+  const { community, lang } = useOutletContext();
+  const rules = [...(Array.isArray(community?.rules) ? community.rules : [])]
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+  if (rules.length === 0) {
+    return (
+      <EmptyState
+        icon="fa-scroll"
+        lang={lang}
+        ht="Pa gen règleman pou kounye a."
+        en="No rules have been set yet."
+        fr="Aucune règle n’a encore été définie."
+        es="Todavía no se han definido reglas."
+      />
+    );
+  }
+
+  return (
+    <section className="c-rules-card c-rules-card--full" data-testid="community-rules-full">
+      <div className="c-rules-head">
+        <h3 className="c-title c-title--sm">
+          <i className="fas fa-gavel" aria-hidden="true" />{' '}
+          {t4(lang, 'Règleman kominote a', 'Community rules', 'Règles de la communauté', 'Reglas de la comunidad')}
+        </h3>
+        <span className="c-rules-count">
+          {countWithUnit(lang, rules.length, RULE_FORMS)}
+        </span>
+      </div>
+      <ol className="c-rules-list">
+        {rules.map((rule, index) => (
+          <li key={rule.id ?? `rule-${index}`} className="c-rules-item">
+            <span className="c-rules-number" aria-hidden="true">{index + 1}</span>
+            <div className="c-rules-copy">
+              <strong className="c-rules-item-title">{rule.title}</strong>
+              {rule.description ? <p className="c-rules-desc">{rule.description}</p> : null}
+            </div>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
 // ── Parent layout ───────────────────────────────────────────────────────
 
 export default function CommunityDetail({ lang = 'en', t = {}, showToast, user, onOpenCheckout }) {
@@ -1364,6 +1590,10 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user, 
     setWelcomeDone((list) => (list.includes(key) ? list : [...list, key]));
   }, []);
   const [memberCount, setMemberCount] = useState(0);
+  // A broken avatar/cover URL falls back to the branded default instead
+  // of leaving an empty box (the API only stores external URLs).
+  const [avatarBroken, setAvatarBroken] = useState(false);
+  const [coverBroken, setCoverBroken] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -1378,6 +1608,8 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user, 
         setIsMember(Boolean(comm?.is_member));
         setMyStatus(comm?.my_status ?? (comm?.is_member ? 'active' : null));
         setMemberCount(comm?.member_count || 0);
+        setAvatarBroken(false);
+        setCoverBroken(false);
         setWelcomeDone([]);
         setError(null);
       })
@@ -1468,6 +1700,13 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user, 
 
   const isOwner = Boolean(community?.current_user_role === 'owner');
 
+  // Give the global assistant FAB a community-specific mobile gutter so
+  // it clears the fixed navigation and never covers the last action row.
+  useEffect(() => {
+    document.body.classList.add('community-detail-page');
+    return () => document.body.classList.remove('community-detail-page');
+  }, []);
+
   // Hooks must run unconditionally — tabLabels/outletContext useMemo
   // calls were MOVED ABOVE the early returns (they used to sit after
   // them, violating rules-of-hooks and crashing when the
@@ -1477,6 +1716,7 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user, 
     events:        lang === 'ht' ? 'Evènman' : lang === 'fr' ? 'Événements' : lang === 'es' ? 'Eventos' : 'Events',
     posts:         lang === 'ht' ? 'Pòs'      : lang === 'fr' ? 'Publications'  : lang === 'es' ? 'Publicaciones' : 'Posts',
     members:       lang === 'ht' ? 'Manm'     : lang === 'fr' ? 'Membres'     : lang === 'es' ? 'Miembros'  : 'Members',
+    rules:         lang === 'ht' ? 'Règleman' : lang === 'fr' ? 'Règles'      : lang === 'es' ? 'Reglas'    : 'Rules',
     banned:        lang === 'ht' ? 'Bloke'    : lang === 'fr' ? 'Bannis'      : lang === 'es' ? 'Baneados' : 'Banned',
     announcements: lang === 'ht' ? 'Anons'    : lang === 'fr' ? 'Annonces'    : lang === 'es' ? 'Anuncios'  : 'Announcements',
     files:         lang === 'ht' ? 'Fichye'   : lang === 'fr' ? 'Fichiers'    : lang === 'es' ? 'Archivos'  : 'Files',
@@ -1532,27 +1772,28 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user, 
       {/* Banner — minimal inline style for dynamic background URL/gradient only */}
       <div
         className="c-banner"
-        style={{
-          background: community.banner_url
-            ? `url(${community.banner_url}) center/cover`
-            : 'linear-gradient(135deg, #2d1b69, #d81b60)',
-        }}
+        style={{ background: 'linear-gradient(135deg, #2d1b69, #d81b60)' }}
       >
+        {community.banner_url && !coverBroken && (
+          <img
+            className="c-banner-cover"
+            src={community.banner_url}
+            alt=""
+            onError={() => setCoverBroken(true)}
+          />
+        )}
         <div className="c-banner-overlay" />
         <div className="c-banner-content">
-          <div
-            className={`c-banner-avatar${!community.avatar_url ? ' c-banner-avatar--default' : ''}`}
-            style={community.avatar_url ? {
-              background: `url(${community.avatar_url}) center/cover`,
-            } : undefined}
-          >
-            {!community.avatar_url && <i className="fas fa-users" />}
+          <div className={`c-banner-avatar${!community.avatar_url || avatarBroken ? ' c-banner-avatar--default' : ''}`}>
+            {community.avatar_url && !avatarBroken
+              ? <img src={community.avatar_url} alt="" onError={() => setAvatarBroken(true)} />
+              : <i className="fas fa-users" />}
           </div>
           <div className="c-banner-info">
             <h2 className="c-banner-name">{community.name}</h2>
             <div className="c-banner-meta">
-              <i className="fas fa-user" /> {memberCount} {t4(lang, "manm", "members", "membres", "miembros")}
-              {community.category && ` · ${community.category}`}
+              <i className="fas fa-user" /> {countWithUnit(lang, memberCount, MEMBER_FORMS)}
+              {community.category && ` · ${localizedCategoryLabel(community.category, lang)}`}
             </div>
           </div>
           {myStatus === 'pending' ? (
@@ -1630,29 +1871,16 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user, 
         <p className="c-desc">{community.description}</p>
       )}
 
-      {/* House rules — read-only, set by managers in Creator Studio */}
-      {Array.isArray(community.rules) && community.rules.length > 0 && (
-        <div className="c-rules" id="community-rules">
-          <h3 className="c-rules-title">
-            <i className="fas fa-scroll" aria-hidden="true" />{' '}
-            {t4(lang, 'Règleman', 'House rules', 'Règles', 'Reglas')}
-          </h3>
-          <ol className="c-rules-list">
-            {[...community.rules].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).map((r) => (
-              <li key={r.id ?? r.title} className="c-rules-item">
-                <strong>{r.title}</strong>
-                {r.description && <span className="c-rules-desc"> — {r.description}</span>}
-              </li>
-            ))}
-          </ol>
-        </div>
-      )}
-
       {/* Tabs — URL-driven via NavLink. The banned tab renders only for
           owner/admin (moderation surface); others never see it and a
           direct URL still 403s server-side. */}
-      <div className="c-tabs">
-        {TAB_KEYS.filter((key) => !MOD_ONLY_TABS.includes(key) || ['owner', 'admin'].includes(community?.current_user_role)).map((key) => (
+      <nav className="c-tabs" aria-label={t4(lang, 'Seksyon kominote a', 'Community sections', 'Sections de la communauté', 'Secciones de la comunidad')}>
+        {TAB_KEYS.filter((key) => (
+          (!MOD_ONLY_TABS.includes(key) || ['owner', 'admin'].includes(community?.current_user_role))
+          // The rules tab only exists when the community actually has rules;
+          // showing an empty tab would advertise a section with nothing in it.
+          && (key !== 'rules' || (Array.isArray(community?.rules) && community.rules.length > 0))
+        )).map((key) => (
           <NavLink
             key={key}
             to={key}
@@ -1661,7 +1889,7 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user, 
             {tabLabels[key]}
           </NavLink>
         ))}
-      </div>
+      </nav>
 
       {/* Tab content via React Router Outlet */}
       <div className="community-tab-content">

@@ -200,6 +200,234 @@ select.cm-input {
 
 .cm-mode-hint i { color: var(--color-primary); }
 
+/* ─── Creation: validation + media ──────────────────────────────── */
+.cm-field-hint {
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--text-tertiary);
+}
+
+.cm-field-error {
+  font-size: 0.74rem;
+  line-height: 1.4;
+  font-weight: 600;
+  color: var(--state-error-dark, #b91c1c);
+}
+
+.cm-input--invalid {
+  border-color: var(--state-error, #ef4444);
+  background: color-mix(in srgb, var(--state-error, #ef4444) 6%, var(--surface-input));
+}
+
+.cm-input--invalid:focus {
+  border-color: var(--state-error, #ef4444);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--state-error, #ef4444) 18%, transparent);
+}
+
+.cm-error-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--state-error, #ef4444) 35%, transparent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--state-error, #ef4444) 8%, var(--surface-card));
+  color: var(--text-primary);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.cm-error-summary i { color: var(--state-error, #ef4444); margin-top: 2px; }
+.cm-error-summary strong { display: block; font-size: 0.8rem; }
+.cm-error-summary ul { margin: 4px 0 0; padding-left: 16px; }
+
+.cm-rule-counter {
+  margin-left: 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+}
+
+.cm-rule-row--invalid { border-color: var(--state-error, #ef4444); }
+
+.cm-access-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin: 0;
+  padding: 9px 11px;
+  border-radius: var(--radius-md);
+  background: var(--surface-highlight);
+  color: var(--text-secondary);
+  font-size: 0.74rem;
+  line-height: 1.5;
+}
+
+.cm-access-note i { color: var(--color-primary); margin-top: 2px; }
+
+.cm-preview-banner-img,
+.cm-preview-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cm-preview-banner-img {
+  position: absolute;
+  inset: 0;
+}
+
+.cm-preview-more {
+  margin-top: 6px;
+  color: var(--text-tertiary);
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.cm-preview-rules li div {
+  margin-top: 1px;
+  color: var(--text-secondary);
+  font-size: 0.74rem;
+}
+
+/* ─── Creation: rules editor ─────────────────────────────────────── */
+.cm-create-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border-color);
+}
+
+.cm-create-section-head h4 {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.cm-create-section-head p {
+  margin: 4px 0 0;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+.cm-rule-row {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--surface-input);
+}
+
+.cm-rule-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cm-rule-number {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.cm-rule-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+}
+
+.cm-icon-action {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.cm-icon-action:hover:not(:disabled) {
+  color: var(--text-primary);
+  background: var(--surface-highlight);
+}
+
+.cm-icon-action:disabled { opacity: 0.35; cursor: default; }
+.cm-icon-action--danger:hover { color: #dc2626; }
+
+.cm-add-rule {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 9px 14px;
+  border: 1px dashed var(--border-color-strong, var(--border-color));
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-primary);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cm-add-rule:hover { background: var(--surface-selected, rgba(216, 27, 96, 0.12)); }
+
+/* ─── Creation: live preview ─────────────────────────────────────── */
+.cm-create-preview {
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+}
+
+.cm-preview-banner {
+  position: relative;
+  height: 86px;
+  background: linear-gradient(135deg, #2d1b69, #d81b60);
+  background-position: center;
+  background-size: cover;
+}
+
+.cm-preview-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(2, 6, 23, 0.02), rgba(2, 6, 23, 0.5));
+}
+
+.cm-preview-avatar {
+  position: absolute;
+  left: 14px;
+  bottom: -22px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  overflow: hidden;
+  border: 3px solid var(--surface-card);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.2);
+  background-position: center;
+  background-size: cover;
+  color: #fff;
+}
+
+.cm-preview-body { padding: 30px 14px 14px; }
+.cm-preview-name { display: block; overflow-wrap: anywhere; color: var(--text-primary); font-size: 1rem; }
+.cm-preview-meta { margin-top: 3px; color: var(--text-secondary); font-size: 0.74rem; }
+.cm-preview-desc { margin: 8px 0 0; color: var(--text-secondary); font-size: 0.8rem; line-height: 1.45; }
+.cm-preview-rules { margin: 9px 0 0; padding-left: 18px; display: grid; gap: 4px; color: var(--text-secondary); font-size: 0.78rem; }
+.cm-preview-rules strong { color: var(--text-primary); }
+
 .cm-actions {
   display: flex;
   justify-content: flex-end;
@@ -536,14 +764,15 @@ select.cm-input {
   height: 190px;
   border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-2xl);
+  isolation: isolate;
 }
 
 .community-detail .c-banner-overlay {
   background: linear-gradient(
     180deg,
-    rgba(0, 0, 0, 0.05) 0%,
-    rgba(0, 0, 0, 0.25) 55%,
-    rgba(0, 0, 0, 0.6) 100%
+    rgba(2, 6, 23, 0.05) 0%,
+    rgba(2, 6, 23, 0.32) 45%,
+    rgba(2, 6, 23, 0.82) 100%
   );
 }
 
@@ -553,7 +782,12 @@ select.cm-input {
   right: var(--sp-4xl);
   align-items: flex-end;
   gap: var(--sp-3xl);
+  z-index: 1;
 }
+
+.community-detail .c-banner-info { min-width: 0; }
+.community-detail .c-banner-name { overflow-wrap: anywhere; line-height: 1.15; }
+.community-detail .c-banner-meta { color: rgba(255, 255, 255, 0.95); opacity: 1; }
 
 .community-detail .c-banner-avatar {
   width: 76px;
@@ -634,13 +868,33 @@ select.cm-input {
 
 /* ── Tabs: pill-style segmented tabs ── */
 .community-detail .c-tabs {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   gap: 6px;
   border-bottom: 1px solid var(--border-color);
   padding-bottom: 10px;
+  padding-inline-end: 4px;
   margin-bottom: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 2px 20px;
+  scrollbar-width: none;
 }
 
+.community-detail .c-tabs::-webkit-scrollbar { display: none; }
+
+/* Breathing room after the last pill so it never sits flush against
+   the scroll container's edge (the symptom looked like a cut-off tab). */
+.community-detail .c-tabs::after { content: ''; flex: 0 0 2px; }
+
 .community-detail .c-tab {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
   padding: 9px 18px;
   border: 1px solid transparent;
   border-radius: var(--radius-full);
@@ -849,35 +1103,84 @@ select.cm-input {
 @media (max-width: 576px) {
   .community-detail { padding: 12px 12px 100px; gap: 14px; }
 
-  .community-detail .c-banner { height: 210px; }
+  /* Height is driven by the content: a fixed 210px banner clipped long
+     names on 320–390px screens and pushed the Join button over the
+     description. */
+  .community-detail .c-banner {
+    height: auto;
+    min-height: 236px;
+  }
+
+  .community-detail .c-banner-overlay {
+    background: linear-gradient(
+      180deg,
+      rgba(2, 6, 23, 0.22) 0%,
+      rgba(2, 6, 23, 0.5) 42%,
+      rgba(2, 6, 23, 0.92) 100%
+    );
+  }
 
   .community-detail .c-banner-content {
-    left: var(--sp-3xl);
-    right: var(--sp-3xl);
-    bottom: var(--sp-3xl);
+    left: 14px;
+    right: 14px;
+    bottom: 14px;
     display: grid;
-    grid-template-columns: 58px minmax(0, 1fr);
-    align-items: center;
-    gap: 8px 10px;
+    grid-template-columns: 56px minmax(0, 1fr);
+    align-items: end;
+    gap: 10px 12px;
   }
 
-  .community-detail .c-banner-avatar { width: 58px; height: 58px; font-size: 1.3rem; }
+  .community-detail .c-banner-avatar {
+    width: 56px;
+    height: 56px;
+    font-size: 1.25rem;
+    align-self: end;
+    flex-shrink: 0;
+  }
 
   .community-detail .c-banner-name {
-    font-size: var(--type-size-xl);
+    font-size: clamp(1.1rem, 5.4vw, 1.5rem);
+    line-height: 1.22;
     overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
+  .community-detail .c-banner-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 6px;
+    font-size: 0.78rem;
+    line-height: 1.35;
+  }
+
+  /* The action row always gets its own full-width line so it can never
+     overlap the avatar/name, and every button is a 44px touch target. */
   .community-detail .c-banner-content > :nth-child(3) {
     grid-column: 1 / -1;
-    justify-self: start;
+    justify-self: stretch;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
     max-width: 100%;
+  }
+
+  .community-detail .c-banner-content > :nth-child(3) > .c-banner-btn {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-inline: 16px;
   }
 
   .community-detail .c-desc { padding: 0; }
 
-  /* Tabs stay scrollable; keep pills compact. */
-  .community-detail .c-tab { padding: 8px 14px; }
+  /* Tabs stay scrollable; keep pills compact and never clip the label. */
+  .community-detail .c-tab {
+    padding: 8px 14px;
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
 }
 
 /* ── Community posts (feed, composer, reactions, skeletons) ── */
@@ -1902,4 +2205,618 @@ select.cm-input {
   .community-detail .c-page-skeleton-avatar { width: 56px; height: 56px; }
   .community-detail .c-page-skeleton-btn { display: none; }
   .community-detail .c-page-skeleton-line--title { width: 150px; }
+}
+
+/* ── Home snapshot: real cards, never concatenated labels ── */
+.community-detail .c-home-stats {
+  display: grid;
+  /* auto-fit keeps the four cards on one row on desktop and reflows to
+     two columns on narrow phones without an arbitrary breakpoint. */
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 10px;
+}
+
+.community-detail .c-home-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.community-detail .c-home-stat:hover {
+  transform: translateY(-1px);
+  border-color: var(--border-color-strong, var(--border-color));
+  box-shadow: var(--shadow-xl);
+}
+
+.community-detail .c-home-stat i { color: var(--color-primary); font-size: 0.9rem; }
+.community-detail div.c-home-stat { cursor: default; }
+.community-detail div.c-home-stat:hover { transform: none; border-color: var(--border-color); box-shadow: none; }
+.community-detail .c-home-stat strong { display: block; color: var(--text-primary); font-size: 1.25rem; line-height: 1.15; }
+.community-detail .c-home-stat span { display: block; overflow-wrap: anywhere; color: var(--text-secondary); font-size: 0.72rem; line-height: 1.3; }
+
+@media (max-width: 576px) {
+  .community-detail .c-home-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* The old negative inline margin pushed the tab strip past the page
+     padding, which caused horizontal overflow on 320px screens. */
+  .community-detail .c-tabs { margin-inline: 0; }
+}
+
+@media (max-width: 380px) {
+  .community-detail .c-home-stats { gap: 8px; }
+  .community-detail .c-home-stat { padding: 12px; }
+  .community-detail .c-home-stat strong {
+    font-size: 1.05rem;
+    overflow-wrap: anywhere;
+  }
+  .community-detail .c-home-stat span { font-size: 0.68rem; }
+}
+
+/* ── Rules: one presentation for preview + full view ── */
+.community-detail .c-rules-card {
+  padding: 16px 18px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+}
+
+.community-detail .c-rules-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.community-detail .c-rules-head .c-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.community-detail .c-rules-head .c-title i { color: var(--color-primary); }
+
+.community-detail .c-rules-link {
+  border: none;
+  background: none;
+  padding: 4px 2px;
+  color: var(--color-primary);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+
+.community-detail .c-rules-link:hover { text-decoration: underline; }
+
+.community-detail .c-rules-count {
+  color: var(--text-tertiary);
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.community-detail .c-rules-list {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.community-detail .c-rules-list--compact { gap: 8px; }
+
+.community-detail .c-rules-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.community-detail .c-rules-number {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: var(--surface-selected, rgba(216, 27, 96, 0.12));
+  color: var(--color-primary);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.community-detail .c-rules-copy { min-width: 0; }
+
+.community-detail .c-rules-item-title {
+  display: block;
+  color: var(--text-primary);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.community-detail .c-rules-desc {
+  margin: 2px 0 0;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.community-detail .c-rules-more {
+  margin-top: 10px;
+  border: none;
+  background: none;
+  padding: 4px 0;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.community-detail .c-rules-more:hover { color: var(--color-primary); }
+
+/* ── Community information + access ── */
+.community-detail .c-about-card {
+  padding: 16px 18px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+}
+
+.community-detail .c-about-card .c-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+}
+
+.community-detail .c-about-card .c-title i { color: var(--color-primary); }
+
+.community-detail .c-about-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px 16px;
+  margin: 0;
+}
+
+.community-detail .c-about-grid > div { min-width: 0; }
+
+.community-detail .c-about-grid dt {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.community-detail .c-about-grid dd {
+  margin: 3px 0 0;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.community-detail .c-about-grid dd i { color: var(--color-primary); }
+
+/* ── Members: search over the loaded roster ── */
+.community-detail .c-member-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  background: var(--surface-input);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.community-detail .c-member-search:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-input-focus);
+}
+
+.community-detail .c-member-search-icon {
+  flex-shrink: 0;
+  color: var(--text-tertiary);
+  font-size: 0.82rem;
+}
+
+.community-detail .c-member-search-input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.community-detail .c-member-search-clear {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--surface-highlight);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.community-detail .c-member-search-count {
+  margin: 0 0 6px;
+  font-size: 0.72rem;
+  color: var(--text-tertiary);
+}
+
+/* ── Contextual empty action (e.g. owner "Create an event") ── */
+.community-detail .c-state--action { gap: 10px; }
+
+.community-detail .c-empty-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--text-on-primary, #fff);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.community-detail .c-empty-action:hover { background: var(--color-primary-dark, #a01346); }
+
+/* ── Shared rule-template picker (modal + studio editor) ── */
+.rule-tpl {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 1px dashed color-mix(in srgb, var(--color-primary) 35%, var(--border-color));
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--color-primary) 4%, var(--surface-card));
+}
+
+.rule-tpl-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.rule-tpl-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.rule-tpl-title i { color: var(--color-primary); }
+
+.rule-tpl-hint {
+  margin: 3px 0 0;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+.rule-tpl-close {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.rule-tpl-close:hover { background: var(--surface-highlight); color: var(--text-primary); }
+
+.rule-tpl-cats {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.rule-tpl-cats::-webkit-scrollbar { display: none; }
+
+.rule-tpl-cat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  background: var(--surface-input);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.rule-tpl-cat--active {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background: var(--surface-selected, rgba(216, 27, 96, 0.12));
+}
+
+.rule-tpl-cat-count {
+  padding: 0 5px;
+  border-radius: var(--radius-full);
+  background: var(--surface-highlight);
+  font-size: 0.64rem;
+}
+
+.rule-tpl-list {
+  display: grid;
+  gap: 6px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.rule-tpl-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  cursor: pointer;
+}
+
+.rule-tpl-item--added { opacity: 0.72; cursor: default; }
+
+.rule-tpl-item input {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  accent-color: var(--color-primary);
+}
+
+.rule-tpl-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.rule-tpl-copy strong {
+  font-size: 0.78rem;
+  color: var(--text-primary);
+}
+
+.rule-tpl-copy small {
+  font-size: 0.7rem;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+.rule-tpl-added {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--text-tertiary);
+}
+
+.rule-tpl-empty {
+  margin: 0;
+  font-size: 0.74rem;
+  color: var(--text-tertiary);
+}
+
+.rule-tpl-foot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.rule-tpl-secondary,
+.rule-tpl-primary {
+  min-height: 36px;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.rule-tpl-secondary {
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.rule-tpl-secondary:disabled { opacity: 0.5; cursor: default; }
+
+.rule-tpl-primary {
+  margin-left: auto;
+  border: 0;
+  background: var(--color-primary);
+  color: var(--text-on-primary, #fff);
+}
+
+.rule-tpl-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.rule-tpl-count {
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+}
+
+.cm-template-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  align-self: flex-start;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px dashed var(--border-color-strong, var(--border-color));
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-primary);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cm-template-toggle:hover:not(:disabled) {
+  background: var(--surface-selected, rgba(216, 27, 96, 0.12));
+}
+
+.cm-template-toggle:disabled { opacity: 0.5; cursor: default; }
+
+/* ── Community-specific assistant gutter ── */
+.community-detail .community-tab-content {
+  padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+}
+
+@media (max-width: 768px) {
+  /* Keep the global assistant clear of the fixed bottom navigation and
+     of the last card's action row. */
+  body.community-detail-page .chat-btn {
+    left: 12px;
+    bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+    /* z-index intentionally untouched: the FAB and the chat window share
+       the component's 2600 layer, and lowering the FAB would put it
+       behind the open window (hiding its own close control). */
+  }
+}
+
+@media (max-width: 380px) {
+  .community-detail .c-rules-card { padding: 14px; }
+}
+
+/* ── Final visual audit fixes ─────────────────────────────────────── */
+
+/* The banner already sits inside a flex column with an 18px gap. Its
+   legacy 48px bottom margin stacked on top of that and pushed the
+   description far below the header. */
+.community-detail .c-banner {
+  margin-bottom: 0;
+  position: relative;
+  overflow: hidden;
+}
+.community-detail .c-banner-cover {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* ``--color-white`` is remapped to a dark value in the AMOLED theme, so
+   inheriting it made the name unreadable on the gradient. Banner text is
+   always on a dark scrim, in every theme. */
+.community-detail .c-banner-info,
+.community-detail .c-banner-name,
+.community-detail .c-banner-avatar {
+  color: #fff;
+}
+.community-detail .c-banner-name {
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
+}
+.community-detail .c-banner-info {
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.5);
+}
+.community-detail .c-banner-avatar {
+  overflow: hidden;
+}
+.community-detail .c-banner-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+/* Long handles must not push the date or delete action out of the card. */
+.community-detail .c-post-header { min-width: 0; }
+.community-detail .c-post-meta .c-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.community-detail .c-post-search-input::placeholder {
+  color: var(--text-secondary);
+  opacity: 1;
+}
+
+/* Give the three counters one shared surface so they do not look like
+   floating chips on the dark page background. */
+.community-detail .c-home-stats {
+  padding: 6px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--surface-card) 72%, transparent);
+}
+
+/* Long rule titles/descriptions wrap instead of overflowing the card. */
+.community-detail .c-rules-item-title,
+.community-detail .c-rules-desc {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 768px) {
+  /* Move the assistant away from left-aligned rule text and reaction
+     controls, and keep it above the bottom navigation safe area. */
+  body.community-detail-page .chat-btn {
+    left: auto;
+    right: 12px;
+    bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+  }
+  .community-detail .c-react-btn,
+  .community-detail .c-post-share,
+  .community-detail .c-comment-toggle {
+    min-height: 44px;
+  }
 }

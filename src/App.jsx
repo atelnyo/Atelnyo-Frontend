@@ -342,6 +342,7 @@ import CommunityDetail, {
   CommunityHome,
   CommunityEvents,
   CommunityMembers,
+  CommunityRulesTab,
   CommunityBannedMembers,
   CommunityAnnouncements,
   CommunityFiles,
@@ -3048,6 +3049,7 @@ function App() {
               SEOHead while this route is active). */}
           <Route path="posts/:postId" element={<CommunityPosts />} />
           <Route path="members" element={<CommunityMembers />} />
+          <Route path="rules" element={<CommunityRulesTab />} />
           <Route path="banned" element={<CommunityBannedMembers />} />
           <Route path="announcements" element={<CommunityAnnouncements />} />
           <Route path="files" element={<CommunityFiles />} />

@@ -13,6 +13,14 @@
  * quote the exact same sentences.
  */
 import { t } from '../../utils/i18n';
+import { countWithUnit } from '../../utils/plural';
+
+const RULE_FORMS = {
+  ht: { one: 'règ', many: 'règ' },
+  en: { one: 'rule', many: 'rules' },
+  fr: { one: 'règle', many: 'règles' },
+  es: { one: 'regla', many: 'reglas' },
+};
 
 export const JOIN_MODES = ['public', 'approval', 'invite'];
 
@@ -213,7 +221,7 @@ export function welcomeSteps(community, lang, upcoming = null) {
       key: 'rules',
       icon: 'fa-scroll',
       label: t(lang, 'Li règleman yo', 'Read the rules', 'Lire les règles'),
-      hint: t(lang, `${rulesCount} règ — de minit pou evite pwoblèm.`, `${rulesCount} rules — two minutes that save trouble.`, `${rulesCount} règles — deux minutes qui évitent des ennuis.`),
+      hint: t(lang, `${countWithUnit(lang, rulesCount, RULE_FORMS)} — de minit pou evite pwoblèm.`, `${countWithUnit(lang, rulesCount, RULE_FORMS)} — two minutes that save trouble.`, `${countWithUnit(lang, rulesCount, RULE_FORMS)} — deux minutes qui évitent des ennuis.`),
       action: 'rules',
     });
   }

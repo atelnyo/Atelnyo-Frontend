@@ -45,23 +45,11 @@ import CommunityAnnouncementsPanel from './CommunityAnnouncementsPanel';
 import CommunityStarterTemplates from './CommunityStarterTemplates';
 import CommunityPreviewCard from './CommunityPreviewCard';
 import { buildTemplateDraft } from './communityTemplates';
+import RuleTemplatePicker from '../../community/RuleTemplatePicker';
+import { mergeRuleLists } from '../../community/ruleTemplates';
 import { PanelHeader } from './communityPanelUI';
 import { ImageUrlField } from '../modals/shared';
 import panelStyles from './communityEditor.module.css';
-
-const RULE_TEMPLATES = {
-  starter: [
-    { title: { en: 'Be respectful', ht: 'Respekte tout moun' }, description: { en: 'Treat every member with kindness. No harassment, hate speech, or personal attacks.', ht: 'Trete chak manm ak respè. Pa gen arasman, diskou rayisman, oswa atak pèsonèl.' } },
-    { title: { en: 'Stay on topic', ht: 'Rete nan sijè a' }, description: { en: 'Share content that is relevant to this community and its goals.', ht: 'Pataje kontni ki gen rapò ak kominote sa a ak objektif li yo.' } },
-    { title: { en: 'No spam or scams', ht: 'Pa gen spam oswa magouy' }, description: { en: 'Do not post repetitive promotions, misleading links, or fraudulent offers.', ht: 'Pa afiche pwomosyon repetitif, lyen twonpe, oswa òf fo.' } },
-    { title: { en: 'Protect privacy', ht: 'Pwoteje vi prive' }, description: { en: 'Do not share someone else’s private information without permission.', ht: 'Pa pataje enfòmasyon prive lòt moun san pèmisyon.' } },
-  ],
-  learning: [
-    { title: { en: 'Help others learn', ht: 'Ede lòt moun aprann' }, description: { en: 'Share knowledge clearly and support members at different levels.', ht: 'Pataje konesans klèman epi sipòte manm yo nan tout nivo.' } },
-    { title: { en: 'Give constructive feedback', ht: 'Bay fidbak konstriktif' }, description: { en: 'Critique ideas, not people. Offer suggestions that help improve work.', ht: 'Kritike lide, pa moun. Bay sijesyon ki ka amelyore travay la.' } },
-    { title: { en: 'Use appropriate channels', ht: 'Sèvi ak bon espas yo' }, description: { en: 'Post questions, resources, and announcements in the right place.', ht: 'Mete kesyon, resous, ak anons nan bon kote a.' } },
-  ],
-};
 
 export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'en', showToast, user, item }) {
   const isHt = lang === 'ht';
@@ -88,6 +76,7 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'e
       : [],
   });
   const [newRule, setNewRule] = useState({ title: '', description: '' });
+  const [showRuleTemplates, setShowRuleTemplates] = useState(false);
   // Which starter template was last applied — purely visual (a check on
   // the card). The form fields remain the source of truth afterwards.
   const [appliedTemplate, setAppliedTemplate] = useState('');
@@ -177,16 +166,22 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'e
     markDirty();
   }, [newRule, markDirty]);
 
-  const applyRuleTemplate = useCallback((templateKey) => {
-    const tpl = RULE_TEMPLATES[templateKey] || [];
-    const key = isHt ? 'ht' : 'en';
-    const mapped = tpl.map((r) => ({
-      title: r.title[key] || r.title.en || '',
-      description: r.description[key] || r.description.en || '',
+  // Append-only: selecting templates must never erase rules the founder
+  // already wrote (the previous shortcut silently replaced the list).
+  const addTemplateRules = useCallback((incoming) => {
+    if (!Array.isArray(incoming) || incoming.length === 0) return;
+    setForm((f) => ({
+      ...f,
+      rules: mergeRuleLists(f.rules || [], incoming),
     }));
-    setForm((f) => ({ ...f, rules: mapped }));
     markDirty();
-  }, [isHt, markDirty]);
+    showToast?.(
+      isHt
+        ? `${incoming.length} règ ajoute. Ou ka chanje yo anba a.`
+        : `${incoming.length} rule${incoming.length === 1 ? '' : 's'} added. You can edit them below.`,
+      'wand-magic-sparkles',
+    );
+  }, [isHt, markDirty, showToast]);
 
   // Starter templates own only the descriptive fields + the first set
   // of rules. The name, images, and visibility stay the founder's, so
@@ -628,24 +623,27 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'e
         </PropertyGroup>
       )}
       <PropertyGroup title={isHt ? 'Règleman' : 'House rules'} defaultOpen>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
-          <button
-            type="button"
-            onClick={() => applyRuleTemplate('starter')}
-            style={{ border: '1px solid var(--border-color, #e5e7eb)', background: 'transparent', borderRadius: 8, padding: '5px 10px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}
-          >
-            <i className="fas fa-wand-magic-sparkles" aria-hidden="true" style={{ marginRight: 6 }} />
-            {isHt ? 'Modèl baz' : 'Starter template'}
-          </button>
-          <button
-            type="button"
-            onClick={() => applyRuleTemplate('learning')}
-            style={{ border: '1px solid var(--border-color, #e5e7eb)', background: 'transparent', borderRadius: 8, padding: '5px 10px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}
-          >
-            <i className="fas fa-graduation-cap" aria-hidden="true" style={{ marginRight: 6 }} />
-            {isHt ? 'Modèl aprantisaj' : 'Learning template'}
-          </button>
-        </div>
+        <button
+          type="button"
+          className="cm-template-toggle"
+          aria-expanded={showRuleTemplates}
+          onClick={() => setShowRuleTemplates((value) => !value)}
+          style={{ marginBottom: 10 }}
+        >
+          <i className="fas fa-wand-magic-sparkles" aria-hidden="true" />
+          {isHt ? 'Ajoute soti nan modèl' : 'Add from templates'}
+        </button>
+        {showRuleTemplates && (
+          <div style={{ marginBottom: 10 }}>
+            <RuleTemplatePicker
+              lang={lang}
+              existingRules={form.rules || []}
+              onAdd={addTemplateRules}
+              onClose={() => setShowRuleTemplates(false)}
+              testId="community-editor-rule-templates"
+            />
+          </div>
+        )}
         {(form.rules || []).map((r, i) => (
           <div key={i} style={{ border: '1px solid var(--border-color, #e5e7eb)', borderRadius: 8, padding: 8, marginBottom: 8 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 6 }}>
