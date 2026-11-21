@@ -10,7 +10,7 @@
  *                 from marketplace/products/?mine=true (includes drafts)
  *   • Orders    — seller sales: pending / completed from
  *                 marketplace/orders/sales/
- *   • Courses   — published count from /courses/ (saving IS publishing)
+ *   • Courses   — published + drafts from /courses/?mine=1 (owner scope)
  *   • Messages  — conversations with unread_count > 0
  *
  * A row is only rendered when its source responds — a failed API never
@@ -39,7 +39,7 @@ export default function StatusSummary({ lang = 'en', onNavigate }) {
     Promise.allSettled([
       marketplaceService.list({ mine: true, limit: 100 }),
       api.get('marketplace/orders/sales/', { params: { limit: 100 } }),
-      courseService.getAll(),
+      courseService.getAll({ mine: true }),
       api.get('messages/conversations/', { params: { limit: 20 } }),
     ]).then(([productsRes, ordersRes, coursesRes, convsRes]) => {
       if (cancelled) return;
@@ -73,10 +73,19 @@ export default function StatusSummary({ lang = 'en', onNavigate }) {
         ? conversations.filter((c) => Number(c.unread_count || 0) > 0).length
         : null;
 
+      // The public catalog hides drafts by design. The Studio summary
+      // must use the owner-scoped list, otherwise a creator with only
+      // drafts sees "0 courses" here while Explore shows other people's
+      // published courses.
+      const courseStats = courses ? {
+        published: courses.filter((c) => c.status === 'published').length,
+        drafts: courses.filter((c) => c.status === 'draft').length,
+      } : null;
+
       setData({
         products: productsStats,
         orders: ordersStats,
-        courses: courses ? courses.length : null,
+        courses: courseStats,
         unread,
       });
     });
@@ -131,7 +140,10 @@ export default function StatusSummary({ lang = 'en', onNavigate }) {
           label={isHt ? 'Kou' : 'Courses'}
           onClick={onNavigate ? () => onNavigate('courses') : null}
         >
-          <StatusChip label={isHt ? 'pibliye' : 'published'} count={data.courses} tone="Emerald" />
+          <StatusChip label={isHt ? 'pibliye' : 'published'} count={data.courses.published} tone="Emerald" />
+          {data.courses.drafts > 0 && (
+            <StatusChip label={isHt ? 'bouyon' : 'drafts'} count={data.courses.drafts} tone="Amber" />
+          )}
         </StatusRow>
       )}
 

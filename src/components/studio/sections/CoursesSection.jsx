@@ -17,6 +17,22 @@ import CurriculumAnalyticsModal from './CurriculumAnalyticsModal';
 import CourseExportImportModal from './CourseExportImportModal';
 import styles from './sections.module.css';
 
+// Course has six lifecycle states. Labelling everything that is not
+// "draft" as "Published" made review/building/archived courses look
+// live even though Explore never showed them.
+const COURSE_STATUS_LABELS = {
+  draft: { en: 'Draft', ht: 'Bouyon', icon: 'fa-clock' },
+  building: { en: 'Building', ht: 'Ap bati', icon: 'fa-hammer' },
+  review: { en: 'In review', ht: 'Nan revizyon', icon: 'fa-magnifying-glass' },
+  published: { en: 'Published', ht: 'Pibliye', icon: 'fa-check-circle' },
+  updating: { en: 'Updating', ht: 'Ap mete ajou', icon: 'fa-rotate' },
+  archived: { en: 'Archived', ht: 'Achive', icon: 'fa-box-archive' },
+};
+
+function courseStatus(status, lang) {
+  return COURSE_STATUS_LABELS[status] || COURSE_STATUS_LABELS.draft;
+}
+
 export default function CoursesSection({ lang, t, showToast, setShowCourseModal, onEdit }) {
   const [confirm, setConfirm] = useState(null);
   const [confirmBusy, setConfirmBusy] = useState(false);
@@ -24,7 +40,7 @@ export default function CoursesSection({ lang, t, showToast, setShowCourseModal,
   const [curriculumAnalyticsCourse, setCurriculumAnalyticsCourse] = useState(null);
   const [exportImportCourse, setExportImportCourse] = useState(null);
   const [showImportModal, setShowImportModal] = useState(false);
-  const { data: courses, loading, refetch, removeLocal } = useFetch(
+  const { data: courses, loading, error, refetch, removeLocal } = useFetch(
     () => courseService.getAll({ mine: true }),
     // The courses API is paginated ({ results: [...] } — CatalogPagination,
     // page_size 100). Unwrap the envelope the same way every other studio
@@ -113,6 +129,7 @@ export default function CoursesSection({ lang, t, showToast, setShowCourseModal,
   if (loading && courses.length === 0) return <StudioSkeleton rows={3} />;
 
   const isEmpty = courses.length === 0;
+  const loadError = error && courses.length === 0;
 
   return (
     <div className={styles.section}>
@@ -138,11 +155,29 @@ export default function CoursesSection({ lang, t, showToast, setShowCourseModal,
           </button>
         }
       />
-      {isEmpty ? (
+      {loadError ? (
+        <div className={styles.printifyCard} role="alert">
+          <p className={styles.printifyError}>
+            <i className="fas fa-triangle-exclamation" aria-hidden="true" />{' '}
+            {lang === 'ht' ? 'Pa t kapab chaje kou ou yo.' : 'Could not load your courses.'}
+          </p>
+          <p className={styles.printifyText}>
+            {error?.response?.data?.detail || error?.message || ''}
+          </p>
+          <div className={styles.printifyRow}>
+            <button type="button" className={styles.secondaryBtn} onClick={refetch}>
+              <i className="fas fa-rotate" aria-hidden="true" />{' '}
+              {lang === 'ht' ? 'Eseye ankò' : 'Retry'}
+            </button>
+          </div>
+        </div>
+      ) : isEmpty ? (
         <EmptyState
           icon="fa-graduation-cap"
           title={t.studio_no_courses || 'No courses yet'}
-          hint={t.studio_no_courses_hint || 'Create your first course to start teaching.'}
+          hint={lang === 'ht'
+            ? 'Kou ou kreye yo parèt isit la, bouyon yo gen ladan yo. Explore sèlman montre kou pibliye.'
+            : 'Courses you create appear here, including drafts. Explore only shows published courses.'}
           ctaLabel={t.studio_create_first || 'Create First Course'}
           onCta={() => setShowCourseModal(true)}
         />
@@ -169,10 +204,9 @@ export default function CoursesSection({ lang, t, showToast, setShowCourseModal,
                   )}
                 </div>
                 <div className={styles.listMeta}>
-                  <span className={`${styles.badge} ${course.status === 'draft' ? styles.badgeDraft : styles.badgePublished}`}>
-                    {course.status === 'draft'
-                      ? <><i className="fas fa-clock" aria-hidden="true" /> {lang === 'ht' ? 'Bouyon' : 'Draft'}</>
-                      : <><i className="fas fa-check-circle" aria-hidden="true" /> {lang === 'ht' ? 'Pibliye' : 'Published'}</>}
+                  <span className={`${styles.badge} ${course.status === 'published' ? styles.badgePublished : styles.badgeDraft}`}>
+                    <i className={`fas ${courseStatus(course.status, lang).icon}`} aria-hidden="true" />{' '}
+                    {courseStatus(course.status, lang)[lang === 'ht' ? 'ht' : 'en']}
                   </span>
                   <span>${course.price || 0}</span>
                   {course.enrollment_count > 0 && (
@@ -196,6 +230,18 @@ export default function CoursesSection({ lang, t, showToast, setShowCourseModal,
                 />
               </div>
               <div className={styles.itemActions}>
+                {/* Owners can read their own drafts through the same
+                    course detail route Explore uses; the backend allows
+                    the creator (and staff) to fetch an unpublished row. */}
+                <a
+                  className={styles.statsBtn}
+                  href={`/sheet/course/${course.id}`}
+                  title={lang === 'ht' ? 'Aperçu kou a' : 'Preview course'}
+                  aria-label={lang === 'ht' ? 'Aperçu kou a' : 'Preview course'}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <i className="fas fa-eye" aria-hidden="true" />
+                </a>
                 <button type="button" className={styles.statsBtn} onClick={() => setAnalyticsCourse(course)}
                   title={lang === 'ht' ? 'Analitik ak elèv' : 'Analytics & students'}>
                   <i className="fas fa-chart-line" aria-hidden="true" />

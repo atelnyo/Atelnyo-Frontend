@@ -94,11 +94,12 @@ export default function CourseOverview({ lang = 'en', onNavigate }) {
             style={{ borderColor: statusColors[status] || '#6b7280', color: statusColors[status] || '#6b7280' }}
           >
             <span className={styles.courseStatusDot} style={{ background: statusColors[status] || '#6b7280' }} />
-            {status === 'draft' ? t('Bouyon', 'Draft') :
-             status === 'published' ? t('Pibliye', 'Published') :
-             status === 'building' ? t('Ap bati', 'Building') :
-             status === 'review' ? t('Revizyon', 'Review') :
-             status === 'archived' ? t('Achive', 'Archived') :
+            {status === 'draft' ? t('Draft', 'Bouyon') :
+             status === 'published' ? t('Published', 'Pibliye') :
+             status === 'building' ? t('Building', 'Ap bati') :
+             status === 'review' ? t('Review', 'Revizyon') :
+             status === 'updating' ? t('Updating', 'Ap mete ajou') :
+             status === 'archived' ? t('Archived', 'Achive') :
              status}
             <span className={styles.courseStatusCount}>{count}</span>
           </span>
@@ -119,9 +120,9 @@ export default function CourseOverview({ lang = 'en', onNavigate }) {
               <div key={c.id} className={styles.courseTopRow}>
                 <span className={styles.courseTopRank}>{i + 1}</span>
                 <div className={styles.courseTopInfo}>
-                  <span className={styles.courseTopName}>{c.title || t('San tit', 'Untitled')}</span>
+                  <span className={styles.courseTopName}>{c.title || t('Untitled', 'San tit')}</span>
                   <span className={styles.courseTopMeta}>
-                    {students} {t('elèv', 'students')}
+                    {students} {t('students', 'elèv')}
                     {c.price > 0 && ` · $${c.price}`}
                     {c.category && ` · ${c.category}`}
                   </span>

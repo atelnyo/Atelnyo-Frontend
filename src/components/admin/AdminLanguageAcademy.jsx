@@ -29,17 +29,28 @@ const LEVELS = [
   { key: 'advanced', label: (isHt) => (isHt ? 'Avanse' : 'Advanced') },
 ];
 
+const PROGRAM_COURSE_STATUS = {
+  draft: { en: 'Draft', ht: 'Bouyon' },
+  building: { en: 'Building', ht: 'Ap bati' },
+  review: { en: 'In review', ht: 'Nan revizyon' },
+  published: { en: 'Published', ht: 'Pibliye' },
+  updating: { en: 'Updating', ht: 'Ap mete ajou' },
+  archived: { en: 'Archived', ht: 'Achive' },
+};
+
 function StatusBadge({ status, isHt }) {
+  const labels = PROGRAM_COURSE_STATUS[status] || PROGRAM_COURSE_STATUS.draft;
+  const label = isHt ? labels.ht : labels.en;
   if (status === 'published') {
     return (
-      <span className="badge" data-badge-type="official" title={isHt ? 'Pibliye' : 'Published'}>
-        <i className="fas fa-circle-check" aria-hidden="true" /> {isHt ? 'Pibliye' : 'Published'}
+      <span className="badge" data-badge-type="official" title={label}>
+        <i className="fas fa-circle-check" aria-hidden="true" /> {label}
       </span>
     );
   }
   return (
-    <span className="badge" data-badge-type="draft" title={isHt ? 'Brouyon' : 'Draft'}>
-      <i className="fas fa-pen-ruler" aria-hidden="true" /> {isHt ? 'Brouyon' : 'Draft'}
+    <span className="badge" data-badge-type="draft" title={label}>
+      <i className="fas fa-pen-ruler" aria-hidden="true" /> {label}
     </span>
   );
 }

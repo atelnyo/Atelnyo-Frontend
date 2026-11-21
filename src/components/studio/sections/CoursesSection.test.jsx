@@ -52,4 +52,47 @@ describe('CoursesSection', () => {
 
     expect(await screen.findByText('Course 12')).toBeTruthy();
   });
+
+  it('surfaces a failed request instead of pretending there are no courses', async () => {
+    courseService.getAll.mockRejectedValue({
+      response: { data: { detail: 'Authentication required.' } },
+    });
+
+    render(
+      <CoursesSection
+        lang="en"
+        t={{}}
+        showToast={vi.fn()}
+        setShowCourseModal={vi.fn()}
+        onEdit={vi.fn()}
+      />,
+    );
+
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Could not load your courses.');
+    expect(alert).toHaveTextContent('Authentication required.');
+  });
+
+  it('labels non-published lifecycle states and lets the owner preview a draft', async () => {
+    courseService.getAll.mockResolvedValue({
+      data: {
+        results: [{ id: 7, title: 'Draft course', status: 'review', price: 0 }],
+      },
+    });
+
+    render(
+      <CoursesSection
+        lang="en"
+        t={{}}
+        showToast={vi.fn()}
+        setShowCourseModal={vi.fn()}
+        onEdit={vi.fn()}
+      />,
+    );
+
+    expect(await screen.findByText('In review')).toBeTruthy();
+    expect(screen.queryByText('Published')).toBeNull();
+    expect(screen.getByRole('link', { name: 'Preview course' }))
+      .toHaveAttribute('href', '/sheet/course/7');
+  });
 });
