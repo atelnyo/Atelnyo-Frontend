@@ -4,6 +4,8 @@ import { storeService } from './storeService';
 import { useAuthStore } from './useAuthStore';
 import { addToCart, loadCart, saveCart } from './cart';
 import SEOHead from '../components/shared/SEOHead';
+import ProductCard from './ProductCard';
+import { recordRecentlyViewed } from './recentlyViewed';
 
 const money = (value, currency = 'USD') => {
   const n = Number(value);
@@ -50,6 +52,8 @@ export default function StoreProductPage() {
   // { productId, id } of the saved favorite for the product on screen.
   const [favorite, setFavorite] = useState(null);
   const [favBusy, setFavBusy] = useState(false);
+  const [related, setRelated] = useState({ status: 'idle', items: [] });
+  const [relatedRetry, setRelatedRetry] = useState(0);
   const [descOpen, setDescOpen] = useState(false);
   const [review, setReview] = useState({ rating: 0, title: '', body: '' });
   const [reviewBusy, setReviewBusy] = useState(false);
@@ -84,6 +88,13 @@ export default function StoreProductPage() {
       cancelled = true;
     };
   }, [slug]);
+
+  // Local-only browsing history; never sent to the server.
+  useEffect(() => {
+    if (state.status === 'ready' && state.product) {
+      recordRecentlyViewed(state.product);
+    }
+  }, [state]);
 
   const loadedId = state.product?.id;
   // Load the buyer's orders once the product is known so a review can
@@ -133,6 +144,29 @@ export default function StoreProductPage() {
       cancelled = true;
     };
   }, [user, loadedId]);
+
+  // "You may also like" — non-blocking: a failure never hides the
+  // product itself, it only replaces the rail with a retry.
+  useEffect(() => {
+    if (!loadedId) {
+      return undefined;
+    }
+    let cancelled = false;
+    setRelated({ status: 'loading', items: [] });
+    storeService
+      .listRelated(loadedId)
+      .then(({ data }) => {
+        if (cancelled) return;
+        const items = Array.isArray(data) ? data : data?.results || [];
+        setRelated({ status: items.length ? 'ready' : 'empty', items });
+      })
+      .catch(() => {
+        if (!cancelled) setRelated({ status: 'error', items: [] });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [loadedId, relatedRetry]);
 
   if (state.status === 'loading') {
     return (
@@ -498,6 +532,47 @@ export default function StoreProductPage() {
           </div>
         )}
       </div>
+
+      {related.status !== 'idle' && related.status !== 'empty' && (
+        <section className="store-product__related" aria-labelledby="store-related-title">
+          <div className="store-related__head">
+            <h2 id="store-related-title">You may also like</h2>
+            <Link to="/store" className="store-related__all">See all in Store</Link>
+          </div>
+          {related.status === 'loading' && (
+            <ul className="store-skeleton-grid" aria-label="Loading recommendations" role="status">
+              {Array.from({ length: 4 }).map((_, idx) => (
+                <li key={idx} className="store-skeleton-card" aria-hidden="true">
+                  <div className="store-skeleton-card__media" />
+                  <div className="store-skeleton-card__body">
+                    <div className="store-skeleton-card__line store-skeleton-card__line--title" />
+                    <div className="store-skeleton-card__line store-skeleton-card__line--price" />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+          {related.status === 'error' && (
+            <p className="store-state" role="alert">
+              Recommendations could not be loaded.{' '}
+              <button
+                type="button"
+                className="store-btn store-btn--ghost"
+                onClick={() => setRelatedRetry((n) => n + 1)}
+              >
+                Try again
+              </button>
+            </p>
+          )}
+          {related.status === 'ready' && (
+            <ul className="store-grid">
+              {related.items.map((item) => (
+                <ProductCard key={item.id} product={item} />
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
     </article>
   );
 }

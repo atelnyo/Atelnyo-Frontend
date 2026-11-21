@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 
@@ -16,6 +16,7 @@ vi.mock('./storeService', () => ({
 }));
 
 import StoreListPage from './StoreListPage';
+import { clearRecentlyViewed, loadRecentlyViewed, recordRecentlyViewed } from './recentlyViewed';
 
 const renderAt = (path) =>
   render(
@@ -33,6 +34,25 @@ describe('StoreListPage', () => {
   beforeEach(() => {
     listCategories.mockReset();
     listProducts.mockReset();
+    clearRecentlyViewed();
+  });
+
+  it('shows recently viewed products on the store home and clears them', async () => {
+    listCategories.mockResolvedValue({ data: [] });
+    listProducts.mockResolvedValue({ data: [] });
+    recordRecentlyViewed({
+      id: 9, slug: 'recent-kit', title: 'Recent Kit', price: '5.00', currency: 'USD',
+    });
+
+    renderAt('/store');
+
+    expect(await screen.findByText('Recently viewed')).toBeTruthy();
+    const link = screen.getByRole('link', { name: 'View Recent Kit' });
+    expect(link.getAttribute('href')).toBe('/store/products/recent-kit');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Clear' }));
+    expect(screen.queryByText('Recently viewed')).toBeNull();
+    expect(loadRecentlyViewed()).toEqual([]);
   });
 
   it('shows a not-found state for an unknown category slug', async () => {

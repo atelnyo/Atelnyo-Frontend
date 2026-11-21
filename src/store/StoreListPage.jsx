@@ -3,6 +3,7 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { storeService } from './storeService';
 import SEOHead from '../components/shared/SEOHead';
 import ProductCard from './ProductCard';
+import { clearRecentlyViewed, loadRecentlyViewed } from './recentlyViewed';
 
 const SORT_OPTIONS = [
   { value: '', label: 'Default' },
@@ -18,6 +19,17 @@ export default function StoreListPage() {
   const ordering = SORT_OPTIONS.some((o) => o.value === params.get('ordering')) ? params.get('ordering') : '';
   const parsedPage = Number.parseInt(params.get('page') || '1', 10);
   const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+
+  const [recent, setRecent] = useState(() => loadRecentlyViewed());
+  useEffect(() => {
+    const refresh = () => setRecent(loadRecentlyViewed());
+    window.addEventListener('storage', refresh);
+    window.addEventListener('store-recently-viewed-changed', refresh);
+    return () => {
+      window.removeEventListener('storage', refresh);
+      window.removeEventListener('store-recently-viewed-changed', refresh);
+    };
+  }, []);
 
   const [categories, setCategories] = useState([]);
   useEffect(() => {
@@ -200,6 +212,26 @@ export default function StoreListPage() {
           </select>
         </label>
       </div>
+
+      {!categorySlug && !q && page === 1 && recent.length > 0 && (
+        <section className="store-recent" aria-labelledby="store-recent-title">
+          <div className="store-recent__head">
+            <h2 id="store-recent-title">Recently viewed</h2>
+            <button
+              type="button"
+              className="store-recent__clear"
+              onClick={() => { clearRecentlyViewed(); setRecent([]); }}
+            >
+              Clear
+            </button>
+          </div>
+          <ul className="store-recent__rail">
+            {recent.slice(0, 4).map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </ul>
+        </section>
+      )}
 
       {current.status === 'loading' && (
         <ul className="store-skeleton-grid" aria-label="Loading products" role="status">

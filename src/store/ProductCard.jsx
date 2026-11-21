@@ -45,6 +45,7 @@ export default function ProductCard({ product: p }) {
   const [favBusy, setFavBusy] = useState(false);
   const images = [p.image_url, ...(Array.isArray(p.gallery) ? p.gallery : [])].filter(Boolean);
   const [imgIdx, setImgIdx] = useState(0);
+  const [imgError, setImgError] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [spun, setSpun] = useState(false);
   const cardRef = useRef(null);
@@ -65,7 +66,7 @@ export default function ProductCard({ product: p }) {
 
   // Auto-rotate the gallery twice like an ad strip, then stop on the first image.
   useEffect(() => {
-    if (!visible || hovered || spun || images.length < 2) return undefined;
+    if (!visible || hovered || spun || imgError || images.length < 2) return undefined;
     if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
       return undefined;
     }
@@ -80,7 +81,13 @@ export default function ProductCard({ product: p }) {
       }
     }, 800);
     return () => clearInterval(timer);
-  }, [visible, hovered, spun, images.length]);
+  }, [visible, hovered, spun, imgError, images.length]);
+
+  useEffect(() => {
+    setImgIdx(0);
+    setImgError(false);
+    setSpun(false);
+  }, [p.id]);
 
   // Hovering across the image moves through the gallery, like a product strip.
   const onMediaMove = (e) => {
@@ -152,9 +159,9 @@ export default function ProductCard({ product: p }) {
 
   return (
     <li className="store-card" ref={cardRef}>
-      <Link to={href} className="store-card__link">
+      <Link to={href} className="store-card__link" aria-label={p.title ? `View ${p.title}` : 'View product'}>
         <div className="store-card__media" onMouseEnter={onMediaEnter} onMouseMove={onMediaMove} onMouseLeave={onMediaLeave}>
-          {images.length > 0 ? (
+          {images.length > 0 && !imgError ? (
             images.map((src, i) => (
               <img
                 key={src}
@@ -162,12 +169,14 @@ export default function ProductCard({ product: p }) {
                 src={src}
                 alt={i === 0 ? p.title || '' : ''}
                 loading="lazy"
+                decoding="async"
+                onError={i === 0 ? () => setImgError(true) : undefined}
               />
             ))
           ) : (
             <div className="store-card__img store-card__img--empty is-active" aria-hidden="true" />
           )}
-          {images.length > 1 && (
+          {images.length > 1 && !imgError && (
             <span className="store-card__dots" aria-hidden="true">
               {images.map((src, i) => (
                 <span key={src} className={`store-card__dot${i === imgIdx ? ' is-active' : ''}`} />
@@ -175,17 +184,6 @@ export default function ProductCard({ product: p }) {
             </span>
           )}
           {newBadge && <span className="store-card__badge">NEW</span>}
-          <button
-            type="button"
-            className={`store-card__fav${favoriteId ? ' is-saved' : ''}`}
-            aria-pressed={Boolean(favoriteId)}
-            aria-label={favoriteId ? 'Remove from favorites' : 'Save to favorites'}
-            title={favoriteId ? 'Remove from favorites' : 'Save to favorites'}
-            onClick={onToggleFavorite}
-            disabled={favBusy}
-          >
-            {favoriteId ? '♥' : '♡'}
-          </button>
           {outOfStock && <span className="store-card__badge store-card__badge--muted">Out of stock</span>}
         </div>
         {p.category && <p className="store-card__category">{p.category}</p>}
@@ -204,6 +202,19 @@ export default function ProductCard({ product: p }) {
           {hasSale && <s className="store-card__price-was">{money(p.compare_at_price, currency)}</s>}
         </p>
       </Link>
+      {/* Sibling of the link (not a nested button inside an anchor): a
+          favorite click must never navigate to the product page. */}
+      <button
+        type="button"
+        className={`store-card__fav${favoriteId ? ' is-saved' : ''}`}
+        aria-pressed={Boolean(favoriteId)}
+        aria-label={favoriteId ? 'Remove from favorites' : 'Save to favorites'}
+        title={favoriteId ? 'Remove from favorites' : 'Save to favorites'}
+        onClick={onToggleFavorite}
+        disabled={favBusy}
+      >
+        {favoriteId ? '♥' : '♡'}
+      </button>
       {hasVariants ? (
         <Link to={href} className="store-card__add">Choose options</Link>
       ) : (

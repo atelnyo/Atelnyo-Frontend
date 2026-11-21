@@ -9,6 +9,7 @@ const getProduct = vi.fn();
 const listOrders = vi.fn();
 const createReview = vi.fn();
 const listFavorites = vi.fn();
+const listRelated = vi.fn();
 const addFavorite = vi.fn();
 const removeFavorite = vi.fn();
 let mockUser = null;
@@ -19,6 +20,7 @@ vi.mock('./storeService', () => ({
     listOrders: (...args) => listOrders(...args),
     createReview: (...args) => createReview(...args),
     listFavorites: (...args) => listFavorites(...args),
+    listRelated: (...args) => listRelated(...args),
     addFavorite: (...args) => addFavorite(...args),
     removeFavorite: (...args) => removeFavorite(...args),
   },
@@ -30,6 +32,7 @@ vi.mock('./useAuthStore', () => ({
 
 import StoreProductPage from './StoreProductPage';
 import { loadCart, CART_STORAGE_KEY } from './cart';
+import { loadRecentlyViewed } from './recentlyViewed';
 
 const product = {
   id: 5,
@@ -70,8 +73,22 @@ describe('StoreProductPage', () => {
     listOrders.mockReset().mockResolvedValue({ data: [] });
     createReview.mockReset().mockResolvedValue({ data: { id: 1 } });
     listFavorites.mockReset().mockResolvedValue({ data: [] });
+    listRelated.mockReset().mockResolvedValue({ data: [] });
     addFavorite.mockReset();
     removeFavorite.mockReset();
+  });
+
+  it('records the viewed product in the local recently-viewed history', async () => {
+    renderPage();
+    await screen.findByRole('button', { name: 'Add to cart' });
+
+    expect(loadRecentlyViewed()).toHaveLength(1);
+    expect(loadRecentlyViewed()[0]).toMatchObject({
+      id: 5,
+      slug: 'poster',
+      title: 'Poster',
+      price: '20.00',
+    });
   });
 
   it('adds the selected variant and quantity to the cart', async () => {
@@ -131,6 +148,18 @@ describe('StoreProductPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Saved' }));
     await waitFor(() => expect(removeFavorite).toHaveBeenCalledWith(900));
     expect(await screen.findByRole('button', { name: 'Save to favorites' })).toBeTruthy();
+  });
+
+  it('shows related products with a link back to the Store', async () => {
+    listRelated.mockResolvedValue({
+      data: [{ ...product, id: 6, slug: 'tee', title: 'Tee', variants: [] }],
+    });
+    renderPage();
+
+    expect(await screen.findByRole('heading', { name: 'You may also like' })).toBeTruthy();
+    expect(listRelated).toHaveBeenCalledWith(5);
+    expect(screen.getByRole('link', { name: 'View Tee' }).getAttribute('href')).toBe('/store/products/tee');
+    expect(screen.getByRole('link', { name: 'See all in Store' }).getAttribute('href')).toBe('/store');
   });
 
   it('shortens a long description and expands it with Show more', async () => {
