@@ -33,12 +33,106 @@ const COMMENT_FORMS = {
   es: { one: 'comentario', many: 'comentarios' },
 };
 
+// Compose limits mirror CommunityPostSerializer.validate_content:
+// 2000 code points, not UTF-16 units (an emoji must count as one).
+const DRAFT_MAX = 2000;
+const POST_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const POST_IMAGE_MAX_BYTES = 10 * 1024 * 1024;
+// The backend's magic-byte validator accepts MP4 video only (not WebM/MOV),
+// so the picker mirrors that exactly instead of offering files it will reject.
+const POST_VIDEO_TYPES = ['video/mp4'];
+const POST_VIDEO_MAX_BYTES = 50 * 1024 * 1024;
+const DRAFT_MAX_HEIGHT = 220;
+
+function unicodeLength(value) {
+  return Array.from(value || '').length;
+}
+
+/** Only http(s) links with a hostname — blocks javascript:, data:, etc. */
+function normalizeHttpUrl(raw) {
+  const value = String(raw || '').trim();
+  if (!value) return '';
+  const withScheme = /^[a-z][a-z0-9+.-]*:/i.test(value)
+    ? value
+    : `https://${value}`;
+  try {
+    const url = new URL(withScheme);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return '';
+    if (!url.hostname || !url.hostname.includes('.')) return '';
+    return url.toString();
+  } catch {
+    return '';
+  }
+}
+
+/** Post body with real clickable http(s) links and safe wrapping. */
+function PostContent({ content }) {
+  const text = String(content || '');
+  if (!text.trim()) return null;
+  const parts = text.split(/(https?:\/\/[^\s]+)/gi);
+  return (
+    <p className="c-post-content">
+      {parts.map((part, index) => {
+        if (!/^https?:\/\//i.test(part)) {
+          return <React.Fragment key={index}>{part}</React.Fragment>;
+        }
+        const href = part.replace(/[.,;:!?)\]]+$/, '');
+        const trailing = part.slice(href.length);
+        return (
+          <React.Fragment key={index}>
+            <a href={href} target="_blank" rel="noopener noreferrer">{href}</a>
+            {trailing}
+          </React.Fragment>
+        );
+      })}
+    </p>
+  );
+}
+
+function visibilityHint(lang, joinMode, readVisibility) {
+  if (readVisibility === 'members') {
+    return t4(
+      lang,
+      'Sèlman manm aktif yo ka li pòs sa a.',
+      'Only active members can read this post.',
+      'Seuls les membres actifs peuvent lire cette publication.',
+      'Solo los miembros activos pueden leer esta publicación.',
+    );
+  }
+  if (joinMode === 'approval') {
+    return t4(
+      lang,
+      'Tout moun ka li pòs sa a. Pou antre nan kominote a, apwobasyon nesesè.',
+      'Anyone can read this post. Joining this community requires approval.',
+      'Tout le monde peut lire cette publication. L’adhésion nécessite une approbation.',
+      'Cualquiera puede leer esta publicación. Unirse requiere aprobación.',
+    );
+  }
+  if (joinMode === 'invite') {
+    return t4(
+      lang,
+      'Tout moun ka li pòs sa a. Se sèlman manm yo ki ka pibliye.',
+      'Anyone can read this post. Only members can publish.',
+      'Tout le monde peut lire cette publication. Seuls les membres peuvent publier.',
+      'Cualquiera puede leer esta publicación. Solo los miembros pueden publicar.',
+    );
+  }
+  return t4(
+    lang,
+    'Pòs sa a vizib pou tout moun.',
+    'This post is visible to everyone.',
+    'Cette publication est visible par tous.',
+    'Esta publicación es visible para todos.',
+  );
+}
+
 /** First playable video URL inside a post body (YouTube/Vimeo/direct file), or '' — same resolver as Music. */
 function firstVideoUrl(text) {
   if (!text || typeof text !== 'string') return '';
-  const urls = text.match(/https?:\/\/[^\s)]+/gi) || [];
-  for (const u of urls) {
-    if (resolveVideoSource(u)) return u;
+  const urls = text.match(/https?:\/\/[^\s<>"']+/gi) || [];
+  for (const raw of urls) {
+    const u = raw.replace(/[.,;:!?)\]}]+$/, '');
+    if (u && resolveVideoSource(u)) return u;
   }
   return '';
 }
@@ -100,7 +194,7 @@ function LinkPreviewCard({ url }) {
   if (!url) return null;
   if (loading) {
     return (
-      <div style={{ marginTop: 8, border: '1px solid var(--border-color, #e2e8f0)', borderRadius: 8, height: 72, background: 'var(--bg-soft, #f8fafc)' }} data-testid="link-preview-loading" />
+      <div style={{ marginTop: 8, border: '1px solid var(--border-color, #e2e8f0)', borderRadius: 8, height: 72, background: 'var(--surface-highlight, #f8fafc)' }} data-testid="link-preview-loading" />
     );
   }
   // Fetch failed (WhatsApp/Facebook login walls, offline host...): still
@@ -110,9 +204,9 @@ function LinkPreviewCard({ url }) {
     try { domain = new URL(url).hostname; } catch { domain = ''; }
     return (
       <a href={url} target="_blank" rel="noopener noreferrer"
-        style={{ marginTop: 8, display: 'flex', gap: 10, alignItems: 'center', border: '1px dashed var(--border-color, #cbd5e1)', borderRadius: 8, overflow: 'hidden', textDecoration: 'none', color: 'inherit', background: 'var(--bg-soft, #fff)', padding: '8px 10px' }}
+        style={{ marginTop: 8, display: 'flex', gap: 10, alignItems: 'center', border: '1px dashed var(--border-color, #cbd5e1)', borderRadius: 8, overflow: 'hidden', textDecoration: 'none', color: 'inherit', background: 'var(--surface-highlight, #fff)', padding: '8px 10px' }}
         data-testid="link-preview-card">
-        <span style={{ width: 36, height: 36, borderRadius: 8, background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }} aria-hidden="true"><i className="fas fa-link" /></span>
+        <span style={{ width: 36, height: 36, borderRadius: 8, background: 'var(--surface-highlight, #f1f5f9)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }} aria-hidden="true"><i className="fas fa-link" /></span>
         <span style={{ minWidth: 0, flex: 1 }}>
           {domain && <span style={{ display: 'block', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.5px', opacity: 0.6 }}>{domain}</span>}
           <span style={{ display: 'block', fontSize: '0.78rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{url}</span>
@@ -123,7 +217,7 @@ function LinkPreviewCard({ url }) {
   }
   return (
     <a href={url} target="_blank" rel="noopener noreferrer"
-      style={{ marginTop: 8, display: 'flex', gap: 10, border: '1px solid var(--border-color, #e2e8f0)', borderRadius: 8, overflow: 'hidden', textDecoration: 'none', color: 'inherit', background: 'var(--bg-soft, #fff)' }}
+      style={{ marginTop: 8, display: 'flex', gap: 10, border: '1px solid var(--border-color, #e2e8f0)', borderRadius: 8, overflow: 'hidden', textDecoration: 'none', color: 'inherit', background: 'var(--surface-highlight, #fff)' }}
       data-testid="link-preview-card">
       {meta.image && (
         <img src={meta.image} alt="" loading="lazy" style={{ width: 96, height: 72, objectFit: 'cover', flexShrink: 0 }} />
@@ -172,7 +266,7 @@ function PostPoll({ post, lang, user, onVoted, showToast }) {
     } finally { setVoting(false); }
   }
   return (
-    <div style={{ marginTop: 8, border: '1px solid var(--border-color, #e2e8f0)', borderRadius: 8, padding: 10, background: 'var(--bg-soft, #fff)' }} data-testid={`post-poll-${post.id}`}>
+    <div style={{ marginTop: 8, border: '1px solid var(--border-color, #e2e8f0)', borderRadius: 8, padding: 10, background: 'var(--surface-highlight, #fff)' }} data-testid={`post-poll-${post.id}`}>
       <div style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: 8 }}><i className="fas fa-chart-bar" aria-hidden="true" style={{ marginRight: 6 }} />{post.poll_question}</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         {opts.map((o, i) => {
@@ -212,6 +306,42 @@ function PostPoll({ post, lang, user, onVoted, showToast }) {
   );
 }
 
+function videoProviderName(url) {
+  const source = resolveVideoSource(url);
+  if (source?.provider === 'youtube') return 'YouTube';
+  if (source?.provider === 'vimeo') return 'Vimeo';
+  if (source?.provider === 'facebook') return 'Facebook';
+  if (source?.provider === 'tiktok') return 'TikTok';
+  if (source?.kind === 'file') return 'Video';
+  return '';
+}
+
+/** Rich YouTube/Vimeo card shown while drafting a post. */
+function ComposerVideoLink({ url, lang }) {
+  const source = resolveVideoSource(url);
+  if (!source) return null;
+  const thumb = youtubeThumbnail(url);
+  const provider = videoProviderName(url);
+  const icon = source.provider === 'youtube'
+    ? 'fab fa-youtube'
+    : source.provider === 'vimeo'
+      ? 'fab fa-vimeo-v'
+      : 'fas fa-play-circle';
+  return (
+    <div className="c-post-composer-video-link" data-testid="post-composer-video-thumb">
+      {thumb
+        ? <img src={thumb} alt="" loading="lazy" />
+        : <span className="c-video-link-thumb" aria-hidden="true"><i className={icon} /></span>}
+      <div className="c-post-composer-video-link-body">
+        <span className="c-post-composer-video-link-provider">
+          {provider || t4(lang, 'Videyo', 'Video', 'Vidéo', 'Video')}
+        </span>
+        <VideoTitleLink url={url} />
+      </div>
+    </div>
+  );
+}
+
 /** Clickable video title (YouTube/Vimeo/...): fetches the real title via
  * /api/link-preview/ (oEmbed server-side) so a pasted video shows more
  * than a bare thumbnail — and the link opens the source on tap. */
@@ -234,12 +364,19 @@ function VideoTitleLink({ url }) {
   let domain = '';
   try { domain = new URL(url).hostname.replace(/^www\./, ''); } catch { domain = ''; }
   const title = meta?.title && meta.title !== meta?.domain ? meta.title : null;
+  const source = resolveVideoSource(url);
+  const provider = videoProviderName(url);
+  const icon = source?.provider === 'youtube'
+    ? 'fab fa-youtube'
+    : source?.provider === 'vimeo'
+      ? 'fab fa-vimeo-v'
+      : 'fas fa-play-circle';
   return (
     <a href={url} target="_blank" rel="noopener noreferrer" data-testid="video-title-link"
       style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, fontSize: '0.82rem', fontWeight: 600, textDecoration: 'none', color: 'inherit' }}>
-      <i className="fas fa-play-circle" aria-hidden="true" style={{ color: '#e11d48' }} />
+      <i className={icon} aria-hidden="true" style={{ color: '#e11d48' }} />
       <span style={{ flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{loading ? '...' : (title || domain || url)}</span>
-      {domain && <span style={{ fontWeight: 400, fontSize: '0.7rem', opacity: 0.6 }}>{domain}</span>}
+      {domain && <span style={{ fontWeight: 400, fontSize: '0.7rem', opacity: 0.6 }}>{provider || domain}</span>}
       <i className="fas fa-external-link-alt" aria-hidden="true" style={{ fontSize: '0.7rem', opacity: 0.5 }} />
     </a>
   );
@@ -262,20 +399,44 @@ function PostSkeleton() {
   );
 }
 
+function postLocale(lang) {
+  return lang === 'ht' ? 'fr-HT' : lang === 'fr' ? 'fr' : lang === 'es' ? 'es' : 'en';
+}
+
+/** Full timestamp for the tooltip / screen readers. */
 function formatPostTime(iso, lang) {
   if (!iso) return '';
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '';
-  const locale = lang === 'ht' ? 'fr-HT' : lang === 'fr' ? 'fr' : lang === 'es' ? 'es' : 'en';
   try {
-    return d.toLocaleString(locale, {
+    // A post from a previous year must not read as if it were this year:
+    // "Mar 5, 2:30 PM" is ambiguous in a feed that mixes old and new posts.
+    return d.toLocaleString(postLocale(lang), {
+      ...(d.getFullYear() === new Date().getFullYear() ? {} : { year: 'numeric' }),
       month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
     });
   } catch { return ''; }
 }
 
+/** Compact relative timestamp; falls back to an absolute date for old posts. */
+function formatRelativePostTime(iso, lang) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const diffMs = d.getTime() - Date.now();
+  const abs = Math.abs(diffMs);
+  try {
+    const rtf = new Intl.RelativeTimeFormat(postLocale(lang), { numeric: 'auto' });
+    if (abs < 60_000) return rtf.format(Math.round(diffMs / 1000), 'second');
+    if (abs < 3_600_000) return rtf.format(Math.round(diffMs / 60_000), 'minute');
+    if (abs < 86_400_000) return rtf.format(Math.round(diffMs / 3_600_000), 'hour');
+    if (abs < 7 * 86_400_000) return rtf.format(Math.round(diffMs / 86_400_000), 'day');
+  } catch { /* older engines — use the absolute date */ }
+  return formatPostTime(iso, lang);
+}
+
 export default function CommunityPosts() {
-  const { community, lang = 'en', user, showToast } = useOutletContext();
+  const { community, lang = 'en', user, showToast, onPostCountChange } = useOutletContext();
   // /community/:slug/posts/:postId — the same feed serves as the post
   // permalink: the requested post is pinned to the top, highlighted and
   // gets its own OG/canonical tags.
@@ -290,20 +451,67 @@ export default function CommunityPosts() {
   const [publishing, setPublishing] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [imageError, setImageError] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [videoProgress, setVideoProgress] = useState(0);
+  const [videoError, setVideoError] = useState('');
   const imageInputRef = useRef(null);
+  const videoInputRef = useRef(null);
+  const [composerNode, setComposerNode] = useState(null);
   const draftInputRef = useRef(null);
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [linkValue, setLinkValue] = useState('');
+  const [linkError, setLinkError] = useState('');
+  const [showEmoji, setShowEmoji] = useState(false);
+  const [draftError, setDraftError] = useState('');
+  const [composerFocused, setComposerFocused] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [editDraft, setEditDraft] = useState('');
+  const [editSaving, setEditSaving] = useState(false);
+  const draftLength = unicodeLength(draft);
 
   function focusDraft() { try { draftInputRef.current?.focus(); } catch { /* noop */ } }
+
   function appendLinkToDraft(raw) {
-    const u = (raw || '').trim();
-    if (!u) return;
-    const clean = u.replace(/^[^h]+(?=https?:)/, '');
-    setDraft((d) => (d && !d.endsWith('\n') ? `${d}\n${clean}` : `${d || ''}${clean}`));
+    const url = normalizeHttpUrl(raw);
+    if (!url) {
+      setLinkError(t4(
+        lang,
+        'Antre yon lyen http(s) valab, pa egzanp https://atelnyo.site.',
+        'Enter a valid http(s) link, for example https://atelnyo.site.',
+        'Entrez un lien http(s) valide, par exemple https://atelnyo.site.',
+        'Introduce un enlace http(s) válido, por ejemplo https://atelnyo.site.',
+      ));
+      return;
+    }
+    setLinkError('');
+    setDraft((current) => {
+      const next = current && !current.endsWith('\n')
+        ? `${current}\n${url}`
+        : `${current || ''}${url}`;
+      return unicodeLength(next) <= DRAFT_MAX ? next : current;
+    });
     setLinkValue('');
     setShowLinkInput(false);
     focusDraft();
+  }
+
+  function insertEmoji(emoji) {
+    const input = draftInputRef.current;
+    const start = input?.selectionStart ?? draft.length;
+    const end = input?.selectionEnd ?? draft.length;
+    const next = `${draft.slice(0, start)}${emoji}${draft.slice(end)}`;
+    if (unicodeLength(next) > DRAFT_MAX) return;
+    setDraft(next);
+    setShowEmoji(false);
+    requestAnimationFrame(() => {
+      try {
+        input?.focus();
+        input?.setSelectionRange(start + emoji.length, start + emoji.length);
+      } catch { /* noop */ }
+    });
   }
 
   // ── Poll composer state ──────────────────────────────────
@@ -331,13 +539,38 @@ export default function CommunityPosts() {
     };
   }
 
+  const canPublish = Boolean(
+    draft.trim()
+    || imageUrl
+    || videoUrl
+    || (showPollCreator && pollQuestion.trim() && pollOptions.filter((option) => option.trim()).length >= 2),
+  );
+
   async function handlePickImage(file) {
     if (!file) return;
-    if (!file.type?.startsWith('image/')) {
-      showToast?.(t4(lang, 'Chwazi yon fichye imaj.', 'Please select an image file.', 'Choisissez une image.', 'Elige una imagen.'), 'exclamation-triangle');
+    setImageError('');
+    if (!POST_IMAGE_TYPES.includes(file.type)) {
+      setImageError(t4(
+        lang,
+        'Fòma imaj la pa sipòte. Sèvi ak JPG, PNG, WEBP oswa GIF.',
+        'Unsupported image format. Use JPG, PNG, WEBP or GIF.',
+        'Format d’image non pris en charge. Utilisez JPG, PNG, WEBP ou GIF.',
+        'Formato de imagen no compatible. Usa JPG, PNG, WEBP o GIF.',
+      ));
+      return;
+    }
+    if (file.size > POST_IMAGE_MAX_BYTES) {
+      setImageError(t4(
+        lang,
+        'Imaj la twò gwo (maksimòm 10 MB).',
+        'Image is too large (10 MB maximum).',
+        'Image trop volumineuse (10 Mo maximum).',
+        'La imagen es demasiado grande (máximo 10 MB).',
+      ));
       return;
     }
     setUploadingImage(true);
+    setUploadProgress(0);
     try {
       const base64 = await new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -345,14 +578,92 @@ export default function CommunityPosts() {
         reader.onerror = () => reject(new Error('read_failed'));
         reader.readAsDataURL(file);
       });
-      const res = await api.post('media/upload/', { file: base64, kind: 'image', filename: file.name || 'post-image' });
-      if (res?.data?.url) setImageUrl(res.data.url);
-    } catch {
-      showToast?.(t4(lang, 'Erè nan telechaje imaj.', 'Image upload failed.', 'Échec du téléversement.', 'Falló la subida.'), 'circle-exclamation');
+      const res = await api.post(
+        'media/upload/',
+        { file: base64, kind: 'image', filename: file.name || 'post-image' },
+        {
+          onUploadProgress: (event) => {
+            if (!event?.total) return;
+            setUploadProgress(Math.round((event.loaded / event.total) * 100));
+          },
+        },
+      );
+      if (!res?.data?.url) throw new Error('missing_url');
+      setImageUrl(res.data.url);
+      setVideoUrl('');
+      setVideoError('');
+      setVideoProgress(0);
+      setUploadProgress(100);
+    } catch (err) {
+      setUploadProgress(0);
+      setImageError(
+        err?.response?.data?.error
+        || t4(lang, 'Erè nan telechaje imaj.', 'Image upload failed.', 'Échec du téléversement.', 'Falló la subida.'),
+      );
     } finally {
       setUploadingImage(false);
     }
   }
+  async function handlePickVideo(file) {
+    if (!file) return;
+    setVideoError('');
+    const isMp4 = POST_VIDEO_TYPES.includes(file.type) || /\.mp4$/i.test(file.name || '');
+    if (!isMp4) {
+      setVideoError(t4(
+        lang,
+        'Fòma videyo a pa sipòte. Sèvi ak MP4.',
+        'Unsupported video format. Use MP4.',
+        'Format vidéo non pris en charge. Utilisez MP4.',
+        'Formato de video no compatible. Usa MP4.',
+      ));
+      return;
+    }
+    if (file.size > POST_VIDEO_MAX_BYTES) {
+      setVideoError(t4(
+        lang,
+        'Videyo a twò gwo (maksimòm 50 MB).',
+        'Video is too large (50 MB maximum).',
+        'Vidéo trop volumineuse (50 Mo maximum).',
+        'El video es demasiado grande (máximo 50 MB).',
+      ));
+      return;
+    }
+    setUploadingVideo(true);
+    setVideoProgress(0);
+    try {
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('read_failed'));
+        reader.readAsDataURL(file);
+      });
+      const res = await api.post(
+        'media/upload/',
+        { file: base64, kind: 'video', filename: file.name || 'post-video.mp4' },
+        {
+          onUploadProgress: (event) => {
+            if (!event?.total) return;
+            setVideoProgress(Math.round((event.loaded / event.total) * 100));
+          },
+        },
+      );
+      if (!res?.data?.url) throw new Error('missing_url');
+      setVideoUrl(res.data.url);
+      setImageUrl('');
+      setImageError('');
+      setUploadProgress(0);
+      setVideoProgress(100);
+    } catch (err) {
+      setVideoProgress(0);
+      setVideoError(
+        err?.response?.data?.error
+        || t4(lang, 'Erè nan telechaje videyo.', 'Video upload failed.', 'Échec du téléversement de la vidéo.', 'Falló la subida del video.'),
+      );
+    } finally {
+      setUploadingVideo(false);
+    }
+  }
+
   const [reacting, setReacting] = useState({});
   const [openComments, setOpenComments] = useState({});
   const [commentLists, setCommentLists] = useState({});
@@ -388,8 +699,10 @@ export default function CommunityPosts() {
   const [totalCount, setTotalCount] = useState(0);
   const [deletingId, setDeletingId] = useState(null);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [searchInput, setSearchInput] = useState('');
-  const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState(() => searchParams.get('q') || '');
+  const [search, setSearch] = useState(() => searchParams.get('q') || '');
+  const [searching, setSearching] = useState(false);
+  const loadedSlugRef = useRef(null);
 
   // Debounce search typing 400ms so one request per query, not per keystroke.
   useEffect(() => {
@@ -397,11 +710,32 @@ export default function CommunityPosts() {
     return () => clearTimeout(t);
   }, [searchInput]);
 
+  // Keep the query in the URL so a permalink/back navigation does not
+  // silently drop the user's search context.
+  useEffect(() => {
+    const next = new URLSearchParams(searchParams);
+    if (search) next.set('q', search);
+    else next.delete('q');
+    if (next.toString() !== searchParams.toString()) {
+      setSearchParams(next, { replace: true });
+    }
+  }, [search, searchParams, setSearchParams]);
+
+  // Browser back/forward restores ?q= into the field as well.
+  useEffect(() => {
+    const q = searchParams.get('q') || '';
+    setSearchInput((current) => (current === q ? current : q));
+  }, [searchParams]);
+
   const load = useCallback(() => {
     if (!slug) return;
     let cancelled = false;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- sync skeleton flip on slug change is intentional
-    setLoading(true);
+    // A new community needs the full skeleton; a search inside the same
+    // community keeps the search field and existing feed visible while
+    // the new results arrive.
+    const slugChanged = loadedSlugRef.current !== slug;
+    if (slugChanged) setLoading(true);
+    else setSearching(true);
     setPage(1);
     setFocusMissing(false);
     // A permalink can point at an old post that isn't on page 1, so fetch
@@ -437,7 +771,13 @@ export default function CommunityPosts() {
         setHasMore(Boolean(next) || data.length >= 20);
       })
       .catch(() => { /* silent — empty state covers failure */ })
-      .finally(() => { if (!cancelled) setLoading(false); });
+      .finally(() => {
+        if (!cancelled) {
+          loadedSlugRef.current = slug;
+          setLoading(false);
+          setSearching(false);
+        }
+      });
     return () => { cancelled = true; };
   }, [slug, search, permalinkId]);
 
@@ -474,6 +814,62 @@ export default function CommunityPosts() {
 
   useEffect(() => load(), [load]);
 
+  // Auto-grow the editor with its content; scroll internally past the
+  // cap instead of reserving a tall empty box or showing a resize handle.
+  useEffect(() => {
+    const input = draftInputRef.current;
+    if (!input) return;
+    input.style.height = 'auto';
+    const next = Math.min(input.scrollHeight || 0, DRAFT_MAX_HEIGHT);
+    input.style.height = `${next}px`;
+    input.style.overflowY = (input.scrollHeight || 0) > DRAFT_MAX_HEIGHT ? 'auto' : 'hidden';
+  }, [draft]);
+
+  // The global assistant FAB is fixed on mobile; hide it while the
+  // composer is focused so it can never cover the editor or publish row.
+  useEffect(() => {
+    if (!composerFocused) return undefined;
+    document.body.classList.add('community-composing');
+    return () => document.body.classList.remove('community-composing');
+  }, [composerFocused]);
+
+  // Stronger FAB protection: on mobile, keep the global assistant hidden
+  // whenever any part of the composer is visible in the viewport — not just
+  // while a field has focus. Scrolling past the composer restores the FAB,
+  // so the assistant remains available across the rest of the community.
+  useEffect(() => {
+    const node = composerNode;
+    if (!node || !isMember || typeof window === 'undefined') return undefined;
+    if (typeof IntersectionObserver === 'undefined' || typeof window.matchMedia !== 'function') return undefined;
+    const media = window.matchMedia('(max-width: 768px)');
+    let observer = null;
+
+    const disconnect = () => {
+      if (observer) observer.disconnect();
+      observer = null;
+      document.body.classList.remove('community-composer-visible');
+    };
+
+    const sync = () => {
+      disconnect();
+      if (!media.matches) return;
+      observer = new IntersectionObserver((entries) => {
+        document.body.classList.toggle(
+          'community-composer-visible',
+          entries.some((entry) => entry.isIntersecting),
+        );
+      }, { threshold: 0.01 });
+      observer.observe(node);
+    };
+
+    sync();
+    media.addEventListener?.('change', sync);
+    return () => {
+      disconnect();
+      media.removeEventListener?.('change', sync);
+    };
+  }, [composerNode, isMember, permalinkId]);
+
   async function handleLoadMore() {
     if (loadingMore || !hasMore) return;
     const nextPage = page + 1;
@@ -495,41 +891,61 @@ export default function CommunityPosts() {
 
   async function handlePublish(e) {
     e?.preventDefault?.();
+    if (publishing) return;
     const content = draft.trim();
-    if (!content || publishing) return;
+    const poll = pollPayload();
+    const hasPoll = Boolean(poll.poll_question);
+    if (!content && !imageUrl && !videoUrl && !hasPoll) return;
     if (!user) {
       showToast?.(t4(lang, 'Konekte pou w pibliye', 'Sign in to publish', 'Connectez-vous pour publier', 'Inicia sesión para publicar'), 'user-lock');
       return;
     }
+    if (poll.__invalid) {
+      showToast?.(t4(lang, 'Sondaj bezwen yon kesyon + omwen 2 opsyon.', 'A poll needs a question + at least 2 options.', 'Un sondage exige une question + 2 options.', 'Una encuesta necesita pregunta + 2 opciones.'), 'circle-exclamation');
+      return;
+    }
     setPublishing(true);
     try {
-      // Same as Music: a YouTube link already carries artwork — reuse its
-      // thumbnail when the user didn't attach a photo from the gallery.
-      const autoThumb = !imageUrl ? youtubeThumbnail(firstVideoUrl(content)) : '';
+      // A YouTube link already carries artwork — reuse its thumbnail when
+      // the user didn't attach a photo or a native video.
+      const autoThumb = !imageUrl && !videoUrl ? youtubeThumbnail(firstVideoUrl(content)) : '';
       const finalImage = imageUrl || autoThumb;
-      const base = finalImage ? { content, image_url: finalImage } : { content };
-      const poll = pollPayload();
-      if (poll.__invalid) {
-        showToast?.(t4(lang, 'Sondaj bezwen yon kesyon + omwen 2 opsyon.', 'A poll needs a question + at least 2 options.', 'Un sondage exige une question + 2 options.', 'Una encuesta necesita pregunta + 2 opciones.'), 'circle-exclamation');
-        setPublishing(false);
-        return;
-      }
+      const base = {
+        content,
+        ...(finalImage ? { image_url: finalImage } : {}),
+        ...(videoUrl ? { video_url: videoUrl } : {}),
+      };
       const payload = { ...base, ...poll };
       const res = await communitiesService.createPost(slug, payload);
-      if (res?.data?.id) {
-        // Backend order is pinned-first then newest: insert the new post
-        // right after the pinned block so epengle posts never move.
-        setPosts((prev) => {
-          const rest = prev.filter((p) => p.id !== res.data.id);
-          const idx = rest.findIndex((p) => !p.is_pinned);
-          if (res.data.is_pinned || idx === -1) return [res.data, ...rest];
-          return [...rest.slice(0, idx), res.data, ...rest.slice(idx)];
-        });
-        setTotalCount((c) => c + 1);
-      }
+      const created = res?.data?.id ? res.data : null;
+      if (!created) throw new Error('publish_failed');
+      // Backend order is pinned-first then newest: insert the new post
+      // right after the pinned block so epengle posts never move.
+      setPosts((prev) => {
+        const rest = prev.filter((p) => p.id !== created.id);
+        const idx = rest.findIndex((p) => !p.is_pinned);
+        if (created.is_pinned || idx === -1) return [created, ...rest];
+        return [...rest.slice(0, idx), created, ...rest.slice(idx)];
+      });
+      setTotalCount((c) => c + 1);
+      onPostCountChange?.(1);
+      // A search-filtered feed must not keep showing a post that may not
+      // match the query. Return to the normal feed after publishing.
+      if (search) { setSearchInput(''); setSearch(''); }
+      // Clear only after the server confirmed the row — a failed publish
+      // keeps the user's text and attachment intact.
       setDraft('');
       setImageUrl('');
+      setImageError('');
+      setUploadProgress(0);
+      setVideoUrl('');
+      setVideoError('');
+      setVideoProgress(0);
+      setLinkError('');
+      setDraftError('');
+      setShowEmoji(false);
       resetPollCreator();
+      setComposerFocused(false);
       showToast?.(t4(lang, 'Pòs pibliye!', 'Post published!', 'Publication réussie !', '¡Publicación exitosa!'), 'check-circle');
     } catch (err) {
       showToast?.(err?.response?.data?.detail || t4(lang, 'Nou pa ka pibliye.', 'Could not publish.', 'Publication impossible.', 'No se pudo publicar.'), 'circle-exclamation');
@@ -551,6 +967,11 @@ export default function CommunityPosts() {
     if (post.my_reaction) {
       nextReactions[post.my_reaction] = Math.max(0, (nextReactions[post.my_reaction] || 1) - 1);
       if (nextReactions[post.my_reaction] === 0) delete nextReactions[post.my_reaction];
+    }
+    // The selected emoji itself must appear optimistically too — not just
+    // the total counter — so the tapped pill immediately shows its count.
+    if (!had) {
+      nextReactions[emoji] = (nextReactions[emoji] || 0) + 1;
     }
     // Same emoji → count drops by 1; swap → count unchanged; fresh → +1.
     const nextCount = Math.max(0, (post.reaction_count || 0) + (had ? -1 : (post.my_reaction ? 0 : 1)));
@@ -579,6 +1000,9 @@ export default function CommunityPosts() {
     setPosts((list) => list.filter((p) => p.id !== post.id));
     try {
       await communitiesService.deletePost(post.id);
+      setTotalCount((c) => Math.max(0, c - 1));
+      onPostCountChange?.(-1);
+      setFocusedPost((current) => (current && current.id === post.id ? null : current));
       showToast?.(t4(lang, 'Pòs efase.', 'Post deleted.', 'Publication supprimée.', 'Publicación eliminada.'), 'trash');
     } catch (err) {
       setPosts(prev);
@@ -588,10 +1012,96 @@ export default function CommunityPosts() {
     }
   }
 
+  function isPostAuthor(post) {
+    return Boolean(user && (user.id === post.author || user.username === post.author_username));
+  }
+
+  function canEdit(post) {
+    return isPostAuthor(post);
+  }
+
   function canDelete(post) {
     if (!user) return false;
-    if (canModerate) return true;
-    return user.id === post.author || user.username === post.author_username;
+    return canModerate || isPostAuthor(post);
+  }
+
+  function postActionsFor(post) {
+    const actions = [];
+    if (canModerate) {
+      actions.push({
+        key: 'pin',
+        label: post.is_pinned
+          ? t4(lang, 'Retire epeng', 'Unpin post', 'Désépingler', 'Quitar fijado')
+          : t4(lang, 'Epengle pòs', 'Pin post', 'Épingler', 'Fijar publicación'),
+        icon: 'fa-thumbtack',
+        onSelect: () => handleTogglePin(post),
+        testId: `post-pin-${post.id}`,
+      });
+    }
+    if (canEdit(post)) {
+      actions.push({
+        key: 'edit',
+        label: t4(lang, 'Modifye pòs', 'Edit post', 'Modifier', 'Editar'),
+        icon: 'fa-pen',
+        onSelect: () => startEdit(post),
+        testId: `post-edit-${post.id}`,
+      });
+    }
+    if (canDelete(post)) {
+      actions.push({
+        key: 'delete',
+        label: t4(lang, 'Efase', 'Delete', 'Supprimer', 'Eliminar'),
+        icon: 'fa-trash',
+        danger: true,
+        disabled: deletingId === post.id,
+        onSelect: () => handleDelete(post),
+        testId: `post-delete-${post.id}`,
+      });
+    }
+    return actions;
+  }
+
+  function startEdit(post) {
+    setEditingId(post.id);
+    setEditDraft(post.content || '');
+  }
+
+  async function handleSaveEdit(post) {
+    const content = editDraft.trim();
+    const hasMedia = Boolean(post.image_url || post.video_url || post.poll_question);
+    if ((!content && !hasMedia) || editSaving) return;
+    if (unicodeLength(content) > DRAFT_MAX) return;
+    setEditSaving(true);
+    try {
+      const res = await communitiesService.updatePost(post.id, { content });
+      if (!res?.data?.id) throw new Error('edit_failed');
+      setPosts((list) => list.map((p) => (p.id === post.id ? res.data : p)));
+      setEditingId(null);
+      setEditDraft('');
+      showToast?.(t4(lang, 'Pòs ajoune.', 'Post updated.', 'Publication mise à jour.', 'Publicación actualizada.'), 'check-circle');
+    } catch (err) {
+      showToast?.(
+        err?.response?.data?.detail
+        || t4(lang, 'Pa t kapab ajoune pòs la.', 'Could not update the post.', 'Impossible de mettre à jour.', 'No se pudo actualizar.'),
+        'circle-exclamation',
+      );
+    } finally {
+      setEditSaving(false);
+    }
+  }
+
+  async function handleTogglePin(post) {
+    try {
+      const res = await communitiesService.updatePost(post.id, { is_pinned: !post.is_pinned });
+      if (!res?.data?.id) throw new Error('pin_failed');
+      setPosts((list) => list.map((p) => (p.id === post.id ? res.data : p)));
+    } catch (err) {
+      showToast?.(
+        err?.response?.data?.detail
+        || t4(lang, 'Pa t kapab epengle pòs la.', 'Could not pin the post.', 'Impossible d’épingler.', 'No se pudo fijar.'),
+        'circle-exclamation',
+      );
+    }
   }
 
   function canDeleteComment(comment) {
@@ -679,12 +1189,12 @@ export default function CommunityPosts() {
   }
 
   return (
-    <div className="c-list c-list--gap12">
+    <div className="c-list c-list--gap12" aria-busy={searching || undefined}>
       {focusedPost && (
         <SEOHead
           title={`Post by @${focusedPost.author_username || 'member'} in ${community?.name || 'community'}`}
           description={focusedPost.content}
-          image={focusedPost.image_url || community?.banner_url || community?.avatar_url}
+          image={focusedPost.image_url || youtubeThumbnail(focusedPost.video_url || firstVideoUrl(focusedPost.content)) || community?.banner_url || community?.avatar_url}
           url={`/community/${slug}/posts/${focusedPost.id}`}
           type="article"
           lang={lang}
@@ -716,12 +1226,20 @@ export default function CommunityPosts() {
           <h2>{t4(lang, 'Pòs ak diskisyon', 'Posts & discussions', 'Publications et discussions', 'Publicaciones y debates')}</h2>
           <p>{t4(lang, 'Pataje yon lide, poze yon kesyon oswa reponn yon pòs — se piblikasyon ak kòmantè ki fè kominote a grandi.', 'Share an idea, ask a question, or reply to a post — this community grows through posts and comments.', 'Partagez vos idées, posez vos questions et échangez avec les membres à travers les publications et les commentaires.', 'Comparte ideas, haz preguntas y conversa con los miembros mediante publicaciones y comentarios.')}</p>
         </div>
-        <span className="c-posts-count">{countWithUnit(lang, totalCount, POST_FORMS)}</span>
+        <span className="c-posts-count" data-testid="posts-count">{countWithUnit(lang, totalCount, POST_FORMS)}</span>
       </header>
       )}
       {!permalinkId && isMember && (
-        <form className="c-post-composer c-post-composer--nice" onSubmit={handlePublish}
-          style={{ border: '1px solid var(--border-color, #e2e8f0)', borderRadius: 12, padding: 12, background: 'var(--bg-soft, #fff)' }}>
+        <form
+          ref={setComposerNode}
+          className={`c-post-composer c-post-composer--nice${composerFocused ? ' c-post-composer--focused' : ''}`}
+          onSubmit={handlePublish}
+          onFocus={() => setComposerFocused(true)}
+          onBlur={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget)) setComposerFocused(false);
+          }}
+          aria-label={t4(lang, 'Kreye yon pòs', 'Write a post', 'Écrire une publication', 'Escribir una publicación')}
+        >
           <div className="c-post-composer-heading">
             <i className="fas fa-pen-to-square" aria-hidden="true" />
             <div>
@@ -729,37 +1247,51 @@ export default function CommunityPosts() {
               <span>{t4(lang, 'Pataje sa w ap panse ak tout manm yo.', 'Share what’s on your mind with the community.', 'Partagez vos idées avec la communauté.', 'Comparte tus ideas con la comunidad.')}</span>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-            <span aria-hidden="true" style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#2d1b69,#d81b60)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, flexShrink: 0 }}>
+          <div className="c-post-composer-editor">
+            <span className="c-post-composer-avatar" aria-hidden="true">
               {((user?.username || '?')[0] || '?').toUpperCase()}
             </span>
             <textarea
               ref={draftInputRef}
+              id="post-composer-input"
               className="c-post-composer-input"
               value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              rows={3}
-              maxLength={2000}
+              onChange={(event) => {
+                const next = event.target.value;
+                if (unicodeLength(next) > DRAFT_MAX) {
+                  setDraft(Array.from(next).slice(0, DRAFT_MAX).join(''));
+                  setDraftError(t4(
+                    lang,
+                    `Maksimòm ${DRAFT_MAX} karaktè. Tèks la koupe.`,
+                    `Maximum ${DRAFT_MAX} characters. The text was shortened.`,
+                    `Maximum ${DRAFT_MAX} caractères. Le texte a été raccourci.`,
+                    `Máximo ${DRAFT_MAX} caracteres. El texto se acortó.`,
+                  ));
+                  return;
+                }
+                setDraft(next);
+                if (draftError) setDraftError('');
+              }}
+              rows={1}
               placeholder={t4(lang, 'Ekri pòs ou la a… Pataje yon lide oswa poze yon kesyon.', 'Write your post here… Share an idea or ask a question.', 'Écrivez votre publication ici… Partagez une idée ou posez une question.', 'Escribe tu publicación aquí… Comparte una idea o haz una pregunta.')}
               aria-label={t4(lang, 'Nouvo pòs', 'New post', 'Nouvelle publication', 'Nueva publicación')}
+              aria-invalid={draftError ? 'true' : undefined}
+              aria-describedby={draftError
+                ? 'post-composer-hint post-composer-count post-composer-length-error'
+                : 'post-composer-hint post-composer-count'}
               data-testid="post-composer-input"
-              style={{ flex: 1, border: 'none', outline: 'none', resize: 'vertical', background: 'transparent' }}
             />
           </div>
+          {draftError && (
+            <p id="post-composer-length-error" className="c-post-composer-error" role="alert" data-testid="post-composer-length-error">
+              {draftError}
+            </p>
+          )}
           {(() => {
-            if (imageUrl) return null;
+            if (imageUrl || videoUrl) return null;
             const vUrl = firstVideoUrl(draft);
-            const thumb = vUrl ? youtubeThumbnail(vUrl) : '';
-            if (!thumb) return null;
-            return (
-              <div data-testid="post-composer-video-thumb">
-                <VideoTitleLink url={vUrl} />
-                <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8rem', opacity: 0.85 }}>
-                  <img src={thumb} alt="" loading="lazy" style={{ width: 72, height: 48, borderRadius: 6, objectFit: 'cover' }} />
-                  <span><i className="fab fa-youtube" aria-hidden="true" style={{ marginRight: 4 }} />{t4(lang, 'Imaj videyo a ap sèvi kòm foto pòs la.', 'Video thumbnail will be used as the post image.', 'La miniature servira d\u2019image.', 'La miniatura se usará como imagen.')}</span>
-                </div>
-              </div>
-            );
+            if (!vUrl) return null;
+            return <ComposerVideoLink url={vUrl} lang={lang} />;
           })()}
           {(() => {
             const link = firstGenericLinkUrl(draft);
@@ -767,13 +1299,54 @@ export default function CommunityPosts() {
             return <LinkPreviewCard url={link} />;
           })()}
           {imageUrl && (
-            <div style={{ position: 'relative', marginTop: 8 }}>
-              <img src={imageUrl} alt="" loading="lazy" style={{ width: '100%', borderRadius: 8, maxHeight: 220, objectFit: 'cover' }} data-testid="post-composer-preview" />
-              <button type="button" onClick={() => setImageUrl('')} aria-label={t4(lang, 'Retire imaj', 'Remove image', 'Retirer', 'Quitar')} data-testid="post-composer-remove-image"
-                style={{ position: 'absolute', top: 6, right: 6, border: 'none', background: 'rgba(0,0,0,0.65)', color: '#fff', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer' }}>
+            <div className="c-post-composer-image">
+              <img
+                src={imageUrl}
+                alt={t4(lang, 'Apèsi imaj pòs la', 'Post image preview', 'Aperçu de l’image', 'Vista previa de la imagen')}
+                loading="lazy"
+                data-testid="post-composer-preview"
+              />
+              <button
+                type="button"
+                className="c-post-composer-image-remove"
+                onClick={() => { setImageUrl(''); setImageError(''); setUploadProgress(0); }}
+                aria-label={t4(lang, 'Retire imaj', 'Remove image', 'Retirer l’image', 'Quitar imagen')}
+                data-testid="post-composer-remove-image"
+              >
                 <i className="fas fa-times" aria-hidden="true" />
               </button>
             </div>
+          )}
+          {videoUrl && (
+            <div className="c-post-composer-video">
+              <video
+                src={videoUrl}
+                controls
+                playsInline
+                preload="metadata"
+                aria-label={t4(lang, 'Apèsi videyo pòs la', 'Post video preview', 'Aperçu de la vidéo', 'Vista previa del video')}
+                data-testid="post-composer-video-preview"
+              />
+              <button
+                type="button"
+                className="c-post-composer-image-remove"
+                onClick={() => { setVideoUrl(''); setVideoError(''); setVideoProgress(0); }}
+                aria-label={t4(lang, 'Retire videyo', 'Remove video', 'Retirer la vidéo', 'Quitar video')}
+                data-testid="post-composer-remove-video"
+              >
+                <i className="fas fa-times" aria-hidden="true" />
+              </button>
+            </div>
+          )}
+          {imageError && (
+            <p className="c-post-composer-error" role="alert" data-testid="post-composer-image-error">
+              {imageError}
+            </p>
+          )}
+          {videoError && (
+            <p className="c-post-composer-error" role="alert" data-testid="post-composer-video-error">
+              {videoError}
+            </p>
           )}
           {showPollCreator && (
             <div style={{ marginTop: 8, border: '1px dashed var(--border-color, #cbd5e1)', borderRadius: 8, padding: 10 }} data-testid="post-composer-poll-creator">
@@ -784,7 +1357,7 @@ export default function CommunityPosts() {
                 placeholder={t4(lang, 'Kesyon sondaj la...', 'Poll question...', 'Question du sondage...', 'Pregunta de la encuesta...')}
                 aria-label={t4(lang, 'Kesyon sondaj', 'Poll question', 'Question', 'Pregunta')}
                 data-testid="post-composer-poll-question"
-                style={{ width: '100%', border: '1px solid var(--border-color, #cbd5e1)', borderRadius: 8, padding: '8px 10px', marginBottom: 8 }}
+                style={{ width: '100%', border: '1px solid var(--border-color, #cbd5e1)', borderRadius: 8, padding: '8px 10px', marginBottom: 8, background: 'var(--surface-card, transparent)', color: 'var(--text-primary, inherit)' }}
               />
               {pollOptions.map((opt, i) => (
                 <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
@@ -794,10 +1367,10 @@ export default function CommunityPosts() {
                     maxLength={200}
                     placeholder={t4(lang, `Opsyon ${i + 1}`, `Option ${i + 1}`, `Option ${i + 1}`, `Opción ${i + 1}`)}
                     data-testid={`post-composer-poll-opt-${i}`}
-                    style={{ flex: 1, border: '1px solid var(--border-color, #cbd5e1)', borderRadius: 8, padding: '6px 10px' }}
+                    style={{ flex: 1, border: '1px solid var(--border-color, #cbd5e1)', borderRadius: 8, padding: '6px 10px', background: 'var(--surface-card, transparent)', color: 'var(--text-primary, inherit)' }}
                   />
                   {pollOptions.length > 2 && (
-                    <button type="button" onClick={() => setPollOptions((list) => list.filter((_, j) => j !== i))} data-testid={`post-composer-poll-del-${i}`} aria-label="Remove"
+                    <button type="button" onClick={() => setPollOptions((list) => list.filter((_, j) => j !== i))} data-testid={`post-composer-poll-del-${i}`} aria-label={t4(lang, 'Retire opsyon', 'Remove option', 'Retirer l’option', 'Quitar opción')}
                       style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}><i className="fas fa-times" aria-hidden="true" /></button>
                   )}
                 </div>
@@ -805,7 +1378,7 @@ export default function CommunityPosts() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4, fontSize: '0.78rem', flexWrap: 'wrap' }}>
                 {pollOptions.length < 10 && (
                   <button type="button" onClick={() => setPollOptions((list) => [...list, ''])} data-testid="post-composer-poll-add"
-                    style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#7c3aed', fontWeight: 700 }}>
+                    style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--text-primary, #1f2937)', fontWeight: 700, textDecoration: 'underline' }}>
                     + {t4(lang, 'Ajoute opsyon', 'Add option', 'Ajouter', 'Añadir')}
                   </button>
                 )}
@@ -820,59 +1393,149 @@ export default function CommunityPosts() {
             </div>
           )}
           {showLinkInput && (
-            <div style={{ display: 'flex', gap: 8, marginTop: 8 }} data-testid="post-composer-link-row">
+            <div className="c-post-composer-link-row" data-testid="post-composer-link-row">
               <input
+                type="url"
                 value={linkValue}
-                onChange={(e) => setLinkValue(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); appendLinkToDraft(linkValue); } }}
-                placeholder="https://..."
+                onChange={(event) => { setLinkValue(event.target.value); setLinkError(''); }}
+                onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); appendLinkToDraft(linkValue); } }}
+                placeholder="https://atelnyo.site"
                 inputMode="url"
+                autoComplete="url"
                 aria-label={t4(lang, 'Kole link', 'Paste link', 'Coller le lien', 'Pegar enlace')}
+                aria-invalid={linkError ? 'true' : undefined}
+                aria-describedby={linkError ? 'post-composer-link-error' : undefined}
                 data-testid="post-composer-link-input"
-                style={{ flex: 1, border: '1px solid var(--border-color, #cbd5e1)', borderRadius: 8, padding: '8px 10px' }}
               />
-              <button type="button" onClick={() => appendLinkToDraft(linkValue)} disabled={!linkValue.trim()} data-testid="post-composer-link-add"
-                style={{ borderRadius: 8, padding: '8px 12px', cursor: 'pointer' }}>
+              <button
+                type="button"
+                onClick={() => appendLinkToDraft(linkValue)}
+                disabled={!linkValue.trim()}
+                data-testid="post-composer-link-add"
+              >
                 {t4(lang, 'Ajoute', 'Add', 'Ajouter', 'Añadir')}
               </button>
             </div>
           )}
-          <div className="c-post-composer-row" style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
-            <span style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }} role="group" aria-label={t4(lang, 'Tip kontni', 'Content type', 'Type de contenu', 'Tipo de contenido')}>
-              <button type="button" onClick={() => imageInputRef.current?.click()} disabled={uploadingImage || publishing} title={t4(lang, 'Foto', 'Photo', 'Photo', 'Foto')} data-testid="post-composer-gallery"
-                style={{ border: imageUrl ? '1px solid #16a34a' : '1px solid var(--border-color, #cbd5e1)', background: imageUrl ? '#f0fdf4' : 'transparent', borderRadius: 20, padding: '6px 12px', cursor: 'pointer', fontSize: '0.8rem' }}>
-                <i className={`fas ${uploadingImage ? 'fa-spinner fa-spin' : 'fa-images'}`} aria-hidden="true" /> {t4(lang, 'Foto', 'Photo', 'Photo', 'Foto')}
+          {linkError && (
+            <p id="post-composer-link-error" className="c-post-composer-error" role="alert" data-testid="post-composer-link-error">
+              {linkError}
+            </p>
+          )}
+          <div className="c-post-composer-tools" role="group" aria-label={t4(lang, 'Zouti pou pòs', 'Post tools', 'Outils de publication', 'Herramientas de publicación')}>
+            <button
+              type="button"
+              className={`c-post-composer-tool${imageUrl ? ' is-active' : ''}`}
+              onClick={() => imageInputRef.current?.click()}
+              disabled={uploadingImage || uploadingVideo || publishing}
+              title={t4(lang, 'Ajoute yon foto', 'Add a photo', 'Ajouter une photo', 'Añadir una foto')}
+              aria-label={t4(lang, 'Ajoute yon foto', 'Add a photo', 'Ajouter une photo', 'Añadir una foto')}
+              data-testid="post-composer-gallery"
+            >
+              <i className={`fas ${uploadingImage ? 'fa-spinner fa-spin' : 'fa-image'}`} aria-hidden="true" />
+              {uploadingImage ? `${uploadProgress}%` : t4(lang, 'Foto', 'Photo', 'Photo', 'Foto')}
+            </button>
+            <button
+              type="button"
+              className={`c-post-composer-tool${videoUrl ? ' is-active' : ''}`}
+              onClick={() => videoInputRef.current?.click()}
+              disabled={uploadingVideo || uploadingImage || publishing}
+              title={t4(lang, 'Ajoute yon videyo', 'Add a video', 'Ajouter une vidéo', 'Añadir un video')}
+              aria-label={t4(lang, 'Ajoute yon videyo MP4', 'Add an MP4 video', 'Ajouter une vidéo MP4', 'Añadir un video MP4')}
+              data-testid="post-composer-video"
+            >
+              <i className={`fas ${uploadingVideo ? 'fa-spinner fa-spin' : 'fa-video'}`} aria-hidden="true" />
+              {uploadingVideo ? `${videoProgress}%` : t4(lang, 'Videyo', 'Video', 'Vidéo', 'Video')}
+            </button>
+            <button
+              type="button"
+              className={`c-post-composer-tool${showLinkInput || firstGenericLinkUrl(draft) ? ' is-active' : ''}`}
+              onClick={() => { setShowLinkInput((value) => !value); setLinkError(''); }}
+              aria-expanded={showLinkInput}
+              title={t4(lang, 'Ajoute yon lyen', 'Add a link', 'Ajouter un lien', 'Añadir un enlace')}
+              aria-label={t4(lang, 'Ajoute yon lyen', 'Add a link', 'Ajouter un lien', 'Añadir un enlace')}
+              data-testid="post-composer-link-btn"
+            >
+              <i className="fas fa-link" aria-hidden="true" /> {t4(lang, 'Lyen', 'Link', 'Lien', 'Enlace')}
+            </button>
+            <div className="c-post-composer-popover-wrap">
+              <button
+                type="button"
+                className={`c-post-composer-tool${showEmoji ? ' is-active' : ''}`}
+                onClick={() => setShowEmoji((value) => !value)}
+                aria-expanded={showEmoji}
+                aria-haspopup="menu"
+                title={t4(lang, 'Ajoute yon emoji', 'Add an emoji', 'Ajouter un emoji', 'Añadir un emoji')}
+                aria-label={t4(lang, 'Ajoute yon emoji', 'Add an emoji', 'Ajouter un emoji', 'Añadir un emoji')}
+                data-testid="post-composer-emoji-btn"
+              >
+                <i className="far fa-smile" aria-hidden="true" /> {t4(lang, 'Emoji', 'Emoji', 'Emoji', 'Emoji')}
               </button>
-              <button type="button" onClick={() => { focusDraft(); showToast?.(t4(lang, 'Kole link YouTube/Vimeo dirèkteman nan tèks la.', 'Paste a YouTube/Vimeo link directly in the text.', 'Collez un lien YouTube/Vimeo dans le texte.', 'Pega un enlace de YouTube/Vimeo en el texto.'), 'info'); }} title="Video" data-testid="post-composer-video-btn"
-                style={{ border: firstVideoUrl(draft) ? '1px solid #7c3aed' : '1px solid var(--border-color, #cbd5e1)', background: firstVideoUrl(draft) ? '#f5f3ff' : 'transparent', borderRadius: 20, padding: '6px 12px', cursor: 'pointer', fontSize: '0.8rem' }}>
-                <i className="fas fa-video" aria-hidden="true" /> Video
-              </button>
-              <button type="button" onClick={() => setShowLinkInput((v) => !v)} title="Link" data-testid="post-composer-link-btn" aria-expanded={showLinkInput}
-                style={{ border: firstGenericLinkUrl(draft) ? '1px solid #0284c7' : '1px solid var(--border-color, #cbd5e1)', background: firstGenericLinkUrl(draft) ? '#f0f9ff' : 'transparent', borderRadius: 20, padding: '6px 12px', cursor: 'pointer', fontSize: '0.8rem' }}>
-                <i className="fas fa-link" aria-hidden="true" /> Link
-              </button>
-              <button type="button" onClick={() => setShowPollCreator((v) => !v)} title={t4(lang, 'Sondaj', 'Poll', 'Sondage', 'Encuesta')} data-testid="post-composer-poll-btn" aria-expanded={showPollCreator}
-                style={{ border: showPollCreator ? '1px solid #7c3aed' : '1px solid var(--border-color, #cbd5e1)', background: showPollCreator ? '#f5f3ff' : 'transparent', borderRadius: 20, padding: '6px 12px', cursor: 'pointer', fontSize: '0.8rem' }}>
-                <i className="fas fa-chart-bar" aria-hidden="true" /> {t4(lang, 'Sondaj', 'Poll', 'Sondage', 'Encuesta')}
-              </button>
+              {showEmoji && (
+                <div className="c-post-composer-emoji-menu" role="menu" aria-label={t4(lang, 'Emoji', 'Emoji', 'Emoji', 'Emoji')}>
+                  {REACTION_EMOJIS.map((emoji) => (
+                    <button
+                      key={emoji}
+                      type="button"
+                      role="menuitem"
+                      onClick={() => insertEmoji(emoji)}
+                      aria-label={t4(lang, 'Ensere yon emoji', 'Insert an emoji', 'Insérer un emoji', 'Insertar un emoji')}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <button
+              type="button"
+              className={`c-post-composer-tool${showPollCreator ? ' is-active' : ''}`}
+              onClick={() => setShowPollCreator((value) => !value)}
+              aria-expanded={showPollCreator}
+              title={t4(lang, 'Sondaj', 'Poll', 'Sondage', 'Encuesta')}
+              aria-label={t4(lang, 'Sondaj', 'Poll', 'Sondage', 'Encuesta')}
+              data-testid="post-composer-poll-btn"
+            >
+              <i className="fas fa-chart-bar" aria-hidden="true" /> {t4(lang, 'Sondaj', 'Poll', 'Sondage', 'Encuesta')}
+            </button>
+          </div>
+          <div className="c-post-composer-row">
+            <span id="post-composer-hint" className="c-post-composer-hint">
+              {visibilityHint(lang, community?.join_mode, community?.read_visibility)}
             </span>
-            <span className="c-post-composer-hint" style={{ marginLeft: 'auto', fontSize: '0.72rem', opacity: 0.65 }}>
-              {t4(lang, 'Piblikasyon yo vizib pou tout moun.', 'Posts are visible to everyone.', 'Les publications sont visibles par tous.', 'Las publicaciones son visibles para todos.')}
+            <span id="post-composer-count" className="c-post-composer-length" aria-live="polite">
+              {draftLength}/{DRAFT_MAX}
             </span>
-            <span className="c-post-composer-length" aria-live="polite">{draft.length}/2000</span>
-            <input ref={imageInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePickImage(f); e.target.value = ''; }} data-testid="post-composer-file" />
             <button
               type="submit"
               className="c-post-composer-btn"
-              disabled={publishing || !draft.trim()}
+              disabled={publishing || uploadingImage || uploadingVideo || !canPublish}
+              aria-busy={publishing || undefined}
               data-testid="post-composer-submit"
-              style={{ borderRadius: 20, padding: '8px 16px', fontWeight: 700 }}
             >
               {publishing
-                ? <i className="fas fa-spinner fa-spin" aria-hidden="true" />
+                ? <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {t4(lang, 'Ap pibliye…', 'Publishing…', 'Publication…', 'Publicando…')}</>
                 : <><i className="fas fa-paper-plane" aria-hidden="true" /> {t4(lang, 'Pibliye pòs', 'Publish post', 'Publier', 'Publicar')}</>}
             </button>
           </div>
+          <input
+            ref={imageInputRef}
+            type="file"
+            className="c-post-composer-file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            aria-label={t4(lang, 'Chwazi yon foto', 'Choose a photo', 'Choisir une photo', 'Elegir una foto')}
+            onChange={(event) => { const file = event.target.files?.[0]; if (file) handlePickImage(file); event.target.value = ''; }}
+            data-testid="post-composer-file"
+          />
+          <input
+            ref={videoInputRef}
+            type="file"
+            className="c-post-composer-file"
+            accept="video/mp4,.mp4"
+            aria-label={t4(lang, 'Chwazi yon videyo MP4', 'Choose an MP4 video', 'Choisir une vidéo MP4', 'Elegir un video MP4')}
+            onChange={(event) => { const file = event.target.files?.[0]; if (file) handlePickVideo(file); event.target.value = ''; }}
+            data-testid="post-composer-video-file"
+          />
         </form>
       )}
       {!permalinkId && !isMember && (
@@ -897,7 +1560,7 @@ export default function CommunityPosts() {
             data-testid="posts-search-input"
           />
           {searchInput && (
-            <button type="button" onClick={() => setSearchInput('')} aria-label="Clear" data-testid="posts-search-clear"
+            <button type="button" onClick={() => setSearchInput('')} aria-label={t4(lang, 'Efase rechèch', 'Clear search', 'Effacer la recherche', 'Borrar búsqueda')} data-testid="posts-search-clear"
               className="c-post-search-clear">
               <i className="fas fa-times" aria-hidden="true" />
             </button>
@@ -905,14 +1568,33 @@ export default function CommunityPosts() {
         </div>
       </div>
       {search && (
-        <p style={{ fontSize: '0.78rem', opacity: 0.7 }} data-testid="posts-search-status">
-          {t4(lang, `Rezilta pou "${search}" — ${totalCount}`, `Results for "${search}" — ${totalCount}`, `Résultats pour "${search}" — ${totalCount}`, `Resultados para "${search}" — ${totalCount}`)}
-        </p>
+        <div className="c-post-search-status" data-testid="posts-search-status" role="status" aria-live="polite">
+          <span>
+            {searching && <i className="fas fa-spinner fa-spin" aria-hidden="true" />}{' '}
+            {t4(lang, `Rezilta pou "${search}" — ${totalCount}`, `Results for "${search}" — ${totalCount}`, `Résultats pour "${search}" — ${totalCount}`, `Resultados para "${search}" — ${totalCount}`)}
+          </span>
+          <button
+            type="button"
+            className="c-post-search-reset"
+            data-testid="posts-search-reset"
+            onClick={() => { setSearchInput(''); setSearch(''); }}
+          >
+            <i className="fas fa-arrow-left" aria-hidden="true" /> {t4(lang, 'Retounen nan fil la', 'Back to feed', 'Retour au fil', 'Volver al feed')}
+          </button>
+        </div>
       )}
       </>
       )}
 
       {posts.length === 0 ? (
+        searching ? (
+          <div className="c-state" data-testid="posts-search-loading" role="status">
+            <i className="fas fa-spinner fa-spin c-state-icon" aria-hidden="true" />
+            <p className="c-state-text">
+              {t4(lang, 'Ap chèche pòs…', 'Searching posts…', 'Recherche des publications…', 'Buscando publicaciones…')}
+            </p>
+          </div>
+        ) : (
         <div className="c-state">
           <i className="fas fa-comments c-state-icon" aria-hidden="true" />
           <p className="c-state-text">
@@ -928,40 +1610,77 @@ export default function CommunityPosts() {
             </p>
           )}
         </div>
+        )
       ) : posts.map((post) => (
         <article key={post.id} className={`c-post-card${post.is_pinned ? ' c-post-card--pinned' : ''}${permalinkId === post.id ? ' c-post-card--focus' : ''}`} data-testid={`community-post-${post.id}`}>
           <div className="c-post-header">
             <span className="c-post-avatar" aria-hidden="true">
-              {(post.author_username || '?')[0].toUpperCase()}
+              {post.author_avatar
+                ? <img src={post.author_avatar} alt="" loading="lazy" />
+                : (post.author_username || '?')[0].toUpperCase()}
             </span>
             <div className="c-post-meta">
-              <span className="c-title c-title--xs">@{post.author_username}</span>
-              <span className="c-post-time">{formatPostTime(post.created_at, lang)}</span>
+              <span className="c-title c-title--xs" title={`@${post.author_username}`}>@{post.author_username}</span>
+              <time className="c-post-time" dateTime={post.created_at} title={formatPostTime(post.created_at, lang)}>
+                {formatRelativePostTime(post.created_at, lang)}
+              </time>
             </div>
             {post.is_pinned && (
               <span className="c-post-pinned" title={t4(lang, 'Epinglé pa moderatè', 'Pinned by moderators', 'Épinglé par les modérateurs', 'Fijado por moderadores')}>
                 <i className="fas fa-thumbtack" aria-hidden="true" />
               </span>
             )}
-            {/* Reporting reuses the platform-wide content report endpoint
-                (/api/content/reports/) — no community-only report store. */}
-            <ContentFeedbackMenu contentType="community_post" contentId={post.id} lang={lang} />
-            {canDelete(post) && (
-              <button
-                type="button"
-                className="c-post-delete"
-                onClick={() => handleDelete(post)}
-                disabled={deletingId === post.id}
-                aria-busy={deletingId === post.id || undefined}
-                title={t4(lang, 'Efase', 'Delete', 'Supprimer', 'Eliminar')}
-                aria-label={t4(lang, 'Efase pòs', 'Delete post', 'Supprimer', 'Eliminar')}
-                data-testid={`post-delete-${post.id}`}
-              >
-                <i className="fas fa-trash" aria-hidden="true" />
-              </button>
-            )}
+            <div className="c-post-actions">
+              {/* One consistent menu: report for non-authors, plus edit/pin/
+                  delete only when the viewer is authorized. Reporting reuses
+                  the platform-wide /api/content/reports/ endpoint. */}
+              <ContentFeedbackMenu
+                contentType="community_post"
+                contentId={post.id}
+                lang={lang}
+                actions={postActionsFor(post)}
+                showReport={Boolean(user && !isPostAuthor(post))}
+                showFeedback={Boolean(user && !isPostAuthor(post))}
+              />
+            </div>
           </div>
-          <p className="c-post-content">{post.content}</p>
+          {editingId === post.id ? (
+            <div className="c-post-edit">
+              <textarea
+                className="c-post-edit-input"
+                value={editDraft}
+                onChange={(event) => {
+                  const next = event.target.value;
+                  if (unicodeLength(next) <= DRAFT_MAX) setEditDraft(next);
+                }}
+                rows={3}
+                aria-label={t4(lang, 'Modifye pòs', 'Edit post', 'Modifier la publication', 'Editar publicación')}
+                data-testid={`post-edit-input-${post.id}`}
+              />
+              <div className="c-post-edit-actions">
+                <button
+                  type="button"
+                  className="c-post-edit-save"
+                  onClick={() => handleSaveEdit(post)}
+                  disabled={editSaving || (!editDraft.trim() && !post.image_url && !post.video_url && !post.poll_question)}
+                  data-testid={`post-edit-save-${post.id}`}
+                >
+                  {editSaving
+                    ? <i className="fas fa-spinner fa-spin" aria-hidden="true" />
+                    : t4(lang, 'Sove', 'Save', 'Enregistrer', 'Guardar')}
+                </button>
+                <button
+                  type="button"
+                  className="c-post-edit-cancel"
+                  onClick={() => { setEditingId(null); setEditDraft(''); }}
+                >
+                  {t4(lang, 'Anile', 'Cancel', 'Annuler', 'Cancelar')}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <PostContent content={post.content} />
+          )}
           {(() => {
             const vidUrl = post.video_url || firstVideoUrl(post.content);
             const video = vidUrl ? resolveVideoSource(vidUrl) : null;
@@ -977,13 +1696,21 @@ export default function CommunityPosts() {
                   video.kind === 'embed' ? (
                     <VideoEmbedFrame
                       src={video.src}
-                      title="Post video"
+                      title={t4(lang, 'Videyo pòs la', 'Post video', 'Vidéo de la publication', 'Video de la publicación')}
                       lang={lang}
-                      style={{ borderRadius: 8, marginTop: 8 }}
+                      className="c-post-video-embed"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     />
                   ) : (
-                    <video src={video.src} controls preload="metadata" playsInline poster={img || undefined} style={{ width: '100%', borderRadius: 8, background: '#000', marginTop: 8, display: 'block' }} />
+                    <video
+                      className="c-post-video"
+                      src={video.src}
+                      controls
+                      preload="metadata"
+                      playsInline
+                      poster={img || undefined}
+                      aria-label={t4(lang, 'Videyo pòs la', 'Post video', 'Vidéo de la publication', 'Video de la publicación')}
+                    />
                   )
                 )}
                 {link && <LinkPreviewCard url={link} />}

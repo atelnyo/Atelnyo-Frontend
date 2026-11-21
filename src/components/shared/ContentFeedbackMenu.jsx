@@ -94,14 +94,21 @@ export default function ContentFeedbackMenu({
   contentId,
   lang = 'en',
   onDone,
+  actions = [],
+  showReport = true,
+  showFeedback = true,
 }) {
   const copy = COPY[lang] || COPY.en;
   const [open, setOpen] = useState(false);
   const [reporting, setReporting] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const hasActions = Array.isArray(actions) && actions.length > 0;
 
   if (!contentType || !contentId) {
+    return null;
+  }
+  if (!hasActions && !showReport && !showFeedback) {
     return null;
   }
 
@@ -160,6 +167,7 @@ export default function ContentFeedbackMenu({
         aria-label={copy.menu}
         aria-haspopup="menu"
         aria-expanded={open}
+        data-testid={`content-feedback-menu-${contentId}`}
         onClick={() => {
           if (open) {
             close();
@@ -225,31 +233,58 @@ export default function ContentFeedbackMenu({
             </>
           ) : (
             <>
-              <button type="button" role="menuitem" className="content-feedback-item"
-                style={itemStyle}
-                onClick={() => act(() => contentFeedbackService.notInterested(contentType, contentId))}>
-                {copy.notInterested}
-              </button>
-              <button type="button" role="menuitem" className="content-feedback-item"
-                style={itemStyle}
-                onClick={() => act(() => contentFeedbackService.hide(contentType, contentId, 'show_less'))}>
-                {copy.showLess}
-              </button>
-              <button type="button" role="menuitem" className="content-feedback-item"
-                style={itemStyle}
-                onClick={() => act(() => contentFeedbackService.muteCreator(contentType, contentId))}>
-                {copy.mute}
-              </button>
-              <button type="button" role="menuitem" className="content-feedback-item"
-                style={itemStyle}
-                onClick={() => act(() => contentFeedbackService.blockCreator(contentType, contentId))}>
-                {copy.block}
-              </button>
-              <button type="button" role="menuitem" className="content-feedback-item"
-                style={itemStyle}
-                onClick={() => setReporting(true)}>
-                {copy.report}
-              </button>
+              {hasActions && actions.map((action) => (
+                <button
+                  key={action.key || action.label}
+                  type="button"
+                  role="menuitem"
+                  className="content-feedback-item"
+                  style={{ ...itemStyle, color: action.danger ? '#f87171' : 'inherit' }}
+                  disabled={Boolean(action.disabled)}
+                  data-testid={action.testId}
+                  onClick={() => {
+                    action.onSelect?.();
+                    close();
+                  }}
+                >
+                  {action.icon && <i className={`fas ${action.icon}`} aria-hidden="true" style={{ marginRight: 7 }} />}
+                  {action.label}
+                </button>
+              ))}
+              {hasActions && (showFeedback || showReport) && (
+                <div style={{ borderTop: '1px solid var(--border-color, rgba(148,163,184,.25))', margin: '4px 0' }} />
+              )}
+              {showFeedback && (
+                <>
+                  <button type="button" role="menuitem" className="content-feedback-item"
+                    style={itemStyle}
+                    onClick={() => act(() => contentFeedbackService.notInterested(contentType, contentId))}>
+                    {copy.notInterested}
+                  </button>
+                  <button type="button" role="menuitem" className="content-feedback-item"
+                    style={itemStyle}
+                    onClick={() => act(() => contentFeedbackService.hide(contentType, contentId, 'show_less'))}>
+                    {copy.showLess}
+                  </button>
+                  <button type="button" role="menuitem" className="content-feedback-item"
+                    style={itemStyle}
+                    onClick={() => act(() => contentFeedbackService.muteCreator(contentType, contentId))}>
+                    {copy.mute}
+                  </button>
+                  <button type="button" role="menuitem" className="content-feedback-item"
+                    style={itemStyle}
+                    onClick={() => act(() => contentFeedbackService.blockCreator(contentType, contentId))}>
+                    {copy.block}
+                  </button>
+                </>
+              )}
+              {showReport && (
+                <button type="button" role="menuitem" className="content-feedback-item"
+                  style={itemStyle}
+                  onClick={() => setReporting(true)}>
+                  {copy.report}
+                </button>
+              )}
             </>
           )}
         </div>

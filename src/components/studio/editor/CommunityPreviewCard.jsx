@@ -51,7 +51,8 @@ export default function CommunityPreviewCard({
     || (isHt
       ? 'Deskripsyon an ap parèt isit la. Eseye di an de liy poukisa moun ta dwe antre.'
       : 'Your description appears here. Try two lines on why someone should join.');
-  const previewRules = (rules || []).filter((rule) => (rule.title || '').trim()).slice(0, 3);
+  const activeRules = (rules || []).filter((rule) => rule.is_active !== false);
+  const previewRules = activeRules.filter((rule) => (rule.title || '').trim()).slice(0, 3);
   const bannerStyle = value.banner_url
     ? { backgroundImage: `url(${value.banner_url})` }
     : undefined;
@@ -98,6 +99,9 @@ export default function CommunityPreviewCard({
             {memberCount} {isHt ? 'manm' : 'members'}
             {' · '}
             {joinCopy.badge}
+            {value.read_visibility === 'members' && (
+              <> · {isHt ? 'Manm sèlman' : 'Members only'}</>
+            )}
           </span>
         </div>
         <span className={`${styles.previewCta}${isMember ? ` ${styles.previewCtaMember}` : ''}`}>
@@ -152,9 +156,9 @@ export default function CommunityPreviewCard({
               </li>
             ))}
           </ol>
-          {(rules || []).length > previewRules.length && (
+          {activeRules.length > previewRules.length && (
             <span className={styles.previewMore}>
-              +{(rules || []).length - previewRules.length} {isHt ? 'lòt règ' : 'more rules'}
+              +{activeRules.length - previewRules.length} {isHt ? 'lòt règ' : 'more rules'}
             </span>
           )}
         </div>

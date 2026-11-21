@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryRouter, Routes, Route, Outlet } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
@@ -13,12 +13,14 @@ const POSTS = [
 ];
 
 vi.mock('../../services/api', () => ({
+  default: { post: vi.fn(), get: vi.fn() },
   communitiesService: {
     posts: vi.fn(),
     getPost: vi.fn(),
     get: vi.fn(),
     getSEO: vi.fn(),
     createPost: vi.fn(),
+    updatePost: vi.fn(),
     deletePost: vi.fn(),
     reactToPost: vi.fn(),
     postComments: vi.fn(),
@@ -30,19 +32,19 @@ vi.mock('../../services/api', () => ({
   eventsService: { ticket: vi.fn(), cancelRSVP: vi.fn() },
 }));
 
-import { communitiesService, communityEventsService, eventsService } from '../../services/api';
+import api, { communitiesService, communityEventsService, eventsService } from '../../services/api';
 import CommunityPosts from './CommunityPosts';
 import CommunityDetail, {
   CommunityDescription, CommunityEvents, CommunityHome, CommunityRulesTab,
 } from '../CommunityDetail';
 
-function Harness({ community, user, entry = '/community/test/posts' }) {
+function Harness({ community, user, entry = '/community/test/posts', onPostCountChange }) {
   return (
     <MemoryRouter initialEntries={[entry]}>
       <Routes>
         <Route
           path="/community/:slug/posts"
-          element={<Outlet context={{ community, lang: 'ht', t: {}, user, showToast: vi.fn() }} />}
+          element={<Outlet context={{ community, lang: 'ht', t: {}, user, showToast: vi.fn(), onPostCountChange }} />}
         >
           <Route index element={<CommunityPosts />} />
         </Route>
@@ -69,6 +71,7 @@ beforeEach(() => {
   eventsService.ticket.mockResolvedValue({ data: { id: 21, status: 'confirmed' } });
   eventsService.cancelRSVP.mockResolvedValue({ data: { attendee_count: 4 } });
   communitiesService.announcements.mockResolvedValue({ data: [] });
+  api.get.mockResolvedValue({ data: null });
 });
 
 describe('Community surfaces', () => {
@@ -437,6 +440,21 @@ describe('Community surfaces', () => {
     expect(screen.queryByTestId('posts-skeleton')).toBeNull();
     // Active reaction button is pressed.
     expect(screen.getByTestId('post-react-1-❤️')).toHaveAttribute('aria-pressed', 'true');
+    const timestamp = document.querySelector('time.c-post-time');
+    expect(timestamp.getAttribute('datetime')).toBe(POSTS[0].created_at);
+    expect(timestamp.getAttribute('title')).toBeTruthy();
+  });
+
+  it('renders the author avatar returned by the API', async () => {
+    const avatarUrl = 'https://cdn.atelnyo.site/avatar.png';
+    communitiesService.posts.mockResolvedValue({
+      data: [{ ...POSTS[0], author_avatar: avatarUrl }],
+    });
+    render(<Harness community={MEMBER_COMM} user={USER} />);
+    await screen.findByText('Bonjou tout moun!');
+
+    const avatar = document.querySelector('.c-post-avatar img');
+    expect(avatar).toHaveAttribute('src', avatarUrl);
   });
 
   it('searches posts in this community and renders the matching results', async () => {
@@ -457,18 +475,404 @@ describe('Community surfaces', () => {
       });
     });
     expect(await screen.findByText('Rezilta rechèch la')).toBeTruthy();
+    // The search field must survive the request instead of being replaced
+    // by the initial skeleton.
+    expect(screen.getByTestId('posts-search-input')).toBeTruthy();
+
+    fireEvent.click(screen.getByTestId('posts-search-reset'));
+    await waitFor(() => {
+      expect(communitiesService.posts).toHaveBeenLastCalledWith('test', { page: 1 });
+    });
+    expect(screen.getByTestId('posts-search-input').value).toBe('');
   });
 
   it('publishes through the composer and prepends the post', async () => {
+    const onPostCountChange = vi.fn();
     communitiesService.createPost.mockResolvedValue({
       data: { ...POSTS[0], id: 2, content: 'Nouvo pòs!' },
     });
-    render(<Harness community={MEMBER_COMM} user={USER} />);
+    render(<Harness community={MEMBER_COMM} user={USER} onPostCountChange={onPostCountChange} />);
     await screen.findByText('Bonjou tout moun!');
     fireEvent.change(screen.getByTestId('post-composer-input'), { target: { value: 'Nouvo pòs!' } });
     fireEvent.click(screen.getByTestId('post-composer-submit'));
     await waitFor(() => expect(communitiesService.createPost).toHaveBeenCalledWith('test', { content: 'Nouvo pòs!' }));
     expect(await screen.findByText('Nouvo pòs!')).toBeTruthy();
+    expect(screen.getByTestId('posts-count')).toHaveTextContent('2');
+    expect(onPostCountChange).toHaveBeenCalledWith(1);
+  });
+
+  it('counts Unicode code points and keeps empty publish disabled', async () => {
+    render(<Harness community={MEMBER_COMM} user={USER} />);
+    await screen.findByText('Bonjou tout moun!');
+    const input = screen.getByTestId('post-composer-input');
+    const submit = screen.getByTestId('post-composer-submit');
+    expect(submit.disabled).toBe(true);
+
+    fireEvent.change(input, { target: { value: '😀' } });
+    expect(input.value).toBe('😀');
+    expect(screen.getByText('1/2000')).toBeTruthy();
+    expect(submit.disabled).toBe(false);
+  });
+
+  it('rejects unsafe links and normalizes valid ones', async () => {
+    render(<Harness community={MEMBER_COMM} user={USER} />);
+    await screen.findByText('Bonjou tout moun!');
+    const input = screen.getByTestId('post-composer-input');
+
+    fireEvent.click(screen.getByTestId('post-composer-link-btn'));
+    let linkInput = screen.getByTestId('post-composer-link-input');
+    fireEvent.change(linkInput, { target: { value: 'javascript:alert(1)' } });
+    fireEvent.click(screen.getByTestId('post-composer-link-add'));
+    expect(await screen.findByTestId('post-composer-link-error')).toBeTruthy();
+    expect(input.value).toBe('');
+
+    // The row stays open after a validation error, so the user can fix
+    // the URL without reopening the tool.
+    linkInput = screen.getByTestId('post-composer-link-input');
+    fireEvent.change(linkInput, { target: { value: 'atelnyo.site' } });
+    fireEvent.click(screen.getByTestId('post-composer-link-add'));
+    await waitFor(() => expect(input.value).toContain('https://atelnyo.site/'));
+  });
+
+  it('validates image type before uploading', async () => {
+    render(<Harness community={MEMBER_COMM} user={USER} />);
+    await screen.findByText('Bonjou tout moun!');
+    const file = new File(['not an image'], 'notes.pdf', { type: 'application/pdf' });
+    fireEvent.change(screen.getByTestId('post-composer-file'), {
+      target: { files: [file] },
+    });
+    expect(await screen.findByTestId('post-composer-image-error')).toBeTruthy();
+  });
+
+  it('tracks the counter through every requested boundary', async () => {
+    render(<Harness community={MEMBER_COMM} user={USER} />);
+    await screen.findByText('Bonjou tout moun!');
+    const input = screen.getByTestId('post-composer-input');
+    const submit = screen.getByTestId('post-composer-submit');
+
+    for (const count of [0, 1, 100, 1000, 1999, 2000]) {
+      fireEvent.change(input, { target: { value: 'a'.repeat(count) } });
+      expect(input.value).toHaveLength(count);
+      expect(screen.getByText(`${count}/2000`)).toBeTruthy();
+      expect(submit.disabled).toBe(count === 0);
+    }
+  });
+
+  it('accepts exactly 2000 code points and enables publishing', async () => {
+    render(<Harness community={MEMBER_COMM} user={USER} />);
+    await screen.findByText('Bonjou tout moun!');
+    const input = screen.getByTestId('post-composer-input');
+    const submit = screen.getByTestId('post-composer-submit');
+
+    fireEvent.change(input, { target: { value: 'a'.repeat(2000) } });
+
+    expect(input.value).toHaveLength(2000);
+    expect(screen.getByText('2000/2000')).toBeTruthy();
+    expect(submit.disabled).toBe(false);
+    expect(screen.queryByTestId('post-composer-length-error')).toBeNull();
+  });
+
+  it('truncates text over 2000 code points and explains why', async () => {
+    render(<Harness community={MEMBER_COMM} user={USER} />);
+    await screen.findByText('Bonjou tout moun!');
+    const input = screen.getByTestId('post-composer-input');
+
+    fireEvent.change(input, { target: { value: 'a'.repeat(2001) } });
+
+    expect(input.value).toHaveLength(2000);
+    expect(await screen.findByTestId('post-composer-length-error')).toBeTruthy();
+  });
+
+  it('keeps the draft intact when publishing fails', async () => {
+    communitiesService.createPost.mockRejectedValue({
+      response: { data: { detail: 'Server refused' } },
+    });
+    render(<Harness community={MEMBER_COMM} user={USER} />);
+    await screen.findByText('Bonjou tout moun!');
+    const input = screen.getByTestId('post-composer-input');
+    fireEvent.change(input, { target: { value: 'Brouyon enpòtan' } });
+    fireEvent.click(screen.getByTestId('post-composer-submit'));
+
+    await waitFor(() => expect(communitiesService.createPost).toHaveBeenCalled());
+    expect(input.value).toBe('Brouyon enpòtan');
+    expect(screen.getByTestId('post-composer-submit').disabled).toBe(false);
+  });
+
+  it('hides the global assistant while the composer is focused', async () => {
+    render(<Harness community={MEMBER_COMM} user={USER} />);
+    await screen.findByText('Bonjou tout moun!');
+    const input = screen.getByTestId('post-composer-input');
+
+    fireEvent.focus(input);
+    expect(document.body.classList.contains('community-composing')).toBe(true);
+
+    fireEvent.blur(input);
+    await waitFor(() => {
+      expect(document.body.classList.contains('community-composing')).toBe(false);
+    });
+  });
+
+  it('inserts an emoji at the caret', async () => {
+    render(<Harness community={MEMBER_COMM} user={USER} />);
+    await screen.findByText('Bonjou tout moun!');
+    const input = screen.getByTestId('post-composer-input');
+    fireEvent.change(input, { target: { value: 'Bonjou ' } });
+
+    fireEvent.click(screen.getByTestId('post-composer-emoji-btn'));
+    const menu = screen.getByRole('menu');
+    fireEvent.click(within(menu).getAllByRole('menuitem')[0]);
+
+    expect(input.value).toBe('Bonjou ❤️');
+    // ❤️ is two code points: the heart plus U+FE0F.
+    expect(screen.getByText('9/2000')).toBeTruthy();
+  });
+
+  it('hides the assistant while the composer is visible in the mobile viewport', async () => {
+    let observerCallback = null;
+    const observe = vi.fn();
+    class MockIntersectionObserver {
+      constructor(callback) { observerCallback = callback; }
+
+      observe = observe;
+
+      disconnect = vi.fn();
+    }
+    const originalObserver = window.IntersectionObserver;
+    const originalMatchMedia = window.matchMedia;
+    Object.defineProperty(window, 'IntersectionObserver', {
+      configurable: true,
+      value: MockIntersectionObserver,
+    });
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true,
+      value: vi.fn(() => ({
+        matches: true,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      })),
+    });
+
+    try {
+      render(<Harness community={MEMBER_COMM} user={USER} />);
+      await screen.findByText('Bonjou tout moun!');
+      await waitFor(() => expect(observe).toHaveBeenCalled());
+
+      act(() => observerCallback([{ isIntersecting: true }]));
+      expect(document.body.classList.contains('community-composer-visible')).toBe(true);
+
+      act(() => observerCallback([{ isIntersecting: false }]));
+      expect(document.body.classList.contains('community-composer-visible')).toBe(false);
+    } finally {
+      Object.defineProperty(window, 'IntersectionObserver', {
+        configurable: true,
+        value: originalObserver,
+      });
+      Object.defineProperty(window, 'matchMedia', {
+        configurable: true,
+        value: originalMatchMedia,
+      });
+    }
+  });
+
+  it('uploads an image and publishes it with image_url', async () => {
+    api.post.mockResolvedValue({
+      data: { url: 'https://cdn.example.com/community/photo.jpg' },
+    });
+    communitiesService.createPost.mockImplementation((slug, data) => Promise.resolve({
+      data: {
+        id: 87,
+        ...data,
+        author: 9,
+        author_username: 'manm1',
+        reaction_count: 0,
+        reactions: {},
+        my_reaction: null,
+        created_at: '2026-11-02T10:00:00Z',
+      },
+    }));
+    render(<Harness community={MEMBER_COMM} user={USER} />);
+    await screen.findByText('Bonjou tout moun!');
+
+    const file = new File(['fake-jpeg'], 'photo.jpg', { type: 'image/jpeg' });
+    fireEvent.change(screen.getByTestId('post-composer-file'), {
+      target: { files: [file] },
+    });
+
+    const preview = await screen.findByTestId('post-composer-preview');
+    expect(preview.getAttribute('src')).toBe('https://cdn.example.com/community/photo.jpg');
+    expect(api.post).toHaveBeenCalledWith(
+      'media/upload/',
+      expect.objectContaining({ kind: 'image' }),
+      expect.any(Object),
+    );
+
+    fireEvent.change(screen.getByTestId('post-composer-input'), {
+      target: { value: 'Yon bèl foto' },
+    });
+    fireEvent.click(screen.getByTestId('post-composer-submit'));
+    await waitFor(() => {
+      expect(communitiesService.createPost).toHaveBeenCalledWith(
+        'test',
+        expect.objectContaining({
+          content: 'Yon bèl foto',
+          image_url: 'https://cdn.example.com/community/photo.jpg',
+        }),
+      );
+    });
+  });
+
+  it('uploads an MP4 and publishes a video-only post', async () => {
+    api.post.mockResolvedValue({
+      data: { url: 'https://cdn.example.com/community/clip.mp4' },
+    });
+    communitiesService.createPost.mockImplementation((slug, data) => Promise.resolve({
+      data: {
+        id: 88,
+        ...data,
+        author: 9,
+        author_username: 'manm1',
+        reaction_count: 0,
+        reactions: {},
+        my_reaction: null,
+        created_at: '2026-11-02T10:00:00Z',
+      },
+    }));
+    render(<Harness community={MEMBER_COMM} user={USER} />);
+    await screen.findByText('Bonjou tout moun!');
+
+    const file = new File(['fake-mp4'], 'clip.mp4', { type: 'video/mp4' });
+    fireEvent.change(screen.getByTestId('post-composer-video-file'), {
+      target: { files: [file] },
+    });
+
+    const preview = await screen.findByTestId('post-composer-video-preview');
+    expect(preview.getAttribute('src')).toBe('https://cdn.example.com/community/clip.mp4');
+    expect(api.post).toHaveBeenCalledWith(
+      'media/upload/',
+      expect.objectContaining({ kind: 'video' }),
+      expect.any(Object),
+    );
+
+    fireEvent.click(screen.getByTestId('post-composer-submit'));
+    await waitFor(() => {
+      expect(communitiesService.createPost).toHaveBeenCalledWith(
+        'test',
+        expect.objectContaining({
+          content: '',
+          video_url: 'https://cdn.example.com/community/clip.mp4',
+        }),
+      );
+    });
+  });
+
+  it('rejects non-MP4 video files before uploading', async () => {
+    render(<Harness community={MEMBER_COMM} user={USER} />);
+    await screen.findByText('Bonjou tout moun!');
+    const file = new File(['fake-webm'], 'clip.webm', { type: 'video/webm' });
+
+    fireEvent.change(screen.getByTestId('post-composer-video-file'), {
+      target: { files: [file] },
+    });
+
+    expect(await screen.findByTestId('post-composer-video-error')).toBeTruthy();
+    expect(api.post).not.toHaveBeenCalled();
+  });
+
+  it('renders a YouTube Short with its timestamp as an embed', async () => {
+    communitiesService.posts.mockResolvedValue({
+      data: [{
+        ...POSTS[0],
+        id: 71,
+        content: 'https://youtu.be/dQw4w9WgXcQ?t=43',
+        video_url: '',
+      }],
+    });
+    render(<Harness community={MEMBER_COMM} user={USER} />);
+
+    const frame = await screen.findByTitle('Videyo pòs la');
+    expect(frame.getAttribute('src')).toContain('/embed/dQw4w9WgXcQ');
+    expect(frame.getAttribute('src')).toContain('start=43');
+  });
+
+  it('renders a Vimeo link as a player embed', async () => {
+    communitiesService.posts.mockResolvedValue({
+      data: [{
+        ...POSTS[0],
+        id: 72,
+        content: 'https://vimeo.com/76979871',
+        video_url: '',
+      }],
+    });
+    render(<Harness community={MEMBER_COMM} user={USER} />);
+
+    const frame = await screen.findByTitle('Videyo pòs la');
+    expect(frame.getAttribute('src')).toBe('https://player.vimeo.com/video/76979871?dnt=1');
+  });
+
+  it('renders a native video-only post with a real player', async () => {
+    communitiesService.posts.mockResolvedValue({
+      data: [{
+        ...POSTS[0],
+        id: 73,
+        content: '',
+        video_url: 'https://cdn.example.com/community/native.mp4',
+      }],
+    });
+    render(<Harness community={MEMBER_COMM} user={USER} />);
+
+    const player = await screen.findByLabelText('Videyo pòs la');
+    expect(player.tagName).toBe('VIDEO');
+    expect(player.getAttribute('src')).toBe('https://cdn.example.com/community/native.mp4');
+  });
+
+  it('explains approval-mode visibility instead of promising open posting', async () => {
+    render(
+      <Harness
+        community={{ ...MEMBER_COMM, join_mode: 'approval' }}
+        user={USER}
+      />,
+    );
+    expect(await screen.findByText(/apwobasyon/i)).toBeTruthy();
+  });
+
+  it('tells members a private community post is members-only', async () => {
+    render(
+      <Harness
+        community={{ ...MEMBER_COMM, read_visibility: 'members' }}
+        user={USER}
+      />,
+    );
+
+    expect(await screen.findByText('Sèlman manm aktif yo ka li pòs sa a.')).toBeTruthy();
+  });
+
+  it('lets the author edit their post in place', async () => {
+    communitiesService.updatePost.mockResolvedValue({
+      data: { ...POSTS[0], content: 'Mete ajou' },
+    });
+    render(<Harness community={MEMBER_COMM} user={USER} />);
+    await screen.findByText('Bonjou tout moun!');
+
+    fireEvent.click(screen.getByTestId('content-feedback-menu-1'));
+    fireEvent.click(await screen.findByTestId('post-edit-1'));
+    const editInput = await screen.findByTestId('post-edit-input-1');
+    fireEvent.change(editInput, { target: { value: 'Mete ajou' } });
+    fireEvent.click(screen.getByTestId('post-edit-save-1'));
+
+    await waitFor(() => expect(communitiesService.updatePost).toHaveBeenCalledWith(1, { content: 'Mete ajou' }));
+    expect(await screen.findByText('Mete ajou')).toBeTruthy();
+  });
+
+  it('renders long URLs as clickable links inside the post body', async () => {
+    const longUrl = 'https://atelnyo.site/yon/lyen/twò/long/ki/pa/dwe/kase/layout/la';
+    communitiesService.posts.mockResolvedValue({
+      data: [{ ...POSTS[0], content: `Gade ${longUrl}` }],
+    });
+    render(<Harness community={MEMBER_COMM} user={USER} />);
+
+    const link = await screen.findByRole('link', { name: longUrl });
+    expect(link).toHaveAttribute('href', longUrl);
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
   });
 
   it('toggles a reaction optimistically', async () => {
@@ -481,19 +885,61 @@ describe('Community surfaces', () => {
     await waitFor(() => expect(communitiesService.reactToPost).toHaveBeenCalledWith(1, '❤️'));
   });
 
+  it('shows the new reaction count optimistically before the server responds', async () => {
+    communitiesService.posts.mockResolvedValue({
+      data: [{ ...POSTS[0], my_reaction: null, reactions: {}, reaction_count: 0 }],
+    });
+    communitiesService.reactToPost.mockReturnValue(new Promise(() => {}));
+    render(<Harness community={MEMBER_COMM} user={USER} />);
+    await screen.findByText('Bonjou tout moun!');
+
+    fireEvent.click(screen.getByTestId('post-react-1-❤️'));
+
+    await waitFor(() => {
+      const button = screen.getByTestId('post-react-1-❤️');
+      expect(button).toHaveAttribute('aria-pressed', 'true');
+      expect(button).toHaveTextContent('1');
+    });
+  });
+
   it('hides the composer for non-members', async () => {
     render(<Harness community={{ slug: 'test', is_member: false }} user={USER} />);
     await screen.findByText('Bonjou tout moun!');
     expect(screen.queryByTestId('post-composer-input')).toBeNull();
   });
 
-  it('deletes the author own post', async () => {
+  it('deletes the author own post and decrements the feed count', async () => {
     window.confirm = vi.fn(() => true);
+    const onPostCountChange = vi.fn();
     communitiesService.deletePost.mockResolvedValue({});
+    render(<Harness community={MEMBER_COMM} user={USER} onPostCountChange={onPostCountChange} />);
+    await screen.findByText('Bonjou tout moun!');
+    expect(screen.getByTestId('posts-count')).toHaveTextContent('1');
+    fireEvent.click(screen.getByTestId('content-feedback-menu-1'));
+    fireEvent.click(await screen.findByTestId('post-delete-1'));
+    await waitFor(() => expect(communitiesService.deletePost).toHaveBeenCalledWith(1));
+    await waitFor(() => expect(screen.getByTestId('posts-count')).toHaveTextContent('0'));
+    expect(onPostCountChange).toHaveBeenCalledWith(-1);
+  });
+
+  it('puts author actions in one menu and never offers Report to the author', async () => {
     render(<Harness community={MEMBER_COMM} user={USER} />);
     await screen.findByText('Bonjou tout moun!');
-    fireEvent.click(screen.getByTestId('post-delete-1'));
-    await waitFor(() => expect(communitiesService.deletePost).toHaveBeenCalledWith(1));
+    fireEvent.click(screen.getByTestId('content-feedback-menu-1'));
+
+    expect(await screen.findByTestId('post-edit-1')).toBeTruthy();
+    expect(screen.getByTestId('post-delete-1')).toBeTruthy();
+    expect(screen.queryByText('Siyale')).toBeNull();
+  });
+
+  it('offers Report but not edit/delete to another member', async () => {
+    render(<Harness community={MEMBER_COMM} user={{ id: 10, username: 'lotmanm' }} />);
+    await screen.findByText('Bonjou tout moun!');
+    fireEvent.click(screen.getByTestId('content-feedback-menu-1'));
+
+    expect(await screen.findByText('Siyale')).toBeTruthy();
+    expect(screen.queryByTestId('post-edit-1')).toBeNull();
+    expect(screen.queryByTestId('post-delete-1')).toBeNull();
   });
 
   it('expands comments and sends one', async () => {

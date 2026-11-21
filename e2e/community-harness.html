@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
+  <title>Community posts harness</title>
+  <style>
+    html, body { margin: 0; padding: 0; }
+    /* Mirror the global assistant FAB's real geometry so the
+       "FAB must not cover the composer" media rule can be verified. */
+    .chat-btn {
+      position: fixed;
+      bottom: 90px;
+      left: 20px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: 0;
+      background: #d81b60;
+      color: #fff;
+      font-weight: 700;
+      z-index: 2600;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/e2e/community-harness.jsx"></script>
+</body>
+</html>

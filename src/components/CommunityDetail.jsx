@@ -37,6 +37,7 @@ import CommunityPageSkeleton from './community/CommunityPageSkeleton';
 import CommunityJoinExplainer from './community/CommunityJoinExplainer';
 import { welcomeSteps, nextEvent } from './community/communityOnboarding';
 import { localizedCategoryLabel } from './community/communityCategories';
+import { visibleCommunityRules } from './community/communityRules';
 import { countWithUnit } from '../utils/plural';
 import useVirtualScroll from '../hooks/useVirtualScroll';
 import { t as t4 } from '../utils/i18n';
@@ -220,7 +221,7 @@ export function CommunityHome() {
   const isMember = Boolean(community?.is_member);
   const joinPending = myStatus === 'pending';
   const inviteOnly = !isMember && !joinPending && community?.join_mode === 'invite' && !canJoin;
-  const rules = Array.isArray(community?.rules) ? community.rules : [];
+  const rules = visibleCommunityRules(community?.rules);
   const joinPolicyLabel = community?.join_mode === 'approval'
     ? t4(lang, 'Sou apwobasyon', 'Approval required', 'Sur approbation', 'Con aprobación')
     : community?.join_mode === 'invite'
@@ -244,9 +245,7 @@ export function CommunityHome() {
       { year: 'numeric', month: 'short', day: 'numeric' },
     )
     : '';
-  const previewRules = [...rules]
-    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-    .slice(0, 3);
+  const previewRules = rules.slice(0, 3);
   const hasLink = (text) => /https?:\/\//i.test(text || '');
   const hasVideo = (text) => /(youtube\.com|youtu\.be|vimeo\.com|facebook\.com\/.+\/videos|tiktok\.com)/i.test(text || '');
   const copyCommunityLink = async () => {
@@ -1576,8 +1575,7 @@ export function CommunityCourses() {
  */
 export function CommunityRulesTab() {
   const { community, lang } = useOutletContext();
-  const rules = [...(Array.isArray(community?.rules) ? community.rules : [])]
-    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  const rules = visibleCommunityRules(community?.rules);
 
   if (rules.length === 0) {
     return (
@@ -1646,6 +1644,15 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user, 
     if (!key) return;
     setWelcomeDone((list) => (list.includes(key) ? list : [...list, key]));
   }, []);
+  // The posts tab owns the authoritative feed total. Publishing/deleting
+  // there must also update the Home snapshot instead of waiting for a
+  // full community refetch.
+  const adjustPostCount = useCallback((delta) => {
+    setCommunity((prev) => (prev ? {
+      ...prev,
+      post_count: Math.max(0, Number(prev.post_count || 0) + Number(delta || 0)),
+    } : prev));
+  }, []);
   const [memberCount, setMemberCount] = useState(0);
   const tabsRef = useRef(null);
   // A broken avatar/cover URL falls back to the branded default instead
@@ -1710,6 +1717,12 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user, 
       const joinedStatus = res?.data?.status || res?.data?.data?.status || 'active';
       setMyStatus(joinedStatus);
       setIsMember(joinedStatus === 'active');
+      setCommunity((prev) => (prev ? {
+        ...prev,
+        is_member: joinedStatus === 'active',
+        my_status: joinedStatus,
+        can_read: joinedStatus === 'active' || prev.read_visibility !== 'members',
+      } : prev));
       setJustJoined(joinedStatus === 'active');
       if (joinedStatus === 'active') setMemberCount((c) => c + 1);
       if (inviteToken && joinedStatus === 'active') {
@@ -1729,11 +1742,24 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user, 
   }, [user, navigate, location.pathname, location.search, location.hash, slug, inviteToken, showToast, t, lang]);
 
   async function handleLeave() {
+    if (!window.confirm(t4(
+      lang,
+      'Èske w sèten w vle kite kominote sa a?',
+      'Are you sure you want to leave this community?',
+      'Êtes-vous sûr de vouloir quitter cette communauté ?',
+      '¿Seguro que quieres salir de esta comunidad?',
+    ))) return;
     setJoining(true);
     try {
       await communitiesService.leave(slug);
       setIsMember(false);
       setMyStatus(null);
+      setCommunity((prev) => (prev ? {
+        ...prev,
+        is_member: false,
+        my_status: null,
+        can_read: prev.read_visibility !== 'members',
+      } : prev));
       setMemberCount((c) => Math.max(0, c - 1));
       showToast?.(t4(lang, "Ou kite kominote a.", "Left community.", "Communauté quittée.", "Saliste de la comunidad."), 'sign-out-alt');
     } catch (err) {
@@ -1757,6 +1783,8 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user, 
   }
 
   const isOwner = Boolean(community?.current_user_role === 'owner');
+  const canManage = ['owner', 'admin'].includes(community?.current_user_role);
+  const readLocked = community?.read_visibility === 'members' && community?.can_read === false;
 
   // Give the global assistant FAB a community-specific mobile gutter so
   // it clears the fixed navigation and never covers the last action row.
@@ -1820,8 +1848,9 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user, 
       onWelcomeStep: markWelcomeStep,
       onDismissWelcome: () => { setJustJoined(false); setWelcomeDone([]); },
       canJoin: community?.join_mode !== 'invite' || Boolean(inviteToken),
+      onPostCountChange: adjustPostCount,
     }),
-    [community, slug, lang, t, user, showToast, isMember, handleJoin, onOpenCheckout, joining, myStatus, inviteToken, justJoined, welcomeDone, markWelcomeStep],
+    [community, slug, lang, t, user, showToast, isMember, handleJoin, onOpenCheckout, joining, myStatus, inviteToken, justJoined, welcomeDone, markWelcomeStep, adjustPostCount],
   );
 
   if (loading) {
@@ -1875,6 +1904,18 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user, 
             <div className="c-banner-meta">
               <i className="fas fa-user" /> {countWithUnit(lang, memberCount, MEMBER_FORMS)}
               {community.category && ` · ${localizedCategoryLabel(community.category, lang)}`}
+              {community.read_visibility === 'members' && (
+                <span className="c-banner-role c-banner-role--private">
+                  <i className="fas fa-lock" aria-hidden="true" />
+                  {t4(lang, 'Prive', 'Private', 'Privé', 'Privada')}
+                </span>
+              )}
+              {isMember && (
+                <span className="c-banner-role">
+                  <i className="fas fa-user-check" aria-hidden="true" />
+                  {roleLabel(community.current_user_role, lang)}
+                </span>
+              )}
             </div>
           </div>
           {myStatus === 'pending' ? (
@@ -1889,28 +1930,28 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user, 
             </button>
           ) : isMember ? (
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {canManage && (
+                <button
+                  type="button"
+                  className="c-banner-btn"
+                  onClick={() => navigate('/sheet/studio?section=communities')}
+                  title={t4(lang, "Paramèt kominote a", "Community settings", "Paramètres de la communauté", "Ajustes de la comunidad")}
+                >
+                  <i className="fas fa-cog" aria-hidden="true" />
+                  {t4(lang, "Paramèt", "Settings", "Paramètres", "Ajustes")}
+                </button>
+              )}
               {isOwner && (
-                <>
-                  <button
-                    type="button"
-                    className="c-banner-btn"
-                    onClick={() => navigate('/sheet/studio?section=communities')}
-                    title={t4(lang, "Paramèt kominote a", "Community settings", "Paramètres de la communauté", "Ajustes de la comunidad")}
-                  >
-                    <i className="fas fa-cog" aria-hidden="true" />
-                    {t4(lang, "Paramèt", "Settings", "Paramètres", "Ajustes")}
-                  </button>
-                  <button
-                    type="button"
-                    className="c-banner-btn"
-                    onClick={handleDelete}
-                    style={{ background: 'rgba(239,68,68,0.9)', border: '1px solid rgba(239,68,68,0.9)' }}
-                    title={t4(lang, "Efase kominote a", "Delete community", "Supprimer la communauté", "Eliminar comunidad")}
-                  >
-                    <i className="fas fa-trash" aria-hidden="true" />
-                    {t4(lang, "Efase", "Delete", "Supprimer", "Eliminar")}
-                  </button>
-                </>
+                <button
+                  type="button"
+                  className="c-banner-btn"
+                  onClick={handleDelete}
+                  style={{ background: 'rgba(239,68,68,0.9)', border: '1px solid rgba(239,68,68,0.9)' }}
+                  title={t4(lang, "Efase kominote a", "Delete community", "Supprimer la communauté", "Eliminar comunidad")}
+                >
+                  <i className="fas fa-trash" aria-hidden="true" />
+                  {t4(lang, "Efase", "Delete", "Supprimer", "Eliminar")}
+                </button>
               )}
               {!isOwner && (
                 <button
@@ -1956,34 +1997,80 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user, 
         />
       )}
 
-      {/* Tabs — URL-driven via NavLink. The banned tab renders only for
-          owner/admin (moderation surface); others never see it and a
-          direct URL still 403s server-side. */}
-      <nav
-        ref={tabsRef}
-        className="c-tabs"
-        aria-label={t4(lang, 'Seksyon kominote a', 'Community sections', 'Sections de la communauté', 'Secciones de la comunidad')}
-      >
-        {TAB_KEYS.filter((key) => (
-          (!MOD_ONLY_TABS.includes(key) || ['owner', 'admin'].includes(community?.current_user_role))
-          // The rules tab only exists when the community actually has rules;
-          // showing an empty tab would advertise a section with nothing in it.
-          && (key !== 'rules' || (Array.isArray(community?.rules) && community.rules.length > 0))
-        )).map((key) => (
-          <NavLink
-            key={key}
-            to={key}
-            className={({ isActive }) => `c-tab c-tab--nav${isActive ? ' c-tab--active' : ''}`}
+      {readLocked ? (
+        <section
+          className="c-private-gate"
+          data-testid="community-private-gate"
+          aria-labelledby="community-private-title"
+        >
+          <span className="c-private-gate-icon" aria-hidden="true">
+            <i className="fas fa-lock" />
+          </span>
+          <h3 id="community-private-title">
+            {t4(lang, 'Manm sèlman', 'Members only', 'Membres uniquement', 'Solo miembros')}
+          </h3>
+          <p>
+            {t4(
+              lang,
+              'Kominote sa a prive. Antre pou w ka li pòs, kòmantè, evènman, fichye ak manm yo.',
+              'This community is private. Join to read its posts, comments, events, files, and members.',
+              'Cette communauté est privée. Rejoignez-la pour lire ses publications, commentaires, événements, fichiers et membres.',
+              'Esta comunidad es privada. Únete para leer sus publicaciones, comentarios, eventos, archivos y miembros.',
+            )}
+          </p>
+          {myStatus === 'pending' ? (
+            <span className="c-private-gate-status">
+              <i className="fas fa-clock" aria-hidden="true" />
+              {t4(lang, 'Demann ou ap tann apwobasyon', 'Your request is awaiting approval', 'Votre demande attend une approbation', 'Tu solicitud está pendiente de aprobación')}
+            </span>
+          ) : (
+            <button
+              type="button"
+              className="c-banner-btn c-banner-btn--join"
+              onClick={handleJoin}
+              disabled={joining || (community.join_mode === 'invite' && !inviteToken)}
+            >
+              {joining ? <i className="fas fa-spinner fa-spin" aria-hidden="true" /> : null}
+              {community.join_mode === 'invite' && !inviteToken
+                ? t4(lang, 'Envitasyon sèlman', 'Invite only', 'Sur invitation', 'Solo con invitación')
+                : community.join_mode === 'approval'
+                  ? t4(lang, 'Mande aksè', 'Request access', 'Demander l’accès', 'Solicitar acceso')
+                  : t4(lang, 'Antre pou li', 'Join to read', 'Rejoindre pour lire', 'Unirse para leer')}
+            </button>
+          )}
+        </section>
+      ) : (
+        <>
+          {/* Tabs — URL-driven via NavLink. The banned tab renders only for
+              owner/admin (moderation surface); others never see it and a
+              direct URL still 403s server-side. */}
+          <nav
+            ref={tabsRef}
+            className="c-tabs"
+            aria-label={t4(lang, 'Seksyon kominote a', 'Community sections', 'Sections de la communauté', 'Secciones de la comunidad')}
           >
-            {tabLabels[key]}
-          </NavLink>
-        ))}
-      </nav>
+            {TAB_KEYS.filter((key) => (
+              (!MOD_ONLY_TABS.includes(key) || ['owner', 'admin'].includes(community?.current_user_role))
+              // The rules tab only exists when the community actually has rules;
+              // showing an empty tab would advertise a section with nothing in it.
+              && (key !== 'rules' || visibleCommunityRules(community?.rules).length > 0)
+            )).map((key) => (
+              <NavLink
+                key={key}
+                to={key}
+                className={({ isActive }) => `c-tab c-tab--nav${isActive ? ' c-tab--active' : ''}`}
+              >
+                {tabLabels[key]}
+              </NavLink>
+            ))}
+          </nav>
 
-      {/* Tab content via React Router Outlet */}
-      <div className="community-tab-content">
-        <Outlet context={outletContext} />
-      </div>
+          {/* Tab content via React Router Outlet */}
+          <div className="community-tab-content">
+            <Outlet context={outletContext} />
+          </div>
+        </>
+      )}
     </div>
   );
 }

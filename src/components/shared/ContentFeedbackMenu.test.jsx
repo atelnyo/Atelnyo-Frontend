@@ -54,6 +54,7 @@ describe('ContentFeedbackMenu', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /more options/i }));
     await userEvent.click(screen.getByRole('menuitem', { name: /^report$/i }));
+    await userEvent.click(screen.getByRole('menuitem', { name: /^other$/i }));
 
     await waitFor(() =>
       expect(contentFeedbackService.report).toHaveBeenCalledWith('post', 2, 'other'),

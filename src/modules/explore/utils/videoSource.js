@@ -16,19 +16,107 @@
  * Matches what the studio editors accept (react-player): YouTube,
  * Vimeo, Facebook, TikTok, or a direct media file.
  */
+
+const YOUTUBE_ID_RE = /^[A-Za-z0-9_-]{6,}$/;
+const YOUTUBE_HOSTS = new Set([
+  'youtube.com',
+  'm.youtube.com',
+  'music.youtube.com',
+  'youtube-nocookie.com',
+]);
+const VIMEO_HOSTS = new Set(['vimeo.com', 'player.vimeo.com']);
+const VIDEO_FILE_RE = /\.(mp4|m4v|webm|ogv|ogg|mov)$/i;
+
+function hostOf(u) {
+  return u.hostname.toLowerCase().replace(/^www\./, '');
+}
+
+function pathParts(u) {
+  return u.pathname.replace(/^\//, '').split('/').filter(Boolean);
+}
+
+/** Convert ``90``, ``1m30s`` or ``1h2m3s`` to seconds. */
+function parseTimecode(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return 0;
+  if (/^\d+$/.test(raw)) return Number(raw);
+  let total = 0;
+  let matched = false;
+  const re = /(\d+)\s*([hms])/gi;
+  let match;
+  while ((match = re.exec(raw)) !== null) {
+    matched = true;
+    const amount = Number(match[1]);
+    const unit = match[2].toLowerCase();
+    total += unit === 'h' ? amount * 3600 : unit === 'm' ? amount * 60 : amount;
+  }
+  return matched ? total : 0;
+}
+
+function youtubeStartSeconds(u) {
+  const raw = u.searchParams.get('start') || u.searchParams.get('t') || '';
+  if (raw) return parseTimecode(raw);
+  const hash = u.hash.replace(/^#/, '');
+  const match = /(?:^|&)t=([^&]+)/.exec(hash);
+  return match ? parseTimecode(decodeURIComponent(match[1])) : 0;
+}
+
+function buildYoutubeEmbed(id, start) {
+  // Keep www.youtube.com: the production CSP already allows that exact
+  // frame host. The ID and start are validated/normalized above.
+  const params = new URLSearchParams({ rel: '0', playsinline: '1' });
+  if (start > 0) params.set('start', String(start));
+  return `https://www.youtube.com/embed/${encodeURIComponent(id)}?${params.toString()}`;
+}
+
+function vimeoDetails(u) {
+  const parts = pathParts(u);
+  let id = '';
+  let idIndex = -1;
+  for (let i = parts.length - 1; i >= 0; i -= 1) {
+    if (/^\d+$/.test(parts[i])) { id = parts[i]; idIndex = i; break; }
+  }
+  if (!id) return null;
+
+  let hash = u.searchParams.get('h') || '';
+  if (!hash && idIndex >= 0) {
+    const next = parts[idIndex + 1];
+    if (next && /^[A-Za-z0-9]+$/.test(next) && !/^\d+$/.test(next)) hash = next;
+  }
+
+  const rawStart = u.searchParams.get('t') || '';
+  let start = parseTimecode(rawStart);
+  if (!start) {
+    const fragment = /(?:^|&)t=(\d+)(?:s)?/.exec(u.hash.replace(/^#/, ''));
+    start = fragment ? Number(fragment[1]) : 0;
+  }
+
+  const params = new URLSearchParams({ dnt: '1' });
+  if (hash) params.set('h', hash);
+  const base = `https://player.vimeo.com/video/${id}?${params.toString()}`;
+  return { id, src: `${base}${start > 0 ? `#t=${start}s` : ''}` };
+}
+
 /** Extract a YouTube video id from any supported YouTube URL, or '' if none. */
 export function youtubeVideoId(url) {
   if (!url || typeof url !== 'string') return '';
   try {
     const u = new URL(url.trim());
-    const host = u.hostname.replace(/^www\./, '');
-    const pathId = u.pathname.replace(/^\//, '').split('/').filter(Boolean);
-    if (host === 'youtu.be') return pathId[0] || '';
-    if (host === 'youtube.com' || host === 'm.youtube.com') {
-      const v = u.searchParams.get('v');
-      if (v) return v;
-      if (pathId[0] === 'shorts' || pathId[0] === 'embed' || pathId[0] === 'live') return pathId[1] || '';
+    const host = hostOf(u);
+    const parts = pathParts(u);
+    let id = '';
+
+    if (host === 'youtu.be') {
+      id = parts[0] || '';
+    } else if (YOUTUBE_HOSTS.has(host)) {
+      id = u.searchParams.get('v') || '';
+      if (!id) {
+        const marker = parts.findIndex((part) => ['shorts', 'embed', 'live', 'v'].includes(part));
+        if (marker >= 0) id = parts[marker + 1] || '';
+      }
     }
+
+    return YOUTUBE_ID_RE.test(id) ? id : '';
   } catch { /* malformed — no id */ }
   return '';
 }
@@ -67,36 +155,25 @@ export function resolveVideoSource(url) {
   if (hasAudioExtension(trimmed)) return null;
   try {
     const u = new URL(trimmed);
-    const host = u.hostname.replace(/^www\./, '');
-    const pathId = u.pathname.replace(/^\//, '').split('/').filter(Boolean);
-    if (host === 'youtu.be') {
-      const id = pathId[0] || '';
-      return id ? { kind: 'embed', provider: 'youtube', src: `https://www.youtube.com/embed/${id}` } : null;
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
+    const host = hostOf(u);
+
+    const youtubeId = youtubeVideoId(trimmed);
+    if (youtubeId) {
+      return {
+        kind: 'embed',
+        provider: 'youtube',
+        src: buildYoutubeEmbed(youtubeId, youtubeStartSeconds(u)),
+      };
     }
-    if (host === 'youtube.com' || host === 'm.youtube.com') {
-      // ?v=ID, /shorts/ID, /embed/ID, /live/ID all carry the video id
-      // in a recognizable slot — the plain page URL (no id) is not
-      // a video and falls through to the file branch (or hides).
-      let id = u.searchParams.get('v');
-      if (!id && pathId[0] === 'shorts') id = pathId[1];
-      if (!id && pathId[0] === 'embed') id = pathId[1];
-      if (!id && pathId[0] === 'live') id = pathId[1];
-      return id ? { kind: 'embed', provider: 'youtube', src: `https://www.youtube.com/embed/${id}` } : null;
+
+    if (VIMEO_HOSTS.has(host)) {
+      const vimeo = vimeoDetails(u);
+      return vimeo
+        ? { kind: 'embed', provider: 'vimeo', src: vimeo.src }
+        : null;
     }
-    if (host === 'vimeo.com' || host === 'player.vimeo.com') {
-      // Accept /ID, /channels/.../ID and the player/video/ID form — the
-      // video id is the LAST numeric path segment. ``player.vimeo.com``
-      // matters: the EMBED url (what creators copy out of Vimeo's own
-      // share dialog, and what the seed commands store) used to fall
-      // through to the ``file`` branch and mount a <video> against an
-      // HTML player page, which never loads — the lesson then showed
-      // "This video could not be loaded." even though the link was fine.
-      let id = null;
-      for (let i = pathId.length - 1; i >= 0; i -= 1) {
-        if (/^\d+$/.test(pathId[i])) { id = pathId[i]; break; }
-      }
-      return id ? { kind: 'embed', provider: 'vimeo', src: `https://player.vimeo.com/video/${id}` } : null;
-    }
+
     if (host === 'facebook.com' || host === 'm.facebook.com' || host === 'fb.watch') {
       // Any Facebook video URL (watch, /videos/ID, fb.watch short
       // links…) embeds through the official plugin — no id parsing
@@ -107,22 +184,29 @@ export function resolveVideoSource(url) {
         src: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(trimmed)}`,
       };
     }
+
     if (host === 'tiktok.com') {
       // /@user/video/ID — the video id is the last numeric segment.
-      const id = [...pathId].reverse().find((s) => /^\d+$/.test(s)) || '';
+      const parts = pathParts(u);
+      const id = [...parts].reverse().find((s) => /^\d+$/.test(s)) || '';
       return id
         ? { kind: 'embed', provider: 'tiktok', src: `https://www.tiktok.com/embed/v2/${id}` }
         : null;
     }
+
     // TikTok share shorteners (vm./vt.tiktok.com) can't be resolved to a
     // video id synchronously (needs a redirect) — hide cleanly rather
     // than mount a broken <video> in the detail sheets.
     if (host === 'vm.tiktok.com' || host === 'vt.tiktok.com') return null;
-    // Direct media files (or anything else) → native <video>.
-    return { kind: 'file', src: trimmed };
+
+    // Direct media files only. A random web page must never mount a
+    // <video> element that then shows a broken player.
+    if (VIDEO_FILE_RE.test(u.pathname)) {
+      return { kind: 'file', src: u.toString() };
+    }
+    return null;
   } catch {
-    // Malformed URL — treat as a direct file attempt.
-    return { kind: 'file', src: trimmed };
+    return null;
   }
 }
 
@@ -134,7 +218,7 @@ export function resolveVideoSource(url) {
 // it actually honors. ``controls=0`` hides the player chrome so the
 // preview reads as a clean live thumbnail on the card.
 function buildHoverEmbedParams(u) {
-  const host = u.hostname.replace(/^www\./, '');
+  const host = hostOf(u);
   if (host.includes('youtube')) {
     u.searchParams.set('autoplay', '1');
     u.searchParams.set('mute', '1');

@@ -61,18 +61,23 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'e
     category: categoryToSlug(item?.category),
     hashtags: hashtagsToInput(item?.tags),
     join_mode: item?.join_mode || 'public',
+    read_visibility: item?.read_visibility || 'public',
     avatar_url: item?.avatar_url || '',
     banner_url: item?.banner_url || '',
     // Archive switch — is_active=false hides the community everywhere
     // (listings filter it out) without destroying data. DELETE (danger
     // zone below) is the irreversible path, owner only.
     is_active: item?.is_active ?? true,
-    // House rules — ordered [{title, description}]. The backend replaces
-    // the whole list on save (POST .../rules/), so the editor owns the
-    // full list and syncs it after the community itself is saved.
+    // House rules — ordered [{title, description, is_active}]. The backend
+    // replaces the whole list on save (POST .../rules/), so the editor owns
+    // the full list and syncs it after the community itself is saved.
     rules: Array.isArray(item?.rules)
       ? [...item.rules].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-        .map((r) => ({ title: r.title || '', description: r.description || '' }))
+        .map((r) => ({
+          title: r.title || '',
+          description: r.description || '',
+          is_active: r.is_active !== false,
+        }))
       : [],
   });
   const [newRule, setNewRule] = useState({ title: '', description: '' });
@@ -160,7 +165,11 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'e
     if (!newRule.title.trim()) return;
     setForm((f) => ({
       ...f,
-      rules: [...(f.rules || []), { title: newRule.title.trim(), description: newRule.description.trim() }],
+      rules: [...(f.rules || []), {
+        title: newRule.title.trim(),
+        description: newRule.description.trim(),
+        is_active: true,
+      }],
     }));
     setNewRule({ title: '', description: '' });
     markDirty();
@@ -240,6 +249,7 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'e
       category: form.category || 'other',
       tags: parseHashtags(form.hashtags),
       join_mode: form.join_mode,
+      read_visibility: form.read_visibility,
       avatar_url: form.avatar_url.trim() || undefined,
       banner_url: form.banner_url.trim() || undefined,
       is_active: Boolean(form.is_active),
@@ -264,6 +274,7 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'e
           await communitiesService.saveRules(slugForRules, form.rules.map((r) => ({
             title: r.title.trim(),
             description: (r.description || '').trim(),
+            is_active: r.is_active !== false,
           })).filter((r) => r.title));
         } catch (ruleErr) {
           showToast?.(ruleErr?.response?.data?.detail || (isHt ? 'Kominote sove, men règleman yo pa sove.' : 'Community saved, but rules were not saved.'), 'circle-exclamation');
@@ -526,6 +537,19 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'e
             {isHt ? 'Demann yo tann nan onglet Manm jiskaske ou apwouve oswa rejte yo.' : 'Requests wait in the Members tab until you approve or reject them.'}
           </p>
         )}
+        <PropField label={isHt ? 'Ki moun ki ka li' : 'Who can read'}>
+          <select value={form.read_visibility} onChange={(e) => handleChange('read_visibility', e.target.value)} className={panelStyles.input}>
+            <option value="public">{isHt ? 'Tout moun — paj piblik' : 'Everyone — public page'}</option>
+            <option value="members">{isHt ? 'Manm sèlman — kontni prive' : 'Members only — private content'}</option>
+          </select>
+        </PropField>
+        {form.read_visibility === 'members' && (
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: '4px 0 0' }}>
+            {isHt
+              ? 'Deskripsyon, règ, pòs, kòmantè, evènman, fichye ak lis manm yo ap fèmen pou moun ki pa manm. Yo ka wè non an epi mande antre.'
+              : 'Description, rules, posts, comments, events, files, and the member list are hidden from non-members. They still see the name and can request access.'}
+          </p>
+        )}
         {form.join_mode === 'invite' && (
           <div style={{ marginTop: 8, display: 'grid', gap: 8 }}>
             <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: 0 }}>
@@ -645,10 +669,24 @@ export default function CommunityEditor({ onClose, onSuccess, onSaved, lang = 'e
           </div>
         )}
         {(form.rules || []).map((r, i) => (
-          <div key={i} style={{ border: '1px solid var(--border-color, #e5e7eb)', borderRadius: 8, padding: 8, marginBottom: 8 }}>
+          <div key={i} style={{ border: '1px solid var(--border-color, #e5e7eb)', borderRadius: 8, padding: 8, marginBottom: 8, opacity: r.is_active === false ? 0.62 : 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 6 }}>
               <span style={{ fontWeight: 700, fontSize: '0.78rem', minWidth: 20 }}>{i + 1}.</span>
               <span style={{ flex: 1 }} />
+              <button
+                type="button"
+                onClick={() => handleRuleChange(i, 'is_active', r.is_active === false)}
+                aria-pressed={r.is_active !== false}
+                aria-label={r.is_active === false
+                  ? (isHt ? 'Montre règ sa a' : 'Show this rule')
+                  : (isHt ? 'Kache règ sa a' : 'Hide this rule')}
+                title={r.is_active === false
+                  ? (isHt ? 'Kache — klike pou montre' : 'Hidden — click to show')
+                  : (isHt ? 'Aktif — klike pou kache' : 'Active — click to hide')}
+                style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: r.is_active === false ? 'var(--text-tertiary)' : 'var(--color-primary)' }}
+              >
+                <i className={`fas ${r.is_active === false ? 'fa-eye-slash' : 'fa-eye'}`} aria-hidden="true" />
+              </button>
               <button type="button" onClick={() => moveRule(i, -1)} disabled={i === 0} aria-label={isHt ? 'Monte' : 'Move up'}
                 style={{ border: 'none', background: 'transparent', cursor: 'pointer', opacity: i === 0 ? 0.3 : 1 }}>
                 <i className="fas fa-chevron-up" aria-hidden="true" />

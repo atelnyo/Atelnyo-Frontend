@@ -3,12 +3,11 @@
  *
  * Unit tests for the shared video-source resolver — the single source
  * of truth for card hover previews AND detail-sheet embeds. Covers the
- * platform matrix (YouTube/Vimeo/Facebook/TikTok/file) plus the edge
- * cases the production code guards against (short links, non-video
- * pages, malformed URLs).
+ * supported providers, direct files, timestamps, privacy parameters and
+ * unsafe/malformed URLs.
  */
 import { describe, it, expect } from 'vitest';
-import { resolveVideoSource, hoverEmbedSrc } from '../videoSource';
+import { resolveVideoSource, hoverEmbedSrc, youtubeVideoId, youtubeThumbnail } from '../videoSource';
 
 describe('resolveVideoSource', () => {
   it('returns null for empty / non-string input', () => {
@@ -23,7 +22,7 @@ describe('resolveVideoSource', () => {
     expect(r).toEqual({
       kind: 'embed',
       provider: 'youtube',
-      src: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      src: 'https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0&playsinline=1',
     });
   });
 
@@ -33,27 +32,47 @@ describe('resolveVideoSource', () => {
     expect(r?.src).toContain('dQw4w9WgXcQ');
   });
 
-  it('resolves YouTube Shorts', () => {
-    const r = resolveVideoSource('https://www.youtube.com/shorts/dQw4w9WgXcQ');
-    expect(r?.provider).toBe('youtube');
-    expect(r?.src).toBe('https://www.youtube.com/embed/dQw4w9WgXcQ');
+  it('resolves YouTube Shorts, live, music and nocookie URLs', () => {
+    for (const url of [
+      'https://www.youtube.com/shorts/dQw4w9WgXcQ',
+      'https://www.youtube.com/live/dQw4w9WgXcQ',
+      'https://music.youtube.com/watch?v=dQw4w9WgXcQ',
+      'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ',
+    ]) {
+      expect(resolveVideoSource(url)?.provider).toBe('youtube');
+    }
+  });
+
+  it('preserves a YouTube start timestamp', () => {
+    const r = resolveVideoSource('https://youtu.be/dQw4w9WgXcQ?t=1m30s');
+    expect(r?.src).toContain('start=90');
   });
 
   it('rejects a YouTube page with no video id', () => {
     expect(resolveVideoSource('https://www.youtube.com/')).toBeNull();
   });
 
+  it('rejects lookalike YouTube hosts', () => {
+    expect(resolveVideoSource('https://youtube.com.evil.example/watch?v=dQw4w9WgXcQ')).toBeNull();
+  });
+
   it('resolves Vimeo numeric ids (last numeric segment)', () => {
     const r = resolveVideoSource('https://vimeo.com/123456789');
     expect(r?.provider).toBe('vimeo');
-    expect(r?.src).toBe('https://player.vimeo.com/video/123456789');
+    expect(r?.src).toBe('https://player.vimeo.com/video/123456789?dnt=1');
   });
 
   it('resolves Vimeo player/embed URLs (player.vimeo.com/video/ID)', () => {
     const r = resolveVideoSource('https://player.vimeo.com/video/148751763');
     expect(r?.kind).toBe('embed');
     expect(r?.provider).toBe('vimeo');
-    expect(r?.src).toBe('https://player.vimeo.com/video/148751763');
+    expect(r?.src).toBe('https://player.vimeo.com/video/148751763?dnt=1');
+  });
+
+  it('preserves a Vimeo unlisted hash and timestamp', () => {
+    const r = resolveVideoSource('https://vimeo.com/76979871/abc123def?t=45s');
+    expect(r?.src).toContain('h=abc123def');
+    expect(r?.src).toContain('#t=45s');
   });
 
   it('resolves Facebook watch URLs via the plugin', () => {
@@ -79,15 +98,24 @@ describe('resolveVideoSource', () => {
     expect(resolveVideoSource('https://vt.tiktok.com/ZSXdRcxyz/')).toBeNull();
   });
 
-  it('treats direct media files as file kind', () => {
+  it('treats direct video files as file kind', () => {
     const r = resolveVideoSource('https://cdn.example.com/video.mp4');
     expect(r?.kind).toBe('file');
     expect(r?.src).toBe('https://cdn.example.com/video.mp4');
   });
 
-  it('falls back to file kind for unknown hosts', () => {
-    const r = resolveVideoSource('https://example.com/whatever');
-    expect(r?.kind).toBe('file');
+  it('rejects arbitrary web pages instead of mounting a broken player', () => {
+    expect(resolveVideoSource('https://example.com/whatever')).toBeNull();
+    expect(resolveVideoSource('javascript:alert(1)')).toBeNull();
+  });
+});
+
+describe('YouTube helpers', () => {
+  it('extracts ids and builds the thumbnail URL', () => {
+    expect(youtubeVideoId('https://youtu.be/dQw4w9WgXcQ')).toBe('dQw4w9WgXcQ');
+    expect(youtubeThumbnail('https://youtu.be/dQw4w9WgXcQ'))
+      .toBe('https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg');
+    expect(youtubeVideoId('https://youtu.be/<script>')).toBe('');
   });
 });
 
@@ -97,7 +125,6 @@ describe('hoverEmbedSrc', () => {
     const hover = hoverEmbedSrc(src);
     expect(hover).toContain('autoplay=1');
     expect(hover).toContain('mute=1');
-    expect(hover).toContain('playsinline=1');
   });
 
   it('appends muted-autoplay params for Vimeo', () => {
