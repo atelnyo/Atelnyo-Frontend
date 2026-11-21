@@ -16,6 +16,16 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { creatorProfileService, creatorProfileHealthService, courseService, marketplaceService, portfolioService } from '../../../services/api';
 import { StudioSkeleton, SectionHeader, classNames } from '../shared';
+import DraftRecoveryBanner from '../shared/DraftRecoveryBanner';
+import { removeFormDraft, restoreFormDraft, saveFormDraft } from '../../../services/appStateStore';
+import {
+  PROFILE_TEMPLATES,
+  applyProfileTemplate,
+  detectProfileTemplate,
+  mergeSectionConfig,
+  templateDescription,
+  templateName,
+} from '../../profile/profileTemplates';
 import { getUserIdentity } from '../../../utils/userIdentity';
 import styles from './sections.module.css';
 
@@ -37,35 +47,27 @@ const DEFAULT_SECTION_CONFIG = {
   ),
 };
 
-function mergeSavedConfig(saved) {
-  const source = saved && typeof saved === 'object' ? saved : {};
-  const savedOrder = Array.isArray(source.section_order)
-    ? [...new Set(source.section_order.filter(
-      id => ALL_SECTIONS.some(section => section.id === id),
-    ))]
-    : [];
-  const sectionOrder = [
-    ...savedOrder,
-    ...DEFAULT_SECTION_CONFIG.section_order.filter(id => !savedOrder.includes(id)),
-  ];
-  const savedVisibility = source.section_visibility && typeof source.section_visibility === 'object'
-    ? source.section_visibility
-    : {};
-  return {
-    section_order: sectionOrder,
-    section_visibility: {
-      ...DEFAULT_SECTION_CONFIG.section_visibility,
-      ...savedVisibility,
-    },
-  };
+// Canonical monthly price string ("" = subscriptions off). Used both for the
+// payload and for the dirty check, so typing "5" then "5.00" is NOT dirty.
+function normalizeSubscriptionPrice(value) {
+  const parsed = Number.parseFloat(value);
+  if (!String(value || '').trim() || Number.isNaN(parsed) || parsed <= 0) {
+    return '';
+  }
+  return String(Math.round(parsed * 100) / 100);
 }
+
 export default function ProfileSettingsSection({ lang, showToast, user }) {
   const isHt = lang === 'ht';
   const identity = getUserIdentity(user);
+  const draftKey = identity.creatorLookupKey
+    ? `creator-profile-settings:${identity.creatorLookupKey}`
+    : null;
 
   // ─── State ─────────────────────────────────────────────────────
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [reorderAnnouncement, setReorderAnnouncement] = useState('');
   const [sectionOrder, setSectionOrder] = useState(DEFAULT_SECTION_CONFIG.section_order);
   const [sectionVisibility, setSectionVisibility] = useState(DEFAULT_SECTION_CONFIG.section_visibility);
   const [savedConfig, setSavedConfig] = useState(null);
@@ -79,6 +81,14 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
 
   // Phase 60 — paid subscriptions: monthly price (USD). '' = disabled.
   const [subscriptionPrice, setSubscriptionPrice] = useState('');
+  const [savedSubscriptionPrice, setSavedSubscriptionPrice] = useState('');
+
+  // Crash/refresh recovery for layout + price changes.
+  const [profileId, setProfileId] = useState(null);
+  const [recoverDraft, setRecoverDraft] = useState(null);
+  const [draftCheckDone, setDraftCheckDone] = useState(false);
+  const draftCheckedFor = useRef(undefined);
+  const draftSaveWarned = useRef(false);
 
   // ─── Fetch data ───────────────────────────────────────────────
   const fetchData = useCallback(async () => {
@@ -92,11 +102,12 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
 
       const profile = profileRes.status === 'fulfilled' ? profileRes.value.data : null;
       const health = healthRes.status === 'fulfilled' ? healthRes.value.data : null;
+      setProfileId(profile?.id || null);
 
       // Load section config — merged so sections added after the creator
       // first saved (e.g. tiktok) still appear; the merged baseline is what
       // hasChanges compares against, so no phantom "unsaved changes".
-      const merged = mergeSavedConfig(profile?.section_config || null);
+      const merged = mergeSectionConfig(profile?.section_config || null);
       setSectionOrder(merged.section_order);
       setSectionVisibility(merged.section_visibility);
       setSavedConfig(merged);
@@ -107,7 +118,9 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
 
       // Phase 60 — subscription price ('' when disabled)
       const price = profile?.subscription_price;
-      setSubscriptionPrice(price && Number(price) > 0 ? String(price) : '');
+      const priceText = price && Number(price) > 0 ? String(price) : '';
+      setSubscriptionPrice(priceText);
+      setSavedSubscriptionPrice(normalizeSubscriptionPrice(priceText));
 
       // Fetch available content for featured pickers
       const [coursesRes, productsRes, portsRes] = await Promise.allSettled([
@@ -135,16 +148,58 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
     return () => { cancelled = true; };
   }, [fetchData]);
 
+  // Restore a local draft once the saved baseline is known. The prompt stays
+  // until the creator chooses; autosave is paused until this check finishes.
+  useEffect(() => {
+    const draftScope = profileId ?? 'default';
+    if (!draftKey || !savedConfig || draftCheckedFor.current === draftScope) {
+      return undefined;
+    }
+    draftCheckedFor.current = draftScope;
+    let cancelled = false;
+    restoreFormDraft(draftKey)
+      .then((draft) => {
+        if (cancelled || !draft) { return; }
+        if (draft.profileId && profileId && draft.profileId !== profileId) {
+          removeFormDraft(draftKey).catch(() => {});
+          return;
+        }
+        const config = mergeSectionConfig({
+          section_order: Array.isArray(draft.sectionOrder) ? draft.sectionOrder : undefined,
+          section_visibility: draft.sectionVisibility && typeof draft.sectionVisibility === 'object'
+            ? draft.sectionVisibility
+            : {},
+        });
+        const price = normalizeSubscriptionPrice(draft.subscriptionPrice);
+        const sameLayout = JSON.stringify(config) === JSON.stringify(savedConfig);
+        const samePrice = price === savedSubscriptionPrice;
+        if (sameLayout && samePrice) {
+          removeFormDraft(draftKey).catch(() => {});
+          return;
+        }
+        setRecoverDraft({ ...draft, config, price });
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) { setDraftCheckDone(true); } });
+    return () => { cancelled = true; };
+  }, [draftKey, profileId, savedConfig, savedSubscriptionPrice]);
+
   // ─── Section order: move up/down (keyboard / touch fallback) ─────
   const moveSection = useCallback((index, direction) => {
+    const target = index + direction;
+    if (target < 0 || target >= sectionOrder.length) { return; }
+    const section = ALL_SECTIONS.find((item) => item.id === sectionOrder[index]);
     setSectionOrder(prev => {
       const arr = [...prev];
-      const target = index + direction;
-      if (target < 0 || target >= arr.length) {return prev;}
       [arr[index], arr[target]] = [arr[target], arr[index]];
       return arr;
     });
-  }, []);
+    if (section) {
+      setReorderAnnouncement(isHt
+        ? `${section.labelHt} deplase nan pozisyon ${target + 1} sou ${sectionOrder.length}.`
+        : `${section.label} moved to position ${target + 1} of ${sectionOrder.length}.`);
+    }
+  }, [sectionOrder, isHt]);
 
   // ─── Drag & drop reorder (pointer events — works with mouse AND touch) ─
   // Native HTML5 drag-and-drop does not fire on touch devices, and the
@@ -247,41 +302,179 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
   };
 
   // ─── Save all settings ─────────────────────────────────────────
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
+    if (saving) { return; }
+    if (recoverDraft) {
+      showToast?.(
+        isHt
+          ? 'Chwazi Retabli oswa Efase bouyon an anvan w sove.'
+          : 'Recover or discard the local draft before saving.',
+        'exclamation-triangle',
+      );
+      return;
+    }
     setSaving(true);
+    let configSaved = false;
     try {
       const config = {
         section_order: sectionOrder,
         section_visibility: sectionVisibility,
       };
       await creatorProfileService.updateSectionConfig(config);
+      configSaved = true;
+      // The section config is already persisted at this point — reflect that
+      // even if the subscription-price call below fails.
+      setSavedConfig(config);
       // Phase 60 — subscription price saves through the profile PATCH
       // endpoint (the same one that persists artist_name / bio / …).
-      const priceNum = Number.parseFloat(subscriptionPrice);
-      const pricePayload = (!subscriptionPrice.trim() || Number.isNaN(priceNum) || priceNum <= 0)
-        ? null
-        : String(Math.round(priceNum * 100) / 100);
+      const normalizedPrice = normalizeSubscriptionPrice(subscriptionPrice);
+      const pricePayload = normalizedPrice || null;
       await creatorProfileService.updateMe({ subscription_price: pricePayload });
-      setSavedConfig(config);
+      setSavedSubscriptionPrice(normalizedPrice);
+      if (draftKey) { removeFormDraft(draftKey).catch(() => {}); }
       showToast?.(
         isHt ? 'Anviwònman pwofil sove!' : 'Profile settings saved!',
         'check-circle',
       );
     } catch {
       showToast?.(
-        isHt ? 'Erè nan sove anviwònman yo.' : 'Error saving settings.',
+        configSaved
+          ? (isHt
+            ? 'Layout sove, men pri abònman an pa t kapab mete ajou. Eseye ankò.'
+            : 'Layout saved, but the subscription price could not be updated. Try again.')
+          : (isHt ? 'Erè nan sove anviwònman yo.' : 'Error saving settings.'),
         'exclamation-triangle',
       );
     } finally {
       setSaving(false);
     }
-  };
+  }, [
+    saving,
+    recoverDraft,
+    isHt,
+    showToast,
+    sectionOrder,
+    sectionVisibility,
+    subscriptionPrice,
+    draftKey,
+  ]);
+
+  // Keep the keyboard listener stable while always invoking the latest save.
+  const handleSaveRef = useRef(handleSave);
+  useEffect(() => { handleSaveRef.current = handleSave; }, [handleSave]);
 
   // ─── Has changes? ──────────────────────────────────────────────
   const hasChanges = JSON.stringify(savedConfig) !== JSON.stringify({
     section_order: sectionOrder,
     section_visibility: sectionVisibility,
+  }) || normalizeSubscriptionPrice(subscriptionPrice) !== savedSubscriptionPrice;
+
+  // Comfort shortcut: Ctrl/Cmd+S applies the same guarded save as the button.
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (!(e.metaKey || e.ctrlKey) || String(e.key).toLowerCase() !== 's') { return; }
+      if (document.querySelector('[role="dialog"][aria-modal="true"]')) { return; }
+      e.preventDefault();
+      if (hasChanges && !saving) { handleSaveRef.current(); }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [hasChanges, saving]);
+
+  // Local autosave of layout + price while the section is dirty.
+  useEffect(() => {
+    if (!draftKey || !hasChanges || recoverDraft || !draftCheckDone) { return undefined; }
+    const timer = setTimeout(() => {
+      saveFormDraft(draftKey, {
+        sectionOrder,
+        sectionVisibility,
+        subscriptionPrice,
+        savedAt: Date.now(),
+        profileId,
+      })
+        .then((result) => {
+          if (result?.ok === false && !draftSaveWarned.current) {
+            draftSaveWarned.current = true;
+            showToast?.(
+              isHt
+                ? 'Espas stokaj la plen — bouyon lokal la pa ka sovgade. Sove manyèlman pou pa pèdi travay ou.'
+                : 'Local storage is full — the safety draft cannot be saved. Save manually so you do not lose work.',
+              'exclamation-triangle',
+            );
+          }
+        })
+        .catch(() => {});
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [
+    draftKey,
+    hasChanges,
+    recoverDraft,
+    draftCheckDone,
+    sectionOrder,
+    sectionVisibility,
+    subscriptionPrice,
+    profileId,
+    isHt,
+    showToast,
+  ]);
+
+  // Browser-level guard: reload/close with unsaved section changes asks
+  // first (the in-page banner covers the normal flow).
+  useEffect(() => {
+    if (!hasChanges) { return undefined; }
+    const onBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, [hasChanges]);
+
+  // Which curated preset matches the current draft (null = custom).
+  const templateId = detectProfileTemplate({
+    section_order: sectionOrder,
+    section_visibility: sectionVisibility,
   });
+
+  const handleApplyTemplate = (template) => {
+    // Preserve sections this build doesn't know about (forward compatible).
+    const config = applyProfileTemplate(template, {
+      section_order: sectionOrder,
+      section_visibility: sectionVisibility,
+    });
+    setSectionOrder(config.section_order);
+    setSectionVisibility(config.section_visibility);
+  };
+
+  const handleDiscardChanges = () => {
+    if (draftKey) { removeFormDraft(draftKey).catch(() => {}); }
+    if (!savedConfig) { return; }
+    setSectionOrder(savedConfig.section_order);
+    setSectionVisibility(savedConfig.section_visibility);
+    setSubscriptionPrice(savedSubscriptionPrice);
+  };
+
+  const handleRecoverDraft = () => {
+    if (!recoverDraft) { return; }
+    setSectionOrder(recoverDraft.config.section_order);
+    setSectionVisibility(recoverDraft.config.section_visibility);
+    setSubscriptionPrice(recoverDraft.subscriptionPrice || '');
+    setRecoverDraft(null);
+    showToast?.(
+      isHt ? 'Bouyon retabli — verifye epi sove.' : 'Draft recovered — review and save.',
+      'check-circle',
+    );
+  };
+
+  const handleDiscardDraft = () => {
+    if (draftKey) { removeFormDraft(draftKey).catch(() => {}); }
+    setRecoverDraft(null);
+    showToast?.(
+      isHt ? 'Bouyon efase. Anviwònman yo rete jan yo te sove a.' : 'Draft discarded. Settings are back to the saved version.',
+      'check-circle',
+    );
+  };
 
   if (loading) {return <StudioSkeleton rows={4} />;}
 
@@ -296,8 +489,8 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
           en: 'Control how your public profile renders: section order, visibility toggles, and featured content (courses, products, portfolio). Changes only apply when you click "Save All".',
         }}
         tip={isHt
-          ? 'Trennen seksyon yo pou reòganize — oswa sèvi ak bouton flèch yo sou ekran touche.'
-          : 'Drag sections to reorder — or use the arrow buttons on touch screens.'}
+          ? 'Trennen seksyon yo pou reòganize, oswa sèvi ak bouton flèch yo. Ctrl/⌘+S sove chanjman yo.'
+          : 'Drag sections to reorder, or use the arrow buttons. Ctrl/⌘+S saves your changes.'}
         action={
           <div className={styles.headerActions}>
             <button
@@ -315,6 +508,59 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
         }
       />
 
+      {recoverDraft && (
+        <div className={styles.profileDraftBanner}>
+          <DraftRecoveryBanner
+            lang={lang}
+            timestamp={recoverDraft.savedAt}
+            onRecover={handleRecoverDraft}
+            onDiscard={handleDiscardDraft}
+          />
+        </div>
+      )}
+
+      {/* ─── Layout Templates ──────────────────────────────────── */}
+      <section style={{ marginBottom: 32 }}>
+        <h3 className={styles.sectionSubtitle}>
+          <i className="fas fa-layer-group" aria-hidden="true" />
+          {isHt ? 'Modèl Layout' : 'Layout Templates'}
+        </h3>
+        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', marginBottom: 16 }}>
+          {isHt
+            ? 'Kòmanse ak yon layout ki bati pou objektif ou. Yon modèl chanje sèlman lòd ak vizibilite seksyon yo — kontni ou rete menm jan an.'
+            : 'Start from a layout built for your goal. A template only changes section order and visibility — your content stays exactly the same.'}
+        </p>
+        <div className={styles.profileTemplateStrip}>
+          {PROFILE_TEMPLATES.map((template) => {
+            const active = templateId === template.id;
+            return (
+              <button
+                key={template.id}
+                type="button"
+                aria-pressed={active}
+                className={`${styles.profileTemplateChip}${active ? ` ${styles.profileTemplateChipActive}` : ''}`}
+                onClick={() => handleApplyTemplate(template)}
+              >
+                <span className={styles.profileTemplateChipIcon}>
+                  <i className={`fas ${template.icon}`} aria-hidden="true" />
+                </span>
+                <span className={styles.profileTemplateChipName}>
+                  {templateName(template, lang)}
+                </span>
+                <span className={styles.profileTemplateChipDesc}>
+                  {templateDescription(template, lang)}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', marginTop: 10 }}>
+          {templateId
+            ? (isHt ? 'Modèl aktyèl la aplikè.' : 'The current layout matches a template.')
+            : (isHt ? 'Layout pèsonalize — chwazi yon modèl oswa kontinye manyèlman.' : 'Custom layout — pick a template or keep customizing manually.')}
+        </p>
+      </section>
+
       {/* ─── Section Order ─────────────────────────────────────── */}
       <section style={{ marginBottom: 32 }}>
         <h3 className={styles.sectionSubtitle}>
@@ -326,7 +572,15 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
             ? 'Reòganize lòd seksyon yo sou pwofil piblik ou a — trennen ak grip la, oswa sèvi ak bouton flèch yo. Seksyon yo parèt nan lòd sa a.'
             : 'Reorder how sections appear on your public profile — drag with the grip, or use the arrow buttons.'}
         </p>
-        <div ref={listRef} className={classNames(styles.list, dragIndex != null && styles.listDragging)}>
+        <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+          {reorderAnnouncement}
+        </span>
+        <div
+          ref={listRef}
+          role="list"
+          aria-label={isHt ? 'Lòd seksyon pwofil' : 'Profile section order'}
+          className={classNames(styles.list, dragIndex != null && styles.listDragging)}
+        >
           {sectionOrder.map((sectionId, index) => {
             const section = ALL_SECTIONS.find(s => s.id === sectionId);
             if (!section) {return null;}
@@ -336,6 +590,9 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
                 key={sectionId}
                 data-section-id={sectionId}
                 data-section-row={index}
+                role="listitem"
+                aria-posinset={index + 1}
+                aria-setsize={sectionOrder.length}
                 className={classNames(styles.listItem, dragIndex === index && styles.listItemDragging)}
                 style={{ opacity: isVisible ? 1 : 0.45 }}
               >
@@ -348,8 +605,8 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
                   title={isHt ? 'Trennen pou reòganize' : 'Drag to reorder'}
                   onKeyDown={(e) => {
                     // Keyboard alternative: ArrowUp / ArrowDown moves the row.
-                    if (e.key === 'ArrowUp') {moveSection(index, -1);}
-                    else if (e.key === 'ArrowDown') {moveSection(index, 1);}
+                    if (e.key === 'ArrowUp') { e.preventDefault(); moveSection(index, -1); }
+                    else if (e.key === 'ArrowDown') { e.preventDefault(); moveSection(index, 1); }
                   }}
                 >
                   <i className="fas fa-grip-vertical" aria-hidden="true" />
@@ -375,9 +632,10 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
                     onClick={() => moveSection(index, -1)}
                     disabled={index === 0}
                     title={isHt ? 'Moute' : 'Move up'}
+                    aria-label={isHt ? `Monte ${section.labelHt}` : `Move ${section.label} up`}
                     style={{ padding: '4px 8px', fontSize: '0.75rem' }}
                   >
-                    <i className="fas fa-chevron-up" />
+                    <i className="fas fa-chevron-up" aria-hidden="true" />
                   </button>
                   <button
                     type="button"
@@ -385,9 +643,10 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
                     onClick={() => moveSection(index, 1)}
                     disabled={index === sectionOrder.length - 1}
                     title={isHt ? 'Desann' : 'Move down'}
+                    aria-label={isHt ? `Desann ${section.labelHt}` : `Move ${section.label} down`}
                     style={{ padding: '4px 8px', fontSize: '0.75rem' }}
                   >
-                    <i className="fas fa-chevron-down" />
+                    <i className="fas fa-chevron-down" aria-hidden="true" />
                   </button>
                 </div>
               </div>
@@ -437,6 +696,9 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
                   type="checkbox"
                   checked={isVisible}
                   onChange={() => toggleVisibility(section.id)}
+                  aria-label={isHt
+                    ? `${isVisible ? 'Kache' : 'Montre'} ${section.labelHt}`
+                    : `${isVisible ? 'Hide' : 'Show'} ${section.label}`}
                 />
                 <span className="affiliateSwitchSlider" />
               </label>
@@ -547,22 +809,23 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
 
       {/* ─── Unsaved changes indicator ──────────────────────────── */}
       {hasChanges && (
-        <div
-          style={{
-            padding: '8px 16px',
-            borderRadius: 8,
-            background: 'rgba(245, 158, 11, 0.1)',
-            color: '#d97706',
-            fontSize: '0.8rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-          }}
-        >
-          <i className="fas fa-exclamation-circle" />
-          {isHt
-            ? 'Gen chanjman ki poko sove. Klike sou "Sove tout" pou aplike yo.'
-            : 'You have unsaved changes. Click "Save All" to apply them.'}
+        <div className={styles.profileEditorDirtyBar} role="status">
+          <span className={styles.profileEditorDirtyText}>
+            <i className="fas fa-circle-exclamation" aria-hidden="true" />{' '}
+            {isHt
+              ? 'Gen chanjman ki poko sove. Klike sou "Sove tout" pou aplike yo.'
+              : 'You have unsaved changes. Click "Save All" to apply them.'}
+          </span>
+          <div className={styles.profileEditorDirtyActions}>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={handleDiscardChanges}
+              disabled={saving}
+            >
+              {isHt ? 'Jete chanjman' : 'Discard'}
+            </button>
+          </div>
         </div>
       )}
     </div>

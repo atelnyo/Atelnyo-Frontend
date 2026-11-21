@@ -12,7 +12,24 @@ import React, { useEffect, useState, useCallback, useRef, lazy, Suspense } from 
 import useSafeNavigate from '../../../hooks/useSafeNavigate';
 import { creatorProfileService } from '../../../services/api';
 import { StudioSkeleton, EmptyState, SectionHeader } from '../shared';
+import DraftRecoveryBanner from '../shared/DraftRecoveryBanner';
 import LocationPicker from '../../shared/LocationPicker';
+import ProfileTemplateModal from '../modals/ProfileTemplateModal';
+import { StudioModal } from '../modals/shared';
+import ProfileCompletenessCard from './ProfileCompletenessCard';
+import { removeFormDraft, restoreFormDraft, saveFormDraft } from '../../../services/appStateStore';
+import { getProfileCompleteness } from '../../profile/profileCompleteness';
+import { parseProfileSaveError } from '../../profile/profileSaveError';
+import { SEO_RECOMMENDED, buildSeoPreview } from '../../profile/seoPreview';
+import { RAIL_ITEMS } from '../../profile/profileConstants';
+import {
+  PROFILE_TEMPLATES,
+  applyProfileTemplate,
+  detectProfileTemplate,
+  mergeSectionConfig,
+  templateDescription,
+  templateName,
+} from '../../profile/profileTemplates';
 import { getUserIdentity } from '../../../utils/userIdentity';
 import styles from './sections.module.css';
 
@@ -30,33 +47,106 @@ export default function PublicProfileSection({ lang, showToast, user }) {
   const isHt = lang === 'ht';
   const identity = getUserIdentity(user);
   const navigate = useSafeNavigate();
+  // Drafts are per creator — one creator must never restore another
+  // account's local work on a shared device.
+  const draftKey = identity.creatorLookupKey
+    ? `creator-public-profile:${identity.creatorLookupKey}`
+    : null;
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState({});
+  // Snapshot of the form as last loaded/saved — powers the unsaved-changes
+  // guard (banner + beforeunload). Null until the profile loads.
+  const [baselineForm, setBaselineForm] = useState(null);
   const [fetchError, setFetchError] = useState(null);
+  // Actionable save failure — field errors rendered with jumps to their tab.
+  const [saveError, setSaveError] = useState(null);
   // Upload states
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const avatarInputRef = useRef(null);
   const coverInputRef = useRef(null);
+  const previewDialogRef = useRef(null);
+  const previewCloseRef = useRef(null);
+  // Crash recovery: only check once per loaded profile, not after every save.
+  const draftCheckedFor = useRef(null);
+  const draftSaveWarned = useRef(false);
+  const [recoverDraft, setRecoverDraft] = useState(null);
+  // Autosave must wait until the recovery check finishes, otherwise typing
+  // immediately after mount could overwrite the very draft we want to offer.
+  const [draftCheckDone, setDraftCheckDone] = useState(false);
 
   // Preview modal — renders the REAL public profile page from the current
   // form draft (snapshot at click time) so the creator can see exactly how
   // the page will look before saving.
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewProfile, setPreviewProfile] = useState(null);
+  // Full template picker modal (Layout tab) — drafts only; saved with Save.
+  const [templateModalOpen, setTemplateModalOpen] = useState(false);
+  // Accessible in-app confirmation instead of window.confirm when leaving
+  // with unpublished edits.
+  const [leaveConfirmOpen, setLeaveConfirmOpen] = useState(false);
+  // Preview device framing: desktop by default, phone width for a realistic
+  // mobile check without opening devtools.
+  const [previewViewport, setPreviewViewport] = useState('desktop');
+  // Live preview starts collapsed on narrow screens: the form is the task
+  // there, and keeping the real page unmounted saves work + scroll. Desktop
+  // starts expanded like a classic two-pane editor.
+  const [previewCollapsed, setPreviewCollapsed] = useState(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') { return false; }
+    return window.matchMedia('(max-width: 1200px)').matches;
+  });
 
-  // Escape closes the preview + body scroll lock while it's open.
+  // Full-screen preview is a REAL modal: focus starts on Close, Tab cycles
+  // inside it, Escape closes it, background scroll locks, and focus returns
+  // to the control that opened it.
   useEffect(() => {
     if (!previewOpen) return undefined;
-    const onKey = (e) => { if (e.key === 'Escape') setPreviewOpen(false); };
-    window.addEventListener('keydown', onKey);
+    const previousFocus = document.activeElement;
+    const node = previewDialogRef.current;
+    const getFocusable = () => (node
+      ? Array.from(node.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ))
+      : []);
+    previewCloseRef.current?.focus();
+
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        setPreviewOpen(false);
+        return;
+      }
+      if (e.key !== 'Tab') { return; }
+      const items = getFocusable();
+      if (items.length === 0) {
+        e.preventDefault();
+        return;
+      }
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      } else if (node && !node.contains(document.activeElement)) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
     return () => {
-      window.removeEventListener('keydown', onKey);
+      document.removeEventListener('keydown', onKey);
       document.body.style.overflow = '';
+      if (previousFocus instanceof HTMLElement && document.contains(previousFocus)) {
+        try { previousFocus.focus(); } catch { /* opener left the DOM */ }
+      }
     };
   }, [previewOpen]);
 
@@ -99,6 +189,16 @@ export default function PublicProfileSection({ lang, showToast, user }) {
       seo_keywords: form.seo_keywords
         ? form.seo_keywords.split(',').map((s) => s.trim()).filter(Boolean)
         : (profile.seo_keywords || []),
+      // Layout drafts render live too: the real page reads section_config
+      // for its tab bar and sidebar visibility.
+      section_config: mergeSectionConfig(
+        Array.isArray(form.section_order)
+          ? {
+            section_order: form.section_order,
+            section_visibility: form.section_visibility,
+          }
+          : profile.section_config,
+      ),
     };
   }, [profile, form]);
 
@@ -134,8 +234,34 @@ export default function PublicProfileSection({ lang, showToast, user }) {
   ];
   const tabLabel = (t) => (isHt ? t.ht : t.en);
 
+  // Keyboard contract for the editor tab bar: ArrowLeft/ArrowRight cycle,
+  // Home/End jump to the edges — the same pattern as the public profile.
+  const handleEditorTabKeyDown = (e, index) => {
+    const keys = ['ArrowRight', 'ArrowLeft', 'Home', 'End'];
+    if (!keys.includes(e.key)) { return; }
+    e.preventDefault();
+    let nextIndex = index;
+    if (e.key === 'ArrowRight') { nextIndex = (index + 1) % EDITOR_TABS.length; }
+    else if (e.key === 'ArrowLeft') { nextIndex = (index - 1 + EDITOR_TABS.length) % EDITOR_TABS.length; }
+    else if (e.key === 'Home') { nextIndex = 0; }
+    else { nextIndex = EDITOR_TABS.length - 1; }
+    const nextTab = EDITOR_TABS[nextIndex];
+    setEditorTab(nextTab.id);
+    const focusTab = () => document.getElementById(`profile-editor-tab-${nextTab.id}`)?.focus();
+    if (typeof requestAnimationFrame === 'function') { requestAnimationFrame(focusTab); }
+    else { focusTab(); }
+  };
+
+  // Comfort: keep the active tab visible inside the horizontally scrolling
+  // mobile tab row after a click or keyboard jump.
+  useEffect(() => {
+    document.getElementById(`profile-editor-tab-${editorTab}`)
+      ?.scrollIntoView?.({ block: 'nearest', inline: 'center' });
+  }, [editorTab]);
+
   const populateForm = useCallback((data) => {
-    setForm({
+    const sectionConfig = mergeSectionConfig(data?.section_config || null);
+    const nextForm = {
       artist_name: data?.artist_name || '',
       bio: data?.bio || '',
       cover_url: data?.cover_url || '',
@@ -172,7 +298,13 @@ export default function PublicProfileSection({ lang, showToast, user }) {
       seo_keywords: Array.isArray(data?.seo_keywords)
         ? data.seo_keywords.join(', ')
         : '',
-    });
+      // Layout state (order + visibility) lives in the same draft so the
+      // Save button publishes profile fields and layout together.
+      section_order: sectionConfig.section_order,
+      section_visibility: sectionConfig.section_visibility,
+    };
+    setForm(nextForm);
+    setBaselineForm(nextForm);
   }, []);
 
   // Repeatable-row helpers (mirror CompanySection): edit/add/remove an
@@ -183,6 +315,44 @@ export default function PublicProfileSection({ lang, showToast, user }) {
     setForm((prev) => ({ ...prev, [key]: [...(Array.isArray(prev[key]) ? prev[key] : []), { ...empty }] }));
   const removeRow = (key, idx) =>
     setForm((prev) => ({ ...prev, [key]: prev[key].filter((_, i) => i !== idx) }));
+
+  // ─── Layout draft helpers (templates + order + visibility) ────────
+  const applyTemplate = useCallback((config, template) => {
+    setForm((prev) => ({
+      ...prev,
+      section_order: [...config.section_order],
+      section_visibility: { ...config.section_visibility },
+    }));
+    showToast?.(
+      isHt
+        ? `Modèl « ${templateName(template, 'ht')} » aplike — sove pou pibliye l.`
+        : `“${templateName(template, 'en')}” template applied — save to publish it.`,
+      'check-circle',
+    );
+  }, [isHt, showToast]);
+
+  const moveLayoutSection = useCallback((index, direction) => {
+    setForm((prev) => {
+      const arr = [...(prev.section_order || [])];
+      const target = index + direction;
+      if (target < 0 || target >= arr.length) return prev;
+      [arr[index], arr[target]] = [arr[target], arr[index]];
+      return { ...prev, section_order: arr };
+    });
+  }, []);
+
+  const toggleLayoutSection = useCallback((sectionId) => {
+    setForm((prev) => {
+      const visibility = prev.section_visibility || {};
+      return {
+        ...prev,
+        section_visibility: {
+          ...visibility,
+          [sectionId]: visibility[sectionId] === false,
+        },
+      };
+    });
+  }, []);
 
   useEffect(() => {
     if (!identity.creatorLookupKey) {return undefined;}
@@ -204,6 +374,33 @@ export default function PublicProfileSection({ lang, showToast, user }) {
     });
     return () => { cancelled = true; };
   }, [identity.creatorLookupKey, populateForm]);
+
+  // Crash/refresh recovery: once the server form is loaded, look for local
+  // work that never reached the backend. The prompt stays until the creator
+  // chooses Retabli or Efase — no timer hides a decision they still owe.
+  useEffect(() => {
+    if (!draftKey || !profile?.id || !baselineForm || draftCheckedFor.current === profile.id) {
+      return undefined;
+    }
+    draftCheckedFor.current = profile.id;
+    let cancelled = false;
+    restoreFormDraft(draftKey)
+      .then((draft) => {
+        if (cancelled || !draft || !draft.form) { return; }
+        if (draft.profileId && draft.profileId !== profile.id) {
+          removeFormDraft(draftKey).catch(() => {});
+          return;
+        }
+        if (JSON.stringify(draft.form) === JSON.stringify(baselineForm)) {
+          removeFormDraft(draftKey).catch(() => {});
+          return;
+        }
+        setRecoverDraft(draft);
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) { setDraftCheckDone(true); } });
+    return () => { cancelled = true; };
+  }, [draftKey, profile?.id, baselineForm]);
 
   // ─── File upload handlers ──────────────────────────────────────────
 
@@ -317,10 +514,33 @@ export default function PublicProfileSection({ lang, showToast, user }) {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSave = () => {
+  const handleSave = useCallback(async () => {
+    if (saving) { return; }
+    if (recoverDraft) {
+      showToast?.(
+        isHt
+          ? 'Chwazi Retabli oswa Efase bouyon an anvan w sove.'
+          : 'Recover or discard the local draft before saving.',
+        'exclamation-triangle',
+      );
+      return;
+    }
+    setSaveError(null);
     setSaving(true);
+    // Layout is saved through its own settings endpoint; profile fields
+    // through updateMe. Strip the layout keys from the profile payload so
+    // the profile serializer never sees them.
+    const draft = { ...form };
+    delete draft.section_order;
+    delete draft.section_visibility;
+    const layout = mergeSectionConfig({
+      section_order: form.section_order,
+      section_visibility: form.section_visibility,
+    });
+    const savedLayout = mergeSectionConfig(profile?.section_config || null);
+    const layoutChanged = JSON.stringify(layout) !== JSON.stringify(savedLayout);
     const payload = {
-      ...form,
+      ...draft,
       languages: form.languages
         ? form.languages.split(',').map((s) => s.trim()).filter(Boolean)
         : [],
@@ -343,22 +563,174 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         ? form.seo_keywords.split(',').map((s) => s.trim()).filter(Boolean)
         : [],
     };
-    creatorProfileService.updateMe(payload)
-      .then((res) => {
-        setProfile(res?.data || profile);
-        showToast?.(
-          isHt ? 'Pwofil aktyalize!' : 'Profile updated!',
-          'check-circle'
-        );
+    let layoutFailed = false;
+    try {
+      const res = await creatorProfileService.updateMe(payload);
+      let nextProfile = res?.data || profile;
+      if (layoutChanged) {
+        try {
+          await creatorProfileService.updateSectionConfig(layout);
+          nextProfile = { ...nextProfile, section_config: layout };
+        } catch {
+          layoutFailed = true;
+          setSaveError({
+            message: isHt
+              ? 'Pwofil la sove, men layout la pa t kapab mete ajou. Lòd ak vizibilite seksyon yo poko pibliye.'
+              : 'The profile was saved, but the layout could not be updated. Section order and visibility are not published yet.',
+            fields: [{
+              field: 'section_config',
+              label: 'Layout',
+              message: isHt ? 'Ouvri Layout epi sove ankò.' : 'Open Layout and save again.',
+              tab: 'layout',
+            }],
+          });
+        }
+      }
+      setProfile(nextProfile);
+      // Only a fully persisted save clears the dirty state. A failed layout
+      // write keeps the banner so the creator can retry that half.
+      if (!layoutFailed) {
+        setBaselineForm(form);
+        // The saved profile is now the source of truth; keep the local
+        // safety copy only when the layout half failed and still needs retry.
+        if (draftKey) { removeFormDraft(draftKey).catch(() => {}); }
+      }
+      showToast?.(
+        layoutFailed
+          ? (isHt
+            ? 'Pwofil sove, men layout la pa t kapab mete ajou. Eseye ankò.'
+            : 'Profile saved, but the layout could not be updated. Try again.')
+          : (isHt ? 'Pwofil aktyalize!' : 'Profile updated!'),
+        layoutFailed ? 'exclamation-triangle' : 'check-circle',
+      );
+    } catch (err) {
+      const parsed = parseProfileSaveError(err, lang);
+      setSaveError(parsed);
+      showToast?.(parsed.message, 'exclamation-triangle');
+    } finally {
+      setSaving(false);
+    }
+  }, [form, profile, saving, isHt, lang, showToast, recoverDraft, draftKey]);
+
+  // Comfort shortcut: Ctrl/Cmd+S saves without hunting for the button, and
+  // never triggers the browser's "save page" dialog while this editor is up.
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (!(e.metaKey || e.ctrlKey) || String(e.key).toLowerCase() !== 's') { return; }
+      // Never save the page behind an open modal/preview dialog.
+      if (document.querySelector('[role="dialog"][aria-modal="true"]')) { return; }
+      e.preventDefault();
+      handleSave();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [handleSave]);
+
+  // Which preset matches the current draft? null = customized layout.
+  const currentTemplateId = detectProfileTemplate({
+    section_order: form.section_order,
+    section_visibility: form.section_visibility,
+  });
+  const isDirty = Boolean(baselineForm)
+    && JSON.stringify(form) !== JSON.stringify(baselineForm);
+
+  const completeness = getProfileCompleteness(profile);
+  const seoPreview = buildSeoPreview({
+    title: form.seo_title,
+    description: form.seo_description,
+    artistName: form.artist_name || identity.displayName,
+    username: identity.creatorLookupKey,
+    bio: form.bio,
+  }, lang);
+  const jumpToCompletenessTab = useCallback((tabId) => {
+    setEditorTab(tabId);
+    const focusTab = () => document.getElementById(`profile-editor-tab-${tabId}`)?.focus();
+    if (typeof requestAnimationFrame === 'function') { requestAnimationFrame(focusTab); }
+    else { focusTab(); }
+  }, []);
+
+  // Autosave the draft locally while it differs from the saved profile.
+  // Paused while a recovery prompt is open so the current server form never
+  // overwrites the very draft the creator is being asked about.
+  useEffect(() => {
+    if (!draftKey || !isDirty || recoverDraft || !draftCheckDone) { return undefined; }
+    const timer = setTimeout(() => {
+      saveFormDraft(draftKey, {
+        form,
+        savedAt: Date.now(),
+        profileId: profile?.id || null,
       })
-      .catch(() => {
-        showToast?.(
-          isHt ? 'Erè nan sove.' : 'Error saving.',
-          'exclamation-triangle'
-        );
-      })
-      .finally(() => setSaving(false));
-  };
+        .then((result) => {
+          // Storage quota failure is a real state — warn once instead of
+          // pretending the safety copy exists.
+          if (result?.ok === false && !draftSaveWarned.current) {
+            draftSaveWarned.current = true;
+            showToast?.(
+              isHt
+                ? 'Espas stokaj la plen — bouyon lokal la pa ka sovgade. Sove manyèlman pou pa pèdi travay ou.'
+                : 'Local storage is full — the safety draft cannot be saved. Save manually so you do not lose work.',
+              'exclamation-triangle',
+            );
+          }
+        })
+        .catch(() => {});
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [draftKey, isDirty, recoverDraft, draftCheckDone, form, profile?.id, isHt, showToast]);
+
+  // Browser-level safety net: a reload/tab-close with unpublished edits
+  // must ask first. In-app navigation is guarded by the visible banner.
+  useEffect(() => {
+    if (!isDirty) { return undefined; }
+    const onBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, [isDirty]);
+
+  const handleDiscard = useCallback(() => {
+    setSaveError(null);
+    if (draftKey) { removeFormDraft(draftKey).catch(() => {}); }
+    if (profile) { populateForm(profile); }
+  }, [draftKey, profile, populateForm]);
+
+  const handleRecoverDraft = useCallback(() => {
+    if (!recoverDraft?.form) { return; }
+    setSaveError(null);
+    // Merge onto the server form so keys added in newer app versions stay.
+    setForm((prev) => ({ ...prev, ...recoverDraft.form }));
+    setRecoverDraft(null);
+    showToast?.(
+      isHt ? 'Bouyon retabli — verifye epi sove.' : 'Draft recovered — review and save.',
+      'check-circle',
+    );
+  }, [recoverDraft, isHt, showToast]);
+
+  const handleDiscardDraft = useCallback(() => {
+    if (draftKey) { removeFormDraft(draftKey).catch(() => {}); }
+    setRecoverDraft(null);
+    showToast?.(
+      isHt ? 'Bouyon efase. Fòm nan rete jan li te sove a.' : 'Draft discarded. The form is back to the saved version.',
+      'check-circle',
+    );
+  }, [draftKey, isHt, showToast]);
+
+  // The only in-app navigation out of this editor still asks before losing
+  // unpublished work; "View live" opens a new tab and never loses it.
+  const handleGoToSettings = useCallback(() => {
+    if (isDirty) {
+      setLeaveConfirmOpen(true);
+      return;
+    }
+    navigate('/sheet/studio?section=profile_settings');
+  }, [isDirty, navigate]);
+
+  const confirmLeaveWithoutSaving = useCallback(() => {
+    setLeaveConfirmOpen(false);
+    navigate('/sheet/studio?section=profile_settings');
+  }, [navigate]);
 
   if (loading) {return <StudioSkeleton rows={4} />;}
 
@@ -466,8 +838,8 @@ export default function PublicProfileSection({ lang, showToast, user }) {
           en: 'Your public profile is your page on the platform — it shows your avatar, cover, artist name, bio, location and all your content. Save your changes to publish them.',
         }}
         tip={isHt
-          ? 'Aperè an dirèk a nan bò dwat la mete ajou pandan w tape — tcheke l pou w wè paj la anvan w sove.'
-          : 'The live preview on the right updates as you type — watch it to see the page before saving.'}
+          ? 'Aperè an dirèk a mete ajou pandan w tape. Ctrl/⌘+S sove san w kite jaden an.'
+          : 'The live preview updates as you type. Ctrl/⌘+S saves without leaving the field.'}
         action={
           <div className={styles.headerActions}>
             <button
@@ -508,6 +880,91 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         }
       />
 
+      {saveError && (
+        <div className={styles.profileSaveError} role="alert">
+          <div className={styles.profileSaveErrorHead}>
+            <i className="fas fa-circle-exclamation" aria-hidden="true" />
+            <strong>{isHt ? 'Pwofil la pa t sove' : 'Profile could not be saved'}</strong>
+          </div>
+          <p className={styles.profileSaveErrorMessage}>{saveError.message}</p>
+          {saveError.fields.length > 0 && (
+            <ul className={styles.profileSaveErrorFields}>
+              {saveError.fields.map((field) => (
+                <li key={field.field}>
+                  {field.tab ? (
+                    <button
+                      type="button"
+                      className={styles.profileSaveErrorField}
+                      onClick={() => jumpToCompletenessTab(field.tab)}
+                      aria-label={`${isHt ? 'Ale nan' : 'Go to'} ${field.label}: ${field.message}`}
+                    >
+                      <strong>{field.label}</strong>
+                      <span>{field.message}</span>
+                      <i className="fas fa-arrow-right" aria-hidden="true" />
+                    </button>
+                  ) : (
+                    <div className={`${styles.profileSaveErrorField} ${styles.profileSaveErrorFieldStatic}`}>
+                      <strong>{field.label}</strong>
+                      <span>{field.message}</span>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {recoverDraft && (
+        <div className={styles.profileDraftBanner}>
+          <DraftRecoveryBanner
+            lang={lang}
+            timestamp={recoverDraft.savedAt}
+            onRecover={handleRecoverDraft}
+            onDiscard={handleDiscardDraft}
+          />
+        </div>
+      )}
+
+      {completeness && (
+        <ProfileCompletenessCard
+          completeness={completeness}
+          lang={lang}
+          isDirty={isDirty}
+          onJump={jumpToCompletenessTab}
+        />
+      )}
+
+      {isDirty && (
+        <div className={styles.profileEditorDirtyBar} role="status">
+          <span className={styles.profileEditorDirtyText}>
+            <i className="fas fa-circle-exclamation" aria-hidden="true" />{' '}
+            {isHt
+              ? 'Chanjman ki poko sove — sove pou pibliye yo.'
+              : 'Unsaved changes — save to publish them.'}
+          </span>
+          <div className={styles.profileEditorDirtyActions}>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={handleDiscard}
+              disabled={saving}
+            >
+              {isHt ? 'Jete chanjman' : 'Discard'}
+            </button>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={handleSave}
+              disabled={saving}
+            >
+              <i className={`fas ${saving ? 'fa-spinner fa-spin' : 'fa-save'}`} aria-hidden="true" />{' '}
+              {isHt ? 'Sove kounye a' : 'Save now'}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className={styles.profileEditorSplit}>
         {/* ─── Left: the form ─────────────────────────────────── */}
         <div className={styles.profileEditorFormPane}>
@@ -518,9 +975,13 @@ export default function PublicProfileSection({ lang, showToast, user }) {
                 key={t.id}
                 type="button"
                 role="tab"
+                id={`profile-editor-tab-${t.id}`}
                 aria-selected={editorTab === t.id}
+                aria-controls={`profile-editor-panel-${t.id}`}
+                tabIndex={editorTab === t.id ? 0 : -1}
                 className={`${styles.profileEditorTab} ${editorTab === t.id ? styles.profileEditorTabActive : ''}`}
                 onClick={() => setEditorTab(t.id)}
+                onKeyDown={(e) => handleEditorTabKeyDown(e, EDITOR_TABS.indexOf(t))}
               >
                 <i className={`fas ${t.icon}`} aria-hidden="true" />
                 {tabLabel(t)}
@@ -528,7 +989,12 @@ export default function PublicProfileSection({ lang, showToast, user }) {
             ))}
           </div>
 
-      <div className={styles.profileForm}>
+      <div
+        className={styles.profileForm}
+        role="tabpanel"
+        id={`profile-editor-panel-${editorTab}`}
+        aria-labelledby={`profile-editor-tab-${editorTab}`}
+      >
         {/* ─── Tab: Appearance — cover + avatar + identity ────── */}
         {editorTab === 'appearance' && (
         <section className={`${styles.profileEditorCard} ${styles.profileEditorCardIndigo}`}>
@@ -1043,28 +1509,37 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         {/* SEO Title */}
         <label className={styles.fieldGroup}>
           <span className={styles.fieldLabel}>
-            {isHt ? 'Tit SEO' : 'SEO Title'} ({(form.seo_title || '').length}/160)
+            {isHt ? 'Tit SEO' : 'SEO Title'}{' '}
+            <span className={`${styles.seoCounter}${seoPreview.titleTooLong ? ` ${styles.seoCounterWarn}` : ''}`}>
+              ({(form.seo_title || '').length}/{SEO_RECOMMENDED.title})
+            </span>
           </span>
           <input
             type="text"
             className={styles.formInput}
             value={form.seo_title || ''}
+            maxLength={160}
             onChange={(e) => handleChange('seo_title', e.target.value.slice(0, 160))}
             placeholder={isHt ? 'Tit pou motè rechèch' : 'Title for search engines'}
+            aria-describedby="profile-seo-guidance"
           />
         </label>
 
         {/* SEO Description */}
         <label className={styles.fieldGroup}>
           <span className={styles.fieldLabel}>
-            {isHt ? 'Deskripsyon SEO' : 'SEO Description'}
+            {isHt ? 'Deskripsyon SEO' : 'SEO Description'}{' '}
+            <span className={`${styles.seoCounter}${seoPreview.descriptionTooLong ? ` ${styles.seoCounterWarn}` : ''}`}>
+              ({(form.seo_description || '').length}/{SEO_RECOMMENDED.description})
+            </span>
           </span>
           <textarea
             className={styles.formTextarea}
             value={form.seo_description || ''}
             onChange={(e) => handleChange('seo_description', e.target.value)}
             placeholder={isHt ? 'Deskripsyon pou motè rechèch' : 'Description for search engines'}
-            rows={2}
+            rows={3}
+            aria-describedby="profile-seo-guidance"
           />
         </label>
 
@@ -1081,6 +1556,36 @@ export default function PublicProfileSection({ lang, showToast, user }) {
             placeholder="creator, music, design"
           />
         </label>
+
+        {/* Real search-result preview built from the current draft. */}
+        <div
+          className={styles.seoPreview}
+          role="group"
+          aria-label={isHt ? 'Apèsi rezilta rechèch' : 'Search result preview'}
+        >
+          <div className={styles.seoPreviewLabel}>
+            <i className="fas fa-magnifying-glass" aria-hidden="true" />{' '}
+            {isHt ? 'Apèsi nan rechèch' : 'Search preview'}
+          </div>
+          <div className={styles.seoPreviewCard}>
+            <div className={styles.seoPreviewSite}>
+              <span className={styles.seoPreviewFavicon} aria-hidden="true">
+                {identity.initial}
+              </span>
+              <span className={styles.seoPreviewSiteText}>
+                <strong>Atelnyo</strong>
+                <span className={styles.seoPreviewUrl}>{seoPreview.url}</span>
+              </span>
+            </div>
+            <div className={styles.seoPreviewTitle}>{seoPreview.title}</div>
+            <p className={styles.seoPreviewDesc}>{seoPreview.description}</p>
+          </div>
+          <p className={styles.seoPreviewHint} id="profile-seo-guidance">
+            {isHt
+              ? 'Apèsi sa a tronke jan Google souvan fè l. Rekòmande: 60 karaktè pou tit, 160 pou deskripsyon. Tit la gen yon maks backend 160.'
+              : 'This preview truncates the way search results often do. Recommended: 60 characters for the title, 160 for the description. The title has a backend maximum of 160.'}
+          </p>
+        </div>
           </div>
         </section>
         )}
@@ -1098,22 +1603,142 @@ export default function PublicProfileSection({ lang, showToast, user }) {
             </div>
           </header>
           <div className={styles.profileEditorBody}>
-        {/* ─── Section Order & Visibility — managed in Profile Settings ─ */}
+        {/* ─── Profile templates — one-click layout presets ──── */}
+        <div className={styles.fieldGroup}>
+          <div className={styles.profileTemplateHeader}>
+            <span className={styles.fieldLabel}>
+              {isHt ? 'Modèl Pwofil' : 'Profile Templates'}
+            </span>
+            <button
+              type="button"
+              className={styles.profileAddChip}
+              onClick={() => setTemplateModalOpen(true)}
+            >
+              <i className="fas fa-layer-group" aria-hidden="true" />{' '}
+              {isHt ? 'Wè tout modèl yo' : 'Browse templates'}
+            </button>
+          </div>
+          <p className={styles.profileLayoutHint}>
+            {isHt
+              ? 'Yon modèl chanje lòd ak vizibilite seksyon yo — li pa janm efase kontni ou.'
+              : 'A template changes section order and visibility — it never deletes your content.'}
+          </p>
+          <div className={styles.profileTemplateStrip}>
+            {PROFILE_TEMPLATES.map((template) => {
+              const active = currentTemplateId === template.id;
+              return (
+                <button
+                  key={template.id}
+                  type="button"
+                  aria-pressed={active}
+                  className={`${styles.profileTemplateChip}${active ? ` ${styles.profileTemplateChipActive}` : ''}`}
+                  onClick={() => applyTemplate(
+                    applyProfileTemplate(template, {
+                      section_order: form.section_order,
+                      section_visibility: form.section_visibility,
+                    }),
+                    template,
+                  )}
+                >
+                  <span className={styles.profileTemplateChipIcon}>
+                    <i className={`fas ${template.icon}`} aria-hidden="true" />
+                  </span>
+                  <span className={styles.profileTemplateChipName}>
+                    {templateName(template, lang)}
+                  </span>
+                  <span className={styles.profileTemplateChipDesc}>
+                    {templateDescription(template, lang)}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          {!currentTemplateId && (
+            <span className={styles.profileTemplateCustom}>
+              <i className="fas fa-sliders-h" aria-hidden="true" />{' '}
+              {isHt ? 'Layout pèsonalize' : 'Custom layout'}
+            </span>
+          )}
+        </div>
+
+        {/* ─── Section order + visibility (saved with Save) ──── */}
+        <div className={styles.fieldGroup}>
+          <span className={styles.fieldLabel}>
+            {isHt ? 'Òd ak Viwabilite Seksyon' : 'Section Order & Visibility'}
+          </span>
+          <p className={styles.profileLayoutHint}>
+            {isHt
+              ? 'Monte oswa desann seksyon yo epi itilize switch la pou kache oswa montre yo. Chanjman yo parèt nan aperè a epi yo sove ak bouton Sove a.'
+              : 'Move sections up or down and use the switch to hide or show them. Changes appear in the preview and are saved with the Save button.'}
+          </p>
+          <div className={styles.profileLayoutList}>
+            {(form.section_order || []).map((sectionId, index) => {
+              const section = RAIL_ITEMS.find((item) => item.id === sectionId);
+              if (!section) return null;
+              const visible = form.section_visibility?.[sectionId] !== false;
+              const label = lang === 'ht' ? section.labelHt : lang === 'fr' ? section.labelFr : section.label;
+              return (
+                <div
+                  key={sectionId}
+                  className={`${styles.profileLayoutRow}${visible ? '' : ` ${styles.profileLayoutRowHidden}`}`}
+                >
+                  <span className={styles.profileLayoutOrder}>{index + 1}</span>
+                  <span className={styles.profileLayoutIcon}>
+                    <i className={`fas ${section.icon}`} aria-hidden="true" />
+                  </span>
+                  <span className={styles.profileLayoutLabel}>{label}</span>
+                  <div className={styles.profileLayoutButtons}>
+                    <button
+                      type="button"
+                      className={styles.profileLayoutBtn}
+                      onClick={() => moveLayoutSection(index, -1)}
+                      disabled={index === 0}
+                      title={isHt ? 'Monte' : 'Move up'}
+                      aria-label={`${label}: ${isHt ? 'monte' : 'move up'}`}
+                    >
+                      <i className="fas fa-chevron-up" aria-hidden="true" />
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.profileLayoutBtn}
+                      onClick={() => moveLayoutSection(index, 1)}
+                      disabled={index === (form.section_order || []).length - 1}
+                      title={isHt ? 'Desann' : 'Move down'}
+                      aria-label={`${label}: ${isHt ? 'desann' : 'move down'}`}
+                    >
+                      <i className="fas fa-chevron-down" aria-hidden="true" />
+                    </button>
+                  </div>
+                  <label className={styles.profileLayoutToggle}>
+                    <input
+                      type="checkbox"
+                      checked={visible}
+                      onChange={() => toggleLayoutSection(sectionId)}
+                      aria-label={`${label}: ${isHt ? 'vizib' : 'visible'}`}
+                    />
+                    <span className={styles.profileLayoutToggleTrack} aria-hidden="true" />
+                  </label>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         <div className={styles.profileEditorNote}>
-          <i className="fas fa-sliders-h" aria-hidden="true" />
+          <i className="fas fa-circle-info" aria-hidden="true" />
           <div style={{ minWidth: 0 }}>
             <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-primary)' }}>
-              {isHt ? 'Òd ak Viwabilite Seksyon' : 'Section Order & Visibility'}
+              {isHt ? 'Plis opsyon nan Profile Settings' : 'More options in Profile Settings'}
             </p>
             <p style={{ margin: '4px 0 10px', fontSize: '0.8rem', color: 'var(--text-secondary, #888)' }}>
               {isHt
-                ? 'Lòd ak viwabilite seksyon yo jere nan Profile Settings — tcheke l la pou reòganize ak kache seksyon yo.'
-                : 'Section order & visibility are managed in Profile Settings — head there to reorder and hide sections.'}
+                ? 'Profile Settings gen tou kontni an vedèt (kou, pwodwi, pòtfolyo) ak abònman peyan.'
+                : 'Profile Settings also holds featured content (courses, products, portfolio) and paid subscriptions.'}
             </p>
             <button
               type="button"
               className="btn-secondary"
-              onClick={() => navigate('/sheet/studio?section=profile_settings')}
+              onClick={handleGoToSettings}
               style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
             >
               <i className="fas fa-sliders-h" aria-hidden="true" />
@@ -1128,7 +1753,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         </div>
 
         {/* ─── Right: live preview — the REAL page from the draft ─ */}
-        <aside className={styles.profileEditorPreviewPane}>
+        <aside className={`${styles.profileEditorPreviewPane}${previewCollapsed ? ` ${styles.profileEditorPreviewPaneCollapsed}` : ''}`}>
           <div className={styles.profileEditorPreviewBar}>
             <span className={styles.profileEditorPreviewDot} aria-hidden="true" />
             <span className={styles.profileEditorPreviewLabel}>
@@ -1136,43 +1761,76 @@ export default function PublicProfileSection({ lang, showToast, user }) {
             </span>
             <button
               type="button"
+              className={`${styles.profileEditorPreviewDevice}${previewViewport === 'mobile' ? ` ${styles.profileEditorPreviewDeviceActive}` : ''}`}
+              onClick={() => setPreviewViewport((value) => (value === 'mobile' ? 'desktop' : 'mobile'))}
+              aria-pressed={previewViewport === 'mobile'}
+              aria-label={previewViewport === 'mobile'
+                ? (isHt ? 'Aperè desktop' : 'Desktop preview')
+                : (isHt ? 'Aperè mobil' : 'Mobile preview')}
+              title={previewViewport === 'mobile'
+                ? (isHt ? 'Aperè desktop' : 'Desktop preview')
+                : (isHt ? 'Aperè mobil' : 'Mobile preview')}
+            >
+              <i className={`fas ${previewViewport === 'mobile' ? 'fa-desktop' : 'fa-mobile-alt'}`} aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              className={styles.profileEditorPreviewCollapse}
+              onClick={() => setPreviewCollapsed((collapsed) => !collapsed)}
+              aria-expanded={!previewCollapsed}
+              aria-label={previewCollapsed
+                ? (isHt ? 'Montre aperè a' : 'Show live preview')
+                : (isHt ? 'Kache aperè a' : 'Hide live preview')}
+              title={previewCollapsed
+                ? (isHt ? 'Montre aperè a' : 'Show live preview')
+                : (isHt ? 'Kache aperè a' : 'Hide live preview')}
+            >
+              <i className={`fas ${previewCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'}`} aria-hidden="true" />
+            </button>
+            <button
+              type="button"
               className={styles.profileEditorPreviewExpand}
               onClick={openPreview}
               title={isHt ? 'Aperè tout ekran' : 'Full-screen preview'}
+              aria-label={isHt ? 'Aperè tout ekran' : 'Full-screen preview'}
             >
               <i className="fas fa-expand" aria-hidden="true" />
             </button>
           </div>
-          <div className={styles.profileEditorPreviewFrame}>
-            {liveDraft ? (
-              <Suspense
-                fallback={
-                  <div className={styles.profileEditorPreviewLoading}>
-                    <i className="fas fa-spinner fa-spin" aria-hidden="true" />
-                  </div>
-                }
-              >
-                <CreatorPublicProfile
-                  lang={lang}
-                  showToast={showToast}
-                  currentUserId={user?.id}
-                  editingMode
-                  username={identity.creatorLookupKey}
-                  overrideProfile={liveDraft}
-                />
-              </Suspense>
-            ) : (
-              <div className={styles.profileEditorPreviewLoading}>
-                <i className="fas fa-spinner fa-spin" aria-hidden="true" />
-              </div>
-            )}
-          </div>
+          {!previewCollapsed && (
+            <div className={`${styles.profileEditorPreviewFrame}${previewViewport === 'mobile' ? ` ${styles.profileEditorPreviewFrameMobile}` : ''}`}>
+              {liveDraft ? (
+                <Suspense
+                  fallback={
+                    <div className={styles.profileEditorPreviewLoading}>
+                      <i className="fas fa-spinner fa-spin" aria-hidden="true" />
+                    </div>
+                  }
+                >
+                  <CreatorPublicProfile
+                    lang={lang}
+                    showToast={showToast}
+                    currentUserId={user?.id}
+                    editingMode
+                    username={identity.creatorLookupKey}
+                    overrideProfile={liveDraft}
+                  />
+                </Suspense>
+              ) : (
+                <div className={styles.profileEditorPreviewLoading}>
+                  <i className="fas fa-spinner fa-spin" aria-hidden="true" />
+                </div>
+              )}
+            </div>
+          )}
         </aside>
       </div>
 
       {/* ─── Full-screen preview — the REAL public profile page from the draft ─ */}
       {previewOpen && previewProfile && (
         <div
+          ref={previewDialogRef}
+          tabIndex={-1}
           className="csp-preview-shell"
           onClick={() => setPreviewOpen(false)}
           role="dialog"
@@ -1180,6 +1838,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
           aria-label={isHt ? 'Aperè pwofil piblik' : 'Public profile preview'}
         >
           <button
+            ref={previewCloseRef}
             type="button"
             className="csp-preview-close"
             onClick={() => setPreviewOpen(false)}
@@ -1206,6 +1865,50 @@ export default function PublicProfileSection({ lang, showToast, user }) {
             </Suspense>
           </div>
         </div>
+      )}
+
+      {/* ─── Template picker — drafts only; Save publishes ────── */}
+      {templateModalOpen && (
+        <ProfileTemplateModal
+          lang={lang}
+          currentTemplateId={currentTemplateId}
+          currentConfig={{
+            section_order: form.section_order,
+            section_visibility: form.section_visibility,
+          }}
+          onClose={() => setTemplateModalOpen(false)}
+          onApply={applyTemplate}
+        />
+      )}
+
+      {leaveConfirmOpen && (
+        <StudioModal
+          onClose={() => setLeaveConfirmOpen(false)}
+          icon="fa-triangle-exclamation"
+          title={isHt ? 'Kite paj la?' : 'Leave this page?'}
+        >
+          <p style={{ margin: '0 0 20px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            {isHt
+              ? 'Ou gen chanjman ki poko pibliye. Yon bouyon lokal konsève yo, men yo p ap parèt sou pwofil piblik ou jiskaske w sove.'
+              : 'You have unpublished changes. A local draft keeps them, but they will not appear on your public profile until you save.'}
+          </p>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => setLeaveConfirmOpen(false)}
+            >
+              {isHt ? 'Rete sou paj la' : 'Stay on this page'}
+            </button>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={confirmLeaveWithoutSaving}
+            >
+              {isHt ? 'Kite san sove' : 'Leave without saving'}
+            </button>
+          </div>
+        </StudioModal>
       )}
     </div>
   );

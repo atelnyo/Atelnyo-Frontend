@@ -12,11 +12,12 @@
  * Biography / Location / Story / Contact & Links) — the same card system
  * as the Public Profile section editor, so both editors read as one.
  */
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import api, { applyTokenPair, creatorProfileService } from '../../../services/api';
 import { StudioModal, FormField, LoadingOverlay } from './shared';
 import styles from './modals.module.css';
 import { t as t4 } from '../../../utils/i18n';
+import { parseProfileSaveError } from '../../profile/profileSaveError';
 
 // Repeatable-entry defaults for the dynamic list editors (experience /
 // education / social links) — same shapes the backend model stores.
@@ -24,8 +25,16 @@ const EMPTY_EXPERIENCE = { title: '', company: '', period: '', description: '' }
 const EMPTY_EDUCATION = { institution: '', degree: '', year: '', description: '' };
 const EMPTY_SOCIAL = { platform: '', url: '' };
 
-export default function ProfileEditModal({ onClose, onSuccess, lang, showToast, user }) {
-  const [form, setForm] = useState({
+// Comma-separated list fields (languages / skills) round-trip between the
+// backend's string arrays and the text input. Keep empty segments while
+// typing so a trailing comma isn't swallowed; filter on submit instead.
+const listToText = (value) => (Array.isArray(value) ? value.join(', ') : '');
+const textToList = (value) => String(value || '').split(',').map((s) => s.trim());
+
+// One canonical initial form shape, reused for the dirty-state comparison so
+// a failed profile fetch still protects what the user has typed.
+function makeInitialForm(user) {
+  return {
     username: user?.username || '',
     email: user?.email || '',
     artist_name: '',
@@ -35,15 +44,30 @@ export default function ProfileEditModal({ onClose, onSuccess, lang, showToast, 
     website_url: '',
     contact_email: '',
     contact_phone: '',
+    availability: 'available',
     languages: [],
     skills: [],
     experience: [],
     education: [],
     social_links: [],
-  });
+  };
+}
+
+export default function ProfileEditModal({ onClose, onSuccess, lang, showToast, user }) {
+  const [form, setForm] = useState(() => makeInitialForm(user));
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
+  const [saveError, setSaveError] = useState(null);
+  const [confirmCloseOpen, setConfirmCloseOpen] = useState(false);
+  const stayButtonRef = useRef(null);
+  const cancelButtonRef = useRef(null);
+  const hadConfirmOpenRef = useRef(false);
+  // Snapshot of the last loaded/persisted form (JSON) — drives the
+  // unsaved-changes guard without adding a second source of truth. State
+  // (not a ref) so React re-renders the guard when the baseline changes.
+  const [baseline, setBaseline] = useState(() => JSON.stringify(makeInitialForm(user)));
+  const isDirty = JSON.stringify(form) !== baseline;
 
   useEffect(() => {
     let cancelled = false;
@@ -57,8 +81,8 @@ export default function ProfileEditModal({ onClose, onSuccess, lang, showToast, 
       creatorProfileService.getMe?.().then((res) => {
         if (cancelled || !res?.data) return;
         const p = res.data;
-        setForm((f) => ({
-          ...f,
+        const next = {
+          ...makeInitialForm(user),
           artist_name: p.artist_name || '',
           bio: p.bio || '',
           country: p.country || '',
@@ -66,6 +90,7 @@ export default function ProfileEditModal({ onClose, onSuccess, lang, showToast, 
           website_url: p.website_url || '',
           contact_email: p.contact_email || '',
           contact_phone: p.contact_phone || '',
+          availability: p.availability || 'available',
           languages: Array.isArray(p.languages) ? p.languages : [],
           skills: Array.isArray(p.skills) ? p.skills : [],
           experience: Array.isArray(p.experience) ? p.experience : [],
@@ -80,7 +105,9 @@ export default function ProfileEditModal({ onClose, onSuccess, lang, showToast, 
             }
             return [];
           })(),
-        }));
+        };
+        setForm(next);
+        setBaseline(JSON.stringify(next));
         setProfileLoading(false);
       }).catch(() => setProfileLoading(false));
     });
@@ -89,23 +116,60 @@ export default function ProfileEditModal({ onClose, onSuccess, lang, showToast, 
 
   const handleChange = useCallback((field, value) => {
     setForm((f) => ({ ...f, [field]: value }));
+    setSaveError(null);
     if (errors[field]) setErrors((e) => ({ ...e, [field]: null }));
   }, [errors]);
 
   // Repeatable-row helpers (same pattern as CompanySection): edit/add/remove
   // an entry inside form.experience / form.education / form.social_links.
-  const updateRow = useCallback((key, idx, patch) =>
-    setForm((f) => ({ ...f, [key]: f[key].map((row, i) => (i === idx ? { ...row, ...patch } : row)) })), []);
-  const addRow = useCallback((key, empty) =>
-    setForm((f) => ({ ...f, [key]: [...(Array.isArray(f[key]) ? f[key] : []), { ...empty }] })), []);
-  const removeRow = useCallback((key, idx) =>
-    setForm((f) => ({ ...f, [key]: f[key].filter((_, i) => i !== idx) })), []);
+  const updateRow = useCallback((key, idx, patch) => {
+    setSaveError(null);
+    setForm((f) => ({ ...f, [key]: f[key].map((row, i) => (i === idx ? { ...row, ...patch } : row)) }));
+  }, []);
+  const addRow = useCallback((key, empty) => {
+    setSaveError(null);
+    setForm((f) => ({ ...f, [key]: [...(Array.isArray(f[key]) ? f[key] : []), { ...empty }] }));
+  }, []);
+  const removeRow = useCallback((key, idx) => {
+    setSaveError(null);
+    setForm((f) => ({ ...f, [key]: f[key].filter((_, i) => i !== idx) }));
+  }, []);
+
+  // Closing with unsaved edits must be intentional. The shared modal routes
+  // all exits (X, Escape, backdrop, Cancel) through this handler.
+  const handleRequestClose = useCallback(() => {
+    if (loading) { return; }
+    if (confirmCloseOpen) {
+      setConfirmCloseOpen(false);
+      return;
+    }
+    if (isDirty) {
+      setConfirmCloseOpen(true);
+      return;
+    }
+    onClose?.();
+  }, [loading, confirmCloseOpen, isDirty, onClose]);
+
+  // Focus the safe choice while the in-app confirmation is open, then return
+  // focus to Cancel when it closes.
+  useEffect(() => {
+    if (confirmCloseOpen) {
+      hadConfirmOpenRef.current = true;
+      stayButtonRef.current?.focus();
+    } else if (hadConfirmOpenRef.current) {
+      hadConfirmOpenRef.current = false;
+      cancelButtonRef.current?.focus();
+    }
+  }, [confirmCloseOpen]);
 
   const handleSubmit = useCallback(async (e) => {
     e?.preventDefault?.();
+    if (loading) { return; }
+    setSaveError(null);
     const errs = {};
     if (!form.username.trim()) errs.username = t4(lang, "Non itilizatè oblije", "Username required", "Nom d'utilisateur requis", "Nombre de usuario obligatorio");
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
+    setErrors({});
     setLoading(true);
     try {
       const authPayload = { username: form.username.trim() };
@@ -125,8 +189,9 @@ export default function ProfileEditModal({ onClose, onSuccess, lang, showToast, 
         website_url: form.website_url,
         contact_email: form.contact_email,
         contact_phone: form.contact_phone,
-        languages: form.languages,
-        skills: form.skills,
+        availability: form.availability || 'available',
+        languages: (Array.isArray(form.languages) ? form.languages : []).filter(Boolean),
+        skills: (Array.isArray(form.skills) ? form.skills : []).filter(Boolean),
         // Drop empty rows, then convert to the backend's stored shapes
         // (experience/education lists, social_links {platform: url} dict).
         experience: (Array.isArray(form.experience) ? form.experience : [])
@@ -140,24 +205,57 @@ export default function ProfileEditModal({ onClose, onSuccess, lang, showToast, 
         ),
       };
       await creatorProfileService.updateMe(profilePayload);
+      setBaseline(JSON.stringify(form));
+      setSaveError(null);
+      setConfirmCloseOpen(false);
       showToast?.(t4(lang, "✅ Pwofil mete ajou!", "✅ Profile updated!", "✅ Profil mis à jour !", "✅ ¡Perfil actualizado!"), 'check-circle');
       onSuccess?.(); onClose?.();
     } catch (err) {
-      const detail = err?.response?.data?.error
-        || err?.response?.data?.detail || err?.response?.data?.username?.[0]
-        || err?.message
-        || (t4(lang, "Pa t kapab mete pwofil la ajou.", "Could not update profile.", "Impossible de mettre à jour le profil.", "No se pudo actualizar el perfil."));
-      setErrors((e) => ({ ...e, _api: detail }));
-      showToast?.(detail, 'circle-exclamation');
+      const parsed = parseProfileSaveError(err, lang);
+      const fieldMap = Object.fromEntries(parsed.fields.map((field) => [field.field, field.message]));
+      setErrors({
+        username: fieldMap.username || null,
+        email: fieldMap.email || null,
+      });
+      setSaveError(parsed);
+      showToast?.(parsed.message, 'circle-exclamation');
     } finally { setLoading(false); }
-  }, [form, lang, showToast, onSuccess, onClose]);
+  }, [form, loading, lang, showToast, onSuccess, onClose]);
+
+  // Comfort shortcut: Ctrl/Cmd+S saves without reaching for the footer.
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (!(e.metaKey || e.ctrlKey) || String(e.key).toLowerCase() !== 's') { return; }
+      if (loading || profileLoading || confirmCloseOpen) { return; }
+      e.preventDefault();
+      handleSubmit();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [handleSubmit, loading, profileLoading, confirmCloseOpen]);
 
   return (
-    <StudioModal onClose={onClose} icon="fa-user-circle" wide
+    <StudioModal onClose={handleRequestClose} icon="fa-user-circle" wide
       title={t4(lang, "Pwofil Creator", "Creator Profile", "Profil Créateur", "Perfil de creador")}
       subtitle={t4(lang, "Mete ajou enpres ou, kontak ou ak istwa ou", "Update your identity, contact info and story", "Mettez à jour votre identité, vos coordonnées et votre histoire", "Actualiza tu identidad, contacto e historia")}>
       <form onSubmit={handleSubmit} className={styles.form}>
-        {errors._api && <div className={styles.apiError} role="alert">{errors._api}</div>}
+        {saveError && (
+          <div className={styles.apiError} role="alert">
+            <strong>
+              {t4(lang, "Pwofil la pa t kapab sove", "Profile could not be saved", "Le profil n'a pas pu être enregistré", "No se pudo guardar el perfil")}
+            </strong>
+            <p style={{ margin: '4px 0 0' }}>{saveError.message}</p>
+            {saveError.fields.length > 0 && (
+              <ul style={{ margin: '8px 0 0', paddingLeft: 18, lineHeight: 1.55 }}>
+                {saveError.fields.map((field) => (
+                  <li key={field.field}>
+                    <strong>{field.label}:</strong> {field.message}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
         <LoadingOverlay loading={profileLoading || loading}>
           <div className={styles.formCards}>
 
@@ -206,12 +304,32 @@ export default function ProfileEditModal({ onClose, onSuccess, lang, showToast, 
                 </div>
               </div>
               <div className={styles.formCardFields}>
-                <FormField label={t4(lang, "Biografi", "Bio", "Bio", "Bio")}>
+                <FormField
+                  label={`${t4(lang, "Biografi", "Bio", "Bio", "Bio")} (${(form.bio || '').length}/500)`}
+                >
                   <textarea className={styles.input} value={form.bio}
-                    onChange={(e) => handleChange('bio', e.target.value)}
+                    onChange={(e) => handleChange('bio', e.target.value.slice(0, 500))}
                     placeholder={t4(lang, "Kout deskripsyon...", "Short bio...", "Courte bio...", "Bio corta...")}
                     rows={3} maxLength={500} />
                 </FormField>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <FormField
+                    label={t4(lang, "Lang", "Languages", "Langues", "Idiomas")}
+                    hint={t4(lang, "Separe ak virgill", "Comma separated", "Séparées par des virgules", "Separados por comas")}
+                  >
+                    <input className={styles.input} value={listToText(form.languages)}
+                      onChange={(e) => handleChange('languages', textToList(e.target.value))}
+                      placeholder="Kreyol, English, Francais" />
+                  </FormField>
+                  <FormField
+                    label={t4(lang, "Konpetans", "Skills", "Compétences", "Habilidades")}
+                    hint={t4(lang, "Separe ak virgill", "Comma separated", "Séparées par des virgules", "Separados por comas")}
+                  >
+                    <input className={styles.input} value={listToText(form.skills)}
+                      onChange={(e) => handleChange('skills', textToList(e.target.value))}
+                      placeholder="Python, React, Music Production" />
+                  </FormField>
+                </div>
               </div>
             </div>
 
@@ -371,6 +489,17 @@ export default function ProfileEditModal({ onClose, onSuccess, lang, showToast, 
                       placeholder="+509..." maxLength={30} />
                   </FormField>
                 </div>
+                <FormField
+                  label={t4(lang, "Disponibilite", "Availability", "Disponibilité", "Disponibilidad")}
+                  hint={t4(lang, "Sa parèt sou pwofil piblik ou.", "Shown on your public profile.", "Affiché sur votre profil public.", "Se muestra en tu perfil público.")}
+                >
+                  <select className={styles.input} value={form.availability || 'available'}
+                    onChange={(e) => handleChange('availability', e.target.value)}>
+                    <option value="available">{t4(lang, "Disponib", "Available", "Disponible", "Disponible")}</option>
+                    <option value="busy">{t4(lang, "Okipe", "Busy", "Occupé", "Ocupado")}</option>
+                    <option value="unavailable">{t4(lang, "Pa disponib", "Unavailable", "Indisponible", "No disponible")}</option>
+                  </select>
+                </FormField>
 
                 {/* Social Links — repeatable platform → url */}
                 <div>
@@ -409,8 +538,52 @@ export default function ProfileEditModal({ onClose, onSuccess, lang, showToast, 
 
           </div>
         </LoadingOverlay>
+        {confirmCloseOpen && (
+          <div
+            role="alertdialog"
+            aria-labelledby="profile-edit-close-confirm-title"
+            style={{
+              marginTop: 'var(--sp-lg, 16px)',
+              padding: '14px 16px',
+              borderRadius: 10,
+              border: '1px solid rgba(245,158,11,0.35)',
+              background: 'rgba(245,158,11,0.08)',
+            }}
+          >
+            <strong id="profile-edit-close-confirm-title">
+              {t4(lang, "Fèmen san sove?", "Close without saving?", "Fermer sans enregistrer ?", "¿Cerrar sin guardar?")}
+            </strong>
+            <p style={{ margin: '6px 0 12px', fontSize: '0.82rem', lineHeight: 1.5, color: 'var(--text-secondary)' }}>
+              {t4(
+                lang,
+                'Chanjman ou fè nan modal sa a ap pèdi si w fèmen kounye a.',
+                'Changes made in this modal will be lost if you close now.',
+                'Les modifications apportées dans cette fenêtre seront perdues si vous fermez maintenant.',
+                'Los cambios realizados en esta ventana se perderán si cierras ahora.',
+              )}
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, flexWrap: 'wrap' }}>
+              <button
+                ref={stayButtonRef}
+                type="button"
+                className="btn-secondary"
+                onClick={() => setConfirmCloseOpen(false)}
+              >
+                {t4(lang, "Rete sou paj la", "Stay on this page", "Rester sur cette page", "Quedarme en esta página")}
+              </button>
+              <button
+                type="button"
+                className="btn-secondary"
+                style={{ color: '#ef4444' }}
+                onClick={() => { setConfirmCloseOpen(false); onClose?.(); }}
+              >
+                {t4(lang, "Fèmen san sove", "Close without saving", "Fermer sans enregistrer", "Cerrar sin guardar")}
+              </button>
+            </div>
+          </div>
+        )}
         <div className={styles.actions}>
-          <button type="button" className="btn-secondary" onClick={onClose} disabled={loading}>
+          <button ref={cancelButtonRef} type="button" className="btn-secondary" onClick={handleRequestClose} disabled={loading}>
             {t4(lang, "Anile", "Cancel", "Annuler", "Cancelar")}
           </button>
           <button type="submit" className="btn-primary" disabled={loading}>

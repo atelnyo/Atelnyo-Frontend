@@ -13,7 +13,7 @@
  * professionalization so every creation form shares one field system
  * instead of four hand-rolled copies of the validation block.
  */
-import React, { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import React, { lazy, Suspense, useCallback, useEffect, useId, useRef, useState } from 'react';
 import { mediaProviderService } from '../../../services/api';
 import styles from './modals.module.css';
 
@@ -49,36 +49,91 @@ export const HELP_COPY = {
   },
 };
 
-export function StudioModal({ onClose, title, icon, subtitle, children, wide }) {
-  const handleBackdrop = useCallback((e) => {
-    if (e.target === e.currentTarget) {
-      onClose?.();
-    }
-  }, [onClose]);
+const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-  // Phase 10: Focus trap — focus first focusable element on mount
-  const cardRef = useCallback((node) => {
-    if (node) {
-      // Focus the first focusable element inside the modal
-      const focusable = node.querySelector(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      );
-      if (focusable) focusable.focus();
-    }
+// Reference-counted body scroll lock: two modals mounted at once (e.g. a
+// confirm opened from inside a form modal) must not unlock the page when
+// the first one unmounts.
+let modalScrollLocks = 0;
+function lockModalScroll() {
+  modalScrollLocks += 1;
+  if (modalScrollLocks === 1) { document.body.style.overflow = 'hidden'; }
+}
+function unlockModalScroll() {
+  modalScrollLocks = Math.max(0, modalScrollLocks - 1);
+  if (modalScrollLocks === 0) { document.body.style.overflow = ''; }
+}
+
+export function StudioModal({ onClose, title, icon, subtitle, children, wide }) {
+  const titleId = useId();
+  const cardRef = useRef(null);
+  // Keep the latest onClose without re-running the mount-only focus trap
+  // (a parent re-render creates a new inline handler every time).
+  const onCloseRef = useRef(onClose);
+  useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
+
+  const handleBackdrop = useCallback((e) => {
+    if (e.target === e.currentTarget) { onCloseRef.current?.(); }
   }, []);
 
-  // Phase 10: Escape key to close + body scroll lock
+  // Mount-only accessibility contract:
+  //   • focus moves into the modal and returns on close;
+  //   • Tab / Shift+Tab cycle inside the dialog (real focus trap);
+  //   • Escape closes it;
+  //   • the page behind is scroll-locked until the LAST modal closes.
   useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === 'Escape') onClose?.();
+    const previousFocus = document.activeElement;
+    const node = cardRef.current;
+    const getFocusable = () => (node ? Array.from(node.querySelectorAll(FOCUSABLE_SELECTOR)) : []);
+
+    // Comfort: when a modal contains a form, start on its first field, not
+    // on the header's Close button. Fall back to the first focusable control
+    // (confirmation dialogs) and finally the card itself.
+    const preferredField = node?.querySelector(
+      'input:not([type="hidden"]):not([disabled]), textarea:not([disabled]), select:not([disabled])',
+    );
+    const initial = getFocusable();
+    if (preferredField) { preferredField.focus(); }
+    else if (initial.length > 0) { initial[0].focus(); }
+    else if (node) { node.focus(); }
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        onCloseRef.current?.();
+        return;
+      }
+      if (e.key !== 'Tab') { return; }
+      const items = getFocusable();
+      if (items.length === 0) {
+        e.preventDefault();
+        return;
+      }
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      } else if (node && !node.contains(document.activeElement)) {
+        e.preventDefault();
+        first.focus();
+      }
     };
-    document.addEventListener('keydown', handleEscape);
-    document.body.style.overflow = 'hidden';
+
+    document.addEventListener('keydown', handleKeyDown);
+    lockModalScroll();
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = '';
+      document.removeEventListener('keydown', handleKeyDown);
+      unlockModalScroll();
+      const target = previousFocus;
+      if (target instanceof HTMLElement && document.contains(target)) {
+        try { target.focus(); } catch (_) { /* modal's opener left the DOM */ }
+      }
     };
-  }, [onClose]);
+  }, []);
 
   return (
     <div
@@ -86,10 +141,11 @@ export function StudioModal({ onClose, title, icon, subtitle, children, wide }) 
       onClick={handleBackdrop}
       role="dialog"
       aria-modal="true"
-      aria-label={title}
+      aria-labelledby={titleId}
     >
       <div
         ref={cardRef}
+        tabIndex={-1}
         className={`${styles.card} ${wide ? styles.cardWide : ''}`}
         onClick={(e) => e.stopPropagation()}
       >
@@ -97,7 +153,7 @@ export function StudioModal({ onClose, title, icon, subtitle, children, wide }) 
           <div className={styles.headerLeft}>
             {icon && <i className={`fas ${icon}`} aria-hidden="true" />}
             <div>
-              <h3 className={styles.title}>{title}</h3>
+              <h3 id={titleId} className={styles.title}>{title}</h3>
               {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
             </div>
           </div>

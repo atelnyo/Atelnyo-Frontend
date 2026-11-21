@@ -27,3 +27,4 @@ export { default as DepositModal } from './DepositModal';
 export { default as RefundModal } from './RefundModal';
 export { default as PasswordChangeModal } from './PasswordChangeModal';
 export { default as TikTokPublishModal } from './TikTokPublishModal';
+export { default as ProfileTemplateModal } from './ProfileTemplateModal';

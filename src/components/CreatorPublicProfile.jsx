@@ -740,9 +740,13 @@ export default function CreatorPublicProfile({
     if (username) {
       try { sessionStorage.setItem(`csp_tab_${username}`, tabId); } catch { /* private mode */ }
     }
-    // Scroll to top of content
+    // Scroll to top of content, respecting reduced-motion preferences and
+    // webviews that do not implement scrollIntoView.
+    const reduceMotion = typeof window !== 'undefined'
+      && typeof window.matchMedia === 'function'
+      && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const contentEl = document.getElementById('csp-content-scroll');
-    if (contentEl) contentEl.scrollIntoView({ behavior: 'smooth' });
+    contentEl?.scrollIntoView?.({ behavior: reduceMotion ? 'auto' : 'smooth' });
   }, [username, trackClick]);
 
   // ─── Restore saved tab on mount (after a detail-page round-trip) ──
@@ -822,7 +826,7 @@ export default function CreatorPublicProfile({
   // (/c/<username>, locale-aware), so no absolute URL is assembled here.
 
   // ─── Render branches ─────────────────────────────────────────────
-  if (loading) return <ProfileSkeleton />;
+  if (loading) return <ProfileSkeleton lang={lang} />;
   if (error === 'not_found' || error === 'load_error' || !profile) {
     // A real 404 (hidden/suspended/missing) says "does not exist"; a
     // transient load failure says "couldn't load" + Retry so a flaky

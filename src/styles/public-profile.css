@@ -818,6 +818,7 @@
 
 .csp-tab {
   padding: 9px 12px;
+  min-height: 40px;
   font-size: 0.72rem;
   font-weight: 500;
   color: var(--csp-text-secondary);
@@ -1803,7 +1804,12 @@
   opacity: 0.25;
 }
 
-/* Skeleton */
+/* ═══════════════════════════════════════════════════════════════════════
+   SKELETON — mirrors the real profile structure (rail / cover / identity /
+   stats / tabs / content grid / sidebar) so the page does not reflow when
+   the data lands. Shimmer is decorative; reduced-motion users get a static
+   surface instead.
+   ═══════════════════════════════════════════════════════════════════════ */
 .csp-skeleton {
   animation: csp-shimmer 1.8s ease-in-out infinite;
   background: linear-gradient(90deg,
@@ -1817,20 +1823,121 @@
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
-.csp-skel-cover { height: clamp(180px, 28vw, 300px); width: 100%; }
-.csp-skel-avatar { width: 110px; height: 110px; border-radius: 50%; margin-top: -55px; margin-left: 20px; }
-.csp-skel-line { height: 11px; margin: 6px 16px; }
+
+.csp-skel-layout { align-items: start; }
+
+/* Left rail placeholder */
+.csp-skel-rail {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 0 16px;
+  background: var(--csp-surface);
+  border-right: 1px solid var(--csp-border);
+}
+.csp-skel-rail-logo { width: 34px; height: 34px; border-radius: var(--csp-radius-sm); margin-bottom: 8px; }
+.csp-skel-rail-item { width: 40px; height: 40px; border-radius: var(--csp-radius-sm); }
+
+/* Main column */
+.csp-skel-main { min-width: 0; padding-bottom: 60px; }
+.csp-skel-cover { height: var(--csp-cover-height); width: 100%; border-radius: 0; }
+.csp-skel-identity {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  padding: 0 16px;
+  margin-top: -36px;
+  position: relative;
+  z-index: 2;
+}
+.csp-skel-avatar {
+  width: var(--csp-avatar-size);
+  height: var(--csp-avatar-size);
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 3px solid var(--csp-surface);
+}
+.csp-skel-identity-lines { flex: 1; min-width: 0; padding-bottom: 10px; }
+.csp-skel-line { height: 11px; margin: 0 0 8px; }
 .csp-skel-line--short { width: 28%; }
 .csp-skel-line--medium { width: 50%; }
 .csp-skel-line--long { width: 75%; }
-/* Card-shaped skeleton — image block + text lines inside a card shell,
-   mirroring the real ProfileCatalogCard proportions. */
+
+/* Glass stats tile row */
+.csp-skel-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 14px 16px 10px;
+  padding: 14px 16px;
+  background: var(--csp-surface-glass);
+  border: 1px solid var(--csp-border-card-alt);
+  border-radius: var(--csp-radius-lg);
+}
+.csp-skel-stat { height: 44px; border-radius: var(--csp-radius-sm); }
+
+/* Sticky tab bar */
+.csp-skel-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--csp-border);
+  border-bottom: 1px solid var(--csp-border);
+  overflow: hidden;
+}
+.csp-skel-tab { height: 30px; width: 74px; flex-shrink: 0; border-radius: var(--csp-radius-pill); }
+
+/* Tab content card grid */
+.csp-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+  padding: 20px 16px;
+}
 .csp-skeleton-card {
   background: var(--csp-surface-alt);
   border: 1px solid var(--csp-border-card-alt);
   border-radius: var(--csp-radius-lg);
   overflow: hidden;
   padding-bottom: 13px;
+}
+
+/* Right business sidebar cards */
+.csp-skel-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  padding: 16px 12px;
+  border-left: 1px solid var(--csp-border);
+  background: var(--csp-surface);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.csp-skel-side-card {
+  padding: 14px;
+  background: var(--csp-surface-alt);
+  border: 1px solid var(--csp-border-card-alt);
+  border-radius: var(--csp-radius-md);
+}
+
+@media (max-width: 1024px) {
+  .csp-skel-sidebar { display: none; }
+}
+
+@media (max-width: 640px) {
+  .csp-skel-rail { display: none; }
+  .csp-skel-stats { grid-template-columns: repeat(2, 1fr); }
+  .csp-skeleton-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 16px 12px; }
+  .csp-skel-tabs { padding: 10px 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .csp-skeleton { animation: none; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -2396,6 +2503,9 @@ body:not(.dark-mode) .csp {
   .csp-glass-stats { padding: 8px 10px; }
   .csp-actions { padding: 6px 12px 2px; gap: 4px; }
   .csp-btn { padding: 5px 10px; font-size: 0.65rem; }
+  /* Thumb-friendly tab targets on phones. */
+  .csp-tab { min-height: 44px; padding: 10px 14px; font-size: 0.75rem; }
+  .csp-content { scroll-margin-top: 96px; }
   .csp-btn--icon { width: 30px; height: 30px; }
   .csp-identity-bar { padding: 0 12px; gap: 10px; }
   .csp-identity-meta { gap: 6px; font-size: 0.65rem; }
