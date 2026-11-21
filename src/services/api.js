@@ -1584,7 +1584,7 @@ export const portfolioService = {
 
 // ─── Marketplace (Phase 32) ──────────────────────────────────────────────
 export const marketplaceService = {
-  list: (params) => api.get('marketplace/products/', { params }),
+  list: (params, signal) => api.get('marketplace/products/', { params, ...(signal ? { signal } : {}) }),
   retrieve: (id) => api.get(`marketplace/products/${id}/`),
   update: (id, data) => api.patch(`marketplace/products/${id}/`, data),
   delete: (id) => api.delete(`marketplace/products/${id}/`),

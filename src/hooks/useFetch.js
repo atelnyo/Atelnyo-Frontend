@@ -15,6 +15,14 @@
  *     { defaultValue: [], deps: [] },
  *   );
  *
+ * Pagination (optional):
+ *   const { data, hasMore, loadingMore, loadMore, loadMoreError } = useFetch(
+ *     (signal, page) => marketplaceService.list({ page, page_size: 100 }, signal),
+ *     { defaultValue: [] },
+ *   );
+ *   // A page-number response with `next` enables loadMore(); pages are
+ *   // appended and deduped by id. Refetch() always restarts at page 1.
+ *
  * Features:
  *   - Real AbortController cancellation on unmount / dependency change
  *   - Returns { data, loading, error, refetch } — standard contract * - ``refetch()`` re-runs the fetch without changing deps
@@ -22,6 +30,9 @@
  *   (optimistic delete — no loading flash). The next refetch reconciles
  *   with the server (and restores rows when the mutation failed — callers
  *   refetch in their catch path). Safe no-op when data isn't an array.
+ * - ``updateLocal(predicate, patch)`` patches matching rows in place for
+ *   optimistic toggles; pass an object to shallow-merge or a function to
+ *   transform the row. Also a safe no-op when data isn't an array.
  *   - ``transform`` callback for normalising the response
  *   - ``defaultValue`` is used while loading AND on error
  *
@@ -32,17 +43,26 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 /**
- * @param {(signal: AbortSignal) => Promise<{data: any}>} fetchFn
+ * @param {(signal: AbortSignal, page: number) => Promise<{data: any}>} fetchFn
  * @param {object}                      [opts]
  * @param {any}                         [opts.defaultValue=null]
  * @param {Array}                       [opts.deps=[]]
  * @param {(responseData) => any}       [opts.transform]
- * @returns {{ data: any, loading: boolean, error: Error|null, refetch: () => void, removeLocal: (predicate: (row: any) => boolean) => void }}
+ * @returns {{
+ *   data: any, loading: boolean, error: Error|null,
+ *   refetch: () => void,
+ *   removeLocal: (predicate: (row: any) => boolean) => void,
+ *   updateLocal: (predicate: (row: any) => boolean, patch: object|((row: any) => any)) => void,
+ *   loadMore: () => void, loadingMore: boolean, hasMore: boolean, loadMoreError: Error|null,
+ * }}
  */
 export default function useFetch(fetchFn, { defaultValue = null, deps, transform } = {}) {
   const [data, setData] = useState(defaultValue);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [loadMoreError, setLoadMoreError] = useState(null);
 
   // Counter-based key so refetch() always triggers a new effect run
   const [tick, setTick] = useState(0);
@@ -55,10 +75,17 @@ export default function useFetch(fetchFn, { defaultValue = null, deps, transform
   const dvRef = useRef(defaultValue);
   dvRef.current = defaultValue;
 
+  const pageRef = useRef(0);
+  const loadingRef = useRef(true);
+  const hasMoreRef = useRef(false);
+  const loadingMoreRef = useRef(false);
+  const moreControllerRef = useRef(null);
+
   const doFetch = useCallback(() => {
     const controller = new AbortController();
     const { signal } = controller;
     setLoading(true);
+    loadingRef.current = true;
     setError(null);
 
     const t = transformRef.current;
@@ -66,23 +93,33 @@ export default function useFetch(fetchFn, { defaultValue = null, deps, transform
 
     // Pass signal to fetchFn — callers that accept (signal) get real
     // cancellation; callers that ignore it still work (no error).
-    Promise.resolve(fnRef.current(signal))
+    Promise.resolve(fnRef.current(signal, 1))
       .then((res) => {
         if (signal.aborted) return;
         const raw = res?.data;
         const normalised = t ? t(raw) : raw ?? dv;
         setData(normalised);
         setError(null);
+        pageRef.current = 1;
+        const more = Boolean(raw?.next);
+        hasMoreRef.current = more;
+        setHasMore(more);
       })
       .catch((err) => {
         if (signal.aborted) return;
-        // AbortError is expected on unmount — don't treat as an error
+        // AbortError is expected on unmount — don't treat it as an error
         if (err?.name === 'AbortError' || err?.code === 'ERR_CANCELED') return;
         setError(err);
         setData(dv);
+        pageRef.current = 0;
+        hasMoreRef.current = false;
+        setHasMore(false);
       })
       .finally(() => {
-        if (!signal.aborted) setLoading(false);
+        if (!signal.aborted) {
+          loadingRef.current = false;
+          setLoading(false);
+        }
       });
 
     // Cleanup: abort the real HTTP request
@@ -98,7 +135,14 @@ export default function useFetch(fetchFn, { defaultValue = null, deps, transform
   }, [...(deps || []), tick, doFetch]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
+  // Abort an in-flight "load more" when the component unmounts.
+  useEffect(() => () => moreControllerRef.current?.abort(), []);
+
   const refetch = useCallback(() => {
+    moreControllerRef.current?.abort();
+    loadingMoreRef.current = false;
+    setLoadingMore(false);
+    setLoadMoreError(null);
     setTick((t) => t + 1);
   }, []);
 
@@ -108,5 +152,74 @@ export default function useFetch(fetchFn, { defaultValue = null, deps, transform
     setData((prev) => (Array.isArray(prev) ? prev.filter((row) => !predicate(row)) : prev));
   }, []);
 
-  return { data, loading, error, refetch, removeLocal };
+  // Optimistic in-place patch — keeps the row mounted (so focus and
+  // scroll survive) while a toggle is in flight.
+  const updateLocal = useCallback((predicate, patch) => {
+    setData((prev) => {
+      if (!Array.isArray(prev)) return prev;
+      return prev.map((row) => {
+        if (!predicate(row)) return row;
+        return typeof patch === 'function' ? patch(row) : { ...row, ...patch };
+      });
+    });
+  }, []);
+
+  const loadMore = useCallback(() => {
+    if (loadingRef.current || loadingMoreRef.current || !hasMoreRef.current) return;
+
+    moreControllerRef.current?.abort();
+    const controller = new AbortController();
+    moreControllerRef.current = controller;
+    const page = pageRef.current + 1;
+
+    loadingMoreRef.current = true;
+    setLoadingMore(true);
+    setLoadMoreError(null);
+
+    const t = transformRef.current;
+    const dv = dvRef.current;
+
+    Promise.resolve(fnRef.current(controller.signal, page))
+      .then((res) => {
+        if (controller.signal.aborted) return;
+        const raw = res?.data;
+        const normalised = t ? t(raw) : raw ?? dv;
+        const rows = Array.isArray(normalised)
+          ? normalised
+          : (Array.isArray(normalised?.results) ? normalised.results : []);
+        setData((prev) => {
+          const base = Array.isArray(prev) ? prev : [];
+          const seen = new Set(base.map((row) => row?.id));
+          return [...base, ...rows.filter((row) => !seen.has(row?.id))];
+        });
+        pageRef.current = page;
+        const more = Boolean(raw?.next);
+        hasMoreRef.current = more;
+        setHasMore(more);
+      })
+      .catch((err) => {
+        if (controller.signal.aborted) return;
+        if (err?.name === 'AbortError' || err?.code === 'ERR_CANCELED') return;
+        setLoadMoreError(err);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          loadingMoreRef.current = false;
+          setLoadingMore(false);
+        }
+      });
+  }, []);
+
+  return {
+    data,
+    loading,
+    error,
+    hasMore,
+    loadingMore,
+    loadMore,
+    loadMoreError,
+    refetch,
+    removeLocal,
+    updateLocal,
+  };
 }
