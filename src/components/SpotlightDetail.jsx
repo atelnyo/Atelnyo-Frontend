@@ -16,7 +16,7 @@ import { Helmet } from 'react-helmet-async';
 import useSafeNavigate from '../hooks/useSafeNavigate';
 import useSavedItem from '../hooks/useSavedItem';
 import SaveHeartButton from './SaveHeartButton';
-import { useLocation, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { spotlightService, creatorProfileService } from '../services/api';
 import { translations } from '../data/translations';
 import { buildContentUrl, isLegacyContentUrl } from '../utils/contentUrl';
@@ -129,6 +129,9 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
   const [payload, setPayload] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errCode, setErrCode] = useState(null);
+  const [retryTick, setRetryTick] = useState(0);
+  const [relatedError, setRelatedError] = useState(false);
+  const [relatedRetryTick, setRelatedRetryTick] = useState(0);
   const [scrolled, setScrolled] = useState(false);
   const [creatorProfile, setCreatorProfile] = useState(null);
   const [creatorLoading, setCreatorLoading] = useState(false);
@@ -168,7 +171,7 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
         if (!cancelledRef.current) setLoading(false);
       });
     return () => { cancelledRef.current = true; };
-  }, [id, idValid]);
+  }, [id, idValid, retryTick]);
 
   // ─── Canonical URL upgrade: legacy /sheet/spotlight/:id deep-links
   //     redirect (replace) to /{id}@{user}/spotlight once loaded. ────
@@ -214,18 +217,22 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
     if (!payload?.id) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setRelatedLoading(true);
+    setRelatedError(false);
     spotlightService.related(payload.id)
       .then((res) => {
         if (cancelledRef.current) return;
         setRelatedSpotlights(Array.isArray(res?.data) ? res.data : []);
+        setRelatedError(false);
       })
       .catch(() => {
+        if (cancelledRef.current) return;
         setRelatedSpotlights([]);
+        setRelatedError(true);
       })
       .finally(() => {
         if (!cancelledRef.current) setRelatedLoading(false);
       });
-  }, [payload?.id]);
+  }, [payload?.id, relatedRetryTick]);
 
   // ─── Scroll-aware sticky header ──────────────────────────────────
   useEffect(() => {
@@ -276,6 +283,24 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
     'spotlight', payload?.id, { user, showToast, t },
   );
 
+  // Best-effort share counter. The endpoint is public and the UI must
+  // never block on analytics: optimistically bump the local number and
+  // reconcile with the server's authoritative count when it replies.
+  const recordShare = () => {
+    if (!payload?.id) return;
+    setPayload((prev) => (
+      prev ? { ...prev, share_count: (Number(prev.share_count) || 0) + 1 } : prev
+    ));
+    spotlightService.share(payload.id)
+      .then((res) => {
+        const nextCount = res?.data?.share_count;
+        if (typeof nextCount === 'number') {
+          setPayload((prev) => (prev ? { ...prev, share_count: nextCount } : prev));
+        }
+      })
+      .catch(() => {});
+  };
+
   const handleShare = async () => {
     // Share the CRAWLER-AWARE URL (/sheet/spotlight/<pk>/og/) once the
     // integer pk is known: the backend serves prerendered OG HTML there
@@ -299,6 +324,7 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
             text: payload?.invention_description?.slice(0, 120) || '',
             url: ogUrl,
           });
+          recordShare();
           return;
         } catch {
           // User cancelled or share failed — fall through to clipboard
@@ -311,6 +337,7 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
     } finally {
       setShareBusy(false);
     }
+    if (copied) recordShare();
     // Toast AFTER the clipboard try — a toast failure must never be
     // mistaken for a clipboard failure (same icon arg as the Business
     // share handler for visual consistency).
@@ -414,12 +441,26 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
             ) : errCode === 'not_found' ? (
               <HeroEmptyMessage
                 icon="fa-circle-question"
-                msg={t.spotlight_detail_not_found || (lang === 'ht' ? 'Envansyon an pa jwenn.' : 'Invention not found.')}
+                msg={t.spotlight_detail_not_found || (
+                  lang === 'ht' ? 'Envansyon sa a pa disponib oswa li pa piblik ankò.'
+                    : lang === 'fr' ? 'Cette invention est indisponible ou n’est plus publique.'
+                      : lang === 'es' ? 'Esta invención no está disponible o ya no es pública.'
+                        : 'This invention is unavailable or no longer public.'
+                )}
+                actionLabel={
+                  lang === 'ht' ? 'Retounen nan Explore'
+                    : lang === 'fr' ? 'Retour à Explorer'
+                      : lang === 'es' ? 'Volver a Explorar'
+                        : 'Back to Explore'
+                }
+                onAction={() => navigate('/sheet/explore')}
               />
             ) : errCode === 'load_error' ? (
               <HeroEmptyMessage
                 icon="fa-triangle-exclamation"
                 msg={t.spotlight_detail_load_error || (lang === 'ht' ? 'Nou pa t kapab chaje envansyon an.' : 'Could not load.')}
+                actionLabel={t.spotlight_detail_retry || (lang === 'ht' ? 'Eseye ankò' : 'Try again')}
+                onAction={() => setRetryTick((n) => n + 1)}
               />
             ) : payload ? (
               <HeroContent payload={payload} creatorProfile={creatorProfile} creatorLoading={creatorLoading} t={t} lang={lang} resolveCategoryLabel={resolveCategoryLabel} />
@@ -701,9 +742,9 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
                     value={formatDate(payload.created_at, lang)}
                   />
                   <StatTile
-                    icon="fa-clock"
-                    label={lang === 'ht' ? 'Soumit' : 'Submitted'}
-                    value={formatDate(payload.created_at, lang)}
+                    icon="fa-share-nodes"
+                    label={lang === 'ht' ? 'Pataje' : 'Shares'}
+                    value={payload.share_count || 0}
                   />
                   {payload.rejection_count > 0 && (
                     <StatTile
@@ -731,6 +772,40 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
               </div>
 
               {/* ─── Related Spotlights ────────────────────────── */}
+              {relatedLoading && (
+                <div className="cd-section" aria-busy="true" data-testid="spotlight-related-skeleton">
+                  <h2 className="cd-section-title">
+                    <i className="fas fa-lightbulb" aria-hidden="true" />
+                    {lang === 'ht' ? 'Lòt Envansyon' : 'More Inventions'}
+                  </h2>
+                  <div className="spotlight-related-skeleton-grid" aria-hidden="true">
+                    {[0, 1, 2].map((i) => (
+                      <div key={i} className="related-spotlight-card related-spotlight-card--skeleton">
+                        <div className="explore-skel-line" style={{ width: '45%' }} />
+                        <div className="explore-skel-line" style={{ width: '80%' }} />
+                        <div className="explore-skel-line" style={{ width: '65%' }} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {!relatedLoading && relatedError && (
+                <div className="cd-section" role="alert">
+                  <p className="cd-text" style={{ marginTop: 0 }}>
+                    {lang === 'ht'
+                      ? 'Nou pa t kapab chaje lòt envansyon yo.'
+                      : 'Could not load more inventions.'}
+                  </p>
+                  <button
+                    type="button"
+                    className="cd-cta-btn cd-cta-btn-secondary"
+                    onClick={() => setRelatedRetryTick((n) => n + 1)}
+                  >
+                    <i className="fas fa-rotate-right" aria-hidden="true" />{' '}
+                    {lang === 'ht' ? 'Eseye ankò' : 'Try again'}
+                  </button>
+                </div>
+              )}
               {!relatedLoading && relatedSpotlights.length > 0 && (
                 <div className="cd-section">
                   <h2 className="cd-section-title">
@@ -913,6 +988,18 @@ function CreatorCardSection({ payload, creatorProfile, creatorLoading, t, lang, 
                 @{slug}
               </span>
             )}
+            {payload.username && (
+              <Link
+                to={`/sheet/spotlight/identity/${String(payload.username).replace(/^@/, '')}`}
+                className="cd-creator-identity-link"
+              >
+                <i className="fas fa-id-badge" aria-hidden="true" />{' '}
+                {lang === 'ht' ? 'Idantite Spotlight'
+                  : lang === 'fr' ? 'Identité Spotlight'
+                    : lang === 'es' ? 'Identidad Spotlight'
+                      : 'Spotlight Identity'}
+              </Link>
+            )}
           </div>
           {payload.category && (
             <span style={{
@@ -963,7 +1050,7 @@ function InfoTile({ icon, label, value, isLink, href }) {
 // ═══════════════════════════════════════════════════════════════════════
 // HERO EMPTY MESSAGE — for not_found / load_error
 // ═══════════════════════════════════════════════════════════════════════
-function HeroEmptyMessage({ icon, msg }) {
+function HeroEmptyMessage({ icon, msg, actionLabel, onAction }) {
   return (
     <div role="alert" style={{
       display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
@@ -971,6 +1058,11 @@ function HeroEmptyMessage({ icon, msg }) {
     }}>
       <i className={`fas ${icon}`} style={{ fontSize: '2rem', opacity: 0.3 }} aria-hidden="true" />
       <p style={{ margin: 0, fontSize: '0.9rem' }}>{msg}</p>
+      {actionLabel && onAction && (
+        <button type="button" className="cd-hero-empty-action" onClick={onAction}>
+          {actionLabel}
+        </button>
+      )}
     </div>
    );
 }
@@ -1077,6 +1169,22 @@ function RelatedSpotlightCard({ item, t, lang, onClick, resolveCategoryLabel }) 
         <span style={{ fontSize: '0.75rem', color: 'var(--cd-text-secondary, #64748b)' }}>
           {item.display_name || `@${item.username || (lang === 'ht' ? 'Endiskitab' : 'Unknown')}`}
         </span>
+        {Number(item.view_count) > 0 && (
+          <span style={{
+            fontSize: '0.7rem', color: 'var(--cd-text-secondary, #64748b)',
+            display: 'inline-flex', alignItems: 'center', gap: 3,
+          }}>
+            <i className="fas fa-eye" aria-hidden="true" /> {item.view_count}
+          </span>
+        )}
+        {Number(item.share_count) > 0 && (
+          <span style={{
+            fontSize: '0.7rem', color: 'var(--cd-text-secondary, #64748b)',
+            display: 'inline-flex', alignItems: 'center', gap: 3,
+          }}>
+            <i className="fas fa-share-nodes" aria-hidden="true" /> {item.share_count}
+          </span>
+        )}
         <span style={{ marginLeft: 'auto', fontSize: '0.7rem', color: cfg.color, fontWeight: 600 }}>
           {lang === 'ht' ? 'Wè plis' : 'View'} <i className="fas fa-arrow-right" style={{ fontSize: '0.6rem' }} />
         </span>

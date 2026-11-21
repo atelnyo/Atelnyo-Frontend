@@ -641,6 +641,7 @@ export default function HomeFeed({
                       item={item}
                       t={t}
                       lang={lang}
+                      user={user}
                       {...commonProps}
                     />
                   );

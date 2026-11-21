@@ -17,31 +17,45 @@
  * @param {string} type  one of SavedItem.ITEM_TYPE_* (product, job,
  *   spotlight, event, portfolio, course)
  * @param {number|string|undefined} id  the catalog row's id
- * @param {{ user?: object|null, showToast?: function, t?: object }} opts
+ * @param {{ user?: object|null, showToast?: function, t?: object,
+ *   initialCount?: number|null, skipCount?: boolean }} opts
+ *   ``initialCount`` seeds the badge when the caller already fetched the
+ *   count in bulk (Explore's ``saveCounts``), and ``skipCount`` stops this
+ *   hook from issuing a second count request per card.
  */
 import { useCallback, useEffect, useState } from 'react';
 import { savedItemService } from '../services/api';
 
-export default function useSavedItem(type, id, { user, showToast, t } = {}) {
+export default function useSavedItem(type, id, {
+  user, showToast, t, initialCount, skipCount = false,
+} = {}) {
   const [isSaved, setIsSaved] = useState(false);
-  const [saveCount, setSaveCount] = useState(null);
+  const [saveCount, setSaveCount] = useState(initialCount ?? null);
   const [saveBusy, setSaveBusy] = useState(false);
+
+  // Keep an externally supplied count in sync (Explore fetches the
+  // spotlight counts in one batched request and passes each row's count).
+  useEffect(() => {
+    if (initialCount !== undefined) setSaveCount(initialCount ?? null);
+  }, [initialCount]);
 
   // Initial state — the count badge is PUBLIC (anonymous visitors
   // see it too); the heart fill only for a signed-in visitor.
   useEffect(() => {
     if (!id) return;
     let cancelled = false;
-    savedItemService.count(type, id)
-      .then((c) => { if (!cancelled) setSaveCount(c); })
-      .catch(() => {});
+    if (!skipCount) {
+      savedItemService.count(type, id)
+        .then((c) => { if (!cancelled) setSaveCount(c); })
+        .catch(() => {});
+    }
     if (user) {
       savedItemService.isSaved(type, id)
         .then((saved) => { if (!cancelled) setIsSaved(saved); })
         .catch(() => {});
     }
     return () => { cancelled = true; };
-  }, [user, type, id]);
+  }, [user, type, id, skipCount]);
 
   const handleToggleSave = useCallback(async () => {
     if (!user) {
@@ -59,10 +73,13 @@ export default function useSavedItem(type, id, { user, showToast, t } = {}) {
       else await savedItemService.create(type, id);
       // Re-sync the badge with the authoritative count — closes the
       // race where the initial count fetch resolves AFTER a fast
-      // toggle with a stale (pre-toggle) value.
-      savedItemService.count(type, id)
-        .then((c) => setSaveCount(c))
-        .catch(() => {});
+      // toggle with a stale (pre-toggle) value. Bulk-count callers
+      // keep the optimistic value instead (skipCount).
+      if (!skipCount) {
+        savedItemService.count(type, id)
+          .then((c) => setSaveCount(c))
+          .catch(() => {});
+      }
     } catch (e) {
       setIsSaved(wasSaved);
       setSaveCount((c) => (c == null ? c : Math.max(0, c + (wasSaved ? 1 : -1))));

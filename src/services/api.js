@@ -1909,6 +1909,9 @@ export const spotlightService = {
   reapply: (id) => api.post(`spotlight/${id}/reapply/`),
   // Phase 58 — related spotlights (same category, excluding current).
   related: (id) => api.get(`spotlight/${id}/related/`),
+  // Share counter — fired best-effort after the browser share sheet /
+  // clipboard succeeds. Public (no auth); returns { share_count }.
+  share: (id) => api.post(`spotlight/${id}/share/`),
   // ─── Admin Spotlight (Phase 47/48) — full admin control ─────
   // The `/admin-all/` endpoint returns ALL applications with full
   // detail (KYC + messages included). Admin can filter by status,
@@ -1919,6 +1922,9 @@ export const spotlightService = {
   adminApprove: (id) => api.post(`spotlight/${id}/approve/`),
   adminReject: (id, note) => api.post(`spotlight/${id}/reject/`, { review_note: note }),
   adminRequestInfo: (id, body) => api.post(`spotlight/${id}/request-info/`, { body }),
+  // Hide/restore an approved Spotlight publicly (staff-only).
+  adminArchive: (id) => api.post(`spotlight/${id}/archive/`),
+  adminUnarchive: (id) => api.post(`spotlight/${id}/unarchive/`),
 
   // Phase 49 §11.2 — Public retrieve by id (deep-link). Hits
   // ``GET /api/spotlight/<pk>/`` and returns the slim

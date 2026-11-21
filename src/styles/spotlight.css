@@ -831,3 +831,205 @@
     justify-content: center;
   }
 }
+
+/* ─── Business Spotlight card overlay ───────────────────────────────
+   Same interaction contract as the Explore creator cards: one real
+   link covers the card, while the website link and read-more button
+   re-capture pointer events above it. */
+.business-spotlight-card--overlay {
+  position: relative;
+}
+
+.business-spotlight-open {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  cursor: pointer;
+}
+
+.business-spotlight-open:focus-visible {
+  outline: 2px solid #f59e0b;
+  outline-offset: -2px;
+  box-shadow: inset 0 0 0 2px rgba(245, 158, 11, 0.25);
+}
+
+.business-spotlight-card--overlay > :not(.business-spotlight-open) {
+  pointer-events: none;
+}
+
+.business-spotlight-card--overlay .business-spotlight-website,
+.business-spotlight-card--overlay .business-spotlight-expand {
+  pointer-events: auto;
+  position: relative;
+  z-index: 2;
+}
+
+.business-spotlight-proof {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+}
+
+.business-spotlight-proof span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.business-spotlight-card--overlay .business-spotlight-view-btn {
+  cursor: pointer;
+}
+
+body.dark-mode .business-spotlight-proof {
+  color: #94a3b8;
+}
+
+/* ─── Spotlight Identity: skeleton, retry, feed heading ──────────── */
+.spotlight-feed-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 4px 0 12px;
+}
+
+.spotlight-feed-heading h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary, #1e293b);
+}
+
+.spotlight-feed-heading span {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--spotlight-primary, #a855f7);
+  font-variant-numeric: tabular-nums;
+}
+
+.spotlight-feed-loading {
+  display: flex;
+  justify-content: center;
+  padding: 28px 0;
+  color: var(--spotlight-primary, #a855f7);
+}
+
+.spotlight-retry-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 8px 18px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 999px;
+  background: var(--bg-primary, #fff);
+  color: var(--spotlight-primary, #a855f7);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.spotlight-retry-btn:hover {
+  border-color: var(--spotlight-primary, #a855f7);
+}
+
+.spotlight-retry-btn:focus-visible {
+  outline: 2px solid var(--spotlight-primary, #a855f7);
+  outline-offset: 2px;
+}
+
+.spotlight-error--inline {
+  padding: 20px;
+}
+
+.spotlight-skeleton .spotlight-identity-header,
+.spotlight-skeleton .spotlight-stat,
+.spotlight-skeleton .achievement-card {
+  pointer-events: none;
+}
+
+.si-skel-header {
+  align-items: center;
+}
+
+.si-skel-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: linear-gradient(90deg, rgba(148,163,184,.16) 25%, rgba(148,163,184,.28) 50%, rgba(148,163,184,.16) 75%);
+  background-size: 200% 100%;
+  animation: si-skel-shimmer 1.4s ease-in-out infinite;
+}
+
+.si-skel-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.si-skel-line {
+  display: block;
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, rgba(148,163,184,.16) 25%, rgba(148,163,184,.28) 50%, rgba(148,163,184,.16) 75%);
+  background-size: 200% 100%;
+  animation: si-skel-shimmer 1.4s ease-in-out infinite;
+}
+
+.si-skel-line--title { width: 55%; height: 18px; }
+.si-skel-line--sub { width: 38%; height: 10px; }
+.si-skel-line--icon { width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0; }
+.si-skel-line--number { width: 46px; height: 20px; }
+.si-skel-stat { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.si-skel-achievement { align-items: center; }
+.si-skel-achievement .si-skel-line--icon { width: 40px; height: 40px; }
+
+@keyframes si-skel-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+body.dark-mode .si-skel-line,
+body.dark-mode .si-skel-avatar {
+  background: linear-gradient(90deg, #272b3d 25%, #333852 50%, #272b3d 75%);
+  background-size: 200% 100%;
+}
+
+body.dark-mode .spotlight-feed-heading h3 { color: #f1f5f9; }
+
+@media (prefers-reduced-motion: reduce) {
+  .si-skel-line,
+  .si-skel-avatar { animation: none; }
+  .achievement-card,
+  .spotlight-animate-in { animation: none; }
+}
+
+/* Creator card → Spotlight Identity link on the detail page. */
+.cd-creator-identity-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  width: fit-content;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--cd-primary, #2563eb);
+  text-decoration: none;
+}
+
+.cd-creator-identity-link:hover { text-decoration: underline; }
+
+.cd-creator-identity-link:focus-visible {
+  outline: 2px solid var(--cd-primary, #2563eb);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+body.dark-mode .cd-creator-identity-link { color: #93c5fd; }

@@ -7,45 +7,53 @@
  *   31-60:  Yellow (Growing)
  *   61-80:  Blue (Trusted)
  *   81-100: Green (Verified)
+ *
+ * The ring is decoration; the score + level are announced through a
+ * single role="img" label. Ring colours come from tokens so light and
+ * dark themes both keep the track visible.
  */
 import React from 'react';
 
 const TRUST_LEVELS = [
-  { min: 0, max: 30, label: 'Nouvo', labelEn: 'New', color: '#ef4444', bgColor: '#fef2f2' },
-  { min: 31, max: 60, label: 'Ap grandi', labelEn: 'Growing', color: '#f59e0b', bgColor: '#fffbeb' },
-  { min: 61, max: 80, label: 'Fyab', labelEn: 'Trusted', color: '#3b82f6', bgColor: '#eff6ff' },
-  { min: 81, max: 100, label: 'Verifye', labelEn: 'Verified', color: '#22c55e', bgColor: '#f0fdf4' },
+  { min: 0, max: 30, labels: { ht: 'Nouvo', en: 'New', fr: 'Nouveau', es: 'Nuevo' }, color: '#ef4444' },
+  { min: 31, max: 60, labels: { ht: 'Ap grandi', en: 'Growing', fr: 'En croissance', es: 'Creciendo' }, color: '#f59e0b' },
+  { min: 61, max: 80, labels: { ht: 'Fyab', en: 'Trusted', fr: 'Fiable', es: 'Confiable' }, color: '#3b82f6' },
+  { min: 81, max: 100, labels: { ht: 'Verifye', en: 'Verified', fr: 'Vérifié', es: 'Verificado' }, color: '#22c55e' },
 ];
 
 function getTrustLevel(score) {
-  return TRUST_LEVELS.find(l => score >= l.min && score <= l.max) || TRUST_LEVELS[0];
+  return TRUST_LEVELS.find((l) => score >= l.min && score <= l.max) || TRUST_LEVELS[0];
 }
 
 export default function TrustScoreBadge({ score = 0, size = 80, lang = 'en' }) {
-  const level = getTrustLevel(score);
+  const safeScore = Math.max(0, Math.min(100, Number(score) || 0));
+  const level = getTrustLevel(safeScore);
+  const label = level.labels[lang] || level.labels.en;
   const radius = (size - 8) / 2;
   const circumference = 2 * Math.PI * radius;
-  const progress = (score / 100) * circumference;
+  const progress = (safeScore / 100) * circumference;
 
   return (
-    <div style={{
-      display: 'inline-flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: 4,
-    }}>
-      <div style={{ position: 'relative', width: size, height: size }}>
+    <div
+      role="img"
+      aria-label={`${safeScore} / 100 · ${label}`}
+      style={{
+        display: 'inline-flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 4,
+      }}
+    >
+      <div style={{ position: 'relative', width: size, height: size }} aria-hidden="true">
         <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
-          {/* Background circle */}
           <circle
             cx={size / 2}
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke="#e5e7eb"
+            stroke="var(--border-color, #e5e7eb)"
             strokeWidth={4}
           />
-          {/* Progress circle */}
           <circle
             cx={size / 2}
             cy={size / 2}
@@ -59,7 +67,6 @@ export default function TrustScoreBadge({ score = 0, size = 80, lang = 'en' }) {
             style={{ transition: 'stroke-dashoffset 0.5s ease' }}
           />
         </svg>
-        {/* Score number */}
         <div style={{
           position: 'absolute',
           top: '50%',
@@ -73,18 +80,21 @@ export default function TrustScoreBadge({ score = 0, size = 80, lang = 'en' }) {
             color: level.color,
             lineHeight: 1,
           }}>
-            {score}
+            {safeScore}
           </div>
         </div>
       </div>
-      <div style={{
-        fontSize: 11,
-        fontWeight: 600,
-        color: level.color,
-        textTransform: 'uppercase',
-        letterSpacing: 0.5,
-      }}>
-        {lang === 'ht' ? level.label : level.labelEn}
+      <div
+        aria-hidden="true"
+        style={{
+          fontSize: 11,
+          fontWeight: 600,
+          color: level.color,
+          textTransform: 'uppercase',
+          letterSpacing: 0.5,
+        }}
+      >
+        {label}
       </div>
     </div>
   );

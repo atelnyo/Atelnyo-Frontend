@@ -1852,9 +1852,18 @@ export function Explore({
             <div className="explore-hscroll">
               {visibleSections.spotlight.map((item) => (
                 item._type === 'business' ? (
-                  <BusinessSpotlightCard key={`biz-${item.id}`} business={item} />
+                  <BusinessSpotlightCard key={`biz-${item.id}`} business={item} t={t} lang={lang} />
                 ) : (
-                  <SpotlightCard key={item.id} item={item} t={t} lang={lang} onOpen={handleLogAndOpenSpotlight} saveCount={saveCounts.spotlight?.[item.id]} />
+                  <SpotlightCard
+                    key={item.id}
+                    item={item}
+                    t={t}
+                    lang={lang}
+                    user={user}
+                    showToast={showToast}
+                    onOpen={handleLogAndOpenSpotlight}
+                    saveCount={saveCounts.spotlight?.[item.id]}
+                  />
                 )
               ))}
             </div>

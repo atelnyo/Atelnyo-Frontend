@@ -14,6 +14,8 @@ import useSafeNavigate from '../../../hooks/useSafeNavigate';
 import { buildContentUrl } from '../../../utils/contentUrl';
 import CardOpenButton from './CardOpenButton';
 import SaveCountChip from './SaveCountChip';
+import SaveHeartButton from '../../../components/SaveHeartButton';
+import useSavedItem from '../../../hooks/useSavedItem';
 
 const CATEGORY_CFG = {
   talent:   { bg: 'linear-gradient(135deg, #7c3aed22, #f59e0b18)', border: '#7c3aed44', pill: '#7c3aed', icon: 'fa-star' },
@@ -41,7 +43,9 @@ function resolveCategoryLabel(cat, t, lang) {
   return fb[cat] || fb.other;
 }
 
-export default function SpotlightCard({ item, t, lang, onOpen, saveCount = null }) {
+export default function SpotlightCard({
+  item, t, lang, onOpen, saveCount: initialSaveCount = null, user, showToast,
+}) {
   const navigate = useSafeNavigate();
   const [imgFailed, setImgFailed] = useState(false);
 
@@ -51,6 +55,21 @@ export default function SpotlightCard({ item, t, lang, onOpen, saveCount = null 
   const desc = item.invention_description || '';
   const username = item.username || '';
   const displayName = item.display_name || username;
+  const views = Number(item.view_count) || 0;
+  const shares = Number(item.share_count) || 0;
+  // Save straight from the rail. Explore already fetches counts in
+  // bulk, so the hook only loads the viewer's saved flag (skipCount).
+  const {
+    isSaved, saveCount, saveBusy, handleToggleSave,
+  } = useSavedItem('spotlight', item.id, {
+    user,
+    showToast,
+    t,
+    initialCount: initialSaveCount,
+    // Explore passes a batched count; the HomeFeed rail does not, so the
+    // hook loads the public count itself there.
+    skipCount: initialSaveCount !== undefined && initialSaveCount !== null,
+  });
   const initial = (username.charAt(0) || '?').toUpperCase();
 
   // Real avatar priority: public profile avatar > cover_image > generated SVG > ui-avatars
@@ -150,6 +169,29 @@ export default function SpotlightCard({ item, t, lang, onOpen, saveCount = null 
           </p>
         )}
 
+        {/* Engagement counters — only rendered when the BE payload has
+            real numbers, so legacy rows keep the compact layout. */}
+        {(views > 0 || shares > 0) && (
+          <div className="spotlight-card-stats">
+            {views > 0 && (
+              <span
+                className="spotlight-card-stat"
+                title={`${views} ${t.spotlight_views || (lang === 'ht' ? 'vi' : 'views')}`}
+              >
+                <i className="fas fa-eye" aria-hidden="true" /> {views}
+              </span>
+            )}
+            {shares > 0 && (
+              <span
+                className="spotlight-card-stat"
+                title={`${shares} ${t.spotlight_shares || (lang === 'ht' ? 'pataje' : 'shares')}`}
+              >
+                <i className="fas fa-share-nodes" aria-hidden="true" /> {shares}
+              </span>
+            )}
+          </div>
+        )}
+
         {/* Author + external link row */}
         <div className="spotlight-card-footer">
           {username ? (
@@ -164,15 +206,24 @@ export default function SpotlightCard({ item, t, lang, onOpen, saveCount = null 
           )}
           <SaveCountChip count={saveCount} t={t} />
           <span className="spotlight-card-actions">
+            <SaveHeartButton
+              className="spotlight-save-btn"
+              savedColor="#f59e0b"
+              isSaved={isSaved}
+              saveBusy={saveBusy}
+              saveCount={saveCount}
+              onToggle={handleToggleSave}
+              t={t}
+            />
             {item.link_url && (
               <a
                 href={item.link_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="spotlight-ext-link"
-                aria-label={t.explore_open_external || 'Open external'}
+                aria-label={`${t.explore_open_external || 'Open external'}: ${title}`}
                 onClick={(e) => e.stopPropagation()}
-                title={t.explore_open_external || 'Open external'}
+                title={`${t.explore_open_external || 'Open external'}: ${title}`}
                 style={{ color: cfg.pill }}
               >
                 <i className="fas fa-arrow-up-right-from-square" aria-hidden="true" />

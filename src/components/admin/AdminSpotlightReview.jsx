@@ -17,6 +17,8 @@
  *       POST /api/spotlight/<id>/approve/ — approve
  *       POST /api/spotlight/<id>/reject/  — reject with note
  *       POST /api/spotlight/<id>/request-info/ — ask for more info
+ *       POST /api/spotlight/<id>/archive/    — hide an approved row
+ *       POST /api/spotlight/<id>/unarchive/  — restore it publicly
  *       GET  /api/spotlight/<id>/messages/ — thread
  *       GET  /api/spotlight/<id>/kyc/     — KYC detail
  */
@@ -106,6 +108,11 @@ function ApplicationRow({ app, onSelect, isSelected }) {
           </span>
           <CategoryPill category={app.category} />
           <StatusBadge status={app.status} />
+          {app.is_archived && (
+            <span className="ad-spot-status-badge" style={{ background: 'rgba(100,116,139,0.12)', color: '#64748b', border: '1px solid rgba(100,116,139,0.3)' }}>
+              <i className="fas fa-box-archive" aria-hidden="true" /> Archived
+            </span>
+          )}
         </div>
         <div className="ad-spot-row-desc">{shorten(app.invention_description, 100)}</div>
       </div>
@@ -163,17 +170,28 @@ function DetailPanel({ app, onRefresh }) {
   const handleAction = async (action, extra = {}) => {
     setActionLoading(action);
     try {
-      if (action === 'approve') await api.post(`spotlight/${app.id}/approve/`, extra);
-      else if (action === 'reject') {
+      let updated = null;
+      if (action === 'approve') {
+        updated = (await api.post(`spotlight/${app.id}/approve/`, extra))?.data;
+      } else if (action === 'reject') {
         if (!note.trim()) return;
-        await api.post(`spotlight/${app.id}/reject/`, { review_note: note });
+        updated = (await api.post(`spotlight/${app.id}/reject/`, { review_note: note }))?.data;
       }
       else if (action === 'request-info') {
         if (!note.trim()) return;
-        await api.post(`spotlight/${app.id}/request-info/`, { body: note });
+        const res = await api.post(`spotlight/${app.id}/request-info/`, { body: note });
+        updated = res?.data?.application || res?.data;
+      }
+      else if (action === 'archive') {
+        updated = (await api.post(`spotlight/${app.id}/archive/`))?.data;
+      }
+      else if (action === 'unarchive') {
+        updated = (await api.post(`spotlight/${app.id}/unarchive/`))?.data;
       }
       setNote('');
-      onRefresh?.();
+      // Feed the fresh row back so the detail panel does not keep a
+      // stale status / is_archived flag after the action succeeds.
+      onRefresh?.(updated || undefined);
     } catch (err) {
       console.error(`Action ${action} failed:`, err);
     } finally { setActionLoading(null); }
@@ -192,6 +210,11 @@ function DetailPanel({ app, onRefresh }) {
           {' '}{app.invention_title}
         </h2>
         <StatusBadge status={app.status} />
+        {app.is_archived && (
+          <span className="ad-spot-status-badge" style={{ background: 'rgba(100,116,139,0.12)', color: '#64748b', border: '1px solid rgba(100,116,139,0.3)' }}>
+            <i className="fas fa-box-archive" aria-hidden="true" /> Archived
+          </span>
+        )}
       </div>
 
       {/* Meta grid */}
@@ -302,6 +325,31 @@ function DetailPanel({ app, onRefresh }) {
                 </button>
               </div>
             </>
+          )}
+          {app.status === 'approved' && (
+            app.is_archived ? (
+              <button
+                type="button"
+                className="ad-spot-btn"
+                style={{ background: 'rgba(16,185,129,0.12)', color: '#047857', border: '1px solid rgba(16,185,129,0.3)' }}
+                onClick={() => handleAction('unarchive')}
+                disabled={actionLoading === 'unarchive'}
+              >
+                {actionLoading === 'unarchive' ? <i className="fas fa-spinner fa-spin" /> : <i className="fas fa-box-open" />}
+                {' '}Restore to public
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="ad-spot-btn"
+                style={{ background: 'rgba(100,116,139,0.12)', color: '#475569', border: '1px solid rgba(100,116,139,0.3)' }}
+                onClick={() => handleAction('archive')}
+                disabled={actionLoading === 'archive'}
+              >
+                {actionLoading === 'archive' ? <i className="fas fa-spinner fa-spin" /> : <i className="fas fa-box-archive" />}
+                {' '}Archive from public
+              </button>
+            )
           )}
         </div>
       </div>
@@ -542,7 +590,10 @@ export default function AdminSpotlightReview({ lang = 'en', showToast, user, onN
         <div className="ad-spot-detail-panel">
           <DetailPanel
             app={selected}
-            onRefresh={() => setRefreshKey((k) => k + 1)}
+            onRefresh={(updated) => {
+              if (updated?.id) setSelected(updated);
+              setRefreshKey((k) => k + 1);
+            }}
           />
         </div>
       </div>
