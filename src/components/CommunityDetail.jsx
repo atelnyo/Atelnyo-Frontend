@@ -1688,6 +1688,113 @@ export default function CommunityDetail({ lang = 'en', t = {}, showToast, user, 
     return () => { cancelled = true; };
   }, [slug, lang]);
 
+  // Membership can change while the page stays open: a moderator approves
+  // a pending request, another tab leaves, or access is revoked. The
+  // community response is the source of truth, so revalidate it when the
+  // user returns to the tab and poll while this viewer is pending. This
+  // flips the composer / private gate without a full-page reload.
+  const myStatusRef = useRef(myStatus);
+  useEffect(() => { myStatusRef.current = myStatus; }, [myStatus]);
+  const showToastRef = useRef(showToast);
+  useEffect(() => { showToastRef.current = showToast; }, [showToast]);
+  const refreshSeqRef = useRef(0);
+  const lastRefreshAtRef = useRef(0);
+
+  const refreshMembership = useCallback(() => {
+    if (!slug) return;
+    // focus + visibilitychange fire together on tab return; one request
+    // is enough for both.
+    const now = Date.now();
+    if (now - lastRefreshAtRef.current < 1200) return;
+    lastRefreshAtRef.current = now;
+    const seq = refreshSeqRef.current + 1;
+    refreshSeqRef.current = seq;
+    communitiesService.get(slug)
+      .then((r) => {
+        const comm = r?.data;
+        if (seq !== refreshSeqRef.current) return;
+        if (!comm || String(comm.slug) !== String(slug)) return;
+        const nextStatus = comm.my_status ?? (comm.is_member ? 'active' : null);
+        if (myStatusRef.current === 'pending' && nextStatus === 'active') {
+          showToastRef.current?.(
+            t4(
+              lang,
+              'Demann ou apwouve! Ou ka pibliye kounye a.',
+              'Request approved! You can publish now.',
+              'Demande approuvée ! Vous pouvez publier.',
+              '¡Solicitud aprobada! Ya puedes publicar!',
+            ),
+            'check-circle',
+          );
+        }
+        setCommunity((prev) => {
+          if (!prev) return prev;
+          const unlocked = !prev.is_member && Boolean(comm.is_member);
+          return {
+            ...prev,
+            is_member: Boolean(comm.is_member),
+            my_status: comm.my_status ?? null,
+            current_user_role: comm.current_user_role ?? null,
+            can_read: comm.can_read ?? prev.can_read,
+            member_count: comm.member_count ?? prev.member_count,
+            description: comm.description ?? prev.description,
+            rules: comm.rules ?? prev.rules,
+            read_visibility: comm.read_visibility ?? prev.read_visibility,
+            join_mode: comm.join_mode ?? prev.join_mode,
+            // A private community blanked these for non-readers; merge them
+            // back when approval unlocks the content.
+            ...(unlocked ? {
+              post_count: comm.post_count ?? prev.post_count,
+              event_count: comm.event_count ?? prev.event_count,
+            } : {}),
+          };
+        });
+        setIsMember(Boolean(comm.is_member));
+        setMyStatus(nextStatus);
+        myStatusRef.current = nextStatus;
+        if (typeof comm.member_count === 'number') setMemberCount(comm.member_count);
+      })
+      .catch(() => { /* keep the last known membership on a transient error */ });
+  }, [slug, lang]);
+
+  useEffect(() => {
+    const onFocus = () => refreshMembership();
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') refreshMembership();
+    };
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [refreshMembership]);
+
+  // The notification socket already delivers the joiner's
+  // ``community_joined`` event; App forwards it here. Revalidate right
+  // away (bypassing the focus throttle) so approval unlocks the composer
+  // and private content without a reload.
+  useEffect(() => {
+    const onMembership = (event) => {
+      const eventSlug = event?.detail?.slug;
+      if (!slug || (eventSlug && String(eventSlug) !== String(slug))) return;
+      lastRefreshAtRef.current = 0;
+      refreshMembership();
+    };
+    window.addEventListener('atelnyo:community-membership', onMembership);
+    return () => window.removeEventListener('atelnyo:community-membership', onMembership);
+  }, [slug, refreshMembership]);
+
+  // Approval is asynchronous: keep a pending request fresh while the
+  // member waits, but only while the tab is visible.
+  useEffect(() => {
+    if (myStatus !== 'pending') return undefined;
+    const id = setInterval(() => {
+      if (document.visibilityState === 'visible') refreshMembership();
+    }, 30_000);
+    return () => clearInterval(id);
+  }, [myStatus, refreshMembership]);
+
   // ─── Content Intelligence SEO data ─────────────────────────────
   const [ciSeo, setCiSeo] = useState(null);
   useEffect(() => {

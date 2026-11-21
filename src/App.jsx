@@ -1248,6 +1248,17 @@ function App() {
         try {
           window.dispatchEvent(new CustomEvent('atelnyo:notif:new', { detail: { event, unread: next } }));
         } catch { /* non-critical */ }
+        // An approved join request arrives as a ``community_joined``
+        // event. Forward the slug so an open community page can unlock
+        // its member UI immediately, without reloading or waiting for
+        // the reconciliation poll.
+        if (event?.event_type === 'community_joined' && event?.data?.community_slug) {
+          try {
+            window.dispatchEvent(new CustomEvent('atelnyo:community-membership', {
+              detail: { slug: event.data.community_slug },
+            }));
+          } catch { /* non-critical */ }
+        }
       },
       onUnread: ({ unread, total }) => {
         if (typeof unread === 'number') {

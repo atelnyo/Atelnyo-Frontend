@@ -1072,6 +1072,114 @@ describe('Community surfaces', () => {
       .toHaveLength(1);
   });
 
+  it('revalidates membership on focus and unlocks the composer after approval', async () => {
+    communitiesService.get.mockReset();
+    communitiesService.get
+      .mockResolvedValueOnce({
+        data: {
+          id: 1, slug: 'test', name: 'Test community', description: 'Pending approval.',
+          member_count: 1, is_member: false, current_user_role: null, my_status: 'pending',
+          join_mode: 'approval', read_visibility: 'public', can_read: true, rules: [],
+        },
+      })
+      .mockResolvedValue({
+        data: {
+          id: 1, slug: 'test', name: 'Test community', description: 'Approved member.',
+          member_count: 2, is_member: true, current_user_role: 'member', my_status: 'active',
+          join_mode: 'approval', read_visibility: 'public', can_read: true, rules: [],
+        },
+      });
+    const showToast = vi.fn();
+
+    render(
+      <HelmetProvider>
+        <MemoryRouter initialEntries={['/community/test/posts']}>
+          <Routes>
+            <Route
+              path="/community/:slug"
+              element={<CommunityDetail lang="en" user={USER} showToast={showToast} />}
+            >
+              <Route path="posts" element={<CommunityPosts />} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      </HelmetProvider>,
+    );
+
+    // Pending members see the request state and no composer.
+    expect(await screen.findByText('Request sent')).toBeTruthy();
+    await waitFor(() => expect(screen.queryByTestId('post-composer-input')).toBeNull());
+
+    // Returning to the tab revalidates membership without a reload.
+    act(() => { window.dispatchEvent(new Event('focus')); });
+
+    await waitFor(() => expect(communitiesService.get).toHaveBeenCalledTimes(2));
+    expect(await screen.findByTestId('post-composer-input')).toBeTruthy();
+    expect(screen.queryByText('Request sent')).toBeNull();
+    expect(showToast).toHaveBeenCalledWith(
+      expect.stringContaining('Request approved'), 'check-circle',
+    );
+  });
+
+  it('unlocks membership when the notification socket reports the approval', async () => {
+    communitiesService.get.mockReset();
+    communitiesService.get
+      .mockResolvedValueOnce({
+        data: {
+          id: 1, slug: 'test', name: 'Test community', description: 'Pending approval.',
+          member_count: 1, is_member: false, current_user_role: null, my_status: 'pending',
+          join_mode: 'approval', read_visibility: 'public', can_read: true, rules: [],
+        },
+      })
+      .mockResolvedValue({
+        data: {
+          id: 1, slug: 'test', name: 'Test community', description: 'Approved member.',
+          member_count: 2, is_member: true, current_user_role: 'member', my_status: 'active',
+          join_mode: 'approval', read_visibility: 'public', can_read: true, rules: [],
+        },
+      });
+    const showToast = vi.fn();
+
+    render(
+      <HelmetProvider>
+        <MemoryRouter initialEntries={['/community/test/posts']}>
+          <Routes>
+            <Route
+              path="/community/:slug"
+              element={<CommunityDetail lang="en" user={USER} showToast={showToast} />}
+            >
+              <Route path="posts" element={<CommunityPosts />} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      </HelmetProvider>,
+    );
+
+    expect(await screen.findByText('Request sent')).toBeTruthy();
+    await waitFor(() => expect(screen.queryByTestId('post-composer-input')).toBeNull());
+
+    // A socket event for another community must not refetch this page.
+    act(() => {
+      window.dispatchEvent(new CustomEvent('atelnyo:community-membership', {
+        detail: { slug: 'other' },
+      }));
+    });
+    expect(communitiesService.get).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      window.dispatchEvent(new CustomEvent('atelnyo:community-membership', {
+        detail: { slug: 'test' },
+      }));
+    });
+
+    await waitFor(() => expect(communitiesService.get).toHaveBeenCalledTimes(2));
+    expect(await screen.findByTestId('post-composer-input')).toBeTruthy();
+    expect(screen.queryByText('Request sent')).toBeNull();
+    expect(showToast).toHaveBeenCalledWith(
+      expect.stringContaining('Request approved'), 'check-circle',
+    );
+  });
+
   describe('Community description', () => {
     it('keeps short descriptions compact without a toggle', () => {
       render(<CommunityDescription text="A short description." lang="en" />);
