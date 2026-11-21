@@ -310,10 +310,16 @@ export function Explore({
     const el = chipsRef.current;
     if (!el) return;
     const max = el.scrollWidth - el.clientWidth;
-    setChipsScroll({
+    const next = {
       prev: el.scrollLeft > 4,
       next: max > 4 && el.scrollLeft < max - 4,
-    });
+    };
+    // ResizeObserver can fire repeatedly around a layout change. Keep the
+    // previous object when nothing changed so React bails out instead of
+    // re-rendering (and potentially producing a ResizeObserver loop).
+    setChipsScroll((prev) => (
+      prev.prev === next.prev && prev.next === next.next ? prev : next
+    ));
   }, []);
 
   useEffect(() => {
