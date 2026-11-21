@@ -630,7 +630,7 @@ export default function CommunityEventsPanel({
                     {ev.location ? ` · ${ev.location}` : ''}
                     {ev.is_online ? ` · 🌐 ${isHt ? 'An liy' : 'Online'}` : ''}
                     {ev.is_free === false && ev.price != null ? ` · $${ev.price} ${ev.currency || 'USD'}` : ''}
-                    {` · 👥 ${ev.attendee_count ?? 0}`}
+                    {` · 👥 ${ev.attendee_count ?? 0}${ev.max_attendees ? ` / ${ev.max_attendees}` : ''}`}
                   </div>
                   {ev.description && (
                     <ExpandableText
