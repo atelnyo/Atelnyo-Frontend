@@ -20,13 +20,30 @@ vi.mock('axios', () => ({
 }));
 
 // Imported AFTER the mock so the module wires the stubbed client.
-const { marketplaceService } = await import('./api');
+const { marketplaceService, adminPlatformConfigService } = await import('./api');
 
 // The single client instance created at module load.
 const mockPost = axios.create.mock.results[0].value.post;
 
 beforeEach(() => {
   mockPost.mockReset();
+});
+
+describe('adminPlatformConfigService.test', () => {
+  it('sends the on-screen draft so test-before-save is accurate', async () => {
+    mockPost.mockResolvedValue({ data: { ok: true } });
+    await adminPlatformConfigService.test(3, 'AQ-draft');
+    expect(mockPost).toHaveBeenCalledWith(
+      'admin/platform-config/3/test/',
+      { value: 'AQ-draft' },
+    );
+  });
+
+  it('omits the value when nothing was edited', async () => {
+    mockPost.mockResolvedValue({ data: { ok: true } });
+    await adminPlatformConfigService.test(3);
+    expect(mockPost).toHaveBeenCalledWith('admin/platform-config/3/test/', {});
+  });
 });
 
 describe('marketplaceService.bulkDeleteVariants', () => {

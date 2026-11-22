@@ -1779,8 +1779,12 @@ export const adminPlatformConfigService = {
   create: (data) => api.post('admin/platform-config/', data),
   // DELETE /api/admin/platform-config/<id>/ — remove a key
   remove: (id) => api.delete(`admin/platform-config/${id}/`),
-  // POST /api/admin/platform-config/<id>/test/ — validate the stored key
-  test: (id) => api.post(`admin/platform-config/${id}/test/`),
+  // POST /api/admin/platform-config/<id>/test/ — validate the key. The
+  // optional ``value`` is the draft currently on screen (test-before-save).
+  test: (id, value) => api.post(
+    `admin/platform-config/${id}/test/`,
+    typeof value === 'string' ? { value } : {},
+  ),
 };
 
 // ─── Events (Phase 34) ──────────────────────────────────────────────────

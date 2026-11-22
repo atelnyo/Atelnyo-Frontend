@@ -277,11 +277,13 @@ export default function AdminPlatformConfig({ lang = 'en', showToast }) {
     }
   }, [addDraft, showToast, t]);
 
-  // Test a stored key against its provider (format + live check).
+  // Test the value on screen against its provider (format + live check).
+  // An unsaved draft must be probed too: testing the stale stored value made
+  // a freshly pasted key report "invalid_client".
   const handleTest = useCallback(async (row) => {
     setTestingKey(row.key);
     try {
-      const resp = await adminPlatformConfigService.test(row.id);
+      const resp = await adminPlatformConfigService.test(row.id, editing[row.key]);
       const { ok, message } = resp?.data || {};
       showToast?.(
         message || (ok ? t('Key looks good.', 'Kle a sanble bon.') : t('Key check failed.', 'Tès kle a echwe.')),
@@ -295,7 +297,7 @@ export default function AdminPlatformConfig({ lang = 'en', showToast }) {
     } finally {
       setTestingKey(null);
     }
-  }, [showToast, t]);
+  }, [showToast, t, editing]);
 
   // Delete a key (with confirmation).
   const handleDelete = useCallback(async (row) => {
