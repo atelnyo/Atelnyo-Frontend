@@ -36,6 +36,7 @@ import { businessCatalogService, businessInquiryService, businessOrderService, b
 import { businessDayLabel, isClosedHours } from '../../utils/businessHours';
 import { requireLogin } from '../../utils/history';
 import { ogImageForLang } from '../profile/profileConstants';
+import { inlineText } from '../../utils/inlineI18n';
 
 function buildOgUrl(slug) {
   const base = window.location.origin || 'https://atelnyo.app';
@@ -107,7 +108,7 @@ function CatalogCard({ item, lang, isHt, canOrder, onOrder }) {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
           <span style={{ color: 'var(--cd-text, #f1f5f9)', fontWeight: 700, fontSize: '0.95rem' }}>{item.name}</span>
           <span style={{ color: '#f472b6', fontWeight: 800, fontSize: '0.9rem', whiteSpace: 'nowrap' }}>
-            {value.toLocaleString(isHt ? 'fr-HT' : 'en-US', { minimumFractionDigits: 2 })} {symbol}
+            {value.toLocaleString(isHt ? 'fr-HT' : inlineText(lang, 'en-US'), { minimumFractionDigits: 2 })} {symbol}
           </span>
         </div>
         {item.category && (
@@ -135,7 +136,7 @@ function CatalogCard({ item, lang, isHt, canOrder, onOrder }) {
             data-testid="business-public-order-btn"
           >
             <i className="fas fa-cart-plus" aria-hidden="true" />
-            {isHt ? 'Kòmande' : 'Order'}
+            {isHt ? 'Kòmande' : inlineText(lang, 'Order')}
           </button>
         )}
       </div>
@@ -169,7 +170,7 @@ function FaqSection({ bizFaqs, prodFaqs, t, lang }) {
   // Group product FAQs under their item name (server sends item_name).
   const grouped = {};
   (prodFaqs || []).forEach((f) => {
-    const key = f.item_name || (isHt ? 'Pwodui' : 'Product');
+    const key = f.item_name || (isHt ? 'Pwodui' : inlineText(lang, 'Product'));
     (grouped[key] = grouped[key] || []).push(f);
   });
 
@@ -177,13 +178,13 @@ function FaqSection({ bizFaqs, prodFaqs, t, lang }) {
     <section className="cd-section" data-testid="business-public-faqs-section">
       <h2 className="cd-section-title">
         <i className="fas fa-circle-question" aria-hidden="true" />
-        {t?.business_public_faqs || (isHt ? 'Kesyon souvan' : 'Frequently asked questions')}
+        {t?.business_public_faqs || (isHt ? 'Kesyon souvan' : inlineText(lang, 'Frequently asked questions'))}
       </h2>
 
       {(bizFaqs || []).length > 0 && (
         <div className="biz-faq-group" data-testid="business-public-business-faqs">
           <h3 className="biz-faq-group-title">
-            {t?.business_public_biz_faq || (isHt ? 'Biznis la' : 'About the business')}
+            {t?.business_public_biz_faq || (isHt ? 'Biznis la' : inlineText(lang, 'About the business'))}
           </h3>
           <FaqAccordion items={bizFaqs} t={t} lang={lang} />
         </div>
@@ -221,7 +222,7 @@ function ReviewsSection({ reviews, t, lang }) {
     <section className="cd-section" data-testid="business-public-reviews-section">
       <h2 className="cd-section-title">
         <i className="fas fa-star" aria-hidden="true" />
-        {t?.business_public_reviews || (isHt ? 'Revizyon kliyan' : 'Customer reviews')}
+        {t?.business_public_reviews || (isHt ? 'Revizyon kliyan' : inlineText(lang, 'Customer reviews'))}
       </h2>
 
       {/* Summary — average rating + count (no chart lib, pure CSS). */}
@@ -245,15 +246,15 @@ function ReviewsSection({ reviews, t, lang }) {
                 <i className="fas fa-user" />
               </div>
               <div className="biz-review-card-who">
-                <span className="biz-review-username">@{r.customer_username || (isHt ? 'Kliyan' : 'Customer')}</span>
+                <span className="biz-review-username">@{r.customer_username || (isHt ? 'Kliyan' : inlineText(lang, 'Customer'))}</span>
                 <span className="biz-review-item">
-                  {t?.business_review_on || (isHt ? 'sou' : 'on')} {r.item_name}
+                  {t?.business_review_on || (isHt ? 'sou' : inlineText(lang, 'on'))} {r.item_name}
                 </span>
               </div>
               <div className="biz-review-card-meta">
                 <StarRow rating={Number(r.rating || 0)} size="0.75rem" />
                 <span className="biz-review-date">
-                  {new Date(r.created_at).toLocaleDateString(isHt ? 'fr-HT' : 'en-US', {
+                  {new Date(r.created_at).toLocaleDateString(isHt ? 'fr-HT' : inlineText(lang, 'en-US'), {
                     year: 'numeric', month: 'short', day: 'numeric',
                   })}
                 </span>
@@ -332,7 +333,7 @@ function HeroContent({ payload, t, lang }) {
                 color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem',
               }} data-testid="business-public-owner">
                 <i className="fas fa-user-circle" aria-hidden="true" />
-                {t?.business_public_operated_by || (isHt ? 'Opere pa' : 'Operated by')}{' '}
+                {t?.business_public_operated_by || (isHt ? 'Opere pa' : inlineText(lang, 'Operated by'))}{' '}
                 <strong style={{ color: 'rgba(255,255,255,0.85)', fontWeight: 600 }}>
                   @{payload.owner_username}
                 </strong>
@@ -530,7 +531,7 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
       }
       await navigator.clipboard.writeText(url);
       if (showToast) {
-        showToast(t?.business_public_share_copied || (isHt ? 'Lyen kopye!' : 'Link copied!'));
+        showToast(t?.business_public_share_copied || (isHt ? 'Lyen kopye!' : inlineText(lang, 'Link copied!')));
       }
     } catch {
       // clipboard unavailable — nothing to do
@@ -566,11 +567,11 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
       });
       const data = res?.data?.data ?? res?.data ?? null;
       setPlacedOrder(data && data.id ? data : null);
-      showToast?.(isHt ? 'Kòmand la kreye!' : 'Order placed!', 'check-circle');
+      showToast?.(isHt ? 'Kòmand la kreye!' : inlineText(lang, 'Order placed!'), 'check-circle');
     } catch (err) {
       showToast?.(
         err?.response?.data?.detail || err?.response?.data?.item || (isHt
-          ? 'Pa t ka kreye kòmand la.' : 'Could not place the order.'),
+          ? 'Pa t ka kreye kòmand la.' : inlineText(lang, 'Could not place the order.')),
         'circle-exclamation',
       );
     } finally {
@@ -585,7 +586,7 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
       const res = await businessOrderService.pay(placedOrder.id);
       const data = res?.data?.data ?? res?.data ?? null;
       if (data?.id) setPlacedOrder(data);
-      showToast?.(isHt ? 'Peman an reyisi! Revni al nan biznis la.' : 'Payment successful!', 'check-circle');
+      showToast?.(isHt ? 'Peman an reyisi! Revni al nan biznis la.' : inlineText(lang, 'Payment successful!'), 'check-circle');
     } catch (err) {
       const status = err?.response?.status;
       const detail = err?.response?.data?.detail;
@@ -593,11 +594,11 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
         showToast?.(
           isHt
             ? 'Balans Wallet ou pa sifi. Mete lajan nan Wallet ou anvan ou peye.'
-            : 'Insufficient wallet balance. Top up your wallet before paying.',
+            : inlineText(lang, 'Insufficient wallet balance. Top up your wallet before paying.'),
           'circle-exclamation',
         );
       } else {
-        showToast?.(detail || (isHt ? 'Peman an pa t mache.' : 'Payment failed.'), 'circle-exclamation');
+        showToast?.(detail || (isHt ? 'Peman an pa t mache.' : inlineText(lang, 'Payment failed.')), 'circle-exclamation');
       }
     } finally {
       setPayBusy(false);
@@ -641,13 +642,13 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
         body: contactBody.trim(),
       });
       setContactSent(true);
-      showToast?.(t?.business_inquiry_sent || (isHt ? '✅ Demann lan voye!' : '✅ Inquiry sent!'), 'check-circle');
+      showToast?.(t?.business_inquiry_sent || (isHt ? '✅ Demann lan voye!' : inlineText(lang, '✅ Inquiry sent!')), 'check-circle');
       loadMyInquiries();
     } catch (err) {
       showToast?.(
         err?.response?.data?.detail || (isHt
           ? 'Pa t ka voye demann lan.'
-          : 'Could not send your question.'),
+          : inlineText(lang, 'Could not send your question.')),
         'circle-exclamation',
       );
     } finally {
@@ -656,9 +657,9 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
   };
 
   const inquiryStatusLabel = (status) => ({
-    new: t?.business_inquiry_status_new || (isHt ? 'Nouvo' : 'New'),
-    replied: t?.business_inquiry_status_replied || (isHt ? 'Reponn' : 'Replied'),
-    closed: t?.business_inquiry_status_closed || (isHt ? 'Fèmen' : 'Closed'),
+    new: t?.business_inquiry_status_new || (isHt ? 'Nouvo' : inlineText(lang, 'New')),
+    replied: t?.business_inquiry_status_replied || (isHt ? 'Reponn' : inlineText(lang, 'Replied')),
+    closed: t?.business_inquiry_status_closed || (isHt ? 'Fèmen' : inlineText(lang, 'Closed')),
   }[status] || status);
 
   const inquiryStatusColor = {
@@ -707,7 +708,7 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
         <header className={`cd-sticky-header${scrolled ? ' cd-sticky-header--scrolled' : ''}`}>
           <div className="cd-sticky-header-inner">
             <button type="button" className="cd-header-back" onClick={handleBack}
-              aria-label={t?.business_public_back || (isHt ? 'Retounen' : 'Back')}
+              aria-label={t?.business_public_back || (isHt ? 'Retounen' : inlineText(lang, 'Back'))}
               data-testid="business-public-back-btn">
               <i className="fas fa-arrow-left" aria-hidden="true" />
             </button>
@@ -717,8 +718,8 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
             <div className="cd-header-actions">
               <button type="button" className="cd-header-action-btn" onClick={handleShare}
                 disabled={shareBusy}
-                aria-label={t?.business_public_share || (isHt ? 'Pataje' : 'Share')}
-                title={t?.business_public_share || (isHt ? 'Pataje' : 'Share')}
+                aria-label={t?.business_public_share || (isHt ? 'Pataje' : inlineText(lang, 'Share'))}
+                title={t?.business_public_share || (isHt ? 'Pataje' : inlineText(lang, 'Share'))}
                 data-testid="business-public-share-btn">
                 <i className="fas fa-share-alt" aria-hidden="true" />
               </button>
@@ -745,7 +746,7 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
                 }} />
                 <div style={{ width: 160, height: 14, borderRadius: 6, background: 'rgba(255,255,255,0.10)', animation: 'pulse 2s infinite ease-in-out' }} />
                 <span style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.4)' }}>
-                  {t?.business_public_loading || (isHt ? 'Ap chaje paj biznis la...' : 'Loading business page...')}
+                  {t?.business_public_loading || (isHt ? 'Ap chaje paj biznis la...' : inlineText(lang, 'Loading business page...'))}
                 </span>
               </div>
             ) : errCode === 'not_found' ? (
@@ -753,14 +754,14 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
                 icon="fa-store-slash"
                 msg={t?.business_public_not_found || (isHt
                   ? 'Paj sa pa egziste oswa biznis la pa aktif.'
-                  : 'This page does not exist or the business is not active.')}
+                  : inlineText(lang, 'This page does not exist or the business is not active.'))}
               />
             ) : errCode === 'load_error' ? (
               <HeroEmptyMessage
                 icon="fa-triangle-exclamation"
                 msg={t?.business_public_load_error || (isHt
                   ? 'Nou pa t kapab chaje paj la.'
-                  : 'Could not load this page.')}
+                  : inlineText(lang, 'Could not load this page.'))}
               />
             ) : payload ? (
               <>
@@ -774,7 +775,7 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
                       data-testid="business-public-contact-btn"
                     >
                       <i className="fas fa-envelope" aria-hidden="true" />
-                      {t?.business_inquiry_ask || (isHt ? 'Poz yon kesyon' : 'Ask a question')}
+                      {t?.business_inquiry_ask || (isHt ? 'Poz yon kesyon' : inlineText(lang, 'Ask a question'))}
                     </button>
                   </div>
                 )}
@@ -795,7 +796,7 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
                 <section className="cd-section" data-testid="business-public-about-section">
                   <h2 className="cd-section-title">
                     <i className="fas fa-circle-info" aria-hidden="true" />
-                    {t?.business_public_about || (isHt ? 'Apwopo' : 'About')}
+                    {t?.business_public_about || (isHt ? 'Apwopo' : inlineText(lang, 'About'))}
                   </h2>
                   <p className="cd-text" style={{ whiteSpace: 'pre-wrap' }}>{payload.description}</p>
                 </section>
@@ -806,7 +807,7 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
                 <section className="cd-section" data-testid="business-public-offerings-section">
                   <h2 className="cd-section-title">
                     <i className="fas fa-box-open" aria-hidden="true" />
-                    {t?.business_public_offerings || (isHt ? 'Pwodwi & Sèvis' : 'Products & Services')}
+                    {t?.business_public_offerings || (isHt ? 'Pwodwi & Sèvis' : inlineText(lang, 'Products & Services'))}
                   </h2>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
                     {items.map((item) => (
@@ -834,34 +835,34 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
                   <section className="cd-section" data-testid="business-public-info-section">
                     <h2 className="cd-section-title">
                       <i className="fas fa-building" aria-hidden="true" />
-                      {t?.business_public_information || (isHt ? 'Enfòmasyon' : 'Information')}
+                      {t?.business_public_information || (isHt ? 'Enfòmasyon' : inlineText(lang, 'Information'))}
                     </h2>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
                       {payload.location && (
                         <InfoTile
                           icon="fa-location-dot"
-                          label={t?.business_field_location || (isHt ? 'Kote' : 'Location')}
+                          label={t?.business_field_location || (isHt ? 'Kote' : inlineText(lang, 'Location'))}
                           value={payload.location}
                         />
                       )}
                       {payload.contact_email && (
                         <InfoTile
                           icon="fa-envelope"
-                          label={t?.business_field_contact_email || (isHt ? 'Imèl kontak' : 'Contact email')}
+                          label={t?.business_field_contact_email || (isHt ? 'Imèl kontak' : inlineText(lang, 'Contact email'))}
                           value={<a className="biz-info-link" href={`mailto:${payload.contact_email}`}>{payload.contact_email}</a>}
                         />
                       )}
                       {payload.phone && (
                         <InfoTile
                           icon="fa-phone"
-                          label={t?.business_field_phone || (isHt ? 'Telefòn' : 'Phone')}
+                          label={t?.business_field_phone || (isHt ? 'Telefòn' : inlineText(lang, 'Phone'))}
                           value={payload.phone}
                         />
                       )}
                       {payload.website_url && (
                         <InfoTile
                           icon="fa-globe"
-                          label={t?.business_field_website || (isHt ? 'Sit wèb' : 'Website')}
+                          label={t?.business_field_website || (isHt ? 'Sit wèb' : inlineText(lang, 'Website'))}
                           value={
                             <a
                               className="biz-info-link"
@@ -886,9 +887,9 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
                       {payload.created_at && (
                         <InfoTile
                           icon="fa-calendar"
-                          label={t?.business_public_created || (isHt ? 'Kreye' : 'Created')}
+                          label={t?.business_public_created || (isHt ? 'Kreye' : inlineText(lang, 'Created'))}
                           value={new Date(payload.created_at).toLocaleDateString(
-                            isHt ? 'fr-HT' : 'en-US',
+                            isHt ? 'fr-HT' : inlineText(lang, 'en-US'),
                             { year: 'numeric', month: 'long', day: 'numeric' },
                           )}
                         />
@@ -899,7 +900,7 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
                         <div className="biz-hours-display" data-testid="business-public-hours">
                           <p className="biz-hours-display-title">
                             <i className="fas fa-clock" aria-hidden="true" />
-                            {t?.business_field_hours || (isHt ? 'Èdtan operasyon' : 'Operating hours')}
+                            {t?.business_field_hours || (isHt ? 'Èdtan operasyon' : inlineText(lang, 'Operating hours'))}
                           </p>
                           <ul className="biz-hours-list">
                             {hoursEntries.map(([day, hoursText]) => (
@@ -942,7 +943,7 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
             <div className="biz-modal-header">
               <h3 className="biz-modal-title">
                 <i className="fas fa-envelope" aria-hidden="true" />
-                {t?.business_inquiry_ask || (isHt ? 'Poz yon kesyon' : 'Ask a question')}
+                {t?.business_inquiry_ask || (isHt ? 'Poz yon kesyon' : inlineText(lang, 'Ask a question'))}
               </h3>
               <button
                 type="button"
@@ -960,7 +961,7 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
                 <p>
                   {t?.business_inquiry_login_required || (isHt
                     ? 'Konekte pou w ka poze yon kesyon bay biznis sa a.'
-                    : 'Log in to ask this business a question.')}
+                    : inlineText(lang, 'Log in to ask this business a question.'))}
                 </p>
                 <button
                   type="button"
@@ -969,7 +970,7 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
                   data-testid="business-inquiry-login-btn"
                 >
                   <i className="fas fa-right-to-bracket" aria-hidden="true" />
-                  {isHt ? 'Konekte' : 'Log in'}
+                  {isHt ? 'Konekte' : inlineText(lang, 'Log in')}
                 </button>
               </div>
             ) : contactSent ? (
@@ -978,21 +979,21 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
                 <p>
                   {t?.business_inquiry_sent || (isHt
                     ? '✅ Demann lan voye! Biznis la ap reponn ou byento.'
-                    : '✅ Inquiry sent! The business will reply to you soon.')}
+                    : inlineText(lang, '✅ Inquiry sent! The business will reply to you soon.'))}
                 </p>
                 <button
                   type="button"
                   className="biz-btn biz-btn-primary"
                   onClick={() => setContactOpen(false)}
                 >
-                  {isHt ? 'Fèmen' : 'Done'}
+                  {isHt ? 'Fèmen' : inlineText(lang, 'Done')}
                 </button>
               </div>
             ) : (
               <div className="biz-form">
                 <div className="biz-form-group">
                   <label className="biz-form-label" htmlFor="biz-inquiry-topic">
-                    {t?.business_inquiry_topic || (isHt ? 'Sijè' : 'Topic')}
+                    {t?.business_inquiry_topic || (isHt ? 'Sijè' : inlineText(lang, 'Topic'))}
                   </label>
                   <select
                     id="biz-inquiry-topic"
@@ -1001,17 +1002,17 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
                     onChange={(e) => setContactTopic(e.target.value)}
                     data-testid="business-inquiry-topic"
                   >
-                    <option value="general">{isHt ? 'Jeneral' : 'General'}</option>
-                    <option value="product">{isHt ? 'Kesyon sou yon pwodui' : 'Product question'}</option>
-                    <option value="order">{isHt ? 'Kòmand / acha' : 'Order / purchase'}</option>
-                    <option value="support">{isHt ? 'Sipò' : 'Support'}</option>
+                    <option value="general">{isHt ? 'Jeneral' : inlineText(lang, 'General')}</option>
+                    <option value="product">{isHt ? 'Kesyon sou yon pwodui' : inlineText(lang, 'Product question')}</option>
+                    <option value="order">{isHt ? 'Kòmand / acha' : inlineText(lang, 'Order / purchase')}</option>
+                    <option value="support">{isHt ? 'Sipò' : inlineText(lang, 'Support')}</option>
                   </select>
                 </div>
 
                 {contactTopic === 'product' && items.length > 0 && (
                   <div className="biz-form-group">
                     <label className="biz-form-label" htmlFor="biz-inquiry-item">
-                      {t?.business_inquiry_item || (isHt ? 'Pwodui / sèvis' : 'Product / service')}
+                      {t?.business_inquiry_item || (isHt ? 'Pwodui / sèvis' : inlineText(lang, 'Product / service'))}
                     </label>
                     <select
                       id="biz-inquiry-item"
@@ -1030,7 +1031,7 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
 
                 <div className="biz-form-group">
                   <label className="biz-form-label" htmlFor="biz-inquiry-subject">
-                    {t?.business_inquiry_subject || (isHt ? 'Sijè kesyon' : 'Subject')}
+                    {t?.business_inquiry_subject || (isHt ? 'Sijè kesyon' : inlineText(lang, 'Subject'))}
                   </label>
                   <input
                     id="biz-inquiry-subject"
@@ -1045,7 +1046,7 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
 
                 <div className="biz-form-group">
                   <label className="biz-form-label" htmlFor="biz-inquiry-body">
-                    {t?.business_inquiry_body || (isHt ? 'Kesyon w la' : 'Your question')}
+                    {t?.business_inquiry_body || (isHt ? 'Kesyon w la' : inlineText(lang, 'Your question'))}
                   </label>
                   <textarea
                     id="biz-inquiry-body"
@@ -1065,7 +1066,7 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
                     onClick={() => setContactOpen(false)}
                     disabled={contactBusy}
                   >
-                    {isHt ? 'Anile' : 'Cancel'}
+                    {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
                   </button>
                   <button
                     type="button"
@@ -1075,7 +1076,7 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
                     data-testid="business-inquiry-send"
                   >
                     <i className={`fas ${contactBusy ? 'fa-spinner fa-spin' : 'fa-paper-plane'}`} aria-hidden="true" />
-                    {t?.business_inquiry_send || (isHt ? 'Voye' : 'Send')}
+                    {t?.business_inquiry_send || (isHt ? 'Voye' : inlineText(lang, 'Send'))}
                   </button>
                 </div>
               </div>
@@ -1093,7 +1094,7 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
                   data-testid="business-inquiry-mine-toggle"
                 >
                   <i className="fas fa-inbox" aria-hidden="true" />
-                  {t?.business_inquiry_mine || (isHt ? 'Demann mwen yo' : 'My inquiries')}
+                  {t?.business_inquiry_mine || (isHt ? 'Demann mwen yo' : inlineText(lang, 'My inquiries'))}
                 </button>
                 {myInquiriesOpen && (
                   <div className="biz-inquiry-mine-list" data-testid="business-inquiry-mine-list">
@@ -1101,7 +1102,7 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
                       <p className="biz-inquiry-mine-empty">
                         {isHt
                           ? 'Ou poko gen demann pou biznis sa a.'
-                          : 'You have no inquiries for this business yet.'}
+                          : inlineText(lang, 'You have no inquiries for this business yet.')}
                       </p>
                     ) : myInquiries.map((q) => {
                       const sc = inquiryStatusColor[q.status] || '#94a3b8';
@@ -1122,7 +1123,7 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
                           </div>
                           <p className="biz-inquiry-mine-meta">
                             <i className="fas fa-user" aria-hidden="true" /> {payload?.name} ·{' '}
-                            {new Date(q.created_at).toLocaleDateString(isHt ? 'fr-HT' : 'en-US', {
+                            {new Date(q.created_at).toLocaleDateString(isHt ? 'fr-HT' : inlineText(lang, 'en-US'), {
                               year: 'numeric', month: 'short', day: 'numeric',
                             })}
                           </p>
@@ -1151,8 +1152,8 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
               <h3 className="biz-modal-title">
                 <i className="fas fa-cart-shopping" aria-hidden="true" />
                 {placedOrder
-                  ? (t?.business_order_pay_title || (isHt ? 'Peye kòmand la' : 'Pay for your order'))
-                  : (t?.business_order_title || (isHt ? 'Kòmande' : 'Order'))}
+                  ? (t?.business_order_pay_title || (isHt ? 'Peye kòmand la' : inlineText(lang, 'Pay for your order')))
+                  : (t?.business_order_title || (isHt ? 'Kòmande' : inlineText(lang, 'Order')))}
               </h3>
               <button type="button" className="biz-modal-close" onClick={closeOrder} aria-label="Close">
                 <i className="fas fa-xmark" aria-hidden="true" />
@@ -1162,13 +1163,13 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
             {!placedOrder ? (
               <>
                 <p className="biz-modal-hint">
-                  {orderItem.name} · {Number(orderItem.price ?? 0).toLocaleString(isHt ? 'fr-HT' : 'en-US', { minimumFractionDigits: 2 })}{' '}
+                  {orderItem.name} · {Number(orderItem.price ?? 0).toLocaleString(isHt ? 'fr-HT' : inlineText(lang, 'en-US'), { minimumFractionDigits: 2 })}{' '}
                   {orderItem.currency === 'HTG' ? 'G' : (orderItem.currency || 'USD')}
                 </p>
                 <div className="biz-form">
                   <div className="biz-form-group">
                     <label className="biz-form-label" htmlFor="biz-order-qty">
-                      {t?.business_order_quantity || (isHt ? 'Kantite' : 'Quantity')}
+                      {t?.business_order_quantity || (isHt ? 'Kantite' : inlineText(lang, 'Quantity'))}
                     </label>
                     <input
                       id="biz-order-qty"
@@ -1183,7 +1184,7 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
                   </div>
                   <div className="biz-form-group">
                     <label className="biz-form-label" htmlFor="biz-order-note">
-                      {t?.business_order_note || (isHt ? 'Nòt (si gen)' : 'Note (optional)')}
+                      {t?.business_order_note || (isHt ? 'Nòt (si gen)' : inlineText(lang, 'Note (optional)'))}
                     </label>
                     <textarea
                       id="biz-order-note"
@@ -1197,7 +1198,7 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
                   </div>
                   <div className="biz-form-actions">
                     <button type="button" className="biz-btn biz-btn-ghost" onClick={closeOrder} disabled={orderBusy}>
-                      {isHt ? 'Anile' : 'Cancel'}
+                      {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
                     </button>
                     <button
                       type="button"
@@ -1207,7 +1208,7 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
                       data-testid="business-order-submit"
                     >
                       <i className={`fas ${orderBusy ? 'fa-spinner fa-spin' : 'fa-check'}`} aria-hidden="true" />
-                      {t?.business_order_place || (isHt ? 'Kreye kòmand' : 'Place order')}
+                      {t?.business_order_place || (isHt ? 'Kreye kòmand' : inlineText(lang, 'Place order'))}
                     </button>
                   </div>
                 </div>
@@ -1221,21 +1222,21 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
                 </p>
                 <div className="biz-ws-card" style={{ marginBottom: 14 }}>
                   <p className="biz-ws-card-line">
-                    <strong>{isHt ? 'Total:' : 'Total:'}</strong>{' '}
-                    {Number(placedOrder.total ?? 0).toLocaleString(isHt ? 'fr-HT' : 'en-US', { minimumFractionDigits: 2 })}{' '}
+                    <strong>{isHt ? 'Total:' : inlineText(lang, 'Total:')}</strong>{' '}
+                    {Number(placedOrder.total ?? 0).toLocaleString(isHt ? 'fr-HT' : inlineText(lang, 'en-US'), { minimumFractionDigits: 2 })}{' '}
                     {placedOrder.currency || 'USD'}
                   </p>
                   <p className="biz-ws-card-line">
-                    <strong>{isHt ? 'Estati peman:' : 'Payment status:'}</strong>{' '}
+                    <strong>{isHt ? 'Estati peman:' : inlineText(lang, 'Payment status:')}</strong>{' '}
                     {placedOrder.payment_status === 'paid'
-                      ? (isHt ? 'Peye ✓' : 'Paid ✓')
-                      : (isHt ? 'Pa peye' : 'Unpaid')}
+                      ? (isHt ? 'Peye ✓' : inlineText(lang, 'Paid ✓'))
+                      : (isHt ? 'Pa peye' : inlineText(lang, 'Unpaid'))}
                   </p>
                 </div>
                 {placedOrder.payment_status === 'unpaid' && placedOrder.payable ? (
                   <div className="biz-form-actions">
                     <button type="button" className="biz-btn biz-btn-ghost" onClick={closeOrder} disabled={payBusy}>
-                      {isHt ? 'Pita' : 'Later'}
+                      {isHt ? 'Pita' : inlineText(lang, 'Later')}
                     </button>
                     <button
                       type="button"
@@ -1245,13 +1246,13 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
                       data-testid="business-order-pay"
                     >
                       <i className={`fas ${payBusy ? 'fa-spinner fa-spin' : 'fa-wallet'}`} aria-hidden="true" />
-                      {t?.business_order_pay || (isHt ? 'Peye ak Wallet' : 'Pay with Wallet')}
+                      {t?.business_order_pay || (isHt ? 'Peye ak Wallet' : inlineText(lang, 'Pay with Wallet'))}
                     </button>
                   </div>
                 ) : (
                   <div className="biz-form-actions">
                     <button type="button" className="biz-btn biz-btn-primary" onClick={closeOrder}>
-                      {isHt ? 'Fèmen' : 'Done'}
+                      {isHt ? 'Fèmen' : inlineText(lang, 'Done')}
                     </button>
                     <button
                       type="button"
@@ -1260,7 +1261,7 @@ export default function BusinessPublicPage({ lang = 'en', showToast }) {
                       data-testid="business-order-view-mine"
                     >
                       <i className="fas fa-receipt" aria-hidden="true" />
-                      {t?.business_my_orders_short || (isHt ? 'Wè kòmand mwen yo' : 'View my orders')}
+                      {t?.business_my_orders_short || (isHt ? 'Wè kòmand mwen yo' : inlineText(lang, 'View my orders'))}
                     </button>
                   </div>
                 )}

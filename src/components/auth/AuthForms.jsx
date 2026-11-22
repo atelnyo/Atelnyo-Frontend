@@ -13,6 +13,7 @@
  */
 import React, { useState, useMemo, useCallback } from 'react';
 import { scorePassword, MIN_PASSWORD_LENGTH, extractOtpCode } from './authUtils';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── Shared field: label + input ─────────────────────────────────────
 function AuthField({ label, id, hint, error, children }) {
@@ -460,7 +461,7 @@ export function TwoFactorFooter({ isLoading, lang, onBackToLogin }) {
   return (
     <p className="auth-footer">
       <button type="button" className="auth-link" onClick={() => { if (!isLoading) onBackToLogin(); }} disabled={isLoading}>
-        {lang === 'ht' ? 'Tounen nan koneksyon' : 'Back to login'}
+        {lang === 'ht' ? 'Tounen nan koneksyon' : inlineText(lang, 'Back to login')}
       </button>
     </p>
   );

@@ -9,6 +9,7 @@
  * silently blocks saving, which is worse than a persistent banner.
  */
 import React from 'react';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function DraftRecoveryBanner({
   onRecover,
@@ -84,7 +85,7 @@ export default function DraftRecoveryBanner({
             fontFamily: 'inherit',
           }}
         >
-          {isHt ? 'Retabli' : 'Recover'}
+          {isHt ? 'Retabli' : inlineText(lang, 'Recover')}
         </button>
         <button
           type="button"
@@ -101,7 +102,7 @@ export default function DraftRecoveryBanner({
             fontFamily: 'inherit',
           }}
         >
-          {isHt ? 'Efase bouyon' : 'Discard draft'}
+          {isHt ? 'Efase bouyon' : inlineText(lang, 'Discard draft')}
         </button>
       </div>
     </div>

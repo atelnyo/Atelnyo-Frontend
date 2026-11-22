@@ -27,6 +27,7 @@
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { saveDraft, restoreDraft } from '../../../services/learningDraftManager';
+import { inlineText } from '../../../utils/inlineI18n';
 
 /**
  * QuestionBase — renders a question with options, feedback, and completion.
@@ -158,11 +159,11 @@ export default function QuestionBase({
 
   // Determine feedback text
   const feedbackText = isCorrect
-    ? (feedback?.correct || (isHt ? 'Repons ou korek!' : 'Your answer is correct!'))
-    : (feedback?.incorrect || (isHt ? 'Pa egzakteman. Eseye ankò.' : 'Not quite. Try again.'));
+    ? (feedback?.correct || (isHt ? 'Repons ou korek!' : inlineText(lang, 'Your answer is correct!')))
+    : (feedback?.incorrect || (isHt ? 'Pa egzakteman. Eseye ankò.' : inlineText(lang, 'Not quite. Try again.')));
 
   return (
-    <div className="ls-question" role="group" aria-label={isHt ? 'Kesyon' : 'Question'}>
+    <div className="ls-question" role="group" aria-label={isHt ? 'Kesyon' : inlineText(lang, 'Question')}>
       {/* §14 — Question text */}
       <div className="ls-question-header">
         <h3 className="ls-question-text">{question}</h3>
@@ -172,7 +173,7 @@ export default function QuestionBase({
       </div>
 
       {/* §15-§17 — Answer options */}
-      <div className="ls-question-options" role={multiple ? 'group' : 'radiogroup'} aria-label={isHt ? 'Repons' : 'Answers'}>
+      <div className="ls-question-options" role={multiple ? 'group' : 'radiogroup'} aria-label={isHt ? 'Repons' : inlineText(lang, 'Answers')}>
         {options.map((opt) => {
           const isSelected = selectedIds.includes(opt.id);
           const isCorrectOption = correctSet.has(opt.id);
@@ -218,7 +219,7 @@ export default function QuestionBase({
             onClick={handleSubmit}
             disabled={selectedIds.length === 0}
           >
-            {isHt ? 'Soumèt' : 'Submit'}
+            {isHt ? 'Soumèt' : inlineText(lang, 'Submit')}
           </button>
         ) : (
           maxAttempts === 0 || attempts < maxAttempts ? (
@@ -228,7 +229,7 @@ export default function QuestionBase({
               onClick={handleRetry}
             >
               <i className="fas fa-rotate-right" aria-hidden="true" />
-              {isHt ? 'Eseye ankò' : 'Try again'}
+              {isHt ? 'Eseye ankò' : inlineText(lang, 'Try again')}
             </button>
           ) : null
         )}

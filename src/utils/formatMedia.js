@@ -1,3 +1,4 @@
+import { inlineText } from './inlineI18n';
 /**
  * src/utils/formatMedia.js — Shared formatters for media display.
  *
@@ -53,9 +54,9 @@ export function fmtDate(iso) {
  * Returns the raw key when unknown so callers never crash.
  */
 export function premiumPlanLabel(plan, lang) {
-  if (plan === 'lifetime') return lang === 'ht' ? 'Pou tout vi' : 'Lifetime';
-  if (plan === 'monthly') return lang === 'ht' ? 'Mensyèl' : 'Monthly';
-  if (plan === 'quarterly') return lang === 'ht' ? 'Trimès' : 'Quarterly';
-  if (plan === 'yearly') return lang === 'ht' ? 'Anyèl' : 'Yearly';
+  if (plan === 'lifetime') return lang === 'ht' ? 'Pou tout vi' : inlineText(lang, 'Lifetime');
+  if (plan === 'monthly') return lang === 'ht' ? 'Mensyèl' : inlineText(lang, 'Monthly');
+  if (plan === 'quarterly') return lang === 'ht' ? 'Trimès' : inlineText(lang, 'Quarterly');
+  if (plan === 'yearly') return lang === 'ht' ? 'Anyèl' : inlineText(lang, 'Yearly');
   return plan;
 }

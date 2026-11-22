@@ -15,6 +15,7 @@
 import React, { useState, useMemo } from 'react';
 import { classNames } from '../shared';
 import styles from './editor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 /**
  * Properties panel frame — sticky header + accordion groups.
@@ -26,7 +27,7 @@ export default function StudioPropertiesPanel({ lang = 'en', children, completio
       <header className={styles.propsHeader}>
         <span className={styles.propsHeaderTitle}>
           <i className="fas fa-sliders-h" aria-hidden="true" />
-          {isHt ? 'Opsyon' : 'Properties'}
+          {isHt ? 'Opsyon' : inlineText(lang, 'Properties')}
         </span>
         {completionPct !== null && (
           <span style={{

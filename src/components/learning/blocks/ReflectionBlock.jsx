@@ -11,6 +11,7 @@
  */
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import useAutosave from '../../../hooks/useAutosave';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function ReflectionBlock({ block, lang = 'en', courseId, moduleIndex, onComplete, reportComplete, registerBlock }) {
   const isHt = lang === 'ht';
@@ -69,7 +70,7 @@ export default function ReflectionBlock({ block, lang = 'en', courseId, moduleIn
       save: async () => { triggerSave(); return { ok: true }; },
       validateForNavigation: () => {
         if (isRequired && !submitted && !response.trim()) {
-          return { ok: false, reason: isHt ? 'Eskri repons ou anvan ou kontinye.' : 'Write your answer before continuing.' };
+          return { ok: false, reason: isHt ? 'Eskri repons ou anvan ou kontinye.' : inlineText(lang, 'Write your answer before continuing.') };
         }
         return { ok: true };
       },
@@ -80,15 +81,15 @@ export default function ReflectionBlock({ block, lang = 'en', courseId, moduleIn
 
   // Status message
   const statusMsg = saveState === 'saving'
-    ? (isHt ? 'Ap sove...' : 'Saving...')
+    ? (isHt ? 'Ap sove...' : inlineText(lang, 'Saving...'))
     : saveState === 'saved'
-      ? (isHt ? '✅ Sove' : '✅ Saved')
+      ? (isHt ? '✅ Sove' : inlineText(lang, '✅ Saved'))
       : saveState === 'local_only'
-        ? (isHt ? '💾 Sove sou aparèy la' : '💾 Saved on device')
+        ? (isHt ? '💾 Sove sou aparèy la' : inlineText(lang, '💾 Saved on device'))
         : saveState === 'failed'
-          ? (isHt ? '❌ Pa t kapab sove' : '❌ Could not save')
+          ? (isHt ? '❌ Pa t kapab sove' : inlineText(lang, '❌ Could not save'))
           : lastSaved
-            ? `${isHt ? 'Dènye sove:' : 'Last saved:'} ${lastSaved.toLocaleTimeString()}`
+            ? `${isHt ? 'Dènye sove:' : inlineText(lang, 'Last saved:')} ${lastSaved.toLocaleTimeString()}`
             : '';
 
   return (
@@ -96,16 +97,16 @@ export default function ReflectionBlock({ block, lang = 'en', courseId, moduleIn
       {/* Header */}
       <div className="ls-question-header">
         <h3 className="ls-question-text">
-          🧠 {block?.title || (isHt ? 'Refleksyon' : 'Reflection')}
+          🧠 {block?.title || (isHt ? 'Refleksyon' : inlineText(lang, 'Reflection'))}
         </h3>
         {mode === 'private' && (
           <p className="ls-question-description" style={{ fontStyle: 'italic' }}>
-            {isHt ? 'Sa a se pou ou menm. Pa gen okenn ki pral wè repons ou.' : 'This is for you alone. No one will see your answer.'}
+            {isHt ? 'Sa a se pou ou menm. Pa gen okenn ki pral wè repons ou.' : inlineText(lang, 'This is for you alone. No one will see your answer.')}
           </p>
         )}
         {isRequired && !submitted && (
           <p className="ls-question-description" style={{ color: 'var(--color-primary, #3b82f6)' }}>
-            {isHt ? '⚠️ Reponn kesyon sa a pou kontinye.' : '⚠️ Answer this question to continue.'}
+            {isHt ? '⚠️ Reponn kesyon sa a pou kontinye.' : inlineText(lang, '⚠️ Answer this question to continue.')}
           </p>
         )}
       </div>
@@ -131,10 +132,10 @@ export default function ReflectionBlock({ block, lang = 'en', courseId, moduleIn
       <textarea
         value={response}
         onChange={(e) => setResponse(e.target.value)}
-        placeholder={isHt ? 'Ekri sa ou panse isit la...' : 'Write your thoughts here...'}
+        placeholder={isHt ? 'Ekri sa ou panse isit la...' : inlineText(lang, 'Write your thoughts here...')}
         rows={6}
         disabled={submitted}
-        aria-label={isHt ? 'Repons ou' : 'Your response'}
+        aria-label={isHt ? 'Repons ou' : inlineText(lang, 'Your response')}
         style={{
           width: '100%',
           padding: '12px',
@@ -162,12 +163,12 @@ export default function ReflectionBlock({ block, lang = 'en', courseId, moduleIn
               onClick={handleSubmit}
               disabled={!response.trim()}
             >
-              {isHt ? 'Soumèt Refleksyon' : 'Submit Reflection'}
+              {isHt ? 'Soumèt Refleksyon' : inlineText(lang, 'Submit Reflection')}
             </button>
           )}
           {submitted && (
             <span style={{ color: '#10b981', fontWeight: 600, fontSize: '0.88rem' }}>
-              ✅ {isHt ? 'Soumèt' : 'Submitted'}
+              ✅ {isHt ? 'Soumèt' : inlineText(lang, 'Submitted')}
             </span>
           )}
         </div>

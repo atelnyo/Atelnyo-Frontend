@@ -2,15 +2,17 @@ import { describe, expect, it } from 'vitest';
 import { ogImageForLang, RAIL_ITEMS } from './profileConstants';
 
 describe('profile locale metadata', () => {
-  it('provides labels for all three supported languages across profile navigation', () => {
+  it('provides labels for all four supported languages across profile navigation', () => {
     for (const item of RAIL_ITEMS) {
       expect(item.label).toBeTruthy();
       expect(item.labelHt).toBeTruthy();
       expect(item.labelFr).toBeTruthy();
+      expect(item.labelEs).toBeTruthy();
     }
   });
 
-  it('maps legacy Spanish banner requests to the English banner', () => {
-    expect(ogImageForLang('es')).toBe(`${window.location.origin}/og-banner-en.svg`);
+  it('uses the Spanish banner for Spanish and falls back to English otherwise', () => {
+    expect(ogImageForLang('es')).toBe(`${window.location.origin}/og-banner-es.svg`);
+    expect(ogImageForLang('de')).toBe(`${window.location.origin}/og-banner-en.svg`);
   });
 });

@@ -9,6 +9,7 @@
  * §41 — "The Creator Studio must validate configuration before publishing."
  */
 import React, { useCallback } from 'react';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const RULE_TYPES = [
   { value: 'all_required_blocks', label: { en: 'All Required Activities', ht: 'Tout Aktivite Obligatwa' }, description: { en: 'Student must complete all required blocks', ht: 'Elèv dwe konplete tout blòk obligatwa' } },
@@ -56,10 +57,10 @@ export default function CompletionRulesEditor({
     <div className="ls-completion-rules-editor">
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <h4 style={{ margin: 0, fontSize: '0.9rem' }}>
-          {isHt ? '📋 Règ Konpleksyon' : '📋 Completion Rules'}
+          {isHt ? '📋 Règ Konpleksyon' : inlineText(lang, '📋 Completion Rules')}
         </h4>
         <button type="button" className="ls-btn" onClick={handleAddRule} style={{ fontSize: '0.8rem', padding: '4px 10px' }}>
-          + {isHt ? 'Ajoute' : 'Add'}
+          + {isHt ? 'Ajoute' : inlineText(lang, 'Add')}
         </button>
       </div>
 
@@ -67,7 +68,7 @@ export default function CompletionRulesEditor({
         <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', margin: '8px 0' }}>
           {isHt
             ? 'Pa gen règ espesifik. Tout blòk obligatwa pral konte.'
-            : 'No specific rules. All required blocks will count.'}
+            : inlineText(lang, 'No specific rules. All required blocks will count.')}
         </p>
       )}
 
@@ -102,7 +103,7 @@ export default function CompletionRulesEditor({
                     padding: '4px 8px', border: 'none', background: 'none',
                     color: '#ef4444', cursor: 'pointer', fontSize: '0.85rem',
                   }}
-                  aria-label={isHt ? 'Efase règ' : 'Remove rule'}
+                  aria-label={isHt ? 'Efase règ' : inlineText(lang, 'Remove rule')}
                 >
                   ✕
                 </button>
@@ -120,7 +121,7 @@ export default function CompletionRulesEditor({
                       fontSize: '0.82rem', fontFamily: 'inherit',
                     }}
                   >
-                    <option value="">{isHt ? 'Chwazi evalyasyon...' : 'Select assessment...'}</option>
+                    <option value="">{isHt ? 'Chwazi evalyasyon...' : inlineText(lang, 'Select assessment...')}</option>
                     {assessmentBlocks.map((b) => (
                       <option key={b.id} value={b.id}>{b.title || b.type}</option>
                     ))}
@@ -136,7 +137,7 @@ export default function CompletionRulesEditor({
                       border: '1px solid var(--border-color, #e5e7eb)',
                       fontSize: '0.82rem', textAlign: 'center',
                     }}
-                    aria-label={isHt ? 'Limit pase (%)' : 'Pass threshold (%)'}
+                    aria-label={isHt ? 'Limit pase (%)' : inlineText(lang, 'Pass threshold (%)')}
                   />
                   <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', alignSelf: 'center' }}>%</span>
                 </div>
@@ -145,7 +146,7 @@ export default function CompletionRulesEditor({
               {rule.type === 'min_score' && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-                    {isHt ? 'Nòt mwayèn minimòm:' : 'Min average score:'}
+                    {isHt ? 'Nòt mwayèn minimòm:' : inlineText(lang, 'Min average score:')}
                   </span>
                   <input
                     type="number"
@@ -173,7 +174,7 @@ export default function CompletionRulesEditor({
                     fontSize: '0.82rem', fontFamily: 'inherit',
                   }}
                 >
-                  <option value="">{isHt ? 'Chwazi blòk...' : 'Select block...'}</option>
+                  <option value="">{isHt ? 'Chwazi blòk...' : inlineText(lang, 'Select block...')}</option>
                   {blocks.filter((b) => ['exercise', 'assignment', 'project'].includes(b.type)).map((b) => (
                     <option key={b.id} value={b.id}>{b.title || b.type}</option>
                   ))}

@@ -11,6 +11,7 @@ import React from 'react';
 import { SkeletonSection } from './ProfileSkeleton';
 import { fmtCount } from './profileUtils';
 import ProfileCatalogCard from './ProfileCatalogCard';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function PortfolioTab({ portfolio, loading, onItemClick, lang }) {
   if (loading) return <SkeletonSection />;
@@ -21,7 +22,7 @@ export default function PortfolioTab({ portfolio, loading, onItemClick, lang }) 
         <p>
           {lang === 'ht'
             ? 'Kreyatè sa a poko pibliye pwojè pòtfolyo pou kounye a.'
-            : 'No portfolio projects yet.'}
+            : inlineText(lang, 'No portfolio projects yet.')}
         </p>
       </div>
     );
@@ -35,9 +36,9 @@ export default function PortfolioTab({ portfolio, loading, onItemClick, lang }) 
           image={project.image_url}
           description={project.description}
           icon="fa-briefcase"
-          typeLabel={lang === 'ht' ? 'Pòtfolyo' : 'Portfolio'}
+          typeLabel={lang === 'ht' ? 'Pòtfolyo' : inlineText(lang, 'Portfolio')}
           rating={project.rating}
-          extra={<>{project.category && <span className="csp-catalog-card-chip">{project.category}</span>}{project.views > 0 && <span>· {fmtCount(project.views)} {lang === 'ht' ? 'vizit' : 'views'}</span>}</>}
+          extra={<>{project.category && <span className="csp-catalog-card-chip">{project.category}</span>}{project.views > 0 && <span>· {fmtCount(project.views)} {lang === 'ht' ? 'vizit' : inlineText(lang, 'views')}</span>}</>}
           onOpen={() => onItemClick?.('portfolio', project.id, project)}
         />
       ))}

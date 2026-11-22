@@ -13,6 +13,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useHasAdminAccess } from '../../hooks/useHasAdminAccess';
 import { adminMediaService } from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 const RISK_COLORS = {
   low:    { color: 'var(--state-success, #10b981)', bg: 'var(--severity-low-bg, rgba(16,185,129,0.09))' },
@@ -57,7 +58,7 @@ export default function AdminValidationQueue({ lang = 'en', showToast, user, onN
   useEffect(() => {
     if (user && !permsLoading && !hasStaffAccess) {
       showToast?.(
-        isHt ? 'Aksè rezeve pou administratè.' : 'Staff access required.',
+        isHt ? 'Aksè rezeve pou administratè.' : inlineText(lang, 'Staff access required.'),
         'user-lock',
       );
       if (onNavigate) onNavigate('/', { replace: true });
@@ -72,7 +73,7 @@ export default function AdminValidationQueue({ lang = 'en', showToast, user, onN
       setTotal(res.data?.total || 0);
     } catch {
       showToast?.(
-        isHt ? 'Pa kapab chaje ke a.' : 'Failed to load queue.',
+        isHt ? 'Pa kapab chaje ke a.' : inlineText(lang, 'Failed to load queue.'),
         'exclamation-triangle',
       );
     } finally {
@@ -88,13 +89,13 @@ export default function AdminValidationQueue({ lang = 'en', showToast, user, onN
       const res = await adminMediaService.retryValidation(id);
       showToast?.(
         res.data?.is_valid
-          ? (isHt ? 'Validasyon reyisi!' : 'Validation passed!')
-          : (isHt ? 'Toujou kase.' : 'Still broken.'),
+          ? (isHt ? 'Validasyon reyisi!' : inlineText(lang, 'Validation passed!'))
+          : (isHt ? 'Toujou kase.' : inlineText(lang, 'Still broken.')),
         res.data?.is_valid ? 'check-circle' : 'exclamation-triangle',
       );
       fetchQueue();
     } catch {
-      showToast?.(isHt ? 'Erè retry.' : 'Retry failed.', 'exclamation-triangle');
+      showToast?.(isHt ? 'Erè retry.' : inlineText(lang, 'Retry failed.'), 'exclamation-triangle');
     } finally {
       setActionLoading(null);
     }
@@ -104,10 +105,10 @@ export default function AdminValidationQueue({ lang = 'en', showToast, user, onN
     setActionLoading(id);
     try {
       await adminMediaService.skipValidation(id);
-      showToast?.(isHt ? 'Sote.' : 'Skipped.', 'check');
+      showToast?.(isHt ? 'Sote.' : inlineText(lang, 'Skipped.'), 'check');
       fetchQueue();
     } catch {
-      showToast?.(isHt ? 'Erè skip.' : 'Skip failed.', 'exclamation-triangle');
+      showToast?.(isHt ? 'Erè skip.' : inlineText(lang, 'Skip failed.'), 'exclamation-triangle');
     } finally {
       setActionLoading(null);
     }
@@ -118,8 +119,8 @@ export default function AdminValidationQueue({ lang = 'en', showToast, user, onN
       <div className="avq-shell">
         <div className="avq-empty">
           <i className="fas fa-user-lock" />
-          <h3>{isHt ? 'Aksè Rezeve' : 'Staff Access Required'}</h3>
-          <p>{isHt ? 'Ou bezwen pèmisyon administratè.' : 'You need staff permissions.'}</p>
+          <h3>{isHt ? 'Aksè Rezeve' : inlineText(lang, 'Staff Access Required')}</h3>
+          <p>{isHt ? 'Ou bezwen pèmisyon administratè.' : inlineText(lang, 'You need staff permissions.')}</p>
         </div>
       </div>
     );
@@ -134,7 +135,7 @@ export default function AdminValidationQueue({ lang = 'en', showToast, user, onN
         </button>
         <div className="avq-header-center">
           <h1 className="avq-title">
-            <i className="fas fa-spinner" /> {isHt ? 'Ke Validasyon' : 'Validation Queue'}
+            <i className="fas fa-spinner" /> {isHt ? 'Ke Validasyon' : inlineText(lang, 'Validation Queue')}
           </h1>
           <p className="avq-subtitle">
             {isHt
@@ -144,7 +145,7 @@ export default function AdminValidationQueue({ lang = 'en', showToast, user, onN
         </div>
         <div className="avq-header-actions">
           <button type="button" className="avq-btn" onClick={fetchQueue}>
-            <i className="fas fa-sync" /> {isHt ? 'Rafrechi' : 'Refresh'}
+            <i className="fas fa-sync" /> {isHt ? 'Rafrechi' : inlineText(lang, 'Refresh')}
           </button>
         </div>
       </div>
@@ -169,26 +170,26 @@ export default function AdminValidationQueue({ lang = 'en', showToast, user, onN
       <div className="avq-body">
         {loading ? (
           <div className="avq-loading">
-            <i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap chaje...' : 'Loading...'}
+            <i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap chaje...' : inlineText(lang, 'Loading...')}
           </div>
         ) : queue.length === 0 ? (
           <div className="avq-empty">
             <i className="fas fa-check-circle" style={{ opacity: 0.3 }} />
-            <p>{isHt ? 'Pa gen validasyon annatant.' : 'No pending validations.'}</p>
+            <p>{isHt ? 'Pa gen validasyon annatant.' : inlineText(lang, 'No pending validations.')}</p>
           </div>
         ) : (
           <div className="avq-table-wrap">
             <table className="avq-table">
               <thead>
                 <tr>
-                  <th>{isHt ? 'Medya' : 'Media'}</th>
-                  <th>{isHt ? 'Kreyatè' : 'Creator'}</th>
-                  <th>{isHt ? 'Provider' : 'Provider'}</th>
-                  <th>{isHt ? 'Retry' : 'Retries'}</th>
-                  <th>{isHt ? 'Risk' : 'Risk'}</th>
-                  <th>{isHt ? 'Dènye Erè' : 'Last Error'}</th>
-                  <th>{isHt ? 'Depi' : 'Since'}</th>
-                  <th>{isHt ? 'Aksyon' : 'Actions'}</th>
+                  <th>{isHt ? 'Medya' : inlineText(lang, 'Media')}</th>
+                  <th>{isHt ? 'Kreyatè' : inlineText(lang, 'Creator')}</th>
+                  <th>{isHt ? 'Provider' : inlineText(lang, 'Provider')}</th>
+                  <th>{isHt ? 'Retry' : inlineText(lang, 'Retries')}</th>
+                  <th>{isHt ? 'Risk' : inlineText(lang, 'Risk')}</th>
+                  <th>{isHt ? 'Dènye Erè' : inlineText(lang, 'Last Error')}</th>
+                  <th>{isHt ? 'Depi' : inlineText(lang, 'Since')}</th>
+                  <th>{isHt ? 'Aksyon' : inlineText(lang, 'Actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -222,7 +223,7 @@ export default function AdminValidationQueue({ lang = 'en', showToast, user, onN
                       <button
                         type="button"
                         className="avq-action-btn avq-action-retry"
-                        title={isHt ? 'Rekòmanse' : 'Retry'}
+                        title={isHt ? 'Rekòmanse' : inlineText(lang, 'Retry')}
                         onClick={() => handleRetry(item.id)}
                         disabled={actionLoading === item.id}
                       >
@@ -231,7 +232,7 @@ export default function AdminValidationQueue({ lang = 'en', showToast, user, onN
                       <button
                         type="button"
                         className="avq-action-btn avq-action-skip"
-                        title={isHt ? 'Sote' : 'Skip'}
+                        title={isHt ? 'Sote' : inlineText(lang, 'Skip')}
                         onClick={() => handleSkip(item.id)}
                         disabled={actionLoading === item.id}
                       >

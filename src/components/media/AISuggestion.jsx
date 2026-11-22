@@ -8,6 +8,7 @@
  *   - Sijesyon pou eseye yon lòt provider
  */
 import React from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 const SUGGESTIONS = {
   403: {
@@ -92,7 +93,7 @@ export default function AISuggestion({ error, statusCode, errorMessage, provider
         <div className="ai-suggestion-title-area">
           <span className="ai-suggestion-title">
             <i className="fas fa-robot" />
-            AI {isHt ? 'Asistan' : 'Assistant'}
+            AI {isHt ? 'Asistan' : inlineText(lang, 'Assistant')}
           </span>
           <h4 className="ai-suggestion-heading">
             {isHt ? config.titleHt : config.titleEn}
@@ -113,14 +114,14 @@ export default function AISuggestion({ error, statusCode, errorMessage, provider
         {provider && (
           <div className="ai-suggestion-provider">
             <i className="fas fa-cloud" />
-            {isHt ? 'Provider detekte' : 'Detected provider'}: <strong>{provider}</strong>
+            {isHt ? 'Provider detekte' : inlineText(lang, 'Detected provider')}: <strong>{provider}</strong>
           </div>
         )}
 
         {errorMessage && (
           <div className="ai-suggestion-error">
             <i className="fas fa-bug" />
-            {isHt ? 'Detay erè' : 'Error details'}: <code>{errorMessage}</code>
+            {isHt ? 'Detay erè' : inlineText(lang, 'Error details')}: <code>{errorMessage}</code>
           </div>
         )}
       </div>
@@ -129,7 +130,7 @@ export default function AISuggestion({ error, statusCode, errorMessage, provider
         <div className="ai-suggestion-footer">
           <button type="button" className="btn-primary" onClick={onRetry}>
             <i className="fas fa-redo" />
-            {isHt ? 'Eseye ankò' : 'Try again'}
+            {isHt ? 'Eseye ankò' : inlineText(lang, 'Try again')}
           </button>
         </div>
       )}

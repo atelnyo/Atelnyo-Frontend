@@ -12,6 +12,7 @@ import {
   LoadingOverlay, HelpTip, FieldTip, HELP_COPY,
 } from './shared';
 import styles from './modals.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function ProjectFormModal({ onClose, onSuccess, lang, showToast, item }) {
   const isEdit = Boolean(item);
@@ -48,7 +49,7 @@ export default function ProjectFormModal({ onClose, onSuccess, lang, showToast, 
 
   const validate = () => {
     const errs = {};
-    if (!form.title.trim()) errs.title = lang === 'ht' ? 'Tit oblije' : 'Title required';
+    if (!form.title.trim()) errs.title = lang === 'ht' ? 'Tit oblije' : inlineText(lang, 'Title required');
     return errs;
   };
 
@@ -65,15 +66,15 @@ if (isEdit) {
       }
       showToast?.(
         isEdit
-          ? (lang === 'ht' ? '✅ Pwojè mete ajou!' : '✅ Project updated!')
-          : (lang === 'ht' ? '✅ Pwojè ajoute avèk siksè!' : '✅ Project added successfully!'),
+          ? (lang === 'ht' ? '✅ Pwojè mete ajou!' : inlineText(lang, '✅ Project updated!'))
+          : (lang === 'ht' ? '✅ Pwojè ajoute avèk siksè!' : inlineText(lang, '✅ Project added successfully!')),
         'check-circle',
       );
       onSuccess?.(); onClose?.();
     } catch (err) {
       const detail = err?.response?.data?.detail || err?.response?.data?.title?.[0]
         || err?.message
-        || (lang === 'ht' ? 'Pa t kapab ajoute pwojè a.' : 'Could not add project.');
+        || (lang === 'ht' ? 'Pa t kapab ajoute pwojè a.' : inlineText(lang, 'Could not add project.'));
       setErrors((e) => ({ ...e, _api: detail }));
       showToast?.(detail, 'circle-exclamation');
     } finally { setLoading(false); }
@@ -81,53 +82,53 @@ if (isEdit) {
 
   return (
     <StudioModal onClose={onClose} icon="fa-briefcase"
-      title={lang === 'ht' ? 'Ajoute yon Pwojè' : 'Add a Project'}
+      title={lang === 'ht' ? 'Ajoute yon Pwojè' : inlineText(lang, 'Add a Project')}
       subtitle={isEdit
-        ? (lang === 'ht' ? 'Modifye pwojè a' : 'Edit this project')
-        : (lang === 'ht' ? 'Montre travay ou nan pòtfolyo ou' : 'Showcase your work in your portfolio')}>
+        ? (lang === 'ht' ? 'Modifye pwojè a' : inlineText(lang, 'Edit this project'))
+        : (lang === 'ht' ? 'Montre travay ou nan pòtfolyo ou' : inlineText(lang, 'Showcase your work in your portfolio'))}>
       <form onSubmit={handleSubmit} className={styles.form}>
         {errors._api && <div className={styles.apiError} role="alert">{errors._api}</div>}
         {isEdit && (
           <div className={styles.editBanner}>
-            <i className="fas fa-pen" aria-hidden="true" /> {lang === 'ht' ? 'Ap modifye' : 'Editing'} <strong>{form.title}</strong>
+            <i className="fas fa-pen" aria-hidden="true" /> {lang === 'ht' ? 'Ap modifye' : inlineText(lang, 'Editing')} <strong>{form.title}</strong>
           </div>
         )}
         <LoadingOverlay loading={loading}>
           <FormSection
             icon="fa-info-circle"
-            title={lang === 'ht' ? 'Enfòmasyon Pwojè' : 'Project Information'}
-            hint={lang === 'ht' ? 'Ki travay sa a?' : 'What is this work?'}
+            title={lang === 'ht' ? 'Enfòmasyon Pwojè' : inlineText(lang, 'Project Information')}
+            hint={lang === 'ht' ? 'Ki travay sa a?' : inlineText(lang, 'What is this work?')}
           >
-            <FormField label={lang === 'ht' ? 'Tit' : 'Title'} required error={errors.title}>
+            <FormField label={lang === 'ht' ? 'Tit' : inlineText(lang, 'Title')} required error={errors.title}>
               <input className={styles.input} value={form.title}
                 onChange={(e) => handleChange('title', e.target.value)}
-                placeholder={lang === 'ht' ? 'Non pwojè a' : 'Project name'}
+                placeholder={lang === 'ht' ? 'Non pwojè a' : inlineText(lang, 'Project name')}
                 maxLength={200} autoFocus />
             </FormField>
-            <FormField label={lang === 'ht' ? 'Kategori' : 'Category'}>
+            <FormField label={lang === 'ht' ? 'Kategori' : inlineText(lang, 'Category')}>
               <input className={styles.input} value={form.category}
                 onChange={(e) => handleChange('category', e.target.value)}
-                placeholder={lang === 'ht' ? 'Web, Design, Mizik...' : 'Web, Design, Music...'} />
+                placeholder={lang === 'ht' ? 'Web, Design, Mizik...' : inlineText(lang, 'Web, Design, Music...')} />
             </FormField>
-            <FormField label={lang === 'ht' ? 'Deskripsyon' : 'Description'}>
+            <FormField label={lang === 'ht' ? 'Deskripsyon' : inlineText(lang, 'Description')}>
               <textarea className={styles.textarea} value={form.description}
                 onChange={(e) => handleChange('description', e.target.value)}
-                placeholder={lang === 'ht' ? 'Dekri pwojè a...' : 'Describe the project...'}
+                placeholder={lang === 'ht' ? 'Dekri pwojè a...' : inlineText(lang, 'Describe the project...')}
                 rows={4} maxLength={5000} />
             </FormField>
           </FormSection>
 
           <FormSection
             icon="fa-link"
-            title={lang === 'ht' ? 'Lyen & Kouvèti' : 'Links & Cover'}
-            hint={lang === 'ht' ? 'Kote moun ka wè pwojè a ak kouvèti li.' : 'Where people can see the project and its cover.'}
+            title={lang === 'ht' ? 'Lyen & Kouvèti' : inlineText(lang, 'Links & Cover')}
+            hint={lang === 'ht' ? 'Kote moun ka wè pwojè a ak kouvèti li.' : inlineText(lang, 'Where people can see the project and its cover.')}
           >
             <FieldTip>
               {lang === 'ht'
                 ? 'Ou ka mete yon lyen GitHub, yon sit, oswa yon videyo YouTube/Vimeo/Facebook/TikTok kòm pwojè.'
-                : 'You can use a GitHub link, a live site, or a YouTube/Vimeo/Facebook/TikTok video as the project.'}
+                : inlineText(lang, 'You can use a GitHub link, a live site, or a YouTube/Vimeo/Facebook/TikTok video as the project.')}
             </FieldTip>
-            <FormField label={lang === 'ht' ? 'URL Pwojè' : 'Project URL'}
+            <FormField label={lang === 'ht' ? 'URL Pwojè' : inlineText(lang, 'Project URL')}
               hint="GitHub, live site, etc.">
               <div className={styles.inputWithHelp}>
                 <input className={styles.input} value={form.project_url}
@@ -140,52 +141,52 @@ if (isEdit) {
               </div>
             </FormField>
             <ImageUrlField
-              label={lang === 'ht' ? 'URL Kouvèti' : 'Cover URL'}
+              label={lang === 'ht' ? 'URL Kouvèti' : inlineText(lang, 'Cover URL')}
               value={form.cover_url}
               onChange={(v) => handleChange('cover_url', v)}
               placeholder="https://example.com/project.jpg"
               lang={lang}
               hint={lang === 'ht'
                 ? 'Kole yon URL imaj DIREK (.jpg, .png, .webp) — pa yon paj galri.'
-                : 'Paste a DIRECT image URL (.jpg, .png, .webp) — not a gallery page.'}
+                : inlineText(lang, 'Paste a DIRECT image URL (.jpg, .png, .webp) — not a gallery page.')}
               help={HELP_COPY.cover}
             />
           </FormSection>
 
           <FormSection
             icon="fa-code"
-            title={lang === 'ht' ? 'Detay Pwojè' : 'Project Details'}
-            hint={lang === 'ht' ? 'Lyen sous, konpetans, nivo ak dat.' : 'Source link, skills, level and date.'}
+            title={lang === 'ht' ? 'Detay Pwojè' : inlineText(lang, 'Project Details')}
+            hint={lang === 'ht' ? 'Lyen sous, konpetans, nivo ak dat.' : inlineText(lang, 'Source link, skills, level and date.')}
           >
-            <FormField label={lang === 'ht' ? 'URL Sous (GitHub)' : 'Source URL (GitHub)'}>
+            <FormField label={lang === 'ht' ? 'URL Sous (GitHub)' : inlineText(lang, 'Source URL (GitHub)')}>
               <input className={styles.input} value={form.source_url}
                 onChange={(e) => handleChange('source_url', e.target.value)}
                 placeholder="https://github.com/..." />
             </FormField>
-            <FormField label={lang === 'ht' ? 'Konpetans (separe ak virgül)' : 'Skills (comma separated)'}>
+            <FormField label={lang === 'ht' ? 'Konpetans (separe ak virgül)' : inlineText(lang, 'Skills (comma separated)')}>
               <input className={styles.input} value={form.skills_used}
                 onChange={(e) => handleChange('skills_used', e.target.value)}
-                placeholder={lang === 'ht' ? 'React, Django, Design...' : 'React, Django, Design...'} />
+                placeholder={lang === 'ht' ? 'React, Django, Design...' : inlineText(lang, 'React, Django, Design...')} />
             </FormField>
-            <FormField label={lang === 'ht' ? 'Nivo' : 'Difficulty'}>
+            <FormField label={lang === 'ht' ? 'Nivo' : inlineText(lang, 'Difficulty')}>
               <select className={styles.input} value={form.difficulty}
                 onChange={(e) => handleChange('difficulty', e.target.value)}>
-                <option value="beginner">{lang === 'ht' ? 'Debitan' : 'Beginner'}</option>
-                <option value="intermediate">{lang === 'ht' ? 'Mwayen' : 'Intermediate'}</option>
-                <option value="advanced">{lang === 'ht' ? 'Avanse' : 'Advanced'}</option>
-                <option value="expert">{lang === 'ht' ? 'Ekspè' : 'Expert'}</option>
+                <option value="beginner">{lang === 'ht' ? 'Debitan' : inlineText(lang, 'Beginner')}</option>
+                <option value="intermediate">{lang === 'ht' ? 'Mwayen' : inlineText(lang, 'Intermediate')}</option>
+                <option value="advanced">{lang === 'ht' ? 'Avanse' : inlineText(lang, 'Advanced')}</option>
+                <option value="expert">{lang === 'ht' ? 'Ekspè' : inlineText(lang, 'Expert')}</option>
               </select>
             </FormField>
-            <FormField label={lang === 'ht' ? 'Dat finalizasyon' : 'Completion date'}>
+            <FormField label={lang === 'ht' ? 'Dat finalizasyon' : inlineText(lang, 'Completion date')}>
               <input type="date" className={styles.input} value={form.completion_date}
                 onChange={(e) => handleChange('completion_date', e.target.value)} />
             </FormField>
             <label className={styles.toggleRow}>
               <span>
-                <strong>{lang === 'ht' ? 'Pibliye' : 'Published'}</strong>
+                <strong>{lang === 'ht' ? 'Pibliye' : inlineText(lang, 'Published')}</strong>
                 <small>{lang === 'ht'
                   ? 'Si w etenn li, pwojè a kache (bouyon).'
-                  : 'When off, the project is hidden (draft).'}</small>
+                  : inlineText(lang, 'When off, the project is hidden (draft).')}</small>
               </span>
               <input
                 type="checkbox"
@@ -197,15 +198,15 @@ if (isEdit) {
 
           <FormSection
             icon="fa-user-lock"
-            title={lang === 'ht' ? 'Piblik' : 'Visibility'}
-            hint={lang === 'ht' ? 'Ki moun ka wè pwojè sa a?' : 'Who can see this project?'}
+            title={lang === 'ht' ? 'Piblik' : inlineText(lang, 'Visibility')}
+            hint={lang === 'ht' ? 'Ki moun ka wè pwojè sa a?' : inlineText(lang, 'Who can see this project?')}
           >
             <label className={styles.toggleRow}>
               <span>
-                <strong>{lang === 'ht' ? 'Abonè sèlman (gratis)' : 'Followers only (free)'}</strong>
+                <strong>{lang === 'ht' ? 'Abonè sèlman (gratis)' : inlineText(lang, 'Followers only (free)')}</strong>
                 <small>{lang === 'ht'
                   ? 'Sèlman ou menm ak moun k ap swiv ou ka wè l.'
-                  : 'Only you and the people following you can see it.'}</small>
+                  : inlineText(lang, 'Only you and the people following you can see it.')}</small>
               </span>
               <input
                 type="checkbox"
@@ -215,10 +216,10 @@ if (isEdit) {
             </label>
             <label className={styles.toggleRow}>
               <span>
-                <strong>{lang === 'ht' ? 'Abonè peyan sèlman' : 'Subscribers only (paid)'}</strong>
+                <strong>{lang === 'ht' ? 'Abonè peyan sèlman' : inlineText(lang, 'Subscribers only (paid)')}</strong>
                 <small>{lang === 'ht'
                   ? 'Sèlman abonè peyan yo ka wè l — ou bezwen mete yon pri abònman nan Anviwònman Pwofil.'
-                  : 'Only paid subscribers can see it — set a subscription price in Profile Settings.'}</small>
+                  : inlineText(lang, 'Only paid subscribers can see it — set a subscription price in Profile Settings.')}</small>
               </span>
               <input
                 type="checkbox"
@@ -230,15 +231,15 @@ if (isEdit) {
         </LoadingOverlay>
         <div className={styles.actions}>
           <button type="button" className="btn-secondary" onClick={onClose} disabled={loading}>
-            {lang === 'ht' ? 'Anile' : 'Cancel'}
+            {lang === 'ht' ? 'Anile' : inlineText(lang, 'Cancel')}
           </button>
           <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? (
-              <><i className="fas fa-spinner fa-spin" /> {lang === 'ht' ? 'Ap sove...' : 'Saving...'}</>
+              <><i className="fas fa-spinner fa-spin" /> {lang === 'ht' ? 'Ap sove...' : inlineText(lang, 'Saving...')}</>
             ) : (
               <><i className={`fas ${isEdit ? 'fa-save' : 'fa-plus'}`} /> {isEdit
-                ? (lang === 'ht' ? 'Mete ajou' : 'Update')
-                : (lang === 'ht' ? 'Ajoute Pwojè' : 'Add Project')}</>
+                ? (lang === 'ht' ? 'Mete ajou' : inlineText(lang, 'Update'))
+                : (lang === 'ht' ? 'Ajoute Pwojè' : inlineText(lang, 'Add Project'))}</>
             )}
           </button>
         </div>

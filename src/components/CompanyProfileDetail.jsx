@@ -29,6 +29,7 @@ import { Helmet } from 'react-helmet-async';
 import { translations } from '../data/translations';
 import { companyProfileService } from '../services/api';
 import { ogImageForLang } from './profile/profileConstants';
+import { inlineText } from '../utils/inlineI18n';
 
 function buildOgUrl(slug) {
   const base = window.location.origin || 'https://atelnyo.app';
@@ -167,7 +168,7 @@ function HeroContent({ payload, t, lang }) {
                   fontWeight: 700, letterSpacing: '0.04em', alignSelf: 'center',
                 }}>
                 <i className="fas fa-badge-check" aria-hidden="true" />
-                {t.company_profile_verified || (lang === 'ht' ? 'Konpanyi Verifye' : 'Verified Company')}
+                {t.company_profile_verified || (lang === 'ht' ? 'Konpanyi Verifye' : inlineText(lang, 'Verified Company'))}
               </span>
             )}
           </div>
@@ -278,7 +279,7 @@ export default function CompanyProfileDetail({ lang = 'en', showToast }) {
         }
       }
       await navigator.clipboard.writeText(url);
-      if (showToast) showToast(t.company_profile_share || (lang === 'ht' ? 'Lyen kopye!' : 'Link copied!'));
+      if (showToast) showToast(t.company_profile_share || (lang === 'ht' ? 'Lyen kopye!' : inlineText(lang, 'Link copied!')));
     } catch {
       // clipboard unavailable — nothing to do
     } finally {
@@ -324,7 +325,7 @@ export default function CompanyProfileDetail({ lang = 'en', showToast }) {
         <header className={`cd-sticky-header${scrolled ? ' cd-sticky-header--scrolled' : ''}`}>
           <div className="cd-sticky-header-inner">
             <button type="button" className="cd-header-back" onClick={handleBack}
-              aria-label={t.company_profile_back || (lang === 'ht' ? 'Retounen' : 'Back')}
+              aria-label={t.company_profile_back || (lang === 'ht' ? 'Retounen' : inlineText(lang, 'Back'))}
               data-testid="company-detail-back-btn">
               <i className="fas fa-arrow-left" aria-hidden="true" />
             </button>
@@ -334,8 +335,8 @@ export default function CompanyProfileDetail({ lang = 'en', showToast }) {
             <div className="cd-header-actions">
               <button type="button" className="cd-header-action-btn" onClick={handleShare}
                 disabled={shareBusy}
-                aria-label={t.company_profile_share || (lang === 'ht' ? 'Pataje' : 'Share')}
-                title={t.company_profile_share || (lang === 'ht' ? 'Pataje' : 'Share')}>
+                aria-label={t.company_profile_share || (lang === 'ht' ? 'Pataje' : inlineText(lang, 'Share'))}
+                title={t.company_profile_share || (lang === 'ht' ? 'Pataje' : inlineText(lang, 'Share'))}>
                 <i className="fas fa-share-alt" aria-hidden="true" />
               </button>
             </div>
@@ -361,18 +362,18 @@ export default function CompanyProfileDetail({ lang = 'en', showToast }) {
                 }} />
                 <div style={{ width: 160, height: 14, borderRadius: 6, background: 'rgba(255,255,255,0.10)', animation: 'pulse 2s infinite ease-in-out' }} />
                 <span style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.4)' }}>
-                  {lang === 'ht' ? 'Ap chaje paj konpanyi a...' : 'Loading company page...'}
+                  {lang === 'ht' ? 'Ap chaje paj konpanyi a...' : inlineText(lang, 'Loading company page...')}
                 </span>
               </div>
             ) : errCode === 'not_found' ? (
               <HeroEmptyMessage
                 icon="fa-building-circle-exclamation"
-                msg={t.company_profile_not_found || (lang === 'ht' ? 'Paj sa pa egziste oswa li poko apwouve.' : 'Not found or not approved yet.')}
+                msg={t.company_profile_not_found || (lang === 'ht' ? 'Paj sa pa egziste oswa li poko apwouve.' : inlineText(lang, 'Not found or not approved yet.'))}
               />
             ) : errCode === 'load_error' ? (
               <HeroEmptyMessage
                 icon="fa-triangle-exclamation"
-                msg={lang === 'ht' ? 'Nou pa t kapab chaje paj la.' : 'Could not load this page.'}
+                msg={lang === 'ht' ? 'Nou pa t kapab chaje paj la.' : inlineText(lang, 'Could not load this page.')}
               />
             ) : payload ? (
               <HeroContent payload={payload} t={t} lang={lang} />
@@ -392,7 +393,7 @@ export default function CompanyProfileDetail({ lang = 'en', showToast }) {
                 <section className="cd-section" data-testid="company-about-section">
                   <h2 className="cd-section-title">
                     <i className="fas fa-circle-info" aria-hidden="true" />
-                    {t.company_profile_about || (lang === 'ht' ? 'Apwopo' : 'About')}
+                    {t.company_profile_about || (lang === 'ht' ? 'Apwopo' : inlineText(lang, 'About'))}
                   </h2>
                   <p className="cd-text" style={{ whiteSpace: 'pre-wrap' }}>{payload.description}</p>
                 </section>
@@ -403,20 +404,20 @@ export default function CompanyProfileDetail({ lang = 'en', showToast }) {
                 <section className="cd-section">
                   <h2 className="cd-section-title">
                     <i className="fas fa-building" aria-hidden="true" />
-                    {lang === 'ht' ? 'Enfòmasyon' : 'Information'}
+                    {lang === 'ht' ? 'Enfòmasyon' : inlineText(lang, 'Information')}
                   </h2>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
                     {(payload.country || payload.city) && (
                       <InfoTile
                         icon="fa-map-marker-alt"
-                        label={lang === 'ht' ? 'Kote' : 'Location'}
+                        label={lang === 'ht' ? 'Kote' : inlineText(lang, 'Location')}
                         value={[payload.city, payload.country].filter(Boolean).join(', ')}
                       />
                     )}
                     {payload.website && (
                       <InfoTile
                         icon="fa-globe"
-                        label={lang === 'ht' ? 'Sit wèb' : 'Website'}
+                        label={lang === 'ht' ? 'Sit wèb' : inlineText(lang, 'Website')}
                         value={payload.website.replace(/^https?:\/\//, '')}
                         isLink href={payload.website}
                       />
@@ -439,7 +440,7 @@ export default function CompanyProfileDetail({ lang = 'en', showToast }) {
                 <section className="cd-section" data-testid="company-team-section">
                   <h2 className="cd-section-title">
                     <i className="fas fa-users" aria-hidden="true" />
-                    {t.company_profile_team || (lang === 'ht' ? 'Ekip nou' : 'Our team')}
+                    {t.company_profile_team || (lang === 'ht' ? 'Ekip nou' : inlineText(lang, 'Our team'))}
                   </h2>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
                     {team.map((m, i) => (
@@ -477,7 +478,7 @@ export default function CompanyProfileDetail({ lang = 'en', showToast }) {
                 <section className="cd-section" data-testid="company-offerings-section">
                   <h2 className="cd-section-title">
                     <i className="fas fa-box-open" aria-hidden="true" />
-                    {t.company_profile_offerings || (lang === 'ht' ? 'Pwodwi & Sèvis' : 'Products & Services')}
+                    {t.company_profile_offerings || (lang === 'ht' ? 'Pwodwi & Sèvis' : inlineText(lang, 'Products & Services'))}
                   </h2>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
                     {offerings.map((o, i) => (
@@ -506,13 +507,13 @@ export default function CompanyProfileDetail({ lang = 'en', showToast }) {
                 <section className="cd-section" data-testid="company-linked-section">
                   <h2 className="cd-section-title">
                     <i className="fas fa-folder-open" aria-hidden="true" />
-                    {t.company_profile_linked || (lang === 'ht' ? 'Kontni Konpanyi' : 'Company Content')}
+                    {t.company_profile_linked || (lang === 'ht' ? 'Kontni Konpanyi' : inlineText(lang, 'Company Content'))}
                   </h2>
 
                   {linkedSpotlight.length > 0 && (
                     <div style={{ marginBottom: 18 }}>
                       <div style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'rgba(148,163,184,0.8)', marginBottom: 10 }}>
-                        {t.company_profile_linked_spotlight || (lang === 'ht' ? 'Envansyon Spotlight' : 'Spotlight Inventions')}
+                        {t.company_profile_linked_spotlight || (lang === 'ht' ? 'Envansyon Spotlight' : inlineText(lang, 'Spotlight Inventions'))}
                       </div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 10 }}>
                         {linkedSpotlight.map((s) => (
@@ -530,7 +531,7 @@ export default function CompanyProfileDetail({ lang = 'en', showToast }) {
                   {linkedProducts.length > 0 && (
                     <div style={{ marginBottom: 18 }}>
                       <div style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'rgba(148,163,184,0.8)', marginBottom: 10 }}>
-                        {t.company_profile_linked_products || (lang === 'ht' ? 'Pwodwi' : 'Products')}
+                        {t.company_profile_linked_products || (lang === 'ht' ? 'Pwodwi' : inlineText(lang, 'Products'))}
                       </div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 10 }}>
                         {linkedProducts.map((p) => (
@@ -549,7 +550,7 @@ export default function CompanyProfileDetail({ lang = 'en', showToast }) {
                   {linkedPortfolio.length > 0 && (
                     <div>
                       <div style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'rgba(148,163,184,0.8)', marginBottom: 10 }}>
-                        {t.company_profile_linked_portfolio || (lang === 'ht' ? 'Pòtfolyo' : 'Portfolio')}
+                        {t.company_profile_linked_portfolio || (lang === 'ht' ? 'Pòtfolyo' : inlineText(lang, 'Portfolio'))}
                       </div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 10 }}>
                         {linkedPortfolio.map((pr) => (

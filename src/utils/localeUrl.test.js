@@ -52,10 +52,11 @@ describe('parseLocaleCountry', () => {
     expect(r.reason).toBe('not-localized');
   });
 
-  it('rejects /es-DO/ because Spanish is no longer a supported UI locale', () => {
+  it('accepts /es-DO/ now that Spanish is a supported UI locale', () => {
     const r = parseLocaleCountry('/es-DO/explore');
-    expect(r.valid).toBe(false);
-    expect(r.reason).toBe('invalid-language');
+    expect(r.valid).toBe(true);
+    expect(r.language).toBe('es');
+    expect(r.country).toBe('DO');
   });
 
   it('rejects a non-locale plain path (root /explore)', () => {
@@ -101,15 +102,15 @@ describe('buildLocaleUrl', () => {
   });
 
   it('returns "" for an unsupported combo (no fake pages)', () => {
-    expect(buildLocaleUrl('es', 'DO')).toBe('');
+    expect(buildLocaleUrl('de', 'DO')).toBe('');
     expect(buildLocaleUrl('ht', 'XX')).toBe('');
   });
 
   describe('platform locale configuration', () => {
-    it('allows exactly HT, EN, and FR for every enabled market', () => {
-      expect(SUPPORTED_LANGUAGES).toEqual(['ht', 'en', 'fr']);
+    it('allows HT, EN, FR, and ES for every enabled market', () => {
+      expect(SUPPORTED_LANGUAGES).toEqual(['ht', 'en', 'fr', 'es']);
       for (const market of Object.values(MARKETS).filter((entry) => entry.marketEnabled)) {
-        expect([...market.supportedLanguages].sort()).toEqual(['en', 'fr', 'ht']);
+        expect([...market.supportedLanguages].sort()).toEqual(['en', 'es', 'fr', 'ht']);
         expect(market.defaultLanguage).not.toBe('es');
       }
     });

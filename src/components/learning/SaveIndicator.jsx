@@ -11,6 +11,7 @@
  * Persistent, minimal, informative.
  */
 import React from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 /**
  * SaveIndicator
@@ -28,31 +29,31 @@ export default function SaveIndicator({ saveState, lang = 'en', className = '' }
     changed: {
       icon: 'fa-circle',
       color: 'var(--text-secondary, #6b7280)',
-      text: lang === 'ht' ? 'Pa encore sove' : 'Unsaved',
+      text: lang === 'ht' ? 'Pa encore sove' : inlineText(lang, 'Unsaved'),
       pulse: false,
     },
     saving: {
       icon: 'fa-spinner fa-spin',
       color: 'var(--pr-color-blue-500, #3b82f6)',
-      text: lang === 'ht' ? 'Ap sove...' : 'Saving...',
+      text: lang === 'ht' ? 'Ap sove...' : inlineText(lang, 'Saving...'),
       pulse: false,
     },
     saved: {
       icon: 'fa-check-circle',
       color: 'var(--pr-color-green-500, #22c55e)',
-      text: lang === 'ht' ? 'Sove' : 'Saved',
+      text: lang === 'ht' ? 'Sove' : inlineText(lang, 'Saved'),
       pulse: false,
     },
     local_only: {
       icon: 'fa-device-mobile',
       color: 'var(--pr-color-amber-500, #f59e0b)',
-      text: lang === 'ht' ? 'Sove sou aparèy sa a' : 'Saved on this device',
+      text: lang === 'ht' ? 'Sove sou aparèy sa a' : inlineText(lang, 'Saved on this device'),
       pulse: false,
     },
     failed: {
       icon: 'fa-exclamation-triangle',
       color: 'var(--pr-color-red-500, #ef4444)',
-      text: lang === 'ht' ? 'Pa kapab sove' : 'Could not save',
+      text: lang === 'ht' ? 'Pa kapab sove' : inlineText(lang, 'Could not save'),
       pulse: true,
     },
   };

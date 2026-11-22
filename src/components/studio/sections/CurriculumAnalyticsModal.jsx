@@ -10,10 +10,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { courseService } from '../../../services/api';
 import styles from './sections.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function CurriculumAnalyticsModal({ course, lang = 'en', onClose }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

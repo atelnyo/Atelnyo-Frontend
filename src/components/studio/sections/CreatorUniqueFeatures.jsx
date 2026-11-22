@@ -11,11 +11,12 @@
  * 5. Community Builder — manage community engagement
  */
 import React, { useState } from 'react';
+import { inlineText } from '../../../utils/inlineI18n';
 
 // ─── 1. Content Calendar ───────────────────────────────────────────
 export function ContentCalendar({ lang = 'en', scheduledContent = [] }) {
   const [view, setView] = useState('week');
-  const t = (ht, en) => lang === 'ht' ? ht : en;
+  const t = (ht, en) => lang === 'ht' ? ht : inlineText(lang, en);
 
   const days = [
     { key: 'mon', labelHt: 'Lun', labelEn: 'Mon' },
@@ -134,7 +135,7 @@ export function ContentCalendar({ lang = 'en', scheduledContent = [] }) {
 
 // ─── 2. Achievement Showcase ────────────────────────────────────────
 export function AchievementShowcase({ achievements = [], lang = 'en' }) {
-  const t = (ht, en) => lang === 'ht' ? ht : en;
+  const t = (ht, en) => lang === 'ht' ? ht : inlineText(lang, en);
 
   const ACHIEVEMENT_TYPES = [
     { type: 'badge', icon: 'fa-medal', color: '#fbbf24', labelHt: 'Badges', labelEn: 'Badges' },
@@ -222,7 +223,7 @@ export function AchievementShowcase({ achievements = [], lang = 'en' }) {
 
 // ─── 3. Collaboration Hub ───────────────────────────────────────────
 export function CollaborationHub({ lang = 'en', collaborators = [] }) {
-  const t = (ht, en) => lang === 'ht' ? ht : en;
+  const t = (ht, en) => lang === 'ht' ? ht : inlineText(lang, en);
 
   return (
     <div style={{
@@ -319,7 +320,7 @@ export function CollaborationHub({ lang = 'en', collaborators = [] }) {
 
 // ─── 4. Learning Path Builder ───────────────────────────────────────
 export function LearningPathBuilder({ lang = 'en', courses = [] }) {
-  const t = (ht, en) => lang === 'ht' ? ht : en;
+  const t = (ht, en) => lang === 'ht' ? ht : inlineText(lang, en);
 
   return (
     <div style={{
@@ -442,7 +443,7 @@ export function LearningPathBuilder({ lang = 'en', courses = [] }) {
 
 // ─── 5. Community Builder ───────────────────────────────────────────
 export function CommunityBuilder({ lang = 'en', stats = {} }) {
-  const t = (ht, en) => lang === 'ht' ? ht : en;
+  const t = (ht, en) => lang === 'ht' ? ht : inlineText(lang, en);
 
   return (
     <div style={{

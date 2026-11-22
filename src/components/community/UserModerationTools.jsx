@@ -12,6 +12,7 @@
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── Constants ────────────────────────────────────────────────────
 
@@ -111,7 +112,7 @@ function StrikeCard({ warning, index, onRevoke, lang }) {
         </div>
         {isActive && onRevoke && (
           <button className="umt-btn umt-btn-revoke" onClick={() => onRevoke(warning.id)}>
-            <i className="fas fa-undo" /> {lang === 'ht' ? 'Anile' : 'Revoke'}
+            <i className="fas fa-undo" /> {lang === 'ht' ? 'Anile' : inlineText(lang, 'Revoke')}
           </button>
         )}
       </div>
@@ -142,7 +143,7 @@ function MutePanel({ user, onMute, onUnmute, lang }) {
     <div className="umt-mute-panel">
       <h4>
         <i className="fas fa-volume-mute" />
-        {lang === 'ht' ? 'Mute Itilizatè' : 'Mute User'}
+        {lang === 'ht' ? 'Mute Itilizatè' : inlineText(lang, 'Mute User')}
       </h4>
 
       <div className="umt-mute-durations">
@@ -160,7 +161,7 @@ function MutePanel({ user, onMute, onUnmute, lang }) {
       <div className="umt-mute-reason">
         <input
           type="text"
-          placeholder={lang === 'ht' ? 'Rezon (opsyonèl)' : 'Reason (optional)'}
+          placeholder={lang === 'ht' ? 'Rezon (opsyonèl)' : inlineText(lang, 'Reason (optional)')}
           value={reason}
           onChange={(e) => setReason(e.target.value)}
         />
@@ -168,7 +169,7 @@ function MutePanel({ user, onMute, onUnmute, lang }) {
 
       <button className="umt-btn umt-btn-mute" onClick={handleMute}>
         <i className="fas fa-volume-mute" />
-        {lang === 'ht' ? 'Mute' : 'Mute User'}
+        {lang === 'ht' ? 'Mute' : inlineText(lang, 'Mute User')}
       </button>
     </div>
   );
@@ -183,13 +184,13 @@ function WarningDialog({ user, warningLevel, onConfirm, onCancel, lang }) {
   const templates = {
     1: lang === 'ht'
       ? 'Avètisman: Kontni ou viole règman communautaire yo. Tanpri revize Règman an.'
-      : 'Warning: Your content violates community guidelines. Please review our rules.',
+      : inlineText(lang, 'Warning: Your content violates community guidelines. Please review our rules.'),
     2: lang === 'ht'
       ? 'Avètisman fò: Sa a dezyèm avètisman ou. Yon lòt viole pral rezilte nan yon ban.'
-      : 'Strong Warning: This is your second warning. Another violation will result in a ban.',
+      : inlineText(lang, 'Strong Warning: This is your second warning. Another violation will result in a ban.'),
     3: lang === 'ht'
       ? 'Dènye avètisman: Sa a dènye avètisman ou anvan yon ban pèmanan.'
-      : 'Final Warning: This is your last warning before a permanent ban.',
+      : inlineText(lang, 'Final Warning: This is your last warning before a permanent ban.'),
   };
 
   return (
@@ -201,11 +202,11 @@ function WarningDialog({ user, warningLevel, onConfirm, onCancel, lang }) {
         </div>
 
         <div className="umt-dialog-body">
-          <p>{lang === 'ht' ? 'Itilizatè:' : 'User:'} <strong>{user?.username}</strong></p>
-          <p>{lang === 'ht' ? 'Nivo Avètisman:' : 'Warning Level:'} <strong>{warningLevel}/3</strong></p>
+          <p>{lang === 'ht' ? 'Itilizatè:' : inlineText(lang, 'User:')} <strong>{user?.username}</strong></p>
+          <p>{lang === 'ht' ? 'Nivo Avètisman:' : inlineText(lang, 'Warning Level:')} <strong>{warningLevel}/3</strong></p>
 
           <div className="umt-dialog-message">
-            <label>{lang === 'ht' ? 'Mesaj:' : 'Message:'}</label>
+            <label>{lang === 'ht' ? 'Mesaj:' : inlineText(lang, 'Message:')}</label>
             <textarea
               value={message || templates[warningLevel] || ''}
               onChange={(e) => setMessage(e.target.value)}
@@ -216,7 +217,7 @@ function WarningDialog({ user, warningLevel, onConfirm, onCancel, lang }) {
 
         <div className="umt-dialog-actions">
           <button className="umt-btn umt-btn-cancel" onClick={onCancel}>
-            {lang === 'ht' ? 'Anile' : 'Cancel'}
+            {lang === 'ht' ? 'Anile' : inlineText(lang, 'Cancel')}
           </button>
           <button
             className="umt-btn umt-btn-confirm"
@@ -224,7 +225,7 @@ function WarningDialog({ user, warningLevel, onConfirm, onCancel, lang }) {
             onClick={() => onConfirm({ user_id: user.id, message, level: warningLevel })}
           >
             <i className={`fas ${wl.icon}`} />
-            {lang === 'ht' ? 'Kontinye' : 'Send Warning'}
+            {lang === 'ht' ? 'Kontinye' : inlineText(lang, 'Send Warning')}
           </button>
         </div>
       </div>
@@ -277,12 +278,12 @@ export default function UserModerationTools({ community, user, lang = 'en', show
       setShowWarningDialog(false);
       fetchUserData();
       showToast?.(
-        lang === 'ht' ? 'Avètisman voye!' : 'Warning sent!',
+        lang === 'ht' ? 'Avètisman voye!' : inlineText(lang, 'Warning sent!'),
         'success'
       );
       onUpdate?.();
     } catch (err) {
-      showToast?.(lang === 'ht' ? 'Erè' : 'Error', 'error');
+      showToast?.(lang === 'ht' ? 'Erè' : inlineText(lang, 'Error'), 'error');
     }
   };
 
@@ -296,12 +297,12 @@ export default function UserModerationTools({ community, user, lang = 'en', show
       setShowMutePanel(false);
       fetchUserData();
       showToast?.(
-        lang === 'ht' ? 'Itilizatè mute!' : 'User muted!',
+        lang === 'ht' ? 'Itilizatè mute!' : inlineText(lang, 'User muted!'),
         'success'
       );
       onUpdate?.();
     } catch (err) {
-      showToast?.(lang === 'ht' ? 'Erè' : 'Error', 'error');
+      showToast?.(lang === 'ht' ? 'Erè' : inlineText(lang, 'Error'), 'error');
     }
   };
 
@@ -312,12 +313,12 @@ export default function UserModerationTools({ community, user, lang = 'en', show
       });
       fetchUserData();
       showToast?.(
-        lang === 'ht' ? 'Itilizatè demute!' : 'User unmuted!',
+        lang === 'ht' ? 'Itilizatè demute!' : inlineText(lang, 'User unmuted!'),
         'success'
       );
       onUpdate?.();
     } catch (err) {
-      showToast?.(lang === 'ht' ? 'Erè' : 'Error', 'error');
+      showToast?.(lang === 'ht' ? 'Erè' : inlineText(lang, 'Error'), 'error');
     }
   };
 
@@ -326,11 +327,11 @@ export default function UserModerationTools({ community, user, lang = 'en', show
       await api.post(`/communities/${community?.id}/moderation/warnings/${warningId}/revoke/`);
       fetchUserData();
       showToast?.(
-        lang === 'ht' ? 'Avètisman anile!' : 'Warning revoked!',
+        lang === 'ht' ? 'Avètisman anile!' : inlineText(lang, 'Warning revoked!'),
         'success'
       );
     } catch (err) {
-      showToast?.(lang === 'ht' ? 'Erè' : 'Error', 'error');
+      showToast?.(lang === 'ht' ? 'Erè' : inlineText(lang, 'Error'), 'error');
     }
   };
 
@@ -343,12 +344,12 @@ export default function UserModerationTools({ community, user, lang = 'en', show
       });
       fetchUserData();
       showToast?.(
-        lang === 'ht' ? 'Itilizatè bloke!' : 'User banned!',
+        lang === 'ht' ? 'Itilizatè bloke!' : inlineText(lang, 'User banned!'),
         'success'
       );
       onUpdate?.();
     } catch (err) {
-      showToast?.(lang === 'ht' ? 'Erè' : 'Error', 'error');
+      showToast?.(lang === 'ht' ? 'Erè' : inlineText(lang, 'Error'), 'error');
     }
   };
 
@@ -356,7 +357,7 @@ export default function UserModerationTools({ community, user, lang = 'en', show
     return (
       <div className="umt-loading">
         <i className="fas fa-spinner fa-spin" />
-        <span>{lang === 'ht' ? 'Ap chaje...' : 'Loading...'}</span>
+        <span>{lang === 'ht' ? 'Ap chaje...' : inlineText(lang, 'Loading...')}</span>
       </div>
     );
   }
@@ -397,16 +398,16 @@ export default function UserModerationTools({ community, user, lang = 'en', show
           {strikeCount < 3 && (
             <button className="umt-btn umt-btn-warn" onClick={() => setShowWarningDialog(true)}>
               <i className="fas fa-exclamation-triangle" />
-              {lang === 'ht' ? 'Avètisman' : 'Warn'}
+              {lang === 'ht' ? 'Avètisman' : inlineText(lang, 'Warn')}
             </button>
           )}
           <button className="umt-btn umt-btn-mute" onClick={() => setShowMutePanel(!showMutePanel)}>
             <i className="fas fa-volume-mute" />
-            {lang === 'ht' ? 'Mute' : 'Mute'}
+            {lang === 'ht' ? 'Mute' : inlineText(lang, 'Mute')}
           </button>
           <button className="umt-btn umt-btn-ban" onClick={() => handleBan(true)}>
             <i className="fas fa-ban" />
-            {lang === 'ht' ? 'Bloke' : 'Ban'}
+            {lang === 'ht' ? 'Bloke' : inlineText(lang, 'Ban')}
           </button>
         </div>
       </div>
@@ -448,9 +449,9 @@ export default function UserModerationTools({ community, user, lang = 'en', show
             {strikeCount >= 3 && (
               <div className="umt-alert umt-alert-danger">
                 <i className="fas fa-exclamation-circle" />
-                <span>{lang === 'ht' ? 'Itilizatè sa a gen 3 avètisman. Li kapab bloke.' : 'This user has 3 strikes. They may be banned.'}</span>
+                <span>{lang === 'ht' ? 'Itilizatè sa a gen 3 avètisman. Li kapab bloke.' : inlineText(lang, 'This user has 3 strikes. They may be banned.')}</span>
                 <button className="umt-btn umt-btn-ban" onClick={() => handleBan(true)}>
-                  {lang === 'ht' ? 'Bloke Kounye a' : 'Ban Now'}
+                  {lang === 'ht' ? 'Bloke Kounye a' : inlineText(lang, 'Ban Now')}
                 </button>
               </div>
             )}
@@ -462,7 +463,7 @@ export default function UserModerationTools({ community, user, lang = 'en', show
             {warnings.length === 0 ? (
               <div className="umt-empty">
                 <i className="fas fa-check-circle" />
-                <p>{lang === 'ht' ? 'Pa gen avètisman' : 'No warnings'}</p>
+                <p>{lang === 'ht' ? 'Pa gen avètisman' : inlineText(lang, 'No warnings')}</p>
               </div>
             ) : (
               warnings.map((warning, idx) => (

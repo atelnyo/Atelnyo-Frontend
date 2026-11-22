@@ -7,6 +7,7 @@
  */
 import React from 'react';
 import MediaTimeline from '../MediaTimeline';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function MediaTimelinePanel({ media, lang = 'en' }) {
   const item = media || {};
@@ -18,10 +19,10 @@ export default function MediaTimelinePanel({ media, lang = 'en' }) {
     <div className="media-panel media-panel-timeline">
       <MediaTimeline events={timeline} lang={lang} />
       {audit.length > 0 && (
-        <section className="media-panel-audit" aria-label={isHt ? 'Istwa odit' : 'Audit history'}>
+        <section className="media-panel-audit" aria-label={isHt ? 'Istwa odit' : inlineText(lang, 'Audit history')}>
           <h4>
             <i className="fas fa-shield-alt" />
-            {isHt ? 'Istwa Odit' : 'Audit History'} <span>({audit.length})</span>
+            {isHt ? 'Istwa Odit' : inlineText(lang, 'Audit History')} <span>({audit.length})</span>
           </h4>
           <ul className="media-panel-audit-list">
             {audit.slice(0, 20).map((entry, i) => (

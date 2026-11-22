@@ -13,6 +13,7 @@
  *   - FAQ
  */
 import React, { useState } from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function MediaPlaceholder({
   title,
@@ -28,10 +29,10 @@ export default function MediaPlaceholder({
 
   const defaultTitle = isHt
     ? 'Konekte depo medya ou'
-    : 'Connect your media storage';
+    : inlineText(lang, 'Connect your media storage');
   const defaultDesc = isHt
     ? 'Atelnyo pa estoke gwo fichye medya ou yo. Nou itilize sèlman URL piblik ou kontwole.'
-    : 'Atelnyo does not store your large media files. We only use public URLs that you control.';
+    : inlineText(lang, 'Atelnyo does not store your large media files. We only use public URLs that you control.');
 
   const howItWorks = isHt
     ? [
@@ -100,7 +101,7 @@ export default function MediaPlaceholder({
       <div className="media-placeholder-section">
         <h4 className="media-placeholder-section-title">
           <i className="fas fa-list-ol" aria-hidden="true" />
-          {isHt ? 'Kijan li mache' : 'How it Works'}
+          {isHt ? 'Kijan li mache' : inlineText(lang, 'How it Works')}
         </h4>
         <ol className="media-placeholder-steps">
           {howItWorks.map((step, i) => (
@@ -113,7 +114,7 @@ export default function MediaPlaceholder({
       <div className="media-placeholder-section">
         <h4 className="media-placeholder-section-title">
           <i className="fas fa-cloud" aria-hidden="true" />
-          {isHt ? 'Providers Sipòte' : 'Supported Providers'}
+          {isHt ? 'Providers Sipòte' : inlineText(lang, 'Supported Providers')}
         </h4>
         <div className="media-placeholder-providers">
           {supportedProviders.map((p, i) => (
@@ -130,13 +131,13 @@ export default function MediaPlaceholder({
         {onChooseProvider && (
           <button type="button" className="btn-primary" onClick={onChooseProvider}>
             <i className="fas fa-plug" aria-hidden="true" />
-            {isHt ? 'Chwazi Provider' : 'Choose Provider'}
+            {isHt ? 'Chwazi Provider' : inlineText(lang, 'Choose Provider')}
           </button>
         )}
         {onReadDocs && (
           <button type="button" className="btn-secondary" onClick={onReadDocs}>
             <i className="fas fa-book" aria-hidden="true" />
-            {isHt ? 'Li Dokimantasyon' : 'Read Documentation'}
+            {isHt ? 'Li Dokimantasyon' : inlineText(lang, 'Read Documentation')}
           </button>
         )}
       </div>
@@ -145,7 +146,7 @@ export default function MediaPlaceholder({
       <div className="media-placeholder-video">
         <div className="media-placeholder-video-thumb">
           <i className="fas fa-play-circle" aria-hidden="true" />
-          <span>{isHt ? 'Tutorial Videyo prèsto' : 'Video Tutorial Coming Soon'}</span>
+          <span>{isHt ? 'Tutorial Videyo prèsto' : inlineText(lang, 'Video Tutorial Coming Soon')}</span>
         </div>
       </div>
 
@@ -158,7 +159,7 @@ export default function MediaPlaceholder({
           aria-expanded={showFaq}
         >
           <i className={`fas fa-chevron-${showFaq ? 'up' : 'down'}`} aria-hidden="true" />
-          {isHt ? 'Kesyon yo poze souvan' : 'FAQ'}
+          {isHt ? 'Kesyon yo poze souvan' : inlineText(lang, 'FAQ')}
         </button>
         {showFaq && (
           <div className="media-placeholder-faq-items">

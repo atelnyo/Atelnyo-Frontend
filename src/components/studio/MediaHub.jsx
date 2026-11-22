@@ -23,6 +23,7 @@ import MediaCard from '../media/MediaCard';
 import MediaPlaceholder from '../media/MediaPlaceholder';
 import MediaCollections from './MediaCollections';
 import MediaHelp from '../media/MediaHelp';
+import { inlineText } from '../../utils/inlineI18n';
 
 function fmtCount(n) {
   if (n == null) return '0';
@@ -80,7 +81,7 @@ function RecentMediaList({ items = [], lang }) {
   return (
     <div className="hub-recent">
       <h4 className="hub-section-subtitle">
-        <i className="fas fa-clock" /> {isHt ? 'Dènye Medya' : 'Recent Media'}
+        <i className="fas fa-clock" /> {isHt ? 'Dènye Medya' : inlineText(lang, 'Recent Media')}
       </h4>
       <div className="hub-recent-list">
         {items.slice(0, 5).map((item, i) => (
@@ -98,35 +99,35 @@ function QuickUploadGuide({ lang, onChooseProvider, onReadDocs }) {
   return (
     <div className="hub-quick-guide">
       <h4 className="hub-section-subtitle">
-        <i className="fas fa-rocket" /> {isHt ? 'Gid rapid pou ajoute medya' : 'Quick Upload Guide'}
+        <i className="fas fa-rocket" /> {isHt ? 'Gid rapid pou ajoute medya' : inlineText(lang, 'Quick Upload Guide')}
       </h4>
       <div className="hub-guide-steps">
         <div className="hub-guide-step">
           <span className="hub-guide-num">1</span>
-          <span>{isHt ? 'Chwazi yon provider depo medya' : 'Choose a media storage provider'}</span>
+          <span>{isHt ? 'Chwazi yon provider depo medya' : inlineText(lang, 'Choose a media storage provider')}</span>
         </div>
         <div className="hub-guide-step">
           <span className="hub-guide-num">2</span>
-          <span>{isHt ? 'Mete medya a sou provider la' : 'Upload media to the provider'}</span>
+          <span>{isHt ? 'Mete medya a sou provider la' : inlineText(lang, 'Upload media to the provider')}</span>
         </div>
         <div className="hub-guide-step">
           <span className="hub-guide-num">3</span>
-          <span>{isHt ? 'Kopi URL piblik la' : 'Copy the public URL'}</span>
+          <span>{isHt ? 'Kopi URL piblik la' : inlineText(lang, 'Copy the public URL')}</span>
         </div>
         <div className="hub-guide-step">
           <span className="hub-guide-num">4</span>
-          <span>{isHt ? 'Kole URL la nan Atelnyo' : 'Paste the URL in Atelnyo'}</span>
+          <span>{isHt ? 'Kole URL la nan Atelnyo' : inlineText(lang, 'Paste the URL in Atelnyo')}</span>
         </div>
       </div>
       <div className="hub-guide-actions">
         {onChooseProvider && (
           <button type="button" className="btn-primary" onClick={onChooseProvider}>
-            <i className="fas fa-plug" /> {isHt ? 'Chwazi Provider' : 'Choose Provider'}
+            <i className="fas fa-plug" /> {isHt ? 'Chwazi Provider' : inlineText(lang, 'Choose Provider')}
           </button>
         )}
         {onReadDocs && (
           <button type="button" className="btn-secondary" onClick={onReadDocs}>
-            <i className="fas fa-book" /> {isHt ? 'Dokimantasyon' : 'Documentation'}
+            <i className="fas fa-book" /> {isHt ? 'Dokimantasyon' : inlineText(lang, 'Documentation')}
           </button>
         )}
       </div>
@@ -190,11 +191,11 @@ export default function MediaHub({ lang = 'en', showToast, user, onNavigateToPro
       <div className="hub-header">
         <h2 className="studio-section-title" style={{ margin: 0 }}>
           <i className="fas fa-photo-video" />
-          {isHt ? 'Media Hub' : 'Media Hub'}
+          {isHt ? 'Media Hub' : inlineText(lang, 'Media Hub')}
         </h2>
         <div className="hub-header-actions">
           <button type="button" className="btn-secondary" onClick={() => setShowCollections(true)}>
-            <i className="fas fa-folder" /> {isHt ? 'Koleksyon' : 'Collections'}
+            <i className="fas fa-folder" /> {isHt ? 'Koleksyon' : inlineText(lang, 'Collections')}
           </button>
           <MediaHelp context="library" lang={lang} />
         </div>
@@ -202,11 +203,11 @@ export default function MediaHub({ lang = 'en', showToast, user, onNavigateToPro
 
       {/* ─── Stats Grid ─────────────────────────────────────────── */}
       <div className="hub-stats-grid">
-        <StatCard icon="fa-database" label={isHt ? 'Total medya' : 'Total Media'} value={totalCount} color="var(--state-info, #38bdf8)" />
-        <StatCard icon="fa-check-circle" label={isHt ? 'An sante' : 'Healthy'} value={healthyCount} color="var(--state-success, #10b981)" />
-        <StatCard icon="fa-exclamation-circle" label={isHt ? 'Kase / Bloke' : 'Broken / Blocked'} value={brokenCount} color="var(--state-error, #ef4444)" onClick={brokenCount > 0 ? () => setFilterHealth('broken') : undefined} />
-        <StatCard icon="fa-hourglass-half" label={isHt ? 'Annatant validasyon' : 'Pending'} value={pendingCount} color="var(--state-warning, #f59e0b)" />
-        <StatCard icon="fa-folder" label={isHt ? 'Providers' : 'Providers'} value={providers.length} color="var(--pr-color-violet-500, #8b5cf6)" />
+        <StatCard icon="fa-database" label={isHt ? 'Total medya' : inlineText(lang, 'Total Media')} value={totalCount} color="var(--state-info, #38bdf8)" />
+        <StatCard icon="fa-check-circle" label={isHt ? 'An sante' : inlineText(lang, 'Healthy')} value={healthyCount} color="var(--state-success, #10b981)" />
+        <StatCard icon="fa-exclamation-circle" label={isHt ? 'Kase / Bloke' : inlineText(lang, 'Broken / Blocked')} value={brokenCount} color="var(--state-error, #ef4444)" onClick={brokenCount > 0 ? () => setFilterHealth('broken') : undefined} />
+        <StatCard icon="fa-hourglass-half" label={isHt ? 'Annatant validasyon' : inlineText(lang, 'Pending')} value={pendingCount} color="var(--state-warning, #f59e0b)" />
+        <StatCard icon="fa-folder" label={isHt ? 'Providers' : inlineText(lang, 'Providers')} value={providers.length} color="var(--pr-color-violet-500, #8b5cf6)" />
       </div>
 
       {/* ─── Quick Upload Guide (when no media) ─────────────────── */}
@@ -228,7 +229,7 @@ export default function MediaHub({ lang = 'en', showToast, user, onNavigateToPro
               : `${brokenCount} broken media items. Replace URLs to avoid broken content.`}
           </span>
           <button type="button" className="hub-alert-btn" onClick={() => setFilterHealth('broken')}>
-            {isHt ? 'Gade' : 'View'}
+            {isHt ? 'Gade' : inlineText(lang, 'View')}
           </button>
         </div>
       )}
@@ -268,7 +269,7 @@ export default function MediaHub({ lang = 'en', showToast, user, onNavigateToPro
           {loading ? (
             <div className="hub-loading">
               <i className="fas fa-spinner fa-spin" />
-              <span>{isHt ? 'Ap chaje medya...' : 'Loading media...'}</span>
+              <span>{isHt ? 'Ap chaje medya...' : inlineText(lang, 'Loading media...')}</span>
             </div>
           ) : items.length === 0 ? (
             <MediaPlaceholder
@@ -310,7 +311,7 @@ export default function MediaHub({ lang = 'en', showToast, user, onNavigateToPro
           {mostUsed.length > 0 && (
             <div className="hub-most-used">
               <h4 className="hub-section-subtitle">
-                <i className="fas fa-star" /> {isHt ? 'Pi itilize' : 'Most Used'}
+                <i className="fas fa-star" /> {isHt ? 'Pi itilize' : inlineText(lang, 'Most Used')}
               </h4>
               <div className="hub-most-used-list">
                 {mostUsed.map((item) => (

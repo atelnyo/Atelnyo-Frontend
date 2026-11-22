@@ -24,6 +24,7 @@
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import './SlidesBlock.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 /** Small markdown-lite renderer: **bold**, *italic*, `code`, - bullets. */
 function renderInline(text, keyBase) {
@@ -74,7 +75,7 @@ export default function SlidesBlock({
   reportComplete,
 }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
 
   const slides = useMemo(() => {
     const raw = Array.isArray(block?.slides) ? block.slides : [];

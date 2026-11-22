@@ -21,6 +21,7 @@ import { SPEECH_CAPS } from '../../../modules/learning/speech';
 import LanguagePracticeBlock from '../../learning/LanguagePracticeBlock';
 import AudioLibraryModal from './AudioLibraryModal';
 import styles from './editor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export const PRACTICE_TYPES = [
   { id: 'repeat',        icon: 'fa-repeat',       label: { en: 'Repeat After Me', ht: 'Repete apre m' }, hint: { en: 'Listen, then repeat the sentence aloud.', ht: 'Koute, epi repete fraz la byen fò.' } },
@@ -122,7 +123,7 @@ export default function LanguagePracticeEditor({ blocks = [], onBlocksChange, la
   // Audio Library — reuse real cataloged audio from the creator's library.
   const [libraryOpen, setLibraryOpen] = useState(false);
 
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
 
   // ─── TTS preview — browser speechSynthesis, feature-detected. ──────
   const ttsSupported = typeof window !== 'undefined'
@@ -167,7 +168,7 @@ export default function LanguagePracticeEditor({ blocks = [], onBlocksChange, la
     if (!SPEECH_CAPS.getUserMedia || !SPEECH_CAPS.mediaRecorder) {
       setRecordErr(isHt
         ? 'Anrejistreman vwa pa sipòte nan navigatè sa a.'
-        : 'Voice recording is not supported in this browser.');
+        : inlineText(lang, 'Voice recording is not supported in this browser.'));
       return;
     }
     setRecordErr('');
@@ -192,11 +193,11 @@ export default function LanguagePracticeEditor({ blocks = [], onBlocksChange, la
           if (url) setDraftField('referenceAudio', url);
           else setRecordErr(isHt
             ? 'Upload odyo a te fèt men pa t jwenn URL la.'
-            : 'The audio uploaded but no URL came back.');
+            : inlineText(lang, 'The audio uploaded but no URL came back.'));
         } catch (e) {
           setRecordErr(e?.response?.data?.error || (isHt
             ? 'Pa t kapab upload odyo a. Tcheke koneksyon an epi eseye ankò.'
-            : 'Could not upload the audio. Check your connection and try again.'));
+            : inlineText(lang, 'Could not upload the audio. Check your connection and try again.')));
         } finally {
           setRecordState('idle');
         }
@@ -207,8 +208,8 @@ export default function LanguagePracticeEditor({ blocks = [], onBlocksChange, la
       setRecordState('idle');
       const name = err?.name || '';
       setRecordErr(name === 'NotAllowedError' || name === 'PermissionDeniedError'
-        ? (isHt ? 'Ou refize aksè mikro a.' : 'Microphone access was denied.')
-        : (isHt ? 'Pa t kapab kòmanse anrejistreman an.' : 'Could not start recording.'));
+        ? (isHt ? 'Ou refize aksè mikro a.' : inlineText(lang, 'Microphone access was denied.'))
+        : (isHt ? 'Pa t kapab kòmanse anrejistreman an.' : inlineText(lang, 'Could not start recording.')));
     }
   }, [isHt, stopTracks, setDraftField]);
 
@@ -257,7 +258,7 @@ export default function LanguagePracticeEditor({ blocks = [], onBlocksChange, la
   const duplicateBlock = (b, i) => {
     onBlocksChange([
       ...blocks.slice(0, i + 1),
-      cloneBlock(b, isHt ? 'kopye' : 'copy'),
+      cloneBlock(b, isHt ? 'kopye' : inlineText(lang, 'copy')),
       ...blocks.slice(i + 1),
     ]);
   };
@@ -343,7 +344,7 @@ export default function LanguagePracticeEditor({ blocks = [], onBlocksChange, la
               {isHt ? meta.label.ht : meta.label.en}
             </span>
             <span className={styles.practiceBlockRowTitle}>
-              {b.title || b.targetText || (isHt ? 'Sans tit' : 'Untitled')}
+              {b.title || b.targetText || (isHt ? 'Sans tit' : inlineText(lang, 'Untitled'))}
             </span>
             <span className={styles.practiceBlockRowActions}>
               <button type="button" onClick={() => moveBlock(i, -1)} disabled={i === 0} aria-label={t('Move up', 'Monte')}>
@@ -398,7 +399,7 @@ export default function LanguagePracticeEditor({ blocks = [], onBlocksChange, la
         <div className={styles.practiceDraft} role="dialog" aria-label={t('Edit practice', 'Modifye pratik')}>
           <div className={styles.practiceDraftHeader}>
             <strong>
-              {PRACTICE_TYPES.find((p) => p.id === draft.type)?.label?.[isHt ? 'ht' : 'en']}
+              {PRACTICE_TYPES.find((p) => p.id === draft.type)?.label?.[isHt ? 'ht' : inlineText(lang, 'en')]}
             </strong>
             <button type="button" className={styles.practiceDraftClose} onClick={() => { setDraft(null); setEditingId(null); }} aria-label={t('Close', 'Fèmen')}>
               <i className="fas fa-times" aria-hidden="true" />

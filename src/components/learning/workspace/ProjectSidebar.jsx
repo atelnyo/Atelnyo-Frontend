@@ -5,6 +5,7 @@
  * current section, required work. Adapts to mobile.
  */
 import React from 'react';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function ProjectSidebar({
   sections,
@@ -12,12 +13,13 @@ export default function ProjectSidebar({
   activeSectionId,
   onSelect,
   isHt,
+  lang = 'en',
   percentage,
 }) {
   return (
-    <nav className="pw-sidebar-nav" aria-label={isHt ? 'Seksyon Pwojè' : 'Project Sections'}>
+    <nav className="pw-sidebar-nav" aria-label={isHt ? 'Seksyon Pwojè' : inlineText(lang, 'Project Sections')}>
       <div className="pw-sidebar-header">
-        <h3 className="pw-sidebar-title">{isHt ? 'Seksyon yo' : 'Sections'}</h3>
+        <h3 className="pw-sidebar-title">{isHt ? 'Seksyon yo' : inlineText(lang, 'Sections')}</h3>
         <div className="pw-sidebar-progress">
           <div className="pw-sidebar-progress-bar">
             <div className="pw-sidebar-progress-fill" style={{ width: `${percentage}%` }} />
@@ -56,7 +58,7 @@ export default function ProjectSidebar({
                   <span className="pw-sidebar-item-meta">
                     {filledFields}/{totalFields}
                     {section.is_required && !isCompleted && (
-                      <span className="pw-sidebar-item-required">{isHt ? ' *' : ' *'}</span>
+                      <span className="pw-sidebar-item-required">{isHt ? ' *' : inlineText(lang, ' *')}</span>
                     )}
                   </span>
                 </span>

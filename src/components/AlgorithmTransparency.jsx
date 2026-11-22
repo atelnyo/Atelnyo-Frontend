@@ -12,6 +12,7 @@
  *   - Explains privacy/data usage
  */
 import React, { useState } from 'react';
+import { inlineText } from '../utils/inlineI18n';
 
 const REASON_LABELS = {
   ht: {
@@ -79,7 +80,7 @@ function ScoreBreakdown({ item, lang = 'en' }) {
 
   return (
     <div className="at-score-breakdown">
-      <h4>{lang === 'ht' ? 'Detay Nòt' : 'Score Breakdown'}</h4>
+      <h4>{lang === 'ht' ? 'Detay Nòt' : inlineText(lang, 'Score Breakdown')}</h4>
       <div className="at-bars">
         {scores.trending > 0 && (
           <div className="at-bar-row">
@@ -186,7 +187,7 @@ export default function AlgorithmTransparency({ item, lang = 'en', onFeedback, o
       <div className="at-reasons">
         <div className="at-reasons-header">
           <i className="fas fa-lightbulb" />
-          <span>{lang === 'ht' ? 'Poukisa ou wè sa?' : 'Why am I seeing this?'}</span>
+          <span>{lang === 'ht' ? 'Poukisa ou wè sa?' : inlineText(lang, 'Why am I seeing this?')}</span>
         </div>
 
         <div className="at-reasons-list">
@@ -200,14 +201,14 @@ export default function AlgorithmTransparency({ item, lang = 'en', onFeedback, o
           {relevance > 0 && (
             <div className="at-reason">
               <i className="fas fa-crosshairs" />
-              <span>{lang === 'ht' ? 'Relevance' : 'Relevance'}: {Math.round(relevance * 100)}%</span>
+              <span>{lang === 'ht' ? 'Relevance' : inlineText(lang, 'Relevance')}: {Math.round(relevance * 100)}%</span>
             </div>
           )}
 
           {affinity > 0 && (
             <div className="at-reason">
               <i className="fas fa-heart" />
-              <span>{lang === 'ht' ? 'Affinitè' : 'Affinity'}: +{Math.round(affinity)}</span>
+              <span>{lang === 'ht' ? 'Affinitè' : inlineText(lang, 'Affinity')}: +{Math.round(affinity)}</span>
             </div>
           )}
 
@@ -226,7 +227,7 @@ export default function AlgorithmTransparency({ item, lang = 'en', onFeedback, o
         onClick={() => setShowDetails(!showDetails)}
       >
         <i className={`fas fa-chevron-${showDetails ? 'up' : 'down'}`} />
-        {lang === 'ht' ? 'Detay Nòt' : 'Score Details'}
+        {lang === 'ht' ? 'Detay Nòt' : inlineText(lang, 'Score Details')}
       </button>
 
       {showDetails && (
@@ -237,26 +238,26 @@ export default function AlgorithmTransparency({ item, lang = 'en', onFeedback, o
       {!feedbackGiven ? (
         <div className="at-feedback">
           <span className="at-feedback-label">
-            {lang === 'ht' ? 'Èske sa itil?' : 'Was this helpful?'}
+            {lang === 'ht' ? 'Èske sa itil?' : inlineText(lang, 'Was this helpful?')}
           </span>
           <button
             className="at-feedback-btn at-feedback-yes"
             onClick={() => handleFeedback('helpful')}
-            title={lang === 'ht' ? 'Wi, sa itil' : 'Yes, helpful'}
+            title={lang === 'ht' ? 'Wi, sa itil' : inlineText(lang, 'Yes, helpful')}
           >
             <i className="fas fa-thumbs-up" />
           </button>
           <button
             className="at-feedback-btn at-feedback-no"
             onClick={() => handleFeedback('not_helpful')}
-            title={lang === 'ht' ? 'Non, pa itil' : 'No, not helpful'}
+            title={lang === 'ht' ? 'Non, pa itil' : inlineText(lang, 'No, not helpful')}
           >
             <i className="fas fa-thumbs-down" />
           </button>
           <button
             className="at-feedback-btn at-feedback-dismiss"
             onClick={() => handleFeedback('not_interested')}
-            title={lang === 'ht' ? 'Pa enterese' : 'Not interested'}
+            title={lang === 'ht' ? 'Pa enterese' : inlineText(lang, 'Not interested')}
           >
             <i className="fas fa-eye-slash" />
           </button>
@@ -264,7 +265,7 @@ export default function AlgorithmTransparency({ item, lang = 'en', onFeedback, o
       ) : (
         <div className="at-feedback-thanks">
           <i className="fas fa-check-circle" />
-          {lang === 'ht' ? 'Mèsi pou fidbak ou!' : 'Thanks for your feedback!'}
+          {lang === 'ht' ? 'Mèsi pou fidbak ou!' : inlineText(lang, 'Thanks for your feedback!')}
         </div>
       )}
 
@@ -274,7 +275,7 @@ export default function AlgorithmTransparency({ item, lang = 'en', onFeedback, o
         <span>
           {lang === 'ht'
             ? 'Algoritm la itilize enterè ou, kote, ak istwa pou pèsonalize feed ou. Ou ka modifye sa nan Settings.'
-            : 'The algorithm uses your interests, location, and history to personalize your feed. You can change this in Settings.'}
+            : inlineText(lang, 'The algorithm uses your interests, location, and history to personalize your feed. You can change this in Settings.')}
         </span>
       </div>
     </div>

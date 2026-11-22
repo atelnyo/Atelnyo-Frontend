@@ -29,6 +29,7 @@ import { adminUserService } from '../../services/api';
 import { useRoleGate } from '../../hooks/useRoleGate';
 import { useHasAdminAccess } from '../../hooks/useHasAdminAccess';
 import permissionManager from '../../pwa/permissions/PermissionManager.js';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ═══════════════════════════════════════════════════════════════════════
 // Helpers
@@ -165,7 +166,7 @@ function GrantModal({ user, onClose, onGranted, showToast, lang }) {
           <div>
             <h3 className="aum-modal-title">
               <i className="fas fa-crown" aria-hidden="true" />
-              {' '}{isHt ? 'Bay Premium' : 'Grant Premium'}
+              {' '}{isHt ? 'Bay Premium' : inlineText(lang, 'Grant Premium')}
             </h3>
             <p className="aum-modal-subtitle">
               {user.username} · {user.email || '—'}
@@ -181,7 +182,7 @@ function GrantModal({ user, onClose, onGranted, showToast, lang }) {
 
           <label className="aum-field">
             <span className="aum-field-label">
-              {isHt ? 'Plan' : 'Plan'}
+              {isHt ? 'Plan' : inlineText(lang, 'Plan')}
             </span>
             <div className="aum-plan-grid">
               {PLANS.map((p) => (
@@ -202,7 +203,7 @@ function GrantModal({ user, onClose, onGranted, showToast, lang }) {
             <span className="aum-field-label">
               {isHt
                 ? 'Jou (si ou vle yon esè — kite vid pou plan konplè)'
-                : 'Days (optional — e.g. a trial; empty = full plan duration)'}
+                : inlineText(lang, 'Days (optional — e.g. a trial; empty = full plan duration)')}
             </span>
             <input
               className="aum-input"
@@ -211,19 +212,19 @@ function GrantModal({ user, onClose, onGranted, showToast, lang }) {
               max="36500"
               value={customDays}
               onChange={(e) => setCustomDays(e.target.value)}
-              placeholder={isHt ? 'ex: 7 pou yon esè' : 'e.g. 7 for a trial'}
+              placeholder={isHt ? 'ex: 7 pou yon esè' : inlineText(lang, 'e.g. 7 for a trial')}
             />
           </label>
 
           <div className="aum-actions">
             <button type="button" className="aum-btn-secondary" onClick={onClose} disabled={loading}>
-              {isHt ? 'Anile' : 'Cancel'}
+              {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
             </button>
             <button type="submit" className="btn-primary" disabled={loading}>
               {loading ? (
-                <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {isHt ? 'Ap bay...' : 'Granting...'}</>
+                <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {isHt ? 'Ap bay...' : inlineText(lang, 'Granting...')}</>
               ) : (
-                <><i className="fas fa-crown" aria-hidden="true" /> {isHt ? 'Konfime Grant' : 'Confirm Grant'}</>
+                <><i className="fas fa-crown" aria-hidden="true" /> {isHt ? 'Konfime Grant' : inlineText(lang, 'Confirm Grant')}</>
               )}
             </button>
           </div>
@@ -299,7 +300,7 @@ function HistoryModal({ user, onClose, showToast, lang }) {
           <div>
             <h3 className="aum-modal-title">
               <i className="fas fa-clock-rotate-left" aria-hidden="true" />
-              {' '}{isHt ? 'Istorik Premium' : 'Premium History'}
+              {' '}{isHt ? 'Istorik Premium' : inlineText(lang, 'Premium History')}
             </h3>
             <p className="aum-modal-subtitle">
               {user.username} · {user.email || '—'}
@@ -311,10 +312,10 @@ function HistoryModal({ user, onClose, showToast, lang }) {
                 type="button"
                 className="aum-btn aum-btn-csv"
                 onClick={handleExportCsv}
-                title={isHt ? 'Ekspòte istorik la an CSV' : 'Export history as CSV'}
+                title={isHt ? 'Ekspòte istorik la an CSV' : inlineText(lang, 'Export history as CSV')}
               >
                 <i className="fas fa-file-csv" aria-hidden="true" />
-                {isHt ? 'Ekspòte CSV' : 'Export CSV'}
+                {isHt ? 'Ekspòte CSV' : inlineText(lang, 'Export CSV')}
               </button>
             )}
             <button type="button" className="aum-modal-close" onClick={onClose} aria-label="Close">
@@ -327,14 +328,14 @@ function HistoryModal({ user, onClose, showToast, lang }) {
           {loading ? (
             <div className="aum-history-loading">
               <i className="fas fa-spinner fa-spin" aria-hidden="true" />
-              <span>{isHt ? 'Ap chaje istorik la...' : 'Loading history...'}</span>
+              <span>{isHt ? 'Ap chaje istorik la...' : inlineText(lang, 'Loading history...')}</span>
             </div>
           ) : error ? (
             <div className="aum-error" role="alert">{error}</div>
           ) : !history || history.length === 0 ? (
             <div className="aum-history-empty">
               <i className="fas fa-crown" aria-hidden="true" />
-              <p>{isHt ? 'Pa gen istorik Premium pou itilizatè sa a.' : 'No premium history for this user yet.'}</p>
+              <p>{isHt ? 'Pa gen istorik Premium pou itilizatè sa a.' : inlineText(lang, 'No premium history for this user yet.')}</p>
             </div>
           ) : (
             <div className="aum-history-timeline">
@@ -351,10 +352,10 @@ function HistoryModal({ user, onClose, showToast, lang }) {
                       <div className="aum-history-head">
                         <strong className="aum-history-title">
                           {isProvider
-                            ? (isHt ? 'Abònman PayPal' : 'PayPal subscription')
+                            ? (isHt ? 'Abònman PayPal' : inlineText(lang, 'PayPal subscription'))
                             : isRevoke
-                              ? (isHt ? 'Revoke Premium' : 'Premium revoked')
-                              : (isHt ? 'Grant Premium' : 'Premium granted')}
+                              ? (isHt ? 'Revoke Premium' : inlineText(lang, 'Premium revoked'))
+                              : (isHt ? 'Grant Premium' : inlineText(lang, 'Premium granted'))}
                         </strong>
                         <span className={`aum-history-status aum-history-status--${row.status}`}>
                           <i className={`fas ${statusIcon(row.status)}`} aria-hidden="true" /> {row.status}
@@ -372,13 +373,13 @@ function HistoryModal({ user, onClose, showToast, lang }) {
                         {row.granted_by_username && (
                           <span className="aum-history-actor aum-history-actor-grant">
                             <i className="fas fa-user-shield" aria-hidden="true" />
-                            {isHt ? 'Bay pa' : 'Granted by'} {row.granted_by_username}
+                            {isHt ? 'Bay pa' : inlineText(lang, 'Granted by')} {row.granted_by_username}
                           </span>
                         )}
                         {row.revoked_by_username && (
                           <span className="aum-history-actor aum-history-actor-revoke">
                             <i className="fas fa-user-slash" aria-hidden="true" />
-                            {isHt ? 'Revoke pa' : 'Revoked by'} {row.revoked_by_username}
+                            {isHt ? 'Revoke pa' : inlineText(lang, 'Revoked by')} {row.revoked_by_username}
                           </span>
                         )}
                       </div>
@@ -408,7 +409,7 @@ function ChangePlanModal({ user, onClose, onChanged, showToast, lang }) {
   const handleSubmit = useCallback(async (e) => {
     e?.preventDefault?.();
     if (!plan) {
-      setError(isHt ? 'Chwazi yon plan.' : 'Choose a plan.');
+      setError(isHt ? 'Chwazi yon plan.' : inlineText(lang, 'Choose a plan.'));
       return;
     }
     setLoading(true);
@@ -445,7 +446,7 @@ function ChangePlanModal({ user, onClose, onChanged, showToast, lang }) {
           <div>
             <h3 className="aum-modal-title">
               <i className="fas fa-arrows-rotate" aria-hidden="true" />
-              {' '}{isHt ? 'Chanje Plan' : 'Change Plan'}
+              {' '}{isHt ? 'Chanje Plan' : inlineText(lang, 'Change Plan')}
             </h3>
             <p className="aum-modal-subtitle">
               {user.username} · {user.email || '—'}
@@ -461,7 +462,7 @@ function ChangePlanModal({ user, onClose, onChanged, showToast, lang }) {
 
           <label className="aum-field">
             <span className="aum-field-label">
-              {isHt ? 'Nouvo plan' : 'New plan'}
+              {isHt ? 'Nouvo plan' : inlineText(lang, 'New plan')}
             </span>
             <div className="aum-plan-grid">
               {PLANS.map((p) => (
@@ -482,7 +483,7 @@ function ChangePlanModal({ user, onClose, onChanged, showToast, lang }) {
             <span className="aum-field-label">
               {isHt
                 ? 'Jou (si ou vle yon dure espesyal — kite vid pou dure plan an)'
-                : 'Days (optional — empty = full plan duration)'}
+                : inlineText(lang, 'Days (optional — empty = full plan duration)')}
             </span>
             <input
               className="aum-input"
@@ -491,19 +492,19 @@ function ChangePlanModal({ user, onClose, onChanged, showToast, lang }) {
               max="36500"
               value={customDays}
               onChange={(e) => setCustomDays(e.target.value)}
-              placeholder={isHt ? 'ex: 7 pou yon esè' : 'e.g. 7 for a trial'}
+              placeholder={isHt ? 'ex: 7 pou yon esè' : inlineText(lang, 'e.g. 7 for a trial')}
             />
           </label>
 
           <div className="aum-actions">
             <button type="button" className="aum-btn-secondary" onClick={onClose} disabled={loading}>
-              {isHt ? 'Anile' : 'Cancel'}
+              {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
             </button>
             <button type="submit" className="btn-primary" disabled={loading}>
               {loading ? (
-                <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {isHt ? 'Ap chanje...' : 'Changing...'}</>
+                <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {isHt ? 'Ap chanje...' : inlineText(lang, 'Changing...')}</>
               ) : (
-                <><i className="fas fa-arrows-rotate" aria-hidden="true" /> {isHt ? 'Konfime Chanjman' : 'Confirm Change'}</>
+                <><i className="fas fa-arrows-rotate" aria-hidden="true" /> {isHt ? 'Konfime Chanjman' : inlineText(lang, 'Confirm Change')}</>
               )}
             </button>
           </div>
@@ -526,14 +527,14 @@ function ChangePasswordModal({ user, onClose, onChanged, showToast, lang }) {
   const handleSubmit = useCallback(async (e) => {
     e?.preventDefault?.();
     if (!password || password.length < 6) {
-      setError(isHt ? 'Modpas la dwe gen omwen 6 karaktè.' : 'Password must be at least 6 characters.');
+      setError(isHt ? 'Modpas la dwe gen omwen 6 karaktè.' : inlineText(lang, 'Password must be at least 6 characters.'));
       return;
     }
     setLoading(true);
     setError(null);
     try {
       await adminUserService.changePassword(user.id, password);
-      showToast?.(isHt ? '🔑 Modpas chanje.' : '🔑 Password updated.', 'check-circle');
+      showToast?.(isHt ? '🔑 Modpas chanje.' : inlineText(lang, '🔑 Password updated.'), 'check-circle');
       onChanged?.();
       onClose?.();
     } catch (err) {
@@ -558,7 +559,7 @@ function ChangePasswordModal({ user, onClose, onChanged, showToast, lang }) {
           <div>
             <h3 className="aum-modal-title">
               <i className="fas fa-key" aria-hidden="true" />
-              {' '}{isHt ? 'Chanje Modpas' : 'Change Password'}
+              {' '}{isHt ? 'Chanje Modpas' : inlineText(lang, 'Change Password')}
             </h3>
             <p className="aum-modal-subtitle">
               {user.username} · {user.email || '—'}
@@ -574,7 +575,7 @@ function ChangePasswordModal({ user, onClose, onChanged, showToast, lang }) {
 
           <label className="aum-field">
             <span className="aum-field-label">
-              {isHt ? 'Nouvo modpas' : 'New password'}
+              {isHt ? 'Nouvo modpas' : inlineText(lang, 'New password')}
             </span>
             <input
               className="aum-input"
@@ -583,20 +584,20 @@ function ChangePasswordModal({ user, onClose, onChanged, showToast, lang }) {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder={isHt ? 'Nouvo modpas...' : 'New password...'}
+              placeholder={isHt ? 'Nouvo modpas...' : inlineText(lang, 'New password...')}
               autoFocus
             />
           </label>
 
           <div className="aum-actions">
             <button type="button" className="aum-btn-secondary" onClick={onClose} disabled={loading}>
-              {isHt ? 'Anile' : 'Cancel'}
+              {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
             </button>
             <button type="submit" className="btn-primary" disabled={loading}>
               {loading ? (
-                <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {isHt ? 'Ap chanje...' : 'Changing...'}</>
+                <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {isHt ? 'Ap chanje...' : inlineText(lang, 'Changing...')}</>
               ) : (
-                <><i className="fas fa-key" aria-hidden="true" /> {isHt ? 'Konfime Chanjman' : 'Confirm Change'}</>
+                <><i className="fas fa-key" aria-hidden="true" /> {isHt ? 'Konfime Chanjman' : inlineText(lang, 'Confirm Change')}</>
               )}
             </button>
           </div>
@@ -684,7 +685,7 @@ function RoleModal({ user, currentUserId, onClose, onChanged, showToast, lang })
           <div>
             <h3 className="aum-modal-title">
               <i className="fas fa-user-shield" aria-hidden="true" />
-              {' '}{isHt ? 'Jere Wòl' : 'Manage Roles'}
+              {' '}{isHt ? 'Jere Wòl' : inlineText(lang, 'Manage Roles')}
             </h3>
             <p className="aum-modal-subtitle">
               {user.username} · {user.email || '—'}
@@ -699,7 +700,7 @@ function RoleModal({ user, currentUserId, onClose, onChanged, showToast, lang })
           {loading ? (
             <div className="aum-history-loading">
               <i className="fas fa-spinner fa-spin" aria-hidden="true" />
-              <span>{isHt ? 'Ap chaje wòl yo...' : 'Loading roles...'}</span>
+              <span>{isHt ? 'Ap chaje wòl yo...' : inlineText(lang, 'Loading roles...')}</span>
             </div>
           ) : error ? (
             <div className="aum-error" role="alert">{error}</div>
@@ -709,11 +710,11 @@ function RoleModal({ user, currentUserId, onClose, onChanged, showToast, lang })
               <div className="aum-role-flags">
                 <span className={`aum-role-flag ${isSuperuser ? 'aum-role-flag--active' : ''}`}>
                   <i className="fas fa-crown" aria-hidden="true" />
-                  {isHt ? 'Superuser' : 'Superuser'} {isSuperuser ? '✓' : ''}
+                  {isHt ? 'Superuser' : inlineText(lang, 'Superuser')} {isSuperuser ? '✓' : ''}
                 </span>
                 <span className={`aum-role-flag ${isInactive ? 'aum-role-flag--danger' : ''}`}>
                   <i className="fas fa-user-slash" aria-hidden="true" />
-                  {isHt ? 'Kont' : 'Account'} {isInactive ? (isHt ? 'Deaktive' : 'Inactive') : (isHt ? 'Aktif' : 'Active')}
+                  {isHt ? 'Kont' : inlineText(lang, 'Account')} {isInactive ? (isHt ? 'Deaktive' : inlineText(lang, 'Inactive')) : (isHt ? 'Aktif' : inlineText(lang, 'Active'))}
                 </span>
               </div>
 
@@ -722,7 +723,7 @@ function RoleModal({ user, currentUserId, onClose, onChanged, showToast, lang })
                   <i className="fas fa-info-circle" aria-hidden="true" />
                   {isHt
                     ? 'Itilizatè sa a se yon superuser — li gen aksè total kèlkeswa wòl yo.'
-                    : 'This user is a superuser — they have full access regardless of role assignments.'}
+                    : inlineText(lang, 'This user is a superuser — they have full access regardless of role assignments.')}
                 </p>
               )}
 
@@ -745,17 +746,17 @@ function RoleModal({ user, currentUserId, onClose, onChanged, showToast, lang })
                         disabled={busyRole === r.value || isInactive}
                         aria-pressed={granted}
                         title={isInactive
-                          ? (isHt ? 'Aktive kont la anvan' : 'Activate the account first')
+                          ? (isHt ? 'Aktive kont la anvan' : inlineText(lang, 'Activate the account first'))
                           : granted
-                            ? (isHt ? 'Retire wòl sa a' : 'Revoke this role')
-                            : (isHt ? 'Bay wòl sa a' : 'Grant this role')}
+                            ? (isHt ? 'Retire wòl sa a' : inlineText(lang, 'Revoke this role'))
+                            : (isHt ? 'Bay wòl sa a' : inlineText(lang, 'Grant this role'))}
                       >
                         {busyRole === r.value ? (
                           <i className="fas fa-spinner fa-spin" aria-hidden="true" />
                         ) : (
                           <>
                             <i className={`fas ${granted ? 'fa-toggle-on' : 'fa-toggle-off'}`} aria-hidden="true" />
-                            <span>{granted ? (isHt ? 'Aktif' : 'Granted') : (isHt ? 'Bay' : 'Grant')}</span>
+                            <span>{granted ? (isHt ? 'Aktif' : inlineText(lang, 'Granted')) : (isHt ? 'Bay' : inlineText(lang, 'Grant'))}</span>
                           </>
                         )}
                       </button>
@@ -845,7 +846,7 @@ function ActivityModal({ user, onClose, showToast, lang }) {
           <div>
             <h3 className="aum-modal-title">
               <i className="fas fa-activity" aria-hidden="true" />
-              {' '}{isHt ? 'Istwa Aktivite' : 'Activity History'}
+              {' '}{isHt ? 'Istwa Aktivite' : inlineText(lang, 'Activity History')}
             </h3>
             <p className="aum-modal-subtitle">
               {user.username} · {user.email || '—'}
@@ -860,14 +861,14 @@ function ActivityModal({ user, onClose, showToast, lang }) {
           {loading ? (
             <div className="aum-history-loading">
               <i className="fas fa-spinner fa-spin" aria-hidden="true" />
-              <span>{isHt ? 'Ap chaje aktivite a...' : 'Loading activity...'}</span>
+              <span>{isHt ? 'Ap chaje aktivite a...' : inlineText(lang, 'Loading activity...')}</span>
             </div>
           ) : error ? (
             <div className="aum-error" role="alert">{error}</div>
           ) : !events || events.length === 0 ? (
             <div className="aum-history-empty">
               <i className="fas fa-activity" aria-hidden="true" />
-              <p>{isHt ? 'Pa gen aktivite anrejistre pou itilizatè sa a.' : 'No recorded activity for this user yet.'}</p>
+              <p>{isHt ? 'Pa gen aktivite anrejistre pou itilizatè sa a.' : inlineText(lang, 'No recorded activity for this user yet.')}</p>
             </div>
           ) : (
             <div className="aum-history-timeline">
@@ -1137,20 +1138,20 @@ function StatsBar({ stats, loading, lang, onRefresh }) {
   const fmtMoney = (n) => `$${(Number(n) || 0).toFixed(2)}`;
   const fmtDays = (n) => {
     const v = Number(n) || 0;
-    return `${v.toFixed(1)} ${isHt ? 'jou' : 'd'}`;
+    return `${v.toFixed(1)} ${isHt ? 'jou' : inlineText(lang, 'd')}`;
   };
 
   const cards = [
     {
       icon: 'fa-users',
       value: String(stats.total_users ?? '—'),
-      label: isHt ? 'Itilizatè total' : 'Total users',
+      label: isHt ? 'Itilizatè total' : inlineText(lang, 'Total users'),
       tint: 'blue',
     },
     {
       icon: 'fa-crown',
       value: String(stats.non_premium_count ?? '—'),
-      label: isHt ? 'Non-premium (dwe aprouve)' : 'Non-premium (to approve)',
+      label: isHt ? 'Non-premium (dwe aprouve)' : inlineText(lang, 'Non-premium (to approve)'),
       tint: 'amber',
       sub: isHt
         ? `${stats.premium_count ?? 0} premium · ${stats.premium_rate ?? 0}%`
@@ -1159,7 +1160,7 @@ function StatsBar({ stats, loading, lang, onRefresh }) {
     {
       icon: 'fa-chart-line',
       value: fmtMoney(stats.potential_monthly_revenue),
-      label: isHt ? 'Revni potansyèl / mwa' : 'Potential rev / month',
+      label: isHt ? 'Revni potansyèl / mwa' : inlineText(lang, 'Potential rev / month'),
       tint: 'green',
       sub: isHt
         ? `si tout moun pran monthly · ${fmtMoney(stats.potential_yearly_revenue)}/an`
@@ -1168,7 +1169,7 @@ function StatsBar({ stats, loading, lang, onRefresh }) {
     {
       icon: 'fa-hourglass-half',
       value: fmtDays(stats.avg_pending_days),
-      label: isHt ? 'Mwayèn ap tann' : 'Avg waiting',
+      label: isHt ? 'Mwayèn ap tann' : inlineText(lang, 'Avg waiting'),
       tint: 'purple',
       sub: isHt
         ? `mwayèn tan pou aprouve: ${fmtDays(stats.avg_approval_days)}`
@@ -1584,7 +1585,7 @@ export default function AdminUserManagement({ lang = 'en', showToast, user, onNa
             type="text"
             value={searchQuery}
             onChange={(e) => { setPage(1); setSearchQuery(e.target.value); }}
-            placeholder={isHt ? 'Chèche pa username oswa email...' : 'Search by username or email...'}
+            placeholder={isHt ? 'Chèche pa username oswa email...' : inlineText(lang, 'Search by username or email...')}
             aria-label="Search users"
           />
           {searchQuery && (
@@ -1612,7 +1613,7 @@ export default function AdminUserManagement({ lang = 'en', showToast, user, onNa
               <i className="fas fa-lock" aria-hidden="true" style={{ color: 'var(--pr-color-amber-500, #f59e0b)', marginRight: 8 }} />
               {isHt
                 ? 'W ap wè lis la, men sèlman admin ki gen pèmisyon billing ka bay / retire Premium.'
-                : 'You can view the list, but only admins with billing permission can grant / revoke Premium.'}
+                : inlineText(lang, 'You can view the list, but only admins with billing permission can grant / revoke Premium.')}
             </p>
           </div>
         )}
@@ -1775,7 +1776,7 @@ export default function AdminUserManagement({ lang = 'en', showToast, user, onNa
               <div>
                 <h3 className="aum-modal-title">
                   <i className="fas fa-trash" aria-hidden="true" />
-                  {' '}{isHt ? 'Siprime Itilizatè' : 'Delete User'}
+                  {' '}{isHt ? 'Siprime Itilizatè' : inlineText(lang, 'Delete User')}
                 </h3>
                 <p className="aum-modal-subtitle">
                   {deleteTarget.username} · {deleteTarget.email || '—'}
@@ -1792,29 +1793,29 @@ export default function AdminUserManagement({ lang = 'en', showToast, user, onNa
                 {' '}
                 {isHt
                   ? 'Sa a ap siprime kont lan (dezaktive + revoke sesyon) epi voye rezon an bay itilizatè a kòm notifikasyon.'
-                  : 'This deletes the account (deactivate + revoke sessions) and notifies the user with your reason.'}
+                  : inlineText(lang, 'This deletes the account (deactivate + revoke sessions) and notifies the user with your reason.')}
               </p>
 
               <label className="aum-field">
-                <span className="aum-field-label">{isHt ? 'Rezon (voye bay user)' : 'Reason (sent to user)'}</span>
+                <span className="aum-field-label">{isHt ? 'Rezon (voye bay user)' : inlineText(lang, 'Reason (sent to user)')}</span>
                 <input
                   className="aum-input"
                   type="text"
                   value={deleteReason}
                   onChange={(e) => setDeleteReason(e.target.value)}
-                  placeholder={isHt ? 'Ex: vyolasyon règleman...' : 'Ex: policy violation...'}
+                  placeholder={isHt ? 'Ex: vyolasyon règleman...' : inlineText(lang, 'Ex: policy violation...')}
                 />
               </label>
 
               <div className="aum-actions">
                 <button type="button" className="aum-btn-secondary" onClick={() => setDeleteTarget(null)} disabled={deleting}>
-                  {isHt ? 'Anile' : 'Cancel'}
+                  {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
                 </button>
                 <button type="submit" className="aum-btn-danger-solid" disabled={deleting}>
                   {deleting ? (
-                    <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {isHt ? 'Ap siprime...' : 'Deleting...'}</>
+                    <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {isHt ? 'Ap siprime...' : inlineText(lang, 'Deleting...')}</>
                   ) : (
-                    <><i className="fas fa-trash" aria-hidden="true" /> {isHt ? 'Konfime Sipresyon' : 'Confirm Delete'}</>
+                    <><i className="fas fa-trash" aria-hidden="true" /> {isHt ? 'Konfime Sipresyon' : inlineText(lang, 'Confirm Delete')}</>
                   )}
                 </button>
               </div>
@@ -1837,7 +1838,7 @@ export default function AdminUserManagement({ lang = 'en', showToast, user, onNa
               <div>
                 <h3 className="aum-modal-title">
                   <i className="fas fa-user-slash" aria-hidden="true" />
-                  {' '}{isHt ? 'Deaktive Kont' : 'Deactivate Account'}
+                  {' '}{isHt ? 'Deaktive Kont' : inlineText(lang, 'Deactivate Account')}
                 </h3>
                 <p className="aum-modal-subtitle">
                   {deactivateTarget.username} · {deactivateTarget.email || '—'}
@@ -1854,29 +1855,29 @@ export default function AdminUserManagement({ lang = 'en', showToast, user, onNa
                 {' '}
                 {isHt
                   ? 'Sa a ap deaktive kont la — itilizatè a p ap ka konekte ankò, epi tout sesyon yo ap revoke.'
-                  : 'This deactivates the account — the user can no longer log in, and all sessions are revoked.'}
+                  : inlineText(lang, 'This deactivates the account — the user can no longer log in, and all sessions are revoked.')}
               </p>
 
               <label className="aum-field">
-                <span className="aum-field-label">{isHt ? 'Rezon (si genyen)' : 'Reason (optional)'}</span>
+                <span className="aum-field-label">{isHt ? 'Rezon (si genyen)' : inlineText(lang, 'Reason (optional)')}</span>
                 <input
                   className="aum-input"
                   type="text"
                   value={deactivateReason}
                   onChange={(e) => setDeactivateReason(e.target.value)}
-                  placeholder={isHt ? 'Rezon deaktivasyon...' : 'Reason for deactivation...'}
+                  placeholder={isHt ? 'Rezon deaktivasyon...' : inlineText(lang, 'Reason for deactivation...')}
                 />
               </label>
 
               <div className="aum-actions">
                 <button type="button" className="aum-btn-secondary" onClick={() => setDeactivateTarget(null)} disabled={deactivating}>
-                  {isHt ? 'Anile' : 'Cancel'}
+                  {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
                 </button>
                 <button type="submit" className="aum-btn-danger-solid" disabled={deactivating}>
                   {deactivating ? (
-                    <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {isHt ? 'Ap deaktive...' : 'Deactivating...'}</>
+                    <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {isHt ? 'Ap deaktive...' : inlineText(lang, 'Deactivating...')}</>
                   ) : (
-                    <><i className="fas fa-user-slash" aria-hidden="true" /> {isHt ? 'Konfime Deaktivasyon' : 'Confirm Deactivate'}</>
+                    <><i className="fas fa-user-slash" aria-hidden="true" /> {isHt ? 'Konfime Deaktivasyon' : inlineText(lang, 'Confirm Deactivate')}</>
                   )}
                 </button>
               </div>
@@ -1899,7 +1900,7 @@ export default function AdminUserManagement({ lang = 'en', showToast, user, onNa
               <div>
                 <h3 className="aum-modal-title">
                   <i className="fas fa-minus-circle" aria-hidden="true" />
-                  {' '}{isHt ? 'Retire Premium' : 'Revoke Premium'}
+                  {' '}{isHt ? 'Retire Premium' : inlineText(lang, 'Revoke Premium')}
                 </h3>
                 <p className="aum-modal-subtitle">
                   {revokeTarget.username} · {revokeTarget.email || '—'}
@@ -1916,29 +1917,29 @@ export default function AdminUserManagement({ lang = 'en', showToast, user, onNa
                 {' '}
                 {isHt
                   ? 'Sa a ap anile tout abònman Premium aktif imedyatman. Itilizatè a p ap gen aksè Premium ankò.'
-                  : 'This cancels all active premium subscriptions immediately. The user loses premium access right away.'}
+                  : inlineText(lang, 'This cancels all active premium subscriptions immediately. The user loses premium access right away.')}
               </p>
 
               <label className="aum-field">
-                <span className="aum-field-label">{isHt ? 'Rezon (si genyen)' : 'Reason (optional)'}</span>
+                <span className="aum-field-label">{isHt ? 'Rezon (si genyen)' : inlineText(lang, 'Reason (optional)')}</span>
                 <input
                   className="aum-input"
                   type="text"
                   value={revokeReason}
                   onChange={(e) => setRevokeReason(e.target.value)}
-                  placeholder={isHt ? 'Rezon revokasyon...' : 'Reason for revocation...'}
+                  placeholder={isHt ? 'Rezon revokasyon...' : inlineText(lang, 'Reason for revocation...')}
                 />
               </label>
 
               <div className="aum-actions">
                 <button type="button" className="aum-btn-secondary" onClick={() => setRevokeTarget(null)} disabled={revoking}>
-                  {isHt ? 'Anile' : 'Cancel'}
+                  {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
                 </button>
                 <button type="submit" className="aum-btn-danger-solid" disabled={revoking}>
                   {revoking ? (
-                    <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {isHt ? 'Ap retire...' : 'Revoking...'}</>
+                    <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {isHt ? 'Ap retire...' : inlineText(lang, 'Revoking...')}</>
                   ) : (
-                    <><i className="fas fa-minus-circle" aria-hidden="true" /> {isHt ? 'Konfime Revokasyon' : 'Confirm Revoke'}</>
+                    <><i className="fas fa-minus-circle" aria-hidden="true" /> {isHt ? 'Konfime Revokasyon' : inlineText(lang, 'Confirm Revoke')}</>
                   )}
                 </button>
               </div>
@@ -1961,7 +1962,7 @@ export default function AdminUserManagement({ lang = 'en', showToast, user, onNa
               <div>
                 <h3 className="aum-modal-title">
                   <i className="fas fa-clock" aria-hidden="true" />
-                  {' '}{isHt ? 'Sispann Itilizatè' : 'Suspend User'}
+                  {' '}{isHt ? 'Sispann Itilizatè' : inlineText(lang, 'Suspend User')}
                 </h3>
                 <p className="aum-modal-subtitle">
                   {suspendTarget.username} · {suspendTarget.email || '—'}
@@ -1976,20 +1977,20 @@ export default function AdminUserManagement({ lang = 'en', showToast, user, onNa
                 <i className="fas fa-exclamation-triangle" aria-hidden="true" />
                 {' '}{isHt
                   ? 'Sa a ap sispann itilizatè a pou yon tan. Li pa pral ka konekte jiskaske tan an fini.'
-                  : 'This suspends the user temporarily. They cannot log in until the period expires.'}
+                  : inlineText(lang, 'This suspends the user temporarily. They cannot log in until the period expires.')}
               </p>
               <label className="aum-field">
-                <span className="aum-field-label">{isHt ? 'Kantite jou' : 'Number of days'}</span>
+                <span className="aum-field-label">{isHt ? 'Kantite jou' : inlineText(lang, 'Number of days')}</span>
                 <input className="aum-input" type="number" min="1" max="365" value={suspendDays} onChange={(e) => setSuspendDays(e.target.value)} />
               </label>
               <label className="aum-field">
-                <span className="aum-field-label">{isHt ? 'Rezon (si genyen)' : 'Reason (optional)'}</span>
-                <input className="aum-input" type="text" value={suspendReason} onChange={(e) => setSuspendReason(e.target.value)} placeholder={isHt ? 'Rezon sispann...' : 'Reason for suspension...'} />
+                <span className="aum-field-label">{isHt ? 'Rezon (si genyen)' : inlineText(lang, 'Reason (optional)')}</span>
+                <input className="aum-input" type="text" value={suspendReason} onChange={(e) => setSuspendReason(e.target.value)} placeholder={isHt ? 'Rezon sispann...' : inlineText(lang, 'Reason for suspension...')} />
               </label>
               <div className="aum-actions">
-                <button type="button" className="aum-btn-secondary" onClick={() => setSuspendTarget(null)} disabled={suspending}>{isHt ? 'Anile' : 'Cancel'}</button>
+                <button type="button" className="aum-btn-secondary" onClick={() => setSuspendTarget(null)} disabled={suspending}>{isHt ? 'Anile' : inlineText(lang, 'Cancel')}</button>
                 <button type="submit" className="aum-btn-danger-solid" disabled={suspending}>
-                  {suspending ? <><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap sispann...' : 'Suspending...'}</> : <><i className="fas fa-clock" /> {isHt ? 'Konfime' : 'Confirm Suspend'}</>}
+                  {suspending ? <><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap sispann...' : inlineText(lang, 'Suspending...')}</> : <><i className="fas fa-clock" /> {isHt ? 'Konfime' : inlineText(lang, 'Confirm Suspend')}</>}
                 </button>
               </div>
             </form>
@@ -2011,7 +2012,7 @@ export default function AdminUserManagement({ lang = 'en', showToast, user, onNa
               <div>
                 <h3 className="aum-modal-title">
                   <i className="fas fa-ban" aria-hidden="true" />
-                  {' '}{isHt ? 'Entèdi Itilizatè' : 'Ban User'}
+                  {' '}{isHt ? 'Entèdi Itilizatè' : inlineText(lang, 'Ban User')}
                 </h3>
                 <p className="aum-modal-subtitle">
                   {banTarget.username} · {banTarget.email || '—'}
@@ -2026,16 +2027,16 @@ export default function AdminUserManagement({ lang = 'en', showToast, user, onNa
                 <i className="fas fa-exclamation-triangle" aria-hidden="true" />
                 {' '}{isHt
                   ? 'Sa a ap entèdi itilizatè a pèmanan. Li pa pral ka konekte ankò.'
-                  : 'This permanently bans the user. They can no longer log in.'}
+                  : inlineText(lang, 'This permanently bans the user. They can no longer log in.')}
               </p>
               <label className="aum-field">
-                <span className="aum-field-label">{isHt ? 'Rezon (si genyen)' : 'Reason (optional)'}</span>
-                <input className="aum-input" type="text" value={banReason} onChange={(e) => setBanReason(e.target.value)} placeholder={isHt ? 'Rezon entèdiksyon...' : 'Reason for ban...'} />
+                <span className="aum-field-label">{isHt ? 'Rezon (si genyen)' : inlineText(lang, 'Reason (optional)')}</span>
+                <input className="aum-input" type="text" value={banReason} onChange={(e) => setBanReason(e.target.value)} placeholder={isHt ? 'Rezon entèdiksyon...' : inlineText(lang, 'Reason for ban...')} />
               </label>
               <div className="aum-actions">
-                <button type="button" className="aum-btn-secondary" onClick={() => setBanTarget(null)} disabled={banning}>{isHt ? 'Anile' : 'Cancel'}</button>
+                <button type="button" className="aum-btn-secondary" onClick={() => setBanTarget(null)} disabled={banning}>{isHt ? 'Anile' : inlineText(lang, 'Cancel')}</button>
                 <button type="submit" className="aum-btn-danger-solid" disabled={banning}>
-                  {banning ? <><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap entèdi...' : 'Banning...'}</> : <><i className="fas fa-ban" /> {isHt ? 'Konfime Entèdiksyon' : 'Confirm Ban'}</>}
+                  {banning ? <><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap entèdi...' : inlineText(lang, 'Banning...')}</> : <><i className="fas fa-ban" /> {isHt ? 'Konfime Entèdiksyon' : inlineText(lang, 'Confirm Ban')}</>}
                 </button>
               </div>
             </form>
@@ -2057,7 +2058,7 @@ export default function AdminUserManagement({ lang = 'en', showToast, user, onNa
               <div>
                 <h3 className="aum-modal-title">
                   <i className="fas fa-rotate-left" aria-hidden="true" />
-                  {' '}{isHt ? 'Rekipere Itilizatè' : 'Restore User'}
+                  {' '}{isHt ? 'Rekipere Itilizatè' : inlineText(lang, 'Restore User')}
                 </h3>
                 <p className="aum-modal-subtitle">
                   {restoreTarget.username} · {restoreTarget.email || '—'}
@@ -2072,16 +2073,16 @@ export default function AdminUserManagement({ lang = 'en', showToast, user, onNa
                 <i className="fas fa-info-circle" aria-hidden="true" />
                 {' '}{isHt
                   ? 'Sa a ap retire tout entèdiksyon aktif pou itilizatè sa a.'
-                  : 'This lifts all active bans for this user.'}
+                  : inlineText(lang, 'This lifts all active bans for this user.')}
               </p>
               <label className="aum-field">
-                <span className="aum-field-label">{isHt ? 'Rezon (si genyen)' : 'Reason (optional)'}</span>
-                <input className="aum-input" type="text" value={restoreReason} onChange={(e) => setRestoreReason(e.target.value)} placeholder={isHt ? 'Rezon rekiperasyon...' : 'Reason for restore...'} />
+                <span className="aum-field-label">{isHt ? 'Rezon (si genyen)' : inlineText(lang, 'Reason (optional)')}</span>
+                <input className="aum-input" type="text" value={restoreReason} onChange={(e) => setRestoreReason(e.target.value)} placeholder={isHt ? 'Rezon rekiperasyon...' : inlineText(lang, 'Reason for restore...')} />
               </label>
               <div className="aum-actions">
-                <button type="button" className="aum-btn-secondary" onClick={() => setRestoreTarget(null)} disabled={restoring}>{isHt ? 'Anile' : 'Cancel'}</button>
+                <button type="button" className="aum-btn-secondary" onClick={() => setRestoreTarget(null)} disabled={restoring}>{isHt ? 'Anile' : inlineText(lang, 'Cancel')}</button>
                 <button type="submit" className="btn-primary" disabled={restoring}>
-                  {restoring ? <><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap rekipere...' : 'Restoring...'}</> : <><i className="fas fa-rotate-left" /> {isHt ? 'Konfime Rekiperasyon' : 'Confirm Restore'}</>}
+                  {restoring ? <><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap rekipere...' : inlineText(lang, 'Restoring...')}</> : <><i className="fas fa-rotate-left" /> {isHt ? 'Konfime Rekiperasyon' : inlineText(lang, 'Confirm Restore')}</>}
                 </button>
               </div>
             </form>
@@ -2103,7 +2104,7 @@ export default function AdminUserManagement({ lang = 'en', showToast, user, onNa
               <div>
                 <h3 className="aum-modal-title">
                   <i className="fas fa-right-from-bracket" aria-hidden="true" />
-                  {' '}{isHt ? 'Dekonekte Fòse' : 'Force Logout'}
+                  {' '}{isHt ? 'Dekonekte Fòse' : inlineText(lang, 'Force Logout')}
                 </h3>
                 <p className="aum-modal-subtitle">
                   {forceLogoutTarget.username} · {forceLogoutTarget.email || '—'}
@@ -2121,13 +2122,13 @@ export default function AdminUserManagement({ lang = 'en', showToast, user, onNa
                   : `This revokes all active sessions for this user (${forceLogoutTarget.active_sessions} session(s)). They will need to log in again.`}
               </p>
               <label className="aum-field">
-                <span className="aum-field-label">{isHt ? 'Rezon (si genyen)' : 'Reason (optional)'}</span>
-                <input className="aum-input" type="text" value={forceLogoutReason} onChange={(e) => setForceLogoutReason(e.target.value)} placeholder={isHt ? 'Rezon dekoneksyon...' : 'Reason for logout...'} />
+                <span className="aum-field-label">{isHt ? 'Rezon (si genyen)' : inlineText(lang, 'Reason (optional)')}</span>
+                <input className="aum-input" type="text" value={forceLogoutReason} onChange={(e) => setForceLogoutReason(e.target.value)} placeholder={isHt ? 'Rezon dekoneksyon...' : inlineText(lang, 'Reason for logout...')} />
               </label>
               <div className="aum-actions">
-                <button type="button" className="aum-btn-secondary" onClick={() => setForceLogoutTarget(null)} disabled={forceLogouting}>{isHt ? 'Anile' : 'Cancel'}</button>
+                <button type="button" className="aum-btn-secondary" onClick={() => setForceLogoutTarget(null)} disabled={forceLogouting}>{isHt ? 'Anile' : inlineText(lang, 'Cancel')}</button>
                 <button type="submit" className="aum-btn-danger-solid" disabled={forceLogouting}>
-                  {forceLogouting ? <><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap dekonekte...' : 'Logging out...'}</> : <><i className="fas fa-right-from-bracket" /> {isHt ? 'Konfime Dekoneksyon' : 'Confirm Logout'}</>}
+                  {forceLogouting ? <><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap dekonekte...' : inlineText(lang, 'Logging out...')}</> : <><i className="fas fa-right-from-bracket" /> {isHt ? 'Konfime Dekoneksyon' : inlineText(lang, 'Confirm Logout')}</>}
                 </button>
               </div>
             </form>

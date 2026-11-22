@@ -24,6 +24,7 @@
  *   />
  */
 import React, { useState, useCallback } from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 const PLACEHOLDER_COLORS = [
   '#d81b60', '#8b5cf6', '#3b82f6', '#10b981', '#f59e0b',
@@ -52,7 +53,7 @@ function ImagePlaceholder({ title, color, lang }) {
       className="media-renderer-placeholder"
       style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}
       role="img"
-      aria-label={title || (isHt ? 'Medya' : 'Media')}
+      aria-label={title || (isHt ? 'Medya' : inlineText(lang, 'Media'))}
     >
       <span className="media-renderer-placeholder-text">{initials}</span>
       {title && <span className="media-renderer-placeholder-title">{title}</span>}
@@ -65,10 +66,10 @@ function ErrorState({ message, onRetry, lang }) {
   return (
     <div className="media-renderer-error" role="alert">
       <i className="fas fa-image-slash" />
-      <p>{message || (isHt ? 'Medya pa disponib' : 'Media unavailable')}</p>
+      <p>{message || (isHt ? 'Medya pa disponib' : inlineText(lang, 'Media unavailable'))}</p>
       {onRetry && (
         <button type="button" className="media-renderer-retry" onClick={onRetry}>
-          <i className="fas fa-sync" /> {isHt ? 'Eseye ankò' : 'Retry'}
+          <i className="fas fa-sync" /> {isHt ? 'Eseye ankò' : inlineText(lang, 'Retry')}
         </button>
       )}
     </div>
@@ -80,9 +81,9 @@ function CircuitOpenState({ lang }) {
   return (
     <div className="media-renderer-error media-renderer-circuit" role="alert">
       <i className="fas fa-cloud-bolt" />
-      <p>{isHt ? 'Provider pa disponib tanporèman.' : 'Provider temporarily unavailable.'}</p>
+      <p>{isHt ? 'Provider pa disponib tanporèman.' : inlineText(lang, 'Provider temporarily unavailable.')}</p>
       <span className="media-renderer-hint">
-        {isHt ? 'Sistèm nan ap eseye ankò otomatikman.' : 'The system will retry automatically.'}
+        {isHt ? 'Sistèm nan ap eseye ankò otomatikman.' : inlineText(lang, 'The system will retry automatically.')}
       </span>
     </div>
   );
@@ -140,7 +141,7 @@ export default function MediaRenderer({
     return (
       <div className={`media-renderer ${className}`} style={style}>
         <ErrorState
-          message={fallbackText || (isHt ? 'Echwe charje medya a.' : 'Failed to load media.')}
+          message={fallbackText || (isHt ? 'Echwe charje medya a.' : inlineText(lang, 'Failed to load media.'))}
           onRetry={retryable ? handleRetry : undefined}
           lang={lang}
         />

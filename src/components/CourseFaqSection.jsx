@@ -13,6 +13,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { courseFaqService } from '../services/api';
 import { faqPageSchema } from './shared/SEOHead';
 import FAQ from './FAQ';
+import { inlineText } from '../utils/inlineI18n';
 
 export default function CourseFaqSection({ courseId, lang = 'en', translations }) {
   const isHt = lang === 'ht';
@@ -59,7 +60,7 @@ export default function CourseFaqSection({ courseId, lang = 'en', translations }
     if (filtered.length === 0) return [];
     const groups = new Map();
     filtered.forEach((faq) => {
-      const catName = faq.category_name || (isHt ? 'Lòt' : 'Other');
+      const catName = faq.category_name || (isHt ? 'Lòt' : inlineText(lang, 'Other'));
       if (!groups.has(catName)) groups.set(catName, []);
       groups.get(catName).push(faq);
     });
@@ -84,7 +85,7 @@ export default function CourseFaqSection({ courseId, lang = 'en', translations }
         </h2>
         <div style={{ padding: '20px 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
           <i className="fas fa-spinner fa-spin" aria-hidden="true" />
-          {' '}{isHt ? 'Chaje FAQ...' : 'Loading FAQ...'}
+          {' '}{isHt ? 'Chaje FAQ...' : inlineText(lang, 'Loading FAQ...')}
         </div>
       </div>
     );
@@ -115,19 +116,19 @@ export default function CourseFaqSection({ courseId, lang = 'en', translations }
             type="text"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setOpenIndex(null); }}
-            placeholder={isHt ? 'Chèche nan FAQ...' : 'Search FAQ...'}
+            placeholder={isHt ? 'Chèche nan FAQ...' : inlineText(lang, 'Search FAQ...')}
             style={{
               border: 'none', outline: 'none', background: 'transparent',
               color: 'var(--text-primary)', fontSize: '0.9rem', width: '100%',
             }}
-            aria-label={isHt ? 'Chèche nan FAQ' : 'Search FAQ'}
+            aria-label={isHt ? 'Chèche nan FAQ' : inlineText(lang, 'Search FAQ')}
           />
           {search && (
             <button
               type="button"
               onClick={() => { setSearch(''); setOpenIndex(null); }}
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}
-              aria-label={isHt ? 'Efase chèch' : 'Clear search'}
+              aria-label={isHt ? 'Efase chèch' : inlineText(lang, 'Clear search')}
             >
               <i className="fas fa-times" aria-hidden="true" />
             </button>
@@ -138,7 +139,7 @@ export default function CourseFaqSection({ courseId, lang = 'en', translations }
       {/* No results */}
       {search && filtered.length === 0 && (
         <p style={{ padding: '12px 0', color: 'var(--text-secondary)', fontSize: '0.9rem', textAlign: 'center' }}>
-          {isHt ? 'Pa gen FAQ ki mache ak chèch ou.' : 'No FAQ matches your search.'}
+          {isHt ? 'Pa gen FAQ ki mache ak chèch ou.' : inlineText(lang, 'No FAQ matches your search.')}
         </p>
       )}
 

@@ -33,6 +33,7 @@ import { INSTALL_STATES } from '../pwa/installation/installationTypes';
 // now?” (updateAvailable / version). It owns the SW update listener;
 // this UI consumes the derived facts and never touches SW plumbing.
 import appController from '../pwa/app/AppController';
+import { inlineText } from '../utils/inlineI18n';
 
 // The native "Install Atelnyo on your device" banner is HIDDEN by
 // default (brand decision — the app is promoted through social channels,
@@ -121,12 +122,12 @@ export default function InstallPrompt({ lang }) {
   const updateAvailable = runtime.updateAvailable && !updateDismissed;
   if (updateAvailable) {
     const uaText = {
-      heading: isHt ? 'Nouvo vèsyon disponib' : 'New version available',
+      heading: isHt ? 'Nouvo vèsyon disponib' : inlineText(lang, 'New version available'),
       body: isHt
         ? 'Yon nouvo vèsyon Atelnyo pare. Rafrechi paj la pou w itilize li.'
-        : 'A new version of Atelnyo is ready. Refresh to use it.',
-      button: isHt ? 'Rafrechi' : 'Refresh',
-      dismiss: isHt ? 'Pita' : 'Later',
+        : inlineText(lang, 'A new version of Atelnyo is ready. Refresh to use it.'),
+      button: isHt ? 'Rafrechi' : inlineText(lang, 'Refresh'),
+      dismiss: isHt ? 'Pita' : inlineText(lang, 'Later'),
     };
     return (
       <div className="pwa-install-banner pwa-install-banner--update" role="dialog" aria-label={uaText.heading}>
@@ -173,12 +174,12 @@ export default function InstallPrompt({ lang }) {
   if (!showInstallBanner) return null;
 
   const t = {
-    heading: isHt ? 'Enstale Atelnyo sou aparèy ou' : 'Install Atelnyo on your device',
+    heading: isHt ? 'Enstale Atelnyo sou aparèy ou' : inlineText(lang, 'Install Atelnyo on your device'),
     body: isHt
       ? 'Jwenn aksè rapid a kou ou yo, menm lè w pa konekte a entènèt.'
-      : 'Get quick access to your courses, even when offline.',
-    install: isHt ? 'Enstale' : 'Install',
-    dismiss: isHt ? 'Pa kounye a' : 'Not now',
+      : inlineText(lang, 'Get quick access to your courses, even when offline.'),
+    install: isHt ? 'Enstale' : inlineText(lang, 'Install'),
+    dismiss: isHt ? 'Pa kounye a' : inlineText(lang, 'Not now'),
   };
 
   return (

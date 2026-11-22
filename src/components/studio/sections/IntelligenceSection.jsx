@@ -16,6 +16,7 @@ import useFetch from '../../../hooks/useFetch';
 import { courseService } from '../../../services/api';
 import { StudioSkeleton, EmptyState, fmtCount, fmtDate, classNames } from '../shared';
 import styles from './sections.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const SUB_TABS = [
   { id: 'intelligence', icon: 'fa-wand-magic-sparkles', label: 'Content AI',   labelHt: 'Kontni AI' },
@@ -57,7 +58,7 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
     try {
       await courseService.processCI(courseId);
       showToast?.(
-        lang === 'ht' ? 'Tretman kòmanse!' : 'Processing started!',
+        lang === 'ht' ? 'Tretman kòmanse!' : inlineText(lang, 'Processing started!'),
         'check-circle',
       );
       // Poll for updates
@@ -65,7 +66,7 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
       setTimeout(() => refetch(), 5000);
     } catch (err) {
       showToast?.(
-        lang === 'ht' ? 'Erè nan tretman' : 'Failed to start processing',
+        lang === 'ht' ? 'Erè nan tretman' : inlineText(lang, 'Failed to start processing'),
         'exclamation-triangle',
       );
     } finally {
@@ -90,7 +91,7 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
       });
     } catch (err) {
       showToast?.(
-        err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab louvri kou a.' : 'Could not open the course.'),
+        err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab louvri kou a.' : inlineText(lang, 'Could not open the course.')),
         'exclamation-triangle',
       );
     } finally {
@@ -107,13 +108,13 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
         [courseId]: response?.data?.status || 'draft',
       }));
       showToast?.(
-        lang === 'ht' ? 'Kou a retounen nan bouyon.' : 'Course moved back to draft.',
+        lang === 'ht' ? 'Kou a retounen nan bouyon.' : inlineText(lang, 'Course moved back to draft.'),
         'check-circle',
       );
       refetch();
     } catch (err) {
       showToast?.(
-        err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab retire piblikasyon an.' : 'Could not unpublish the course.'),
+        err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab retire piblikasyon an.' : inlineText(lang, 'Could not unpublish the course.')),
         'exclamation-triangle',
       );
     } finally {
@@ -130,7 +131,7 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
         [courseId]: response?.data?.status || 'published',
       }));
       showToast?.(
-        lang === 'ht' ? 'Kou a pibliye ankò.' : 'Course published again.',
+        lang === 'ht' ? 'Kou a pibliye ankò.' : inlineText(lang, 'Course published again.'),
         'check-circle',
       );
       refetch();
@@ -140,7 +141,7 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
       const missing = errors && Object.values(errors).join(' · ');
       showToast?.(
         [detail, missing].filter(Boolean).join(' — ')
-          || (lang === 'ht' ? 'Pa t kapab pibliye kou a.' : 'Could not publish the course.'),
+          || (lang === 'ht' ? 'Pa t kapab pibliye kou a.' : inlineText(lang, 'Could not publish the course.')),
         'exclamation-triangle',
       );
     } finally {
@@ -153,8 +154,8 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
     return (
       <EmptyState
         icon="fa-graduation-cap"
-        title={lang === 'ht' ? 'Pa gen kou' : 'No courses yet'}
-        hint={lang === 'ht' ? 'Kreye yon kou pou wè Content Intelligence' : 'Create a course to see Content Intelligence'}
+        title={lang === 'ht' ? 'Pa gen kou' : inlineText(lang, 'No courses yet')}
+        hint={lang === 'ht' ? 'Kreye yon kou pou wè Content Intelligence' : inlineText(lang, 'Create a course to see Content Intelligence')}
       />
     );
   }
@@ -169,22 +170,22 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
       <div className={styles.affiliateGrid} style={{ marginBottom: '20px' }}>
         <div className={styles.affiliateStatCard}>
           <div className={styles.affiliateStatValue}>{courses.length}</div>
-          <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Kou Total' : 'Total Courses'}</div>
+          <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Kou Total' : inlineText(lang, 'Total Courses')}</div>
         </div>
         <div className={styles.affiliateStatCard}>
           <div className={styles.affiliateStatValue} style={{ color: '#059669' }}>{ready}</div>
-          <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Entèlijans pare' : 'Intelligence Ready'}</div>
+          <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Entèlijans pare' : inlineText(lang, 'Intelligence Ready')}</div>
         </div>
         <div className={styles.affiliateStatCard}>
           <div className={styles.affiliateStatValue} style={{ color: notProcessed > 0 ? '#d97706' : '#059669' }}>{notProcessed}</div>
-          <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Pa Treté' : 'Not Processed'}</div>
+          <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Pa Treté' : inlineText(lang, 'Not Processed')}</div>
         </div>
       </div>
 
       {/* Course list */}
       <h3 className={styles.sectionSubtitle}>
         <i className="fas fa-graduation-cap" aria-hidden="true" />
-        {' '}{lang === 'ht' ? 'Kou Ou' : 'Your Courses'}
+        {' '}{lang === 'ht' ? 'Kou Ou' : inlineText(lang, 'Your Courses')}
       </h3>
 
       <div className={styles.list}>
@@ -221,8 +222,8 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
                   }}>
                     <i className={`fas ${courseStatus === 'published' ? 'fa-globe' : 'fa-pen'}`} />
                     {courseStatus === 'published'
-                      ? (lang === 'ht' ? 'Pibliye' : 'Published')
-                      : (lang === 'ht' ? 'Bouyon' : 'Draft')}
+                      ? (lang === 'ht' ? 'Pibliye' : inlineText(lang, 'Published'))
+                      : (lang === 'ht' ? 'Bouyon' : inlineText(lang, 'Draft'))}
                   </span>
                   {/* Feature indicators */}
                   {course.seo_ready && (
@@ -276,10 +277,10 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
                     color: '#4f46e5', cursor: editingId === course.id ? 'wait' : 'pointer',
                     fontSize: '0.8rem', fontWeight: 500, whiteSpace: 'nowrap',
                   }}
-                  title={lang === 'ht' ? 'Modifye kou a' : 'Edit course'}
-                  aria-label={lang === 'ht' ? 'Modifye kou a' : 'Edit'}
+                  title={lang === 'ht' ? 'Modifye kou a' : inlineText(lang, 'Edit course')}
+                  aria-label={lang === 'ht' ? 'Modifye kou a' : inlineText(lang, 'Edit')}
                 >
-                  {editingId === course.id ? <i className="fas fa-spinner fa-spin" /> : <><i className="fas fa-pen" /> {lang === 'ht' ? 'Modifye' : 'Edit'}</>}
+                  {editingId === course.id ? <i className="fas fa-spinner fa-spin" /> : <><i className="fas fa-pen" /> {lang === 'ht' ? 'Modifye' : inlineText(lang, 'Edit')}</>}
                 </button>
                 {canManageCourseContent === true && (
                   <>
@@ -294,9 +295,9 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
                           color: '#b45309', cursor: unpublishingId === course.id ? 'wait' : 'pointer',
                           fontSize: '0.8rem', fontWeight: 500, whiteSpace: 'nowrap',
                         }}
-                        title={lang === 'ht' ? 'Retire piblikasyon an epi mete kou a nan bouyon' : 'Unpublish and move course to draft'}
+                        title={lang === 'ht' ? 'Retire piblikasyon an epi mete kou a nan bouyon' : inlineText(lang, 'Unpublish and move course to draft')}
                       >
-                        {unpublishingId === course.id ? <i className="fas fa-spinner fa-spin" /> : <><i className="fas fa-eye-slash" /> {lang === 'ht' ? 'Mete an bouyon' : 'Move to draft'}</>}
+                        {unpublishingId === course.id ? <i className="fas fa-spinner fa-spin" /> : <><i className="fas fa-eye-slash" /> {lang === 'ht' ? 'Mete an bouyon' : inlineText(lang, 'Move to draft')}</>}
                       </button>
                     )}
                     {courseStatus === 'draft' && (
@@ -310,9 +311,9 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
                           color: '#047857', cursor: publishingId === course.id ? 'wait' : 'pointer',
                           fontSize: '0.8rem', fontWeight: 500, whiteSpace: 'nowrap',
                         }}
-                        title={lang === 'ht' ? 'Pibliye kou a ankò' : 'Publish the course again'}
+                        title={lang === 'ht' ? 'Pibliye kou a ankò' : inlineText(lang, 'Publish the course again')}
                       >
-                        {publishingId === course.id ? <i className="fas fa-spinner fa-spin" /> : <><i className="fas fa-rocket" /> {lang === 'ht' ? 'Pibliye' : 'Publish'}</>}
+                        {publishingId === course.id ? <i className="fas fa-spinner fa-spin" /> : <><i className="fas fa-rocket" /> {lang === 'ht' ? 'Pibliye' : inlineText(lang, 'Publish')}</>}
                       </button>
                     )}
                   </>
@@ -328,12 +329,12 @@ function ContentIntelligenceTab({ lang, t, showToast, onEdit }) {
                       color: '#6366f1', cursor: processing[course.id] ? 'wait' : 'pointer',
                       fontSize: '0.8rem', fontWeight: 500, whiteSpace: 'nowrap',
                     }}
-                    title={lang === 'ht' ? 'Retretman' : 'Re-process'}
+                    title={lang === 'ht' ? 'Retretman' : inlineText(lang, 'Re-process')}
                   >
                     {processing[course.id] ? (
                       <i className="fas fa-spinner fa-spin" />
                     ) : (
-                      <><i className="fas fa-sync-alt" /> {lang === 'ht' ? 'Tretman' : 'Process'}</>
+                      <><i className="fas fa-sync-alt" /> {lang === 'ht' ? 'Tretman' : inlineText(lang, 'Process')}</>
                     )}
                   </button>
                 )}
@@ -353,8 +354,8 @@ function InsightsTab({ lang, t, showToast }) {
   );
 
   if (loading) return <StudioSkeleton rows={4} />;
-  if (!metrics) return <EmptyState icon="fa-brain" title={lang === 'ht' ? 'Pa gen done' : 'No data yet'}
-    hint={lang === 'ht' ? 'Kontinye itilize platfòm pou wè insights' : 'Keep using the platform to see insights'} />;
+  if (!metrics) return <EmptyState icon="fa-brain" title={lang === 'ht' ? 'Pa gen done' : inlineText(lang, 'No data yet')}
+    hint={lang === 'ht' ? 'Kontinye itilize platfòm pou wè insights' : inlineText(lang, 'Keep using the platform to see insights')} />;
 
   return (
     <div className={styles.section}>
@@ -362,19 +363,19 @@ function InsightsTab({ lang, t, showToast }) {
       <div className={styles.affiliateGrid}>
         <div className={styles.affiliateStatCard}>
           <div className={styles.affiliateStatValue}>{metrics.engagement_score?.toFixed(1) || '0'}</div>
-          <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Angajman' : 'Engagement Score'}</div>
+          <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Angajman' : inlineText(lang, 'Engagement Score')}</div>
         </div>
         <div className={styles.affiliateStatCard}>
           <div className={styles.affiliateStatValue}>{metrics.evolution_score?.toFixed(1) || '0'}</div>
-          <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Evolisyon' : 'Evolution Score'}</div>
+          <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Evolisyon' : inlineText(lang, 'Evolution Score')}</div>
         </div>
         <div className={styles.affiliateStatCard}>
           <div className={styles.affiliateStatValue}>{(metrics.trust_score * 100)?.toFixed(0) || '50'}</div>
-          <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Konfyans' : 'Trust Score'}</div>
+          <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Konfyans' : inlineText(lang, 'Trust Score')}</div>
         </div>
         <div className={styles.affiliateStatCard}>
           <div className={styles.affiliateStatValue}>{metrics.segments?.total_segments || 0}</div>
-          <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Segment Odyans' : 'Audience Segments'}</div>
+          <div className={styles.affiliateStatLabel}>{lang === 'ht' ? 'Segment Odyans' : inlineText(lang, 'Audience Segments')}</div>
         </div>
       </div>
 
@@ -383,7 +384,7 @@ function InsightsTab({ lang, t, showToast }) {
         <>
           <h3 className={styles.sectionSubtitle} style={{ marginTop: '24px' }}>
             <i className="fas fa-star" aria-hidden="true" />
-            {lang === 'ht' ? 'Enterè ou' : 'Your Interests'}
+            {lang === 'ht' ? 'Enterè ou' : inlineText(lang, 'Your Interests')}
           </h3>
           <div className={styles.list}>
             <div className={styles.listItem}>
@@ -408,7 +409,7 @@ function InsightsTab({ lang, t, showToast }) {
         <>
           <h3 className={styles.sectionSubtitle} style={{ marginTop: '16px' }}>
             <i className="fas fa-tools" aria-hidden="true" />
-            {lang === 'ht' ? 'Konpetans ou' : 'Your Skills'}
+            {lang === 'ht' ? 'Konpetans ou' : inlineText(lang, 'Your Skills')}
           </h3>
           <div className={styles.list}>
             <div className={styles.listItem}>
@@ -433,7 +434,7 @@ function InsightsTab({ lang, t, showToast }) {
         <>
           <h3 className={styles.sectionSubtitle} style={{ marginTop: '24px' }}>
             <i className="fas fa-history" aria-hidden="true" />
-            {lang === 'ht' ? 'Aktivite Resan' : 'Recent Activity'}
+            {lang === 'ht' ? 'Aktivite Resan' : inlineText(lang, 'Recent Activity')}
           </h3>
           <div className={styles.list}>
             {metrics.recent_activity.map((evt) => (
@@ -464,10 +465,10 @@ function AudienceTab({ lang, t, showToast }) {
   const handleRecalculate = useCallback(async (id) => {
     try {
       await affiliateApi.recalculateAudienceSegment(id);
-      showToast?.(lang === 'ht' ? 'Segman rekalkile' : 'Segment recalculated', 'check');
+      showToast?.(lang === 'ht' ? 'Segman rekalkile' : inlineText(lang, 'Segment recalculated'), 'check');
       refetch();
     } catch {
-      showToast?.(lang === 'ht' ? 'Erek' : 'Failed', 'error');
+      showToast?.(lang === 'ht' ? 'Erek' : inlineText(lang, 'Failed'), 'error');
     }
   }, [showToast, refetch]);
 
@@ -477,12 +478,12 @@ function AudienceTab({ lang, t, showToast }) {
     <div className={styles.section}>
       <h3 className={styles.sectionSubtitle}>
         <i className="fas fa-users" aria-hidden="true" />
-        {lang === 'ht' ? 'Segment Odyans' : 'Audience Segments'}
+        {lang === 'ht' ? 'Segment Odyans' : inlineText(lang, 'Audience Segments')}
       </h3>
 
       {segments.length === 0 ? (
         <EmptyState icon="fa-users"
-          title={lang === 'ht' ? 'Pokò gen segment' : 'No segments yet'} />
+          title={lang === 'ht' ? 'Pokò gen segment' : inlineText(lang, 'No segments yet')} />
       ) : (
         <div className={styles.list}>
           {segments.map((seg) => (
@@ -493,15 +494,15 @@ function AudienceTab({ lang, t, showToast }) {
               <div className={styles.listBody}>
                 <div className={styles.listTitle}>{seg.name}</div>
                 <div className={styles.listMeta}>
-                  {seg.category} · {fmtCount(seg.member_count)} {lang === 'ht' ? 'manb' : 'members'}
-                  {seg.is_system && ` · ${lang === 'ht' ? 'Sistèm' : 'System'}`}
+                  {seg.category} · {fmtCount(seg.member_count)} {lang === 'ht' ? 'manb' : inlineText(lang, 'members')}
+                  {seg.is_system && ` · ${lang === 'ht' ? 'Sistèm' : inlineText(lang, 'System')}`}
                   {seg.last_calculated && ` · ${fmtDate(seg.last_calculated)}`}
                 </div>
               </div>
               {!seg.is_system && (
                 <button type="button" className={styles.affiliateBtnApprove}
                   onClick={() => handleRecalculate(seg.id)}
-                  title={lang === 'ht' ? 'Rekalkile' : 'Recalculate'}>
+                  title={lang === 'ht' ? 'Rekalkile' : inlineText(lang, 'Recalculate')}>
                   <i className="fas fa-sync" />
                 </button>
               )}
@@ -525,13 +526,13 @@ function BestTimesTab({ lang, t, showToast }) {
     <div className={styles.section}>
       <h3 className={styles.sectionSubtitle}>
         <i className="fas fa-clock" aria-hidden="true" />
-        {lang === 'ht' ? 'Pi bon Momant pou Pibliye' : 'Best Times to Post'}
+        {lang === 'ht' ? 'Pi bon Momant pou Pibliye' : inlineText(lang, 'Best Times to Post')}
       </h3>
 
       {!times?.best_hours?.length ? (
         <EmptyState icon="fa-clock"
-          title={lang === 'ht' ? 'Pokò gen ase done' : 'Not enough data yet'}
-          hint={lang === 'ht' ? 'Kontinye itilize platfòm pou wè analiz' : 'Keep using the platform to see analysis'} />
+          title={lang === 'ht' ? 'Pokò gen ase done' : inlineText(lang, 'Not enough data yet')}
+          hint={lang === 'ht' ? 'Kontinye itilize platfòm pou wè analiz' : inlineText(lang, 'Keep using the platform to see analysis')} />
       ) : (
         <>
           <div className={styles.affiliateGrid}>
@@ -540,7 +541,7 @@ function BestTimesTab({ lang, t, showToast }) {
                 <div className={styles.affiliateStatValue}>
                   {h.hour % 12 || 12}{h.hour < 12 ? 'AM' : 'PM'}
                 </div>
-                <div className={styles.affiliateStatLabel}>{fmtCount(h.count)} {lang === 'ht' ? 'aktivite' : 'activities'}</div>
+                <div className={styles.affiliateStatLabel}>{fmtCount(h.count)} {lang === 'ht' ? 'aktivite' : inlineText(lang, 'activities')}</div>
               </div>
             ))}
           </div>
@@ -549,13 +550,13 @@ function BestTimesTab({ lang, t, showToast }) {
             <>
               <h4 className={styles.sectionSubtitle} style={{ fontSize: '1rem', marginTop: '16px' }}>
                 <i className="fas fa-calendar" />
-                {lang === 'ht' ? 'Pi bon Jou' : 'Best Days'}
+                {lang === 'ht' ? 'Pi bon Jou' : inlineText(lang, 'Best Days')}
               </h4>
               <div className={styles.affiliateGrid}>
                 {times.best_days.slice(0, 3).map((d) => (
                   <div key={d.day} className={styles.affiliateStatCard}>
                     <div className={styles.affiliateStatValue}>{d.day}</div>
-                    <div className={styles.affiliateStatLabel}>{fmtCount(d.count)} {lang === 'ht' ? 'aktivite' : 'activities'}</div>
+                    <div className={styles.affiliateStatLabel}>{fmtCount(d.count)} {lang === 'ht' ? 'aktivite' : inlineText(lang, 'activities')}</div>
                   </div>
                 ))}
               </div>
@@ -587,10 +588,10 @@ function PrivacyTab({ lang, t, showToast }) {
     try {
       const newVal = !privacy.settings[setting];
       await affiliateApi.updatePrivacy({ [setting]: newVal });
-      showToast?.(lang === 'ht' ? 'Mizajou' : 'Updated', 'check');
+      showToast?.(lang === 'ht' ? 'Mizajou' : inlineText(lang, 'Updated'), 'check');
       refetch();
     } catch {
-      showToast?.(lang === 'ht' ? 'Ere' : 'Failed', 'error');
+      showToast?.(lang === 'ht' ? 'Ere' : inlineText(lang, 'Failed'), 'error');
     } finally {
       setSaving(false);
     }
@@ -599,31 +600,31 @@ function PrivacyTab({ lang, t, showToast }) {
   const handleReset = useCallback(async () => {
     try {
       await affiliateApi.resetPrivacy();
-      showToast?.(lang === 'ht' ? 'Reyajiste' : 'Reset to defaults', 'check');
+      showToast?.(lang === 'ht' ? 'Reyajiste' : inlineText(lang, 'Reset to defaults'), 'check');
       refetch();
     } catch {
-      showToast?.(lang === 'ht' ? 'Ere' : 'Failed', 'error');
+      showToast?.(lang === 'ht' ? 'Ere' : inlineText(lang, 'Failed'), 'error');
     }
   }, [showToast, refetch, lang]);
 
   if (loading) return <StudioSkeleton rows={3} />;
 
   const settings = [
-    { key: 'allow_personalization', label: lang === 'ht' ? 'Pèsonalizasyon' : 'Personalization',
-      desc: lang === 'ht' ? 'Rekòmandasyon pèsonalize' : 'Personalized recommendations' },
-    { key: 'allow_behavior_tracking', label: lang === 'ht' ? 'Swivi Konpòtman' : 'Behavior Tracking',
-      desc: lang === 'ht' ? 'Swivi aksyon ou pou amelyore rekòmandasyon' : 'Track actions to improve recommendations' },
-    { key: 'allow_location_usage', label: lang === 'ht' ? 'Itilizasyon Lokalizasyon' : 'Location Usage',
-      desc: lang === 'ht' ? 'Itilize lokalizasyon ou pou dekouvri kontni' : 'Use location for content discovery' },
-    { key: 'allow_profile_analysis', label: lang === 'ht' ? 'Analiz Pwofil' : 'Profile Analysis',
-      desc: lang === 'ht' ? 'Analize pwofil ou pou insights' : 'Analyze profile for insights' },
+    { key: 'allow_personalization', label: lang === 'ht' ? 'Pèsonalizasyon' : inlineText(lang, 'Personalization'),
+      desc: lang === 'ht' ? 'Rekòmandasyon pèsonalize' : inlineText(lang, 'Personalized recommendations') },
+    { key: 'allow_behavior_tracking', label: lang === 'ht' ? 'Swivi Konpòtman' : inlineText(lang, 'Behavior Tracking'),
+      desc: lang === 'ht' ? 'Swivi aksyon ou pou amelyore rekòmandasyon' : inlineText(lang, 'Track actions to improve recommendations') },
+    { key: 'allow_location_usage', label: lang === 'ht' ? 'Itilizasyon Lokalizasyon' : inlineText(lang, 'Location Usage'),
+      desc: lang === 'ht' ? 'Itilize lokalizasyon ou pou dekouvri kontni' : inlineText(lang, 'Use location for content discovery') },
+    { key: 'allow_profile_analysis', label: lang === 'ht' ? 'Analiz Pwofil' : inlineText(lang, 'Profile Analysis'),
+      desc: lang === 'ht' ? 'Analize pwofil ou pou insights' : inlineText(lang, 'Analyze profile for insights') },
   ];
 
   return (
     <div className={styles.section}>
       <h3 className={styles.sectionSubtitle}>
         <i className="fas fa-shield-alt" />
-        {lang === 'ht' ? 'Prive ak Kontwòl' : 'Privacy & Controls'}
+        {lang === 'ht' ? 'Prive ak Kontwòl' : inlineText(lang, 'Privacy & Controls')}
       </h3>
 
       {privacy?.insights?.personalization_active !== undefined && (
@@ -631,8 +632,8 @@ function PrivacyTab({ lang, t, showToast }) {
           <i className={`fas ${privacy.insights.personalization_active ? 'fa-check-circle' : 'fa-pause-circle'}`} />
           <span>
             {privacy.insights.personalization_active
-              ? (lang === 'ht' ? 'Pèsonalizasyon aktif' : 'Personalization active')
-              : (lang === 'ht' ? 'Pèsonalizasyon dezaktive' : 'Personalization inactive')}
+              ? (lang === 'ht' ? 'Pèsonalizasyon aktif' : inlineText(lang, 'Personalization active'))
+              : (lang === 'ht' ? 'Pèsonalizasyon dezaktive' : inlineText(lang, 'Personalization inactive'))}
           </span>
         </div>
       )}
@@ -655,7 +656,7 @@ function PrivacyTab({ lang, t, showToast }) {
         <button type="button" className="btn-secondary" onClick={handleReset} disabled={saving}
           style={{ marginTop: '12px' }}>
           <i className="fas fa-undo" />
-          {lang === 'ht' ? 'Retabli Defo' : 'Reset to Defaults'}
+          {lang === 'ht' ? 'Retabli Defo' : inlineText(lang, 'Reset to Defaults')}
         </button>
       </div>
 
@@ -663,7 +664,7 @@ function PrivacyTab({ lang, t, showToast }) {
         <>
           <h4 className={styles.sectionSubtitle} style={{ fontSize: '1rem', marginTop: '24px' }}>
             <i className="fas fa-info-circle" />
-            {lang === 'ht' ? 'Karakteristik afekte' : 'Affected Features'}
+            {lang === 'ht' ? 'Karakteristik afekte' : inlineText(lang, 'Affected Features')}
           </h4>
           <div className={styles.list}>
             {Object.entries(privacy.insights.features_affected).map(([feature, active]) => (

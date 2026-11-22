@@ -14,6 +14,7 @@
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── Helpers ───────────────────────────────────────────────────────
 
@@ -97,13 +98,13 @@ function ContentQueueItem({ item, onApprove, onReject, onFlag, lang }) {
       {item.status === 'pending' && (
         <div className="mod-queue-actions">
           <button className="mod-btn mod-btn-approve" onClick={() => onApprove?.(item)}>
-            <i className="fas fa-check" /> {lang === 'ht' ? 'Apwouve' : 'Approve'}
+            <i className="fas fa-check" /> {lang === 'ht' ? 'Apwouve' : inlineText(lang, 'Approve')}
           </button>
           <button className="mod-btn mod-btn-reject" onClick={() => onReject?.(item)}>
-            <i className="fas fa-times" /> {lang === 'ht' ? 'Rejte' : 'Reject'}
+            <i className="fas fa-times" /> {lang === 'ht' ? 'Rejte' : inlineText(lang, 'Reject')}
           </button>
           <button className="mod-btn mod-btn-flag" onClick={() => onFlag?.(item)}>
-            <i className="fas fa-flag" /> {lang === 'ht' ? 'Flagge' : 'Flag'}
+            <i className="fas fa-flag" /> {lang === 'ht' ? 'Flagge' : inlineText(lang, 'Flag')}
           </button>
         </div>
       )}
@@ -253,7 +254,7 @@ function AutoModSettings({ settings, onSave, lang }) {
     <div className="mod-automod">
       <h3>
         <i className="fas fa-robot" />
-        {lang === 'ht' ? 'Otomatik Moderasyon' : 'Auto-Moderation'}
+        {lang === 'ht' ? 'Otomatik Moderasyon' : inlineText(lang, 'Auto-Moderation')}
       </h3>
 
       <div className="mod-automod-settings">
@@ -264,10 +265,10 @@ function AutoModSettings({ settings, onSave, lang }) {
               checked={localSettings.spam_filter || false}
               onChange={(e) => handleChange('spam_filter', e.target.checked)}
             />
-            <span>{lang === 'ht' ? 'Filtre Spam' : 'Spam Filter'}</span>
+            <span>{lang === 'ht' ? 'Filtre Spam' : inlineText(lang, 'Spam Filter')}</span>
           </label>
           <p className="mod-setting-desc">
-            {lang === 'ht' ? 'Automatikman bloke mesaj spam' : 'Automatically block spam messages'}
+            {lang === 'ht' ? 'Automatikman bloke mesaj spam' : inlineText(lang, 'Automatically block spam messages')}
           </p>
         </div>
 
@@ -278,10 +279,10 @@ function AutoModSettings({ settings, onSave, lang }) {
               checked={localSettings.link_filter || false}
               onChange={(e) => handleChange('link_filter', e.target.checked)}
             />
-            <span>{lang === 'ht' ? 'Filtre Lyen' : 'Link Filter'}</span>
+            <span>{lang === 'ht' ? 'Filtre Lyen' : inlineText(lang, 'Link Filter')}</span>
           </label>
           <p className="mod-setting-desc">
-            {lang === 'ht' ? 'Filtre lyen sispèk' : 'Filter suspicious links'}
+            {lang === 'ht' ? 'Filtre lyen sispèk' : inlineText(lang, 'Filter suspicious links')}
           </p>
         </div>
 
@@ -292,10 +293,10 @@ function AutoModSettings({ settings, onSave, lang }) {
               checked={localSettings.word_filter || false}
               onChange={(e) => handleChange('word_filter', e.target.checked)}
             />
-            <span>{lang === 'ht' ? 'Filtre Mo' : 'Word Filter'}</span>
+            <span>{lang === 'ht' ? 'Filtre Mo' : inlineText(lang, 'Word Filter')}</span>
           </label>
           <p className="mod-setting-desc">
-            {lang === 'ht' ? 'Filtre mo ofansif' : 'Filter offensive words'}
+            {lang === 'ht' ? 'Filtre mo ofansif' : inlineText(lang, 'Filter offensive words')}
           </p>
         </div>
 
@@ -306,16 +307,16 @@ function AutoModSettings({ settings, onSave, lang }) {
               checked={localSettings.auto_approve || false}
               onChange={(e) => handleChange('auto_approve', e.target.checked)}
             />
-            <span>{lang === 'ht' ? 'Otomatik Apwouve' : 'Auto-Approve'}</span>
+            <span>{lang === 'ht' ? 'Otomatik Apwouve' : inlineText(lang, 'Auto-Approve')}</span>
           </label>
           <p className="mod-setting-desc">
-            {lang === 'ht' ? 'Otomatikman apwouve kontni ki pa gen pwoblèm' : 'Automatically approve content with no issues'}
+            {lang === 'ht' ? 'Otomatikman apwouve kontni ki pa gen pwoblèm' : inlineText(lang, 'Automatically approve content with no issues')}
           </p>
         </div>
 
         <div className="mod-setting">
           <label>
-            <span>{lang === 'ht' ? 'Max Rapò pou Auto-Flag' : 'Max Reports to Auto-Flag'}</span>
+            <span>{lang === 'ht' ? 'Max Rapò pou Auto-Flag' : inlineText(lang, 'Max Reports to Auto-Flag')}</span>
           </label>
           <input
             type="number"
@@ -328,7 +329,7 @@ function AutoModSettings({ settings, onSave, lang }) {
       </div>
 
       <button className="mod-btn mod-btn-save" onClick={() => onSave?.(localSettings)}>
-        <i className="fas fa-save" /> {lang === 'ht' ? 'Sove' : 'Save Settings'}
+        <i className="fas fa-save" /> {lang === 'ht' ? 'Sove' : inlineText(lang, 'Save Settings')}
       </button>
     </div>
   );
@@ -380,9 +381,9 @@ export default function ModerationDashboard({ community, lang = 'en', showToast 
     try {
       await api.post(`/communities/${community?.id}/moderation/approve/`, { id: item.id });
       fetchData();
-      showToast?.(lang === 'ht' ? 'Apwouve!' : 'Approved!', 'success');
+      showToast?.(lang === 'ht' ? 'Apwouve!' : inlineText(lang, 'Approved!'), 'success');
     } catch (err) {
-      showToast?.(lang === 'ht' ? 'Erè' : 'Error', 'error');
+      showToast?.(lang === 'ht' ? 'Erè' : inlineText(lang, 'Error'), 'error');
     }
   };
 
@@ -390,9 +391,9 @@ export default function ModerationDashboard({ community, lang = 'en', showToast 
     try {
       await api.post(`/communities/${community?.id}/moderation/reject/`, { id: item.id });
       fetchData();
-      showToast?.(lang === 'ht' ? 'Rejte!' : 'Rejected!', 'success');
+      showToast?.(lang === 'ht' ? 'Rejte!' : inlineText(lang, 'Rejected!'), 'success');
     } catch (err) {
-      showToast?.(lang === 'ht' ? 'Erè' : 'Error', 'error');
+      showToast?.(lang === 'ht' ? 'Erè' : inlineText(lang, 'Error'), 'error');
     }
   };
 
@@ -400,9 +401,9 @@ export default function ModerationDashboard({ community, lang = 'en', showToast 
     try {
       await api.post(`/communities/${community?.id}/moderation/ban/`, { user_id: user.id });
       fetchData();
-      showToast?.(lang === 'ht' ? 'Bloke!' : 'Banned!', 'success');
+      showToast?.(lang === 'ht' ? 'Bloke!' : inlineText(lang, 'Banned!'), 'success');
     } catch (err) {
-      showToast?.(lang === 'ht' ? 'Erè' : 'Error', 'error');
+      showToast?.(lang === 'ht' ? 'Erè' : inlineText(lang, 'Error'), 'error');
     }
   };
 
@@ -410,9 +411,9 @@ export default function ModerationDashboard({ community, lang = 'en', showToast 
     try {
       await api.post(`/communities/${community?.id}/moderation/mute/`, { user_id: user.id });
       fetchData();
-      showToast?.(lang === 'ht' ? 'Mute!' : 'Muted!', 'success');
+      showToast?.(lang === 'ht' ? 'Mute!' : inlineText(lang, 'Muted!'), 'success');
     } catch (err) {
-      showToast?.(lang === 'ht' ? 'Erè' : 'Error', 'error');
+      showToast?.(lang === 'ht' ? 'Erè' : inlineText(lang, 'Error'), 'error');
     }
   };
 
@@ -420,9 +421,9 @@ export default function ModerationDashboard({ community, lang = 'en', showToast 
     try {
       await api.post(`/communities/${community?.id}/moderation/warn/`, { user_id: user.id });
       fetchData();
-      showToast?.(lang === 'ht' ? 'Avètisman!' : 'Warning!', 'success');
+      showToast?.(lang === 'ht' ? 'Avètisman!' : inlineText(lang, 'Warning!'), 'success');
     } catch (err) {
-      showToast?.(lang === 'ht' ? 'Erè' : 'Error', 'error');
+      showToast?.(lang === 'ht' ? 'Erè' : inlineText(lang, 'Error'), 'error');
     }
   };
 
@@ -430,9 +431,9 @@ export default function ModerationDashboard({ community, lang = 'en', showToast 
     try {
       await api.post(`/communities/${community?.id}/moderation/reports/resolve/`, { id: report.id });
       fetchData();
-      showToast?.(lang === 'ht' ? 'Rezoud!' : 'Resolved!', 'success');
+      showToast?.(lang === 'ht' ? 'Rezoud!' : inlineText(lang, 'Resolved!'), 'success');
     } catch (err) {
-      showToast?.(lang === 'ht' ? 'Erè' : 'Error', 'error');
+      showToast?.(lang === 'ht' ? 'Erè' : inlineText(lang, 'Error'), 'error');
     }
   };
 
@@ -440,9 +441,9 @@ export default function ModerationDashboard({ community, lang = 'en', showToast 
     try {
       await api.post(`/communities/${community?.id}/moderation/automod/`, settings);
       setAutoModSettings(settings);
-      showToast?.(lang === 'ht' ? 'Sove!' : 'Saved!', 'success');
+      showToast?.(lang === 'ht' ? 'Sove!' : inlineText(lang, 'Saved!'), 'success');
     } catch (err) {
-      showToast?.(lang === 'ht' ? 'Erè' : 'Error', 'error');
+      showToast?.(lang === 'ht' ? 'Erè' : inlineText(lang, 'Error'), 'error');
     }
   };
 
@@ -451,7 +452,7 @@ export default function ModerationDashboard({ community, lang = 'en', showToast 
       <div className="mod-header">
         <h2>
           <i className="fas fa-shield-alt" />
-          {lang === 'ht' ? 'Moderasyon' : 'Moderation'}
+          {lang === 'ht' ? 'Moderasyon' : inlineText(lang, 'Moderation')}
         </h2>
       </div>
 
@@ -498,7 +499,7 @@ export default function ModerationDashboard({ community, lang = 'en', showToast 
                 {queue.length === 0 ? (
                   <div className="mod-empty">
                     <i className="fas fa-check-circle" />
-                    <p>{lang === 'ht' ? 'Pa gen kontni nan ke a' : 'No items in queue'}</p>
+                    <p>{lang === 'ht' ? 'Pa gen kontni nan ke a' : inlineText(lang, 'No items in queue')}</p>
                   </div>
                 ) : (
                   queue.map((item) => (
@@ -519,7 +520,7 @@ export default function ModerationDashboard({ community, lang = 'en', showToast 
                 {users.length === 0 ? (
                   <div className="mod-empty">
                     <i className="fas fa-users" />
-                    <p>{lang === 'ht' ? 'Pa gen itilizatè' : 'No users'}</p>
+                    <p>{lang === 'ht' ? 'Pa gen itilizatè' : inlineText(lang, 'No users')}</p>
                   </div>
                 ) : (
                   users.map((user) => (
@@ -541,7 +542,7 @@ export default function ModerationDashboard({ community, lang = 'en', showToast 
                 {reports.length === 0 ? (
                   <div className="mod-empty">
                     <i className="fas fa-flag" />
-                    <p>{lang === 'ht' ? 'Pa gen rapò' : 'No reports'}</p>
+                    <p>{lang === 'ht' ? 'Pa gen rapò' : inlineText(lang, 'No reports')}</p>
                   </div>
                 ) : (
                   reports.map((report) => (
@@ -561,7 +562,7 @@ export default function ModerationDashboard({ community, lang = 'en', showToast 
                 {logs.length === 0 ? (
                   <div className="mod-empty">
                     <i className="fas fa-history" />
-                    <p>{lang === 'ht' ? 'Pa gen jounal' : 'No logs'}</p>
+                    <p>{lang === 'ht' ? 'Pa gen jounal' : inlineText(lang, 'No logs')}</p>
                   </div>
                 ) : (
                   logs.map((log) => (

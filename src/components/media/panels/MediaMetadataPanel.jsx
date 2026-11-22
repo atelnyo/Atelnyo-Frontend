@@ -12,6 +12,7 @@
  * than fake values.
  */
 import React from 'react';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const FIELDS = [
   { key: 'id', labelEn: 'Unique ID', labelHt: 'ID Inik', mono: true },
@@ -61,7 +62,7 @@ export default function MediaMetadataPanel({ media, lang = 'en', className = '' 
       <p className="media-panel-intro">
         {isHt
           ? 'Tout metadata ki egziste sou medya sa a. Jaden ki pa egziste ankò montre sa yo pa disponib.'
-          : 'All existing metadata for this media. Fields not yet supported show as unavailable.'}
+          : inlineText(lang, 'All existing metadata for this media. Fields not yet supported show as unavailable.')}
       </p>
       <dl className="media-panel-meta-grid">
         {FIELDS.map((f) => {

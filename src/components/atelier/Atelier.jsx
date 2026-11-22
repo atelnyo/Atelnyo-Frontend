@@ -39,6 +39,7 @@
  * is sticky across reloads. No backend changes.
  */
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── Atelier i18n (inline; kept here so the component is self-contained
 //                    — also mirrored in src/data/translations.js so the
@@ -350,7 +351,7 @@ function AuraSynthesizer({ t, lang, onCommit, showToast, registerCommit }) {
       localStorage.removeItem('atelnyo_theme_color');
       localStorage.removeItem('atelnyo_aura_signature');
     } catch (_) {}
-    showToast?.(lang === 'ht' ? 'Pink Atelnyo retounen' : 'Atelnyo pink restored', 'rotate-left');
+    showToast?.(lang === 'ht' ? 'Pink Atelnyo retounen' : inlineText(lang, 'Atelnyo pink restored'), 'rotate-left');
   };
 
   // Register the commit action with the shell so the fixed footer's
@@ -653,12 +654,12 @@ function ChronoCapsule({ t, lang, showToast }) {
 
   const handleSave = () => {
     if (!text.trim()) {
-      showToast?.(lang === 'ht' ? 'Ekri yon mesaje anvan.' : 'Write a message first.', 'exclamation-triangle');
+      showToast?.(lang === 'ht' ? 'Ekri yon mesaje anvan.' : inlineText(lang, 'Write a message first.'), 'exclamation-triangle');
       return;
     }
     const revealDate = new Date(revealAt + 'T00:00:00');
     if (revealDate <= new Date()) {
-      showToast?.(lang === 'ht' ? 'Dat dwe nan lavni.' : 'Date must be in the future.', 'exclamation-triangle');
+      showToast?.(lang === 'ht' ? 'Dat dwe nan lavni.' : inlineText(lang, 'Date must be in the future.'), 'exclamation-triangle');
       return;
     }
     const capsule = {
@@ -670,7 +671,7 @@ function ChronoCapsule({ t, lang, showToast }) {
     };
     saveCapsules([capsule, ...capsules]);
     setText('');
-    showToast?.(lang === 'ht' ? 'Kapsil fèmen. Li ap louvri nan dat ou chwazi a.' : 'Capsule sealed. It opens on the date you chose.', 'lock');
+    showToast?.(lang === 'ht' ? 'Kapsil fèmen. Li ap louvri nan dat ou chwazi a.' : inlineText(lang, 'Capsule sealed. It opens on the date you chose.'), 'lock');
   };
 
   const handleReveal = (id) => {
@@ -693,7 +694,7 @@ function ChronoCapsule({ t, lang, showToast }) {
       if (due.length) {
         saveCapsules(capsules.map(c => c.revealAt <= now ? { ...c, revealed: true } : c));
         due.forEach(() => {
-          showToast?.(lang === 'ht' ? '🔓 Yon kapsil ou louvri!' : '🔓 A capsule just opened!', 'envelope-open');
+          showToast?.(lang === 'ht' ? '🔓 Yon kapsil ou louvri!' : inlineText(lang, '🔓 A capsule just opened!'), 'envelope-open');
         });
       }
     };
@@ -718,7 +719,7 @@ function ChronoCapsule({ t, lang, showToast }) {
             onChange={e => setText(e.target.value.slice(0, 500))}
             maxLength={500}
             rows={3}
-            placeholder={lang === 'ht' ? 'Bonjou lavni mwen...' : 'Hello future me...'}
+            placeholder={lang === 'ht' ? 'Bonjou lavni mwen...' : inlineText(lang, 'Hello future me...')}
           />
         </label>
         <label className="atelier-capsule-label">
@@ -936,7 +937,7 @@ function TypographicDNA({ t, lang }) {
         {stats && (
           <div className="atelier-dna-formula">
             <span>R = σ / μ = {stats.sigma.toFixed(0)}ms / {stats.mu.toFixed(0)}ms = <strong>{r.toFixed(3)}</strong></span>
-            <span className="atelier-dna-samples">{stats.samples} {lang === 'ht' ? 'echantiyon' : 'samples'}</span>
+            <span className="atelier-dna-samples">{stats.samples} {lang === 'ht' ? 'echantiyon' : inlineText(lang, 'samples')}</span>
           </div>
         )}
       </div>

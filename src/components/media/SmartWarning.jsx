@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import LinkedContent from './LinkedContent';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function SmartWarning({
   open = false,
@@ -25,13 +26,13 @@ export default function SmartWarning({
 
   return (
     <div className="smart-warning-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}>
-      <div className="smart-warning-modal" role="alertdialog" aria-label={isHt ? 'Avètisman efasman' : 'Delete warning'}>
+      <div className="smart-warning-modal" role="alertdialog" aria-label={isHt ? 'Avètisman efasman' : inlineText(lang, 'Delete warning')}>
         <div className="smart-warning-header">
           <div className="smart-warning-icon">
             <i className="fas fa-exclamation-triangle" />
           </div>
           <h3 className="smart-warning-title">
-            {isHt ? 'Atansyon!' : 'Warning!'}
+            {isHt ? 'Atansyon!' : inlineText(lang, 'Warning!')}
           </h3>
         </div>
 
@@ -39,14 +40,14 @@ export default function SmartWarning({
           <p className="smart-warning-desc">
             {isHt
               ? 'Medya sa itilize nan plizyè kote. Si ou retire referans sa a, tout seksyon sa yo pap montre medya ankò.'
-              : 'This media is used in multiple places. If you remove this reference, all these sections will no longer show the media.'}
+              : inlineText(lang, 'This media is used in multiple places. If you remove this reference, all these sections will no longer show the media.')}
           </p>
 
           {usageCount > 0 && (
             <div className="smart-warning-count">
               <span className="smart-warning-count-badge">
                 <i className="fas fa-link" />
-                {usageCount} {isHt ? 'koneksyon' : 'connections'}
+                {usageCount} {isHt ? 'koneksyon' : inlineText(lang, 'connections')}
               </span>
             </div>
           )}
@@ -58,7 +59,7 @@ export default function SmartWarning({
           {url && (
             <div className="smart-warning-url">
               <span className="smart-warning-url-label">
-                {isHt ? 'URL la' : 'The URL'}
+                {isHt ? 'URL la' : inlineText(lang, 'The URL')}
               </span>
               <code className="smart-warning-url-value">{url}</code>
             </div>
@@ -68,20 +69,20 @@ export default function SmartWarning({
             <i className="fas fa-info-circle" />
             {isHt
               ? 'Sa pa efase fichye orijinal la sou provider ou. Li sèlman retire referans nan atelnyo.'
-              : 'This does NOT delete the original file from your provider. It only removes the reference in atelnyo.'}
+              : inlineText(lang, 'This does NOT delete the original file from your provider. It only removes the reference in atelnyo.')}
           </p>
         </div>
 
         <div className="smart-warning-actions">
           <button type="button" className="btn-secondary" onClick={onCancel}>
             <i className="fas fa-times" />
-            {isHt ? 'Anile' : 'Cancel'}
+            {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
           </button>
           <button type="button" className="smart-warning-delete-btn" onClick={onConfirm}>
             <i className="fas fa-trash" />
             {usageCount > 0
-              ? (isHt ? 'Retire referans ak tout koneksyon' : 'Remove reference & all connections')
-              : (isHt ? 'Retire referans' : 'Remove reference')}
+              ? (isHt ? 'Retire referans ak tout koneksyon' : inlineText(lang, 'Remove reference & all connections'))
+              : (isHt ? 'Retire referans' : inlineText(lang, 'Remove reference'))}
           </button>
         </div>
       </div>

@@ -19,6 +19,7 @@
 import React, { useEffect, useState } from 'react';
 import ConfirmModal from '../../common/ConfirmModal';
 import styles from './editor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function ProductVariantsPanel({ lang = 'en', variants = [], canEdit, onAdd, onUpdate, onRemove, onRemoveMany }) {
   const isHt = lang === 'ht';
@@ -29,7 +30,7 @@ export default function ProductVariantsPanel({ lang = 'en', variants = [], canEd
   const [confirmBulk, setConfirmBulk] = useState(false);
   const [bulkBusy, setBulkBusy] = useState(false);
 
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
 
   // Drop ids that are gone (after a delete + reload) so the count
   // never references stale rows.
@@ -49,7 +50,7 @@ export default function ProductVariantsPanel({ lang = 'en', variants = [], canEd
 
   const submitAdd = () => {
     if (!draft.name.trim()) {
-      setError(isHt ? 'Non variant la oblije.' : 'Variant name is required.');
+      setError(isHt ? 'Non variant la oblije.' : inlineText(lang, 'Variant name is required.'));
       return;
     }
     onAdd({
@@ -68,7 +69,7 @@ export default function ProductVariantsPanel({ lang = 'en', variants = [], canEd
       if (v.stock == null) return t('Available (Printify)', 'Disponib (Printify)');
       return t('Unavailable on Printify', 'Pa disponib sou Printify');
     }
-    if (v.stock != null) return `${v.stock} ${isHt ? 'an stock' : 'in stock'}`;
+    if (v.stock != null) return `${v.stock} ${isHt ? 'an stock' : inlineText(lang, 'in stock')}`;
     return t('unlimited', 'illimite');
   };
 
@@ -166,7 +167,7 @@ export default function ProductVariantsPanel({ lang = 'en', variants = [], canEd
                   <input
                     value={draft.name}
                     onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-                    placeholder={isHt ? 'Nwa / M' : 'Black / M'}
+                    placeholder={isHt ? 'Nwa / M' : inlineText(lang, 'Black / M')}
                     maxLength={200}
                   />
                 </label>
@@ -198,7 +199,7 @@ export default function ProductVariantsPanel({ lang = 'en', variants = [], canEd
                     step="1"
                     value={draft.stock}
                     onChange={(e) => setDraft({ ...draft, stock: e.target.value })}
-                    placeholder={isHt ? 'Illimite' : 'Unlimited'}
+                    placeholder={isHt ? 'Illimite' : inlineText(lang, 'Unlimited')}
                   />
                 </label>
               </div>

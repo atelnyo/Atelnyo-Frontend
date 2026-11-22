@@ -11,6 +11,7 @@
 import React from 'react';
 import SEOHead from './shared/SEOHead';
 import { t2 } from '../utils/i18n';
+import { inlineText } from '../utils/inlineI18n';
 
 const SEO = {
   en: {
@@ -227,9 +228,9 @@ export default function TrustCenter({ lang = 'en', market = '' }) {
           <table style={styles.table}>
             <thead>
               <tr>
-                <th style={styles.th}>{lang === 'ht' ? 'Navigatè' : 'Browser'}</th>
-                <th style={styles.th}>{lang === 'ht' ? 'Estati' : 'Support'}</th>
-                <th style={styles.th}>{lang === 'ht' ? 'Nòt' : 'Notes'}</th>
+                <th style={styles.th}>{lang === 'ht' ? 'Navigatè' : inlineText(lang, 'Browser')}</th>
+                <th style={styles.th}>{lang === 'ht' ? 'Estati' : inlineText(lang, 'Support')}</th>
+                <th style={styles.th}>{lang === 'ht' ? 'Nòt' : inlineText(lang, 'Notes')}</th>
               </tr>
             </thead>
             <tbody>
@@ -247,8 +248,8 @@ export default function TrustCenter({ lang = 'en', market = '' }) {
           <table style={styles.table}>
             <thead>
               <tr>
-                <th style={styles.th}>{lang === 'ht' ? 'Fonksyonalite' : 'Feature'}</th>
-                <th style={styles.th}>{lang === 'ht' ? 'Navigatè' : 'Browsers'}</th>
+                <th style={styles.th}>{lang === 'ht' ? 'Fonksyonalite' : inlineText(lang, 'Feature')}</th>
+                <th style={styles.th}>{lang === 'ht' ? 'Navigatè' : inlineText(lang, 'Browsers')}</th>
               </tr>
             </thead>
             <tbody>

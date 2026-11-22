@@ -30,6 +30,7 @@
  */
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { blockSubmissionService } from '../../../services/api';
+import { inlineText } from '../../../utils/inlineI18n';
 
 // ─── Pyodide loader (lazy) ────────────────────────────────────────────
 let pyodideInstance = null;
@@ -430,19 +431,19 @@ export default function CodeExerciseBlock({
               tabSize: 4,
             }}
             spellCheck={false}
-            aria-label={isHt ? 'Editè kòd' : 'Code editor'}
+            aria-label={isHt ? 'Editè kòd' : inlineText(lang, 'Code editor')}
           />
         </div>
 
         {/* Output pane */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
           <div style={{ padding: '6px 10px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
-            <span style={{ fontWeight: 600 }}>{isHt ? 'Sòti' : 'Output'}</span>
+            <span style={{ fontWeight: 600 }}>{isHt ? 'Sòti' : inlineText(lang, 'Output')}</span>
             {pyodideLoading && <span style={{ color: '#f59e0b' }}>Loading Python...</span>}
           </div>
           {isWeb && previewDoc && (
             <iframe
-              title={isHt ? 'Preview kòd la' : 'Code preview'}
+              title={isHt ? 'Preview kòd la' : inlineText(lang, 'Code preview')}
               srcDoc={previewDoc}
               sandbox="allow-scripts"
               style={{ width: '100%', height: 260, border: 'none', borderBottom: '1px solid var(--border-subtle)', background: '#fff' }}
@@ -463,12 +464,12 @@ export default function CodeExerciseBlock({
             {error && <div style={{ color: '#f85149', marginTop: output ? 8 : 0 }}>{error}</div>}
             {!output && !error && !isRunning && (
               <div style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>
-                {isHt ? 'Klike "Ekzekye" pou wè sòti a.' : 'Click "Run" to see output.'}
+                {isHt ? 'Klike "Ekzekye" pou wè sòti a.' : inlineText(lang, 'Click "Run" to see output.')}
               </div>
             )}
             {isRunning && (
               <div style={{ color: '#f59e0b' }}>
-                <i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap ekzekye...' : 'Running...'}
+                <i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap ekzekye...' : inlineText(lang, 'Running...')}
               </div>
             )}
           </div>
@@ -481,7 +482,7 @@ export default function CodeExerciseBlock({
           type="button"
           onClick={handleRun}
           disabled={isRunning || (!isWeb && !pyodideReady) || Boolean(runtimeError)}
-          aria-label={isRunning ? (isHt ? 'Ap ekzekye...' : 'Running...') : (isHt ? 'Ekzekye kòd la' : 'Run code')}
+          aria-label={isRunning ? (isHt ? 'Ap ekzekye...' : inlineText(lang, 'Running...')) : (isHt ? 'Ekzekye kòd la' : inlineText(lang, 'Run code'))}
           style={{
             padding: '6px 14px',
             borderRadius: 6,
@@ -498,7 +499,7 @@ export default function CodeExerciseBlock({
           }}
         >
           <i className={`fas ${isRunning ? 'fa-spinner fa-spin' : 'fa-play'}`} />
-          {isHt ? 'Ekzekye' : 'Run'}
+          {isHt ? 'Ekzekye' : inlineText(lang, 'Run')}
         </button>
 
         {runtimeError && !submitted && (
@@ -511,7 +512,7 @@ export default function CodeExerciseBlock({
               fontSize: '0.8rem', fontFamily: 'inherit',
             }}
           >
-            <i className="fas fa-forward" /> {isHt ? 'Kontinye san ekzekisyon' : 'Continue without running'}
+            <i className="fas fa-forward" /> {isHt ? 'Kontinye san ekzekisyon' : inlineText(lang, 'Continue without running')}
           </button>
         )}
 
@@ -519,7 +520,7 @@ export default function CodeExerciseBlock({
           type="button"
           onClick={handleReset}
           disabled={isRunning}
-          aria-label={isHt ? 'Reyinisyalize kòd la' : 'Reset code'}
+          aria-label={isHt ? 'Reyinisyalize kòd la' : inlineText(lang, 'Reset code')}
           style={{
             padding: '6px 12px',
             borderRadius: 6,
@@ -531,7 +532,7 @@ export default function CodeExerciseBlock({
             fontFamily: 'inherit',
           }}
         >
-          <i className="fas fa-undo" /> {isHt ? 'Reyinisyalize' : 'Reset'}
+          <i className="fas fa-undo" /> {isHt ? 'Reyinisyalize' : inlineText(lang, 'Reset')}
         </button>
 
         {!submitted ? (
@@ -539,7 +540,7 @@ export default function CodeExerciseBlock({
             type="button"
             onClick={handleSubmit}
             disabled={isRunning}
-            aria-label={isHt ? 'Soumèt kòd la pou nòt' : 'Submit code for grading'}
+            aria-label={isHt ? 'Soumèt kòd la pou nòt' : inlineText(lang, 'Submit code for grading')}
             style={{
               padding: '6px 14px',
               borderRadius: 6,
@@ -556,7 +557,7 @@ export default function CodeExerciseBlock({
               marginLeft: 'auto',
             }}
           >
-            <i className="fas fa-paper-plane" /> {isHt ? 'Soumèt' : 'Submit'}
+            <i className="fas fa-paper-plane" /> {isHt ? 'Soumèt' : inlineText(lang, 'Submit')}
           </button>
         ) : (
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -588,7 +589,7 @@ export default function CodeExerciseBlock({
               fontFamily: 'inherit',
             }}
           >
-            <i className="fas fa-lightbulb" /> {isHt ? 'Indis' : 'Hint'}
+            <i className="fas fa-lightbulb" /> {isHt ? 'Indis' : inlineText(lang, 'Hint')}
           </button>
         )}
       </div>
@@ -620,10 +621,10 @@ export default function CodeExerciseBlock({
           {score == null
             ? (isHt
               ? '🕒 Sèvis ekzekisyon pa disponib — travay ou anrejistre pou revizyon. Ou ka kontinye.'
-              : '🕒 Runtime unavailable — your work is saved for review. You can continue.')
+              : inlineText(lang, '🕒 Runtime unavailable — your work is saved for review. You can continue.'))
             : score >= 70
-              ? (isHt ? '🎉 Brav! Ou pase egzèsis sa a!' : '🎉 Great! You passed this exercise!')
-              : (isHt ? '⚠️ Eseye ankò — revize kòd ou a epi tcheke sòti a.' : '⚠️ Try again — review your code and check the output.')}
+              ? (isHt ? '🎉 Brav! Ou pase egzèsis sa a!' : inlineText(lang, '🎉 Great! You passed this exercise!'))
+              : (isHt ? '⚠️ Eseye ankò — revize kòd ou a epi tcheke sòti a.' : inlineText(lang, '⚠️ Try again — review your code and check the output.'))}
         </div>
       )}
     </div>

@@ -34,6 +34,7 @@ import { historyBack } from '../../utils/history';
 import { translations } from '../../data/translations';
 import { businessOrderService, marketplaceService } from '../../services/api';
 import '../../styles/business.css';
+import { inlineText } from '../../utils/inlineI18n';
 
 const STATUS_FLOW_LABEL = {
   new: { ht: 'Nouvo', en: 'New' },
@@ -55,7 +56,7 @@ function payColor(paymentStatus) {
 }
 
 function money(n, lang) {
-  return Number(n ?? 0).toLocaleString(lang === 'ht' ? 'fr-HT' : 'en-US', {
+  return Number(n ?? 0).toLocaleString(lang === 'ht' ? 'fr-HT' : inlineText(lang, 'en-US'), {
     minimumFractionDigits: 2,
   });
 }
@@ -122,10 +123,10 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
       if (data?.id) {
         setOrders((prev) => prev.map((o) => (o.id === data.id ? data : o)));
       }
-      showToast?.(isHt ? 'Kòmand la anile.' : 'Order cancelled.', 'check-circle');
+      showToast?.(isHt ? 'Kòmand la anile.' : inlineText(lang, 'Order cancelled.'), 'check-circle');
     } catch (err) {
       showToast?.(
-        err?.response?.data?.detail || (isHt ? 'Pa t ka anile kòmand la.' : 'Could not cancel the order.'),
+        err?.response?.data?.detail || (isHt ? 'Pa t ka anile kòmand la.' : inlineText(lang, 'Could not cancel the order.')),
         'circle-exclamation',
       );
     } finally {
@@ -146,7 +147,7 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
       if (data?.id) {
         setOrders((prev) => prev.map((o) => (o.id === data.id ? data : o)));
       }
-      showToast?.(isHt ? 'Peman an reyisi!' : 'Payment successful!', 'check-circle');
+      showToast?.(isHt ? 'Peman an reyisi!' : inlineText(lang, 'Payment successful!'), 'check-circle');
     } catch (err) {
       const status = err?.response?.status;
       const detail = err?.response?.data?.detail;
@@ -154,11 +155,11 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
         showToast?.(
           isHt
             ? 'Balans Wallet ou pa sifi. Mete lajan nan Wallet ou anvan ou peye.'
-            : 'Insufficient wallet balance. Top up your wallet before paying.',
+            : inlineText(lang, 'Insufficient wallet balance. Top up your wallet before paying.'),
           'circle-exclamation',
         );
       } else {
-        showToast?.(detail || (isHt ? 'Peman an pa t mache.' : 'Payment failed.'), 'circle-exclamation');
+        showToast?.(detail || (isHt ? 'Peman an pa t mache.' : inlineText(lang, 'Payment failed.')), 'circle-exclamation');
       }
     } finally {
       setBusyId(null);
@@ -207,7 +208,7 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
     if (!reviewOrder || reviewBusy) return;
     if (!reviewRating || reviewRating < 1 || reviewRating > 5) {
       showToast?.(
-        isHt ? 'Chwazi yon nòt 1 a 5.' : 'Choose a rating from 1 to 5.',
+        isHt ? 'Chwazi yon nòt 1 a 5.' : inlineText(lang, 'Choose a rating from 1 to 5.'),
         'circle-exclamation',
       );
       return;
@@ -222,13 +223,13 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
       if (data?.id) {
         setOrders((prev) => prev.map((o) => (o.id === reviewOrder.id ? { ...o, reviewed: true } : o)));
       }
-      showToast?.(isHt ? '✅ Revizyon ou voye! Mèsi.' : '✅ Review submitted! Thank you.', 'check-circle');
+      showToast?.(isHt ? '✅ Revizyon ou voye! Mèsi.' : inlineText(lang, '✅ Review submitted! Thank you.'), 'check-circle');
       setReviewOrder(null);
       setReviewRating(0);
       setReviewComment('');
     } catch (err) {
       showToast?.(
-        err?.response?.data?.detail || (isHt ? 'Pa t ka voye revizyon an.' : 'Could not submit the review.'),
+        err?.response?.data?.detail || (isHt ? 'Pa t ka voye revizyon an.' : inlineText(lang, 'Could not submit the review.')),
         'circle-exclamation',
       );
     } finally {
@@ -247,12 +248,12 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
       <div className="biz-hub-hero">
         <div className="biz-hub-badge"><i className="fas fa-receipt" aria-hidden="true" /></div>
         <h1 className="biz-hub-title">
-          {t?.business_my_orders_title || (isHt ? 'Kòmand mwen' : 'My Orders')}
+          {t?.business_my_orders_title || (isHt ? 'Kòmand mwen' : inlineText(lang, 'My Orders'))}
         </h1>
         <p className="biz-hub-hint">
           {t?.business_my_orders_hint || (isHt
             ? 'Swiv kòmand ou yo nan tout biznis — peye ak Wallet ou oswa anile yon kòmand ki poko peye.'
-            : 'Track your orders across businesses — pay with your Wallet or cancel an unpaid order.')}
+            : inlineText(lang, 'Track your orders across businesses — pay with your Wallet or cancel an unpaid order.'))}
         </p>
         <button
           type="button"
@@ -261,7 +262,7 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
           data-testid="business-my-orders-back"
         >
           <i className="fas fa-arrow-left" aria-hidden="true" />
-          {t?.business_public_back || (isHt ? 'Retounen' : 'Back')}
+          {t?.business_public_back || (isHt ? 'Retounen' : inlineText(lang, 'Back'))}
         </button>
       </div>
 
@@ -271,7 +272,7 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
           <div className="biz-orders-list" style={{ maxWidth: 720, margin: '0 auto 24px' }} data-testid="mwen-printify-orders">
             <h3 style={{ margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 8 }}>
               <i className="fas fa-box" aria-hidden="true" />
-              {isHt ? 'Kòmand fizik mwen yo' : 'My physical orders'}
+              {isHt ? 'Kòmand fizik mwen yo' : inlineText(lang, 'My physical orders')}
             </h3>
             {printifyOrders.map((order) => (
               <div className="biz-order-card" key={`printify-${order.id}`} data-testid="mwen-printify-order">
@@ -279,27 +280,27 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
                   <span className="biz-order-name">{(order.items || []).map((item) => item.product_title).filter(Boolean).join(', ')}</span>
                   <p className="biz-order-meta">
                     <i className="fas fa-receipt" aria-hidden="true" />{' '}
-                    {isHt ? 'Kòmand' : 'Order'} #{order.id}{' · '}
+                    {isHt ? 'Kòmand' : inlineText(lang, 'Order')} #{order.id}{' · '}
                     {order.printify_fulfillment.map((fulfillment) => (
                       <span key={`${order.id}-${fulfillment.status || 'unknown'}-${(fulfillment.shipments || []).map((shipment) => shipment.number || shipment.url || 'shipment').join(',')}`}>
                         {({
-                          pending: isHt ? 'Ap tann' : 'Pending',
-                          'on-hold': isHt ? 'An atant' : 'On hold',
-                          'in-production': isHt ? 'An pwodiksyon' : 'In production',
-                          'partially-fulfilled': isHt ? 'Kèk atik voye' : 'Partially shipped',
-                          fulfilled: isHt ? 'Voye' : 'Shipped',
-                          canceled: isHt ? 'Anile' : 'Cancelled',
-                        })[fulfillment.status] || fulfillment.status || (isHt ? 'Ap tann mizajou' : 'Awaiting update')}
+                          pending: isHt ? 'Ap tann' : inlineText(lang, 'Pending'),
+                          'on-hold': isHt ? 'An atant' : inlineText(lang, 'On hold'),
+                          'in-production': isHt ? 'An pwodiksyon' : inlineText(lang, 'In production'),
+                          'partially-fulfilled': isHt ? 'Kèk atik voye' : inlineText(lang, 'Partially shipped'),
+                          fulfilled: isHt ? 'Voye' : inlineText(lang, 'Shipped'),
+                          canceled: isHt ? 'Anile' : inlineText(lang, 'Cancelled'),
+                        })[fulfillment.status] || fulfillment.status || (isHt ? 'Ap tann mizajou' : inlineText(lang, 'Awaiting update'))}
                         {fulfillment.shipments?.map((shipment) => (
                           <span key={`${shipment.number || shipment.url || shipment.carrier || 'shipment'}`}>
-                            {' · '}{shipment.carrier || (isHt ? 'Transpò' : 'Carrier')}{' '}
+                            {' · '}{shipment.carrier || (isHt ? 'Transpò' : inlineText(lang, 'Carrier'))}{' '}
                             {shipment.url?.startsWith('https://') ? (
                               <a href={shipment.url} target="_blank" rel="noreferrer">
-                                {shipment.number || (isHt ? 'Swiv livrezon' : 'Track shipment')}
+                                {shipment.number || (isHt ? 'Swiv livrezon' : inlineText(lang, 'Track shipment'))}
                               </a>
                             ) : (shipment.number || '')}
                             {shipment.delivered_at && (
-                              <span>{' · '}{isHt ? 'Livre' : 'Delivered'}</span>
+                              <span>{' · '}{isHt ? 'Livre' : inlineText(lang, 'Delivered')}</span>
                             )}
                           </span>
                         ))}
@@ -318,16 +319,16 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
         ) : digitalItems.length === 0 ? (
           <div className="biz-hub-empty" style={{ padding: '14px 0' }}>
             <i className="fas fa-file-arrow-down" aria-hidden="true" />
-            <h3>{isHt ? 'Ou poko gen pwodwi dijital' : 'No digital products yet'}</h3>
+            <h3>{isHt ? 'Ou poko gen pwodwi dijital' : inlineText(lang, 'No digital products yet')}</h3>
             <p>{isHt
               ? 'Achte yon pwodwi dijital sou Marketplace a — li parèt isit la epi li ale nan email ou tou, dirèkteman apre peman an.'
-              : 'Buy a digital product on the Marketplace — it appears here (and in your receipt email) right after payment.'}</p>
+              : inlineText(lang, 'Buy a digital product on the Marketplace — it appears here (and in your receipt email) right after payment.')}</p>
           </div>
         ) : (
           <div className="biz-orders-list" style={{ maxWidth: 720, margin: '0 auto', marginBottom: 24 }}>
             <h3 style={{ margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 8 }}>
               <i className="fas fa-file-arrow-down" aria-hidden="true" />
-              {isHt ? 'Pwodwi dijital mwen' : 'My digital products'}
+              {isHt ? 'Pwodwi dijital mwen' : inlineText(lang, 'My digital products')}
             </h3>
             {digitalItems.map((item) => (
               <div className="biz-order-card" key={`${item.order_id}-${item.id}`} data-testid="mwen-digital-item">
@@ -338,7 +339,7 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
                     Lòd #{item.order_id}{' · '}<strong>{money(item.unit_price, lang)}</strong>
                     {' · '}
                     <span className="biz-status-pill" style={{ background: '#34d3991f', color: '#34d399', border: '1px solid #34d39955' }}>
-                      {isHt ? 'Peye' : 'Paid'}
+                      {isHt ? 'Peye' : inlineText(lang, 'Paid')}
                     </span>
                   </p>
                 </div>
@@ -350,7 +351,7 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
                     data-testid="mwen-digital-download"
                   >
                     <i className="fas fa-download" aria-hidden="true" />
-                    {isHt ? 'Telechaje' : 'Download'}
+                    {isHt ? 'Telechaje' : inlineText(lang, 'Download')}
                   </button>
                 </div>
               </div>
@@ -358,7 +359,7 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
             <p style={{ opacity: 0.7, fontSize: '0.8rem', margin: '6px 4px 0' }}>
               <i className="fas fa-shield-halved" aria-hidden="true" />{' '}
               {isHt ? 'Lyen yo siye epi yo ekspire nan 48 èdtan —mentaire pou ou pale wè resi email la tou. Gen 5 téléchajman pa pwodwi achte.'
-                : 'Links are signed and expire after 48 hours — the receipt email carries them too. 5 downloads per purchased product.'}
+                : inlineText(lang, 'Links are signed and expire after 48 hours — the receipt email carries them too. 5 downloads per purchased product.')}
             </p>
           </div>
         )}
@@ -371,10 +372,10 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
       ) : orders.length === 0 ? (
         <div className="biz-hub-empty">
           <i className="fas fa-receipt" aria-hidden="true" />
-          <h3>{t?.business_my_orders_empty || (isHt ? 'Ou poko gen kòmand' : 'No orders yet')}</h3>
+          <h3>{t?.business_my_orders_empty || (isHt ? 'Ou poko gen kòmand' : inlineText(lang, 'No orders yet'))}</h3>
           <p>{isHt
             ? 'Lè w kòmande yon atik sou paj piblik yon biznis, li ap parèt isit la.'
-            : 'When you order an item on a business public page, it will appear here.'}</p>
+            : inlineText(lang, 'When you order an item on a business public page, it will appear here.')}</p>
         </div>
       ) : (
         <div className="biz-orders-list" style={{ maxWidth: 720, margin: '0 auto' }}>
@@ -397,7 +398,7 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
                         border: `1px solid ${pc}55`,
                       }}
                     >
-                      {PAY_LABEL[order.payment_status]?.[isHt ? 'ht' : 'en'] || order.payment_status}
+                      {PAY_LABEL[order.payment_status]?.[isHt ? 'ht' : inlineText(lang, 'en')] || order.payment_status}
                     </span>
                   </div>
                   <p className="biz-order-meta">
@@ -408,7 +409,7 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
                     {' · '}<strong>{money(order.total, lang)} {order.currency}</strong>
                     {' · '}
                     <span className={`biz-order-lead biz-order-lead-${order.status}`}>
-                      {STATUS_FLOW_LABEL[order.status]?.[isHt ? 'ht' : 'en'] || order.status}
+                      {STATUS_FLOW_LABEL[order.status]?.[isHt ? 'ht' : inlineText(lang, 'en')] || order.status}
                     </span>
                   </p>
                   {order.note && <p className="biz-order-note">“{order.note}”</p>}
@@ -424,7 +425,7 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
                       data-testid="business-my-order-pay"
                     >
                       <i className={`fas ${busyId === `pay_${order.id}` ? 'fa-spinner fa-spin' : 'fa-wallet'}`} aria-hidden="true" />
-                      {t?.business_order_pay || (isHt ? 'Peye ak Wallet' : 'Pay with Wallet')}
+                      {t?.business_order_pay || (isHt ? 'Peye ak Wallet' : inlineText(lang, 'Pay with Wallet'))}
                     </button>
                   )}
                   {canCancel && (
@@ -436,7 +437,7 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
                       data-testid="business-my-order-cancel"
                     >
                       <i className={`fas ${busyId === `cancel_${order.id}` ? 'fa-spinner fa-spin' : 'fa-xmark'}`} aria-hidden="true" />
-                      {isHt ? 'Anile' : 'Cancel'}
+                      {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
                     </button>
                   )}
                   {canReview && (
@@ -447,7 +448,7 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
                       data-testid="business-my-order-review"
                     >
                       <i className="fas fa-star" aria-hidden="true" />
-                      {t?.business_review_cta || (isHt ? 'Kite yon revizyon' : 'Leave a review')}
+                      {t?.business_review_cta || (isHt ? 'Kite yon revizyon' : inlineText(lang, 'Leave a review'))}
                     </button>
                   )}
                   {reviewed && (
@@ -461,7 +462,7 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
                       data-testid="business-my-order-reviewed"
                     >
                       <i className="fas fa-star" aria-hidden="true" />
-                      {t?.business_review_done || (isHt ? 'Revize ✓' : 'Reviewed ✓')}
+                      {t?.business_review_done || (isHt ? 'Revize ✓' : inlineText(lang, 'Reviewed ✓'))}
                     </span>
                   )}
                   {order.business_profile_slug && (
@@ -472,7 +473,7 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
                       data-testid="business-my-order-shop"
                     >
                       <i className="fas fa-store" aria-hidden="true" />
-                      {isHt ? 'Biznis la' : 'View shop'}
+                      {isHt ? 'Biznis la' : inlineText(lang, 'View shop')}
                     </button>
                   )}
                 </div>
@@ -489,7 +490,7 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
             <div className="biz-modal-header">
               <h3 className="biz-modal-title">
                 <i className="fas fa-star" aria-hidden="true" />
-                {t?.business_review_title || (isHt ? 'Kite yon revizyon' : 'Leave a review')}
+                {t?.business_review_title || (isHt ? 'Kite yon revizyon' : inlineText(lang, 'Leave a review'))}
               </h3>
               <button type="button" className="biz-modal-close" onClick={closeReview} aria-label="Close">
                 <i className="fas fa-xmark" aria-hidden="true" />
@@ -502,13 +503,13 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
             <p className="biz-modal-hint">
               {t?.business_review_hint || (isHt
                 ? 'Kòmand la ranpli — pataje eksperyans ou ak biznis la.'
-                : 'Order fulfilled — share your experience with the business.')}
+                : inlineText(lang, 'Order fulfilled — share your experience with the business.'))}
             </p>
 
             <div className="biz-form">
               <div className="biz-form-group">
                 <label className="biz-form-label">
-                  {t?.business_review_rating_label || (isHt ? 'Nòt ou' : 'Your rating')}
+                  {t?.business_review_rating_label || (isHt ? 'Nòt ou' : inlineText(lang, 'Your rating'))}
                 </label>
                 <div className="biz-review-stars" data-testid="business-review-stars">
                   {[1, 2, 3, 4, 5].map((n) => (
@@ -529,7 +530,7 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
               </div>
               <div className="biz-form-group">
                 <label className="biz-form-label" htmlFor="biz-review-comment">
-                  {t?.business_review_comment || (isHt ? 'Kòmantè (si gen)' : 'Comment (optional)')}
+                  {t?.business_review_comment || (isHt ? 'Kòmantè (si gen)' : inlineText(lang, 'Comment (optional)'))}
                 </label>
                 <textarea
                   id="biz-review-comment"
@@ -543,7 +544,7 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
               </div>
               <div className="biz-form-actions">
                 <button type="button" className="biz-btn biz-btn-ghost" onClick={closeReview} disabled={reviewBusy}>
-                  {isHt ? 'Anile' : 'Cancel'}
+                  {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
                 </button>
                 <button
                   type="button"
@@ -553,7 +554,7 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
                   data-testid="business-review-submit"
                 >
                   <i className={`fas ${reviewBusy ? 'fa-spinner fa-spin' : 'fa-paper-plane'}`} aria-hidden="true" />
-                  {t?.business_review_submit || (isHt ? 'Voye revizyon' : 'Submit review')}
+                  {t?.business_review_submit || (isHt ? 'Voye revizyon' : inlineText(lang, 'Submit review'))}
                 </button>
               </div>
             </div>

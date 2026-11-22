@@ -16,6 +16,7 @@ import {
 } from './shared';
 import { parseHashtags, hashtagsToInput } from '../../../utils/hashtags';
 import styles from './modals.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 /** Format seconds → "M:SS" (the Explore catalog's canonical shape). */
 function secondsToDuration(secs) {
@@ -198,13 +199,13 @@ export default function MusicUploadModal({ onClose, onSuccess, lang, showToast, 
 
   const validate = () => {
     const errs = {};
-    if (!form.title.trim()) errs.title = lang === 'ht' ? 'Tit oblije' : 'Title required';
-    if (!form.artist.trim()) errs.artist = lang === 'ht' ? 'Non atis oblije' : 'Artist name required';
-    if (!form.duration.trim()) errs.duration = lang === 'ht' ? 'Dire oblije' : 'Duration required';
+    if (!form.title.trim()) errs.title = lang === 'ht' ? 'Tit oblije' : inlineText(lang, 'Title required');
+    if (!form.artist.trim()) errs.artist = lang === 'ht' ? 'Non atis oblije' : inlineText(lang, 'Artist name required');
+    if (!form.duration.trim()) errs.duration = lang === 'ht' ? 'Dire oblije' : inlineText(lang, 'Duration required');
     if (form.duration.trim() && !/^\d{1,2}:[0-5]\d$/.test(form.duration.trim())) {
-      errs.duration = lang === 'ht' ? 'Fòma: M:SS (egzanp: 3:42)' : 'Format: M:SS (e.g. 3:42)';
+      errs.duration = lang === 'ht' ? 'Fòma: M:SS (egzanp: 3:42)' : inlineText(lang, 'Format: M:SS (e.g. 3:42)');
     }
-    if (!form.cover_url.trim()) errs.cover_url = lang === 'ht' ? 'URL kouvèti oblije' : 'Cover URL required';
+    if (!form.cover_url.trim()) errs.cover_url = lang === 'ht' ? 'URL kouvèti oblije' : inlineText(lang, 'Cover URL required');
     return errs;
   };
 
@@ -239,8 +240,8 @@ export default function MusicUploadModal({ onClose, onSuccess, lang, showToast, 
       }
       showToast?.(
         isEdit
-          ? (lang === 'ht' ? '✅ Mizik mete ajou!' : '✅ Music track updated!')
-          : (lang === 'ht' ? '✅ Mizik ajoute avèk siksè!' : '✅ Music track added successfully!'),
+          ? (lang === 'ht' ? '✅ Mizik mete ajou!' : inlineText(lang, '✅ Music track updated!'))
+          : (lang === 'ht' ? '✅ Mizik ajoute avèk siksè!' : inlineText(lang, '✅ Music track added successfully!')),
         'check-circle',
       );
       onSuccess?.(); onClose?.();
@@ -250,7 +251,7 @@ export default function MusicUploadModal({ onClose, onSuccess, lang, showToast, 
         || err?.response?.data?.artist?.[0]
         || err?.response?.data?.cover_url?.[0]
         || err?.message
-        || (lang === 'ht' ? 'Pa t kapab ajoute mizik la.' : 'Could not add music track.');
+        || (lang === 'ht' ? 'Pa t kapab ajoute mizik la.' : inlineText(lang, 'Could not add music track.'));
       setErrors((e) => ({ ...e, _api: detail }));
       showToast?.(detail, 'circle-exclamation');
     } finally { setLoading(false); }
@@ -258,48 +259,48 @@ export default function MusicUploadModal({ onClose, onSuccess, lang, showToast, 
 
   return (
     <StudioModal onClose={onClose} icon="fa-music"
-      title={lang === 'ht' ? 'Ajoute Mizik' : 'Add Music Track'}
+      title={lang === 'ht' ? 'Ajoute Mizik' : inlineText(lang, 'Add Music Track')}
       subtitle={isEdit
-        ? (lang === 'ht' ? 'Modifye mizik la' : 'Edit this music track')
-        : (lang === 'ht' ? 'Pataje yon track mizik ou kreye' : 'Share a music track you created')}>
+        ? (lang === 'ht' ? 'Modifye mizik la' : inlineText(lang, 'Edit this music track'))
+        : (lang === 'ht' ? 'Pataje yon track mizik ou kreye' : inlineText(lang, 'Share a music track you created'))}>
       <form onSubmit={handleSubmit} className={styles.form}>
         {errors._api && <div className={styles.apiError} role="alert">{errors._api}</div>}
         {isEdit && (
           <div className={styles.editBanner}>
-            <i className="fas fa-pen" aria-hidden="true" /> {lang === 'ht' ? 'Ap modifye' : 'Editing'} <strong>{form.title}</strong>
+            <i className="fas fa-pen" aria-hidden="true" /> {lang === 'ht' ? 'Ap modifye' : inlineText(lang, 'Editing')} <strong>{form.title}</strong>
           </div>
         )}
         <LoadingOverlay loading={loading}>
           <FormSection
             icon="fa-info-circle"
-            title={lang === 'ht' ? 'Enfòmasyon Mizik' : 'Track Information'}
-            hint={lang === 'ht' ? 'Detay debaz sou track la.' : 'Basic details about the track.'}
+            title={lang === 'ht' ? 'Enfòmasyon Mizik' : inlineText(lang, 'Track Information')}
+            hint={lang === 'ht' ? 'Detay debaz sou track la.' : inlineText(lang, 'Basic details about the track.')}
           >
-            <FormField label={lang === 'ht' ? 'Tit' : 'Title'} required error={errors.title}>
+            <FormField label={lang === 'ht' ? 'Tit' : inlineText(lang, 'Title')} required error={errors.title}>
               <input className={styles.input} value={form.title}
                 onChange={(e) => handleChange('title', e.target.value)}
-                placeholder={lang === 'ht' ? 'Antre tit mizik la' : 'Enter track title'}
+                placeholder={lang === 'ht' ? 'Antre tit mizik la' : inlineText(lang, 'Enter track title')}
                 maxLength={200} autoFocus />
             </FormField>
             <div className={styles.row}>
-              <FormField label={lang === 'ht' ? 'Atis' : 'Artist'} required error={errors.artist}>
+              <FormField label={lang === 'ht' ? 'Atis' : inlineText(lang, 'Artist')} required error={errors.artist}>
                 <input className={styles.input} value={form.artist}
                   onChange={(e) => handleChange('artist', e.target.value)}
-                  placeholder={lang === 'ht' ? 'Non atis la' : 'Artist name'} />
+                  placeholder={lang === 'ht' ? 'Non atis la' : inlineText(lang, 'Artist name')} />
               </FormField>
-              <FormField label={lang === 'ht' ? 'Jen' : 'Genre'}>
+              <FormField label={lang === 'ht' ? 'Jen' : inlineText(lang, 'Genre')}>
                 <input className={styles.input} value={form.genre}
                   onChange={(e) => handleChange('genre', e.target.value)}
-                  placeholder={lang === 'ht' ? 'Rap, Kompa, Jazz...' : 'Rap, Kompa, Jazz...'} />
+                  placeholder={lang === 'ht' ? 'Rap, Kompa, Jazz...' : inlineText(lang, 'Rap, Kompa, Jazz...')} />
               </FormField>
             </div>
-            <FormField label={lang === 'ht' ? 'Dire' : 'Duration'} required error={errors.duration}
+            <FormField label={lang === 'ht' ? 'Dire' : inlineText(lang, 'Duration')} required error={errors.duration}
               hint={detectStatus === 'ok'
                 ? (lang === 'ht' ? `Detekte otomatikman: ${form.duration} ✓` : `Auto-detected: ${form.duration} ✓`)
                 : detectStatus === 'failed'
-                  ? (lang === 'ht' ? 'Pa t kapab detekte — antre l manyèlman (M:SS)' : 'Could not detect — enter manually (M:SS)')
+                  ? (lang === 'ht' ? 'Pa t kapab detekte — antre l manyèlman (M:SS)' : inlineText(lang, 'Could not detect — enter manually (M:SS)'))
                   : detectStatus === 'detecting'
-                    ? (lang === 'ht' ? 'Ap detekte dire a...' : 'Detecting duration...')
+                    ? (lang === 'ht' ? 'Ap detekte dire a...' : inlineText(lang, 'Detecting duration...'))
                     : 'M:SS (3:42) — oswa kite sistèm lan detekte l'}> 
               <div className={styles.durationRow}>
                 <input className={styles.input} value={form.duration}
@@ -312,7 +313,7 @@ export default function MusicUploadModal({ onClose, onSuccess, lang, showToast, 
                   onClick={() => {
                     const url = form.preview_url.trim();
                     if (!url) {
-                      showToast?.(lang === 'ht' ? 'Antre URL preview a an premye' : 'Add the preview URL first', 'circle-exclamation');
+                      showToast?.(lang === 'ht' ? 'Antre URL preview a an premye' : inlineText(lang, 'Add the preview URL first'), 'circle-exclamation');
                       return;
                     }
                     // Explicit click → overwrite any existing value with
@@ -325,7 +326,7 @@ export default function MusicUploadModal({ onClose, onSuccess, lang, showToast, 
                     runDurationDetection(url, true);
                   }}
                   disabled={detectStatus === 'detecting' || !form.preview_url.trim()}
-                  title={lang === 'ht' ? 'Detekte dire a otomatikman' : 'Auto-detect the duration'}
+                  title={lang === 'ht' ? 'Detekte dire a otomatikman' : inlineText(lang, 'Auto-detect the duration')}
                   style={{ flexShrink: 0 }}
                 >
                   {detectStatus === 'detecting' ? (
@@ -333,7 +334,7 @@ export default function MusicUploadModal({ onClose, onSuccess, lang, showToast, 
                   ) : (
                     <i className="fas fa-wand-magic-sparkles" aria-hidden="true" />
                   )}
-                  <span>{lang === 'ht' ? 'Detekte' : 'Detect'}</span>
+                  <span>{lang === 'ht' ? 'Detekte' : inlineText(lang, 'Detect')}</span>
                 </button>
               </div>
               <HelpTip help={{
@@ -345,11 +346,11 @@ export default function MusicUploadModal({ onClose, onSuccess, lang, showToast, 
 
           <FormSection
             icon="fa-hashtag"
-            title={lang === 'ht' ? 'Dekouvèt' : 'Discovery'}
-            hint={lang === 'ht' ? 'Hashtags yo alimante trending sou Explore.' : 'Hashtags feed trending on Explore.'}
+            title={lang === 'ht' ? 'Dekouvèt' : inlineText(lang, 'Discovery')}
+            hint={lang === 'ht' ? 'Hashtags yo alimante trending sou Explore.' : inlineText(lang, 'Hashtags feed trending on Explore.')}
           >
-            <FormField label={lang === 'ht' ? 'Hashtags' : 'Hashtags'}
-              hint={lang === 'ht' ? 'Separe ak espas — #Kreyol #Music' : 'Separate with spaces — #Kreyol #Music'}>
+            <FormField label={lang === 'ht' ? 'Hashtags' : inlineText(lang, 'Hashtags')}
+              hint={lang === 'ht' ? 'Separe ak espas — #Kreyol #Music' : inlineText(lang, 'Separate with spaces — #Kreyol #Music')}>
               <div className={styles.inputWithHelp}>
                 <input className={styles.input} value={form.hashtags}
                   onChange={(e) => handleChange('hashtags', e.target.value)}
@@ -361,26 +362,26 @@ export default function MusicUploadModal({ onClose, onSuccess, lang, showToast, 
 
           <FormSection
             icon="fa-image"
-            title={lang === 'ht' ? 'Kouvèti & Preview' : 'Cover & Preview'}
-            hint={lang === 'ht' ? 'Imaj kouvèti a oblije; preview odyo a opsyonèl.' : 'Cover image is required; audio preview is optional.'}
+            title={lang === 'ht' ? 'Kouvèti & Preview' : inlineText(lang, 'Cover & Preview')}
+            hint={lang === 'ht' ? 'Imaj kouvèti a oblije; preview odyo a opsyonèl.' : inlineText(lang, 'Cover image is required; audio preview is optional.')}
           >
             <FieldTip>
               {lang === 'ht'
                 ? 'Chak lyen ou mete a gen yon preview anba a — tcheke l anvan ou sove!'
-                : 'Every link you add has a live preview below — check it before saving!'}
+                : inlineText(lang, 'Every link you add has a live preview below — check it before saving!')}
             </FieldTip>
             <ImageUrlField
-              label={lang === 'ht' ? 'URL Kouvèti' : 'Cover URL'}
+              label={lang === 'ht' ? 'URL Kouvèti' : inlineText(lang, 'Cover URL')}
               value={form.cover_url}
               onChange={(v) => handleChange('cover_url', v)}
               required
               error={errors.cover_url}
               placeholder="https://example.com/cover.jpg"
               lang={lang}
-              hint={lang === 'ht' ? 'URL DIRÈK imaj kouvèti a (.jpg, .png, .webp)' : 'Direct cover image URL (.jpg, .png, .webp)'}
+              hint={lang === 'ht' ? 'URL DIRÈK imaj kouvèti a (.jpg, .png, .webp)' : inlineText(lang, 'Direct cover image URL (.jpg, .png, .webp)')}
             />
-            <FormField label={lang === 'ht' ? 'URL Preview' : 'Preview URL'}
-              hint={lang === 'ht' ? 'Lyen dirèk nan fichye odyo a (MP3, OGG) — opsyonèl' : 'Direct audio file link (MP3, OGG) — optional'}>
+            <FormField label={lang === 'ht' ? 'URL Preview' : inlineText(lang, 'Preview URL')}
+              hint={lang === 'ht' ? 'Lyen dirèk nan fichye odyo a (MP3, OGG) — opsyonèl' : inlineText(lang, 'Direct audio file link (MP3, OGG) — optional')}>
               <div className={styles.inputWithHelp}>
                 <input className={styles.input} value={form.preview_url}
                   onChange={(e) => handleChange('preview_url', e.target.value)}
@@ -389,7 +390,7 @@ export default function MusicUploadModal({ onClose, onSuccess, lang, showToast, 
               </div>
             </FormField>
             <MediaUrlField
-              label={lang === 'ht' ? 'URL Videyo' : 'Video URL'}
+              label={lang === 'ht' ? 'URL Videyo' : inlineText(lang, 'Video URL')}
               value={form.video_url}
               onChange={(v) => handleChange('video_url', v)}
               kind="video"
@@ -400,24 +401,24 @@ export default function MusicUploadModal({ onClose, onSuccess, lang, showToast, 
               hint={videoDetectStatus === 'ok'
                 ? (lang === 'ht' ? `Dire videyo a: ${videoDetectedDuration} ✓` : `Video duration: ${videoDetectedDuration} ✓`)
                 : videoDetectStatus === 'failed'
-                  ? (lang === 'ht' ? 'Pa t kapab detekte dire a — antre l manyèlman si li nesesè' : 'Could not detect the duration — enter it manually if needed')
+                  ? (lang === 'ht' ? 'Pa t kapab detekte dire a — antre l manyèlman si li nesesè' : inlineText(lang, 'Could not detect the duration — enter it manually if needed'))
                   : videoDetectStatus === 'detecting'
-                    ? (lang === 'ht' ? 'Ap detekte dire videyo a...' : 'Detecting video duration...')
-                    : (lang === 'ht' ? 'YouTube, Vimeo oswa fichye MP4/WebM — jwe preview anba a' : 'YouTube, Vimeo or direct MP4/WebM — preview plays below')}
+                    ? (lang === 'ht' ? 'Ap detekte dire videyo a...' : inlineText(lang, 'Detecting video duration...'))
+                    : (lang === 'ht' ? 'YouTube, Vimeo oswa fichye MP4/WebM — jwe preview anba a' : inlineText(lang, 'YouTube, Vimeo or direct MP4/WebM — preview plays below'))}
             />
           </FormSection>
         </LoadingOverlay>
         <div className={styles.actions}>
           <button type="button" className="btn-secondary" onClick={onClose} disabled={loading}>
-            {lang === 'ht' ? 'Anile' : 'Cancel'}
+            {lang === 'ht' ? 'Anile' : inlineText(lang, 'Cancel')}
           </button>
           <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? (
-              <><i className="fas fa-spinner fa-spin" /> {lang === 'ht' ? 'Ap sove...' : 'Saving...'}</>
+              <><i className="fas fa-spinner fa-spin" /> {lang === 'ht' ? 'Ap sove...' : inlineText(lang, 'Saving...')}</>
             ) : (
               <><i className={`fas ${isEdit ? 'fa-save' : 'fa-upload'}`} /> {isEdit
-                ? (lang === 'ht' ? 'Mete ajou' : 'Update')
-                : (lang === 'ht' ? 'Ajoute Mizik' : 'Add Track')}</>
+                ? (lang === 'ht' ? 'Mete ajou' : inlineText(lang, 'Update'))
+                : (lang === 'ht' ? 'Ajoute Mizik' : inlineText(lang, 'Add Track'))}</>
             )}
           </button>
         </div>

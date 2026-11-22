@@ -20,6 +20,7 @@ import { tiktokService } from '../../services/tiktokService';
 import TikTokPostStatus from './TikTokPostStatus';
 import { TikTokPublishModal } from './modals';
 import styles from './TikTokConnect.module.css';
+import { inlineText } from '../../utils/inlineI18n';
 
 // Localized copy (ht primary — plan C.5). Fallback keys follow the `t.x || 'default'`
 // convention used across Creator Studio.
@@ -343,7 +344,7 @@ export default function TikTokConnect({ lang = 'en', showToast }) {
               {posts.slice(0, 10).map((p) => (
                 <li key={p.id} className={styles.postItem}>
                   <span className={styles.postTitle}>
-                    {p.title || (lang === 'ht' ? '(san tit)' : '(untitled)')}
+                    {p.title || (lang === 'ht' ? '(san tit)' : inlineText(lang, '(untitled)'))}
                   </span>
                   <TikTokPostStatus post={p} lang={lang} onUpdate={onPostUpdate} />
                 </li>

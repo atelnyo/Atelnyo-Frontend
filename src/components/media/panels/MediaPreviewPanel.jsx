@@ -11,6 +11,7 @@ import ImageViewer from '../ImageViewer';
 import AISuggestion from '../AISuggestion';
 import MediaTypeIcon from '../MediaIconography';
 import VideoEmbedFrame from '../VideoEmbedFrame';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function MediaPreviewPanel({ media, lang = 'en', className = '' }) {
   const item = media || {};
@@ -24,7 +25,7 @@ export default function MediaPreviewPanel({ media, lang = 'en', className = '' }
     return (
       <div className={`media-panel-preview media-panel-empty-preview ${className}`}>
         <MediaTypeIcon kind="image" size={42} color="#94a3b8" />
-        <p>{isHt ? 'Pa gen URL pou_preview' : 'No URL to preview'}</p>
+        <p>{isHt ? 'Pa gen URL pou_preview' : inlineText(lang, 'No URL to preview')}</p>
       </div>
     );
   }
@@ -54,10 +55,10 @@ export default function MediaPreviewPanel({ media, lang = 'en', className = '' }
         {mediaType === 'document' && (
           <div className="inspector-preview-file">
             <MediaTypeIcon kind="document" size={48} color="#f59e0b" />
-            <p>{url.split('/').pop() || (isHt ? 'Dokiman' : 'Document')}</p>
+            <p>{url.split('/').pop() || (isHt ? 'Dokiman' : inlineText(lang, 'Document'))}</p>
             <a href={url} target="_blank" rel="noopener noreferrer" className="btn-secondary">
               <i className="fas fa-external-link-alt" />
-              {isHt ? 'Louvri' : 'Open'}
+              {isHt ? 'Louvri' : inlineText(lang, 'Open')}
             </a>
           </div>
         )}
@@ -67,7 +68,7 @@ export default function MediaPreviewPanel({ media, lang = 'en', className = '' }
             <p>{url.split('/').pop() || '—'}</p>
             <a href={url} target="_blank" rel="noopener noreferrer" className="btn-secondary">
               <i className="fas fa-external-link-alt" />
-              {isHt ? 'Louvri' : 'Open'}
+              {isHt ? 'Louvri' : inlineText(lang, 'Open')}
             </a>
           </div>
         )}

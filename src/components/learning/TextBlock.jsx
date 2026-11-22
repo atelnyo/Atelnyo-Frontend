@@ -9,6 +9,7 @@
  */
 import React, { useState, useMemo } from 'react';
 import styles from './learning.module.css';
+import { inlineText } from '../../utils/inlineI18n';
 
 /**
  * Parse a single line of inline markdown into React elements.
@@ -199,7 +200,7 @@ function ParagraphBlock({ text, index }) {
 
 export default function TextBlock({ block, lang = 'en', reportComplete }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
   const [readDone, setReadDone] = useState(false);
 
   // Split content into paragraphs (double newline) and render with markdown

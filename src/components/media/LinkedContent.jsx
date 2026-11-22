@@ -5,6 +5,7 @@
  * Marketplace, Portfolio, Spotlight, CMS
  */
 import React from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 const MODULE_ICONS = {
   course: 'fa-graduation-cap',
@@ -45,7 +46,7 @@ export default function LinkedContent({ usages = [], lang = 'en', className = ''
     return (
       <div className="linked-content-empty">
         <i className="fas fa-unlink" />
-        <p>{isHt ? 'Medya sa pa itilize okenn kote.' : 'This media is not used anywhere.'}</p>
+        <p>{isHt ? 'Medya sa pa itilize okenn kote.' : inlineText(lang, 'This media is not used anywhere.')}</p>
       </div>
     );
   }
@@ -54,7 +55,7 @@ export default function LinkedContent({ usages = [], lang = 'en', className = ''
     <div className={`linked-content ${className}`}>
       <h4 className="linked-content-title">
         <i className="fas fa-link" />
-        {isHt ? 'Itilize nan' : 'Used in'} ({usages.length})
+        {isHt ? 'Itilize nan' : inlineText(lang, 'Used in')} ({usages.length})
       </h4>
       <div className="linked-content-list">
         {usages.map((usage, i) => {
@@ -83,7 +84,7 @@ export default function LinkedContent({ usages = [], lang = 'en', className = ''
                   target="_blank"
                   rel="noopener noreferrer"
                   className="linked-content-open"
-                  title={isHt ? 'Louvri' : 'Open'}
+                  title={isHt ? 'Louvri' : inlineText(lang, 'Open')}
                 >
                   <i className="fas fa-external-link-alt" />
                 </a>

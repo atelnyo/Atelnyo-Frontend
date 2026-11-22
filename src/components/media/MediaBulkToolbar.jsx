@@ -20,6 +20,7 @@
  * disabled (visual cue) rather than missing.
  */
 import React, { useState, useRef, useEffect } from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 const ACTION_GROUPS = [
   {
@@ -181,23 +182,23 @@ export default function MediaBulkToolbar({
     <div
       className={`media-bulk-toolbar ${className}`}
       role="toolbar"
-      aria-label={isHt ? 'Aksyon an mas' : 'Bulk actions'}
+      aria-label={isHt ? 'Aksyon an mas' : inlineText(lang, 'Bulk actions')}
     >
       <div className="media-bulk-toolbar-summary">
         <span className="media-bulk-toolbar-count">
           <i className="fas fa-check-square" aria-hidden="true" />
           <strong>{selectedCount}</strong>{' '}
-          {isHt ? 'chwazi' : 'selected'}
+          {isHt ? 'chwazi' : inlineText(lang, 'selected')}
         </span>
         {onClearSelection && (
           <button
             type="button"
             className="media-bulk-toolbar-clear"
             onClick={(e) => { e.stopPropagation(); onClearSelection(); }}
-            aria-label={isHt ? 'Netwaye seleksyon' : 'Clear selection'}
+            aria-label={isHt ? 'Netwaye seleksyon' : inlineText(lang, 'Clear selection')}
           >
             <i className="fas fa-times" aria-hidden="true" />
-            {isHt ? 'Netwaye' : 'Clear'}
+            {isHt ? 'Netwaye' : inlineText(lang, 'Clear')}
           </button>
         )}
       </div>
@@ -240,7 +241,7 @@ export default function MediaBulkToolbar({
           className="media-bulk-toolbar-form"
           onSubmit={submitMove}
           role="dialog"
-          aria-label={isHt ? 'Deplase nan yon koleksyon' : 'Move to a collection'}
+          aria-label={isHt ? 'Deplase nan yon koleksyon' : inlineText(lang, 'Move to a collection')}
           // Skip ARIA dialog role's focus-trap expectations because this
           // is an INLINE form (not modal); Escape + return-to-trigger
           // provides the same escape affordance without trapping Tab.
@@ -250,9 +251,9 @@ export default function MediaBulkToolbar({
               className="media-bulk-toolbar-form-select"
               value=""
               onChange={(e) => { if (e.target.value) setMoveName(e.target.value); }}
-              aria-label={isHt ? 'Chwazi yon koleksyon egzistan' : 'Pick an existing collection'}
+              aria-label={isHt ? 'Chwazi yon koleksyon egzistan' : inlineText(lang, 'Pick an existing collection')}
             >
-              <option value="">{isHt ? 'Chwazi koleksyon...' : 'Pick a collection…'}</option>
+              <option value="">{isHt ? 'Chwazi koleksyon...' : inlineText(lang, 'Pick a collection…')}</option>
               {collections.map((c) => (
                 <option key={c.id || c.name} value={c.name}>{c.name}</option>
               ))}
@@ -262,31 +263,31 @@ export default function MediaBulkToolbar({
             ref={moveInputRef}
             type="text"
             className="media-bulk-toolbar-form-input"
-            placeholder={isHt ? 'Oswa tape nouvo non koleksyon...' : 'Or type a new collection name…'}
+            placeholder={isHt ? 'Oswa tape nouvo non koleksyon...' : inlineText(lang, 'Or type a new collection name…')}
             value={moveName}
             onChange={(e) => setMoveName(e.target.value)}
             maxLength={64}
             disabled={!moveName.trim() && false /* always enabled but guarded on submit */}
-            aria-label={isHt ? 'Non koleksyon' : 'Collection name'}
+            aria-label={isHt ? 'Non koleksyon' : inlineText(lang, 'Collection name')}
             aria-invalid={false}
           />
           <button
             type="submit"
             className="media-bulk-toolbar-form-confirm"
             disabled={!moveName.trim()}
-            aria-label={isHt ? 'Konfime deplasman' : 'Confirm move'}
+            aria-label={isHt ? 'Konfime deplasman' : inlineText(lang, 'Confirm move')}
           >
             <i className="fas fa-check" aria-hidden="true" />
-            {isHt ? 'Konfime' : 'Confirm'}
+            {isHt ? 'Konfime' : inlineText(lang, 'Confirm')}
           </button>
           <button
             type="button"
             className="media-bulk-toolbar-form-cancel"
             onClick={handleClose}
-            aria-label={isHt ? 'Anile' : 'Cancel'}
+            aria-label={isHt ? 'Anile' : inlineText(lang, 'Cancel')}
           >
             <i className="fas fa-times" aria-hidden="true" />
-            {isHt ? 'Anile' : 'Cancel'}
+            {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
           </button>
         </form>
       )}
@@ -297,9 +298,9 @@ export default function MediaBulkToolbar({
           className="media-bulk-toolbar-form"
           onSubmit={submitVisibility}
           role="dialog"
-          aria-label={isHt ? 'Chanje vizibilite' : 'Change visibility'}
+          aria-label={isHt ? 'Chanje vizibilite' : inlineText(lang, 'Change visibility')}
         >
-          <div className="media-bulk-toolbar-form-chips" role="radiogroup" aria-label={isHt ? 'Vizibilite' : 'Visibility'}>
+          <div className="media-bulk-toolbar-form-chips" role="radiogroup" aria-label={isHt ? 'Vizibilite' : inlineText(lang, 'Visibility')}>
             {VISIBILITY_PRESETS.filter((v) => visibilities.includes(v.value)).map((v) => (
               <button
                 key={v.value}
@@ -333,19 +334,19 @@ export default function MediaBulkToolbar({
             type="submit"
             className="media-bulk-toolbar-form-confirm"
             disabled={!visibilities.includes(visibilityChoice)}
-            aria-label={isHt ? 'Konfime chanjman' : 'Confirm change'}
+            aria-label={isHt ? 'Konfime chanjman' : inlineText(lang, 'Confirm change')}
           >
             <i className="fas fa-check" aria-hidden="true" />
-            {isHt ? 'Konfime' : 'Confirm'}
+            {isHt ? 'Konfime' : inlineText(lang, 'Confirm')}
           </button>
           <button
             type="button"
             className="media-bulk-toolbar-form-cancel"
             onClick={handleClose}
-            aria-label={isHt ? 'Anile' : 'Cancel'}
+            aria-label={isHt ? 'Anile' : inlineText(lang, 'Cancel')}
           >
             <i className="fas fa-times" aria-hidden="true" />
-            {isHt ? 'Anile' : 'Cancel'}
+            {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
           </button>
         </form>
       )}

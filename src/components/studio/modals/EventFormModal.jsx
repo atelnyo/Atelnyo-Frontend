@@ -11,6 +11,7 @@ import { communityEventsService, communitiesService } from '../../../services/ap
 import { StudioModal, FormField, LoadingOverlay, MediaUrlField, HelpTip, HELP_COPY } from './shared';
 import { parseHashtags, hashtagsToInput } from '../../../utils/hashtags';
 import styles from './modals.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 function toLocalInput(iso) {
   if (!iso) return '';
@@ -59,16 +60,16 @@ export default function EventFormModal({ onClose, onSuccess, lang, showToast, ev
 
   const validate = () => {
     const errs = {};
-    if (!form.title.trim()) errs.title = lang === 'ht' ? 'Tit oblije' : 'Title required';
-    if (!form.community) errs.community = lang === 'ht' ? 'Chwazi yon kominote' : 'Pick a community';
-    if (!form.start_time) errs.start_time = lang === 'ht' ? 'Dat kòmansman oblije' : 'Start time required';
-    if (!form.end_time) errs.end_time = lang === 'ht' ? 'Dat fen oblije' : 'End time required';
+    if (!form.title.trim()) errs.title = lang === 'ht' ? 'Tit oblije' : inlineText(lang, 'Title required');
+    if (!form.community) errs.community = lang === 'ht' ? 'Chwazi yon kominote' : inlineText(lang, 'Pick a community');
+    if (!form.start_time) errs.start_time = lang === 'ht' ? 'Dat kòmansman oblije' : inlineText(lang, 'Start time required');
+    if (!form.end_time) errs.end_time = lang === 'ht' ? 'Dat fen oblije' : inlineText(lang, 'End time required');
     if (form.start_time && form.end_time && new Date(form.end_time) <= new Date(form.start_time)) {
-      errs.end_time = lang === 'ht' ? 'Fen dwe apre kòmansman' : 'End must be after start';
+      errs.end_time = lang === 'ht' ? 'Fen dwe apre kòmansman' : inlineText(lang, 'End must be after start');
     }
     if (!form.is_free) {
       if (form.price === '' || !Number.isFinite(Number(form.price)) || Number(form.price) <= 0) {
-        errs.price = lang === 'ht' ? 'Pri oblije (pou evènman peye)' : 'Price required for paid events';
+        errs.price = lang === 'ht' ? 'Pri oblije (pou evènman peye)' : inlineText(lang, 'Price required for paid events');
       }
     }
     return errs;
@@ -107,8 +108,8 @@ export default function EventFormModal({ onClose, onSuccess, lang, showToast, ev
       }
       showToast?.(
         isEdit
-          ? (lang === 'ht' ? '✅ Evènman mete ajou!' : '✅ Event updated!')
-          : (lang === 'ht' ? '✅ Evènman kreye!' : '✅ Event created!'),
+          ? (lang === 'ht' ? '✅ Evènman mete ajou!' : inlineText(lang, '✅ Event updated!'))
+          : (lang === 'ht' ? '✅ Evènman kreye!' : inlineText(lang, '✅ Event created!')),
         'check-circle',
       );
       onSuccess?.(); onClose?.();
@@ -118,7 +119,7 @@ export default function EventFormModal({ onClose, onSuccess, lang, showToast, ev
         || err?.response?.data?.start_time?.[0]
         || err?.response?.data?.community?.[0]
         || err?.message
-        || (lang === 'ht' ? 'Pa t kapab sove evènman an.' : 'Could not save event.');
+        || (lang === 'ht' ? 'Pa t kapab sove evènman an.' : inlineText(lang, 'Could not save event.'));
       setErrors((e) => ({ ...e, _api: detail }));
       showToast?.(detail, 'circle-exclamation');
     } finally { setLoading(false); }
@@ -127,45 +128,45 @@ export default function EventFormModal({ onClose, onSuccess, lang, showToast, ev
   return (
     <StudioModal onClose={onClose} icon="fa-calendar-check" wide
       title={isEdit
-        ? (lang === 'ht' ? 'Modifye Evènman' : 'Edit Event')
-        : (lang === 'ht' ? 'Kreye Evènman' : 'Create Event')}
+        ? (lang === 'ht' ? 'Modifye Evènman' : inlineText(lang, 'Edit Event'))
+        : (lang === 'ht' ? 'Kreye Evènman' : inlineText(lang, 'Create Event'))}
       subtitle={lang === 'ht'
         ? 'Pibliye yon evènman nan yon kominote'
-        : 'Publish an event in a community'}>
+        : inlineText(lang, 'Publish an event in a community')}>
       <form onSubmit={handleSubmit} className={styles.form}>
         {errors._api && <div className={styles.apiError} role="alert">{errors._api}</div>}
         <LoadingOverlay loading={loading}>
-          <FormField label={lang === 'ht' ? 'Tit' : 'Title'} required error={errors.title}>
+          <FormField label={lang === 'ht' ? 'Tit' : inlineText(lang, 'Title')} required error={errors.title}>
             <input className={styles.input} value={form.title}
               onChange={(e) => handleChange('title', e.target.value)}
-              placeholder={lang === 'ht' ? 'Antre tit evènman an' : 'Enter event title'}
+              placeholder={lang === 'ht' ? 'Antre tit evènman an' : inlineText(lang, 'Enter event title')}
               maxLength={200} autoFocus />
           </FormField>
-          <FormField label={lang === 'ht' ? 'Kominote' : 'Community'} required error={errors.community}
+          <FormField label={lang === 'ht' ? 'Kominote' : inlineText(lang, 'Community')} required error={errors.community}
             hint={!loadingCommunities && communities.length === 0
               ? (lang === 'ht'
                 ? 'Ou poko gen kominote — kreye yon kominote anvan ou pibliye yon evènman.'
-                : 'No communities yet — create a community before publishing an event.')
+                : inlineText(lang, 'No communities yet — create a community before publishing an event.'))
               : undefined}>
             <select className={styles.input} value={form.community}
               onChange={(e) => handleChange('community', e.target.value)}
               disabled={loadingCommunities || communities.length === 0}>
               <option value="">
-                {lang === 'ht' ? 'Chwazi yon kominote...' : 'Select a community...'}
+                {lang === 'ht' ? 'Chwazi yon kominote...' : inlineText(lang, 'Select a community...')}
               </option>
               {communities.map((c) => (
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
             </select>
           </FormField>
-          <FormField label={lang === 'ht' ? 'Deskripsyon' : 'Description'}>
+          <FormField label={lang === 'ht' ? 'Deskripsyon' : inlineText(lang, 'Description')}>
             <textarea className={styles.textarea} value={form.description}
               onChange={(e) => handleChange('description', e.target.value)}
-              placeholder={lang === 'ht' ? 'Dekri evènman an...' : 'Describe the event...'}
+              placeholder={lang === 'ht' ? 'Dekri evènman an...' : inlineText(lang, 'Describe the event...')}
               rows={4} maxLength={3000} />
           </FormField>
-          <FormField label={lang === 'ht' ? 'Hashtags' : 'Hashtags'}
-            hint={lang === 'ht' ? 'Separe ak espas — #Atelnyo #Kreyol (alimante trending)' : 'Separate with spaces — #Atelnyo #Kreyol (feeds trending)'}>
+          <FormField label={lang === 'ht' ? 'Hashtags' : inlineText(lang, 'Hashtags')}
+            hint={lang === 'ht' ? 'Separe ak espas — #Atelnyo #Kreyol (alimante trending)' : inlineText(lang, 'Separate with spaces — #Atelnyo #Kreyol (feeds trending)')}>
             <div className={styles.inputWithHelp}>
               <input className={styles.input} value={form.hashtags}
                 onChange={(e) => handleChange('hashtags', e.target.value)}
@@ -174,22 +175,22 @@ export default function EventFormModal({ onClose, onSuccess, lang, showToast, ev
             </div>
           </FormField>
           <div className={styles.row}>
-            <FormField label={lang === 'ht' ? 'Kòmansman' : 'Starts'} required error={errors.start_time}>
+            <FormField label={lang === 'ht' ? 'Kòmansman' : inlineText(lang, 'Starts')} required error={errors.start_time}>
               <input className={styles.input} type="datetime-local" value={form.start_time}
                 onChange={(e) => handleChange('start_time', e.target.value)} />
             </FormField>
-            <FormField label={lang === 'ht' ? 'Fen' : 'Ends'} required error={errors.end_time}>
+            <FormField label={lang === 'ht' ? 'Fen' : inlineText(lang, 'Ends')} required error={errors.end_time}>
               <input className={styles.input} type="datetime-local" value={form.end_time}
                 onChange={(e) => handleChange('end_time', e.target.value)} />
             </FormField>
           </div>
           <div className={styles.row}>
-            <FormField label={lang === 'ht' ? 'Kote' : 'Location'}>
+            <FormField label={lang === 'ht' ? 'Kote' : inlineText(lang, 'Location')}>
               <input className={styles.input} value={form.location}
                 onChange={(e) => handleChange('location', e.target.value)}
-                placeholder={lang === 'ht' ? 'Potoprens, Ayiti' : 'Port-au-Prince, Haiti'} />
+                placeholder={lang === 'ht' ? 'Potoprens, Ayiti' : inlineText(lang, 'Port-au-Prince, Haiti')} />
             </FormField>
-            <FormField label={lang === 'ht' ? 'Fuseau' : 'Timezone'}>
+            <FormField label={lang === 'ht' ? 'Fuseau' : inlineText(lang, 'Timezone')}>
               <input className={styles.input} value={form.timezone}
                 onChange={(e) => handleChange('timezone', e.target.value)}
                 maxLength={64} />
@@ -197,9 +198,9 @@ export default function EventFormModal({ onClose, onSuccess, lang, showToast, ev
           </div>
           <div className={styles.toggleRow}>
             <span className={styles.toggleLabel}>
-              {lang === 'ht' ? 'Evènman an liy' : 'Online event'}
+              {lang === 'ht' ? 'Evènman an liy' : inlineText(lang, 'Online event')}
               <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary, #888)', fontWeight: 400 }}>
-                {lang === 'ht' ? 'Moun kapab patisipe a distans' : 'People can join remotely'}
+                {lang === 'ht' ? 'Moun kapab patisipe a distans' : inlineText(lang, 'People can join remotely')}
               </span>
             </span>
             <button
@@ -208,13 +209,13 @@ export default function EventFormModal({ onClose, onSuccess, lang, showToast, ev
               onClick={() => handleChange('is_online', !form.is_online)}
               role="switch"
               aria-checked={form.is_online}
-              aria-label={lang === 'ht' ? 'Evènman an liy' : 'Online event'}
+              aria-label={lang === 'ht' ? 'Evènman an liy' : inlineText(lang, 'Online event')}
             >
               <span className={styles.toggleKnob} />
             </button>
           </div>
           {form.is_online && (
-            <FormField label={lang === 'ht' ? 'Liy evènman (URL)' : 'Online event URL'}>
+            <FormField label={lang === 'ht' ? 'Liy evènman (URL)' : inlineText(lang, 'Online event URL')}>
               <div className={styles.inputWithHelp}>
                 <input className={styles.input} value={form.online_url}
                   onChange={(e) => handleChange('online_url', e.target.value)}
@@ -227,14 +228,14 @@ export default function EventFormModal({ onClose, onSuccess, lang, showToast, ev
             </FormField>
           )}
           <div className={styles.row}>
-            <FormField label={lang === 'ht' ? 'Maks patisipan' : 'Max attendees'}>
+            <FormField label={lang === 'ht' ? 'Maks patisipan' : inlineText(lang, 'Max attendees')}>
               <input className={styles.input} type="number" min="0"
                 value={form.max_attendees}
                 onChange={(e) => handleChange('max_attendees', e.target.value)}
-                placeholder={lang === 'ht' ? 'San limit' : 'Unlimited'} />
+                placeholder={lang === 'ht' ? 'San limit' : inlineText(lang, 'Unlimited')} />
             </FormField>
             <MediaUrlField
-              label={lang === 'ht' ? 'URL kouvèti' : 'Cover URL'}
+              label={lang === 'ht' ? 'URL kouvèti' : inlineText(lang, 'Cover URL')}
               value={form.cover_url}
               onChange={(v) => handleChange('cover_url', v)}
               kind="auto"
@@ -244,7 +245,7 @@ export default function EventFormModal({ onClose, onSuccess, lang, showToast, ev
             />
           </div>
           <MediaUrlField
-            label={lang === 'ht' ? 'URL trailer' : 'Trailer URL'}
+            label={lang === 'ht' ? 'URL trailer' : inlineText(lang, 'Trailer URL')}
             value={form.trailer_url}
             onChange={(v) => handleChange('trailer_url', v)}
             kind="video"
@@ -254,7 +255,7 @@ export default function EventFormModal({ onClose, onSuccess, lang, showToast, ev
           />
           <div className={styles.toggleRow}>
             <span className={styles.toggleLabel}>
-              {lang === 'ht' ? 'Gratis' : 'Free event'}
+              {lang === 'ht' ? 'Gratis' : inlineText(lang, 'Free event')}
             </span>
             <button
               type="button"
@@ -262,20 +263,20 @@ export default function EventFormModal({ onClose, onSuccess, lang, showToast, ev
               onClick={() => handleChange('is_free', !form.is_free)}
               role="switch"
               aria-checked={form.is_free}
-              aria-label={lang === 'ht' ? 'Gratis' : 'Free event'}
+              aria-label={lang === 'ht' ? 'Gratis' : inlineText(lang, 'Free event')}
             >
               <span className={styles.toggleKnob} />
             </button>
           </div>
           {!form.is_free && (
             <div className={styles.row}>
-              <FormField label={lang === 'ht' ? 'Pri ($)' : 'Price ($)'} required error={errors.price}>
+              <FormField label={lang === 'ht' ? 'Pri ($)' : inlineText(lang, 'Price ($)')} required error={errors.price}>
                 <input className={styles.input} type="number" min="0.01" step="0.01"
                   value={form.price}
                   onChange={(e) => handleChange('price', e.target.value)}
                   placeholder="10" />
               </FormField>
-              <FormField label={lang === 'ht' ? 'Deviz' : 'Currency'}>
+              <FormField label={lang === 'ht' ? 'Deviz' : inlineText(lang, 'Currency')}>
                 <input className={styles.input} value={form.currency}
                   onChange={(e) => handleChange('currency', e.target.value)}
                   maxLength={3} placeholder="USD" />
@@ -285,15 +286,15 @@ export default function EventFormModal({ onClose, onSuccess, lang, showToast, ev
         </LoadingOverlay>
         <div className={styles.actions}>
           <button type="button" className="btn-secondary" onClick={onClose} disabled={loading}>
-            {lang === 'ht' ? 'Anile' : 'Cancel'}
+            {lang === 'ht' ? 'Anile' : inlineText(lang, 'Cancel')}
           </button>
           <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? (
-              <><i className="fas fa-spinner fa-spin" /> {lang === 'ht' ? 'Ap sove...' : 'Saving...'}</>
+              <><i className="fas fa-spinner fa-spin" /> {lang === 'ht' ? 'Ap sove...' : inlineText(lang, 'Saving...')}</>
             ) : (
               <><i className="fas fa-save" /> {isEdit
-                ? (lang === 'ht' ? 'Mete ajou' : 'Update')
-                : (lang === 'ht' ? 'Kreye Evènman' : 'Create Event')}</>
+                ? (lang === 'ht' ? 'Mete ajou' : inlineText(lang, 'Update'))
+                : (lang === 'ht' ? 'Kreye Evènman' : inlineText(lang, 'Create Event'))}</>
             )}
           </button>
         </div>

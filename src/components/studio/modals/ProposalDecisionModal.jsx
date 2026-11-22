@@ -24,6 +24,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { proposalService } from '../../../services/api';
 import { StudioModal, FormField, LoadingOverlay } from './shared';
 import styles from './modals.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const formatDate = (iso) => {
   try {
@@ -72,7 +73,7 @@ export default function ProposalDecisionModal({
         err?.response?.data?.detail
         || (lang === 'ht'
           ? 'Pa t kapab fè aksyon an. Eseye ankò.'
-          : 'Could not complete this action. Please try again.'),
+          : inlineText(lang, 'Could not complete this action. Please try again.')),
       );
       setLoading(false);
     }
@@ -86,8 +87,8 @@ export default function ProposalDecisionModal({
       onClose={loading ? undefined : onClose}
       icon={isAccept ? 'fa-check-circle' : 'fa-xmark-circle'}
       title={isAccept
-        ? (lang === 'ht' ? 'Aksepte Proposal' : 'Accept Proposal')
-        : (lang === 'ht' ? 'Rejte Proposal' : 'Reject Proposal')}
+        ? (lang === 'ht' ? 'Aksepte Proposal' : inlineText(lang, 'Accept Proposal'))
+        : (lang === 'ht' ? 'Rejte Proposal' : inlineText(lang, 'Reject Proposal'))}
       subtitle={proposal?.job_title || ''}
     >
       <div className={styles.form}>
@@ -139,7 +140,7 @@ export default function ProposalDecisionModal({
                   }}
                 >
                   <i className="fas fa-badge-check" aria-hidden="true" />{' '}
-                  {lang === 'ht' ? 'Verifye' : 'Verified'}
+                  {lang === 'ht' ? 'Verifye' : inlineText(lang, 'Verified')}
                 </span>
               )}
             </div>
@@ -169,7 +170,7 @@ export default function ProposalDecisionModal({
             color: 'var(--text-secondary, #64748b)',
             marginBottom: 4,
           }}>
-            {lang === 'ht' ? 'Montan Bid la' : 'Bid amount'}
+            {lang === 'ht' ? 'Montan Bid la' : inlineText(lang, 'Bid amount')}
           </div>
           <div style={{
             fontSize: 'var(--text-4xl, 2rem)',
@@ -218,11 +219,11 @@ export default function ProposalDecisionModal({
         {/* ─── Client note ────────────────────────────────────── */}
         <FormField
           label={isAccept
-            ? (lang === 'ht' ? 'Nòt pou freelancer la (opsyonèl)' : 'Note for the freelancer (optional)')
-            : (lang === 'ht' ? 'Nòt rejtman (opsyonèl)' : 'Rejection note (optional)')}
+            ? (lang === 'ht' ? 'Nòt pou freelancer la (opsyonèl)' : inlineText(lang, 'Note for the freelancer (optional)'))
+            : (lang === 'ht' ? 'Nòt rejtman (opsyonèl)' : inlineText(lang, 'Rejection note (optional)'))}
           hint={isAccept
-            ? (lang === 'ht' ? 'Mesaj ou ap parèt sou proposal la.' : 'Your message will be visible on the proposal.')
-            : (lang === 'ht' ? 'Ede freelancer la konprann poukisa.' : 'Help the freelancer understand why.')}
+            ? (lang === 'ht' ? 'Mesaj ou ap parèt sou proposal la.' : inlineText(lang, 'Your message will be visible on the proposal.'))
+            : (lang === 'ht' ? 'Ede freelancer la konprann poukisa.' : inlineText(lang, 'Help the freelancer understand why.'))}
         >
           <textarea
             className={styles.textarea}
@@ -231,8 +232,8 @@ export default function ProposalDecisionModal({
             rows={3}
             maxLength={500}
             placeholder={isAccept
-              ? (lang === 'ht' ? 'Mèsi pou bid ou a!' : 'Thanks for your bid!')
-              : (lang === 'ht' ? 'Nou chwazi yon lòt kandidat...' : 'We chose another candidate...')}
+              ? (lang === 'ht' ? 'Mèsi pou bid ou a!' : inlineText(lang, 'Thanks for your bid!'))
+              : (lang === 'ht' ? 'Nou chwazi yon lòt kandidat...' : inlineText(lang, 'We chose another candidate...'))}
           />
         </FormField>
 
@@ -241,7 +242,7 @@ export default function ProposalDecisionModal({
             <i className="fas fa-triangle-exclamation" aria-hidden="true" />{' '}
             {lang === 'ht'
               ? 'Dènye plas la! Aksepte isit la ap rejte tout lòt òf ki sou ret yo otomatikman.'
-              : 'Last slot! Accepting here will auto-reject all other pending offers.'}
+              : inlineText(lang, 'Last slot! Accepting here will auto-reject all other pending offers.')}
           </div>
         )}
 
@@ -251,14 +252,14 @@ export default function ProposalDecisionModal({
         <LoadingOverlay loading={loading}>
           <div className={styles.actions}>
             <button type="button" className="btn-secondary" onClick={onClose} disabled={loading}>
-              {lang === 'ht' ? 'Retounen' : 'Go back'}
+              {lang === 'ht' ? 'Retounen' : inlineText(lang, 'Go back')}
             </button>
             {isAccept ? (
               <button type="button" className="btn-primary" onClick={handleConfirm} disabled={loading}>
                 {loading ? (
-                  <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {lang === 'ht' ? 'Ap kreye kontra...' : 'Creating contract...'}</>
+                  <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {lang === 'ht' ? 'Ap kreye kontra...' : inlineText(lang, 'Creating contract...')}</>
                 ) : (
-                  <><i className="fas fa-check" aria-hidden="true" /> {lang === 'ht' ? 'Aksepte & Kreye Kontra' : 'Accept & Create Contract'}</>
+                  <><i className="fas fa-check" aria-hidden="true" /> {lang === 'ht' ? 'Aksepte & Kreye Kontra' : inlineText(lang, 'Accept & Create Contract')}</>
                 )}
               </button>
             ) : (
@@ -269,9 +270,9 @@ export default function ProposalDecisionModal({
                 disabled={loading}
               >
                 {loading ? (
-                  <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {lang === 'ht' ? 'Ap rejte...' : 'Rejecting...'}</>
+                  <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {lang === 'ht' ? 'Ap rejte...' : inlineText(lang, 'Rejecting...')}</>
                 ) : (
-                  <><i className="fas fa-xmark" aria-hidden="true" /> {lang === 'ht' ? 'Rejte Proposal' : 'Reject Proposal'}</>
+                  <><i className="fas fa-xmark" aria-hidden="true" /> {lang === 'ht' ? 'Rejte Proposal' : inlineText(lang, 'Reject Proposal')}</>
                 )}
               </button>
             )}

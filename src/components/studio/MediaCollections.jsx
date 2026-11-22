@@ -10,6 +10,7 @@
  */
 import React, { useState } from 'react';
 import MediaCard from '../media/MediaCard';
+import { inlineText } from '../../utils/inlineI18n';
 
 const PREDEFINED_COLLECTIONS = [
   { id: 'course_assets', icon: 'fa-graduation-cap', en: 'Course Assets', ht: 'Ressous Kou' },
@@ -48,7 +49,7 @@ export default function MediaCollections({ lang = 'en', showToast, onBack }) {
     ]);
     setNewName('');
     setShowCreate(false);
-    showToast?.(isHt ? 'Koleksyon kreye!' : 'Collection created!', 'check');
+    showToast?.(isHt ? 'Koleksyon kreye!' : inlineText(lang, 'Collection created!'), 'check');
   };
 
   const toggleExpand = (id) => {
@@ -62,13 +63,13 @@ export default function MediaCollections({ lang = 'en', showToast, onBack }) {
       {/* Header */}
       <div className="hub-header">
         <button type="button" className="btn-secondary" onClick={onBack}>
-          <i className="fas fa-arrow-left" /> {isHt ? 'Retounen' : 'Back'}
+          <i className="fas fa-arrow-left" /> {isHt ? 'Retounen' : inlineText(lang, 'Back')}
         </button>
         <h2 className="studio-section-title" style={{ margin: 0 }}>
-          <i className="fas fa-folder" /> {isHt ? 'Koleksyon Medya' : 'Media Collections'}
+          <i className="fas fa-folder" /> {isHt ? 'Koleksyon Medya' : inlineText(lang, 'Media Collections')}
         </h2>
         <button type="button" className="btn-primary" onClick={() => setShowCreate(true)}>
-          <i className="fas fa-plus" /> {isHt ? 'Nouvo Koleksyon' : 'New Collection'}
+          <i className="fas fa-plus" /> {isHt ? 'Nouvo Koleksyon' : inlineText(lang, 'New Collection')}
         </button>
       </div>
 
@@ -78,17 +79,17 @@ export default function MediaCollections({ lang = 'en', showToast, onBack }) {
           <input
             type="text"
             className="field-input"
-            placeholder={isHt ? 'Non koleksyon...' : 'Collection name...'}
+            placeholder={isHt ? 'Non koleksyon...' : inlineText(lang, 'Collection name...')}
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') handleCreate(); }}
             autoFocus
           />
           <button type="button" className="btn-primary" onClick={handleCreate} disabled={!newName.trim()}>
-            {isHt ? 'Kreye' : 'Create'}
+            {isHt ? 'Kreye' : inlineText(lang, 'Create')}
           </button>
           <button type="button" className="btn-secondary" onClick={() => setShowCreate(false)}>
-            {isHt ? 'Anile' : 'Cancel'}
+            {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
           </button>
         </div>
       )}
@@ -110,7 +111,7 @@ export default function MediaCollections({ lang = 'en', showToast, onBack }) {
                   {isHt ? col.ht : col.en}
                 </span>
                 <span className="collection-card-count">
-                  {col.items.length} {isHt ? 'atik' : 'items'}
+                  {col.items.length} {isHt ? 'atik' : inlineText(lang, 'items')}
                 </span>
               </div>
               <i className={`fas fa-chevron-${col.expanded ? 'up' : 'down'} collection-card-arrow`} />
@@ -121,7 +122,7 @@ export default function MediaCollections({ lang = 'en', showToast, onBack }) {
                 {col.items.length === 0 ? (
                   <div className="collection-empty">
                     <i className="fas fa-inbox" />
-                    <p>{isHt ? 'Koleksyon sa a vid. Ajoute medya ladan l.' : 'This collection is empty. Add media to it.'}</p>
+                    <p>{isHt ? 'Koleksyon sa a vid. Ajoute medya ladan l.' : inlineText(lang, 'This collection is empty. Add media to it.')}</p>
                   </div>
                 ) : (
                   <div className="collection-items">

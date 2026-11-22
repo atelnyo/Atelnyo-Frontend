@@ -22,6 +22,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { companyProfileService } from '../../../services/api';
 import { StudioSkeleton, EmptyState, SectionHeader } from '../shared';
 import styles from './sections.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const EMPTY_MEMBER = { name: '', role: '', bio: '' };
 const EMPTY_OFFERING = { title: '', description: '', icon: 'fa-cube' };
@@ -94,7 +95,7 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.company_name.trim()) {
-      showToast?.(isHt ? 'Non konpanyi a obligatwa.' : 'Company name is required.', 'circle-exclamation');
+      showToast?.(isHt ? 'Non konpanyi a obligatwa.' : inlineText(lang, 'Company name is required.'), 'circle-exclamation');
       return;
     }
     setSaving(true);
@@ -116,15 +117,15 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
       }
       showToast?.(
         profile?.id
-          ? (isHt ? '✅ Pwofil mete ajou! Sou apwobasyon ankò si li te apwouve.' : '✅ Profile updated! Back to pending if it was approved.')
-          : (isHt ? '✅ Pwofil soumèt pou apwobasyon!' : '✅ Profile submitted for approval!'),
+          ? (isHt ? '✅ Pwofil mete ajou! Sou apwobasyon ankò si li te apwouve.' : inlineText(lang, '✅ Profile updated! Back to pending if it was approved.'))
+          : (isHt ? '✅ Pwofil soumèt pou apwobasyon!' : inlineText(lang, '✅ Profile submitted for approval!')),
         'check-circle',
       );
       await load();
     } catch (err) {
       const detail = err?.response?.data?.detail
         || err?.response?.data?.company_name?.[0]
-        || (isHt ? 'Pa t kapab sove pwofil la.' : 'Could not save the profile.');
+        || (isHt ? 'Pa t kapab sove pwofil la.' : inlineText(lang, 'Could not save the profile.'));
       showToast?.(detail, 'circle-exclamation');
     } finally {
       setSaving(false);
@@ -132,9 +133,9 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
   };
 
   const statusLabel = (status) => ({
-    pending: isHt ? 'Annatant apwobasyon' : 'Pending approval',
-    approved: isHt ? 'Apwouve — pibliye' : 'Approved — live',
-    rejected: isHt ? 'Rejete' : 'Rejected',
+    pending: isHt ? 'Annatant apwobasyon' : inlineText(lang, 'Pending approval'),
+    approved: isHt ? 'Apwouve — pibliye' : inlineText(lang, 'Approved — live'),
+    rejected: isHt ? 'Rejete' : inlineText(lang, 'Rejected'),
   }[status] || status);
 
   const statusColor = {
@@ -149,7 +150,7 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
     <div className={styles.section}>
       <SectionHeader
         icon="fa-building"
-        title={t?.company_profile || (isHt ? 'Pwofil Konpanyi' : 'Company Profile')}
+        title={t?.company_profile || (isHt ? 'Pwofil Konpanyi' : inlineText(lang, 'Company Profile'))}
         lang={lang}
         help={{
           ht: 'Yon paj konpanyi dedye pou brand ou — non, tagline, logo, istwa, ekip ak pwodwi/sèvis. Soumèt li epi administratè a ap apwouve l anvan li pibliye.',
@@ -157,7 +158,7 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
         }}
         tip={isHt
           ? 'Modifye yon pwofil apwouve remèt l annatant apwobasyon ankò.'
-          : 'Editing an approved profile drops it back to pending approval.'}
+          : inlineText(lang, 'Editing an approved profile drops it back to pending approval.')}
         action={
           profile ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
@@ -180,7 +181,7 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
                   color: '#34d399', fontSize: '0.75rem', fontWeight: 700,
                 }}>
                   <i className="fas fa-badge-check" aria-hidden="true" />
-                  {isHt ? 'Konpanyi Verifye' : 'Verified Company'}
+                  {isHt ? 'Konpanyi Verifye' : inlineText(lang, 'Verified Company')}
                 </span>
               )}
               {profile.status === 'approved' && (
@@ -190,7 +191,7 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
                   style={{ color: '#93c5fd', fontSize: '0.8rem', textDecoration: 'none' }}
                   data-testid="company-view-public-link"
                 >
-                  <i className="fas fa-external-link-alt" aria-hidden="true" /> {isHt ? 'Wè paj piblik' : 'View public page'}
+                  <i className="fas fa-external-link-alt" aria-hidden="true" /> {isHt ? 'Wè paj piblik' : inlineText(lang, 'View public page')}
                 </a>
               )}
             </div>
@@ -201,14 +202,14 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
       <p className={styles.sectionHint} style={{ color: 'rgba(148,163,184,0.85)', fontSize: '0.82rem', marginBottom: 16 }}>
         {t?.company_profile_hint || (isHt
           ? 'Yon paj konpanyi dedye pou brand ou. Soumèt li, epi administratè a ap apwouve l anvan li pibliye.'
-          : 'A dedicated company page for your brand. Submit it and an admin approves it before it goes public.')}
+          : inlineText(lang, 'A dedicated company page for your brand. Submit it and an admin approves it before it goes public.'))}
       </p>
 
       {!profile && !loading && (
         <EmptyState
           icon="fa-building"
-          title={t?.company_profile_no_profile || (isHt ? 'Ou poko gen pwofil konpanyi.' : 'No company profile yet.')}
-          hint={isHt ? 'Kreye paj konpanyi ou anba a.' : 'Create your company page below.'}
+          title={t?.company_profile_no_profile || (isHt ? 'Ou poko gen pwofil konpanyi.' : inlineText(lang, 'No company profile yet.'))}
+          hint={isHt ? 'Kreye paj konpanyi ou anba a.' : inlineText(lang, 'Create your company page below.')}
         />
       )}
 
@@ -218,7 +219,7 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
           borderRadius: 10, padding: '10px 14px', marginBottom: 16, fontSize: '0.82rem',
         }} data-testid="company-review-note">
           <strong style={{ color: '#fbbf24' }}>
-            {t?.company_profile_review_note || (isHt ? 'Nòt revizyon' : 'Review note')}:
+            {t?.company_profile_review_note || (isHt ? 'Nòt revizyon' : inlineText(lang, 'Review note'))}:
           </strong>{' '}
           <span style={{ color: 'rgba(226,232,240,0.9)' }}>{profile.review_note}</span>
         </div>
@@ -228,7 +229,7 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
         {/* ─── Identity ───────────────────────────────────────── */}
         <div className={styles.formGroup}>
           <label className={styles.formLabel}>
-            {t?.company_profile_field_name || (isHt ? 'Non konpanyi / brand' : 'Company / brand name')} *
+            {t?.company_profile_field_name || (isHt ? 'Non konpanyi / brand' : inlineText(lang, 'Company / brand name'))} *
           </label>
           <input
             type="text"
@@ -236,7 +237,7 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
             value={form.company_name}
             onChange={(e) => set('company_name', e.target.value)}
             maxLength={120}
-            placeholder={isHt ? 'Egzanp: Kreyatif Studio' : 'e.g. Creative Studio'}
+            placeholder={isHt ? 'Egzanp: Kreyatif Studio' : inlineText(lang, 'e.g. Creative Studio')}
             data-testid="company-form-name"
             required
           />
@@ -244,7 +245,7 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
 
         <div className={styles.formGroup}>
           <label className={styles.formLabel}>
-            {t?.company_profile_field_tagline || (isHt ? 'Slogan / tagline' : 'Tagline')}
+            {t?.company_profile_field_tagline || (isHt ? 'Slogan / tagline' : inlineText(lang, 'Tagline'))}
           </label>
           <input
             type="text"
@@ -252,13 +253,13 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
             value={form.tagline}
             onChange={(e) => set('tagline', e.target.value)}
             maxLength={200}
-            placeholder={isHt ? 'Yon fraz ki dekri konpanyi ou' : 'One line that describes your company'}
+            placeholder={isHt ? 'Yon fraz ki dekri konpanyi ou' : inlineText(lang, 'One line that describes your company')}
           />
         </div>
 
         <div className={styles.formGroup}>
           <label className={styles.formLabel}>
-            {t?.company_profile_field_logo || (isHt ? 'Logo (URL)' : 'Logo (URL)')}
+            {t?.company_profile_field_logo || (isHt ? 'Logo (URL)' : inlineText(lang, 'Logo (URL)'))}
           </label>
           <input
             type="url"
@@ -275,7 +276,7 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
 
         <div className={styles.formGroup}>
           <label className={styles.formLabel}>
-            {t?.company_profile_field_description || (isHt ? 'Istwa konpanyi ou' : 'Company story')}
+            {t?.company_profile_field_description || (isHt ? 'Istwa konpanyi ou' : inlineText(lang, 'Company story'))}
           </label>
           <textarea
             className={styles.formInput}
@@ -283,7 +284,7 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
             value={form.description}
             onChange={(e) => set('description', e.target.value)}
             maxLength={3000}
-            placeholder={isHt ? 'Kisa konpanyi ou fè, pou kisa li egziste...' : 'What your company does, why it exists...'}
+            placeholder={isHt ? 'Kisa konpanyi ou fè, pou kisa li egziste...' : inlineText(lang, 'What your company does, why it exists...')}
           />
         </div>
 
@@ -291,7 +292,7 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
         <div className={styles.formRow}>
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>
-              {t?.company_profile_field_country || (isHt ? 'Peyi' : 'Country')}
+              {t?.company_profile_field_country || (isHt ? 'Peyi' : inlineText(lang, 'Country'))}
             </label>
             <input
               type="text"
@@ -303,7 +304,7 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
           </div>
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>
-              {t?.company_profile_field_city || (isHt ? 'Vil' : 'City')}
+              {t?.company_profile_field_city || (isHt ? 'Vil' : inlineText(lang, 'City'))}
             </label>
             <input
               type="text"
@@ -315,7 +316,7 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
           </div>
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>
-              {t?.company_profile_field_website || (isHt ? 'Sit wèb' : 'Website')}
+              {t?.company_profile_field_website || (isHt ? 'Sit wèb' : inlineText(lang, 'Website'))}
             </label>
             <input
               type="url"
@@ -331,17 +332,17 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
         <div className={styles.formGroup}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <label className={styles.formLabel} style={{ marginBottom: 4 }}>
-              {t?.company_profile_field_social || (isHt ? 'Lyen sosyal' : 'Social links')}
+              {t?.company_profile_field_social || (isHt ? 'Lyen sosyal' : inlineText(lang, 'Social links'))}
             </label>
             <button type="button" className="studio-company-add-btn"
               onClick={() => addRow('social_links', EMPTY_SOCIAL)}
               style={{ background: 'none', border: 'none', color: '#f472b6', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}>
-              <i className="fas fa-plus" aria-hidden="true" /> {t?.company_profile_add || (isHt ? 'Ajoute' : 'Add')}
+              <i className="fas fa-plus" aria-hidden="true" /> {t?.company_profile_add || (isHt ? 'Ajoute' : inlineText(lang, 'Add'))}
             </button>
           </div>
           {form.social_links.length === 0 && (
             <p style={{ color: 'rgba(148,163,184,0.6)', fontSize: '0.78rem', margin: '6px 0' }}>
-              {isHt ? 'Pa gen lyen sosyal.' : 'No social links yet.'}
+              {isHt ? 'Pa gen lyen sosyal.' : inlineText(lang, 'No social links yet.')}
             </p>
           )}
           {form.social_links.map((s, i) => (
@@ -352,7 +353,7 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
                 style={{ flex: 1 }}
                 value={s.platform}
                 onChange={(e) => updateRow('social_links', i, { platform: e.target.value })}
-                placeholder={isHt ? 'Platfòm (instagram, tiktok…)' : 'Platform (instagram, tiktok…)'}
+                placeholder={isHt ? 'Platfòm (instagram, tiktok…)' : inlineText(lang, 'Platform (instagram, tiktok…)')}
               />
               <input
                 type="url"
@@ -364,7 +365,7 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
               />
               <button type="button" onClick={() => removeRow('social_links', i)}
                 style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer' }}
-                aria-label={isHt ? 'Retire' : 'Remove'}>
+                aria-label={isHt ? 'Retire' : inlineText(lang, 'Remove')}>
                 <i className="fas fa-trash" aria-hidden="true" />
               </button>
             </div>
@@ -375,16 +376,16 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
         <div className={styles.formGroup}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <label className={styles.formLabel} style={{ marginBottom: 4 }}>
-              {t?.company_profile_field_team || (isHt ? 'Ekip' : 'Team')}
+              {t?.company_profile_field_team || (isHt ? 'Ekip' : inlineText(lang, 'Team'))}
             </label>
             <button type="button" onClick={() => addRow('team_members', EMPTY_MEMBER)}
               style={{ background: 'none', border: 'none', color: '#f472b6', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}>
-              <i className="fas fa-plus" aria-hidden="true" /> {t?.company_profile_add || (isHt ? 'Ajoute' : 'Add')}
+              <i className="fas fa-plus" aria-hidden="true" /> {t?.company_profile_add || (isHt ? 'Ajoute' : inlineText(lang, 'Add'))}
             </button>
           </div>
           {form.team_members.length === 0 && (
             <p style={{ color: 'rgba(148,163,184,0.6)', fontSize: '0.78rem', margin: '6px 0' }}>
-              {t?.company_profile_empty_team || (isHt ? 'Pokò gen manm ekip.' : 'No team members yet.')}
+              {t?.company_profile_empty_team || (isHt ? 'Pokò gen manm ekip.' : inlineText(lang, 'No team members yet.'))}
             </p>
           )}
           {form.team_members.map((m, i) => (
@@ -398,7 +399,7 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
                 style={{ flex: 1, minWidth: 120 }}
                 value={m.name}
                 onChange={(e) => updateRow('team_members', i, { name: e.target.value })}
-                placeholder={t?.company_profile_field_team_member_name || (isHt ? 'Non manm' : 'Member name')}
+                placeholder={t?.company_profile_field_team_member_name || (isHt ? 'Non manm' : inlineText(lang, 'Member name'))}
               />
               <input
                 type="text"
@@ -406,7 +407,7 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
                 style={{ flex: 1, minWidth: 100 }}
                 value={m.role}
                 onChange={(e) => updateRow('team_members', i, { role: e.target.value })}
-                placeholder={t?.company_profile_field_team_member_role || (isHt ? 'Wòl' : 'Role')}
+                placeholder={t?.company_profile_field_team_member_role || (isHt ? 'Wòl' : inlineText(lang, 'Role'))}
               />
               <input
                 type="text"
@@ -414,11 +415,11 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
                 style={{ flex: 2, minWidth: 160 }}
                 value={m.bio}
                 onChange={(e) => updateRow('team_members', i, { bio: e.target.value })}
-                placeholder={t?.company_profile_field_team_member_bio || (isHt ? 'Biyo' : 'Bio')}
+                placeholder={t?.company_profile_field_team_member_bio || (isHt ? 'Biyo' : inlineText(lang, 'Bio'))}
               />
               <button type="button" onClick={() => removeRow('team_members', i)}
                 style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer' }}
-                aria-label={isHt ? 'Retire' : 'Remove'}>
+                aria-label={isHt ? 'Retire' : inlineText(lang, 'Remove')}>
                 <i className="fas fa-trash" aria-hidden="true" />
               </button>
             </div>
@@ -429,16 +430,16 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
         <div className={styles.formGroup}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <label className={styles.formLabel} style={{ marginBottom: 4 }}>
-              {t?.company_profile_field_products_services || (isHt ? 'Pwodwi / Sèvis' : 'Products / Services')}
+              {t?.company_profile_field_products_services || (isHt ? 'Pwodwi / Sèvis' : inlineText(lang, 'Products / Services'))}
             </label>
             <button type="button" onClick={() => addRow('products_services', EMPTY_OFFERING)}
               style={{ background: 'none', border: 'none', color: '#f472b6', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}>
-              <i className="fas fa-plus" aria-hidden="true" /> {t?.company_profile_add || (isHt ? 'Ajoute' : 'Add')}
+              <i className="fas fa-plus" aria-hidden="true" /> {t?.company_profile_add || (isHt ? 'Ajoute' : inlineText(lang, 'Add'))}
             </button>
           </div>
           {form.products_services.length === 0 && (
             <p style={{ color: 'rgba(148,163,184,0.6)', fontSize: '0.78rem', margin: '6px 0' }}>
-              {t?.company_profile_empty_offerings || (isHt ? 'Pokò gen pwodwi oswa sèvis.' : 'No products or services yet.')}
+              {t?.company_profile_empty_offerings || (isHt ? 'Pokò gen pwodwi oswa sèvis.' : inlineText(lang, 'No products or services yet.'))}
             </p>
           )}
           {form.products_services.map((o, i) => (
@@ -452,7 +453,7 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
                 style={{ flex: 1, minWidth: 120 }}
                 value={o.title}
                 onChange={(e) => updateRow('products_services', i, { title: e.target.value })}
-                placeholder={t?.company_profile_field_item_title || (isHt ? 'Tit' : 'Title')}
+                placeholder={t?.company_profile_field_item_title || (isHt ? 'Tit' : inlineText(lang, 'Title'))}
               />
               <input
                 type="text"
@@ -460,7 +461,7 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
                 style={{ flex: 2, minWidth: 160 }}
                 value={o.description}
                 onChange={(e) => updateRow('products_services', i, { description: e.target.value })}
-                placeholder={t?.company_profile_field_item_description || (isHt ? 'Deskripsyon' : 'Description')}
+                placeholder={t?.company_profile_field_item_description || (isHt ? 'Deskripsyon' : inlineText(lang, 'Description'))}
               />
               <input
                 type="text"
@@ -473,7 +474,7 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
               />
               <button type="button" onClick={() => removeRow('products_services', i)}
                 style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer' }}
-                aria-label={isHt ? 'Retire' : 'Remove'}>
+                aria-label={isHt ? 'Retire' : inlineText(lang, 'Remove')}>
                 <i className="fas fa-trash" aria-hidden="true" />
               </button>
             </div>
@@ -491,10 +492,10 @@ export default function CompanySection({ lang = 'en', t, showToast }) {
           >
             <i className={`fas ${saving ? 'fa-spinner fa-spin' : 'fa-paper-plane'}`} aria-hidden="true" />
             {saving
-              ? (isHt ? 'Ap sove...' : 'Saving...')
+              ? (isHt ? 'Ap sove...' : inlineText(lang, 'Saving...'))
               : (profile?.id
-                ? (t?.company_profile_edit || (isHt ? 'Modifye Pwofil Konpanyi' : 'Edit Company Profile'))
-                : (t?.company_profile_apply || (isHt ? 'Kreye Pwofil Konpanyi' : 'Create Company Profile')))}
+                ? (t?.company_profile_edit || (isHt ? 'Modifye Pwofil Konpanyi' : inlineText(lang, 'Edit Company Profile')))
+                : (t?.company_profile_apply || (isHt ? 'Kreye Pwofil Konpanyi' : inlineText(lang, 'Create Company Profile'))))}
           </button>
         </div>
       </form>

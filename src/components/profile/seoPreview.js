@@ -1,3 +1,4 @@
+import { inlineText } from '../../utils/inlineI18n';
 /**
  * src/components/profile/seoPreview.js
  *
@@ -47,11 +48,11 @@ export function buildSeoPreview({
   const isHt = lang === 'ht';
   const cleanTitle = clean(title);
   const cleanDescription = clean(description);
-  const fallbackTitle = `${clean(artistName) || (isHt ? 'Kreyatè' : 'Creator')} — ${SITE_NAME}`;
+  const fallbackTitle = `${clean(artistName) || (isHt ? 'Kreyatè' : inlineText(lang, 'Creator'))} — ${SITE_NAME}`;
   const fallbackDescription = clean(bio)
     || (isHt
       ? 'Pwofil kreyatè sou Atelnyo — pwojè, kou ak sèvis.'
-      : 'Creator profile on Atelnyo — projects, courses and services.');
+      : inlineText(lang, 'Creator profile on Atelnyo — projects, courses and services.'));
 
   return {
     title: truncateSeoText(cleanTitle || fallbackTitle, SEO_RECOMMENDED.title),

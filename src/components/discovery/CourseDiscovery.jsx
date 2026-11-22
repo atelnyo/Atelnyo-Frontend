@@ -17,6 +17,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
 import CourseCard from '../../modules/explore/cards/CourseCard';
+import { inlineText } from '../../utils/inlineI18n';
 
 const DISCOVERY_CACHE_KEY = 'atelnyo_discovery_page';
 const DISCOVERY_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
@@ -147,10 +148,10 @@ function DiscoveryError({ error, onRetry, lang }) {
       <i className="fas fa-exclamation-triangle" aria-hidden="true" />
       <p>{isHt
         ? 'Pa t ka chaje kontni dekouvèt la. Eseye ankò.'
-        : 'Could not load discovery content. Please try again.'}</p>
+        : inlineText(lang, 'Could not load discovery content. Please try again.')}</p>
       {onRetry && (
         <button onClick={onRetry} className="disc-retry-btn">
-          {isHt ? 'Eseye ankò' : 'Retry'}
+          {isHt ? 'Eseye ankò' : inlineText(lang, 'Retry')}
         </button>
       )}
     </div>
@@ -194,7 +195,7 @@ export default function CourseDiscovery({ lang = 'en', onOpenCourse }) {
   );
 
   return (
-    <div className="course-discovery" role="main" aria-label={isHt ? 'Dekouvri kou' : 'Discover courses'}>
+    <div className="course-discovery" role="main" aria-label={isHt ? 'Dekouvri kou' : inlineText(lang, 'Discover courses')}>
       {/* Screen reader announcement */}
       <div className="sr-only" role="status" aria-live="polite">
         {totalCourses > 0
@@ -203,24 +204,24 @@ export default function CourseDiscovery({ lang = 'en', onOpenCourse }) {
             : `${totalCourses} courses available to discover.`
           : isHt
             ? 'Pa gen kou pou kounye a.'
-            : 'No courses available right now.'}
+            : inlineText(lang, 'No courses available right now.')}
       </div>
 
       {/* Continue Learning */}
       <DiscoveryRail
-        title={isHt ? 'Continue Aprann' : 'Continue Learning'}
+        title={isHt ? 'Continue Aprann' : inlineText(lang, 'Continue Learning')}
         icon="fa-play-circle"
         courses={data.continue_learning}
         onOpen={handleOpenCourse}
         lang={lang}
         emptyMessage={isHt
           ? 'Ou pa gen kou ou ap suiv kounye a.'
-          : 'You don\'t have any courses in progress yet.'}
+          : inlineText(lang, 'You don\'t have any courses in progress yet.')}
       />
 
       {/* Recommended */}
       <DiscoveryRail
-        title={isHt ? 'Rekòmande pou Ou' : 'Recommended for You'}
+        title={isHt ? 'Rekòmande pou Ou' : inlineText(lang, 'Recommended for You')}
         icon="fa-magic"
         courses={data.recommended}
         onOpen={handleOpenCourse}
@@ -229,7 +230,7 @@ export default function CourseDiscovery({ lang = 'en', onOpenCourse }) {
 
       {/* Featured */}
       <DiscoveryRail
-        title={isHt ? 'Kou Piblize' : 'Featured Courses'}
+        title={isHt ? 'Kou Piblize' : inlineText(lang, 'Featured Courses')}
         icon="fa-star"
         courses={data.featured}
         onOpen={handleOpenCourse}
@@ -238,7 +239,7 @@ export default function CourseDiscovery({ lang = 'en', onOpenCourse }) {
 
       {/* New */}
       <DiscoveryRail
-        title={isHt ? 'Kou Nouvo' : 'New Courses'}
+        title={isHt ? 'Kou Nouvo' : inlineText(lang, 'New Courses')}
         icon="fa-sparkles"
         courses={data.new}
         onOpen={handleOpenCourse}
@@ -247,7 +248,7 @@ export default function CourseDiscovery({ lang = 'en', onOpenCourse }) {
 
       {/* Popular */}
       <DiscoveryRail
-        title={isHt ? 'Kou Popilè' : 'Popular Courses'}
+        title={isHt ? 'Kou Popilè' : inlineText(lang, 'Popular Courses')}
         icon="fa-fire"
         courses={data.popular}
         onOpen={handleOpenCourse}

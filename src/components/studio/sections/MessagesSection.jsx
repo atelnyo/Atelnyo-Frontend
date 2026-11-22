@@ -29,6 +29,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import api from '../../../services/api';
 import { StudioSkeleton, EmptyState, SectionHeader, fmtDate } from '../shared';
 import styles from './sections.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const CONVERSATIONS_URL = 'messages/conversations/';
 
@@ -105,7 +106,7 @@ export default function MessagesSection({ lang, t, showToast }) {
       })
       .catch(() => {
         setThread([]);
-        showToast?.(isHt ? 'Pa t kapab chaje konvèsasyon an.' : 'Could not load the conversation.', 'exclamation-triangle');
+        showToast?.(isHt ? 'Pa t kapab chaje konvèsasyon an.' : inlineText(lang, 'Could not load the conversation.'), 'exclamation-triangle');
       })
       .finally(() => setThreadLoading(false));
   }, [isHt, showToast]);
@@ -140,7 +141,7 @@ export default function MessagesSection({ lang, t, showToast }) {
         });
       })
       .catch(() => {
-        showToast?.(isHt ? 'Pa t kapab voye mesaj la.' : 'Could not send the message.', 'exclamation-triangle');
+        showToast?.(isHt ? 'Pa t kapab voye mesaj la.' : inlineText(lang, 'Could not send the message.'), 'exclamation-triangle');
       })
       .finally(() => setSending(false));
   }, [draft, sending, activeChat, isHt, showToast]);
@@ -161,11 +162,11 @@ export default function MessagesSection({ lang, t, showToast }) {
           <div className={styles.messagesUnavailableIcon}>
             <i className="fas fa-hourglass-half" aria-hidden="true" />
           </div>
-          <h3>{isHt ? 'Mesaj ap vini byento' : 'Messaging is coming soon'}</h3>
+          <h3>{isHt ? 'Mesaj ap vini byento' : inlineText(lang, 'Messaging is coming soon')}</h3>
           <p>
             {isHt
               ? 'N ap travay sou yon sistèm mesaj pou kreyatè yo. Lè li pare, konvèsasyon ou yo ap parèt isit la.'
-              : 'We are building a messaging system for creators. When it ships, your conversations will appear here.'}
+              : inlineText(lang, 'We are building a messaging system for creators. When it ships, your conversations will appear here.')}
           </p>
           <button
             type="button"
@@ -173,7 +174,7 @@ export default function MessagesSection({ lang, t, showToast }) {
             onClick={() => { setRetryKey(k => k + 1); }}
           >
             <i className="fas fa-rotate-right" aria-hidden="true" />
-            {isHt ? 'Tcheke ankò' : 'Check again'}
+            {isHt ? 'Tcheke ankò' : inlineText(lang, 'Check again')}
           </button>
         </div>
       </div>
@@ -194,11 +195,11 @@ export default function MessagesSection({ lang, t, showToast }) {
           <div className={styles.messagesErrorIcon}>
             <i className="fas fa-triangle-exclamation" aria-hidden="true" />
           </div>
-          <h3>{isHt ? 'Pa t kapab chaje mesaj yo' : 'Could not load messages'}</h3>
+          <h3>{isHt ? 'Pa t kapab chaje mesaj yo' : inlineText(lang, 'Could not load messages')}</h3>
           <p>
             {isHt
               ? 'Gen yon pwoblèm koneksyon. Eseye ankò nan kèk segond.'
-              : 'There was a connection problem. Try again in a moment.'}
+              : inlineText(lang, 'There was a connection problem. Try again in a moment.')}
           </p>
           <button
             type="button"
@@ -206,7 +207,7 @@ export default function MessagesSection({ lang, t, showToast }) {
             onClick={() => { setRetryKey(k => k + 1); }}
           >
             <i className="fas fa-rotate-right" aria-hidden="true" />
-            {isHt ? 'Eseye ankò' : 'Retry'}
+            {isHt ? 'Eseye ankò' : inlineText(lang, 'Retry')}
           </button>
         </div>
       </div>
@@ -231,7 +232,7 @@ export default function MessagesSection({ lang, t, showToast }) {
         action={!isEmpty ? (
           <span className={`${styles.badge} ${styles.unreadCount}`}>
             {conversations.filter((c) => c.unread_count > 0).length}{' '}
-            {isHt ? 'nouvo' : 'new'}
+            {isHt ? 'nouvo' : inlineText(lang, 'new')}
           </span>
         ) : null}
       />
@@ -276,13 +277,13 @@ export default function MessagesSection({ lang, t, showToast }) {
               <div className={styles.chatPlaceholder}>
                 <i className="fas fa-envelope-open-text" aria-hidden="true" />
                 <p>
-                  {isHt ? 'Chwazi yon konvèsasyon' : 'Select a conversation'}
+                  {isHt ? 'Chwazi yon konvèsasyon' : inlineText(lang, 'Select a conversation')}
                 </p>
               </div>
             ) : threadLoading ? (
               <div className={styles.chatPlaceholder}>
                 <i className="fas fa-spinner fa-spin" aria-hidden="true" />
-                <p>{isHt ? 'Ap chaje...' : 'Loading...'}</p>
+                <p>{isHt ? 'Ap chaje...' : inlineText(lang, 'Loading...')}</p>
               </div>
             ) : (
               <div className={styles.chatPane}>
@@ -325,15 +326,15 @@ export default function MessagesSection({ lang, t, showToast }) {
                     className={styles.chatComposerInput}
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
-                    placeholder={isHt ? 'Ekri yon mesaj...' : 'Type a message...'}
-                    aria-label={isHt ? 'Mesaj' : 'Message'}
+                    placeholder={isHt ? 'Ekri yon mesaj...' : inlineText(lang, 'Type a message...')}
+                    aria-label={isHt ? 'Mesaj' : inlineText(lang, 'Message')}
                     maxLength={2000}
                   />
                   <button
                     type="submit"
                     className={styles.chatComposerSend}
                     disabled={sending || !draft.trim()}
-                    aria-label={isHt ? 'Voye' : 'Send'}
+                    aria-label={isHt ? 'Voye' : inlineText(lang, 'Send')}
                   >
                     {sending
                       ? <i className="fas fa-spinner fa-spin" aria-hidden="true" />

@@ -16,6 +16,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import styles from './editor.module.css';
 import { DEFAULT_SECTIONS } from '../../learning/blocks/CanvasBlock';
+import { inlineText } from '../../../utils/inlineI18n';
 
 /** Turn whatever is stored into `{ key, title, hint }` strings. */
 export function toEditableSections(raw, lang = 'en') {
@@ -54,7 +55,7 @@ function newKey() {
 
 export default function CanvasSectionsEditor({ block, onChange, lang = 'en' }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
 
   const sections = useMemo(
     () => toEditableSections(block?.sections, lang),
@@ -75,7 +76,7 @@ export default function CanvasSectionsEditor({ block, onChange, lang = 'en' }) {
   const addSection = useCallback(() => {
     patch([
       ...sections,
-      { key: newKey(), title: isHt ? 'Nouvo seksyon' : 'New section', hint: '' },
+      { key: newKey(), title: isHt ? 'Nouvo seksyon' : inlineText(lang, 'New section'), hint: '' },
     ]);
   }, [sections, patch, isHt]);
 
@@ -94,8 +95,8 @@ export default function CanvasSectionsEditor({ block, onChange, lang = 'en' }) {
   const resetToStandard = useCallback(() => {
     patch(DEFAULT_SECTIONS.map((s) => ({
       key: s.key,
-      title: s.title[isHt ? 'ht' : 'en'],
-      hint: s.hint[isHt ? 'ht' : 'en'],
+      title: s.title[isHt ? 'ht' : inlineText(lang, 'en')],
+      hint: s.hint[isHt ? 'ht' : inlineText(lang, 'en')],
     })));
   }, [patch, isHt]);
 
@@ -205,7 +206,7 @@ export default function CanvasSectionsEditor({ block, onChange, lang = 'en' }) {
         <p className={styles.checkEmpty}>
           {isHt
             ? 'Pa gen seksyon — elèv yo ap wè 9 seksyon estanda yo.'
-            : 'No sections — learners will see the nine standard sections.'}
+            : inlineText(lang, 'No sections — learners will see the nine standard sections.')}
         </p>
       )}
 
@@ -213,10 +214,10 @@ export default function CanvasSectionsEditor({ block, onChange, lang = 'en' }) {
         <p>
           <i className="fas fa-info-circle" aria-hidden="true" /> {isHt
             ? 'Lè w chanje non yon seksyon, repons elèv yo deja ekri yo rete.'
-            : 'Renaming a section keeps answers learners already wrote.'}
+            : inlineText(lang, 'Renaming a section keeps answers learners already wrote.')}
         </p>
         <button type="button" className={styles.blockCtrl} onClick={resetToStandard}>
-          <i className="fas fa-rotate-left" aria-hidden="true" /> {isHt ? 'Retabli 9 estanda' : 'Restore the 9 standard'}
+          <i className="fas fa-rotate-left" aria-hidden="true" /> {isHt ? 'Retabli 9 estanda' : inlineText(lang, 'Restore the 9 standard')}
         </button>
       </div>
     </div>

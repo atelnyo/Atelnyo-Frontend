@@ -5,6 +5,7 @@
  * Troubleshooting, Contact Support, Documentation, Video Guide.
  */
 import React, { useState } from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 const HELP_CONTENT = {
   library: {
@@ -59,8 +60,8 @@ export default function MediaHelp({ context = 'library', lang = 'en', className 
         type="button"
         className={`media-help-trigger ${className}`}
         onClick={() => setIsOpen(true)}
-        title={isHt ? 'Èd' : 'Help'}
-        aria-label={isHt ? 'Èd' : 'Help'}
+        title={isHt ? 'Èd' : inlineText(lang, 'Help')}
+        aria-label={isHt ? 'Èd' : inlineText(lang, 'Help')}
       >
         <i className="fas fa-question-circle" />
       </button>
@@ -69,7 +70,7 @@ export default function MediaHelp({ context = 'library', lang = 'en', className 
 
   return (
     <div className="media-help-modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget) setIsOpen(false); }}>
-      <div className="media-help-modal" role="dialog" aria-label={isHt ? 'Èd' : 'Help'}>
+      <div className="media-help-modal" role="dialog" aria-label={isHt ? 'Èd' : inlineText(lang, 'Help')}>
         <div className="media-help-header">
           <div className="media-help-header-icon">
             <i className={`fas ${content.icon}`} />
@@ -100,7 +101,7 @@ export default function MediaHelp({ context = 'library', lang = 'en', className 
               <p className="media-help-text">{isHt ? content.tutorial.ht : content.tutorial.en}</p>
               <div className="media-help-video-placeholder">
                 <i className="fas fa-play-circle" />
-                <span>{isHt ? 'Pa gen videyo dispo pou kounye a.' : 'No video available at this time.'}</span>
+                <span>{isHt ? 'Pa gen videyo dispo pou kounye a.' : inlineText(lang, 'No video available at this time.')}</span>
               </div>
             </div>
           )}
@@ -118,7 +119,7 @@ export default function MediaHelp({ context = 'library', lang = 'en', className 
                 </details>
               ))}
               {(!content.faq || content.faq.length === 0) && (
-                <p className="media-help-empty">{isHt ? 'Pa gen FAQ pou ekran sa a.' : 'No FAQ for this screen.'}</p>
+                <p className="media-help-empty">{isHt ? 'Pa gen FAQ pou ekran sa a.' : inlineText(lang, 'No FAQ for this screen.')}</p>
               )}
             </div>
           )}
@@ -126,10 +127,10 @@ export default function MediaHelp({ context = 'library', lang = 'en', className 
           {activeTab === 'troubleshooting' && (
             <div className="media-help-section">
               <ul className="media-help-troubleshoot-list">
-                <li>{isHt ? 'Tcheke koneksyon entènèt ou' : 'Check your internet connection'}</li>
-                <li>{isHt ? 'Verifye fichye a toujou sou provider ou' : 'Verify the file is still on your provider'}</li>
-                <li>{isHt ? 'Eseye yon lòt provider' : 'Try a different provider'}</li>
-                <li>{isHt ? 'Kontakte sipò si pwoblèm nan pèsiste' : 'Contact support if the issue persists'}</li>
+                <li>{isHt ? 'Tcheke koneksyon entènèt ou' : inlineText(lang, 'Check your internet connection')}</li>
+                <li>{isHt ? 'Verifye fichye a toujou sou provider ou' : inlineText(lang, 'Verify the file is still on your provider')}</li>
+                <li>{isHt ? 'Eseye yon lòt provider' : inlineText(lang, 'Try a different provider')}</li>
+                <li>{isHt ? 'Kontakte sipò si pwoblèm nan pèsiste' : inlineText(lang, 'Contact support if the issue persists')}</li>
               </ul>
               <a
                 href="/help/troubleshooting"
@@ -139,7 +140,7 @@ export default function MediaHelp({ context = 'library', lang = 'en', className 
                 style={{ marginTop: 12 }}
               >
                 <i className="fas fa-book" />
-                {isHt ? 'Li Dokimantasyon' : 'Read Documentation'}
+                {isHt ? 'Li Dokimantasyon' : inlineText(lang, 'Read Documentation')}
               </a>
             </div>
           )}
@@ -149,7 +150,7 @@ export default function MediaHelp({ context = 'library', lang = 'en', className 
               <p className="media-help-text">
                 {isHt
                   ? 'Si w bezwen èd anplis, kontakte ekip sipò atelnyo.'
-                  : 'If you need additional help, contact the Atelnyo support team.'}
+                  : inlineText(lang, 'If you need additional help, contact the Atelnyo support team.')}
               </p>
               <a
                 href="mailto:support@atelnyo.site"
@@ -157,7 +158,7 @@ export default function MediaHelp({ context = 'library', lang = 'en', className 
                 style={{ marginTop: 8 }}
               >
                 <i className="fas fa-envelope" />
-                {isHt ? 'Voye yon imèl' : 'Send an email'}
+                {isHt ? 'Voye yon imèl' : inlineText(lang, 'Send an email')}
               </a>
             </div>
           )}

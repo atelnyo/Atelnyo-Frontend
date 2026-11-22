@@ -4215,6 +4215,7 @@ const trans_fr = {
   };
 
 export const translations = {
+    'es': trans_es,
     'ht': trans_ht,
     'en': trans_en,
     'fr': trans_fr

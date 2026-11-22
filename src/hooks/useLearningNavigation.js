@@ -18,6 +18,7 @@
  *   §31   ｜ Navigation transaction concept
  */
 import { useCallback, useRef, useState } from 'react';
+import { inlineText } from '../utils/inlineI18n';
 
 /* ─── Navigation States (§2) ──────────────────────────────────── */
 export const NAV_STATE = {
@@ -44,17 +45,17 @@ export const SAVE_STATE = {
 };
 
 /* ─── Helper: human-friendly navigation label (§2) ────────────── */
-function navLabel(state, isHt) {
+function navLabel(state, isHt, lang = 'en') {
   const labels = {
-    [NAV_STATE.IDLE]: isHt ? 'Kontinye' : 'Continue',
-    [NAV_STATE.CHECKING]: isHt ? 'Ap tcheke...' : 'Checking...',
-    [NAV_STATE.VALIDATING]: isHt ? 'Ap verifye...' : 'Validating...',
-    [NAV_STATE.SAVING]: isHt ? 'Ap sove travay ou...' : 'Saving your work...',
-    [NAV_STATE.SYNCING]: isHt ? 'Ap senkronize...' : 'Syncing...',
-    [NAV_STATE.COMPLETING]: isHt ? 'Ap konplete...' : 'Completing...',
-    [NAV_STATE.RESOLVING]: isHt ? 'Ap prepare pwochen leson...' : 'Preparing next lesson...',
-    [NAV_STATE.NAVIGATING]: isHt ? 'Ap travèse...' : 'Navigating...',
-    [NAV_STATE.ERROR]: isHt ? 'Eseye ankò' : 'Try again',
+    [NAV_STATE.IDLE]: isHt ? 'Kontinye' : inlineText(lang, 'Continue'),
+    [NAV_STATE.CHECKING]: isHt ? 'Ap tcheke...' : inlineText(lang, 'Checking...'),
+    [NAV_STATE.VALIDATING]: isHt ? 'Ap verifye...' : inlineText(lang, 'Validating...'),
+    [NAV_STATE.SAVING]: isHt ? 'Ap sove travay ou...' : inlineText(lang, 'Saving your work...'),
+    [NAV_STATE.SYNCING]: isHt ? 'Ap senkronize...' : inlineText(lang, 'Syncing...'),
+    [NAV_STATE.COMPLETING]: isHt ? 'Ap konplete...' : inlineText(lang, 'Completing...'),
+    [NAV_STATE.RESOLVING]: isHt ? 'Ap prepare pwochen leson...' : inlineText(lang, 'Preparing next lesson...'),
+    [NAV_STATE.NAVIGATING]: isHt ? 'Ap travèse...' : inlineText(lang, 'Navigating...'),
+    [NAV_STATE.ERROR]: isHt ? 'Eseye ankò' : inlineText(lang, 'Try again'),
   };
   return labels[state] || labels[NAV_STATE.IDLE];
 }
@@ -78,6 +79,7 @@ export default function useLearningNavigation({
   syllabus = [],
   showToast,
   isHt = false,
+  lang = 'en',
   enqueueProgress,
 }) {
   const [navState, setNavState] = useState(NAV_STATE.IDLE);
@@ -158,13 +160,13 @@ export default function useLearningNavigation({
       if (api?.validateForNavigation) {
         const result = api.validateForNavigation();
         if (!result?.ok) {
-          return { ok: false, reason: result.reason || (isHt ? 'Konplete aktivite a anvan ou kontinye.' : 'Complete the activity before continuing.') };
+          return { ok: false, reason: result.reason || (isHt ? 'Konplete aktivite a anvan ou kontinye.' : inlineText(lang, 'Complete the activity before continuing.')) };
         }
       }
     }
     // Basic step completion check
     if (!stepDone) {
-      return { ok: false, reason: isHt ? 'Konplete aktivite a pou kontinye.' : 'Complete the activity to continue.' };
+      return { ok: false, reason: isHt ? 'Konplete aktivite a pou kontinye.' : inlineText(lang, 'Complete the activity to continue.') };
     }
     return { ok: true };
   }, [isHt]);
@@ -217,12 +219,12 @@ export default function useLearningNavigation({
       const pending = checkPendingWork();
       if (pending.length > 0) {
         setNavState(NAV_STATE.SAVING);
-        setTransitionMsg(isHt ? 'Ap sove travay ou...' : 'Saving your work...');
+        setTransitionMsg(isHt ? 'Ap sove travay ou...' : inlineText(lang, 'Saving your work...'));
         const saveResult = await saveAllPending();
         if (saveResult.localOnly) {
           // §11 — show local save indicator
           showToast?.(
-            isHt ? '💾 Travay sove sou aparèy la. Ap senkronize lè koneksyon retounen.' : '💾 Saved on this device. Will sync when connection returns.',
+            isHt ? '💾 Travay sove sou aparèy la. Ap senkronize lè koneksyon retounen.' : inlineText(lang, '💾 Saved on this device. Will sync when connection returns.'),
             'info-circle',
           );
         }
@@ -230,7 +232,7 @@ export default function useLearningNavigation({
 
       // §14 — resolve next destination
       setNavState(NAV_STATE.RESOLVING);
-      setTransitionMsg(isHt ? 'Ap prepare pwochen etap...' : 'Preparing next step...');
+      setTransitionMsg(isHt ? 'Ap prepare pwochen etap...' : inlineText(lang, 'Preparing next step...'));
 
       if (isLastStep) {
         // Module complete
@@ -255,7 +257,7 @@ export default function useLearningNavigation({
       console.error('[LearningNavigation] Error:', err);
       setNavState(NAV_STATE.ERROR);
       showToast?.(
-        isHt ? 'Yon erè rive. Travay ou an sekirite — esseye ankò.' : 'Something went wrong. Your work is safe — try again.',
+        isHt ? 'Yon erè rive. Travay ou an sekirite — esseye ankò.' : inlineText(lang, 'Something went wrong. Your work is safe — try again.'),
         'exclamation-triangle',
       );
     } finally {
@@ -291,7 +293,7 @@ export default function useLearningNavigation({
     navState,
     saveState,
     transitionMsg,
-    navLabel: navLabel(navState, isHt),
+    navLabel: navLabel(navState, isHt, lang),
 
     // §8 — Block save contract
     registerBlock,

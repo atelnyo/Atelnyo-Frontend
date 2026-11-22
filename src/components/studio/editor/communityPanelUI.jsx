@@ -9,6 +9,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import styles from './communityEditor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 /**
  * True only for the first load of a panel. Refetches keep the previous
@@ -230,7 +231,7 @@ export function ExpandableText({
               style={{ marginTop: 4 }}
               onClick={() => setOpen(true)}
             >
-              {isHt ? 'Wè plis' : 'Show more'}
+              {isHt ? 'Wè plis' : inlineText(lang, 'Show more')}
             </button>
           </>
         )}
@@ -245,17 +246,17 @@ export function ExpandableText({
             className={styles.textModal}
             role="dialog"
             aria-modal="true"
-            aria-label={isHt ? 'Tèks konplè' : 'Full text'}
+            aria-label={isHt ? 'Tèks konplè' : inlineText(lang, 'Full text')}
             onClick={(e) => e.stopPropagation()}
           >
             <div className={styles.textModalHead}>
-              <strong>{isHt ? 'Tèks konplè' : 'Full text'}</strong>
+              <strong>{isHt ? 'Tèks konplè' : inlineText(lang, 'Full text')}</strong>
               <button
                 type="button"
                 className={styles.iconBtn}
                 onClick={() => setOpen(false)}
-                aria-label={isHt ? 'Fèmen' : 'Close'}
-                title={isHt ? 'Fèmen' : 'Close'}
+                aria-label={isHt ? 'Fèmen' : inlineText(lang, 'Close')}
+                title={isHt ? 'Fèmen' : inlineText(lang, 'Close')}
               >
                 <i className="fas fa-times" aria-hidden="true" />
               </button>

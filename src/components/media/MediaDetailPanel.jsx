@@ -24,6 +24,7 @@ import SmartWarning from './SmartWarning';
 import AISuggestion from './AISuggestion';
 import MediaHelp from './MediaHelp';
 import VideoEmbedFrame from './VideoEmbedFrame';
+import { inlineText } from '../../utils/inlineI18n';
 
 function fmtFileSize(bytes) {
   if (bytes == null) return '—';
@@ -103,7 +104,7 @@ export default function MediaDetailPanel({
 
   return (
     <div className="detail-panel-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose?.(); }}>
-      <div className={`detail-panel ${className}`} role="dialog" aria-label={isHt ? 'Detay medya' : 'Media detail'} aria-modal="true">
+      <div className={`detail-panel ${className}`} role="dialog" aria-label={isHt ? 'Detay medya' : inlineText(lang, 'Media detail')} aria-modal="true">
         {/* ─── Header ──────────────────────────────────────────── */}
         <div className="detail-panel-header">
           <div className="detail-panel-header-left">
@@ -206,41 +207,41 @@ export default function MediaDetailPanel({
                 )}
                 {width && height && (
                   <div className="detail-meta-item">
-                    <span className="detail-meta-label">{isHt ? 'Dimansyon' : 'Dimensions'}</span>
+                    <span className="detail-meta-label">{isHt ? 'Dimansyon' : inlineText(lang, 'Dimensions')}</span>
                     <span className="detail-meta-value">{width} × {height}</span>
                   </div>
                 )}
                 {size != null && (
                   <div className="detail-meta-item">
-                    <span className="detail-meta-label">{isHt ? 'Gwosè' : 'Size'}</span>
+                    <span className="detail-meta-label">{isHt ? 'Gwosè' : inlineText(lang, 'Size')}</span>
                     <span className="detail-meta-value">{fmtFileSize(size)}</span>
                   </div>
                 )}
                 {duration != null && duration > 0 && (
                   <div className="detail-meta-item">
-                    <span className="detail-meta-label">{isHt ? 'Dire' : 'Duration'}</span>
+                    <span className="detail-meta-label">{isHt ? 'Dire' : inlineText(lang, 'Duration')}</span>
                     <span className="detail-meta-value">{fmtDuration(duration)}</span>
                   </div>
                 )}
                 {item.created_at && (
                   <div className="detail-meta-item">
-                    <span className="detail-meta-label">{isHt ? 'Kreye' : 'Created'}</span>
+                    <span className="detail-meta-label">{isHt ? 'Kreye' : inlineText(lang, 'Created')}</span>
                     <span className="detail-meta-value">{new Date(item.created_at).toLocaleString()}</span>
                   </div>
                 )}
                 {item.updated_at && (
                   <div className="detail-meta-item">
-                    <span className="detail-meta-label">{isHt ? 'Mete ajou' : 'Updated'}</span>
+                    <span className="detail-meta-label">{isHt ? 'Mete ajou' : inlineText(lang, 'Updated')}</span>
                     <span className="detail-meta-value">{new Date(item.updated_at).toLocaleString()}</span>
                   </div>
                 )}
                 <div className="detail-meta-item">
-                  <span className="detail-meta-label">{isHt ? 'Vizibilite' : 'Visibility'}</span>
+                  <span className="detail-meta-label">{isHt ? 'Vizibilite' : inlineText(lang, 'Visibility')}</span>
                   <span className="detail-meta-value">{visibility}</span>
                 </div>
                 {provider && (
                   <div className="detail-meta-item">
-                    <span className="detail-meta-label">{isHt ? 'Provider' : 'Provider'}</span>
+                    <span className="detail-meta-label">{isHt ? 'Provider' : inlineText(lang, 'Provider')}</span>
                     <span className="detail-meta-value">{provider}</span>
                   </div>
                 )}
@@ -277,24 +278,24 @@ export default function MediaDetailPanel({
         <div className="detail-panel-actions">
           {onReplace && (
             <button type="button" className="btn-secondary" onClick={() => onReplace(item)}>
-              <i className="fas fa-exchange-alt" /> {isHt ? 'Ranplase URL' : 'Replace URL'}
+              <i className="fas fa-exchange-alt" /> {isHt ? 'Ranplase URL' : inlineText(lang, 'Replace URL')}
             </button>
           )}
           <button type="button" className="btn-secondary" onClick={handleCopyUrl}>
             <i className={`fas ${copied ? 'fa-check' : 'fa-copy'}`} />
-            {copied ? (isHt ? 'Kopi!' : 'Copied!') : (isHt ? 'Kopi URL' : 'Copy URL')}
+            {copied ? (isHt ? 'Kopi!' : inlineText(lang, 'Copied!')) : (isHt ? 'Kopi URL' : inlineText(lang, 'Copy URL'))}
           </button>
           <a href={url} target="_blank" rel="noopener noreferrer" className="btn-secondary">
-            <i className="fas fa-external-link-alt" /> {isHt ? 'Louvri' : 'Open'}
+            <i className="fas fa-external-link-alt" /> {isHt ? 'Louvri' : inlineText(lang, 'Open')}
           </a>
           {onArchive && (
             <button type="button" className="btn-secondary" onClick={() => onArchive(item)}>
-              <i className="fas fa-archive" /> {isHt ? 'Achive' : 'Archive'}
+              <i className="fas fa-archive" /> {isHt ? 'Achive' : inlineText(lang, 'Archive')}
             </button>
           )}
           {onDelete && (
             <button type="button" className="detail-panel-delete-btn" onClick={() => setShowDelete(true)}>
-              <i className="fas fa-trash" /> {isHt ? 'Efase' : 'Delete'}
+              <i className="fas fa-trash" /> {isHt ? 'Efase' : inlineText(lang, 'Delete')}
             </button>
           )}
         </div>

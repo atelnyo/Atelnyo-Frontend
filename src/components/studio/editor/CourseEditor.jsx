@@ -66,6 +66,7 @@ import ContentStructureView from './ContentStructureView';
 import CompletionRulesEditor from './CompletionRulesEditor';
 import StudioAIChat from './StudioAIChat';
 import styles from './editor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en', showToast, user, item, deliveryType = 'online' }) {
   const isEdit = Boolean(item);
@@ -118,7 +119,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
   // ─── Validation (mirrors the backend course rules + readiness) ───────
   // Now with exercise-block checks (instructions / options / items) so a
   // broken exercise is never published silently.
-  const { validate, readiness } = useCourseValidation({ form, isExternal, isHt });
+  const { validate, readiness } = useCourseValidation({ form, isExternal, isHt, lang });
 
   // ─── Persistence: autosave + explicit save + draft recovery ──────────
   // Payload built once in buildCoursePayload (no more dual builders).
@@ -128,13 +129,13 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
     dirtyRef, clearDirty, setDirty,
     saveState, setSaveState, setSaveError,
     setErrors,
-    validate, isExternal, isHt, showToast, onSaved,
+    validate, isExternal, isHt, lang, showToast, onSaved,
     adminManaged,
   });
 
   // ─── Publish (draft → published, explicit + validated) ───────────────
   const { handlePublish } = useCoursePublish({
-    savedIdRef, doSave, isHt, showToast,
+    savedIdRef, doSave, isHt, lang, showToast,
     setSaveState, setSaveError, clearDirty, setDirty, onSaved,
   });
 
@@ -145,7 +146,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
   const [showVersionHistory, setShowVersionHistory] = useState(false);
   const handlePreview = useCallback(() => {
     if (form.modules.length === 0) {
-      showToast?.(isHt ? 'Ajoute yon modil anvan w fè preview.' : 'Add a module before previewing.', 'circle-info');
+      showToast?.(isHt ? 'Ajoute yon modil anvan w fè preview.' : inlineText(lang, 'Add a module before previewing.'), 'circle-info');
       return;
     }
     setPreviewOpen(true);
@@ -172,14 +173,14 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
       <div className={styles.structureHeader}>
         <span className={styles.structureTitle}>
           <i className="fas fa-list-ol" aria-hidden="true" />
-          {isHt ? 'Estrikti Kou' : 'Course Structure'}
+          {isHt ? 'Estrikti Kou' : inlineText(lang, 'Course Structure')}
         </span>
         <button
           type="button"
           className={styles.structureAdd}
           onClick={addModule}
-          aria-label={isHt ? 'Ajoute yon modil' : 'Add a module'}
-          title={isHt ? 'Ajoute modil' : 'Add module'}
+          aria-label={isHt ? 'Ajoute yon modil' : inlineText(lang, 'Add a module')}
+          title={isHt ? 'Ajoute modil' : inlineText(lang, 'Add module')}
         >
           <i className="fas fa-plus" aria-hidden="true" />
         </button>
@@ -192,9 +193,9 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
         >
           <i className="fas fa-book-open" aria-hidden="true" style={{ color: 'var(--color-primary)', width: 20, textAlign: 'center' }} />
           <span className={styles.structureItemText}>
-            <span className={styles.structureItemTitle}>{isHt ? 'Apèsi' : 'Overview'}</span>
+            <span className={styles.structureItemTitle}>{isHt ? 'Apèsi' : inlineText(lang, 'Overview')}</span>
             <span className={styles.structureItemMeta}>
-              {isHt ? 'Tit ak deskripsyon kou a' : 'Course title & description'}
+              {isHt ? 'Tit ak deskripsyon kou a' : inlineText(lang, 'Course title & description')}
             </span>
           </span>
         </button>
@@ -220,8 +221,8 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
                 <span className={styles.structureItemTitle}>{m.title.trim() || (isHt ? `Modil ${i + 1}` : `Module ${i + 1}`)}</span>
                 <span className={styles.structureItemMeta}>
                   {m.description.trim()
-                    ? `${m.description.trim().length} ${isHt ? 'karaktè' : 'chars'}`
-                    : (isHt ? 'Pa gen kontni ankò' : 'No content yet')}
+                    ? `${m.description.trim().length} ${isHt ? 'karaktè' : inlineText(lang, 'chars')}`
+                    : (isHt ? 'Pa gen kontni ankò' : inlineText(lang, 'No content yet'))}
                 </span>
               </span>
             </button>
@@ -231,8 +232,8 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
                 className={styles.structureItemCtrl}
                 onClick={() => moveModule(i, -1)}
                 disabled={i === 0}
-                aria-label={isHt ? 'Monte' : 'Move up'}
-                title={isHt ? 'Monte' : 'Move up'}
+                aria-label={isHt ? 'Monte' : inlineText(lang, 'Move up')}
+                title={isHt ? 'Monte' : inlineText(lang, 'Move up')}
               >
                 <i className="fas fa-chevron-up" aria-hidden="true" />
               </button>
@@ -241,8 +242,8 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
                 className={styles.structureItemCtrl}
                 onClick={() => moveModule(i, 1)}
                 disabled={i === form.modules.length - 1}
-                aria-label={isHt ? 'Desann' : 'Move down'}
-                title={isHt ? 'Desann' : 'Move down'}
+                aria-label={isHt ? 'Desann' : inlineText(lang, 'Move down')}
+                title={isHt ? 'Desann' : inlineText(lang, 'Move down')}
               >
                 <i className="fas fa-chevron-down" aria-hidden="true" />
               </button>
@@ -250,8 +251,8 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
                 type="button"
                 className={`${styles.structureItemCtrl}${copyFrom === i ? ` ${styles.structureItemCtrlActive || ''}` : ''}`}
                 onClick={() => setCopyFrom(copyFrom === i ? null : i)}
-                aria-label={isHt ? 'Kopye blòk yo' : 'Copy blocks'}
-                title={isHt ? 'Kopye blòk modil sa a nan yon lòt' : 'Copy this module’s blocks into another'}
+                aria-label={isHt ? 'Kopye blòk yo' : inlineText(lang, 'Copy blocks')}
+                title={isHt ? 'Kopye blòk modil sa a nan yon lòt' : inlineText(lang, 'Copy this module’s blocks into another')}
               >
                 <i className="fas fa-copy" aria-hidden="true" />
               </button>
@@ -259,8 +260,8 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
                 type="button"
                 className={`${styles.structureItemCtrl} ${styles.structureItemCtrlDanger}`}
                 onClick={() => removeModule(i)}
-                aria-label={isHt ? 'Efase modil' : 'Delete module'}
-                title={isHt ? 'Efase' : 'Delete'}
+                aria-label={isHt ? 'Efase modil' : inlineText(lang, 'Delete module')}
+                title={isHt ? 'Efase' : inlineText(lang, 'Delete')}
               >
                 <i className="fas fa-trash" aria-hidden="true" />
               </button>
@@ -271,7 +272,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
           <p className={styles.propsHint} style={{ padding: '0 var(--sp-lg)' }}>
             {isHt
               ? 'Ajoute modil pou òganize leson yo (Egzanp: Chapit 1, Chapit 2...).'
-              : 'Add modules to organize lessons (e.g. Chapter 1, Chapter 2…).'}
+              : inlineText(lang, 'Add modules to organize lessons (e.g. Chapter 1, Chapter 2…).')}
           </p>
         )}
 
@@ -284,9 +285,9 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
           >
             <i className="fas fa-sitemap" aria-hidden="true" style={{ color: '#10b981', width: 20, textAlign: 'center' }} />
             <span className={styles.structureItemText}>
-              <span className={styles.structureItemTitle}>{isHt ? 'Kurikilom' : 'Curriculum'}</span>
+              <span className={styles.structureItemTitle}>{isHt ? 'Kurikilom' : inlineText(lang, 'Curriculum')}</span>
               <span className={styles.structureItemMeta}>
-                {isHt ? 'Chapit & leson detaye' : 'Detailed chapters & lessons'}
+                {isHt ? 'Chapit & leson detaye' : inlineText(lang, 'Detailed chapters & lessons')}
               </span>
             </span>
           </button>
@@ -301,9 +302,9 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
           >
             <i className="fas fa-shield-halved" aria-hidden="true" style={{ color: '#8b5cf6', width: 20, textAlign: 'center' }} />
             <span className={styles.structureItemText}>
-              <span className={styles.structureItemTitle}>{isHt ? 'Validasyon' : 'Validation'}</span>
+              <span className={styles.structureItemTitle}>{isHt ? 'Validasyon' : inlineText(lang, 'Validation')}</span>
               <span className={styles.structureItemMeta}>
-                {isHt ? 'Kalite kontni ak tcheke publish' : 'Content quality & publish check'}
+                {isHt ? 'Kalite kontni ak tcheke publish' : inlineText(lang, 'Content quality & publish check')}
               </span>
             </span>
           </button>
@@ -318,9 +319,9 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
           >
             <i className="fas fa-question-circle" aria-hidden="true" style={{ color: '#f59e0b', width: 20, textAlign: 'center' }} />
             <span className={styles.structureItemText}>
-              <span className={styles.structureItemTitle}>{isHt ? 'FAQ' : 'FAQ'}</span>
+              <span className={styles.structureItemTitle}>{isHt ? 'FAQ' : inlineText(lang, 'FAQ')}</span>
               <span className={styles.structureItemMeta}>
-                {isHt ? 'Kesyon ak repons pou elèv yo' : 'Questions & answers for learners'}
+                {isHt ? 'Kesyon ak repons pou elèv yo' : inlineText(lang, 'Questions & answers for learners')}
               </span>
             </span>
           </button>
@@ -341,7 +342,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
                 className={styles.structureCopyTarget}
                 onClick={() => copyBlocksToModule(i)}
               >
-                {m.title.trim() || `${isHt ? 'Modil' : 'Module'} ${i + 1}`}
+                {m.title.trim() || `${isHt ? 'Modil' : inlineText(lang, 'Module')} ${i + 1}`}
               </button>
             ))}
             <button
@@ -349,7 +350,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
               className={styles.structureCopyCancel}
               onClick={() => setCopyFrom(null)}
             >
-              {isHt ? 'Anile' : 'Cancel'}
+              {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
             </button>
           </div>
         )}
@@ -369,27 +370,27 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
             {selected === 'faq'
               ? 'FAQ'
               : selected === 'curriculum'
-                ? (isHt ? 'Kurikilom' : 'Curriculum')
+                ? (isHt ? 'Kurikilom' : inlineText(lang, 'Curriculum'))
                 : selected === 'validation'
-                  ? (isHt ? 'Validasyon Kontni' : 'Content Validation')
+                  ? (isHt ? 'Validasyon Kontni' : inlineText(lang, 'Content Validation'))
                   : selected === 'lesson'
-                    ? (isHt ? 'Editè Leson' : 'Lesson Editor')
+                    ? (isHt ? 'Editè Leson' : inlineText(lang, 'Lesson Editor'))
                     : selected === null
-                      ? (isHt ? 'Apèsi Kou' : 'Course Overview')
-                      : (isHt ? 'Modil Editè' : 'Module Editor')}
+                      ? (isHt ? 'Apèsi Kou' : inlineText(lang, 'Course Overview'))
+                      : (isHt ? 'Modil Editè' : inlineText(lang, 'Module Editor'))}
           </h2>
           <p className={styles.editorSectionHint}>
             {selected === 'faq'
-              ? (isHt ? 'Kesyon ak repons pou elèv yo — jere, òganize, ak kontwole vizibilite.' : 'Questions & answers for learners — manage, organize, and control visibility.')
+              ? (isHt ? 'Kesyon ak repons pou elèv yo — jere, òganize, ak kontwole vizibilite.' : inlineText(lang, 'Questions & answers for learners — manage, organize, and control visibility.'))
               : selected === 'validation'
-                ? (isHt ? 'Tcheke kalite kontni an ak erè anvan publish.' : 'Check content quality and errors before publishing.')
+                ? (isHt ? 'Tcheke kalite kontni an ak erè anvan publish.' : inlineText(lang, 'Check content quality and errors before publishing.'))
                 : selected === 'curriculum'
-                ? (isHt ? 'Bati estrikti kou a ak chapit ak leson detaye.' : 'Build the course structure with chapters and detailed lessons.')
+                ? (isHt ? 'Bati estrikti kou a ak chapit ak leson detaye.' : inlineText(lang, 'Build the course structure with chapters and detailed lessons.'))
                 : selected === 'lesson'
                   ? (isHt ? `Modifye blòk kontni leson: ${selectedLesson?.title || '...'}` : `Edit content blocks for lesson: ${selectedLesson?.title || '...'}`)
                   : selected === null
-                    ? (isHt ? 'Tit ak deskripsyon an — sa achtè yo wè an premye.' : 'Title and description — what buyers see first.')
-                    : (isHt ? 'Kontni modil la — leson, konsèy, ak materyèl.' : 'Module content — lessons, tips, and materials.')}
+                    ? (isHt ? 'Tit ak deskripsyon an — sa achtè yo wè an premye.' : inlineText(lang, 'Title and description — what buyers see first.'))
+                    : (isHt ? 'Kontni modil la — leson, konsèy, ak materyèl.' : inlineText(lang, 'Module content — lessons, tips, and materials.'))}
           </p>
         </div>
       </header>
@@ -443,7 +444,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
               className={styles.canvasTitle}
               value={form.title}
               onChange={(e) => handleChange('title', e.target.value)}
-              placeholder={isHt ? 'Tit kou a...' : 'Course title…'}
+              placeholder={isHt ? 'Tit kou a...' : inlineText(lang, 'Course title…')}
               maxLength={200}
               aria-invalid={errors.title ? 'true' : 'false'}
             />
@@ -458,7 +459,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
               onChange={(e) => handleChange('description', e.target.value)}
               placeholder={isHt
                 ? 'Dekri sa elèv yo pral aprann, pou kiyès li ye, ak rezilta yo pral jwenn...'
-                : 'Describe what students will learn, who it is for, and the outcome…'}
+                : inlineText(lang, 'Describe what students will learn, who it is for, and the outcome…')}
               rows={10}
               maxLength={5000}
               aria-invalid={errors.description ? 'true' : 'false'}
@@ -475,7 +476,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
               className={styles.canvasTitle}
               value={activeModule?.title || ''}
               onChange={(e) => handleModuleChange(selected, 'title', e.target.value)}
-              placeholder={isHt ? 'Tit modil la...' : 'Module title…'}
+              placeholder={isHt ? 'Tit modil la...' : inlineText(lang, 'Module title…')}
               maxLength={200}
             />
             <textarea
@@ -484,7 +485,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
               onChange={(e) => handleModuleChange(selected, 'description', e.target.value)}
               placeholder={isHt
                 ? 'Ekri kontni leson an isit la...'
-                : 'Write the lesson content here…'}
+                : inlineText(lang, 'Write the lesson content here…')}
               rows={12}
             />
             {/* Universal content block editor for this module */}
@@ -526,12 +527,12 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
 
   const qualityGroups = useMemo(() => {
     const groups = {
-      course: { title: isHt ? 'Enfòmasyon kou' : 'Course information', target: 'overview', items: [] },
-      curriculum: { title: isHt ? 'Kurikilòm' : 'Curriculum', target: 'curriculum', items: [] },
-      media: { title: isHt ? 'Medya & aksè' : 'Media & access', target: 'props', items: [] },
-      path: { title: isHt ? 'Che aprantisaj' : 'Learning path', target: 'props', items: [] },
-      projects: { title: isHt ? 'Pwojè' : 'Projects', target: 'props', items: [] },
-      misc: { title: isHt ? 'Rekòmandasyon' : 'Recommendations', target: 'props', items: [] },
+      course: { title: isHt ? 'Enfòmasyon kou' : inlineText(lang, 'Course information'), target: 'overview', items: [] },
+      curriculum: { title: isHt ? 'Kurikilòm' : inlineText(lang, 'Curriculum'), target: 'curriculum', items: [] },
+      media: { title: isHt ? 'Medya & aksè' : inlineText(lang, 'Media & access'), target: 'props', items: [] },
+      path: { title: isHt ? 'Che aprantisaj' : inlineText(lang, 'Learning path'), target: 'props', items: [] },
+      projects: { title: isHt ? 'Pwojè' : inlineText(lang, 'Projects'), target: 'props', items: [] },
+      misc: { title: isHt ? 'Rekòmandasyon' : inlineText(lang, 'Recommendations'), target: 'props', items: [] },
     };
 
     const classify = (issue) => {
@@ -572,8 +573,8 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
     <span className={`${styles.deliveryBadge} ${isExternal ? styles.deliveryBadgeExternal : styles.deliveryBadgeOnline}`}>
       <i className={`fas ${isExternal ? 'fa-globe' : 'fa-laptop-code'}`} aria-hidden="true" />
       {isExternal
-        ? (isHt ? 'Kou Ekstèn' : 'External')
-        : (isHt ? 'Sou Atelnyo' : 'Online')}
+        ? (isHt ? 'Kou Ekstèn' : inlineText(lang, 'External'))
+        : (isHt ? 'Sou Atelnyo' : inlineText(lang, 'Online'))}
     </span>
   );
 
@@ -593,29 +594,29 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
           <PropInput
             value={form.short_description}
             onChange={(e) => handleChange('short_description', e.target.value)}
-            placeholder={isHt ? 'Rezime kout pou kat ak previews...' : 'One-line summary for cards and previews...'}
+            placeholder={isHt ? 'Rezime kout pou kat ak previews...' : inlineText(lang, 'One-line summary for cards and previews...')}
             maxLength={200}
           />
         </PropField>
         <PropField label="Difficulty" labelHt="Nivo" lang={lang}>
           <PropSelect value={form.difficulty} onChange={(e) => handleChange('difficulty', e.target.value)}>
-            <option value="beginner">{isHt ? 'Debitan' : 'Beginner'}</option>
-            <option value="intermediate">{isHt ? 'Mwayen' : 'Intermediate'}</option>
-            <option value="advanced">{isHt ? 'Avanse' : 'Advanced'}</option>
+            <option value="beginner">{isHt ? 'Debitan' : inlineText(lang, 'Beginner')}</option>
+            <option value="intermediate">{isHt ? 'Mwayen' : inlineText(lang, 'Intermediate')}</option>
+            <option value="advanced">{isHt ? 'Avanse' : inlineText(lang, 'Advanced')}</option>
           </PropSelect>
         </PropField>
         <PropField label="Category" labelHt="Kategori" lang={lang}>
           <PropInput
             value={form.category}
             onChange={(e) => handleChange('category', e.target.value)}
-            placeholder={isHt ? 'Teknoloji, Biznis, Atizay...' : 'Technology, Business, Art…'}
+            placeholder={isHt ? 'Teknoloji, Biznis, Atizay...' : inlineText(lang, 'Technology, Business, Art…')}
           />
         </PropField>
         <PropField label="Estimated Duration" labelHt="Durasyon Estime" lang={lang}>
           <PropInput
             value={form.estimated_duration}
             onChange={(e) => handleChange('estimated_duration', e.target.value)}
-            placeholder={isHt ? '12 èdtan, 4 semèn, 20 lesyon...' : '12 hours, 4 weeks, 20 lessons...'}
+            placeholder={isHt ? '12 èdtan, 4 semèn, 20 lesyon...' : inlineText(lang, '12 hours, 4 weeks, 20 lessons...')}
             maxLength={60}
           />
         </PropField>
@@ -633,7 +634,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
           <PropInput
             value={form.target_audience}
             onChange={(e) => handleChange('target_audience', e.target.value)}
-            placeholder={isHt ? 'Kiyès kou sa a ye pou?' : 'Who is this course for?'}
+            placeholder={isHt ? 'Kiyès kou sa a ye pou?' : inlineText(lang, 'Who is this course for?')}
             maxLength={300}
           />
         </PropField>
@@ -642,7 +643,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
             className={styles.propsTextarea}
             value={form.objectives}
             onChange={(e) => handleChange('objectives', e.target.value)}
-            placeholder={isHt ? 'Yonn pa lin\nAprende baz Python\nBati yon sit web' : 'One per line\nLearn Python basics\nBuild a web app'}
+            placeholder={isHt ? 'Yonn pa lin\nAprende baz Python\nBati yon sit web' : inlineText(lang, 'One per line\nLearn Python basics\nBuild a web app')}
             rows={3}
           />
         </PropField>
@@ -651,7 +652,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
             className={styles.propsTextarea}
             value={form.prerequisites}
             onChange={(e) => handleChange('prerequisites', e.target.value)}
-            placeholder={isHt ? 'Yonn pa lin\nKonnen enfòmatik bazik\nPython enstale' : 'One per line\nBasic computer skills\nPython installed'}
+            placeholder={isHt ? 'Yonn pa lin\nKonnen enfòmatik bazik\nPython enstale' : inlineText(lang, 'One per line\nBasic computer skills\nPython installed')}
             rows={2}
           />
         </PropField>
@@ -665,13 +666,13 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
         lang={lang}
         hint={isHt
           ? 'Opsyonèl — sèlman pou kou lang. Pa enfòse sou lòt kou.'
-          : 'Optional — for language courses only. Never forced on other courses.'}
+          : inlineText(lang, 'Optional — for language courses only. Never forced on other courses.')}
       >
         <PropField label="Teaching language" labelHt="Lang ansèyman" lang={lang}>
           <PropInput
             value={form.teaching_language}
             onChange={(e) => handleChange('teaching_language', e.target.value)}
-            placeholder={isHt ? 'Anglè, Kreyòl, Panyòl...' : 'English, Haitian Creole, Spanish…'}
+            placeholder={isHt ? 'Anglè, Kreyòl, Panyòl...' : inlineText(lang, 'English, Haitian Creole, Spanish…')}
             maxLength={60}
           />
         </PropField>
@@ -679,12 +680,12 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
           label="Learner language"
           labelHt="Lang elèv"
           lang={lang}
-          hint={isHt ? 'Fakiltatif — se pa tout kou lang gen yon lang tradiksyon.' : 'Optional — not every language course has a translation language.'}
+          hint={isHt ? 'Fakiltatif — se pa tout kou lang gen yon lang tradiksyon.' : inlineText(lang, 'Optional — not every language course has a translation language.')}
         >
           <PropInput
             value={form.learner_language}
             onChange={(e) => handleChange('learner_language', e.target.value)}
-            placeholder={isHt ? 'Kreyòl Ayisyen...' : 'Haitian Creole…'}
+            placeholder={isHt ? 'Kreyòl Ayisyen...' : inlineText(lang, 'Haitian Creole…')}
             maxLength={60}
           />
         </PropField>
@@ -692,7 +693,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
           <PropInput
             value={form.learning_objective}
             onChange={(e) => handleChange('learning_objective', e.target.value)}
-            placeholder={isHt ? 'e.g. Kòmande manje an Anglè.' : 'e.g. Order food in English.'}
+            placeholder={isHt ? 'e.g. Kòmande manje an Anglè.' : inlineText(lang, 'e.g. Order food in English.')}
             maxLength={300}
           />
         </PropField>
@@ -705,7 +706,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
         labelHt="Règ Konpleksyon"
         lang={lang}
         accent="#10b981"
-        hint={isHt ? 'Konfigurè règ pou konplete kou a. Pa gen règ = tout blòk obligatwa dwe fini.' : 'Configure rules for course completion. No rules = all required blocks must be completed.'}
+        hint={isHt ? 'Konfigurè règ pou konplete kou a. Pa gen règ = tout blòk obligatwa dwe fini.' : inlineText(lang, 'Configure rules for course completion. No rules = all required blocks must be completed.')}
       >
         <CompletionRulesEditor
           rules={form.completion_rules || []}
@@ -720,7 +721,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
           label="Hashtags"
           labelHt="Hashtags"
           lang={lang}
-          hint={isHt ? 'Separe ak espas — #Python #Kreyol' : 'Separate with spaces — #Python #Kreyol'}
+          hint={isHt ? 'Separe ak espas — #Python #Kreyol' : inlineText(lang, 'Separate with spaces — #Python #Kreyol')}
         >
           <PropInput
             value={form.hashtags}
@@ -733,7 +734,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
           value={form.image_url}
           onChange={(v) => handleChange('image_url', v)}
           kind="image"
-          label={isHt ? 'Imaj Kouvèti' : 'Cover Image'}
+          label={isHt ? 'Imaj Kouvèti' : inlineText(lang, 'Cover Image')}
           placeholder="https://example.com/cover.jpg"
           isPremium={isPremium}
           required
@@ -743,7 +744,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
           value={form.video_url}
           onChange={(v) => handleChange('video_url', v)}
           kind="video"
-          label={isHt ? 'Videyo Pwomosyon' : 'Promo Video'}
+          label={isHt ? 'Videyo Pwomosyon' : inlineText(lang, 'Promo Video')}
           placeholder="https://youtube.com/watch?v=..."
           isPremium={isPremium}
           lang={lang}
@@ -768,7 +769,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
           lang={lang}
           hint={isHt
             ? 'Pri yon fwa pou aksè pou toujou. Kite vid si pa gen LTD.'
-            : 'One-time price for lifetime access. Leave empty if no LTD.'}
+            : inlineText(lang, 'One-time price for lifetime access. Leave empty if no LTD.')}
         >
           <PropInput
             type="number"
@@ -791,7 +792,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
             error={errors.external_url}
             hint={isHt
               ? 'Kote elèv yo ale pou enskri oswa aprann (Zoom, YouTube, yon sit, yon enstitisyon...)'
-              : 'Where students go to enroll or learn (Zoom, YouTube, a website, an institution…)'}
+              : inlineText(lang, 'Where students go to enroll or learn (Zoom, YouTube, a website, an institution…)')}
           >
             <PropInput
               type="url"
@@ -804,12 +805,12 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
             label="Course Format"
             labelHt="Fòma Kou a"
             lang={lang}
-            hint={isHt ? 'Zoom, Google Meet, YouTube, klas, enstitisyon...' : 'Zoom, Google Meet, YouTube, classroom, institution…'}
+            hint={isHt ? 'Zoom, Google Meet, YouTube, klas, enstitisyon...' : inlineText(lang, 'Zoom, Google Meet, YouTube, classroom, institution…')}
           >
             <PropInput
               value={form.external_format}
               onChange={(e) => handleChange('external_format', e.target.value)}
-              placeholder={isHt ? 'Zoom / YouTube / Klas...' : 'Zoom / YouTube / Classroom…'}
+              placeholder={isHt ? 'Zoom / YouTube / Klas...' : inlineText(lang, 'Zoom / YouTube / Classroom…')}
               maxLength={100}
             />
           </PropField>
@@ -819,7 +820,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
       <PropertyGroup icon="fa-chart-line" label="Course Quality" labelHt="Kalite Kou" lang={lang} accent="#6366f1">
         {qualityLoading ? (
           <p className={styles.propsHint}>
-            <i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap tcheke...' : 'Checking…'}
+            <i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap tcheke...' : inlineText(lang, 'Checking…')}
           </p>
         ) : qualityReport ? (
           (() => {
@@ -828,13 +829,13 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
             const qRecs = Array.isArray(qualityReport.recommendations) ? qualityReport.recommendations : [];
             const readiness = qualityReport.readiness_level || (qualityReport.is_publishable ? 'ready' : (qErrors.length > 0 ? 'blocked' : 'needs_attention'));
             const readinessText = readiness === 'ready'
-              ? (isHt ? 'Pare pou pibliye' : 'Ready to publish')
+              ? (isHt ? 'Pare pou pibliye' : inlineText(lang, 'Ready to publish'))
               : readiness === 'needs_attention'
-                ? (isHt ? 'Bezwen atansyon' : 'Needs attention')
-                : (isHt ? 'Bloke' : 'Blocked');
+                ? (isHt ? 'Bezwen atansyon' : inlineText(lang, 'Needs attention'))
+                : (isHt ? 'Bloke' : inlineText(lang, 'Blocked'));
             const readinessColor = readiness === 'ready' ? '#10b981' : readiness === 'needs_attention' ? '#f59e0b' : '#ef4444';
             const clean = qErrors.length === 0 && qWarnings.length === 0 && qRecs.length === 0;
-            const issueGroups = qualityGroups.length > 0 ? qualityGroups : [{ title: isHt ? 'Lè sa a' : 'At the moment', target: 'overview', items: [] }];
+            const issueGroups = qualityGroups.length > 0 ? qualityGroups : [{ title: isHt ? 'Lè sa a' : inlineText(lang, 'At the moment'), target: 'overview', items: [] }];
 
             return (
               <>
@@ -852,7 +853,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
                       {readinessText}
                     </div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                      {qErrors.length} {isHt ? 'erè' : 'errors'} · {qWarnings.length} {isHt ? 'avètisman' : 'warnings'} · {qRecs.length} {isHt ? 'rekòmandasyon' : 'tips'}
+                      {qErrors.length} {isHt ? 'erè' : inlineText(lang, 'errors')} · {qWarnings.length} {isHt ? 'avètisman' : inlineText(lang, 'warnings')} · {qRecs.length} {isHt ? 'rekòmandasyon' : inlineText(lang, 'tips')}
                     </div>
                   </div>
                 </div>
@@ -864,7 +865,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
                     </div>
                     {group.items.length === 0 ? (
                       <div style={{ fontSize: '0.76rem', color: '#10b981' }}>
-                        {isHt ? 'Tout sa bon nan seksyon sa a.' : 'This section looks good.'}
+                        {isHt ? 'Tout sa bon nan seksyon sa a.' : inlineText(lang, 'This section looks good.')}
                       </div>
                     ) : (
                       group.items.map((issue, idx) => {
@@ -894,12 +895,12 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
 
                 {clean && (
                   <p style={{ fontSize: '0.78rem', color: '#10b981', margin: 0 }}>
-                    ✅ {isHt ? 'Pa gen pwoblèm — kou a pare!' : 'No issues — the course is ready!'}
+                    ✅ {isHt ? 'Pa gen pwoblèm — kou a pare!' : inlineText(lang, 'No issues — the course is ready!')}
                   </p>
                 )}
                 {!qualityReport.is_publishable && (
                   <p style={{ fontSize: '0.75rem', color: '#ef4444', margin: '8px 0 0' }}>
-                    {isHt ? 'Kòrèk erè yo anvan w pibliye.' : 'Fix the errors before publishing.'}
+                    {isHt ? 'Kòrèk erè yo anvan w pibliye.' : inlineText(lang, 'Fix the errors before publishing.')}
                   </p>
                 )}
               </>
@@ -907,12 +908,12 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
           })()
         ) : (
           <p className={styles.propsHint}>
-            {isHt ? 'Sove kou a pou wè rapò kalite a.' : 'Save the course to see the quality report.'}
+            {isHt ? 'Sove kou a pou wè rapò kalite a.' : inlineText(lang, 'Save the course to see the quality report.')}
           </p>
         )}
         {savedId && (
           <button type="button" className={styles.propsBtn} onClick={fetchQuality}>
-            <i className="fas fa-refresh" /> {isHt ? 'Rechaje' : 'Refresh'}
+            <i className="fas fa-refresh" /> {isHt ? 'Rechaje' : inlineText(lang, 'Refresh')}
           </button>
         )}
       </PropertyGroup>
@@ -921,12 +922,12 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
         {/* Current status badge */}
         <div className={styles.statusBadgeRow}>
           <span className={`${styles.statusBadge} ${styles[`status_${courseStatus}`] || ''}`}>
-            {courseStatus === 'draft' && <><i className="fas fa-pen" /> {isHt ? 'Bouyon' : 'Draft'}</>}
-            {courseStatus === 'building' && <><i className="fas fa-hammer" /> {isHt ? 'Ap bati' : 'Building'}</>}
-            {courseStatus === 'review' && <><i className="fas fa-eye" /> {isHt ? 'Revizyon' : 'Review'}</>}
-            {courseStatus === 'published' && <><i className="fas fa-globe" /> {isHt ? 'Pibliye' : 'Published'}</>}
-            {courseStatus === 'updating' && <><i className="fas fa-sync" /> {isHt ? 'Mete ajou' : 'Updating'}</>}
-            {courseStatus === 'archived' && <><i className="fas fa-archive" /> {isHt ? 'Achive' : 'Archived'}</>}
+            {courseStatus === 'draft' && <><i className="fas fa-pen" /> {isHt ? 'Bouyon' : inlineText(lang, 'Draft')}</>}
+            {courseStatus === 'building' && <><i className="fas fa-hammer" /> {isHt ? 'Ap bati' : inlineText(lang, 'Building')}</>}
+            {courseStatus === 'review' && <><i className="fas fa-eye" /> {isHt ? 'Revizyon' : inlineText(lang, 'Review')}</>}
+            {courseStatus === 'published' && <><i className="fas fa-globe" /> {isHt ? 'Pibliye' : inlineText(lang, 'Published')}</>}
+            {courseStatus === 'updating' && <><i className="fas fa-sync" /> {isHt ? 'Mete ajou' : inlineText(lang, 'Updating')}</>}
+            {courseStatus === 'archived' && <><i className="fas fa-archive" /> {isHt ? 'Achive' : inlineText(lang, 'Archived')}</>}
           </span>
         </div>
 
@@ -935,38 +936,38 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
           <div className={styles.statusTransitions}>
             {courseStatus === 'draft' && (
               <button type="button" className={styles.statusTransitionBtn} onClick={async () => {
-                try { await courseService.transition(savedIdRef.current, 'building'); setCourseStatus('building'); showToast?.(isHt ? 'Kou a kòmanse bati.' : 'Course moved to building.', 'check-circle'); } catch (e) { showToast?.(e?.response?.data?.detail || 'Error', 'circle-exclamation'); }
+                try { await courseService.transition(savedIdRef.current, 'building'); setCourseStatus('building'); showToast?.(isHt ? 'Kou a kòmanse bati.' : inlineText(lang, 'Course moved to building.'), 'check-circle'); } catch (e) { showToast?.(e?.response?.data?.detail || 'Error', 'circle-exclamation'); }
               }}>
-                <i className="fas fa-hammer" /> {isHt ? 'Kòmanse bati' : 'Start building'}
+                <i className="fas fa-hammer" /> {isHt ? 'Kòmanse bati' : inlineText(lang, 'Start building')}
               </button>
             )}
             {courseStatus === 'building' && (
               <button type="button" className={styles.statusTransitionBtn} onClick={async () => {
-                try { await courseService.transition(savedIdRef.current, 'review'); setCourseStatus('review'); showToast?.(isHt ? 'Kou a nan revizyon.' : 'Course submitted for review.', 'check-circle'); } catch (e) { showToast?.(e?.response?.data?.detail || 'Error', 'circle-exclamation'); }
+                try { await courseService.transition(savedIdRef.current, 'review'); setCourseStatus('review'); showToast?.(isHt ? 'Kou a nan revizyon.' : inlineText(lang, 'Course submitted for review.'), 'check-circle'); } catch (e) { showToast?.(e?.response?.data?.detail || 'Error', 'circle-exclamation'); }
               }}>
-                <i className="fas fa-eye" /> {isHt ? 'Voye pou revizyon' : 'Submit for review'}
+                <i className="fas fa-eye" /> {isHt ? 'Voye pou revizyon' : inlineText(lang, 'Submit for review')}
               </button>
             )}
             {courseStatus === 'review' && (
               <button type="button" className={styles.statusTransitionBtn} onClick={async () => {
-                try { await courseService.transition(savedIdRef.current, 'building'); setCourseStatus('building'); showToast?.(isHt ? 'Retounen nan bati.' : 'Returned to building.', 'check-circle'); } catch (e) { showToast?.(e?.response?.data?.detail || 'Error', 'circle-exclamation'); }
+                try { await courseService.transition(savedIdRef.current, 'building'); setCourseStatus('building'); showToast?.(isHt ? 'Retounen nan bati.' : inlineText(lang, 'Returned to building.'), 'check-circle'); } catch (e) { showToast?.(e?.response?.data?.detail || 'Error', 'circle-exclamation'); }
               }}>
-                <i className="fas fa-arrow-left" /> {isHt ? 'Retounen nan bati' : 'Back to building'}
+                <i className="fas fa-arrow-left" /> {isHt ? 'Retounen nan bati' : inlineText(lang, 'Back to building')}
               </button>
             )}
             {(courseStatus === 'published' || courseStatus === 'updating') && (
               <button type="button" className={`${styles.statusTransitionBtn} ${styles.statusTransitionDanger}`} onClick={async () => {
-                if (!window.confirm(isHt ? 'Vle achive kou sa a?' : 'Archive this course?')) return;
-                try { await courseService.transition(savedIdRef.current, 'archived'); setCourseStatus('archived'); showToast?.(isHt ? 'Kou a achive.' : 'Course archived.', 'check-circle'); } catch (e) { showToast?.(e?.response?.data?.detail || 'Error', 'circle-exclamation'); }
+                if (!window.confirm(isHt ? 'Vle achive kou sa a?' : inlineText(lang, 'Archive this course?'))) return;
+                try { await courseService.transition(savedIdRef.current, 'archived'); setCourseStatus('archived'); showToast?.(isHt ? 'Kou a achive.' : inlineText(lang, 'Course archived.'), 'check-circle'); } catch (e) { showToast?.(e?.response?.data?.detail || 'Error', 'circle-exclamation'); }
               }}>
-                <i className="fas fa-archive" /> {isHt ? 'Achive' : 'Archive'}
+                <i className="fas fa-archive" /> {isHt ? 'Achive' : inlineText(lang, 'Archive')}
               </button>
             )}
             {courseStatus === 'archived' && (
               <button type="button" className={styles.statusTransitionBtn} onClick={async () => {
-                try { await courseService.transition(savedIdRef.current, 'draft'); setCourseStatus('draft'); showToast?.(isHt ? 'Kou a retounen nan bouyon.' : 'Course restored to draft.', 'check-circle'); } catch (e) { showToast?.(e?.response?.data?.detail || 'Error', 'circle-exclamation'); }
+                try { await courseService.transition(savedIdRef.current, 'draft'); setCourseStatus('draft'); showToast?.(isHt ? 'Kou a retounen nan bouyon.' : inlineText(lang, 'Course restored to draft.'), 'check-circle'); } catch (e) { showToast?.(e?.response?.data?.detail || 'Error', 'circle-exclamation'); }
               }}>
-                <i className="fas fa-undo" /> {isHt ? 'Retounen' : 'Restore'}
+                <i className="fas fa-undo" /> {isHt ? 'Retounen' : inlineText(lang, 'Restore')}
               </button>
             )}
           </div>
@@ -976,7 +977,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
           {adminManaged
             ? (isHt
               ? 'W ap modifye kou a kòm administratè; jesyon piblikasyon rete nan Intelligence.'
-              : 'You are editing this course as an administrator; publication controls remain in Intelligence.')
+              : inlineText(lang, 'You are editing this course as an administrator; publication controls remain in Intelligence.'))
             : isHt
             ? isExternal
               ? 'Kou a kòmanse kòm bouyon. Klike “Pibliye” anlè a pou l vin piblik — Atelnyo prezante kou a epi pouse elèv yo ale aprann sou platfòm ekstèn lan (li klè sou paj piblik la).'
@@ -1011,7 +1012,7 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
         />
       )}
       <StudioEditorShell
-      title={isHt ? 'Editè Kou' : 'Course Editor'}
+      title={isHt ? 'Editè Kou' : inlineText(lang, 'Course Editor')}
       icon="fa-graduation-cap"
       lang={lang}
       docTitle={form.title.trim()}
@@ -1025,8 +1026,8 @@ export default function CourseEditor({ onClose, onSuccess, onSaved, lang = 'en',
       onVersionHistory={adminManaged ? undefined : () => setShowVersionHistory(true)}
       onSave={handleSave}
       onPublish={adminManaged ? undefined : handlePublish}
-      publishLabel={isHt ? 'Pibliye' : 'Publish'}
-      saveLabel={hasSaved ? (isHt ? 'Sove' : 'Save') : (isHt ? 'Kreye Kou' : 'Create Course')}
+      publishLabel={isHt ? 'Pibliye' : inlineText(lang, 'Publish')}
+      saveLabel={hasSaved ? (isHt ? 'Sove' : inlineText(lang, 'Save')) : (isHt ? 'Kreye Kou' : inlineText(lang, 'Create Course'))}
       canSave
       validation={readiness()}
       onFixValidation={(item) => {

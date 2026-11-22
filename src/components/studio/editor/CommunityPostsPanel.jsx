@@ -25,6 +25,7 @@ import PanelSkeleton, {
 import { POST_MAX_LENGTH, countPostChars, validatePostDraft } from '../../community/postRules';
 import CommentListSkeleton from '../../community/CommentListSkeleton';
 import styles from './communityEditor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const asArray = (data) => (Array.isArray(data) ? data : (data?.results || []));
 const PAGE_SIZE = 30;
@@ -191,7 +192,7 @@ function PostRichContent({ post, lang }) {
         video.kind === 'embed' ? (
           <VideoEmbedFrame
             src={video.src}
-            title={lang === 'ht' ? 'Videyo pòs la' : 'Post video'}
+            title={lang === 'ht' ? 'Videyo pòs la' : inlineText(lang, 'Post video')}
             lang={lang}
             style={{ borderRadius: 10, marginTop: 8 }}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -308,11 +309,11 @@ export default function CommunityPostsPanel({
   const handlePickImage = useCallback(async (file) => {
     if (!file) return;
     if (!file.type?.startsWith('image/')) {
-      showToast?.(isHt ? 'Tanpri chwazi yon imaj.' : 'Please choose an image file.', 'exclamation-triangle');
+      showToast?.(isHt ? 'Tanpri chwazi yon imaj.' : inlineText(lang, 'Please choose an image file.'), 'exclamation-triangle');
       return;
     }
     if (file.size > 8 * 1024 * 1024) {
-      showToast?.(isHt ? 'Imaj la twò gwo (max 8 MB).' : 'Image is too large (max 8 MB).', 'exclamation-triangle');
+      showToast?.(isHt ? 'Imaj la twò gwo (max 8 MB).' : inlineText(lang, 'Image is too large (max 8 MB).'), 'exclamation-triangle');
       return;
     }
     setUploadingImage(true);
@@ -326,12 +327,12 @@ export default function CommunityPostsPanel({
       const res = await api.post('media/upload/', { file: base64, kind: 'image', filename: file.name || 'post-image' });
       if (res?.data?.url) {
         setDraftImageUrl(res.data.url);
-        showToast?.(isHt ? 'Imaj ajoute.' : 'Image added.', 'image');
+        showToast?.(isHt ? 'Imaj ajoute.' : inlineText(lang, 'Image added.'), 'image');
       } else {
-        showToast?.(isHt ? 'Telechajman imaj echwe.' : 'Image upload failed.', 'circle-exclamation');
+        showToast?.(isHt ? 'Telechajman imaj echwe.' : inlineText(lang, 'Image upload failed.'), 'circle-exclamation');
       }
     } catch {
-      showToast?.(isHt ? 'Telechajman imaj echwe.' : 'Image upload failed.', 'circle-exclamation');
+      showToast?.(isHt ? 'Telechajman imaj echwe.' : inlineText(lang, 'Image upload failed.'), 'circle-exclamation');
     } finally {
       setUploadingImage(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -356,7 +357,7 @@ export default function CommunityPostsPanel({
     const content = check.text;
     const cleanPollOptions = pollOptions.map((o) => o.trim()).filter(Boolean).slice(0, 10);
     if (showPoll && pollQuestion.trim() && cleanPollOptions.length < 2) {
-      showToast?.(isHt ? 'Sondaj la bezwen omwen 2 opsyon.' : 'A poll needs at least 2 options.', 'circle-exclamation');
+      showToast?.(isHt ? 'Sondaj la bezwen omwen 2 opsyon.' : inlineText(lang, 'A poll needs at least 2 options.'), 'circle-exclamation');
       return;
     }
     setPublishing(true);
@@ -371,11 +372,11 @@ export default function CommunityPostsPanel({
       }
       await communitiesService.createPost(slug, payload);
       resetComposer();
-      showToast?.(isHt ? 'Pòs pibliye!' : 'Post published!', 'check-circle');
+      showToast?.(isHt ? 'Pòs pibliye!' : inlineText(lang, 'Post published!'), 'check-circle');
       refetch();
     } catch (err) {
       showToast?.(
-        err?.response?.data?.detail || (isHt ? 'Pa t kapab pibliye pòs la.' : 'Could not publish the post.'),
+        err?.response?.data?.detail || (isHt ? 'Pa t kapab pibliye pòs la.' : inlineText(lang, 'Could not publish the post.')),
         'circle-exclamation',
       );
     } finally {
@@ -395,13 +396,13 @@ export default function CommunityPostsPanel({
       refetch();
       showToast?.(
         post.is_pinned
-          ? (isHt ? 'Pòs la dekloure.' : 'Post unpinned.')
-          : (isHt ? 'Pòs la kloure anlè.' : 'Post pinned to the top.'),
+          ? (isHt ? 'Pòs la dekloure.' : inlineText(lang, 'Post unpinned.'))
+          : (isHt ? 'Pòs la kloure anlè.' : inlineText(lang, 'Post pinned to the top.')),
         'thumbtack',
       );
     } catch (err) {
       showToast?.(
-        err?.response?.data?.detail || (isHt ? 'Pa t kapab chanje pòs la.' : 'Could not update the post.'),
+        err?.response?.data?.detail || (isHt ? 'Pa t kapab chanje pòs la.' : inlineText(lang, 'Could not update the post.')),
         'circle-exclamation',
       );
     } finally {
@@ -424,7 +425,7 @@ export default function CommunityPostsPanel({
       if (commentsForRef.current === post.id) {
         setCommentsError(
           err?.response?.data?.detail
-            || (isHt ? 'Pa t kapab chaje kòmantè yo.' : 'Could not load the comments.'),
+            || (isHt ? 'Pa t kapab chaje kòmantè yo.' : inlineText(lang, 'Could not load the comments.')),
         );
       }
     } finally {
@@ -452,10 +453,10 @@ export default function CommunityPostsPanel({
       await communitiesService.deleteComment(target.id);
       setComments((prev) => prev.filter((c) => c.id !== target.id));
       refetch();
-      showToast?.(isHt ? 'Kòmantè efase.' : 'Comment deleted.', 'trash-can');
+      showToast?.(isHt ? 'Kòmantè efase.' : inlineText(lang, 'Comment deleted.'), 'trash-can');
     } catch (err) {
       showToast?.(
-        err?.response?.data?.detail || (isHt ? 'Pa t kapab efase kòmantè a.' : 'Could not delete the comment.'),
+        err?.response?.data?.detail || (isHt ? 'Pa t kapab efase kòmantè a.' : inlineText(lang, 'Could not delete the comment.')),
         'circle-exclamation',
       );
     } finally {
@@ -471,10 +472,10 @@ export default function CommunityPostsPanel({
     try {
       await communitiesService.deletePost(target.id);
       refetch();
-      showToast?.(isHt ? 'Pòs la efase.' : 'Post deleted.', 'trash-can');
+      showToast?.(isHt ? 'Pòs la efase.' : inlineText(lang, 'Post deleted.'), 'trash-can');
     } catch (err) {
       showToast?.(
-        err?.response?.data?.detail || (isHt ? 'Pa t kapab efase pòs la.' : 'Could not delete the post.'),
+        err?.response?.data?.detail || (isHt ? 'Pa t kapab efase pòs la.' : inlineText(lang, 'Could not delete the post.')),
         'circle-exclamation',
       );
     } finally {
@@ -483,7 +484,7 @@ export default function CommunityPostsPanel({
   }, [deleteTarget, isHt, refetch, showToast]);
 
   if (initialLoading) {
-    return <PanelSkeleton rows={4} label={isHt ? 'Ap chaje pòs yo' : 'Loading posts'} />;
+    return <PanelSkeleton rows={4} label={isHt ? 'Ap chaje pòs yo' : inlineText(lang, 'Loading posts')} />;
   }
 
   const needle = query.trim().toLowerCase();
@@ -499,14 +500,14 @@ export default function CommunityPostsPanel({
     <div>
       <PanelHeader
         icon="fa-comments"
-        title={isHt ? 'Pòs kominote a' : 'Community posts'}
+        title={isHt ? 'Pòs kominote a' : inlineText(lang, 'Community posts')}
         count={typeof totalCount === 'number' ? totalCount : posts.length}
         subtitle={isHt
           ? 'Ekri, kloure oswa modere pòs yo. Itilize bouton "Ekri yon pòs" pou pibliye dirèkteman.'
-          : 'Write, pin, or moderate posts. Use "Write a post" to publish directly.'}
+          : inlineText(lang, 'Write, pin, or moderate posts. Use "Write a post" to publish directly.')}
         refreshing={loading && loadedOnce}
         onRefresh={refetch}
-        refreshLabel={isHt ? 'Rafrechi pòs yo' : 'Refresh posts'}
+        refreshLabel={isHt ? 'Rafrechi pòs yo' : inlineText(lang, 'Refresh posts')}
       >
         {canModerate && (
           <button
@@ -517,8 +518,8 @@ export default function CommunityPostsPanel({
           >
             <i className={`fas ${composerOpen ? 'fa-xmark' : 'fa-pen-to-square'}`} aria-hidden="true" />
             {composerOpen
-              ? (isHt ? 'Fèmen' : 'Close')
-              : (isHt ? 'Ekri yon pòs' : 'Write a post')}
+              ? (isHt ? 'Fèmen' : inlineText(lang, 'Close'))
+              : (isHt ? 'Ekri yon pòs' : inlineText(lang, 'Write a post'))}
           </button>
         )}
       </PanelHeader>
@@ -526,7 +527,7 @@ export default function CommunityPostsPanel({
       {composerOpen && canModerate && (
         <div className={styles.composer} style={{ marginBottom: 16 }}>
           <div className={styles.fieldLabel} style={{ marginBottom: 6 }}>
-            {isHt ? 'Nouvo piblikasyon' : 'New publication'}
+            {isHt ? 'Nouvo piblikasyon' : inlineText(lang, 'New publication')}
           </div>
           <textarea
             ref={draftRef}
@@ -536,9 +537,9 @@ export default function CommunityPostsPanel({
             onChange={(e) => setDraft(e.target.value)}
             placeholder={isHt
               ? 'Ekri sa w vle pataje… Kole yon lyen YouTube, WhatsApp, Facebook oswa sit wèb, li ap vin klike ak aperçu.'
-              : 'Share an update… Paste a YouTube, WhatsApp, Facebook, or website link to make it clickable with a preview.'}
+              : inlineText(lang, 'Share an update… Paste a YouTube, WhatsApp, Facebook, or website link to make it clickable with a preview.')}
             maxLength={POST_MAX_LENGTH}
-            aria-label={isHt ? 'Kontni pòs la' : 'Post content'}
+            aria-label={isHt ? 'Kontni pòs la' : inlineText(lang, 'Post content')}
           />
 
           {draftVideoUrl && (
@@ -547,7 +548,7 @@ export default function CommunityPostsPanel({
               {!draftImageUrl && draftAutoThumb && (
                 <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8rem', color: 'var(--text-secondary, #64748b)' }}>
                   <img src={draftAutoThumb} alt="" loading="lazy" style={{ width: 72, height: 44, borderRadius: 6, objectFit: 'cover' }} />
-                  <span><i className="fab fa-youtube" aria-hidden="true" /> {isHt ? 'Miniyati videyo a ap itilize kòm imaj pòs la.' : 'Video thumbnail will be used as the post image.'}</span>
+                  <span><i className="fab fa-youtube" aria-hidden="true" /> {isHt ? 'Miniyati videyo a ap itilize kòm imaj pòs la.' : inlineText(lang, 'Video thumbnail will be used as the post image.')}</span>
                 </div>
               )}
             </div>
@@ -571,7 +572,7 @@ export default function CommunityPostsPanel({
                 disabled={uploadingImage || publishing}
               >
                 <i className={`fas ${uploadingImage ? 'fa-spinner fa-spin' : 'fa-image'}`} aria-hidden="true" />
-                {uploadingImage ? (isHt ? 'Ap telechaje…' : 'Uploading…') : (isHt ? 'Imaj' : 'Image')}
+                {uploadingImage ? (isHt ? 'Ap telechaje…' : inlineText(lang, 'Uploading…')) : (isHt ? 'Imaj' : inlineText(lang, 'Image'))}
               </button>
               <button
                 type="button"
@@ -579,7 +580,7 @@ export default function CommunityPostsPanel({
                 onClick={() => setShowLinkInput((v) => !v)}
                 aria-expanded={showLinkInput}
               >
-                <i className="fas fa-link" aria-hidden="true" /> {isHt ? 'Lyen' : 'Link'}
+                <i className="fas fa-link" aria-hidden="true" /> {isHt ? 'Lyen' : inlineText(lang, 'Link')}
               </button>
               <button
                 type="button"
@@ -587,7 +588,7 @@ export default function CommunityPostsPanel({
                 onClick={() => setShowPoll((v) => !v)}
                 aria-expanded={showPoll}
               >
-                <i className="fas fa-chart-bar" aria-hidden="true" /> {isHt ? 'Sondaj' : 'Poll'}
+                <i className="fas fa-chart-bar" aria-hidden="true" /> {isHt ? 'Sondaj' : inlineText(lang, 'Poll')}
               </button>
             </div>
           </div>
@@ -600,7 +601,7 @@ export default function CommunityPostsPanel({
                 value={linkValue}
                 onChange={(e) => setLinkValue(e.target.value)}
                 placeholder="https://youtube.com/... oswa https://wa.me/... oswa https://..."
-                aria-label={isHt ? 'Kole lyen' : 'Paste link'}
+                aria-label={isHt ? 'Kole lyen' : inlineText(lang, 'Paste link')}
                 style={{ flex: '1 1 220px' }}
               />
               <button
@@ -616,7 +617,7 @@ export default function CommunityPostsPanel({
                   draftRef.current?.focus();
                 }}
               >
-                <i className="fas fa-plus" aria-hidden="true" /> {isHt ? 'Ajoute lyen' : 'Add link'}
+                <i className="fas fa-plus" aria-hidden="true" /> {isHt ? 'Ajoute lyen' : inlineText(lang, 'Add link')}
               </button>
             </div>
           )}
@@ -628,8 +629,8 @@ export default function CommunityPostsPanel({
                 value={pollQuestion}
                 onChange={(e) => setPollQuestion(e.target.value)}
                 maxLength={300}
-                placeholder={isHt ? 'Kesyon sondaj la...' : 'Poll question...'}
-                aria-label={isHt ? 'Kesyon sondaj' : 'Poll question'}
+                placeholder={isHt ? 'Kesyon sondaj la...' : inlineText(lang, 'Poll question...')}
+                aria-label={isHt ? 'Kesyon sondaj' : inlineText(lang, 'Poll question')}
                 style={{ marginBottom: 8 }}
               />
               {pollOptions.map((opt, i) => (
@@ -642,7 +643,7 @@ export default function CommunityPostsPanel({
                     placeholder={isHt ? `Opsyon ${i + 1}` : `Option ${i + 1}`}
                   />
                   {pollOptions.length > 2 && (
-                    <button type="button" className={styles.iconBtn} onClick={() => setPollOptions((list) => list.filter((_, j) => j !== i))} aria-label={isHt ? 'Retire opsyon' : 'Remove option'}>
+                    <button type="button" className={styles.iconBtn} onClick={() => setPollOptions((list) => list.filter((_, j) => j !== i))} aria-label={isHt ? 'Retire opsyon' : inlineText(lang, 'Remove option')}>
                       <i className="fas fa-times" aria-hidden="true" />
                     </button>
                   )}
@@ -651,15 +652,15 @@ export default function CommunityPostsPanel({
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', fontSize: '0.8rem' }}>
                 {pollOptions.length < 10 && (
                   <button type="button" className={styles.secondaryBtn} onClick={() => setPollOptions((list) => [...list, ''])} style={{ padding: '4px 10px' }}>
-                    + {isHt ? 'Ajoute opsyon' : 'Add option'}
+                    + {isHt ? 'Ajoute opsyon' : inlineText(lang, 'Add option')}
                   </button>
                 )}
                 <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
                   <input type="checkbox" checked={pollAllowMultiple} onChange={(e) => setPollAllowMultiple(e.target.checked)} />
-                  {isHt ? 'Plizyè chwa' : 'Multiple choice'}
+                  {isHt ? 'Plizyè chwa' : inlineText(lang, 'Multiple choice')}
                 </label>
                 <button type="button" className={styles.linkBtn} onClick={() => { setShowPoll(false); setPollQuestion(''); setPollOptions(['', '']); setPollAllowMultiple(false); }} style={{ marginLeft: 'auto' }}>
-                  {isHt ? 'Retire sondaj' : 'Remove poll'}
+                  {isHt ? 'Retire sondaj' : inlineText(lang, 'Remove poll')}
                 </button>
               </div>
             </div>
@@ -671,7 +672,7 @@ export default function CommunityPostsPanel({
               <button
                 type="button"
                 onClick={() => setDraftImageUrl('')}
-                aria-label={isHt ? 'Retire imaj' : 'Remove image'}
+                aria-label={isHt ? 'Retire imaj' : inlineText(lang, 'Remove image')}
                 style={{ position: 'absolute', top: 6, right: 6, border: 'none', background: 'rgba(0,0,0,0.65)', color: '#fff', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer' }}
               >
                 <i className="fas fa-times" aria-hidden="true" />
@@ -680,7 +681,7 @@ export default function CommunityPostsPanel({
           )}
           <div className={styles.composerActions} style={{ marginTop: 12, gap: 8 }}>
             <button type="button" className={styles.secondaryBtn} onClick={resetComposer} disabled={publishing}>
-              {isHt ? 'Anile' : 'Cancel'}
+              {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
             </button>
             <button
               type="button"
@@ -689,7 +690,7 @@ export default function CommunityPostsPanel({
               disabled={publishing || uploadingImage || !draft.trim()}
             >
               <i className={`fas ${publishing ? 'fa-spinner fa-spin' : 'fa-paper-plane'}`} aria-hidden="true" />
-              {publishing ? (isHt ? 'Ap pibliye…' : 'Publishing…') : (isHt ? 'Pibliye pòs' : 'Publish post')}
+              {publishing ? (isHt ? 'Ap pibliye…' : inlineText(lang, 'Publishing…')) : (isHt ? 'Pibliye pòs' : inlineText(lang, 'Publish post'))}
             </button>
           </div>
         </div>
@@ -697,9 +698,9 @@ export default function CommunityPostsPanel({
 
       {error && (
         <PanelError
-          message={isHt ? 'Pat kapab chaje pòs yo.' : 'Could not load the posts.'}
+          message={isHt ? 'Pat kapab chaje pòs yo.' : inlineText(lang, 'Could not load the posts.')}
           onRetry={refetch}
-          retryLabel={isHt ? 'Reyese' : 'Retry'}
+          retryLabel={isHt ? 'Reyese' : inlineText(lang, 'Retry')}
         />
       )}
 
@@ -710,17 +711,17 @@ export default function CommunityPostsPanel({
           className={styles.searchInput}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder={isHt ? 'Chèche nan pòs yo…' : 'Search posts…'}
-          aria-label={isHt ? 'Chèche nan pòs yo' : 'Search posts'}
+          placeholder={isHt ? 'Chèche nan pòs yo…' : inlineText(lang, 'Search posts…')}
+          aria-label={isHt ? 'Chèche nan pòs yo' : inlineText(lang, 'Search posts')}
         />
       </div>
 
       {posts.length > 0 && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
           {[
-            { id: 'all', label: isHt ? 'Tout' : 'All' },
-            { id: 'pinned', label: isHt ? 'Kloure' : 'Pinned' },
-            { id: 'poll', label: isHt ? 'Sondaj' : 'Polls' },
+            { id: 'all', label: isHt ? 'Tout' : inlineText(lang, 'All') },
+            { id: 'pinned', label: isHt ? 'Kloure' : inlineText(lang, 'Pinned') },
+            { id: 'poll', label: isHt ? 'Sondaj' : inlineText(lang, 'Polls') },
           ].map((opt) => (
             <button
               key={opt.id}
@@ -740,13 +741,13 @@ export default function CommunityPostsPanel({
         <PanelEmpty
           icon={needle || postFilter !== 'all' ? 'fa-magnifying-glass' : 'fa-comments'}
           title={needle || postFilter !== 'all'
-            ? (isHt ? 'Pa gen pòs ki koresponn.' : 'No posts match your filters.')
-            : (isHt ? 'Poko gen pòs.' : 'No posts yet.')}
+            ? (isHt ? 'Pa gen pòs ki koresponn.' : inlineText(lang, 'No posts match your filters.'))
+            : (isHt ? 'Poko gen pòs.' : inlineText(lang, 'No posts yet.'))}
           description={needle || postFilter !== 'all'
-            ? (isHt ? 'Ajiste rechèch oswa filtè a pou wè lòt pòs.' : 'Adjust your search or filter to see other posts.')
+            ? (isHt ? 'Ajiste rechèch oswa filtè a pou wè lòt pòs.' : inlineText(lang, 'Adjust your search or filter to see other posts.'))
             : (isHt
               ? 'Lè manm yo kòmanse pataje, pòs yo ap parèt isit la pou ou jere.'
-              : 'Once members start sharing, their posts show up here for you to manage.')}
+              : inlineText(lang, 'Once members start sharing, their posts show up here for you to manage.'))}
         />
       ) : (
         <>
@@ -762,12 +763,12 @@ export default function CommunityPostsPanel({
                     {post.is_pinned && (
                       <span className={`${styles.pill} ${styles.pillOwner}`}>
                         <i className="fas fa-thumbtack" aria-hidden="true" />
-                        {isHt ? 'Kloure' : 'Pinned'}
+                        {isHt ? 'Kloure' : inlineText(lang, 'Pinned')}
                       </span>
                     )}
                     {post.poll_question && (
                       <span className={`${styles.pill} ${styles.pillStaff}`}>
-                        {isHt ? 'Sondaj' : 'Poll'}
+                        {isHt ? 'Sondaj' : inlineText(lang, 'Poll')}
                       </span>
                     )}
                   </div>
@@ -783,7 +784,7 @@ export default function CommunityPostsPanel({
                     <div className={styles.postPoll} style={{ marginTop: 8, padding: 10, border: '1px solid var(--border-color, #e2e8f0)', borderRadius: 10 }}>
                       <div style={{ fontWeight: 600, marginBottom: 6 }}>
                         <i className="fas fa-chart-simple" aria-hidden="true" /> {post.poll_question}
-                        {post.poll_allow_multiple ? <span className={styles.pill} style={{ marginLeft: 6 }}>{isHt ? 'Plizyè chwa' : 'Multiple'}</span> : null}
+                        {post.poll_allow_multiple ? <span className={styles.pill} style={{ marginLeft: 6 }}>{isHt ? 'Plizyè chwa' : inlineText(lang, 'Multiple')}</span> : null}
                       </div>
                       {Array.isArray(post.poll_options) && post.poll_options.length > 0 && (
                         <div style={{ display: 'grid', gap: 6 }}>
@@ -812,7 +813,7 @@ export default function CommunityPostsPanel({
                     aria-expanded={commentsFor === post.id}
                   >
                     <i className="fas fa-comment-dots" aria-hidden="true" />
-                    {isHt ? 'Kòmantè' : 'Comments'}
+                    {isHt ? 'Kòmantè' : inlineText(lang, 'Comments')}
                     {` (${post.comment_count ?? 0})`}
                   </button>
                 </div>
@@ -823,7 +824,7 @@ export default function CommunityPostsPanel({
                       className={styles.iconBtn}
                       onClick={() => togglePin(post)}
                       disabled={busy}
-                      title={post.is_pinned ? (isHt ? 'Dekloure' : 'Unpin') : (isHt ? 'Kloure' : 'Pin')}
+                      title={post.is_pinned ? (isHt ? 'Dekloure' : inlineText(lang, 'Unpin')) : (isHt ? 'Kloure' : inlineText(lang, 'Pin'))}
                       aria-label={post.is_pinned
                         ? (isHt ? `Dekloure pòs @${post.author_username}` : `Unpin post by @${post.author_username}`)
                         : (isHt ? `Kloure pòs @${post.author_username}` : `Pin post by @${post.author_username}`)}
@@ -835,7 +836,7 @@ export default function CommunityPostsPanel({
                       className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
                       onClick={() => setDeleteTarget(post)}
                       disabled={busy}
-                      title={isHt ? 'Efase pòs la' : 'Delete post'}
+                      title={isHt ? 'Efase pòs la' : inlineText(lang, 'Delete post')}
                       aria-label={isHt ? `Efase pòs @${post.author_username}` : `Delete post by @${post.author_username}`}
                     >
                       <i className="fas fa-trash-can" aria-hidden="true" />
@@ -847,7 +848,7 @@ export default function CommunityPostsPanel({
                     <div className={styles.subPanelHead}>
                       <span>
                         <i className="fas fa-comment-dots" aria-hidden="true" />{' '}
-                        {isHt ? 'Kòmantè' : 'Comments'}
+                        {isHt ? 'Kòmantè' : inlineText(lang, 'Comments')}
                         {` (${comments.length})`}
                       </span>
                     </div>
@@ -857,12 +858,12 @@ export default function CommunityPostsPanel({
                       <div className={styles.subError}>
                         <span>{commentsError}</span>
                         <button type="button" className={styles.linkBtn} onClick={() => loadComments(post)}>
-                          {isHt ? 'Reyese' : 'Retry'}
+                          {isHt ? 'Reyese' : inlineText(lang, 'Retry')}
                         </button>
                       </div>
                     ) : comments.length === 0 ? (
                       <div className={styles.subEmpty}>
-                        {isHt ? 'Poko gen kòmantè sou pòs sa a.' : 'No comments on this post yet.'}
+                        {isHt ? 'Poko gen kòmantè sou pòs sa a.' : inlineText(lang, 'No comments on this post yet.')}
                       </div>
                     ) : (
                       <div className={styles.subList}>
@@ -886,7 +887,7 @@ export default function CommunityPostsPanel({
                                 className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
                                 onClick={() => setCommentToDelete(comment)}
                                 disabled={busy}
-                                title={isHt ? 'Efase kòmantè a' : 'Delete comment'}
+                                title={isHt ? 'Efase kòmantè a' : inlineText(lang, 'Delete comment')}
                                 aria-label={isHt
                                   ? `Efase kòmantè @${comment.author_username}`
                                   : `Delete comment by @${comment.author_username}`}
@@ -912,8 +913,8 @@ export default function CommunityPostsPanel({
               disabled={loadingMore}
             >
               {loadingMore
-                ? (isHt ? 'Ap chaje…' : 'Loading…')
-                : (isHt ? 'Chaje plis pòs' : 'Load more posts')}
+                ? (isHt ? 'Ap chaje…' : inlineText(lang, 'Loading…'))
+                : (isHt ? 'Chaje plis pòs' : inlineText(lang, 'Load more posts'))}
             </button>
           </div>
         )}
@@ -923,12 +924,12 @@ export default function CommunityPostsPanel({
       {commentToDelete && (
         <ConfirmModal
           lang={lang}
-          title={isHt ? 'Efase kòmantè a?' : 'Delete comment?'}
+          title={isHt ? 'Efase kòmantè a?' : inlineText(lang, 'Delete comment?')}
           message={isHt
             ? `Kòmantè @${commentToDelete.author_username} ap disparèt pou tout moun.`
             : `@${commentToDelete.author_username}'s comment will be removed for everyone.`}
-          confirmText={isHt ? 'Efase' : 'Delete'}
-          cancelText={isHt ? 'Anile' : 'Cancel'}
+          confirmText={isHt ? 'Efase' : inlineText(lang, 'Delete')}
+          cancelText={isHt ? 'Anile' : inlineText(lang, 'Cancel')}
           onConfirm={confirmDeleteComment}
           onCancel={() => setCommentToDelete(null)}
         />
@@ -937,12 +938,12 @@ export default function CommunityPostsPanel({
       {deleteTarget && (
         <ConfirmModal
           lang={lang}
-          title={isHt ? 'Efase pòs la?' : 'Delete post?'}
+          title={isHt ? 'Efase pòs la?' : inlineText(lang, 'Delete post?')}
           message={isHt
             ? `Pòs @${deleteTarget.author_username} ap disparèt pou tout manm yo. Reaksyon ak kòmantè li yo ale tou.`
             : `@${deleteTarget.author_username}'s post will be removed for every member. Its reactions and comments go with it.`}
-          confirmText={isHt ? 'Efase' : 'Delete'}
-          cancelText={isHt ? 'Anile' : 'Cancel'}
+          confirmText={isHt ? 'Efase' : inlineText(lang, 'Delete')}
+          cancelText={isHt ? 'Anile' : inlineText(lang, 'Cancel')}
           onConfirm={confirmDelete}
           onCancel={() => setDeleteTarget(null)}
         />

@@ -32,6 +32,7 @@ import {
 } from '../../profile/profileTemplates';
 import { getUserIdentity } from '../../../utils/userIdentity';
 import styles from './sections.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 // The real public profile page, lazy-loaded for the in-editor preview modal
 // (keeps it out of the studio chunk; App.jsx already lazy-loads it too).
@@ -411,7 +412,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
     // Validate type
     if (!file.type.startsWith('image/')) {
       showToast?.(
-        isHt ? 'Chwazi yon fichye imaj.' : 'Please select an image file.',
+        isHt ? 'Chwazi yon fichye imaj.' : inlineText(lang, 'Please select an image file.'),
         'exclamation-triangle',
       );
       return;
@@ -427,15 +428,15 @@ export default function PublicProfileSection({ lang, showToast, user }) {
       if (url) {
         setForm((prev) => ({ ...prev, avatar_url: url }));
         showToast?.(
-          isHt ? 'Avatè telechaje!' : 'Avatar uploaded!',
+          isHt ? 'Avatè telechaje!' : inlineText(lang, 'Avatar uploaded!'),
           'check-circle',
         );
       }
     } catch (err) {
       showToast?.(
         err?.message === 'too_large'
-          ? (isHt ? 'Imaj twò gwo (maks 8 MB).' : 'Image too large (max 8 MB).')
-          : (isHt ? 'Erè nan telechaje avatè.' : 'Error uploading avatar.'),
+          ? (isHt ? 'Imaj twò gwo (maks 8 MB).' : inlineText(lang, 'Image too large (max 8 MB).'))
+          : (isHt ? 'Erè nan telechaje avatè.' : inlineText(lang, 'Error uploading avatar.')),
         'exclamation-triangle',
       );
     } finally {
@@ -450,7 +451,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
 
     if (!file.type.startsWith('image/')) {
       showToast?.(
-        isHt ? 'Chwazi yon fichye imaj.' : 'Please select an image file.',
+        isHt ? 'Chwazi yon fichye imaj.' : inlineText(lang, 'Please select an image file.'),
         'exclamation-triangle',
       );
       return;
@@ -466,15 +467,15 @@ export default function PublicProfileSection({ lang, showToast, user }) {
       if (url) {
         setForm((prev) => ({ ...prev, cover_url: url }));
         showToast?.(
-          isHt ? 'Kouvèti telechaje!' : 'Cover uploaded!',
+          isHt ? 'Kouvèti telechaje!' : inlineText(lang, 'Cover uploaded!'),
           'check-circle',
         );
       }
     } catch (err) {
       showToast?.(
         err?.message === 'too_large'
-          ? (isHt ? 'Imaj twò gwo (maks 8 MB).' : 'Image too large (max 8 MB).')
-          : (isHt ? 'Erè nan telechaje kouvèti.' : 'Error uploading cover.'),
+          ? (isHt ? 'Imaj twò gwo (maks 8 MB).' : inlineText(lang, 'Image too large (max 8 MB).'))
+          : (isHt ? 'Erè nan telechaje kouvèti.' : inlineText(lang, 'Error uploading cover.')),
         'exclamation-triangle',
       );
     } finally {
@@ -490,7 +491,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
     creatorProfileService.updateMe({})
       .then((res) => {
         showToast?.(
-          isHt ? 'Pwofil piblik kreye!' : 'Public profile created!',
+          isHt ? 'Pwofil piblik kreye!' : inlineText(lang, 'Public profile created!'),
           'check-circle',
         );
         setProfile(res?.data || null);
@@ -502,7 +503,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
           setFetchError('not_creator');
         } else {
           showToast?.(
-            isHt ? 'Erè nan kreye pwofil.' : 'Error creating profile.',
+            isHt ? 'Erè nan kreye pwofil.' : inlineText(lang, 'Error creating profile.'),
             'exclamation-triangle',
           );
         }
@@ -520,7 +521,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
       showToast?.(
         isHt
           ? 'Chwazi Retabli oswa Efase bouyon an anvan w sove.'
-          : 'Recover or discard the local draft before saving.',
+          : inlineText(lang, 'Recover or discard the local draft before saving.'),
         'exclamation-triangle',
       );
       return;
@@ -576,11 +577,11 @@ export default function PublicProfileSection({ lang, showToast, user }) {
           setSaveError({
             message: isHt
               ? 'Pwofil la sove, men layout la pa t kapab mete ajou. Lòd ak vizibilite seksyon yo poko pibliye.'
-              : 'The profile was saved, but the layout could not be updated. Section order and visibility are not published yet.',
+              : inlineText(lang, 'The profile was saved, but the layout could not be updated. Section order and visibility are not published yet.'),
             fields: [{
               field: 'section_config',
               label: 'Layout',
-              message: isHt ? 'Ouvri Layout epi sove ankò.' : 'Open Layout and save again.',
+              message: isHt ? 'Ouvri Layout epi sove ankò.' : inlineText(lang, 'Open Layout and save again.'),
               tab: 'layout',
             }],
           });
@@ -599,8 +600,8 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         layoutFailed
           ? (isHt
             ? 'Pwofil sove, men layout la pa t kapab mete ajou. Eseye ankò.'
-            : 'Profile saved, but the layout could not be updated. Try again.')
-          : (isHt ? 'Pwofil aktyalize!' : 'Profile updated!'),
+            : inlineText(lang, 'Profile saved, but the layout could not be updated. Try again.'))
+          : (isHt ? 'Pwofil aktyalize!' : inlineText(lang, 'Profile updated!')),
         layoutFailed ? 'exclamation-triangle' : 'check-circle',
       );
     } catch (err) {
@@ -668,7 +669,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
             showToast?.(
               isHt
                 ? 'Espas stokaj la plen — bouyon lokal la pa ka sovgade. Sove manyèlman pou pa pèdi travay ou.'
-                : 'Local storage is full — the safety draft cannot be saved. Save manually so you do not lose work.',
+                : inlineText(lang, 'Local storage is full — the safety draft cannot be saved. Save manually so you do not lose work.'),
               'exclamation-triangle',
             );
           }
@@ -703,7 +704,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
     setForm((prev) => ({ ...prev, ...recoverDraft.form }));
     setRecoverDraft(null);
     showToast?.(
-      isHt ? 'Bouyon retabli — verifye epi sove.' : 'Draft recovered — review and save.',
+      isHt ? 'Bouyon retabli — verifye epi sove.' : inlineText(lang, 'Draft recovered — review and save.'),
       'check-circle',
     );
   }, [recoverDraft, isHt, showToast]);
@@ -712,7 +713,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
     if (draftKey) { removeFormDraft(draftKey).catch(() => {}); }
     setRecoverDraft(null);
     showToast?.(
-      isHt ? 'Bouyon efase. Fòm nan rete jan li te sove a.' : 'Draft discarded. The form is back to the saved version.',
+      isHt ? 'Bouyon efase. Fòm nan rete jan li te sove a.' : inlineText(lang, 'Draft discarded. The form is back to the saved version.'),
       'check-circle',
     );
   }, [draftKey, isHt, showToast]);
@@ -741,7 +742,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         <div className={styles.section}>
           <SectionHeader
             icon="fa-user-circle"
-            title={isHt ? 'Foto pwofil Premium' : 'Premium profile photo'}
+            title={isHt ? 'Foto pwofil Premium' : inlineText(lang, 'Premium profile photo')}
             lang={lang}
             help={{
               ht: 'Kont Premium yo ka mete foto kont yo isit la. Sa pa aktive yon pwofil kreyatè ni lòt zouti kreyatè.',
@@ -751,7 +752,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
           {(form.avatar_url || user.avatar_url) && (
             <img
               src={form.avatar_url || user.avatar_url}
-              alt={isHt ? 'Foto pwofil' : 'Profile photo'}
+              alt={isHt ? 'Foto pwofil' : inlineText(lang, 'Profile photo')}
               style={{ width: 112, height: 112, borderRadius: '50%', objectFit: 'cover', marginBottom: 16 }}
             />
           )}
@@ -770,8 +771,8 @@ export default function PublicProfileSection({ lang, showToast, user }) {
           >
             <i className={`fas ${uploadingAvatar ? 'fa-spinner fa-spin' : 'fa-cloud-upload-alt'}`} aria-hidden="true" />{' '}
             {uploadingAvatar
-              ? (isHt ? 'Ap telechaje...' : 'Uploading...')
-              : (isHt ? 'Telechaje foto pwofil' : 'Upload profile photo')}
+              ? (isHt ? 'Ap telechaje...' : inlineText(lang, 'Uploading...'))
+              : (isHt ? 'Telechaje foto pwofil' : inlineText(lang, 'Upload profile photo'))}
           </button>
         </div>
       );
@@ -782,10 +783,10 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         <div className={styles.section}>
           <EmptyState
             icon="fa-user-circle"
-            title={isHt ? 'Pa gen pwofil piblik' : 'No public profile'}
+            title={isHt ? 'Pa gen pwofil piblik' : inlineText(lang, 'No public profile')}
             hint={isHt
               ? 'Ou dwe vin yon kreyatè anvan ou ka kreye yon pwofil piblik.'
-              : 'You must become a creator before you can create a public profile.'}
+              : inlineText(lang, 'You must become a creator before you can create a public profile.')}
           />
         </div>
       );
@@ -795,7 +796,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
       <div className={styles.section}>
         <SectionHeader
           icon="fa-user-circle"
-          title={isHt ? 'Pwofil Piblik' : 'Public Profile'}
+          title={isHt ? 'Pwofil Piblik' : inlineText(lang, 'Public Profile')}
           lang={lang}
           help={{
             ht: 'Pwofil piblik ou a se paj ou sou platfòm — li montre avatè, kouvèti, atis, biyo, lokalisasyon ak tout kontni ou. Chèche tout moun ka wè l la.',
@@ -804,10 +805,10 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         />
         <EmptyState
           icon="fa-user-plus"
-          title={isHt ? 'Pwofil poko kreye' : 'Profile not created yet'}
+          title={isHt ? 'Pwofil poko kreye' : inlineText(lang, 'Profile not created yet')}
           hint={isHt
             ? 'Pwofil piblik ou a poko kreye. Klike sou bouton ki anba a pou kreye l.'
-            : 'Your public profile has not been created yet. Click the button below to create it.'}
+            : inlineText(lang, 'Your public profile has not been created yet. Click the button below to create it.')}
           action={
             <button
               type="button"
@@ -818,8 +819,8 @@ export default function PublicProfileSection({ lang, showToast, user }) {
             >
               <i className={`fas ${creating ? 'fa-spinner fa-spin' : 'fa-plus-circle'}`} aria-hidden="true" />
               {creating
-                ? (isHt ? 'Ap kreye...' : 'Creating...')
-                : (isHt ? 'Kreye Pwofil Piblik' : 'Create Public Profile')}
+                ? (isHt ? 'Ap kreye...' : inlineText(lang, 'Creating...'))
+                : (isHt ? 'Kreye Pwofil Piblik' : inlineText(lang, 'Create Public Profile'))}
             </button>
           }
         />
@@ -831,7 +832,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
     <div className={`${styles.section} ${styles.profileEditorSection}`}>
       <SectionHeader
         icon="fa-user-circle"
-        title={isHt ? 'Pwofil Piblik' : 'Public Profile'}
+        title={isHt ? 'Pwofil Piblik' : inlineText(lang, 'Public Profile')}
         lang={lang}
         help={{
           ht: 'Pwofil piblik ou a se paj ou sou platfòm — li montre avatè, kouvèti, atis, biyo, lokalisasyon ak tout kontni ou. Sove chanjman ou pou yo parèt sou paj la.',
@@ -839,7 +840,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         }}
         tip={isHt
           ? 'Aperè an dirèk a mete ajou pandan w tape. Ctrl/⌘+S sove san w kite jaden an.'
-          : 'The live preview updates as you type. Ctrl/⌘+S saves without leaving the field.'}
+          : inlineText(lang, 'The live preview updates as you type. Ctrl/⌘+S saves without leaving the field.')}
         action={
           <div className={styles.headerActions}>
             <button
@@ -847,10 +848,10 @@ export default function PublicProfileSection({ lang, showToast, user }) {
               className="btn-secondary"
               onClick={openPreview}
               disabled={!profile || !identity.creatorLookupKey}
-              title={isHt ? 'Aperè pwofil piblik ou' : 'Preview your public profile'}
+              title={isHt ? 'Aperè pwofil piblik ou' : inlineText(lang, 'Preview your public profile')}
             >
               <i className="fas fa-eye" aria-hidden="true" />{' '}
-              {isHt ? 'Aperè' : 'Preview'}
+              {isHt ? 'Aperè' : inlineText(lang, 'Preview')}
             </button>
             {/* Only render the live link when a username exists — an empty
                 key would produce a broken "/@" URL that bounces to 404. */}
@@ -862,7 +863,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
                 className="btn-secondary"
               >
                 <i className="fas fa-external-link-alt" aria-hidden="true" />{' '}
-                {isHt ? 'Gade piblik' : 'View live'}
+                {isHt ? 'Gade piblik' : inlineText(lang, 'View live')}
               </a>
             ) : null}
             <button
@@ -873,8 +874,8 @@ export default function PublicProfileSection({ lang, showToast, user }) {
             >
               <i className={`fas ${saving ? 'fa-spinner fa-spin' : 'fa-save'}`} aria-hidden="true" />
               {saving
-                ? (isHt ? 'Ap sove...' : 'Saving...')
-                : (isHt ? 'Sove' : 'Save')}
+                ? (isHt ? 'Ap sove...' : inlineText(lang, 'Saving...'))
+                : (isHt ? 'Sove' : inlineText(lang, 'Save'))}
             </button>
           </div>
         }
@@ -884,7 +885,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         <div className={styles.profileSaveError} role="alert">
           <div className={styles.profileSaveErrorHead}>
             <i className="fas fa-circle-exclamation" aria-hidden="true" />
-            <strong>{isHt ? 'Pwofil la pa t sove' : 'Profile could not be saved'}</strong>
+            <strong>{isHt ? 'Pwofil la pa t sove' : inlineText(lang, 'Profile could not be saved')}</strong>
           </div>
           <p className={styles.profileSaveErrorMessage}>{saveError.message}</p>
           {saveError.fields.length > 0 && (
@@ -896,7 +897,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
                       type="button"
                       className={styles.profileSaveErrorField}
                       onClick={() => jumpToCompletenessTab(field.tab)}
-                      aria-label={`${isHt ? 'Ale nan' : 'Go to'} ${field.label}: ${field.message}`}
+                      aria-label={`${isHt ? 'Ale nan' : inlineText(lang, 'Go to')} ${field.label}: ${field.message}`}
                     >
                       <strong>{field.label}</strong>
                       <span>{field.message}</span>
@@ -941,7 +942,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
             <i className="fas fa-circle-exclamation" aria-hidden="true" />{' '}
             {isHt
               ? 'Chanjman ki poko sove — sove pou pibliye yo.'
-              : 'Unsaved changes — save to publish them.'}
+              : inlineText(lang, 'Unsaved changes — save to publish them.')}
           </span>
           <div className={styles.profileEditorDirtyActions}>
             <button
@@ -950,7 +951,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
               onClick={handleDiscard}
               disabled={saving}
             >
-              {isHt ? 'Jete chanjman' : 'Discard'}
+              {isHt ? 'Jete chanjman' : inlineText(lang, 'Discard')}
             </button>
             <button
               type="button"
@@ -959,7 +960,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
               disabled={saving}
             >
               <i className={`fas ${saving ? 'fa-spinner fa-spin' : 'fa-save'}`} aria-hidden="true" />{' '}
-              {isHt ? 'Sove kounye a' : 'Save now'}
+              {isHt ? 'Sove kounye a' : inlineText(lang, 'Save now')}
             </button>
           </div>
         </div>
@@ -969,7 +970,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         {/* ─── Left: the form ─────────────────────────────────── */}
         <div className={styles.profileEditorFormPane}>
           {/* Editor tabs — short focused panels instead of one long form */}
-          <div className={styles.profileEditorTabs} role="tablist" aria-label={isHt ? 'Seksyon editè' : 'Editor sections'}>
+          <div className={styles.profileEditorTabs} role="tablist" aria-label={isHt ? 'Seksyon editè' : inlineText(lang, 'Editor sections')}>
             {EDITOR_TABS.map((t) => (
               <button
                 key={t.id}
@@ -1001,9 +1002,9 @@ export default function PublicProfileSection({ lang, showToast, user }) {
           <header className={styles.profileEditorCardHeader}>
             <span className={styles.profileEditorIcon}><i className="fas fa-image" aria-hidden="true" /></span>
             <div className={styles.profileEditorCardHeaderText}>
-              <h4 className={styles.profileEditorCardTitle}>{isHt ? 'Aparans' : 'Appearance'}</h4>
+              <h4 className={styles.profileEditorCardTitle}>{isHt ? 'Aparans' : inlineText(lang, 'Appearance')}</h4>
               <p className={styles.profileEditorCardHint}>
-                {isHt ? 'Kouvèti, avatè ak non piblik ou.' : 'Your cover, avatar and public name.'}
+                {isHt ? 'Kouvèti, avatè ak non piblik ou.' : inlineText(lang, 'Your cover, avatar and public name.')}
               </p>
             </div>
           </header>
@@ -1016,7 +1017,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
           ) : (
             <div className={styles.coverCardPlaceholder}>
               <i className="fas fa-cloud-upload-alt" aria-hidden="true" />
-              <span>{isHt ? 'Ajoute yon foto kouvèti' : 'Add a cover image'}</span>
+              <span>{isHt ? 'Ajoute yon foto kouvèti' : inlineText(lang, 'Add a cover image')}</span>
             </div>
           )}
         </div>
@@ -1037,7 +1038,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
             disabled={uploadingCover}
           >
             <i className={`fas ${uploadingCover ? 'fa-spinner fa-spin' : 'fa-cloud-upload-alt'}`} aria-hidden="true" />
-            {' '}{uploadingCover ? (isHt ? 'Ap telechaje...' : 'Uploading...') : (isHt ? 'Telechaje' : 'Upload')}
+            {' '}{uploadingCover ? (isHt ? 'Ap telechaje...' : inlineText(lang, 'Uploading...')) : (isHt ? 'Telechaje' : inlineText(lang, 'Upload'))}
           </button>
           <input
             type="url"
@@ -1078,7 +1079,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
             disabled={uploadingAvatar}
           >
             <i className={`fas ${uploadingAvatar ? 'fa-spinner fa-spin' : 'fa-cloud-upload-alt'}`} aria-hidden="true" />
-            {' '}{uploadingAvatar ? (isHt ? 'Ap telechaje...' : 'Uploading...') : (isHt ? 'Telechaje' : 'Upload')}
+            {' '}{uploadingAvatar ? (isHt ? 'Ap telechaje...' : inlineText(lang, 'Uploading...')) : (isHt ? 'Telechaje' : inlineText(lang, 'Upload'))}
           </button>
           <input
             type="url"
@@ -1104,14 +1105,14 @@ export default function PublicProfileSection({ lang, showToast, user }) {
 
         <label className={styles.fieldGroup}>
           <span className={styles.fieldLabel}>
-            {isHt ? 'Non Atis' : 'Artist Name'}
+            {isHt ? 'Non Atis' : inlineText(lang, 'Artist Name')}
           </span>
           <input
             type="text"
             className={styles.formInput}
             value={form.artist_name || ''}
             onChange={(e) => handleChange('artist_name', e.target.value)}
-            placeholder={isHt ? 'Non piblik ou' : 'Your public name'}
+            placeholder={isHt ? 'Non piblik ou' : inlineText(lang, 'Your public name')}
           />
         </label>
           </div>
@@ -1125,9 +1126,9 @@ export default function PublicProfileSection({ lang, showToast, user }) {
           <header className={styles.profileEditorCardHeader}>
             <span className={styles.profileEditorIcon}><i className="fas fa-align-left" aria-hidden="true" /></span>
             <div className={styles.profileEditorCardHeaderText}>
-              <h4 className={styles.profileEditorCardTitle}>{isHt ? 'Biyografi' : 'Biography'}</h4>
+              <h4 className={styles.profileEditorCardTitle}>{isHt ? 'Biyografi' : inlineText(lang, 'Biography')}</h4>
               <p className={styles.profileEditorCardHint}>
-                {isHt ? 'Deskripsyon kout sou ou — li parèt anba non ou.' : 'A short description about you — shown under your name.'}
+                {isHt ? 'Deskripsyon kout sou ou — li parèt anba non ou.' : inlineText(lang, 'A short description about you — shown under your name.')}
               </p>
             </div>
           </header>
@@ -1135,13 +1136,13 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         {/* Bio */}
         <label className={styles.fieldGroup}>
           <span className={styles.fieldLabel}>
-            {isHt ? 'Biyo' : 'Bio'} ({(form.bio || '').length}/500)
+            {isHt ? 'Biyo' : inlineText(lang, 'Bio')} ({(form.bio || '').length}/500)
           </span>
           <textarea
             className={styles.formTextarea}
             value={form.bio || ''}
             onChange={(e) => handleChange('bio', e.target.value.slice(0, 500))}
-            placeholder={isHt ? 'Biyo kout ou...' : 'Your short bio...'}
+            placeholder={isHt ? 'Biyo kout ou...' : inlineText(lang, 'Your short bio...')}
             rows={3}
           />
         </label>
@@ -1153,9 +1154,9 @@ export default function PublicProfileSection({ lang, showToast, user }) {
           <header className={styles.profileEditorCardHeader}>
             <span className={styles.profileEditorIcon}><i className="fas fa-map-marker-alt" aria-hidden="true" /></span>
             <div className={styles.profileEditorCardHeaderText}>
-              <h4 className={styles.profileEditorCardTitle}>{isHt ? 'Lokalizasyon' : 'Location'}</h4>
+              <h4 className={styles.profileEditorCardTitle}>{isHt ? 'Lokalizasyon' : inlineText(lang, 'Location')}</h4>
               <p className={styles.profileEditorCardHint}>
-                {isHt ? 'Kote w ye — peyi, vil ak kòd postal.' : 'Where you are — country, city and postal code.'}
+                {isHt ? 'Kote w ye — peyi, vil ak kòd postal.' : inlineText(lang, 'Where you are — country, city and postal code.')}
               </p>
             </div>
           </header>
@@ -1163,7 +1164,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         {/* Location — country + city + postal code with geolocation */}
         <div className={styles.fieldGroup}>
           <span className={styles.fieldLabel}>
-            {isHt ? 'Lokalisasyon' : 'Location'}
+            {isHt ? 'Lokalisasyon' : inlineText(lang, 'Location')}
           </span>
           <LocationPicker
             value={{
@@ -1192,9 +1193,9 @@ export default function PublicProfileSection({ lang, showToast, user }) {
           <header className={styles.profileEditorCardHeader}>
             <span className={styles.profileEditorIcon}><i className="fas fa-language" aria-hidden="true" /></span>
             <div className={styles.profileEditorCardHeaderText}>
-              <h4 className={styles.profileEditorCardTitle}>{isHt ? 'Lang & Konpetans' : 'Languages & Skills'}</h4>
+              <h4 className={styles.profileEditorCardTitle}>{isHt ? 'Lang & Konpetans' : inlineText(lang, 'Languages & Skills')}</h4>
               <p className={styles.profileEditorCardHint}>
-                {isHt ? 'Lang ou pale ak konpetans ou — separe ak virgill.' : 'The languages you speak and your skills — comma separated.'}
+                {isHt ? 'Lang ou pale ak konpetans ou — separe ak virgill.' : inlineText(lang, 'The languages you speak and your skills — comma separated.')}
               </p>
             </div>
           </header>
@@ -1203,7 +1204,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         {/* Languages */}
         <label className={styles.fieldGroup}>
           <span className={styles.fieldLabel}>
-            {isHt ? 'Lang (separe ak virgill)' : 'Languages (comma separated)'}
+            {isHt ? 'Lang (separe ak virgill)' : inlineText(lang, 'Languages (comma separated)')}
           </span>
           <input
             type="text"
@@ -1217,7 +1218,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         {/* Skills */}
         <label className={styles.fieldGroup}>
           <span className={styles.fieldLabel}>
-            {isHt ? 'Konpetans (separe ak virgill)' : 'Skills (comma separated)'}
+            {isHt ? 'Konpetans (separe ak virgill)' : inlineText(lang, 'Skills (comma separated)')}
           </span>
           <input
             type="text"
@@ -1239,9 +1240,9 @@ export default function PublicProfileSection({ lang, showToast, user }) {
           <header className={styles.profileEditorCardHeader}>
             <span className={styles.profileEditorIcon}><i className="fas fa-briefcase" aria-hidden="true" /></span>
             <div className={styles.profileEditorCardHeaderText}>
-              <h4 className={styles.profileEditorCardTitle}>{isHt ? 'Istwa' : 'Story'}</h4>
+              <h4 className={styles.profileEditorCardTitle}>{isHt ? 'Istwa' : inlineText(lang, 'Story')}</h4>
               <p className={styles.profileEditorCardHint}>
-                {isHt ? 'Eksperyans pwofesyonèl ak edikasyon ou — yo parèt nan tab About la.' : 'Your professional experience and education — shown in the About tab.'}
+                {isHt ? 'Eksperyans pwofesyonèl ak edikasyon ou — yo parèt nan tab About la.' : inlineText(lang, 'Your professional experience and education — shown in the About tab.')}
               </p>
             </div>
           </header>
@@ -1250,17 +1251,17 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         <div className={styles.fieldGroup}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <span className={styles.fieldLabel}>
-              {isHt ? 'Eksperyans' : 'Experience'}
+              {isHt ? 'Eksperyans' : inlineText(lang, 'Experience')}
             </span>
             <button type="button"
               onClick={() => addRow('experience', EMPTY_EXPERIENCE)}
               className={styles.profileAddChip}>
-              <i className="fas fa-plus" aria-hidden="true" /> {isHt ? 'Ajoute' : 'Add'}
+              <i className="fas fa-plus" aria-hidden="true" /> {isHt ? 'Ajoute' : inlineText(lang, 'Add')}
             </button>
           </div>
           {!form.experience?.length && (
             <p style={{ color: 'rgba(148,163,184,0.6)', fontSize: '0.78rem', margin: '6px 0' }}>
-              {isHt ? 'Pa gen eksperyans ankò.' : 'No experience yet.'}
+              {isHt ? 'Pa gen eksperyans ankò.' : inlineText(lang, 'No experience yet.')}
             </p>
           )}
           {(form.experience || []).map((exp, i) => (
@@ -1272,7 +1273,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
                   style={{ flex: 1 }}
                   value={exp.title || ''}
                   onChange={(e) => updateRow('experience', i, { title: e.target.value })}
-                  placeholder={isHt ? 'Pòs (eg. Devlòpè Web)' : 'Role (e.g. Web Developer)'}
+                  placeholder={isHt ? 'Pòs (eg. Devlòpè Web)' : inlineText(lang, 'Role (e.g. Web Developer)')}
                 />
                 <input
                   type="text"
@@ -1280,7 +1281,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
                   style={{ flex: 1 }}
                   value={exp.company || ''}
                   onChange={(e) => updateRow('experience', i, { company: e.target.value })}
-                  placeholder={isHt ? 'Konpanyi' : 'Company'}
+                  placeholder={isHt ? 'Konpanyi' : inlineText(lang, 'Company')}
                 />
               </div>
               <input
@@ -1288,7 +1289,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
                 className={styles.formInput}
                 value={exp.period || ''}
                 onChange={(e) => updateRow('experience', i, { period: e.target.value })}
-                placeholder={isHt ? 'Peryòd (eg. 2022 — 2025)' : 'Period (e.g. 2022 — 2025)'}
+                placeholder={isHt ? 'Peryòd (eg. 2022 — 2025)' : inlineText(lang, 'Period (e.g. 2022 — 2025)')}
               />
               <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
                 <textarea
@@ -1296,12 +1297,12 @@ export default function PublicProfileSection({ lang, showToast, user }) {
                   style={{ flex: 1 }}
                   value={exp.description || ''}
                   onChange={(e) => updateRow('experience', i, { description: e.target.value })}
-                  placeholder={isHt ? 'Deskripsyon...' : 'Description...'}
+                  placeholder={isHt ? 'Deskripsyon...' : inlineText(lang, 'Description...')}
                   rows={2}
                 />
                 <button type="button" onClick={() => removeRow('experience', i)}
                   style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', paddingTop: 6 }}
-                  aria-label={isHt ? 'Retire' : 'Remove'}>
+                  aria-label={isHt ? 'Retire' : inlineText(lang, 'Remove')}>
                   <i className="fas fa-trash" aria-hidden="true" />
                 </button>
               </div>
@@ -1313,17 +1314,17 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         <div className={styles.fieldGroup}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <span className={styles.fieldLabel}>
-              {isHt ? 'Edikasyon' : 'Education'}
+              {isHt ? 'Edikasyon' : inlineText(lang, 'Education')}
             </span>
             <button type="button"
               onClick={() => addRow('education', EMPTY_EDUCATION)}
               className={styles.profileAddChip}>
-              <i className="fas fa-plus" aria-hidden="true" /> {isHt ? 'Ajoute' : 'Add'}
+              <i className="fas fa-plus" aria-hidden="true" /> {isHt ? 'Ajoute' : inlineText(lang, 'Add')}
             </button>
           </div>
           {!form.education?.length && (
             <p style={{ color: 'rgba(148,163,184,0.6)', fontSize: '0.78rem', margin: '6px 0' }}>
-              {isHt ? 'Pa gen edikasyon ankò.' : 'No education yet.'}
+              {isHt ? 'Pa gen edikasyon ankò.' : inlineText(lang, 'No education yet.')}
             </p>
           )}
           {(form.education || []).map((edu, i) => (
@@ -1335,7 +1336,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
                   style={{ flex: 1 }}
                   value={edu.institution || ''}
                   onChange={(e) => updateRow('education', i, { institution: e.target.value })}
-                  placeholder={isHt ? 'Enstitisyon (eg. INUQUA)' : 'Institution (e.g. INUQUA)'}
+                  placeholder={isHt ? 'Enstitisyon (eg. INUQUA)' : inlineText(lang, 'Institution (e.g. INUQUA)')}
                 />
                 <input
                   type="text"
@@ -1343,7 +1344,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
                   style={{ flex: 1 }}
                   value={edu.degree || ''}
                   onChange={(e) => updateRow('education', i, { degree: e.target.value })}
-                  placeholder={isHt ? 'Diplòm (eg. Licence)' : 'Degree (e.g. Bachelor)'}
+                  placeholder={isHt ? 'Diplòm (eg. Licence)' : inlineText(lang, 'Degree (e.g. Bachelor)')}
                 />
               </div>
               <input
@@ -1351,7 +1352,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
                 className={styles.formInput}
                 value={edu.year || ''}
                 onChange={(e) => updateRow('education', i, { year: e.target.value })}
-                placeholder={isHt ? 'Ane (eg. 2023)' : 'Year (e.g. 2023)'}
+                placeholder={isHt ? 'Ane (eg. 2023)' : inlineText(lang, 'Year (e.g. 2023)')}
               />
               <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
                 <textarea
@@ -1359,12 +1360,12 @@ export default function PublicProfileSection({ lang, showToast, user }) {
                   style={{ flex: 1 }}
                   value={edu.description || ''}
                   onChange={(e) => updateRow('education', i, { description: e.target.value })}
-                  placeholder={isHt ? 'Deskripsyon...' : 'Description...'}
+                  placeholder={isHt ? 'Deskripsyon...' : inlineText(lang, 'Description...')}
                   rows={2}
                 />
                 <button type="button" onClick={() => removeRow('education', i)}
                   style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', paddingTop: 6 }}
-                  aria-label={isHt ? 'Retire' : 'Remove'}>
+                  aria-label={isHt ? 'Retire' : inlineText(lang, 'Remove')}>
                   <i className="fas fa-trash" aria-hidden="true" />
                 </button>
               </div>
@@ -1380,9 +1381,9 @@ export default function PublicProfileSection({ lang, showToast, user }) {
           <header className={styles.profileEditorCardHeader}>
             <span className={styles.profileEditorIcon}><i className="fas fa-globe" aria-hidden="true" /></span>
             <div className={styles.profileEditorCardHeaderText}>
-              <h4 className={styles.profileEditorCardTitle}>{isHt ? 'Sitwèb & Kontak' : 'Website & Contact'}</h4>
+              <h4 className={styles.profileEditorCardTitle}>{isHt ? 'Sitwèb & Kontak' : inlineText(lang, 'Website & Contact')}</h4>
               <p className={styles.profileEditorCardHint}>
-                {isHt ? 'Lyen ou ak fason moun ka kontakte ou.' : 'Your links and how people can reach you.'}
+                {isHt ? 'Lyen ou ak fason moun ka kontakte ou.' : inlineText(lang, 'Your links and how people can reach you.')}
               </p>
             </div>
           </header>
@@ -1390,7 +1391,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         {/* Website */}
         <label className={styles.fieldGroup}>
           <span className={styles.fieldLabel}>
-            {isHt ? 'Sit Wèb' : 'Website'}
+            {isHt ? 'Sit Wèb' : inlineText(lang, 'Website')}
           </span>
           <input
             type="url"
@@ -1405,17 +1406,17 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         <div className={styles.fieldGroup}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <span className={styles.fieldLabel}>
-              {isHt ? 'Lyen Sosyal' : 'Social Links'}
+              {isHt ? 'Lyen Sosyal' : inlineText(lang, 'Social Links')}
             </span>
             <button type="button"
               onClick={() => addRow('social_links', EMPTY_SOCIAL)}
               className={styles.profileAddChip}>
-              <i className="fas fa-plus" aria-hidden="true" /> {isHt ? 'Ajoute' : 'Add'}
+              <i className="fas fa-plus" aria-hidden="true" /> {isHt ? 'Ajoute' : inlineText(lang, 'Add')}
             </button>
           </div>
           {!form.social_links?.length && (
             <p style={{ color: 'rgba(148,163,184,0.6)', fontSize: '0.78rem', margin: '6px 0' }}>
-              {isHt ? 'Pa gen lyen sosyal.' : 'No social links yet.'}
+              {isHt ? 'Pa gen lyen sosyal.' : inlineText(lang, 'No social links yet.')}
             </p>
           )}
           {(form.social_links || []).map((s, i) => (
@@ -1426,7 +1427,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
                 style={{ flex: 1 }}
                 value={s.platform || ''}
                 onChange={(e) => updateRow('social_links', i, { platform: e.target.value })}
-                placeholder={isHt ? 'Platfòm (instagram, github…)' : 'Platform (instagram, github…)'}
+                placeholder={isHt ? 'Platfòm (instagram, github…)' : inlineText(lang, 'Platform (instagram, github…)')}
               />
               <input
                 type="url"
@@ -1438,7 +1439,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
               />
               <button type="button" onClick={() => removeRow('social_links', i)}
                 style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer' }}
-                aria-label={isHt ? 'Retire' : 'Remove'}>
+                aria-label={isHt ? 'Retire' : inlineText(lang, 'Remove')}>
                 <i className="fas fa-trash" aria-hidden="true" />
               </button>
             </div>
@@ -1449,7 +1450,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         {/* Contact Email */}
         <label className={styles.fieldGroup}>
           <span className={styles.fieldLabel}>
-            {isHt ? 'Imèl Kontak' : 'Contact Email'}
+            {isHt ? 'Imèl Kontak' : inlineText(lang, 'Contact Email')}
           </span>
           <input
             type="email"
@@ -1463,7 +1464,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         {/* Contact Phone */}
         <label className={styles.fieldGroup}>
           <span className={styles.fieldLabel}>
-            {isHt ? 'Telefòn Kontak' : 'Contact Phone'}
+            {isHt ? 'Telefòn Kontak' : inlineText(lang, 'Contact Phone')}
           </span>
           <input
             type="tel"
@@ -1478,16 +1479,16 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         {/* Availability */}
         <label className={styles.fieldGroup}>
           <span className={styles.fieldLabel}>
-            {isHt ? 'Disponibilite' : 'Availability'}
+            {isHt ? 'Disponibilite' : inlineText(lang, 'Availability')}
           </span>
           <select
             className={styles.formSelect}
             value={form.availability || 'available'}
             onChange={(e) => handleChange('availability', e.target.value)}
           >
-            <option value="available">{isHt ? 'Disponib' : 'Available'}</option>
-            <option value="busy">{isHt ? 'Okipe' : 'Busy'}</option>
-            <option value="unavailable">{isHt ? 'Pa disponib' : 'Unavailable'}</option>            </select>
+            <option value="available">{isHt ? 'Disponib' : inlineText(lang, 'Available')}</option>
+            <option value="busy">{isHt ? 'Okipe' : inlineText(lang, 'Busy')}</option>
+            <option value="unavailable">{isHt ? 'Pa disponib' : inlineText(lang, 'Unavailable')}</option>            </select>
         </label>
           </div>
         </section>
@@ -1501,7 +1502,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
             <div className={styles.profileEditorCardHeaderText}>
               <h4 className={styles.profileEditorCardTitle}>SEO</h4>
               <p className={styles.profileEditorCardHint}>
-                {isHt ? 'Meta pou motè rechèch lè moun chache ou.' : 'Search-engine metadata used when people look you up.'}
+                {isHt ? 'Meta pou motè rechèch lè moun chache ou.' : inlineText(lang, 'Search-engine metadata used when people look you up.')}
               </p>
             </div>
           </header>
@@ -1509,7 +1510,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         {/* SEO Title */}
         <label className={styles.fieldGroup}>
           <span className={styles.fieldLabel}>
-            {isHt ? 'Tit SEO' : 'SEO Title'}{' '}
+            {isHt ? 'Tit SEO' : inlineText(lang, 'SEO Title')}{' '}
             <span className={`${styles.seoCounter}${seoPreview.titleTooLong ? ` ${styles.seoCounterWarn}` : ''}`}>
               ({(form.seo_title || '').length}/{SEO_RECOMMENDED.title})
             </span>
@@ -1520,7 +1521,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
             value={form.seo_title || ''}
             maxLength={160}
             onChange={(e) => handleChange('seo_title', e.target.value.slice(0, 160))}
-            placeholder={isHt ? 'Tit pou motè rechèch' : 'Title for search engines'}
+            placeholder={isHt ? 'Tit pou motè rechèch' : inlineText(lang, 'Title for search engines')}
             aria-describedby="profile-seo-guidance"
           />
         </label>
@@ -1528,7 +1529,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         {/* SEO Description */}
         <label className={styles.fieldGroup}>
           <span className={styles.fieldLabel}>
-            {isHt ? 'Deskripsyon SEO' : 'SEO Description'}{' '}
+            {isHt ? 'Deskripsyon SEO' : inlineText(lang, 'SEO Description')}{' '}
             <span className={`${styles.seoCounter}${seoPreview.descriptionTooLong ? ` ${styles.seoCounterWarn}` : ''}`}>
               ({(form.seo_description || '').length}/{SEO_RECOMMENDED.description})
             </span>
@@ -1537,7 +1538,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
             className={styles.formTextarea}
             value={form.seo_description || ''}
             onChange={(e) => handleChange('seo_description', e.target.value)}
-            placeholder={isHt ? 'Deskripsyon pou motè rechèch' : 'Description for search engines'}
+            placeholder={isHt ? 'Deskripsyon pou motè rechèch' : inlineText(lang, 'Description for search engines')}
             rows={3}
             aria-describedby="profile-seo-guidance"
           />
@@ -1546,7 +1547,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         {/* SEO Keywords */}
         <label className={styles.fieldGroup}>
           <span className={styles.fieldLabel}>
-            {isHt ? 'Mo Kle SEO (separe ak virgill)' : 'SEO Keywords (comma separated)'}
+            {isHt ? 'Mo Kle SEO (separe ak virgill)' : inlineText(lang, 'SEO Keywords (comma separated)')}
           </span>
           <input
             type="text"
@@ -1561,11 +1562,11 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         <div
           className={styles.seoPreview}
           role="group"
-          aria-label={isHt ? 'Apèsi rezilta rechèch' : 'Search result preview'}
+          aria-label={isHt ? 'Apèsi rezilta rechèch' : inlineText(lang, 'Search result preview')}
         >
           <div className={styles.seoPreviewLabel}>
             <i className="fas fa-magnifying-glass" aria-hidden="true" />{' '}
-            {isHt ? 'Apèsi nan rechèch' : 'Search preview'}
+            {isHt ? 'Apèsi nan rechèch' : inlineText(lang, 'Search preview')}
           </div>
           <div className={styles.seoPreviewCard}>
             <div className={styles.seoPreviewSite}>
@@ -1583,7 +1584,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
           <p className={styles.seoPreviewHint} id="profile-seo-guidance">
             {isHt
               ? 'Apèsi sa a tronke jan Google souvan fè l. Rekòmande: 60 karaktè pou tit, 160 pou deskripsyon. Tit la gen yon maks backend 160.'
-              : 'This preview truncates the way search results often do. Recommended: 60 characters for the title, 160 for the description. The title has a backend maximum of 160.'}
+              : inlineText(lang, 'This preview truncates the way search results often do. Recommended: 60 characters for the title, 160 for the description. The title has a backend maximum of 160.')}
           </p>
         </div>
           </div>
@@ -1596,9 +1597,9 @@ export default function PublicProfileSection({ lang, showToast, user }) {
           <header className={styles.profileEditorCardHeader}>
             <span className={styles.profileEditorIcon}><i className="fas fa-layer-group" aria-hidden="true" /></span>
             <div className={styles.profileEditorCardHeaderText}>
-              <h4 className={styles.profileEditorCardTitle}>{isHt ? 'Layout' : 'Layout'}</h4>
+              <h4 className={styles.profileEditorCardTitle}>{isHt ? 'Layout' : inlineText(lang, 'Layout')}</h4>
               <p className={styles.profileEditorCardHint}>
-                {isHt ? 'Òd ak viwabilite seksyon yo sou paj ou.' : 'How your profile sections are ordered and shown.'}
+                {isHt ? 'Òd ak viwabilite seksyon yo sou paj ou.' : inlineText(lang, 'How your profile sections are ordered and shown.')}
               </p>
             </div>
           </header>
@@ -1607,7 +1608,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         <div className={styles.fieldGroup}>
           <div className={styles.profileTemplateHeader}>
             <span className={styles.fieldLabel}>
-              {isHt ? 'Modèl Pwofil' : 'Profile Templates'}
+              {isHt ? 'Modèl Pwofil' : inlineText(lang, 'Profile Templates')}
             </span>
             <button
               type="button"
@@ -1615,13 +1616,13 @@ export default function PublicProfileSection({ lang, showToast, user }) {
               onClick={() => setTemplateModalOpen(true)}
             >
               <i className="fas fa-layer-group" aria-hidden="true" />{' '}
-              {isHt ? 'Wè tout modèl yo' : 'Browse templates'}
+              {isHt ? 'Wè tout modèl yo' : inlineText(lang, 'Browse templates')}
             </button>
           </div>
           <p className={styles.profileLayoutHint}>
             {isHt
               ? 'Yon modèl chanje lòd ak vizibilite seksyon yo — li pa janm efase kontni ou.'
-              : 'A template changes section order and visibility — it never deletes your content.'}
+              : inlineText(lang, 'A template changes section order and visibility — it never deletes your content.')}
           </p>
           <div className={styles.profileTemplateStrip}>
             {PROFILE_TEMPLATES.map((template) => {
@@ -1656,7 +1657,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
           {!currentTemplateId && (
             <span className={styles.profileTemplateCustom}>
               <i className="fas fa-sliders-h" aria-hidden="true" />{' '}
-              {isHt ? 'Layout pèsonalize' : 'Custom layout'}
+              {isHt ? 'Layout pèsonalize' : inlineText(lang, 'Custom layout')}
             </span>
           )}
         </div>
@@ -1664,19 +1665,19 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         {/* ─── Section order + visibility (saved with Save) ──── */}
         <div className={styles.fieldGroup}>
           <span className={styles.fieldLabel}>
-            {isHt ? 'Òd ak Viwabilite Seksyon' : 'Section Order & Visibility'}
+            {isHt ? 'Òd ak Viwabilite Seksyon' : inlineText(lang, 'Section Order & Visibility')}
           </span>
           <p className={styles.profileLayoutHint}>
             {isHt
               ? 'Monte oswa desann seksyon yo epi itilize switch la pou kache oswa montre yo. Chanjman yo parèt nan aperè a epi yo sove ak bouton Sove a.'
-              : 'Move sections up or down and use the switch to hide or show them. Changes appear in the preview and are saved with the Save button.'}
+              : inlineText(lang, 'Move sections up or down and use the switch to hide or show them. Changes appear in the preview and are saved with the Save button.')}
           </p>
           <div className={styles.profileLayoutList}>
             {(form.section_order || []).map((sectionId, index) => {
               const section = RAIL_ITEMS.find((item) => item.id === sectionId);
               if (!section) return null;
               const visible = form.section_visibility?.[sectionId] !== false;
-              const label = lang === 'ht' ? section.labelHt : lang === 'fr' ? section.labelFr : section.label;
+              const label = lang === 'ht' ? section.labelHt : lang === 'fr' ? section.labelFr : lang === 'es' ? section.labelEs : section.label;
               return (
                 <div
                   key={sectionId}
@@ -1693,8 +1694,8 @@ export default function PublicProfileSection({ lang, showToast, user }) {
                       className={styles.profileLayoutBtn}
                       onClick={() => moveLayoutSection(index, -1)}
                       disabled={index === 0}
-                      title={isHt ? 'Monte' : 'Move up'}
-                      aria-label={`${label}: ${isHt ? 'monte' : 'move up'}`}
+                      title={isHt ? 'Monte' : inlineText(lang, 'Move up')}
+                      aria-label={`${label}: ${isHt ? 'monte' : inlineText(lang, 'move up')}`}
                     >
                       <i className="fas fa-chevron-up" aria-hidden="true" />
                     </button>
@@ -1703,8 +1704,8 @@ export default function PublicProfileSection({ lang, showToast, user }) {
                       className={styles.profileLayoutBtn}
                       onClick={() => moveLayoutSection(index, 1)}
                       disabled={index === (form.section_order || []).length - 1}
-                      title={isHt ? 'Desann' : 'Move down'}
-                      aria-label={`${label}: ${isHt ? 'desann' : 'move down'}`}
+                      title={isHt ? 'Desann' : inlineText(lang, 'Move down')}
+                      aria-label={`${label}: ${isHt ? 'desann' : inlineText(lang, 'move down')}`}
                     >
                       <i className="fas fa-chevron-down" aria-hidden="true" />
                     </button>
@@ -1714,7 +1715,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
                       type="checkbox"
                       checked={visible}
                       onChange={() => toggleLayoutSection(sectionId)}
-                      aria-label={`${label}: ${isHt ? 'vizib' : 'visible'}`}
+                      aria-label={`${label}: ${isHt ? 'vizib' : inlineText(lang, 'visible')}`}
                     />
                     <span className={styles.profileLayoutToggleTrack} aria-hidden="true" />
                   </label>
@@ -1728,12 +1729,12 @@ export default function PublicProfileSection({ lang, showToast, user }) {
           <i className="fas fa-circle-info" aria-hidden="true" />
           <div style={{ minWidth: 0 }}>
             <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-primary)' }}>
-              {isHt ? 'Plis opsyon nan Profile Settings' : 'More options in Profile Settings'}
+              {isHt ? 'Plis opsyon nan Profile Settings' : inlineText(lang, 'More options in Profile Settings')}
             </p>
             <p style={{ margin: '4px 0 10px', fontSize: '0.8rem', color: 'var(--text-secondary, #888)' }}>
               {isHt
                 ? 'Profile Settings gen tou kontni an vedèt (kou, pwodwi, pòtfolyo) ak abònman peyan.'
-                : 'Profile Settings also holds featured content (courses, products, portfolio) and paid subscriptions.'}
+                : inlineText(lang, 'Profile Settings also holds featured content (courses, products, portfolio) and paid subscriptions.')}
             </p>
             <button
               type="button"
@@ -1742,7 +1743,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
               style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
             >
               <i className="fas fa-sliders-h" aria-hidden="true" />
-              {isHt ? 'Ale nan Profile Settings' : 'Go to Profile Settings'}
+              {isHt ? 'Ale nan Profile Settings' : inlineText(lang, 'Go to Profile Settings')}
             </button>
           </div>
         </div>
@@ -1757,7 +1758,7 @@ export default function PublicProfileSection({ lang, showToast, user }) {
           <div className={styles.profileEditorPreviewBar}>
             <span className={styles.profileEditorPreviewDot} aria-hidden="true" />
             <span className={styles.profileEditorPreviewLabel}>
-              {isHt ? 'Aperè an dirèk' : 'Live Preview'}
+              {isHt ? 'Aperè an dirèk' : inlineText(lang, 'Live Preview')}
             </span>
             <button
               type="button"
@@ -1765,11 +1766,11 @@ export default function PublicProfileSection({ lang, showToast, user }) {
               onClick={() => setPreviewViewport((value) => (value === 'mobile' ? 'desktop' : 'mobile'))}
               aria-pressed={previewViewport === 'mobile'}
               aria-label={previewViewport === 'mobile'
-                ? (isHt ? 'Aperè desktop' : 'Desktop preview')
-                : (isHt ? 'Aperè mobil' : 'Mobile preview')}
+                ? (isHt ? 'Aperè desktop' : inlineText(lang, 'Desktop preview'))
+                : (isHt ? 'Aperè mobil' : inlineText(lang, 'Mobile preview'))}
               title={previewViewport === 'mobile'
-                ? (isHt ? 'Aperè desktop' : 'Desktop preview')
-                : (isHt ? 'Aperè mobil' : 'Mobile preview')}
+                ? (isHt ? 'Aperè desktop' : inlineText(lang, 'Desktop preview'))
+                : (isHt ? 'Aperè mobil' : inlineText(lang, 'Mobile preview'))}
             >
               <i className={`fas ${previewViewport === 'mobile' ? 'fa-desktop' : 'fa-mobile-alt'}`} aria-hidden="true" />
             </button>
@@ -1779,11 +1780,11 @@ export default function PublicProfileSection({ lang, showToast, user }) {
               onClick={() => setPreviewCollapsed((collapsed) => !collapsed)}
               aria-expanded={!previewCollapsed}
               aria-label={previewCollapsed
-                ? (isHt ? 'Montre aperè a' : 'Show live preview')
-                : (isHt ? 'Kache aperè a' : 'Hide live preview')}
+                ? (isHt ? 'Montre aperè a' : inlineText(lang, 'Show live preview'))
+                : (isHt ? 'Kache aperè a' : inlineText(lang, 'Hide live preview'))}
               title={previewCollapsed
-                ? (isHt ? 'Montre aperè a' : 'Show live preview')
-                : (isHt ? 'Kache aperè a' : 'Hide live preview')}
+                ? (isHt ? 'Montre aperè a' : inlineText(lang, 'Show live preview'))
+                : (isHt ? 'Kache aperè a' : inlineText(lang, 'Hide live preview'))}
             >
               <i className={`fas ${previewCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'}`} aria-hidden="true" />
             </button>
@@ -1791,8 +1792,8 @@ export default function PublicProfileSection({ lang, showToast, user }) {
               type="button"
               className={styles.profileEditorPreviewExpand}
               onClick={openPreview}
-              title={isHt ? 'Aperè tout ekran' : 'Full-screen preview'}
-              aria-label={isHt ? 'Aperè tout ekran' : 'Full-screen preview'}
+              title={isHt ? 'Aperè tout ekran' : inlineText(lang, 'Full-screen preview')}
+              aria-label={isHt ? 'Aperè tout ekran' : inlineText(lang, 'Full-screen preview')}
             >
               <i className="fas fa-expand" aria-hidden="true" />
             </button>
@@ -1835,14 +1836,14 @@ export default function PublicProfileSection({ lang, showToast, user }) {
           onClick={() => setPreviewOpen(false)}
           role="dialog"
           aria-modal="true"
-          aria-label={isHt ? 'Aperè pwofil piblik' : 'Public profile preview'}
+          aria-label={isHt ? 'Aperè pwofil piblik' : inlineText(lang, 'Public profile preview')}
         >
           <button
             ref={previewCloseRef}
             type="button"
             className="csp-preview-close"
             onClick={() => setPreviewOpen(false)}
-            aria-label={isHt ? 'Fèmen aperè' : 'Close preview'}
+            aria-label={isHt ? 'Fèmen aperè' : inlineText(lang, 'Close preview')}
           >
             <i className="fas fa-times" aria-hidden="true" />
           </button>
@@ -1885,12 +1886,12 @@ export default function PublicProfileSection({ lang, showToast, user }) {
         <StudioModal
           onClose={() => setLeaveConfirmOpen(false)}
           icon="fa-triangle-exclamation"
-          title={isHt ? 'Kite paj la?' : 'Leave this page?'}
+          title={isHt ? 'Kite paj la?' : inlineText(lang, 'Leave this page?')}
         >
           <p style={{ margin: '0 0 20px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
             {isHt
               ? 'Ou gen chanjman ki poko pibliye. Yon bouyon lokal konsève yo, men yo p ap parèt sou pwofil piblik ou jiskaske w sove.'
-              : 'You have unpublished changes. A local draft keeps them, but they will not appear on your public profile until you save.'}
+              : inlineText(lang, 'You have unpublished changes. A local draft keeps them, but they will not appear on your public profile until you save.')}
           </p>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, flexWrap: 'wrap' }}>
             <button
@@ -1898,14 +1899,14 @@ export default function PublicProfileSection({ lang, showToast, user }) {
               className="btn-secondary"
               onClick={() => setLeaveConfirmOpen(false)}
             >
-              {isHt ? 'Rete sou paj la' : 'Stay on this page'}
+              {isHt ? 'Rete sou paj la' : inlineText(lang, 'Stay on this page')}
             </button>
             <button
               type="button"
               className="btn-primary"
               onClick={confirmLeaveWithoutSaving}
             >
-              {isHt ? 'Kite san sove' : 'Leave without saving'}
+              {isHt ? 'Kite san sove' : inlineText(lang, 'Leave without saving')}
             </button>
           </div>
         </StudioModal>

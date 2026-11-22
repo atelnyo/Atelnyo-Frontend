@@ -15,6 +15,7 @@ import React, { useState } from 'react';
 import MediaBadge from './MediaBadge';
 import ImageViewer from './ImageViewer';
 import VideoEmbedFrame from './VideoEmbedFrame';
+import { inlineText } from '../../utils/inlineI18n';
 
 function fmtFileSize(bytes) {
   if (bytes == null) return '—';
@@ -99,13 +100,13 @@ export default function MediaPreview({
               className="media-preview-audio-player"
               preload="metadata"
             >
-              {isHt ? 'Navigatè w pa sipòte odyo.' : 'Your browser does not support audio.'}
+              {isHt ? 'Navigatè w pa sipòte odyo.' : inlineText(lang, 'Your browser does not support audio.')}
             </audio>
           </div>
         ) : (
           <div className="media-preview-file">
             <i className="fas fa-file-alt" />
-            <p>{url ? url.split('/').pop() : (isHt ? 'Medya' : 'Media')}</p>
+            <p>{url ? url.split('/').pop() : (isHt ? 'Medya' : inlineText(lang, 'Media'))}</p>
           </div>
         )}
       </div>
@@ -131,19 +132,19 @@ export default function MediaPreview({
         <div className="media-preview-meta-grid">
           {width && height && (
             <div className="media-preview-meta-item">
-              <span className="media-preview-meta-label">{isHt ? 'Dimansyon' : 'Dimensions'}</span>
+              <span className="media-preview-meta-label">{isHt ? 'Dimansyon' : inlineText(lang, 'Dimensions')}</span>
               <span className="media-preview-meta-value">{width} × {height}</span>
             </div>
           )}
           {size != null && (
             <div className="media-preview-meta-item">
-              <span className="media-preview-meta-label">{isHt ? 'Gwosè' : 'Size'}</span>
+              <span className="media-preview-meta-label">{isHt ? 'Gwosè' : inlineText(lang, 'Size')}</span>
               <span className="media-preview-meta-value">{fmtFileSize(size)}</span>
             </div>
           )}
           {duration != null && duration > 0 && (
             <div className="media-preview-meta-item">
-              <span className="media-preview-meta-label">{isHt ? 'Dire' : 'Duration'}</span>
+              <span className="media-preview-meta-label">{isHt ? 'Dire' : inlineText(lang, 'Duration')}</span>
               <span className="media-preview-meta-value">{fmtDuration(duration)}</span>
             </div>
           )}
@@ -163,8 +164,8 @@ export default function MediaPreview({
               type="button"
               className="media-preview-url-copy"
               onClick={handleCopyUrl}
-              title={isHt ? 'Kopi URL' : 'Copy URL'}
-              aria-label={isHt ? 'Kopi URL' : 'Copy URL'}
+              title={isHt ? 'Kopi URL' : inlineText(lang, 'Copy URL')}
+              aria-label={isHt ? 'Kopi URL' : inlineText(lang, 'Copy URL')}
             >
               <i className={`fas ${copied ? 'fa-check' : 'fa-copy'}`} aria-hidden="true" />
             </button>

@@ -1,3 +1,4 @@
+import { inlineText } from '../../utils/inlineI18n';
 /**
  * Internal-only lang fallback for MediaCommandBar / MediaContextMenuBuilder.
  * Both modules need a small `t(en, ht)` switcher. The global
@@ -33,7 +34,7 @@ const STRINGS = {
 
 export function t(lang = 'en', key) {
   if (!STRINGS[key]) return key;
-  return STRINGS[key][lang === 'ht' ? 'ht' : 'en'] || STRINGS[key].en;
+  return STRINGS[key][lang === 'ht' ? 'ht' : inlineText(lang, 'en')] || STRINGS[key].en;
 }
 
 export function makeT(lang = 'en') {

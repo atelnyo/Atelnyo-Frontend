@@ -94,6 +94,7 @@ import ProductsTab from './profile/ProfileProductsTab';
 import PortfolioTab from './profile/ProfilePortfolioTab';
 import ReviewsTab from './profile/ProfileReviewsTab';
 import AboutTab from './profile/ProfileAboutTab';
+import { inlineText } from '../utils/inlineI18n';
 
 // ═══════════════════════════════════════════════════════════════════════
 // CREATOR STUDIO CONFIG BAR — visible when editing mode is active
@@ -106,7 +107,7 @@ function ConfigBar({ lang }) {
       <span>
         {lang === 'ht'
           ? 'Edit profile sections from Creator Studio'
-          : 'Edit profile sections from Creator Studio'}
+          : inlineText(lang, 'Edit profile sections from Creator Studio')}
       </span>
     </div>
   );
@@ -619,7 +620,7 @@ export default function CreatorPublicProfile({
           showToast?.(
             lang === 'ht'
               ? 'Ou ap swiv yon kreyatè ki gen pwogram afilye! Tcheke paj Afilye pou aplike.'
-              : 'You are now following a creator with an active affiliate program! Check the Affiliate page to apply.',
+              : inlineText(lang, 'You are now following a creator with an active affiliate program! Check the Affiliate page to apply.'),
             'hand-holding-usd',
           );
         } else {

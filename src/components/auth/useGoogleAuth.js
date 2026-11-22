@@ -12,6 +12,7 @@ import {
   readPendingGoogle, writePendingGoogle, clearPendingGoogle,
   isDarkTheme, isEmbeddedWebView,
 } from './authUtils';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function useGoogleAuth({ lang, onLoginSuccess, showToast, isLoading }) {
   const googleRef = useRef(null);
@@ -54,7 +55,7 @@ export default function useGoogleAuth({ lang, onLoginSuccess, showToast, isLoadi
   const handleGoogleCredential = useCallback(async (response) => {
     const idToken = response?.credential;
     if (!idToken) {
-      return { error: lang === 'ht' ? 'Google pa retounen kredansyal.' : 'Google returned no credential.' };
+      return { error: lang === 'ht' ? 'Google pa retounen kredansyal.' : inlineText(lang, 'Google returned no credential.') };
     }
     setGoogleLoading(true);
     try {
@@ -74,12 +75,12 @@ export default function useGoogleAuth({ lang, onLoginSuccess, showToast, isLoadi
       });
       clearPendingGoogle();
       setPendingGoogle(null);
-      if (showToast) showToast(lang === 'ht' ? 'Koneksyon siksè!' : 'Login successful!', 'check-circle');
+      if (showToast) showToast(lang === 'ht' ? 'Koneksyon siksè!' : inlineText(lang, 'Login successful!'), 'check-circle');
       onLoginSuccess(payload?.user, payload);
       return { success: true, user: payload?.user };
     } catch (err) {
       const msg = err?.response?.data?.error || err?.response?.data?.detail
-        || (lang === 'ht' ? 'Google koneksyon echwe.' : 'Google sign-in failed.');
+        || (lang === 'ht' ? 'Google koneksyon echwe.' : inlineText(lang, 'Google sign-in failed.'));
       try {
         const raw = idToken.split('.')[1];
         const payload = JSON.parse(atob(raw.replace(/-/g, '+').replace(/_/g, '/')));

@@ -15,6 +15,7 @@
 import React, { useState } from 'react';
 import styles from './communityEditor.module.css';
 import { joinPlan } from '../../community/communityOnboarding';
+import { inlineText } from '../../../utils/inlineI18n';
 
 // Join wording lives in communityOnboarding so the preview quotes the
 // public page word for word instead of drifting from it.
@@ -35,7 +36,7 @@ export default function CommunityPreviewCard({
   memberCount = 0,
 }) {
   const isHt = lang === 'ht';
-  const key = isHt ? 'ht' : 'en';
+  const key = isHt ? 'ht' : inlineText(lang, 'en');
   const [mode, setMode] = useState('visitor');
   const isMember = mode === 'member';
   const plan = joinPlan(value.join_mode, lang);
@@ -46,11 +47,11 @@ export default function CommunityPreviewCard({
     cta: isHt ? JOIN_CTA_HT[joinMode] : JOIN_CTA_EN[joinMode],
   };
 
-  const name = (value.name || '').trim() || (isHt ? 'Non kominote w' : 'Your community name');
+  const name = (value.name || '').trim() || (isHt ? 'Non kominote w' : inlineText(lang, 'Your community name'));
   const description = (value.description || '').trim()
     || (isHt
       ? 'Deskripsyon an ap parèt isit la. Eseye di an de liy poukisa moun ta dwe antre.'
-      : 'Your description appears here. Try two lines on why someone should join.');
+      : inlineText(lang, 'Your description appears here. Try two lines on why someone should join.'));
   const activeRules = (rules || []).filter((rule) => rule.is_active !== false);
   const previewRules = activeRules.filter((rule) => (rule.title || '').trim()).slice(0, 3);
   const bannerStyle = value.banner_url
@@ -62,9 +63,9 @@ export default function CommunityPreviewCard({
       <div className={styles.previewHead}>
         <h3 className={styles.formTitle} id="community-preview-title">
           <i className="fas fa-eye" aria-hidden="true" />
-          {isHt ? 'Apèsi' : 'Preview'}
+          {isHt ? 'Apèsi' : inlineText(lang, 'Preview')}
         </h3>
-        <div className={styles.previewToggle} role="tablist" aria-label={isHt ? 'Wè kòm' : 'View as'}>
+        <div className={styles.previewToggle} role="tablist" aria-label={isHt ? 'Wè kòm' : inlineText(lang, 'View as')}>
           {[
             { id: 'visitor', icon: 'fa-user', label: { en: 'Visitor', ht: 'Vizitè' } },
             { id: 'member', icon: 'fa-user-check', label: { en: 'Member', ht: 'Manm' } },
@@ -96,17 +97,17 @@ export default function CommunityPreviewCard({
         <div className={styles.previewIdentity}>
           <strong>{name}</strong>
           <span>
-            {memberCount} {isHt ? 'manm' : 'members'}
+            {memberCount} {isHt ? 'manm' : inlineText(lang, 'members')}
             {' · '}
             {joinCopy.badge}
             {value.read_visibility === 'members' && (
-              <> · {isHt ? 'Manm sèlman' : 'Members only'}</>
+              <> · {isHt ? 'Manm sèlman' : inlineText(lang, 'Members only')}</>
             )}
           </span>
         </div>
         <span className={`${styles.previewCta}${isMember ? ` ${styles.previewCtaMember}` : ''}`}>
           <i className={`fas ${isMember ? 'fa-pen' : joinMode === 'invite' ? 'fa-lock' : 'fa-user-plus'}`} aria-hidden="true" />
-          {isMember ? (isHt ? 'Kreye yon pòs' : 'Write a post') : joinCopy.cta}
+          {isMember ? (isHt ? 'Kreye yon pòs' : inlineText(lang, 'Write a post')) : joinCopy.cta}
         </span>
       </div>
 
@@ -123,20 +124,20 @@ export default function CommunityPreviewCard({
           </div>
           <div className={styles.previewComposer} aria-hidden="true">
             <i className="fas fa-pen-to-square" />
-            {isHt ? 'Pataje yon bagay ak kominote a…' : 'Share something with the community…'}
+            {isHt ? 'Pataje yon bagay ak kominote a…' : inlineText(lang, 'Share something with the community…')}
           </div>
           <div className={styles.previewWelcome}>
             <span className={styles.previewWelcomeTitle}>
               <i className="fas fa-hand-sparkles" aria-hidden="true" />
-              {isHt ? 'Apre yon moun antre' : 'After someone joins'}
+              {isHt ? 'Apre yon moun antre' : inlineText(lang, 'After someone joins')}
             </span>
             <ul>
-              <li>{isHt ? 'Prezante tèt li nan yon premye pòs' : 'Introduce themselves in a first post'}</li>
+              <li>{isHt ? 'Prezante tèt li nan yon premye pòs' : inlineText(lang, 'Introduce themselves in a first post')}</li>
               {previewRules.length > 0 && (
-                <li>{isHt ? 'Li règleman kominote a' : 'Read the house rules'}</li>
+                <li>{isHt ? 'Li règleman kominote a' : inlineText(lang, 'Read the house rules')}</li>
               )}
-              <li>{isHt ? 'Wè evènman ki gen pou rive' : 'See what events are coming up'}</li>
-              <li>{isHt ? 'Envite yon zanmi' : 'Invite a friend'}</li>
+              <li>{isHt ? 'Wè evènman ki gen pou rive' : inlineText(lang, 'See what events are coming up')}</li>
+              <li>{isHt ? 'Envite yon zanmi' : inlineText(lang, 'Invite a friend')}</li>
             </ul>
           </div>
         </div>
@@ -146,7 +147,7 @@ export default function CommunityPreviewCard({
         <div className={styles.previewRules}>
           <span className={styles.previewRulesTitle}>
             <i className="fas fa-scroll" aria-hidden="true" />
-            {isHt ? 'Règleman' : 'House rules'}
+            {isHt ? 'Règleman' : inlineText(lang, 'House rules')}
           </span>
           <ol>
             {previewRules.map((rule) => (
@@ -158,7 +159,7 @@ export default function CommunityPreviewCard({
           </ol>
           {activeRules.length > previewRules.length && (
             <span className={styles.previewMore}>
-              +{activeRules.length - previewRules.length} {isHt ? 'lòt règ' : 'more rules'}
+              +{activeRules.length - previewRules.length} {isHt ? 'lòt règ' : inlineText(lang, 'more rules')}
             </span>
           )}
         </div>
@@ -170,7 +171,7 @@ export default function CommunityPreviewCard({
           ? joinCopy.hint
           : (isHt
             ? 'Se sa yon vizitè wè anvan l antre. CTA a chanje selon fason antre ou chwazi a.'
-            : 'This is what a visitor sees before joining. The button follows the join mode you chose.')}
+            : inlineText(lang, 'This is what a visitor sees before joining. The button follows the join mode you chose.'))}
       </p>
     </aside>
   );

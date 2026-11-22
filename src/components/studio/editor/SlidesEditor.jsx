@@ -15,6 +15,7 @@ import { useUndoRedo } from '../../../hooks/useUndoRedo';
 import { useKeyboardShortcuts } from '../../../hooks/useKeyboardShortcuts';
 import styles from './editor.module.css';
 import AudioLibraryModal from './AudioLibraryModal';
+import { inlineText } from '../../../utils/inlineI18n';
 
 /* ─── Icon definitions ───────────────────────────────────────────── */
 const Icon = ({ name, className, title }) => (
@@ -117,7 +118,7 @@ const defaultElement = {
 /* ─── Slide editor component ─────────────────────────────────────── */
 export default function SlidesEditor({ block, onChange, lang = 'en' }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht || en : en);
+  const t = (en, ht) => (isHt ? ht || en : inlineText(lang, en));
 
   const normalizedSlides = useMemo(
     () => normalizeSlides(block?.slides, block?.theme),
@@ -1152,7 +1153,7 @@ const ElementIcon = {
 /* ─── Theme modal ──────────────────────────────────────────────── */
 function ThemeModal({ onClose, onSelect, lang = 'en', value = 'brand', background = '#ffffff', imageUrl = '' }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
   const [selected, setSelected] = useState(value);
   const [hovered, setHovered] = useState(null);
   const [imageFailed, setImageFailed] = useState(false);
@@ -1160,9 +1161,9 @@ function ThemeModal({ onClose, onSelect, lang = 'en', value = 'brand', backgroun
   const previewTheme = SLIDE_THEMES[previewValue] || SLIDE_THEMES.brand;
   const previewCanvas = previewTheme.canvas || background || '#ffffff';
   const themes = [
-    { value: 'brand', label: isHt ? 'Mak' : 'Brand' },
-    { value: 'light', label: isHt ? 'Klè' : 'Light' },
-    { value: 'dark', label: isHt ? 'Fonse' : 'Dark' },
+    { value: 'brand', label: isHt ? 'Mak' : inlineText(lang, 'Brand') },
+    { value: 'light', label: isHt ? 'Klè' : inlineText(lang, 'Light') },
+    { value: 'dark', label: isHt ? 'Fonse' : inlineText(lang, 'Dark') },
   ];
 
   return (

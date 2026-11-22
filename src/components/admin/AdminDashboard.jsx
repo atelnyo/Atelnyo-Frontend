@@ -26,6 +26,7 @@ import api, { mediaProviderService, spotlightService } from '../../services/api'
 import { SHEETS } from '../../routes/sheets';
 import { CREATOR_APP_STATUS, SPOTLIGHT_STATUS } from '../../constants/statusConfig';
 import AdminPlatformConfig from './AdminPlatformConfig';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── Helpers ─────────────────────────────────────────────────────────
 
@@ -124,6 +125,7 @@ function CertificatePreviewPanel({ lang: _lang, onNavigate }) {
           issuedDate: new Date(cert.issued_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
           verifyUrl: `https://atelnyo.site/verify?cert=${certNum}`,
           isHt: false,
+          lang,
         });
       } else {
         // Sample preview (no real certificates yet)
@@ -134,6 +136,7 @@ function CertificatePreviewPanel({ lang: _lang, onNavigate }) {
           issuedDate: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
           verifyUrl: 'https://atelnyo.site/verify?cert=ATY-00000000-00000000',
           isHt: false,
+          lang,
         });
       }
     });
@@ -521,7 +524,7 @@ export default function AdminDashboard({ lang = 'en', showToast, user, onNavigat
     const slug = profile?.slug;
     if (!slug) {
       showToast?.(
-        lang === 'ht' ? 'Pwofil la pa gen slug.' : 'Profile has no slug.',
+        lang === 'ht' ? 'Pwofil la pa gen slug.' : inlineText(lang, 'Profile has no slug.'),
         'exclamation-triangle',
       );
       return;
@@ -532,12 +535,12 @@ export default function AdminDashboard({ lang = 'en', showToast, user, onNavigat
         prev.map((p) => (p.id === profile.id ? { ...p, ...updates } : p)),
       );
       showToast?.(
-        lang === 'ht' ? 'Pwofil mete ajou!' : 'Profile updated!',
+        lang === 'ht' ? 'Pwofil mete ajou!' : inlineText(lang, 'Profile updated!'),
         'check-circle',
       );
     } catch {
       showToast?.(
-        lang === 'ht' ? 'Erè nan mete ajou pwofil.' : 'Error updating profile.',
+        lang === 'ht' ? 'Erè nan mete ajou pwofil.' : inlineText(lang, 'Error updating profile.'),
         'exclamation-triangle',
       );
     }

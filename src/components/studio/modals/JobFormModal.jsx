@@ -8,6 +8,7 @@ import React, { useState, useCallback } from 'react';
 import { jobService } from '../../../services/api';
 import { StudioModal, FormField, LoadingOverlay, HelpTip, MediaUrlField, HELP_COPY } from './shared';
 import styles from './modals.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function JobFormModal({ onClose, onSuccess, lang, showToast, job }) {
   const isEdit = Boolean(job);
@@ -34,14 +35,14 @@ export default function JobFormModal({ onClose, onSuccess, lang, showToast, job 
 
   const validate = () => {
     const errs = {};
-    if (!form.title.trim()) errs.title = lang === 'ht' ? 'Tit oblije' : 'Title required';
-    if (!form.description.trim()) errs.description = lang === 'ht' ? 'Deskripsyon oblije' : 'Description required';
+    if (!form.title.trim()) errs.title = lang === 'ht' ? 'Tit oblije' : inlineText(lang, 'Title required');
+    if (!form.description.trim()) errs.description = lang === 'ht' ? 'Deskripsyon oblije' : inlineText(lang, 'Description required');
     const min = Number(form.budget_min);
     const max = Number(form.budget_max);
-    if (!Number.isFinite(min) || min < 0) errs.budget_min = lang === 'ht' ? 'Budjè min envalid' : 'Invalid min budget';
-    if (!Number.isFinite(max) || max < 0) errs.budget_max = lang === 'ht' ? 'Budjè max envalid' : 'Invalid max budget';
+    if (!Number.isFinite(min) || min < 0) errs.budget_min = lang === 'ht' ? 'Budjè min envalid' : inlineText(lang, 'Invalid min budget');
+    if (!Number.isFinite(max) || max < 0) errs.budget_max = lang === 'ht' ? 'Budjè max envalid' : inlineText(lang, 'Invalid max budget');
     if (Number.isFinite(min) && Number.isFinite(max) && max < min) {
-      errs.budget_max = lang === 'ht' ? 'Max dwe >= min' : 'Max must be >= min';
+      errs.budget_max = lang === 'ht' ? 'Max dwe >= min' : inlineText(lang, 'Max must be >= min');
     }
     return errs;
   };
@@ -74,8 +75,8 @@ export default function JobFormModal({ onClose, onSuccess, lang, showToast, job 
       }
       showToast?.(
         isEdit
-          ? (lang === 'ht' ? '✅ Travay mete ajou!' : '✅ Job updated!')
-          : (lang === 'ht' ? '✅ Travay kreye!' : '✅ Job created!'),
+          ? (lang === 'ht' ? '✅ Travay mete ajou!' : inlineText(lang, '✅ Job updated!'))
+          : (lang === 'ht' ? '✅ Travay kreye!' : inlineText(lang, '✅ Job created!')),
         'check-circle',
       );
       onSuccess?.(); onClose?.();
@@ -84,7 +85,7 @@ export default function JobFormModal({ onClose, onSuccess, lang, showToast, job 
         || err?.response?.data?.title?.[0]
         || err?.response?.data?.budget_max?.[0]
         || err?.message
-        || (lang === 'ht' ? 'Pa t kapab sove travay la.' : 'Could not save job.');
+        || (lang === 'ht' ? 'Pa t kapab sove travay la.' : inlineText(lang, 'Could not save job.'));
       setErrors((e) => ({ ...e, _api: detail }));
       showToast?.(detail, 'circle-exclamation');
     } finally { setLoading(false); }
@@ -93,66 +94,66 @@ export default function JobFormModal({ onClose, onSuccess, lang, showToast, job 
   return (
     <StudioModal onClose={onClose} icon="fa-briefcase" wide
       title={isEdit
-        ? (lang === 'ht' ? 'Modifye Travay' : 'Edit Job')
-        : (lang === 'ht' ? 'Kreye Travay' : 'Create Job')}
+        ? (lang === 'ht' ? 'Modifye Travay' : inlineText(lang, 'Edit Job'))
+        : (lang === 'ht' ? 'Kreye Travay' : inlineText(lang, 'Create Job'))}
       subtitle={lang === 'ht'
         ? 'Pibliye yon travay pou Explore'
-        : 'Publish a job to the Explore catalog'}>
+        : inlineText(lang, 'Publish a job to the Explore catalog')}>
       <form onSubmit={handleSubmit} className={styles.form}>
         {errors._api && <div className={styles.apiError} role="alert">{errors._api}</div>}
         <LoadingOverlay loading={loading}>
-          <FormField label={lang === 'ht' ? 'Tit' : 'Title'} required error={errors.title}>
+          <FormField label={lang === 'ht' ? 'Tit' : inlineText(lang, 'Title')} required error={errors.title}>
             <input className={styles.input} value={form.title}
               onChange={(e) => handleChange('title', e.target.value)}
-              placeholder={lang === 'ht' ? 'Antre tit travay la' : 'Enter job title'}
+              placeholder={lang === 'ht' ? 'Antre tit travay la' : inlineText(lang, 'Enter job title')}
               maxLength={200} autoFocus />
           </FormField>
-          <FormField label={lang === 'ht' ? 'Deskripsyon' : 'Description'} required error={errors.description}>
+          <FormField label={lang === 'ht' ? 'Deskripsyon' : inlineText(lang, 'Description')} required error={errors.description}>
             <textarea className={styles.textarea} value={form.description}
               onChange={(e) => handleChange('description', e.target.value)}
-              placeholder={lang === 'ht' ? 'Dekri travay la...' : 'Describe the job...'}
+              placeholder={lang === 'ht' ? 'Dekri travay la...' : inlineText(lang, 'Describe the job...')}
               rows={4} maxLength={3000} />
           </FormField>
           <MediaUrlField
-            label={lang === 'ht' ? 'Imaj Kouvèti' : 'Cover Image'}
+            label={lang === 'ht' ? 'Imaj Kouvèti' : inlineText(lang, 'Cover Image')}
             value={form.cover_url}
             onChange={(v) => handleChange('cover_url', v)}
             kind="image"
             lang={lang}
-            hint={lang === 'ht' ? 'Opsyonèl — yon kouvèti fè travay ou parèt pi byen' : 'Optional — a cover makes your job stand out'}
+            hint={lang === 'ht' ? 'Opsyonèl — yon kouvèti fè travay ou parèt pi byen' : inlineText(lang, 'Optional — a cover makes your job stand out')}
             help={HELP_COPY.cover}
             placeholder="https://example.com/cover.jpg"
           />
           <div className={styles.row}>
-            <FormField label={lang === 'ht' ? 'Kalite Budjè' : 'Budget Type'}>
+            <FormField label={lang === 'ht' ? 'Kalite Budjè' : inlineText(lang, 'Budget Type')}>
               <select className={styles.input} value={form.budget_type}
                 onChange={(e) => handleChange('budget_type', e.target.value)}>
-                <option value="fixed">{lang === 'ht' ? 'Fiks' : 'Fixed price'}</option>
-                <option value="hourly">{lang === 'ht' ? 'Pa èdtan' : 'Hourly'}</option>
+                <option value="fixed">{lang === 'ht' ? 'Fiks' : inlineText(lang, 'Fixed price')}</option>
+                <option value="hourly">{lang === 'ht' ? 'Pa èdtan' : inlineText(lang, 'Hourly')}</option>
               </select>
             </FormField>
-            <FormField label={lang === 'ht' ? 'Deviz' : 'Currency'}>
+            <FormField label={lang === 'ht' ? 'Deviz' : inlineText(lang, 'Currency')}>
               <input className={styles.input} value={form.currency}
                 onChange={(e) => handleChange('currency', e.target.value)}
                 maxLength={3} placeholder="USD" />
             </FormField>
           </div>
           <div className={styles.row}>
-            <FormField label={lang === 'ht' ? 'Budjè Min' : 'Budget Min'} required error={errors.budget_min}>
+            <FormField label={lang === 'ht' ? 'Budjè Min' : inlineText(lang, 'Budget Min')} required error={errors.budget_min}>
               <input className={styles.input} type="number" min="0" step="0.01"
                 value={form.budget_min}
                 onChange={(e) => handleChange('budget_min', e.target.value)}
                 placeholder="100" />
             </FormField>
-            <FormField label={lang === 'ht' ? 'Budjè Max' : 'Budget Max'} required error={errors.budget_max}>
+            <FormField label={lang === 'ht' ? 'Budjè Max' : inlineText(lang, 'Budget Max')} required error={errors.budget_max}>
               <input className={styles.input} type="number" min="0" step="0.01"
                 value={form.budget_max}
                 onChange={(e) => handleChange('budget_max', e.target.value)}
                 placeholder="300" />
             </FormField>
           </div>
-          <FormField label={lang === 'ht' ? 'Konpetans nesesè (separe ak virgül)' : 'Required skills (comma separated)'}
-            hint={lang === 'ht' ? 'Egzanp: React, Python, Dizayn' : 'e.g. React, Python, Design'}>
+          <FormField label={lang === 'ht' ? 'Konpetans nesesè (separe ak virgül)' : inlineText(lang, 'Required skills (comma separated)')}
+            hint={lang === 'ht' ? 'Egzanp: React, Python, Dizayn' : inlineText(lang, 'e.g. React, Python, Design')}>
             <div className={styles.inputWithHelp}>
               <input className={styles.input} value={form.skills_required}
                 onChange={(e) => handleChange('skills_required', e.target.value)}
@@ -164,22 +165,22 @@ export default function JobFormModal({ onClose, onSuccess, lang, showToast, job 
             </div>
           </FormField>
           <div className={styles.row}>
-            <FormField label={lang === 'ht' ? 'Kote' : 'Location'}>
+            <FormField label={lang === 'ht' ? 'Kote' : inlineText(lang, 'Location')}>
               <input className={styles.input} value={form.location}
                 onChange={(e) => handleChange('location', e.target.value)}
-                placeholder={lang === 'ht' ? 'Potoprens, Ayiti' : 'Port-au-Prince, Haiti'} />
+                placeholder={lang === 'ht' ? 'Potoprens, Ayiti' : inlineText(lang, 'Port-au-Prince, Haiti')} />
             </FormField>
-            <FormField label={lang === 'ht' ? 'Vizibilite' : 'Visibility'}>
+            <FormField label={lang === 'ht' ? 'Vizibilite' : inlineText(lang, 'Visibility')}>
               <select className={styles.input} value={form.visibility}
                 onChange={(e) => handleChange('visibility', e.target.value)}>
-                <option value="public">{lang === 'ht' ? 'Piblik' : 'Public'}</option>
-                <option value="community">{lang === 'ht' ? 'Kominote' : 'Community'}</option>
+                <option value="public">{lang === 'ht' ? 'Piblik' : inlineText(lang, 'Public')}</option>
+                <option value="community">{lang === 'ht' ? 'Kominote' : inlineText(lang, 'Community')}</option>
               </select>
             </FormField>
           </div>
           <div className={styles.toggleRow}>
             <span className={styles.toggleLabel}>
-              {lang === 'ht' ? 'Travay a distans' : 'Remote job'}
+              {lang === 'ht' ? 'Travay a distans' : inlineText(lang, 'Remote job')}
             </span>
             <button
               type="button"
@@ -187,7 +188,7 @@ export default function JobFormModal({ onClose, onSuccess, lang, showToast, job 
               onClick={() => handleChange('is_remote', !form.is_remote)}
               role="switch"
               aria-checked={form.is_remote}
-              aria-label={lang === 'ht' ? 'Travay a distans' : 'Remote job'}
+              aria-label={lang === 'ht' ? 'Travay a distans' : inlineText(lang, 'Remote job')}
             >
               <span className={styles.toggleKnob} />
             </button>
@@ -195,15 +196,15 @@ export default function JobFormModal({ onClose, onSuccess, lang, showToast, job 
         </LoadingOverlay>
         <div className={styles.actions}>
           <button type="button" className="btn-secondary" onClick={onClose} disabled={loading}>
-            {lang === 'ht' ? 'Anile' : 'Cancel'}
+            {lang === 'ht' ? 'Anile' : inlineText(lang, 'Cancel')}
           </button>
           <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? (
-              <><i className="fas fa-spinner fa-spin" /> {lang === 'ht' ? 'Ap sove...' : 'Saving...'}</>
+              <><i className="fas fa-spinner fa-spin" /> {lang === 'ht' ? 'Ap sove...' : inlineText(lang, 'Saving...')}</>
             ) : (
               <><i className="fas fa-save" /> {isEdit
-                ? (lang === 'ht' ? 'Mete ajou' : 'Update')
-                : (lang === 'ht' ? 'Kreye Travay' : 'Create Job')}</>
+                ? (lang === 'ht' ? 'Mete ajou' : inlineText(lang, 'Update'))
+                : (lang === 'ht' ? 'Kreye Travay' : inlineText(lang, 'Create Job'))}</>
             )}
           </button>
         </div>

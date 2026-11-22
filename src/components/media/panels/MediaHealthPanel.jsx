@@ -6,6 +6,7 @@
  * "Health" without depending on MediaInspector.
  */
 import React from 'react';
+import { inlineText } from '../../../utils/inlineI18n';
 
 function StatBox({ icon, label, value, color }) {
   return (
@@ -48,25 +49,25 @@ export default function MediaHealthPanel({ media, lang = 'en' }) {
         <div className="inspector-score-stats">
           <StatBox
             icon="fa-tachometer-alt"
-            label={isHt ? 'Latansi' : 'Latency'}
+            label={isHt ? 'Latansi' : inlineText(lang, 'Latency')}
             value={item.response_time_ms != null ? `${item.response_time_ms}ms` : '—'}
             color="#38bdf8"
           />
           <StatBox
             icon="fa-chart-bar"
-            label={isHt ? 'Disponibilite' : 'Uptime'}
+            label={isHt ? 'Disponibilite' : inlineText(lang, 'Uptime')}
             value={item.is_valid ? '100%' : (healthScore != null ? `${healthScore}%` : '—')}
             color="#10b981"
           />
           <StatBox
             icon="fa-redo"
-            label={isHt ? 'Validasyon' : 'Validations'}
+            label={isHt ? 'Validasyon' : inlineText(lang, 'Validations')}
             value={String(validationHistory.length)}
             color="#8b5cf6"
           />
           <StatBox
             icon="fa-shield-alt"
-            label={isHt ? 'Sekirite' : 'Security Score'}
+            label={isHt ? 'Sekirite' : inlineText(lang, 'Security Score')}
             value={item.security_score != null ? `${item.security_score}%` : '—'}
             color="#0ea5e9"
           />

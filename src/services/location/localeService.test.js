@@ -8,21 +8,21 @@ describe('getSupportedBrowserLanguage', () => {
 
   it('walks ordered browser locales until it finds a supported language', () => {
     vi.stubGlobal('navigator', {
-      languages: ['de-DE', 'es-ES', 'fr-CA', 'en-US'],
+      languages: ['de-DE', 'pt-BR', 'fr-CA', 'en-US'],
       language: 'de-DE',
     });
 
     expect(getSupportedBrowserLanguage()).toBe('fr');
   });
 
-  it('maps a legacy Spanish browser locale to English, never to an unsupported UI language', () => {
+  it('maps a Spanish browser locale to the supported Spanish UI language', () => {
     vi.stubGlobal('navigator', {
       languages: ['es-ES'],
       language: 'es-ES',
     });
 
-    expect(getSupportedBrowserLanguage()).toBe('en');
-    expect(getSupportedBrowserLanguage(['es'])).toBeNull();
+    expect(getSupportedBrowserLanguage()).toBe('es');
+    expect(getSupportedBrowserLanguage(['ht', 'en', 'fr'])).toBeNull();
   });
 
   it('returns null when no browser locale is supported', () => {

@@ -26,6 +26,7 @@ import React, { useState, useRef } from 'react';
 import MediaSkeleton from './MediaSkeleton';
 import MediaBadge from './MediaBadge';
 import { mediaProviderService } from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── Visibility meta ────────────────────────────────────────────────
 const VISIBILITY_META = {
@@ -224,7 +225,7 @@ export default function MediaCard({
             <div className="media-card-thumb-fallback">
               <i className="fas fa-image" aria-hidden="true" />
               <span className="media-card-thumb-fallback-text">
-                {isHt ? 'Imaj kase' : 'Image broken'}
+                {isHt ? 'Imaj kase' : inlineText(lang, 'Image broken')}
               </span>
             </div>
           ) : (
@@ -250,7 +251,7 @@ export default function MediaCard({
               <div className="media-card-thumb-fallback">
                 <i className="fas fa-video" aria-hidden="true" />
                 <span className="media-card-thumb-fallback-text">
-                  {isHt ? 'Pa gen thumbnail' : 'No thumbnail'}
+                  {isHt ? 'Pa gen thumbnail' : inlineText(lang, 'No thumbnail')}
                 </span>
               </div>
             )}
@@ -280,8 +281,8 @@ export default function MediaCard({
             type="button"
             className={`media-card-favorite ${isFavorite ? 'media-card-favorite-active' : ''}`}
             onClick={handleFavorite}
-            title={isFavorite ? (isHt ? 'Retire nan favori' : 'Remove from favorites') : (isHt ? 'Ajoute nan favori' : 'Add to favorites')}
-            aria-label={isFavorite ? (isHt ? 'Retire nan favori' : 'Remove from favorites') : (isHt ? 'Ajoute nan favori' : 'Add to favorites')}
+            title={isFavorite ? (isHt ? 'Retire nan favori' : inlineText(lang, 'Remove from favorites')) : (isHt ? 'Ajoute nan favori' : inlineText(lang, 'Add to favorites'))}
+            aria-label={isFavorite ? (isHt ? 'Retire nan favori' : inlineText(lang, 'Remove from favorites')) : (isHt ? 'Ajoute nan favori' : inlineText(lang, 'Add to favorites'))}
             aria-pressed={isFavorite}
           >
             <i className={`${isFavorite ? 'fas' : 'far'} fa-star`} aria-hidden="true" />
@@ -289,7 +290,7 @@ export default function MediaCard({
         </div>
 
         {showActions && (
-          <div className="media-card-hover-actions" role="toolbar" aria-label={isHt ? 'Aksyon medya' : 'Media actions'}>
+          <div className="media-card-hover-actions" role="toolbar" aria-label={isHt ? 'Aksyon medya' : inlineText(lang, 'Media actions')}>
             {hoverActions.map((a) => (
               <button
                 key={a.key}
@@ -326,7 +327,7 @@ export default function MediaCard({
               onChange={(e) => setEditTitle(e.target.value)}
               onKeyDown={handleRenameKeyDown}
               onBlur={handleSaveRename}
-              placeholder={isHt ? 'Non medya...' : 'Media name...'}
+              placeholder={isHt ? 'Non medya...' : inlineText(lang, 'Media name...')}
               maxLength={256}
             />
             {saving && <i className="fas fa-spinner fa-spin media-card-title-spinner" aria-hidden="true" />}
@@ -337,19 +338,19 @@ export default function MediaCard({
             title={isHt ? 'Klike pou renome — ' + title : 'Click to rename — ' + title}
             onClick={handleStartEdit}
           >
-            {title.length > 60 ? `${title.slice(0, 60)}…` : title || (isHt ? 'San tit' : 'Untitled')}
+            {title.length > 60 ? `${title.slice(0, 60)}…` : title || (isHt ? 'San tit' : inlineText(lang, 'Untitled'))}
             <i className="fas fa-pencil-alt media-card-title-pencil" aria-hidden="true" />
           </div>
         )}
         <div className="media-card-meta">
           {updatedAt && (
-            <span className="media-card-meta-item" title={isHt ? 'Dènye mizajou' : 'Last updated'}>
+            <span className="media-card-meta-item" title={isHt ? 'Dènye mizajou' : inlineText(lang, 'Last updated')}>
               <i className="fas fa-clock" aria-hidden="true" />
               {fmtDate(updatedAt)}
             </span>
           )}
           {Number(referenceCount) > 0 && (
-            <span className="media-card-meta-item" title={isHt ? 'Referans' : 'References'}>
+            <span className="media-card-meta-item" title={isHt ? 'Referans' : inlineText(lang, 'References')}>
               <i className="fas fa-link" aria-hidden="true" />
               {referenceCount}
             </span>
@@ -359,28 +360,28 @@ export default function MediaCard({
 
       {/* ── Quick Action Toolbar (always visible) ────────────────── */}
       {showActions && (
-        <div className="media-card-quick-toolbar" role="toolbar" aria-label={isHt ? 'Aksyon rapid' : 'Quick actions'}>
+        <div className="media-card-quick-toolbar" role="toolbar" aria-label={isHt ? 'Aksyon rapid' : inlineText(lang, 'Quick actions')}>
           <button
             type="button"
             className={`media-card-quick-btn media-card-quick-rename ${editing ? 'media-card-quick-btn-active' : ''}`}
             onClick={handleStartEdit}
-            title={isHt ? 'Renome rapid' : 'Quick Rename'}
-            aria-label={isHt ? 'Renome rapid' : 'Quick Rename'}
+            title={isHt ? 'Renome rapid' : inlineText(lang, 'Quick Rename')}
+            aria-label={isHt ? 'Renome rapid' : inlineText(lang, 'Quick Rename')}
           >
             <i className={`fas ${saving ? 'fa-spinner fa-spin' : 'fa-pencil-alt'}`} aria-hidden="true" />
-            <span className="media-card-quick-label">{isHt ? 'Renome' : 'Rename'}</span>
+            <span className="media-card-quick-label">{isHt ? 'Renome' : inlineText(lang, 'Rename')}</span>
           </button>
           <button
             type="button"
             className={`media-card-quick-btn media-card-quick-copy ${copied ? 'media-card-quick-btn-copied' : ''}`}
             onClick={handleCopy}
             disabled={!mediaUrl}
-            title={isHt ? 'Kopye URL rapid' : 'Quick Copy URL'}
-            aria-label={isHt ? 'Kopye URL rapid' : 'Quick Copy URL'}
+            title={isHt ? 'Kopye URL rapid' : inlineText(lang, 'Quick Copy URL')}
+            aria-label={isHt ? 'Kopye URL rapid' : inlineText(lang, 'Quick Copy URL')}
           >
             <i className={`fas ${copied ? 'fa-check' : 'fa-copy'}`} aria-hidden="true" />
             <span className="media-card-quick-label">
-              {copied ? (isHt ? 'Kopye!' : 'Copied!') : (isHt ? 'Kopi URL' : 'Copy URL')}
+              {copied ? (isHt ? 'Kopye!' : inlineText(lang, 'Copied!')) : (isHt ? 'Kopi URL' : inlineText(lang, 'Copy URL'))}
             </span>
           </button>
         </div>

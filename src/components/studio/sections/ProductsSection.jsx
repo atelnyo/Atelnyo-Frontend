@@ -16,6 +16,7 @@ import useFetch from '../../../hooks/useFetch';
 import { EmptyState, SectionHeader, fmtCurrency, fmtCount } from '../shared';
 import ConfirmModal from '../../common/ConfirmModal';
 import styles from './sections.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const STATUS_FILTERS = ['all', 'published', 'draft'];
 
@@ -34,7 +35,7 @@ function ProductsTableSkeleton({ lang, t }) {
   return (
     <div className={styles.tableWrap} aria-busy="true">
       <span className={styles.srOnly} role="status">
-        {lang === 'ht' ? 'Ap chaje pwodwi yo…' : 'Loading products…'}
+        {lang === 'ht' ? 'Ap chaje pwodwi yo…' : inlineText(lang, 'Loading products…')}
       </span>
       <table className={styles.table} aria-hidden="true">
         <thead>
@@ -333,8 +334,8 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
       await marketplaceService.update(product.id, { is_active: nextActive });
       showToast?.(
         nextActive
-          ? (lang === 'ht' ? '✅ Pwodwi pibliye!' : '✅ Product is now published!')
-          : (lang === 'ht' ? '🙈 Pwodwi kache.' : '🙈 Product hidden.'),
+          ? (lang === 'ht' ? '✅ Pwodwi pibliye!' : inlineText(lang, '✅ Product is now published!'))
+          : (lang === 'ht' ? '🙈 Pwodwi kache.' : inlineText(lang, '🙈 Product hidden.')),
         'eye',
       );
       refetch();
@@ -343,7 +344,7 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
       updateLocal((row) => row.id === product.id, { is_active: product.is_active !== false });
       showToast?.(
         err?.response?.data?.detail
-          || (lang === 'ht' ? 'Pa t kapab chanje estati a.' : 'Could not change the product status.'),
+          || (lang === 'ht' ? 'Pa t kapab chanje estati a.' : inlineText(lang, 'Could not change the product status.')),
         'circle-exclamation',
       );
     } finally {
@@ -354,7 +355,7 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
   const handleDeleteClick = (item) => {
     setConfirm({
       item,
-      title: lang === 'ht' ? 'Efase pwodwi' : 'Delete product',
+      title: lang === 'ht' ? 'Efase pwodwi' : inlineText(lang, 'Delete product'),
       message: lang === 'ht' ? `Eske w sèten ou vle efase "${item.title}"?` : `Are you sure you want to delete "${item.title}"?`,
       onConfirm: () => {
         // Optimistic + non-blocking: the row vanishes instantly AND the
@@ -374,9 +375,9 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
         (async () => {
           try {
             await marketplaceService.delete(item.id);
-            showToast?.(lang === 'ht' ? '✅ Pwodwi efase!' : '✅ Product deleted!', 'check-circle');
+            showToast?.(lang === 'ht' ? '✅ Pwodwi efase!' : inlineText(lang, '✅ Product deleted!'), 'check-circle');
           } catch (err) {
-            showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase.' : 'Could not delete.'), 'circle-exclamation');
+            showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase.' : inlineText(lang, 'Could not delete.')), 'circle-exclamation');
           }
           refetch();
         })();
@@ -417,9 +418,9 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
       ) : showError ? (
         <div className={styles.loadError} role="alert">
           <i className="fas fa-circle-exclamation" aria-hidden="true" />
-          <p>{lang === 'ht' ? 'Pa t kapab chaje pwodwi yo.' : 'Products could not be loaded.'}</p>
+          <p>{lang === 'ht' ? 'Pa t kapab chaje pwodwi yo.' : inlineText(lang, 'Products could not be loaded.')}</p>
           <button type="button" className={styles.loadMoreBtn} onClick={refetch}>
-            {lang === 'ht' ? 'Eseye ankò' : 'Try again'}
+            {lang === 'ht' ? 'Eseye ankò' : inlineText(lang, 'Try again')}
           </button>
         </div>
       ) : isEmpty ? (
@@ -436,26 +437,26 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
             <label className={styles.productSearch}>
               <i className="fas fa-magnifying-glass" aria-hidden="true" />
               <span className={styles.srOnly}>
-                {lang === 'ht' ? 'Chèche pwodwi' : 'Search products'}
+                {lang === 'ht' ? 'Chèche pwodwi' : inlineText(lang, 'Search products')}
               </span>
               <input
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder={lang === 'ht' ? 'Chèche pa non, tip…' : 'Search by name, type…'}
+                placeholder={lang === 'ht' ? 'Chèche pa non, tip…' : inlineText(lang, 'Search by name, type…')}
                 autoComplete="off"
               />
             </label>
             <div
               className={styles.productFilters}
               role="group"
-              aria-label={lang === 'ht' ? 'Filtre pa estati' : 'Filter products by status'}
+              aria-label={lang === 'ht' ? 'Filtre pa estati' : inlineText(lang, 'Filter products by status')}
             >
               {STATUS_FILTERS.map((value) => {
                 const label = {
-                  all: lang === 'ht' ? 'Tout' : 'All',
-                  published: lang === 'ht' ? 'Pibliye' : 'Published',
-                  draft: lang === 'ht' ? 'Bouyon' : 'Drafts',
+                  all: lang === 'ht' ? 'Tout' : inlineText(lang, 'All'),
+                  published: lang === 'ht' ? 'Pibliye' : inlineText(lang, 'Published'),
+                  draft: lang === 'ht' ? 'Bouyon' : inlineText(lang, 'Drafts'),
                 }[value];
                 return (
                   <button
@@ -476,7 +477,7 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
           </div>
 
           {selectedProducts.length > 0 && (
-            <div className={styles.bulkBar} role="region" aria-label={lang === 'ht' ? 'Aksyon an blòk' : 'Bulk actions'}>
+            <div className={styles.bulkBar} role="region" aria-label={lang === 'ht' ? 'Aksyon an blòk' : inlineText(lang, 'Bulk actions')}>
               <span className={styles.bulkCount} aria-live="polite">
                 {lang === 'ht' ? `${selectedProducts.length} chwazi` : `${selectedProducts.length} selected`}
               </span>
@@ -488,8 +489,8 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
                   disabled={bulkBusy || selectedDraftCount === 0}
                 >
                   {bulkBusy
-                    ? (lang === 'ht' ? 'Ap mete ajou…' : 'Updating…')
-                    : (lang === 'ht' ? 'Pibliye chwazi yo' : 'Publish selected')}
+                    ? (lang === 'ht' ? 'Ap mete ajou…' : inlineText(lang, 'Updating…'))
+                    : (lang === 'ht' ? 'Pibliye chwazi yo' : inlineText(lang, 'Publish selected'))}
                 </button>
                 <button
                   type="button"
@@ -498,8 +499,8 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
                   disabled={bulkBusy || selectedLiveCount === 0}
                 >
                   {bulkBusy
-                    ? (lang === 'ht' ? 'Ap mete ajou…' : 'Updating…')
-                    : (lang === 'ht' ? 'Kache chwazi yo' : 'Unpublish selected')}
+                    ? (lang === 'ht' ? 'Ap mete ajou…' : inlineText(lang, 'Updating…'))
+                    : (lang === 'ht' ? 'Kache chwazi yo' : inlineText(lang, 'Unpublish selected'))}
                 </button>
                 <button
                   type="button"
@@ -507,7 +508,7 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
                   onClick={handleBulkDeleteClick}
                   disabled={bulkBusy}
                 >
-                  {lang === 'ht' ? 'Efase chwazi yo' : 'Delete selected'}
+                  {lang === 'ht' ? 'Efase chwazi yo' : inlineText(lang, 'Delete selected')}
                 </button>
               </div>
               <button
@@ -516,7 +517,7 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
                 onClick={() => setSelectedIds(new Set())}
                 disabled={bulkBusy}
               >
-                {lang === 'ht' ? 'Retire seleksyon' : 'Clear selection'}
+                {lang === 'ht' ? 'Retire seleksyon' : inlineText(lang, 'Clear selection')}
               </button>
             </div>
           )}
@@ -525,9 +526,9 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
             <div className={styles.tableWrap}>
               <div className={styles.filterEmpty} role="status">
                 <i className="fas fa-magnifying-glass" aria-hidden="true" />
-                <p>{lang === 'ht' ? 'Pa gen pwodwi ki matche ak filtè yo.' : 'No products match your filters.'}</p>
+                <p>{lang === 'ht' ? 'Pa gen pwodwi ki matche ak filtè yo.' : inlineText(lang, 'No products match your filters.')}</p>
                 <button type="button" className={styles.clearFilters} onClick={clearFilters}>
-                  {lang === 'ht' ? 'Retire filtè yo' : 'Clear filters'}
+                  {lang === 'ht' ? 'Retire filtè yo' : inlineText(lang, 'Clear filters')}
                 </button>
               </div>
             </div>
@@ -584,10 +585,10 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
                     const isLive = p.is_active !== false;
                     const isToggling = togglingId === p.id;
                     const kindLabel = {
-                      digital: lang === 'ht' ? 'Dijital' : 'Digital',
-                      physical: lang === 'ht' ? 'Fizik' : 'Physical',
-                      service: lang === 'ht' ? 'Sèvis' : 'Service',
-                      subscription: lang === 'ht' ? 'Abònman' : 'Subscription',
+                      digital: lang === 'ht' ? 'Dijital' : inlineText(lang, 'Digital'),
+                      physical: lang === 'ht' ? 'Fizik' : inlineText(lang, 'Physical'),
+                      service: lang === 'ht' ? 'Sèvis' : inlineText(lang, 'Service'),
+                      subscription: lang === 'ht' ? 'Abònman' : inlineText(lang, 'Subscription'),
                     }[p.kind] || p.kind;
                     return (
                       <tr key={p.id}>
@@ -597,7 +598,7 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
                             checked={selectedIds.has(p.id)}
                             onChange={() => toggleSelect(p.id)}
                             disabled={bulkBusy}
-                            aria-label={`${selectedIds.has(p.id) ? (lang === 'ht' ? 'Dekoleksyone' : 'Deselect') : (lang === 'ht' ? 'Seleksyone' : 'Select')} ${p.title}`}
+                            aria-label={`${selectedIds.has(p.id) ? (lang === 'ht' ? 'Dekoleksyone' : inlineText(lang, 'Deselect')) : (lang === 'ht' ? 'Seleksyone' : inlineText(lang, 'Select'))} ${p.title}`}
                           />
                         </td>
                         <td className={styles.cellName}>
@@ -610,7 +611,7 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
                                   href={`/store/products/${encodeURIComponent(p.slug)}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  title={lang === 'ht' ? 'Wè nan Store' : 'View in Store'}
+                                  title={lang === 'ht' ? 'Wè nan Store' : inlineText(lang, 'View in Store')}
                                 >
                                   {p.title}
                                 </a>
@@ -628,7 +629,7 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
                         <td>
                           <span className={`${styles.badge} ${isLive ? styles.badgePublished : styles.badgeDraft}`}>
                             <i className={`fas ${isLive ? 'fa-eye' : 'fa-eye-slash'}`} aria-hidden="true" />
-                            {isLive ? (lang === 'ht' ? 'Pibliye' : 'Published') : (lang === 'ht' ? 'Bouyon' : 'Draft')}
+                            {isLive ? (lang === 'ht' ? 'Pibliye' : inlineText(lang, 'Published')) : (lang === 'ht' ? 'Bouyon' : inlineText(lang, 'Draft'))}
                           </span>
                         </td>
                         <td className={styles.cellActions}>
@@ -639,11 +640,11 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
                             disabled={isToggling}
                             aria-busy={isToggling}
                             title={isLive
-                              ? (lang === 'ht' ? 'Depibliye' : 'Unpublish')
-                              : (lang === 'ht' ? 'Pibliye' : 'Publish')}
+                              ? (lang === 'ht' ? 'Depibliye' : inlineText(lang, 'Unpublish'))
+                              : (lang === 'ht' ? 'Pibliye' : inlineText(lang, 'Publish'))}
                             aria-label={`${isLive
-                              ? (lang === 'ht' ? 'Depibliye' : 'Unpublish')
-                              : (lang === 'ht' ? 'Pibliye' : 'Publish')} ${p.title}`}
+                              ? (lang === 'ht' ? 'Depibliye' : inlineText(lang, 'Unpublish'))
+                              : (lang === 'ht' ? 'Pibliye' : inlineText(lang, 'Publish'))} ${p.title}`}
                           >
                             <i className={`fas ${isLive ? 'fa-eye-slash' : 'fa-eye'}`} aria-hidden="true" />
                           </button>
@@ -651,8 +652,8 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
                             type="button"
                             className={styles.editBtn}
                             onClick={() => onEdit?.(p)}
-                            title={lang === 'ht' ? 'Modifye' : 'Edit'}
-                            aria-label={`${lang === 'ht' ? 'Modifye' : 'Edit'} ${p.title}`}
+                            title={lang === 'ht' ? 'Modifye' : inlineText(lang, 'Edit')}
+                            aria-label={`${lang === 'ht' ? 'Modifye' : inlineText(lang, 'Edit')} ${p.title}`}
                           >
                             <i className="fas fa-pen" aria-hidden="true" />
                           </button>
@@ -660,8 +661,8 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
                             type="button"
                             className={styles.deleteBtn}
                             onClick={() => handleDeleteClick(p)}
-                            title={lang === 'ht' ? 'Efase' : 'Delete'}
-                            aria-label={`${lang === 'ht' ? 'Efase' : 'Delete'} ${p.title}`}
+                            title={lang === 'ht' ? 'Efase' : inlineText(lang, 'Delete')}
+                            aria-label={`${lang === 'ht' ? 'Efase' : inlineText(lang, 'Delete')} ${p.title}`}
                           >
                             <i className="fas fa-trash-can" aria-hidden="true" />
                           </button>
@@ -678,7 +679,7 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
             <div className={styles.loadMoreRow}>
               {loadMoreError && (
                 <span className={styles.loadMoreError} role="alert">
-                  {lang === 'ht' ? 'Pa t kapab chaje plis.' : 'Could not load more.'}
+                  {lang === 'ht' ? 'Pa t kapab chaje plis.' : inlineText(lang, 'Could not load more.')}
                 </span>
               )}
               <button
@@ -688,10 +689,10 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
                 disabled={loadingMore}
               >
                 {loadingMore
-                  ? (lang === 'ht' ? 'Ap chaje…' : 'Loading…')
+                  ? (lang === 'ht' ? 'Ap chaje…' : inlineText(lang, 'Loading…'))
                   : (loadMoreError
-                    ? (lang === 'ht' ? 'Eseye ankò' : 'Try again')
-                    : (lang === 'ht' ? 'Chaje plis' : 'Load more'))}
+                    ? (lang === 'ht' ? 'Eseye ankò' : inlineText(lang, 'Try again'))
+                    : (lang === 'ht' ? 'Chaje plis' : inlineText(lang, 'Load more')))}
               </button>
             </div>
           )}
@@ -700,7 +701,7 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
             <p className={styles.filterHint}>
               {lang === 'ht'
                 ? 'Filtè aktif — efase yo pou wè tout pwodwi yo.'
-                : 'Filters are active — clear them to see every product.'}
+                : inlineText(lang, 'Filters are active — clear them to see every product.')}
             </p>
           )}
         </>

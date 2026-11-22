@@ -15,6 +15,7 @@
  */
 import React, { useState, useCallback } from 'react';
 import { courseService } from '../../../services/api';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const ROLE_INFO = {
   owner: { icon: 'fa-crown', color: '#f59e0b', label: { ht: 'Pwopriyetè', en: 'Owner' } },
@@ -32,7 +33,7 @@ const ROLE_DESCRIPTIONS = {
 
 export default function CollaborationPanel({ courseId, lang = 'en', isOwner = false }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
 
   const [collaborators, setCollaborators] = useState([]);
   const [loading, setLoading] = useState(false);

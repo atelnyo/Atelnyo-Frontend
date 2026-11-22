@@ -26,6 +26,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import useSafeNavigate from '../hooks/useSafeNavigate';
 import api from '../services/api';
+import { inlineText } from '../utils/inlineI18n';
 
 const SORT_OPTIONS = [
   { value: 'relevance', label: 'Relevance', icon: 'fa-sort-amount-down' },
@@ -96,28 +97,28 @@ const SearchResultsPage = ({
   }, [searchParams, setSearchParams]);
 
   const t = {
-    results_for: lang === 'ht' ? 'Rezilta pou' : 'Results for',
-    no_results: lang === 'ht' ? 'Pa gen rezilta' : 'No results found',
-    try_different: lang === 'ht' ? 'Eseye yon lòt tèm oswa chanje filtè yo' : 'Try a different search term or change filters',
-    browse_explore: lang === 'ht' ? 'Eksplore Tout' : 'Browse Explore',
-    sort_by: lang === 'ht' ? 'Triye pa' : 'Sort by',
-    showing: lang === 'ht' ? 'Ap montre' : 'Showing',
-    of: lang === 'ht' ? 'nan' : 'of',
-    results: lang === 'ht' ? 'rezilta' : 'results',
-    view: lang === 'ht' ? 'Wè' : 'View',
-    filters: lang === 'ht' ? 'Filtè' : 'Filters',
-    clear_filters: lang === 'ht' ? 'Retire filtè' : 'Clear filters',
+    results_for: lang === 'ht' ? 'Rezilta pou' : inlineText(lang, 'Results for'),
+    no_results: lang === 'ht' ? 'Pa gen rezilta' : inlineText(lang, 'No results found'),
+    try_different: lang === 'ht' ? 'Eseye yon lòt tèm oswa chanje filtè yo' : inlineText(lang, 'Try a different search term or change filters'),
+    browse_explore: lang === 'ht' ? 'Eksplore Tout' : inlineText(lang, 'Browse Explore'),
+    sort_by: lang === 'ht' ? 'Triye pa' : inlineText(lang, 'Sort by'),
+    showing: lang === 'ht' ? 'Ap montre' : inlineText(lang, 'Showing'),
+    of: lang === 'ht' ? 'nan' : inlineText(lang, 'of'),
+    results: lang === 'ht' ? 'rezilta' : inlineText(lang, 'results'),
+    view: lang === 'ht' ? 'Wè' : inlineText(lang, 'View'),
+    filters: lang === 'ht' ? 'Filtè' : inlineText(lang, 'Filters'),
+    clear_filters: lang === 'ht' ? 'Retire filtè' : inlineText(lang, 'Clear filters'),
     choose_type_hint: lang === 'ht'
       ? 'Chwazi yon tip anwo a pou wè filtè avanse li.'
-      : 'Pick a type above to see its advanced filters.',
+      : inlineText(lang, 'Pick a type above to see its advanced filters.'),
     no_adv_filters: lang === 'ht'
       ? 'Pa gen filtè avanse pou tip sa a.'
-      : 'No advanced filters for this type.',
-    categories: lang === 'ht' ? 'Kategori' : 'Categories',
-    all: lang === 'ht' ? 'Tout' : 'All',
-    loading: lang === 'ht' ? 'Ap chaje...' : 'Loading...',
-    prev: lang === 'ht' ? 'Anvan' : 'Prev',
-    next: lang === 'ht' ? 'Apre' : 'Next',
+      : inlineText(lang, 'No advanced filters for this type.'),
+    categories: lang === 'ht' ? 'Kategori' : inlineText(lang, 'Categories'),
+    all: lang === 'ht' ? 'Tout' : inlineText(lang, 'All'),
+    loading: lang === 'ht' ? 'Ap chaje...' : inlineText(lang, 'Loading...'),
+    prev: lang === 'ht' ? 'Anvan' : inlineText(lang, 'Prev'),
+    next: lang === 'ht' ? 'Apre' : inlineText(lang, 'Next'),
   };
 
   // Handle sort change — mirror it into the URL and notify the parent so

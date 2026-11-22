@@ -30,6 +30,7 @@ import React from 'react';
 import { fmtCount, fmtDate, isNewItem } from './profileUtils';
 import ProfileCatalogCard from './ProfileCatalogCard';
 import { SkeletonSection } from './ProfileSkeleton';
+import { inlineText } from '../../utils/inlineI18n';
 
 /* ─── Dashboard section renderers map ──────────────────────────────
  * Each key matches a section id from DASHBOARD_INTERNAL_ORDER.
@@ -43,7 +44,7 @@ import { SkeletonSection } from './ProfileSkeleton';
  */
 const ViewAll = ({ onClick, lang }) => (
   <button type="button" className="csp-view-all" onClick={onClick}>
-    {lang === 'ht' ? 'Wè tout' : 'View all'}
+    {lang === 'ht' ? 'Wè tout' : inlineText(lang, 'View all')}
     <i className="fas fa-arrow-right" aria-hidden="true" />
   </button>
 );
@@ -84,19 +85,19 @@ const DASHBOARD_SECTION_RENDERERS = {
               image={course.image_url}
               description={course.description}
               icon="fa-graduation-cap"
-              typeLabel={lang === 'ht' ? 'Kou' : 'Course'}
+              typeLabel={lang === 'ht' ? 'Kou' : inlineText(lang, 'Course')}
               price={`$${course.price || 0}`}
-              freeLabel={lang === 'ht' ? 'Gratis' : 'Free'}
+              freeLabel={lang === 'ht' ? 'Gratis' : inlineText(lang, 'Free')}
               rating={course.rating}
               isFeatured={!!course.is_featured}
               isNew={isNewItem(course.created_at)}
               isPopular={course.student_count >= 25}
               badgeLabels={{
-                featured: lang === 'ht' ? 'Rekòmande' : 'Featured',
-                new: lang === 'ht' ? 'Nouvo' : 'New',
-                popular: lang === 'ht' ? 'Popilè' : 'Popular',
+                featured: lang === 'ht' ? 'Rekòmande' : inlineText(lang, 'Featured'),
+                new: lang === 'ht' ? 'Nouvo' : inlineText(lang, 'New'),
+                popular: lang === 'ht' ? 'Popilè' : inlineText(lang, 'Popular'),
               }}
-              extra={course.student_count > 0 ? <span>· {fmtCount(course.student_count)} {lang === 'ht' ? 'elèv' : 'students'}</span> : null}
+              extra={course.student_count > 0 ? <span>· {fmtCount(course.student_count)} {lang === 'ht' ? 'elèv' : inlineText(lang, 'students')}</span> : null}
               onOpen={() => onItemClick('course', course.id, course)}
             />
           ))}
@@ -120,19 +121,19 @@ const DASHBOARD_SECTION_RENDERERS = {
               image={product.image_url}
               description={product.description}
               icon="fa-cube"
-              typeLabel={lang === 'ht' ? 'Pwodwi' : 'Product'}
+              typeLabel={lang === 'ht' ? 'Pwodwi' : inlineText(lang, 'Product')}
               price={`$${product.price || 0}`}
-              freeLabel={lang === 'ht' ? 'Gratis' : 'Free'}
+              freeLabel={lang === 'ht' ? 'Gratis' : inlineText(lang, 'Free')}
               rating={product.rating}
               isFeatured={!!product.is_featured}
               isNew={isNewItem(product.created_at)}
               isPopular={product.sales_count >= 25}
               badgeLabels={{
-                featured: lang === 'ht' ? 'Rekòmande' : 'Featured',
-                new: lang === 'ht' ? 'Nouvo' : 'New',
-                popular: lang === 'ht' ? 'Popilè' : 'Popular',
+                featured: lang === 'ht' ? 'Rekòmande' : inlineText(lang, 'Featured'),
+                new: lang === 'ht' ? 'Nouvo' : inlineText(lang, 'New'),
+                popular: lang === 'ht' ? 'Popilè' : inlineText(lang, 'Popular'),
               }}
-              extra={product.sales_count > 0 ? <span>· {fmtCount(product.sales_count)} {lang === 'ht' ? 'vann' : 'sold'}</span> : null}
+              extra={product.sales_count > 0 ? <span>· {fmtCount(product.sales_count)} {lang === 'ht' ? 'vann' : inlineText(lang, 'sold')}</span> : null}
               onOpen={() => onItemClick('product', product.id, product)}
             />
           ))}
@@ -145,7 +146,7 @@ const DASHBOARD_SECTION_RENDERERS = {
       <div className="csp-card-m3" key="jobs">
         <div className="csp-card-m3-header">
           <span className="csp-card-m3-icon"><i className="fas fa-briefcase" /></span>
-          <span className="csp-card-m3-title">{t.profile_jobs || (lang === 'ht' ? 'Travay' : 'Jobs')}</span>
+          <span className="csp-card-m3-title">{t.profile_jobs || (lang === 'ht' ? 'Travay' : inlineText(lang, 'Jobs'))}</span>
         </div>
         <div className="csp-card-grid">
           {jobs.slice(0, 6).map((job) => {
@@ -159,7 +160,7 @@ const DASHBOARD_SECTION_RENDERERS = {
                 image={job.cover_url}
                 description={job.description}
                 icon="fa-briefcase"
-                typeLabel={lang === 'ht' ? 'Travay' : 'Job'}
+                typeLabel={lang === 'ht' ? 'Travay' : inlineText(lang, 'Job')}
                 price={budget}
                 extra={<>{job.is_remote && <span>· {t.explore_remote || 'Remote'}</span>}{job.location && <span>· {job.location}</span>}</>}
                 onOpen={() => onItemClick('job', job.id, job)}
@@ -186,9 +187,9 @@ const DASHBOARD_SECTION_RENDERERS = {
               image={project.image_url}
               description={project.description}
               icon="fa-briefcase"
-              typeLabel={lang === 'ht' ? 'Pòtfolyo' : 'Portfolio'}
+              typeLabel={lang === 'ht' ? 'Pòtfolyo' : inlineText(lang, 'Portfolio')}
               rating={project.rating}
-              extra={<>{project.category && <span className="csp-catalog-card-chip">{project.category}</span>}{project.views > 0 && <span>· {fmtCount(project.views)} {lang === 'ht' ? 'vizit' : 'views'}</span>}</>}
+              extra={<>{project.category && <span className="csp-catalog-card-chip">{project.category}</span>}{project.views > 0 && <span>· {fmtCount(project.views)} {lang === 'ht' ? 'vizit' : inlineText(lang, 'views')}</span>}</>}
               onOpen={() => onItemClick('portfolio', project.id, project)}
             />
           ))}
@@ -326,7 +327,7 @@ const DASHBOARD_SECTION_RENDERERS = {
               <span className="csp-tipper-name">@{row.username}</span>
               <span className="csp-tipper-total">${row.total}</span>
               <span className="csp-tipper-count">
-                {fmtCount(row.tip_count)} {lang === 'ht' ? 'tip' : 'tips'}
+                {fmtCount(row.tip_count)} {lang === 'ht' ? 'tip' : inlineText(lang, 'tips')}
               </span>
             </div>
           ))}
@@ -458,7 +459,7 @@ export default function DashboardTab({
   if (loading) {
     return (
       <div className="csp-dashboard" role="status" aria-busy="true"
-        aria-label={lang === 'ht' ? 'Ap chaje piblikasyon yo' : 'Loading published content'}>
+        aria-label={lang === 'ht' ? 'Ap chaje piblikasyon yo' : inlineText(lang, 'Loading published content')}>
         <p className="csp-dashboard-state__label">
           {lang === 'ht' ? 'Ap chaje afich yo…' : lang === 'es' ? 'Cargando publicaciones…' : 'Loading posts…'}
         </p>

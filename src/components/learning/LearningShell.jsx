@@ -31,6 +31,7 @@
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import './LearningShell.css';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── Constants ──────────────────────────────────────────────────
 
@@ -134,6 +135,7 @@ export default function LearningShell({
         pct={pct}
         isComplete={isComplete}
         isHt={isHt}
+        lang={lang}
         isSessionActive={isSessionActive}
         onBack={onBack}
         onOpenDrawer={() => setDrawerOpen(true)}
@@ -156,6 +158,7 @@ export default function LearningShell({
             maxReached={maxReached}
             pct={pct}
             isHt={isHt}
+            lang={lang}
             onModuleSelect={onModuleSelect}
             header={sidebarHeader}
             footer={sidebarFooter}
@@ -166,7 +169,7 @@ export default function LearningShell({
         <div
           className={`ls-shell-content${isSessionActive ? ' is-session-active' : ''}`}
           role="region"
-          aria-label={isHt ? 'Kontni leson' : 'Lesson content'}
+          aria-label={isHt ? 'Kontni leson' : inlineText(lang, 'Lesson content')}
         >
           {children}
         </div>
@@ -174,7 +177,7 @@ export default function LearningShell({
 
       {/* ─── Action Area ────────────────────────────────────── */}
       {actionArea && (
-        <div className="ls-action-area" role="navigation" aria-label={isHt ? 'Navigasyon leson' : 'Lesson navigation'}>
+        <div className="ls-action-area" role="navigation" aria-label={isHt ? 'Navigasyon leson' : inlineText(lang, 'Lesson navigation')}>
           <div className="ls-action-area-inner">
             {actionArea}
           </div>
@@ -193,6 +196,7 @@ export default function LearningShell({
           maxReached={maxReached}
           pct={pct}
           isHt={isHt}
+          lang={lang}
           onModuleSelect={(idx) => {
             onModuleSelect?.(idx);
             setDrawerOpen(false);
@@ -211,6 +215,7 @@ function LearningShellHeader({
   pct,
   isComplete,
   isHt,
+  lang = 'en',
   isSessionActive,
   onBack,
   onOpenDrawer,
@@ -234,7 +239,7 @@ function LearningShellHeader({
         type="button"
         className="ls-shell-header-back"
         onClick={onBack}
-        aria-label={isHt ? 'Retounen' : 'Back'}
+        aria-label={isHt ? 'Retounen' : inlineText(lang, 'Back')}
       >
         <i className="fas fa-arrow-left" aria-hidden="true" />
       </button>
@@ -243,7 +248,7 @@ function LearningShellHeader({
         <div className="ls-shell-header-title">{title}</div>
         {/* §4 — Show breadcrumb on session, subtitle on overview */}
         {hasBreadcrumb ? (
-          <div className="ls-shell-header-subtitle" aria-label={isHt ? 'Kote ou ye' : 'Current position'}>
+          <div className="ls-shell-header-subtitle" aria-label={isHt ? 'Kote ou ye' : inlineText(lang, 'Current position')}>
             {currentModuleTitle && (
               <span>{currentModuleTitle}</span>
             )}
@@ -266,7 +271,7 @@ function LearningShellHeader({
             type="button"
             className="ls-shell-header-btn"
             onClick={onOpenDrawer}
-            aria-label={isHt ? 'Kourikoulòm' : 'Curriculum'}
+            aria-label={isHt ? 'Kourikoulòm' : inlineText(lang, 'Curriculum')}
             aria-haspopup="dialog"
           >
             <i className="fas fa-bars-staggered" aria-hidden="true" />
@@ -279,7 +284,7 @@ function LearningShellHeader({
             type="button"
             className={`ls-shell-header-btn${focusMode ? ' is-active' : ''}`}
             onClick={onToggleFocus}
-            aria-label={isHt ? 'Mòd Konsantre' : 'Focus Mode'}
+            aria-label={isHt ? 'Mòd Konsantre' : inlineText(lang, 'Focus Mode')}
             aria-pressed={focusMode}
           >
             <i className={`fas ${focusMode ? 'fa-eye-slash' : 'fa-eye'}`} aria-hidden="true" />
@@ -309,21 +314,22 @@ function CurriculumSidebar({
   maxReached,
   pct,
   isHt,
+  lang = 'en',
   onModuleSelect,
   header,
   footer,
 }) {
   return (
-    <nav className="ls-shell-sidebar" role="navigation" aria-label={isHt ? 'Kourikoulòm' : 'Curriculum'}>
+    <nav className="ls-shell-sidebar" role="navigation" aria-label={isHt ? 'Kourikoulòm' : inlineText(lang, 'Curriculum')}>
       {header && <div className="ls-shell-sidebar-header">{header}</div>}
 
       {!header && (
         <div className="ls-shell-sidebar-header">
           <h2 className="ls-shell-sidebar-title">
-            {isHt ? 'Kourikoulòm' : 'Curriculum'}
+            {isHt ? 'Kourikoulòm' : inlineText(lang, 'Curriculum')}
           </h2>
           <div className="ls-shell-sidebar-meta">
-            {pct}% {isHt ? 'konplete' : 'complete'}
+            {pct}% {isHt ? 'konplete' : inlineText(lang, 'complete')}
           </div>
         </div>
       )}
@@ -334,7 +340,7 @@ function CurriculumSidebar({
           const isFuture = mi > maxReached && state === 'available';
           const modTitle = (typeof item === 'object' && item.title)
             ? item.title
-            : `${isHt ? 'Modil' : 'Module'} ${mi + 1}`;
+            : `${isHt ? 'Modil' : inlineText(lang, 'Module')} ${mi + 1}`;
           const blocks = (typeof item === 'object' && Array.isArray(item.blocks)) ? item.blocks : [];
           const doneDots = blocks.filter((b) => completedBlocksMap[String(mi)]?.has(b.id)).length;
 
@@ -392,6 +398,7 @@ function MobileCurriculumDrawer({
   maxReached,
   pct,
   isHt,
+  lang = 'en',
   onModuleSelect,
 }) {
   const drawerRef = useRef(null);
@@ -420,7 +427,7 @@ function MobileCurriculumDrawer({
         className={`ls-mobile-drawer${isOpen ? ' is-open' : ''}`}
         role="dialog"
         aria-modal="true"
-        aria-label={isHt ? 'Kourikoulòm' : 'Curriculum'}
+        aria-label={isHt ? 'Kourikoulòm' : inlineText(lang, 'Curriculum')}
       >
         {/* Drag handle */}
         <div className="ls-mobile-drawer-handle">
@@ -430,13 +437,13 @@ function MobileCurriculumDrawer({
         {/* Header */}
         <div className="ls-mobile-drawer-header">
           <h2 className="ls-mobile-drawer-title">
-            {isHt ? 'Kourikoulòm' : 'Curriculum'}
+            {isHt ? 'Kourikoulòm' : inlineText(lang, 'Curriculum')}
           </h2>
           <button
             type="button"
             className="ls-mobile-drawer-close"
             onClick={onClose}
-            aria-label={isHt ? 'Fèmen' : 'Close'}
+            aria-label={isHt ? 'Fèmen' : inlineText(lang, 'Close')}
           >
             <i className="fas fa-xmark" aria-hidden="true" />
           </button>
@@ -444,7 +451,7 @@ function MobileCurriculumDrawer({
 
         {/* Progress */}
         <div className="ls-mobile-drawer-progress">
-          {pct}% {isHt ? 'konplete' : 'complete'}
+          {pct}% {isHt ? 'konplete' : inlineText(lang, 'complete')}
         </div>
 
         {/* Module list */}
@@ -455,7 +462,7 @@ function MobileCurriculumDrawer({
               const isFuture = mi > maxReached && state === 'available';
               const modTitle = (typeof item === 'object' && item.title)
                 ? item.title
-                : `${isHt ? 'Modil' : 'Module'} ${mi + 1}`;
+                : `${isHt ? 'Modil' : inlineText(lang, 'Module')} ${mi + 1}`;
               const blocks = (typeof item === 'object' && Array.isArray(item.blocks)) ? item.blocks : [];
               const doneDots = blocks.filter((b) => completedBlocksMap[String(mi)]?.has(b.id)).length;
               const isCurrent = mi === currentModule;
@@ -555,7 +562,7 @@ export class BlockErrorBoundary extends React.Component {
 
   render() {
     if (this.state.hasError) {
-      const { isHt = false, onRetry, blockType } = this.props;
+      const { isHt = false, lang = 'en', onRetry, blockType } = this.props;
       return (
         <div className="ls-block-error" role="alert">
           <div className="ls-block-error-icon">
@@ -564,17 +571,17 @@ export class BlockErrorBoundary extends React.Component {
           <div className="ls-block-error-label">
             {isHt
               ? 'Aktivite sa a pa t kapab chaje.'
-              : 'This activity could not load.'}
+              : inlineText(lang, 'This activity could not load.')}
           </div>
           {blockType && (
             <div className="ls-block-error-type">
-              {isHt ? 'Kalite:' : 'Type:'} {blockType}
+              {isHt ? 'Kalite:' : inlineText(lang, 'Type:')} {blockType}
             </div>
           )}
           {onRetry && (
             <button type="button" className="ls-block-error-retry" onClick={onRetry}>
               <i className="fas fa-rotate-right" aria-hidden="true" />
-              {isHt ? 'Eseye ankò' : 'Retry'}
+              {isHt ? 'Eseye ankò' : inlineText(lang, 'Retry')}
             </button>
           )}
         </div>
@@ -586,9 +593,9 @@ export class BlockErrorBoundary extends React.Component {
 
 // ─── LoadingShell ──────────────────────────────────────────────
 // §45 — Progressive loading: shell → context → content → blocks
-export function LoadingShell({ isHt = false }) {
+export function LoadingShell({ isHt = false, lang = 'en' }) {
   return (
-    <div className="ls-shell" role="status" aria-busy="true" aria-label={isHt ? 'Ap chaje...' : 'Loading...'}>
+    <div className="ls-shell" role="status" aria-busy="true" aria-label={isHt ? 'Ap chaje...' : inlineText(lang, 'Loading...')}>
       {/* Skeleton header */}
       <div className="ls-shell-header ls-skel-header" aria-hidden="true">
         <div className="ls-shell-skeleton ls-skel-back" />
@@ -624,14 +631,14 @@ export function LoadingShell({ isHt = false }) {
 
       <div className="ls-loading-label" role="status" aria-live="polite">
         <i className="fas fa-spinner fa-spin" aria-hidden="true" />
-        <span>{isHt ? 'Ap chaje espas aprantisaj la...' : 'Loading your learning space...'}</span>
+        <span>{isHt ? 'Ap chaje espas aprantisaj la...' : inlineText(lang, 'Loading your learning space...')}</span>
       </div>
     </div>
   );
 }
 
 // ─── ErrorShell ────────────────────────────────────────────────
-export function ErrorShell({ isHt = false, message, onBack, onRetry }) {
+export function ErrorShell({ isHt = false, lang = 'en', message, onBack, onRetry }) {
   return (
     <div className="ls-shell">
       <div className="ls-shell-header" role="banner">
@@ -640,7 +647,7 @@ export function ErrorShell({ isHt = false, message, onBack, onRetry }) {
         </button>
         <div className="ls-shell-header-info">
           <div className="ls-shell-header-title">
-            {isHt ? 'Espas Aprantisaj' : 'Learning Space'}
+            {isHt ? 'Espas Aprantisaj' : inlineText(lang, 'Learning Space')}
           </div>
         </div>
       </div>
@@ -648,15 +655,15 @@ export function ErrorShell({ isHt = false, message, onBack, onRetry }) {
         <div className="ls-shell-content">
           <div className="ls-error-state" role="alert">
             <i className="fas fa-triangle-exclamation ls-error-state-icon" aria-hidden="true" />
-            <h3>{isHt ? 'Pa t kapab chaje kou a.' : 'Could not load the course.'}</h3>
-            <p>{message || (isHt ? 'Tcheke koneksyon ou epi eseye ankò.' : 'Check your connection and try again.')}</p>
+            <h3>{isHt ? 'Pa t kapab chaje kou a.' : inlineText(lang, 'Could not load the course.')}</h3>
+            <p>{message || (isHt ? 'Tcheke koneksyon ou epi eseye ankò.' : inlineText(lang, 'Check your connection and try again.'))}</p>
             <div className="ls-error-state-actions">
               <button type="button" className="ls-btn" onClick={onBack}>
-                <i className="fas fa-arrow-left" aria-hidden="true" /> {isHt ? 'Retounen' : 'Back'}
+                <i className="fas fa-arrow-left" aria-hidden="true" /> {isHt ? 'Retounen' : inlineText(lang, 'Back')}
               </button>
               {onRetry && (
                 <button type="button" className="ls-btn ls-btn--primary" onClick={onRetry}>
-                  <i className="fas fa-rotate-right" aria-hidden="true" /> {isHt ? 'Eseye ankò' : 'Try again'}
+                  <i className="fas fa-rotate-right" aria-hidden="true" /> {isHt ? 'Eseye ankò' : inlineText(lang, 'Try again')}
                 </button>
               )}
             </div>

@@ -14,6 +14,7 @@
  * sections naturally.
  */
 import React from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function LessonIntroduction({
   title,
@@ -28,7 +29,7 @@ export default function LessonIntroduction({
   const hasObjectives = Array.isArray(objectives) && objectives.length > 0;
 
   return (
-    <div className={`ls-lesson-intro ${className}`} role="region" aria-label={isHt ? 'Entwodiksyon leson' : 'Lesson introduction'}>
+    <div className={`ls-lesson-intro ${className}`} role="region" aria-label={isHt ? 'Entwodiksyon leson' : inlineText(lang, 'Lesson introduction')}>
       {/* §25 — Lesson Title */}
       {title && !hideTitle && (
         <h2 className="ls-lesson-intro-title">{title}</h2>
@@ -45,7 +46,7 @@ export default function LessonIntroduction({
           <p className="ls-lesson-intro-objectives-label">
             {isHt
               ? 'Nan fen leson sa a, ou pral kapab:'
-              : 'By the end of this lesson, you will be able to:'}
+              : inlineText(lang, 'By the end of this lesson, you will be able to:')}
           </p>
           <ul className="ls-lesson-intro-objectives-list">
             {objectives.map((obj, i) => (

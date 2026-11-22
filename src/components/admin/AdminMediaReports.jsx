@@ -12,6 +12,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useHasAdminAccess } from '../../hooks/useHasAdminAccess';
 import { adminMediaService } from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 const REPORT_STATUSES = [
   { key: 'pending', label: 'Pending', icon: 'fa-clock', color: 'var(--state-warning, #f59e0b)', bg: 'var(--severity-medium-bg, rgba(245,158,11,0.09))' },
@@ -46,13 +47,13 @@ export default function AdminMediaReports({ lang = 'en', showToast, user, onNavi
   const [actionLoading, setActionLoading] = useState(null);
 
   useEffect(() => {
-    if (user && !permsLoading && !hasStaffAccess) { showToast?.(isHt?'Aksè rezeve.':'Staff access required.','user-lock'); if(onNavigate) onNavigate('/',{replace:true}); }
+    if (user && !permsLoading && !hasStaffAccess) { showToast?.(isHt?'Aksè rezeve.':inlineText(lang, 'Staff access required.'),'user-lock'); if(onNavigate) onNavigate('/',{replace:true}); }
   }, [user, hasStaffAccess, permsLoading]);
 
   const fetchReports = useCallback(async () => {
     setLoading(true);
     try { const res = await adminMediaService.reportsList(statusFilter); setReports(res.data?.reports||[]); }
-    catch { showToast?.(isHt?'Pa kapab chaje.':'Failed to load.','exclamation-triangle'); }
+    catch { showToast?.(isHt?'Pa kapab chaje.':inlineText(lang, 'Failed to load.'),'exclamation-triangle'); }
     finally { setLoading(false); }
   }, [statusFilter]);
 
@@ -61,14 +62,14 @@ export default function AdminMediaReports({ lang = 'en', showToast, user, onNavi
   const handleAssign = async (id) => {
     setActionLoading(id);
     try { await adminMediaService.assignReport(id); showToast?.('✓ Assigned','check-circle'); fetchReports(); }
-    catch { showToast?.(isHt?'Erè.':'Failed.','exclamation-triangle'); }
+    catch { showToast?.(isHt?'Erè.':inlineText(lang, 'Failed.'),'exclamation-triangle'); }
     finally { setActionLoading(null); }
   };
 
   const handleResolve = async (id, decision) => {
     setActionLoading(id);
     try { await adminMediaService.resolveReport(id, decision); showToast?.('✓ '+decision,'check-circle'); fetchReports(); setDetailId(null); }
-    catch { showToast?.(isHt?'Erè.':'Failed.','exclamation-triangle'); }
+    catch { showToast?.(isHt?'Erè.':inlineText(lang, 'Failed.'),'exclamation-triangle'); }
     finally { setActionLoading(null); }
   };
 
@@ -83,10 +84,10 @@ export default function AdminMediaReports({ lang = 'en', showToast, user, onNavi
       <div className="amr-header">
         <button type="button" className="amr-back" onClick={() => onNavigate?.(-1)}><i className="fas fa-arrow-left" /></button>
         <div className="amr-header-center">
-          <h1 className="amr-title"><i className="fas fa-flag" /> {isHt?'Sant Rapò Medya':'Media Report Center'}</h1>
-          <p className="amr-subtitle">{isHt?'Revize rapò itilizatè yo.':'Review user-submitted media reports.'}</p>
+          <h1 className="amr-title"><i className="fas fa-flag" /> {isHt?'Sant Rapò Medya':inlineText(lang, 'Media Report Center')}</h1>
+          <p className="amr-subtitle">{isHt?'Revize rapò itilizatè yo.':inlineText(lang, 'Review user-submitted media reports.')}</p>
         </div>
-        <button type="button" className="amr-btn" onClick={fetchReports}><i className="fas fa-sync" /> {isHt?'Rafrechi':'Refresh'}</button>
+        <button type="button" className="amr-btn" onClick={fetchReports}><i className="fas fa-sync" /> {isHt?'Rafrechi':inlineText(lang, 'Refresh')}</button>
       </div>
 
       <div className="amr-filters">
@@ -100,8 +101,8 @@ export default function AdminMediaReports({ lang = 'en', showToast, user, onNavi
 
       <div className="amr-body" style={{display:'flex',gap:0,flex:1,overflow:'hidden'}}>
         <div style={{flex:1,overflowY:'auto',borderRight:detail?'1px solid var(--border-color, rgba(216,27,96,0.06))':'none'}}>
-          {loading ? <div className="amr-loading"><i className="fas fa-spinner fa-spin" /> {isHt?'Ap chaje...':'Loading...'}</div>
-          : reports.length===0 ? <div className="amr-empty"><i className="fas fa-inbox" style={{opacity:.3}} /><p>{isHt?'Pa gen rapò.':'No reports.'}</p></div>
+          {loading ? <div className="amr-loading"><i className="fas fa-spinner fa-spin" /> {isHt?'Ap chaje...':inlineText(lang, 'Loading...')}</div>
+          : reports.length===0 ? <div className="amr-empty"><i className="fas fa-inbox" style={{opacity:.3}} /><p>{isHt?'Pa gen rapò.':inlineText(lang, 'No reports.')}</p></div>
           : (
             <div className="amr-list">
               {reports.map(r => (
@@ -117,8 +118,8 @@ export default function AdminMediaReports({ lang = 'en', showToast, user, onNavi
                     </span>
                   </div>
                   <div className="amr-list-meta">
-                    <span>{isHt?'Pa':'By'} {r.reporter||'—'}</span>
-                    <span>{isHt?'Sou':'Re'} {r.owner||'—'}</span>
+                    <span>{isHt?'Pa':inlineText(lang, 'By')} {r.reporter||'—'}</span>
+                    <span>{isHt?'Sou':inlineText(lang, 'Re')} {r.owner||'—'}</span>
                     {r.assigned_moderator&&<span>→ {r.assigned_moderator}</span>}
                   </div>
                   <div className="amr-list-reason">{r.reason?.slice(0,80)}</div>
@@ -130,17 +131,17 @@ export default function AdminMediaReports({ lang = 'en', showToast, user, onNavi
 
         {detail && (
           <div className="amr-detail" style={{width:380,flexShrink:0,overflowY:'auto',padding:'16px 20px'}}>
-            <h3 className="amr-detail-title">{isHt?'Detay Rapò':'Report Detail'}</h3>
+            <h3 className="amr-detail-title">{isHt?'Detay Rapò':inlineText(lang, 'Report Detail')}</h3>
             <dl className="amr-detail-dl">
-              <dt>{isHt?'Tip':'Type'}</dt><dd>{TYPE_LABELS[detail.report_type]||detail.report_type}</dd>
-              <dt>{isHt?'Rapòtè':'Reporter'}</dt><dd>{detail.reporter||'—'}</dd>
-              <dt>{isHt?'Pwopriyetè':'Owner'}</dt><dd>{detail.owner||'—'}</dd>
-              <dt>{isHt?'Medya':'Media URL'}</dt><dd className="amr-detail-url">{detail.media_url||'—'}</dd>
-              <dt>{isHt?'Reyon':'Reason'}</dt><dd>{detail.reason||'—'}</dd>
-              <dt>{isHt?'Deskripsyon':'Description'}</dt><dd>{detail.description||'—'}</dd>
-              <dt>{isHt?'Moderatè':'Moderator'}</dt><dd>{detail.assigned_moderator||(isHt?'Pa asiyen':'Unassigned')}</dd>
-              <dt>{isHt?'Estati':'Status'}</dt><dd>{detail.status}</dd>
-              {detail.decision&&<><dt>{isHt?'Desizyon':'Decision'}</dt><dd>{detail.decision}</dd></>}
+              <dt>{isHt?'Tip':inlineText(lang, 'Type')}</dt><dd>{TYPE_LABELS[detail.report_type]||detail.report_type}</dd>
+              <dt>{isHt?'Rapòtè':inlineText(lang, 'Reporter')}</dt><dd>{detail.reporter||'—'}</dd>
+              <dt>{isHt?'Pwopriyetè':inlineText(lang, 'Owner')}</dt><dd>{detail.owner||'—'}</dd>
+              <dt>{isHt?'Medya':inlineText(lang, 'Media URL')}</dt><dd className="amr-detail-url">{detail.media_url||'—'}</dd>
+              <dt>{isHt?'Reyon':inlineText(lang, 'Reason')}</dt><dd>{detail.reason||'—'}</dd>
+              <dt>{isHt?'Deskripsyon':inlineText(lang, 'Description')}</dt><dd>{detail.description||'—'}</dd>
+              <dt>{isHt?'Moderatè':inlineText(lang, 'Moderator')}</dt><dd>{detail.assigned_moderator||(isHt?'Pa asiyen':inlineText(lang, 'Unassigned'))}</dd>
+              <dt>{isHt?'Estati':inlineText(lang, 'Status')}</dt><dd>{detail.status}</dd>
+              {detail.decision&&<><dt>{isHt?'Desizyon':inlineText(lang, 'Decision')}</dt><dd>{detail.decision}</dd></>}
             </dl>
 
             <div className="amr-detail-actions">
@@ -148,7 +149,7 @@ export default function AdminMediaReports({ lang = 'en', showToast, user, onNavi
                 <button type="button" className="btn-primary" onClick={()=>handleAssign(detail.id)}
                   disabled={actionLoading===detail.id}>
                   <i className={`fas ${actionLoading===detail.id?'fa-spinner fa-spin':'fa-user-plus'}`} />
-                  {isHt?'Asiyen mwen':'Assign to me'}
+                  {isHt?'Asiyen mwen':inlineText(lang, 'Assign to me')}
                 </button>
               )}
               {(detail.status==='pending'||detail.status==='under_review')&&(

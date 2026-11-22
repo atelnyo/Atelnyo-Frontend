@@ -6,6 +6,7 @@
  * never published silently — every block problem maps to its module.
  */
 import { useCallback } from 'react';
+import { inlineText } from '../../../../utils/inlineI18n';
 
 function asList(v) {
   if (Array.isArray(v)) return v;
@@ -13,26 +14,26 @@ function asList(v) {
   return [];
 }
 
-export function useCourseValidation({ form, isExternal, isHt }) {
+export function useCourseValidation({ form, isExternal, isHt, lang = 'en' }) {
   const validate = useCallback(() => {
     const errs = {};
-    if (!form.title.trim()) errs.title = isHt ? 'Tit oblije' : 'Title required';
+    if (!form.title.trim()) errs.title = isHt ? 'Tit oblije' : inlineText(lang, 'Title required');
     if (!form.description.trim() || form.description.trim().length < 20) {
       errs.description = isHt
         ? 'Deskripsyon an dwe gen 20 karaktè minimòm'
-        : 'Description must be at least 20 characters';
+        : inlineText(lang, 'Description must be at least 20 characters');
     }
     if (form.price && isNaN(Number(form.price))) {
-      errs.price = isHt ? 'Pri a pa valab' : 'Invalid price';
+      errs.price = isHt ? 'Pri a pa valab' : inlineText(lang, 'Invalid price');
     }
     // External courses must point learners somewhere — a valid destination
     // URL is the one thing that makes an external course real.
     if (isExternal && !form.external_url.trim()) {
       errs.external_url = isHt
         ? 'Ajoute yon URL ekstèn (kote elèv yo ale pou aprann)'
-        : 'Add an external URL (where students go to learn)';
+        : inlineText(lang, 'Add an external URL (where students go to learn)');
     } else if (isExternal && form.external_url.trim() && !/^https?:\/\//i.test(form.external_url.trim())) {
-      errs.external_url = isHt ? 'URL la dwe kòmanse ak http(s)://' : 'The URL must start with http(s)://';
+      errs.external_url = isHt ? 'URL la dwe kòmanse ak http(s)://' : inlineText(lang, 'The URL must start with http(s)://');
     }
     return errs;
   }, [form.title, form.description, form.price, form.external_url, isExternal, isHt]);
@@ -110,13 +111,13 @@ export function useCourseValidation({ form, isExternal, isHt }) {
 
   const readiness = useCallback(() => {
     const items = [];
-    if (!form.title.trim()) items.push({ message: isHt ? 'Ajoute yon tit' : 'Add a title', target: 'overview' });
+    if (!form.title.trim()) items.push({ message: isHt ? 'Ajoute yon tit' : inlineText(lang, 'Add a title'), target: 'overview' });
     if (!form.description.trim() || form.description.trim().length < 20) {
-      items.push({ message: isHt ? 'Ekri deskripsyon an (20+ karaktè)' : 'Write the description (20+ characters)', target: 'overview' });
+      items.push({ message: isHt ? 'Ekri deskripsyon an (20+ karaktè)' : inlineText(lang, 'Write the description (20+ characters)'), target: 'overview' });
     }
-    if (!form.image_url.trim()) items.push({ message: isHt ? 'Ajoute yon imaj kouvèti' : 'Add a cover image', target: 'props' });
+    if (!form.image_url.trim()) items.push({ message: isHt ? 'Ajoute yon imaj kouvèti' : inlineText(lang, 'Add a cover image'), target: 'props' });
     if (isExternal && !form.external_url.trim()) {
-      items.push({ message: isHt ? 'Ajoute URL kou ekstèn lan' : 'Add the external course URL', target: 'props' });
+      items.push({ message: isHt ? 'Ajoute URL kou ekstèn lan' : inlineText(lang, 'Add the external course URL'), target: 'props' });
     }
     return items.concat(blockReadiness(form.modules));
   }, [form.title, form.description, form.image_url, form.external_url, isExternal, form.modules, blockReadiness, isHt]);

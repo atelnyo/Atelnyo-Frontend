@@ -25,6 +25,7 @@ import { useSpeechRecognition } from '../../../modules/learning/useSpeechRecogni
 import { transcribeTakeOnServer } from '../../../modules/learning/serverTranscription';
 import SpeechRecorder from '../SpeechRecorder';
 import styles from '../learning.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 /**
  * Resolve the BCP-47 tag for speech recognition.
@@ -43,7 +44,7 @@ export function resolveRecognitionLang(block, lang) {
 
 export default function ExerciseBlock({ block, lang = 'en', courseId, moduleIndex, onComplete, onPortfolioSave, registerBlock }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
   const { markComplete } = useCompletionContract({
     blockId: block?.id,
     blockType: 'exercise',

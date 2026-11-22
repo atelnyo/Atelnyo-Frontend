@@ -13,10 +13,11 @@
 import React, { useState } from 'react';
 import { BlockRenderer } from '../../learning/blocks';
 import { getBlockMeta } from '../../learning/blocks/registry';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function CoursePreviewModal({ course, lang = 'en', onClose }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
   const modules = Array.isArray(course?.modules) ? course.modules : [];
   const [moduleIndex, setModuleIndex] = useState(0);
   const [previewBlockId, setPreviewBlockId] = useState(null);

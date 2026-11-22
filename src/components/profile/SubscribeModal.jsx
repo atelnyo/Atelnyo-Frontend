@@ -25,6 +25,7 @@
  */
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { creatorProfileService, paymentConfigService } from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── PayPal SDK loader (injected once, capture intent) ─────────────────
 // Mirrors ProfileContactModal / DepositModal — the SDK is loaded from the
@@ -80,8 +81,8 @@ export default function SubscribeModal({
   const priceDisplay = price ? `$${price}` : '';
   const title = t.profile_subscribe_title || (isHt
     ? 'Abòne w nan kontni eksklizif'
-    : 'Subscribe to exclusive content');
-  const cancelLabel = t.profile_contact_cancel || (isHt ? 'Anile' : 'Cancel');
+    : inlineText(lang, 'Subscribe to exclusive content'));
+  const cancelLabel = t.profile_contact_cancel || (isHt ? 'Anile' : inlineText(lang, 'Cancel'));
 
   // Anonymous visitor pressed Subscribe → open auth in place; after
   // sign-in the subscribe fires automatically (they stay on this page).
@@ -95,7 +96,7 @@ export default function SubscribeModal({
       setPeriodEnd(data?.period_end || null);
       setPhase('success');
       showToast?.(
-        t.profile_subscribe_success || (isHt ? 'Abònman an aktive! 🎉' : 'Subscription active! 🎉'),
+        t.profile_subscribe_success || (isHt ? 'Abònman an aktive! 🎉' : inlineText(lang, 'Subscription active! 🎉')),
         'check-circle',
       );
       onSubscribed?.(data);
@@ -110,7 +111,7 @@ export default function SubscribeModal({
       setPhase('error');
       setError(err?.response?.data?.detail || err?.response?.data?.error || err?.message || (isHt
         ? 'Abònman an echwe. Tanpri eseye ankò.'
-        : 'Subscription failed. Please try again.'));
+        : inlineText(lang, 'Subscription failed. Please try again.')));
     }
   }, [user, slug, t, isHt, showToast, onSubscribed]);
 
@@ -141,7 +142,7 @@ export default function SubscribeModal({
       if (!cfgData?.configured || !cfgData?.client_id) {
         throw new Error(t.profile_tip_paypal_unavailable || (isHt
           ? 'PayPal poko disponib kounye a.'
-          : 'PayPal is not available right now.'));
+          : inlineText(lang, 'PayPal is not available right now.')));
       }
       const pp = await loadPayPalScript(cfgData.client_id, cfgData.sandbox);
       setPaypal(pp);
@@ -154,7 +155,7 @@ export default function SubscribeModal({
       setPpPhase('failed');
       setError(err?.response?.data?.error || err?.message || (isHt
         ? 'Pa t kapab kòmanse peman an.'
-        : 'Could not start the payment.'));
+        : inlineText(lang, 'Could not start the payment.')));
     }
   }, [user, slug, t, isHt]);
 
@@ -180,7 +181,7 @@ export default function SubscribeModal({
           setPeriodEnd(data?.period_end || null);
           setPhase('success');
           showToast?.(
-            t.profile_subscribe_success || (isHt ? 'Abònman an aktive! 🎉' : 'Subscription active! 🎉'),
+            t.profile_subscribe_success || (isHt ? 'Abònman an aktive! 🎉' : inlineText(lang, 'Subscription active! 🎉')),
             'check-circle',
           );
           onSubscribed?.(data);
@@ -188,7 +189,7 @@ export default function SubscribeModal({
           setPpPhase('failed');
           setError(err?.response?.data?.error || err?.message || (isHt
             ? 'Peman echwe. Tanpri eseye ankò.'
-            : 'Payment failed. Please try again.'));
+            : inlineText(lang, 'Payment failed. Please try again.')));
         } finally {
           ppProcessingRef.current = false;
         }
@@ -198,7 +199,7 @@ export default function SubscribeModal({
         setPpPhase('failed');
         setError(t.profile_tip_paypal_unavailable || (isHt
           ? 'PayPal poko disponib kounye a.'
-          : 'PayPal is not available right now.'));
+          : inlineText(lang, 'PayPal is not available right now.')));
       },
     });
     buttons.render(container).then(() => {
@@ -207,7 +208,7 @@ export default function SubscribeModal({
       setPpPhase('failed');
       setError(t.profile_tip_paypal_unavailable || (isHt
         ? 'PayPal poko disponib kounye a.'
-        : 'PayPal is not available right now.'));
+        : inlineText(lang, 'PayPal is not available right now.')));
     });
     return () => { try { container.innerHTML = ''; } catch (_) {} };
   }, [ppPhase, paypal, ppOrder, slug, t, showToast, onSubscribed, isHt]);
@@ -227,7 +228,7 @@ export default function SubscribeModal({
         <div className="csp-modal-body" style={{ padding: '26px 22px 22px' }}>
           <div className="csp-modal-type-badge">
             <i className="fas fa-star" aria-hidden="true" />
-            {isHt ? 'Abònman' : 'Subscription'}
+            {isHt ? 'Abònman' : inlineText(lang, 'Subscription')}
           </div>
           <h2 className="csp-modal-title" style={{ padding: '10px 0 4px', fontSize: '1rem' }}>
             {title}
@@ -238,12 +239,12 @@ export default function SubscribeModal({
               <i className="fas fa-check-circle" aria-hidden="true" />
               <p>{t.profile_subscribe_success_body || (isHt
                 ? 'Ou gen aksè a tout kontni abonè kounye a. Mèsi pou sipò ou!'
-                : 'You now have access to all subscribers-only content. Thanks for your support!')}</p>
+                : inlineText(lang, 'You now have access to all subscribers-only content. Thanks for your support!'))}</p>
               {periodEnd && (
                 <p className="csp-subscribe-period">
                   {t.profile_subscribe_period_end || (isHt
                     ? 'Abònman an fini:'
-                    : 'Subscription ends:')}{' '}
+                    : inlineText(lang, 'Subscription ends:'))}{' '}
                   {new Date(periodEnd).toLocaleDateString()}
                 </p>
               )}
@@ -252,7 +253,7 @@ export default function SubscribeModal({
                 className="csp-modal-btn csp-modal-btn--primary"
                 onClick={onClose}
               >
-                {t.profile_subscribe_done || (isHt ? 'Fèmen' : 'Done')}
+                {t.profile_subscribe_done || (isHt ? 'Fèmen' : inlineText(lang, 'Done'))}
               </button>
             </div>
           ) : (
@@ -260,13 +261,13 @@ export default function SubscribeModal({
               <div className="csp-subscribe-price">
                 <span className="csp-subscribe-price-amount">{priceDisplay}</span>
                 <span className="csp-subscribe-price-period">
-                  {t.profile_subscribe_per_month || (isHt ? '/mwa' : '/month')}
+                  {t.profile_subscribe_per_month || (isHt ? '/mwa' : inlineText(lang, '/month'))}
                 </span>
               </div>
               <p className="csp-subscribe-blurb">
                 {t.profile_subscribe_blurb || (isHt
                   ? 'Jwenn aksè a tout kontni abonè sèlman pandan 30 jou.'
-                  : 'Get access to all subscribers-only content for 30 days.')}
+                  : inlineText(lang, 'Get access to all subscribers-only content for 30 days.'))}
               </p>
 
               {error && (
@@ -284,7 +285,7 @@ export default function SubscribeModal({
                       onClick={startPayPalFlow}
                       disabled={ppPhase === 'loading'}
                     >
-                      <i className="fab fa-paypal" aria-hidden="true" /> {t.profile_tip_paypal || (isHt ? 'Paye ak PayPal' : 'Pay with PayPal')}
+                      <i className="fab fa-paypal" aria-hidden="true" /> {t.profile_tip_paypal || (isHt ? 'Paye ak PayPal' : inlineText(lang, 'Pay with PayPal'))}
                     </button>
                   ) : ppPhase === 'ready' || ppPhase === 'processing' ? (
                     <div className="csp-tip-paypal-box">
@@ -301,7 +302,7 @@ export default function SubscribeModal({
                       <div ref={ppContainerRef} className="csp-tip-paypal-buttons" />
                       {ppPhase === 'processing' && (
                         <div className="csp-tip-paypal-processing">
-                          <i className="fas fa-spinner fa-spin" aria-hidden="true" /> {t.profile_contact_sending || (isHt ? 'Ap voye...' : 'Sending...')}
+                          <i className="fas fa-spinner fa-spin" aria-hidden="true" /> {t.profile_contact_sending || (isHt ? 'Ap voye...' : inlineText(lang, 'Sending...'))}
                         </div>
                       )}
                     </div>
@@ -311,11 +312,11 @@ export default function SubscribeModal({
                       className="csp-modal-btn csp-modal-btn--primary"
                       onClick={startPayPalFlow}
                     >
-                      <i className="fas fa-rotate-right" aria-hidden="true" /> {isHt ? 'Eseye ankò' : 'Retry'}
+                      <i className="fas fa-rotate-right" aria-hidden="true" /> {isHt ? 'Eseye ankò' : inlineText(lang, 'Retry')}
                     </button>
                   ) : (
                     <div className="csp-tip-paypal-loading">
-                      <i className="fas fa-spinner fa-spin" aria-hidden="true" /> {isHt ? 'Ap prepare PayPal...' : 'Preparing PayPal...'}
+                      <i className="fas fa-spinner fa-spin" aria-hidden="true" /> {isHt ? 'Ap prepare PayPal...' : inlineText(lang, 'Preparing PayPal...')}
                     </div>
                   )
                 ) : (
@@ -326,8 +327,8 @@ export default function SubscribeModal({
                     disabled={phase === 'paying'}
                   >
                     {phase === 'paying'
-                      ? <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {t.profile_contact_sending || (isHt ? 'Ap voye...' : 'Sending...')}</>
-                      : <><i className="fas fa-star" aria-hidden="true" /> {t.profile_subscribe_btn || (isHt ? 'Abòne kounye a' : 'Subscribe now')}</>}
+                      ? <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {t.profile_contact_sending || (isHt ? 'Ap voye...' : inlineText(lang, 'Sending...'))}</>
+                      : <><i className="fas fa-star" aria-hidden="true" /> {t.profile_subscribe_btn || (isHt ? 'Abòne kounye a' : inlineText(lang, 'Subscribe now'))}</>}
                   </button>
                 )}
                 {needFunds && (
@@ -336,7 +337,7 @@ export default function SubscribeModal({
                     className="csp-modal-btn csp-modal-btn--secondary csp-tip-wallet-link"
                     onClick={() => { handleClose(); onOpenWallet?.(); }}
                   >
-                    <i className="fas fa-wallet" aria-hidden="true" /> {t.profile_tip_topup || (isHt ? 'Oubyen ranpli bous la' : 'Or top up wallet')}
+                    <i className="fas fa-wallet" aria-hidden="true" /> {t.profile_tip_topup || (isHt ? 'Oubyen ranpli bous la' : inlineText(lang, 'Or top up wallet'))}
                   </button>
                 )}
               </div>

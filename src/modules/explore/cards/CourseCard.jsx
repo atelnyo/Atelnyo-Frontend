@@ -10,9 +10,10 @@ import ContentFeedbackMenu from '../../../components/shared/ContentFeedbackMenu'
 import CardOpenButton from './CardOpenButton';
 import SaveCountChip from './SaveCountChip';
 import TrendingVelocity from './TrendingVelocity';
+import { inlineText } from '../../../utils/inlineI18n';
 
 /** Inline SVG fallback — bèl ilistrasyon rose lè pa gen imaj oswa imaj kase */
-function CourseFallback({ title, isHt }) {
+function CourseFallback({ title, isHt, lang = 'en' }) {
   return (
     <div className="explore-card-fallback">
       <svg viewBox="0 0 600 340" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -32,7 +33,7 @@ function CourseFallback({ title, isHt }) {
         </g>
         <text x="300" y="270" textAnchor="middle" fill="#d81b60" opacity="0.55"
               fontFamily="system-ui, -apple-system, sans-serif" fontSize="14" fontWeight="600">
-          {title || (isHt ? 'San tit' : 'Untitled')}
+          {title || (isHt ? 'San tit' : inlineText(lang, 'Untitled'))}
         </text>
       </svg>
     </div>
@@ -87,7 +88,7 @@ export default function CourseCard({ course, onOpen, lang, t, saveCount = null, 
             onError={() => setImgFailed(true)}
           />
         ) : (
-          <CourseFallback title={course.title} isHt={isHt} />
+          <CourseFallback title={course.title} isHt={isHt} lang={lang} />
         )}
         {showPreview && (
           <HoverVideoPreview videoSrc={videoSrc} title={course.title} />
@@ -110,8 +111,8 @@ export default function CourseCard({ course, onOpen, lang, t, saveCount = null, 
         {course.delivery_type === 'external' && (
           <div
             className="explore-card-badge explore-card-badge-external"
-            title={isHt ? 'Kou ekstèn — aprann yon lòt kote' : 'External — learn elsewhere'}
-            aria-label={isHt ? 'Kou ekstèn' : 'External course'}
+            title={isHt ? 'Kou ekstèn — aprann yon lòt kote' : inlineText(lang, 'External — learn elsewhere')}
+            aria-label={isHt ? 'Kou ekstèn' : inlineText(lang, 'External course')}
           >
             <i className="fas fa-globe" aria-hidden="true" />
           </div>
@@ -128,19 +129,19 @@ export default function CourseCard({ course, onOpen, lang, t, saveCount = null, 
         {/* FREE badge — the card says so without opening the course */}
         {Number(course.price) === 0 && (
           <div className="explore-card-badge explore-card-badge-free"
-            title={isHt ? 'Gratis' : 'Free'}
-            aria-label={isHt ? 'Gratis' : 'Free'}>
+            title={isHt ? 'Gratis' : inlineText(lang, 'Free')}
+            aria-label={isHt ? 'Gratis' : inlineText(lang, 'Free')}>
             <i className="fas fa-gift" aria-hidden="true" />
-            <span>{isHt ? 'GRATIS' : 'FREE'}</span>
+            <span>{isHt ? 'GRATIS' : inlineText(lang, 'FREE')}</span>
           </div>
         )}
         {/* Atelnyo Official — admin-created courses carry the trust badge */}
         {course.owner_type === 'official' && (
           <div className="explore-card-badge explore-card-badge-official"
-            title={isHt ? 'Atelnyo Ofisyèl' : 'Atelnyo Official'}
-            aria-label={isHt ? 'Atelnyo Ofisyèl' : 'Atelnyo Official'}>
+            title={isHt ? 'Atelnyo Ofisyèl' : inlineText(lang, 'Atelnyo Official')}
+            aria-label={isHt ? 'Atelnyo Ofisyèl' : inlineText(lang, 'Atelnyo Official')}>
             <i className="fas fa-building-columns" aria-hidden="true" />
-            <span>{isHt ? 'OFISYÈL' : 'OFFICIAL'}</span>
+            <span>{isHt ? 'OFISYÈL' : inlineText(lang, 'OFFICIAL')}</span>
           </div>
         )}
         {/* Trending Velocity — shows how fast this course is rising */}
@@ -176,12 +177,12 @@ export default function CourseCard({ course, onOpen, lang, t, saveCount = null, 
               <span className="explore-card-price-label">{t.explore_price_label || 'Price'}</span>
               {Number(course.price) === 0 ? (
                 <span className="explore-card-price-value explore-card-price-value--free">
-                  {isHt ? 'Gratis' : 'Free'}
+                  {isHt ? 'Gratis' : inlineText(lang, 'Free')}
                 </span>
               ) : premiumPrice !== null ? (
                 <span className="explore-card-price-value">
                   <span style={{ textDecoration: 'line-through', opacity: 0.5, marginRight: 4, fontSize: '0.85em' }}>${Number(course.price).toFixed(2)}</span>
-                  {premiumPrice === 0 ? (isHt ? 'Gratis' : 'Free') : `$${premiumPrice.toFixed(2)}`}
+                  {premiumPrice === 0 ? (isHt ? 'Gratis' : inlineText(lang, 'Free')) : `$${premiumPrice.toFixed(2)}`}
                   <span style={{ marginLeft: 4, fontSize: '0.6em', color: 'var(--pr-color-orange-500, #f97316)', fontWeight: 600 }}>
                     <i className="fas fa-crown" style={{ marginRight: 1 }} />Premium
                   </span>
@@ -192,7 +193,7 @@ export default function CourseCard({ course, onOpen, lang, t, saveCount = null, 
             </span>
           )}
           <SaveCountChip count={saveCount} t={t} />
-          <ContentFeedbackMenu contentType="course" contentId={course.id} lang={isHt ? 'ht' : 'en'} />
+          <ContentFeedbackMenu contentType="course" contentId={course.id} lang={lang} />
           <span className="explore-card-cta" aria-hidden="true">
             <i className="fas fa-arrow-right" />
           </span>
@@ -206,9 +207,9 @@ export default function CourseCard({ course, onOpen, lang, t, saveCount = null, 
             </span>
             {course.difficulty && (
               <span className="explore-card-level">
-                {course.difficulty === 'beginner' ? (isHt ? 'Debitan' : 'Beginner')
-                  : course.difficulty === 'intermediate' ? (isHt ? 'Mwayen' : 'Intermediate')
-                    : (isHt ? 'Avanse' : 'Advanced')}
+                {course.difficulty === 'beginner' ? (isHt ? 'Debitan' : inlineText(lang, 'Beginner'))
+                  : course.difficulty === 'intermediate' ? (isHt ? 'Mwayen' : inlineText(lang, 'Intermediate'))
+                    : (isHt ? 'Avanse' : inlineText(lang, 'Advanced'))}
               </span>
             )}
           </div>

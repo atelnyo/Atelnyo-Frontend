@@ -87,16 +87,16 @@ describe('DEFAULT_LANGUAGE export agrees with markets config', () => {
 });
 
 describe('supported interface languages', () => {
-  it('exposes only Haitian Creole, English, and French', () => {
-    expect(SUPPORTED_LANGUAGES).toEqual(['ht', 'en', 'fr']);
-    expect(Object.keys(translations).sort()).toEqual(['en', 'fr', 'ht']);
+  it('exposes Haitian Creole, English, French, and Spanish', () => {
+    expect(SUPPORTED_LANGUAGES).toEqual(['ht', 'en', 'fr', 'es']);
+    expect(Object.keys(translations).sort()).toEqual(['en', 'es', 'fr', 'ht']);
   });
 
-  it('normalizes legacy Spanish UI preferences to English', () => {
-    expect(normalizeSupportedLanguage('es')).toBe('en');
-    expect(normalizeSupportedLanguage('ES-es')).toBe('en');
-    expect(t2('es', { ht: 'Kreyòl', en: 'English', fr: 'Français', es: 'Español' })).toBe('English');
-    expect(t('es', 'Kreyòl', 'English', 'Français', 'Español')).toBe('English');
+  it('normalizes supported Spanish locale codes to Spanish', () => {
+    expect(normalizeSupportedLanguage('es')).toBe('es');
+    expect(normalizeSupportedLanguage('ES-es')).toBe('es');
+    expect(t2('es', { ht: 'Kreyòl', en: 'English', fr: 'Français', es: 'Español' })).toBe('Español');
+    expect(t('es', 'Kreyòl', 'English', 'Français', 'Español')).toBe('Español');
   });
 
   it('requires each supported dictionary to provide the same non-empty keys', () => {

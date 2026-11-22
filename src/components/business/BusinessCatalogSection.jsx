@@ -18,6 +18,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { businessCatalogService, businessProductFaqService } from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 const STATUS_LABELS = {
   active: 'Active',
@@ -68,7 +69,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
       } catch {
         if (!cancelled) {
           showToast?.(
-            isHt ? 'Pa t kapab chaje katalòg la.' : 'Could not load the catalog.',
+            isHt ? 'Pa t kapab chaje katalòg la.' : inlineText(lang, 'Could not load the catalog.'),
             'circle-exclamation',
           );
         }
@@ -106,7 +107,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
     e.preventDefault();
     if (!form.name.trim()) {
       showToast?.(
-        isHt ? 'Non atik la obligatwa.' : 'Item name is required.',
+        isHt ? 'Non atik la obligatwa.' : inlineText(lang, 'Item name is required.'),
         'circle-exclamation',
       );
       return;
@@ -129,7 +130,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
           setItems((prev) => prev.map((it) => (it.id === updated.id ? updated : it)));
         }
         showToast?.(
-          isHt ? '✅ Atik mete ajou!' : '✅ Item updated!',
+          isHt ? '✅ Atik mete ajou!' : inlineText(lang, '✅ Item updated!'),
           'check-circle',
         );
       } else {
@@ -137,7 +138,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
         const created = res?.data?.data ?? res?.data ?? null;
         if (created?.id) setItems((prev) => [created, ...prev]);
         showToast?.(
-          isHt ? '✅ Atik ajoute nan katalòg la!' : '✅ Item added to the catalog!',
+          isHt ? '✅ Atik ajoute nan katalòg la!' : inlineText(lang, '✅ Item added to the catalog!'),
           'check-circle',
         );
       }
@@ -147,7 +148,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
       const detail = err?.response?.data?.detail
         || err?.response?.data?.name?.[0]
         || err?.response?.data?.business_profile?.[0]
-        || (isHt ? 'Pa t kapab sove atik la.' : 'Could not save the item.');
+        || (isHt ? 'Pa t kapab sove atik la.' : inlineText(lang, 'Could not save the item.'));
       showToast?.(detail, 'circle-exclamation');
     } finally {
       setSaving(false);
@@ -165,13 +166,13 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
       }
       showToast?.(
         next === 'active'
-          ? (isHt ? 'Atik la aktif ankò.' : 'Item is active again.')
-          : (isHt ? 'Atik la achive.' : 'Item archived.'),
+          ? (isHt ? 'Atik la aktif ankò.' : inlineText(lang, 'Item is active again.'))
+          : (isHt ? 'Atik la achive.' : inlineText(lang, 'Item archived.')),
         next === 'active' ? 'circle-play' : 'box-archive',
       );
     } catch (err) {
       showToast?.(
-        err?.response?.data?.detail || (isHt ? 'Aksyon an pa t mache.' : 'The action failed.'),
+        err?.response?.data?.detail || (isHt ? 'Aksyon an pa t mache.' : inlineText(lang, 'The action failed.')),
         'circle-exclamation',
       );
     } finally {
@@ -186,12 +187,12 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
       setItems((prev) => prev.filter((it) => it.id !== item.id));
       setConfirmDeleteId(null);
       showToast?.(
-        isHt ? 'Atik la efase.' : 'Item deleted.',
+        isHt ? 'Atik la efase.' : inlineText(lang, 'Item deleted.'),
         'trash',
       );
     } catch (err) {
       showToast?.(
-        err?.response?.data?.detail || (isHt ? 'Pa t kapab efase atik la.' : 'Could not delete the item.'),
+        err?.response?.data?.detail || (isHt ? 'Pa t kapab efase atik la.' : inlineText(lang, 'Could not delete the item.')),
         'circle-exclamation',
       );
     } finally {
@@ -202,7 +203,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
   const formatPrice = (item) => {
     const value = Number(item.price ?? 0);
     const symbol = item.currency === 'HTG' ? 'G' : (item.currency || 'USD');
-    return `${value.toLocaleString(isHt ? 'fr-HT' : 'en-US', { minimumFractionDigits: 2 })} ${symbol}`;
+    return `${value.toLocaleString(isHt ? 'fr-HT' : inlineText(lang, 'en-US'), { minimumFractionDigits: 2 })} ${symbol}`;
   };
 
   // ─── Phase 7a — product FAQ editor ─────────────────────────────────
@@ -218,7 +219,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
     } catch {
       setFaqs([]);
       showToast?.(
-        isHt ? 'Pa t kapab chaje FAQ atik la.' : 'Could not load the item FAQs.',
+        isHt ? 'Pa t kapab chaje FAQ atik la.' : inlineText(lang, 'Could not load the item FAQs.'),
         'circle-exclamation',
       );
     } finally {
@@ -252,13 +253,13 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
     if (!faqItem) return;
     if ((faqForm.question || '').trim().length < 3) {
       showToast?.(
-        isHt ? 'Kesyon an twò kout (3 karaktè minimòm).' : 'Question is too short (3+ characters).',
+        isHt ? 'Kesyon an twò kout (3 karaktè minimòm).' : inlineText(lang, 'Question is too short (3+ characters).'),
         'circle-exclamation',
       );
       return;
     }
     if (!(faqForm.answer || '').trim()) {
-      showToast?.(isHt ? 'Repons lan obligatwa.' : 'Answer is required.', 'circle-exclamation');
+      showToast?.(isHt ? 'Repons lan obligatwa.' : inlineText(lang, 'Answer is required.'), 'circle-exclamation');
       return;
     }
     setFaqSaving(true);
@@ -268,7 +269,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
         const res = await businessProductFaqService.update(faqEditing.id, payload);
         const updated = res?.data?.data ?? res?.data ?? null;
         if (updated?.id) setFaqs((prev) => prev.map((f) => (f.id === updated.id ? updated : f)));
-        showToast?.(isHt ? '✅ FAQ mete ajou!' : '✅ FAQ updated!', 'check-circle');
+        showToast?.(isHt ? '✅ FAQ mete ajou!' : inlineText(lang, '✅ FAQ updated!'), 'check-circle');
       } else {
         const res = await businessProductFaqService.create({
           ...payload,
@@ -277,7 +278,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
         });
         const created = res?.data?.data ?? res?.data ?? null;
         if (created?.id) setFaqs((prev) => [...prev, created]);
-        showToast?.(isHt ? '✅ FAQ ajoute!' : '✅ FAQ added!', 'check-circle');
+        showToast?.(isHt ? '✅ FAQ ajoute!' : inlineText(lang, '✅ FAQ added!'), 'check-circle');
       }
       setFaqFormOpen(false);
       setFaqEditing(null);
@@ -286,7 +287,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
         || err?.response?.data?.question?.[0]
         || err?.response?.data?.answer?.[0]
         || err?.response?.data?.catalog_item?.[0]
-        || (isHt ? 'Pa t kapab sove FAQ la.' : 'Could not save the FAQ.');
+        || (isHt ? 'Pa t kapab sove FAQ la.' : inlineText(lang, 'Could not save the FAQ.'));
       showToast?.(detail, 'circle-exclamation');
     } finally {
       setFaqSaving(false);
@@ -308,7 +309,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
         .map((f) => (updatedB?.id && f.id === b.id ? updatedB : f)));
     } catch {
       showToast?.(
-        isHt ? 'Pa t kapab reyòdone FAQ yo.' : 'Could not reorder FAQs.',
+        isHt ? 'Pa t kapab reyòdone FAQ yo.' : inlineText(lang, 'Could not reorder FAQs.'),
         'circle-exclamation',
       );
     } finally {
@@ -324,7 +325,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
       const updated = res?.data?.data ?? res?.data ?? null;
       if (updated?.id) setFaqs((prev) => prev.map((f) => (f.id === updated.id ? updated : f)));
     } catch {
-      showToast?.(isHt ? 'Aksyon an pa t mache.' : 'The action failed.', 'circle-exclamation');
+      showToast?.(isHt ? 'Aksyon an pa t mache.' : inlineText(lang, 'The action failed.'), 'circle-exclamation');
     } finally {
       setFaqBusyId(null);
     }
@@ -335,10 +336,10 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
     try {
       await businessProductFaqService.remove(faq.id);
       setFaqs((prev) => prev.filter((f) => f.id !== faq.id));
-      showToast?.(isHt ? 'FAQ la efase.' : 'FAQ deleted.', 'trash');
+      showToast?.(isHt ? 'FAQ la efase.' : inlineText(lang, 'FAQ deleted.'), 'trash');
     } catch {
       showToast?.(
-        isHt ? 'Pa t kapab efase FAQ la.' : 'Could not delete the FAQ.',
+        isHt ? 'Pa t kapab efase FAQ la.' : inlineText(lang, 'Could not delete the FAQ.'),
         'circle-exclamation',
       );
     } finally {
@@ -352,12 +353,12 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
         <div>
           <h3 className="biz-catalog-title">
             <i className="fas fa-box-open" aria-hidden="true" />
-            {t?.business_catalog || (isHt ? 'Katalòg' : 'Catalog')}
+            {t?.business_catalog || (isHt ? 'Katalòg' : inlineText(lang, 'Catalog'))}
           </h3>
           <p className="biz-catalog-hint">
             {t?.business_catalog_hint || (isHt
               ? 'Atik sa yo fè pati Business Profile ou — yo pa parèt nan Explore ni nan Home Feed.'
-              : 'These items belong to your Business Profile — they never appear in Explore or the Home Feed.')}
+              : inlineText(lang, 'These items belong to your Business Profile — they never appear in Explore or the Home Feed.'))}
           </p>
         </div>
         <button
@@ -367,7 +368,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
           data-testid="business-catalog-add"
         >
           <i className="fas fa-plus" aria-hidden="true" />
-          {t?.business_catalog_add || (isHt ? 'Ajoute yon atik' : 'Add an item')}
+          {t?.business_catalog_add || (isHt ? 'Ajoute yon atik' : inlineText(lang, 'Add an item'))}
         </button>
       </div>
 
@@ -378,11 +379,11 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
       ) : items.length === 0 ? (
         <div className="biz-catalog-empty" data-testid="business-catalog-empty">
           <i className="fas fa-box-open" aria-hidden="true" />
-          <h4>{t?.business_catalog_empty || (isHt ? 'Katalòg la vid' : 'The catalog is empty')}</h4>
+          <h4>{t?.business_catalog_empty || (isHt ? 'Katalòg la vid' : inlineText(lang, 'The catalog is empty'))}</h4>
           <p>
             {t?.business_catalog_empty_hint || (isHt
               ? 'Ajoute pwodwi oswa sèvis ou yo. Atik aktif yo ap parèt sou paj piblik biznis ou.'
-              : 'Add your products or services. Active items will appear on your public business page.')}
+              : inlineText(lang, 'Add your products or services. Active items will appear on your public business page.'))}
           </p>
         </div>
       ) : (
@@ -428,7 +429,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
                       data-testid="business-catalog-edit"
                     >
                       <i className="fas fa-pen" aria-hidden="true" />
-                      {isHt ? 'Modifye' : 'Edit'}
+                      {isHt ? 'Modifye' : inlineText(lang, 'Edit')}
                     </button>
                     <button
                       type="button"
@@ -438,17 +439,17 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
                       data-testid="business-catalog-faqs"
                     >
                       <i className="fas fa-circle-question" aria-hidden="true" />
-                      {t?.business_catalog_faqs || (isHt ? 'FAQ' : 'FAQ')}
+                      {t?.business_catalog_faqs || (isHt ? 'FAQ' : inlineText(lang, 'FAQ'))}
                     </button>
                     <button
                       type="button"
                       className="biz-btn biz-btn-ghost biz-btn-sm"
                       onClick={() => toggleStatus(item)}
                       disabled={busyId === item.id}
-                      title={item.status === 'active' ? (isHt ? 'Achive' : 'Archive') : (isHt ? 'Re-aktive' : 'Reactivate')}
+                      title={item.status === 'active' ? (isHt ? 'Achive' : inlineText(lang, 'Archive')) : (isHt ? 'Re-aktive' : inlineText(lang, 'Reactivate'))}
                     >
                       <i className={`fas ${item.status === 'active' ? 'fa-box-archive' : 'fa-circle-play'}`} aria-hidden="true" />
-                      {item.status === 'active' ? (isHt ? 'Achive' : 'Archive') : (isHt ? 'Aktive' : 'Activate')}
+                      {item.status === 'active' ? (isHt ? 'Achive' : inlineText(lang, 'Archive')) : (isHt ? 'Aktive' : inlineText(lang, 'Activate'))}
                     </button>
                     {confirmDeleteId === item.id ? (
                       <button
@@ -459,7 +460,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
                         data-testid="business-catalog-delete-confirm"
                       >
                         <i className="fas fa-trash" aria-hidden="true" />
-                        {isHt ? 'Konfime?' : 'Confirm?'}
+                        {isHt ? 'Konfime?' : inlineText(lang, 'Confirm?')}
                       </button>
                     ) : (
                       <button
@@ -470,7 +471,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
                         data-testid="business-catalog-delete"
                       >
                         <i className="fas fa-trash" aria-hidden="true" />
-                        {isHt ? 'Efase' : 'Delete'}
+                        {isHt ? 'Efase' : inlineText(lang, 'Delete')}
                       </button>
                     )}
                   </div>
@@ -494,9 +495,9 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
             <div className="biz-modal-header">
               <h3 className="biz-modal-title">
                 <i className="fas fa-circle-question" aria-hidden="true" />
-                {t?.business_catalog_faqs_title || (isHt ? 'FAQ atik la' : 'Item FAQs')}: {faqItem.name}
+                {t?.business_catalog_faqs_title || (isHt ? 'FAQ atik la' : inlineText(lang, 'Item FAQs'))}: {faqItem.name}
               </h3>
-              <button type="button" className="biz-modal-close" onClick={closeFaqs} aria-label={isHt ? 'Fèmen' : 'Close'}>
+              <button type="button" className="biz-modal-close" onClick={closeFaqs} aria-label={isHt ? 'Fèmen' : inlineText(lang, 'Close')}>
                 <i className="fas fa-xmark" aria-hidden="true" />
               </button>
             </div>
@@ -504,7 +505,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
             <p className="biz-modal-hint">
               {t?.business_product_faqs_hint || (isHt
                 ? 'Kesyon espesifik pou pwodui/sèvis sa a — yo ap parèt anba atik la sou paj piblik la.'
-                : 'Item-specific questions — they appear under this product on the public page.')}
+                : inlineText(lang, 'Item-specific questions — they appear under this product on the public page.'))}
             </p>
 
             {faqLoading ? (
@@ -516,7 +517,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
                 {faqs.length === 0 && !faqFormOpen ? (
                   <div className="biz-catalog-empty" data-testid="business-catalog-faq-empty">
                     <i className="fas fa-circle-question" aria-hidden="true" />
-                    <h4>{t?.business_faq_empty || (isHt ? 'Pokò gen FAQ' : 'No FAQs yet')}</h4>
+                    <h4>{t?.business_faq_empty || (isHt ? 'Pokò gen FAQ' : inlineText(lang, 'No FAQs yet'))}</h4>
                   </div>
                 ) : (
                   <div className="biz-faq-list biz-faq-list-compact">
@@ -539,17 +540,17 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
                           <div className="biz-faq-row-actions">
                             <button type="button" className="biz-btn biz-btn-ghost biz-btn-sm"
                               onClick={() => moveFaq(index, -1)} disabled={faqBusyId === faq.id || index === 0}
-                              aria-label={isHt ? 'Moute' : 'Move up'}>
+                              aria-label={isHt ? 'Moute' : inlineText(lang, 'Move up')}>
                               <i className="fas fa-arrow-up" aria-hidden="true" />
                             </button>
                             <button type="button" className="biz-btn biz-btn-ghost biz-btn-sm"
                               onClick={() => moveFaq(index, 1)} disabled={faqBusyId === faq.id || index === faqs.length - 1}
-                              aria-label={isHt ? 'Desann' : 'Move down'}>
+                              aria-label={isHt ? 'Desann' : inlineText(lang, 'Move down')}>
                               <i className="fas fa-arrow-down" aria-hidden="true" />
                             </button>
                             <button type="button" className="biz-btn biz-btn-ghost biz-btn-sm"
                               onClick={() => toggleFaqStatus(faq)} disabled={faqBusyId === faq.id}
-                              title={faq.status === 'active' ? (isHt ? 'Achive' : 'Archive') : (isHt ? 'Aktive' : 'Activate')}>
+                              title={faq.status === 'active' ? (isHt ? 'Achive' : inlineText(lang, 'Archive')) : (isHt ? 'Aktive' : inlineText(lang, 'Activate'))}>
                               <i className={`fas ${faq.status === 'active' ? 'fa-box-archive' : 'fa-circle-play'}`} aria-hidden="true" />
                             </button>
                             <button type="button" className="biz-btn biz-btn-ghost biz-btn-sm"
@@ -558,7 +559,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
                               <i className="fas fa-pen" aria-hidden="true" />
                             </button>
                             <button type="button" className="biz-btn biz-btn-danger biz-btn-sm"
-                              onClick={() => { if (window.confirm(isHt ? 'Efase FAQ sa a?' : 'Delete this FAQ?')) deleteFaq(faq); }}
+                              onClick={() => { if (window.confirm(isHt ? 'Efase FAQ sa a?' : inlineText(lang, 'Delete this FAQ?'))) deleteFaq(faq); }}
                               disabled={faqBusyId === faq.id}
                               data-testid="business-catalog-faq-delete">
                               <i className="fas fa-trash" aria-hidden="true" />
@@ -574,7 +575,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
                   <form onSubmit={submitFaq} className="biz-form biz-faq-form-inline" data-testid="business-catalog-faq-form">
                     <div className="biz-form-group">
                       <label className="biz-form-label">
-                        {t?.business_faq_question || (isHt ? 'Kesyon' : 'Question')} *
+                        {t?.business_faq_question || (isHt ? 'Kesyon' : inlineText(lang, 'Question'))} *
                       </label>
                       <input type="text" className="biz-form-input" value={faqForm.question}
                         onChange={(e) => setFaq('question', e.target.value)} maxLength={300}
@@ -582,7 +583,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
                     </div>
                     <div className="biz-form-group">
                       <label className="biz-form-label">
-                        {t?.business_faq_answer || (isHt ? 'Repons' : 'Answer')} *
+                        {t?.business_faq_answer || (isHt ? 'Repons' : inlineText(lang, 'Answer'))} *
                       </label>
                       <textarea className="biz-form-input" rows={2} value={faqForm.answer}
                         onChange={(e) => setFaq('answer', e.target.value)} maxLength={2000}
@@ -590,23 +591,23 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
                     </div>
                     <div className="biz-form-group">
                       <label className="biz-form-label">
-                        {t?.business_catalog_field_status || (isHt ? 'Estati' : 'Status')}
+                        {t?.business_catalog_field_status || (isHt ? 'Estati' : inlineText(lang, 'Status'))}
                       </label>
                       <select className="biz-form-input" value={faqForm.status}
                         onChange={(e) => setFaq('status', e.target.value)}>
-                        <option value="active">{isHt ? 'Aktif' : 'Active'}</option>
-                        <option value="draft">{isHt ? 'Brouyon' : 'Draft'}</option>
-                        <option value="archived">{isHt ? 'Achive' : 'Archived'}</option>
+                        <option value="active">{isHt ? 'Aktif' : inlineText(lang, 'Active')}</option>
+                        <option value="draft">{isHt ? 'Brouyon' : inlineText(lang, 'Draft')}</option>
+                        <option value="archived">{isHt ? 'Achive' : inlineText(lang, 'Archived')}</option>
                       </select>
                     </div>
                     <div className="biz-form-actions">
                       <button type="button" className="biz-btn biz-btn-ghost" onClick={() => setFaqFormOpen(false)} disabled={faqSaving}>
-                        {isHt ? 'Anile' : 'Cancel'}
+                        {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
                       </button>
                       <button type="submit" className="biz-btn biz-btn-primary" disabled={faqSaving}
                         data-testid="business-catalog-faq-submit">
                         <i className={`fas ${faqSaving ? 'fa-spinner fa-spin' : 'fa-save'}`} aria-hidden="true" />
-                        {faqEditing ? (isHt ? 'Sove' : 'Save') : (isHt ? 'Ajoute' : 'Add')}
+                        {faqEditing ? (isHt ? 'Sove' : inlineText(lang, 'Save')) : (isHt ? 'Ajoute' : inlineText(lang, 'Add'))}
                       </button>
                     </div>
                   </form>
@@ -615,7 +616,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
                     <button type="button" className="biz-btn biz-btn-primary" onClick={openFaqCreate}
                       data-testid="business-catalog-faq-add">
                       <i className="fas fa-plus" aria-hidden="true" />
-                      {t?.business_faq_add || (isHt ? 'Ajoute yon FAQ' : 'Add a FAQ')}
+                      {t?.business_faq_add || (isHt ? 'Ajoute yon FAQ' : inlineText(lang, 'Add a FAQ'))}
                     </button>
                   </div>
                 )}
@@ -631,17 +632,17 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
             className="biz-modal"
             role="dialog"
             aria-modal="true"
-            aria-label={editing ? (isHt ? 'Modifye atik la' : 'Edit item') : (isHt ? 'Ajoute yon atik' : 'Add an item')}
+            aria-label={editing ? (isHt ? 'Modifye atik la' : inlineText(lang, 'Edit item')) : (isHt ? 'Ajoute yon atik' : inlineText(lang, 'Add an item'))}
             onClick={(ev) => ev.stopPropagation()}
           >
             <div className="biz-modal-header">
               <h3 className="biz-modal-title">
                 <i className="fas fa-box-open" aria-hidden="true" />
                 {editing
-                  ? (t?.business_catalog_edit || (isHt ? 'Modifye atik la' : 'Edit item'))
-                  : (t?.business_catalog_add || (isHt ? 'Ajoute yon atik' : 'Add an item'))}
+                  ? (t?.business_catalog_edit || (isHt ? 'Modifye atik la' : inlineText(lang, 'Edit item')))
+                  : (t?.business_catalog_add || (isHt ? 'Ajoute yon atik' : inlineText(lang, 'Add an item')))}
               </h3>
-              <button type="button" className="biz-modal-close" onClick={() => { if (!saving) setFormOpen(false); }} aria-label={isHt ? 'Fèmen' : 'Close'}>
+              <button type="button" className="biz-modal-close" onClick={() => { if (!saving) setFormOpen(false); }} aria-label={isHt ? 'Fèmen' : inlineText(lang, 'Close')}>
                 <i className="fas fa-xmark" aria-hidden="true" />
               </button>
             </div>
@@ -649,7 +650,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
             <form onSubmit={handleSubmit} className="biz-form" data-testid="business-catalog-form">
               <div className="biz-form-group">
                 <label className="biz-form-label">
-                  {t?.business_catalog_field_name || (isHt ? 'Non pwodwi / sèvis' : 'Product / service name')} *
+                  {t?.business_catalog_field_name || (isHt ? 'Non pwodwi / sèvis' : inlineText(lang, 'Product / service name'))} *
                 </label>
                 <input
                   type="text"
@@ -657,7 +658,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
                   value={form.name}
                   onChange={(e) => set('name', e.target.value)}
                   maxLength={160}
-                  placeholder={isHt ? 'Egzanp: Konsepsyon logo' : 'e.g. Logo design'}
+                  placeholder={isHt ? 'Egzanp: Konsepsyon logo' : inlineText(lang, 'e.g. Logo design')}
                   data-testid="business-catalog-name"
                   required
                   autoFocus
@@ -667,7 +668,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
               <div className="biz-form-row">
                 <div className="biz-form-group">
                   <label className="biz-form-label">
-                    {t?.business_catalog_field_category || (isHt ? 'Kategori' : 'Category')}
+                    {t?.business_catalog_field_category || (isHt ? 'Kategori' : inlineText(lang, 'Category'))}
                   </label>
                   <input
                     type="text"
@@ -675,12 +676,12 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
                     value={form.category}
                     onChange={(e) => set('category', e.target.value)}
                     maxLength={60}
-                    placeholder={isHt ? 'Egzanp: Sèvis' : 'e.g. Services'}
+                    placeholder={isHt ? 'Egzanp: Sèvis' : inlineText(lang, 'e.g. Services')}
                   />
                 </div>
                 <div className="biz-form-group">
                   <label className="biz-form-label">
-                    {t?.business_catalog_field_price || (isHt ? 'Pri' : 'Price')}
+                    {t?.business_catalog_field_price || (isHt ? 'Pri' : inlineText(lang, 'Price'))}
                   </label>
                   <div className="biz-cat-price-row">
                     <input
@@ -700,7 +701,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
                       onChange={(e) => set('currency', e.target.value)}
                       maxLength={3}
                       placeholder="USD"
-                      title={isHt ? 'Kòd lajan (USD, HTG, EUR)' : 'Currency code (USD, HTG, EUR)'}
+                      title={isHt ? 'Kòd lajan (USD, HTG, EUR)' : inlineText(lang, 'Currency code (USD, HTG, EUR)')}
                     />
                   </div>
                 </div>
@@ -708,7 +709,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
 
               <div className="biz-form-group">
                 <label className="biz-form-label">
-                  {t?.business_catalog_field_image || (isHt ? 'Imaj (URL)' : 'Image (URL)')}
+                  {t?.business_catalog_field_image || (isHt ? 'Imaj (URL)' : inlineText(lang, 'Image (URL)'))}
                 </label>
                 <input
                   type="url"
@@ -724,7 +725,7 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
 
               <div className="biz-form-group">
                 <label className="biz-form-label">
-                  {t?.business_catalog_field_description || (isHt ? 'Deskripsyon' : 'Description')}
+                  {t?.business_catalog_field_description || (isHt ? 'Deskripsyon' : inlineText(lang, 'Description'))}
                 </label>
                 <textarea
                   className="biz-form-input"
@@ -732,30 +733,30 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
                   value={form.description}
                   onChange={(e) => set('description', e.target.value)}
                   maxLength={3000}
-                  placeholder={isHt ? 'Kisa atik sa a ye...' : 'What this item is...'}
+                  placeholder={isHt ? 'Kisa atik sa a ye...' : inlineText(lang, 'What this item is...')}
                 />
               </div>
 
               {editing && (
                 <div className="biz-form-group">
                   <label className="biz-form-label">
-                    {t?.business_catalog_field_status || (isHt ? 'Estati' : 'Status')}
+                    {t?.business_catalog_field_status || (isHt ? 'Estati' : inlineText(lang, 'Status'))}
                   </label>
                   <select
                     className="biz-form-input"
                     value={form.status}
                     onChange={(e) => set('status', e.target.value)}
                   >
-                    <option value="active">{isHt ? 'Aktif (parèt sou paj piblik)' : 'Active (shows on public page)'}</option>
-                    <option value="draft">{isHt ? 'Brouyon' : 'Draft'}</option>
-                    <option value="archived">{isHt ? 'Achive' : 'Archived'}</option>
+                    <option value="active">{isHt ? 'Aktif (parèt sou paj piblik)' : inlineText(lang, 'Active (shows on public page)')}</option>
+                    <option value="draft">{isHt ? 'Brouyon' : inlineText(lang, 'Draft')}</option>
+                    <option value="archived">{isHt ? 'Achive' : inlineText(lang, 'Archived')}</option>
                   </select>
                 </div>
               )}
 
               <div className="biz-form-actions">
                 <button type="button" className="biz-btn biz-btn-ghost" onClick={() => setFormOpen(false)} disabled={saving}>
-                  {isHt ? 'Anile' : 'Cancel'}
+                  {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
                 </button>
                 <button
                   type="submit"
@@ -765,8 +766,8 @@ export default function BusinessCatalogSection({ lang = 'en', t, showToast, prof
                 >
                   <i className={`fas ${saving ? 'fa-spinner fa-spin' : 'fa-save'}`} aria-hidden="true" />
                   {saving
-                    ? (isHt ? 'Ap sove...' : 'Saving...')
-                    : (editing ? (isHt ? 'Sove chanjman' : 'Save changes') : (isHt ? 'Ajoute atik' : 'Add item'))}
+                    ? (isHt ? 'Ap sove...' : inlineText(lang, 'Saving...'))
+                    : (editing ? (isHt ? 'Sove chanjman' : inlineText(lang, 'Save changes')) : (isHt ? 'Ajoute atik' : inlineText(lang, 'Add item')))}
                 </button>
               </div>
             </form>

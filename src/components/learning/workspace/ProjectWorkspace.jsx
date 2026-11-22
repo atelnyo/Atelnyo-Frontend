@@ -17,6 +17,7 @@ import SectionEditor from './SectionEditor';
 import ProjectSidebar from './ProjectSidebar';
 import ProjectSummaryView from './ProjectSummaryView';
 import './ProjectWorkspace.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function ProjectWorkspace({
   courseId,
@@ -74,9 +75,9 @@ export default function ProjectWorkspace({
           // No template — create project
           api.post(`projects/my/${courseId}/`)
             .then((res) => setProject(res.data))
-            .catch(() => setError(isHt ? 'Pa gen modèl pwojè pou kou sa a.' : 'No project template for this course.'));
+            .catch(() => setError(isHt ? 'Pa gen modèl pwojè pou kou sa a.' : inlineText(lang, 'No project template for this course.')));
         } else {
-          setError(isHt ? 'Pa t kapab chaje pwojè a.' : 'Could not load project.');
+          setError(isHt ? 'Pa t kapab chaje pwojè a.' : inlineText(lang, 'Could not load project.'));
         }
       })
       .finally(() => setLoading(false));
@@ -108,7 +109,7 @@ export default function ProjectWorkspace({
       });
     } catch {
       notify(
-        isHt ? '⚠️ Erè sove — travay ou an sekirite lokalman.' : '⚠️ Save error — your work is safe locally.',
+        isHt ? '⚠️ Erè sove — travay ou an sekirite lokalman.' : inlineText(lang, '⚠️ Save error — your work is safe locally.'),
         'error',
         'high',
       );
@@ -125,7 +126,7 @@ export default function ProjectWorkspace({
       });
       setProject(res.data);
       notify(
-        isHt ? '✅ Seksyon fini!' : '✅ Section complete!',
+        isHt ? '✅ Seksyon fini!' : inlineText(lang, '✅ Section complete!'),
         'success',
       );
     } catch (err) {
@@ -144,7 +145,7 @@ export default function ProjectWorkspace({
       const res = await api.post(`projects/my/${courseId}/submit/`);
       setProject(res.data);
       notify(
-        isHt ? '🎉 Pwojè soumèt!' : '🎉 Project submitted!',
+        isHt ? '🎉 Pwojè soumèt!' : inlineText(lang, '🎉 Project submitted!'),
         'success',
         'high',
       );
@@ -158,7 +159,7 @@ export default function ProjectWorkspace({
         );
       } else {
         notify(
-          isHt ? '⚠️ Erè nan soumèt pwojè a.' : '⚠️ Error submitting project.',
+          isHt ? '⚠️ Erè nan soumèt pwojè a.' : inlineText(lang, '⚠️ Error submitting project.'),
           'error',
           'high',
         );
@@ -176,7 +177,7 @@ export default function ProjectWorkspace({
     return (
       <div className="pw-loading" role="status" aria-busy="true">
         <div className="pw-spinner" />
-        <p>{isHt ? 'Ap chaje pwojè a...' : 'Loading project...'}</p>
+        <p>{isHt ? 'Ap chaje pwojè a...' : inlineText(lang, 'Loading project...')}</p>
       </div>
     );
   }
@@ -189,7 +190,7 @@ export default function ProjectWorkspace({
         {onReturnToLesson && (
           <button className="pw-btn pw-btn--secondary" onClick={onReturnToLesson}>
             <i className="fas fa-arrow-left" aria-hidden="true" />
-            {isHt ? 'Retounen nan leson an' : 'Return to lesson'}
+            {isHt ? 'Retounen nan leson an' : inlineText(lang, 'Return to lesson')}
           </button>
         )}
       </div>
@@ -221,18 +222,18 @@ export default function ProjectWorkspace({
           <button
             className="pw-menu-btn"
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            aria-label={isHt ? ' Seksyon' : ' Sections'}
+            aria-label={isHt ? ' Seksyon' : inlineText(lang, ' Sections')}
           >
             <i className="fas fa-bars" aria-hidden="true" />
           </button>
           <div className="pw-header-info">
-            <h2 className="pw-title">{project.title || (isHt ? 'Pwojè Mwen' : 'My Project')}</h2>
+            <h2 className="pw-title">{project.title || (isHt ? 'Pwojè Mwen' : inlineText(lang, 'My Project'))}</h2>
             <div className="pw-meta">
-              {completedCount}/{totalRequired} {isHt ? 'sekasyon fini' : 'sections complete'}
+              {completedCount}/{totalRequired} {isHt ? 'sekasyon fini' : inlineText(lang, 'sections complete')}
               {lastSaved && (
                 <span className="pw-save-status">
                   {saving
-                    ? (isHt ? '💾 Ap sove...' : '💾 Saving...')
+                    ? (isHt ? '💾 Ap sove...' : inlineText(lang, '💾 Saving...'))
                     : (isHt ? `💾 Sove ${lastSaved.toLocaleTimeString()}` : `💾 Saved ${lastSaved.toLocaleTimeString()}`)}
                 </span>
               )}
@@ -246,20 +247,20 @@ export default function ProjectWorkspace({
             onClick={() => setShowSummary(!showSummary)}
           >
             <i className="fas fa-list-check" aria-hidden="true" />
-            {isHt ? 'Rezime' : 'Summary'}
+            {isHt ? 'Rezime' : inlineText(lang, 'Summary')}
           </button>
           {/* §16 — Return to lesson */}
           {onReturnToLesson && (
             <button className="pw-btn pw-btn--ghost" onClick={onReturnToLesson}>
               <i className="fas fa-book-open" aria-hidden="true" />
-              {isHt ? 'Retounen nan leson' : 'Return to lesson'}
+              {isHt ? 'Retounen nan leson' : inlineText(lang, 'Return to lesson')}
             </button>
           )}
           {/* §41 — Submit */}
           {project.status !== 'submitted' && project.status !== 'approved' && (
             <button className="pw-btn pw-btn--primary" onClick={submitProject}>
               <i className="fas fa-paper-plane" aria-hidden="true" />
-              {isHt ? 'Soumèt' : 'Submit'}
+              {isHt ? 'Soumèt' : inlineText(lang, 'Submit')}
             </button>
           )}
         </div>
@@ -280,6 +281,7 @@ export default function ProjectWorkspace({
           activeSectionId={activeSectionId}
           onSelect={(id) => { setActiveSectionId(id); setSidebarOpen(false); }}
           isHt={isHt}
+          lang={lang}
           percentage={project.completion_percentage}
         />
       </div>
@@ -290,6 +292,7 @@ export default function ProjectWorkspace({
           <ProjectSummaryView
             project={project}
             isHt={isHt}
+            lang={lang}
             user={user}
             onBack={() => setShowSummary(false)}
           />
@@ -299,12 +302,13 @@ export default function ProjectWorkspace({
             onSave={saveField}
             onComplete={completeSection}
             isHt={isHt}
+            lang={lang}
             isSectionCompleted={(project.completed_sections || []).includes(activeSection.id)}
           />
         ) : (
           <div className="pw-empty">
             <i className="fas fa-folder-open" aria-hidden="true" />
-            <p>{isHt ? 'Chwazi yon seksyon nan lis la.' : 'Select a section from the list.'}</p>
+            <p>{isHt ? 'Chwazi yon seksyon nan lis la.' : inlineText(lang, 'Select a section from the list.')}</p>
           </div>
         )}
       </div>

@@ -17,6 +17,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { creatorProfileService } from '../../../services/api';
 import { StudioModal } from './shared';
 import styles from './modals.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 // Final square avatar resolution (server receives a real square crop).
 const CROP_OUT = 512;
@@ -77,13 +78,13 @@ export default function AvatarEditModal({ onClose, onSuccess, lang, showToast, c
     if (!allowedTypes.includes(file.type)) {
       setError(isHt
         ? 'Tanpri chwazi yon imaj (JPEG, PNG, WebP, GIF, AVIF).'
-        : 'Please select an image (JPEG, PNG, WebP, GIF, AVIF).');
+        : inlineText(lang, 'Please select an image (JPEG, PNG, WebP, GIF, AVIF).'));
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
       setError(isHt
         ? 'Imaj la twò gwo. Maksimòm 5 MB.'
-        : 'Image too large. Maximum 5 MB.');
+        : inlineText(lang, 'Image too large. Maximum 5 MB.'));
       return;
     }
     setError(null);
@@ -253,7 +254,7 @@ export default function AvatarEditModal({ onClose, onSuccess, lang, showToast, c
       const res = await creatorProfileService.uploadAvatar(uploadFile);
       const newUrl = res?.data?.avatar_url || res?.data?.url || res?.data?.data?.avatar_url;
       showToast?.(
-        isHt ? '✅ Foto profile mete ajou!' : '✅ Profile photo updated!',
+        isHt ? '✅ Foto profile mete ajou!' : inlineText(lang, '✅ Profile photo updated!'),
         'check-circle',
       );
       resetFile();
@@ -263,7 +264,7 @@ export default function AvatarEditModal({ onClose, onSuccess, lang, showToast, c
       const detail = err?.response?.data?.error
         || err?.response?.data?.detail
         || err?.message
-        || (isHt ? 'Pa t kapab chaje foto a. Eseye ankò.' : 'Could not upload photo. Try again.');
+        || (isHt ? 'Pa t kapab chaje foto a. Eseye ankò.' : inlineText(lang, 'Could not upload photo. Try again.'));
       setError(detail);
       showToast?.(detail, 'circle-exclamation');
     } finally {
@@ -285,10 +286,10 @@ export default function AvatarEditModal({ onClose, onSuccess, lang, showToast, c
     <StudioModal
       onClose={handleClose}
       icon="fa-camera"
-      title={isHt ? 'Foto Profile' : 'Profile Photo'}
+      title={isHt ? 'Foto Profile' : inlineText(lang, 'Profile Photo')}
       subtitle={isHt
         ? 'Chwazi yon imaj epi kadre l jan ou vle'
-        : 'Choose an image and frame it the way you like'}
+        : inlineText(lang, 'Choose an image and frame it the way you like')}
     >
       <div className={styles.avatarEditContent}>
         {/* Preview circle (only the SAVED avatar; while a file is being
@@ -324,7 +325,7 @@ export default function AvatarEditModal({ onClose, onSuccess, lang, showToast, c
               onPointerUp={endDrag}
               onPointerCancel={endDrag}
               role="application"
-              aria-label={isHt ? 'Zòn kadraj — glise pou deplase imaj la' : 'Crop area — drag to move the image'}
+              aria-label={isHt ? 'Zòn kadraj — glise pou deplase imaj la' : inlineText(lang, 'Crop area — drag to move the image')}
             >
               {view && (
                 <img
@@ -358,7 +359,7 @@ export default function AvatarEditModal({ onClose, onSuccess, lang, showToast, c
 
             <div className={styles.avatarCropHint}>
               <i className="fas fa-arrows-up-down-left-right" aria-hidden="true" />
-              {isHt ? 'Glise imaj la pou reframe l' : 'Drag the image to reframe'}
+              {isHt ? 'Glise imaj la pou reframe l' : inlineText(lang, 'Drag the image to reframe')}
             </div>
 
             {/* Zoom control */}
@@ -372,13 +373,13 @@ export default function AvatarEditModal({ onClose, onSuccess, lang, showToast, c
                 step={ZOOM_STEP}
                 value={zoom}
                 onChange={(e) => handleZoomChange(parseFloat(e.target.value))}
-                aria-label={isHt ? 'Zoom' : 'Zoom'}
+                aria-label={isHt ? 'Zoom' : inlineText(lang, 'Zoom')}
               />
               <button
                 type="button"
                 className={styles.avatarCropZoomBtn}
                 onClick={() => handleZoomChange(zoom + ZOOM_STEP)}
-                aria-label={isHt ? 'Agrandi' : 'Zoom in'}
+                aria-label={isHt ? 'Agrandi' : inlineText(lang, 'Zoom in')}
               >
                 <i className="fas fa-plus" aria-hidden="true" />
               </button>
@@ -386,13 +387,13 @@ export default function AvatarEditModal({ onClose, onSuccess, lang, showToast, c
                 type="button"
                 className={styles.avatarCropZoomBtn}
                 onClick={() => handleZoomChange(zoom - ZOOM_STEP)}
-                aria-label={isHt ? 'Retresi' : 'Zoom out'}
+                aria-label={isHt ? 'Retresi' : inlineText(lang, 'Zoom out')}
               >
                 <i className="fas fa-minus" aria-hidden="true" />
               </button>
             </div>
             <p className={styles.avatarCropSizeHint}>
-              {isHt ? 'Fini: avatè a pral voye koupe nan 512×512.' : 'Final: avatar is uploaded as a 512×512 square crop.'}
+              {isHt ? 'Fini: avatè a pral voye koupe nan 512×512.' : inlineText(lang, 'Final: avatar is uploaded as a 512×512 square crop.')}
             </p>
           </div>
         ) : (
@@ -407,7 +408,7 @@ export default function AvatarEditModal({ onClose, onSuccess, lang, showToast, c
               role="button"
               tabIndex={0}
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') fileInputRef.current?.click(); }}
-              aria-label={isHt ? 'Chwazi yon fichye' : 'Choose a file'}
+              aria-label={isHt ? 'Chwazi yon fichye' : inlineText(lang, 'Choose a file')}
             >
               <input
                 ref={fileInputRef}
@@ -423,10 +424,10 @@ export default function AvatarEditModal({ onClose, onSuccess, lang, showToast, c
                   ? selectedFile.name
                   : (isHt
                       ? 'Klike oswa glise yon imaj la a'
-                      : 'Click or drag an image here')}
+                      : inlineText(lang, 'Click or drag an image here'))}
               </p>
               <p className={styles.avatarDropHint}>
-                {isHt ? 'JPEG, PNG, WebP, GIF, AVIF • Maks 5 MB' : 'JPEG, PNG, WebP, GIF, AVIF • Max 5 MB'}
+                {isHt ? 'JPEG, PNG, WebP, GIF, AVIF • Maks 5 MB' : inlineText(lang, 'JPEG, PNG, WebP, GIF, AVIF • Max 5 MB')}
               </p>
             </div>
           </>
@@ -447,7 +448,7 @@ export default function AvatarEditModal({ onClose, onSuccess, lang, showToast, c
             onClick={handleClose}
             disabled={loading}
           >
-            {isHt ? 'Anile' : 'Cancel'}
+            {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
           </button>
           {selectedFile && (
             <button
@@ -456,7 +457,7 @@ export default function AvatarEditModal({ onClose, onSuccess, lang, showToast, c
               onClick={resetFile}
               disabled={loading}
             >
-              <i className="fas fa-times" /> {isHt ? 'Rekòmanse' : 'Reset'}
+              <i className="fas fa-times" /> {isHt ? 'Rekòmanse' : inlineText(lang, 'Reset')}
             </button>
           )}
           <button
@@ -466,9 +467,9 @@ export default function AvatarEditModal({ onClose, onSuccess, lang, showToast, c
             disabled={!canSave}
           >
             {loading ? (
-              <><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap chaje...' : 'Uploading...'}</>
+              <><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap chaje...' : inlineText(lang, 'Uploading...')}</>
             ) : (
-              <><i className="fas fa-save" /> {isHt ? 'Sove' : 'Save'}</>
+              <><i className="fas fa-save" /> {isHt ? 'Sove' : inlineText(lang, 'Save')}</>
             )}
           </button>
         </div>

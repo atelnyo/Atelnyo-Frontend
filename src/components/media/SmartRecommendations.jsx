@@ -17,6 +17,7 @@
  */
 import React, { useMemo } from 'react';
 import { moduleLabel } from '../../constants/media';
+import { inlineText } from '../../utils/inlineI18n';
 // ─── Module label resolution lives in ../../constants/media so the
 // bilingual vocabulary is shared with MediaList.jsx. ───
 
@@ -39,7 +40,7 @@ function fmtAge(iso) {
   return `${Math.floor(days / 30)}mo ago`;
 }
 
-function buildInsights(media, isHt) {
+function buildInsights(media, isHt, lang = 'en') {
   const insights = [];
 
   // ─── 1. Cross-module reuse ─────────────────────────────────
@@ -55,7 +56,7 @@ function buildInsights(media, isHt) {
         detail: isHt
           ? `Itilize sou ${modules.length} modil (${modules.map((x) => moduleLabel(x, isHt)).join(', ')})`
           : `Used on ${modules.length} modules (${modules.map((x) => moduleLabel(x, isHt)).join(', ')})`,
-        action: isHt ? 'Reitilize sou lòt modil' : 'Reuse on more modules',
+        action: isHt ? 'Reitilize sou lòt modil' : inlineText(lang, 'Reuse on more modules'),
       });
     }
   }
@@ -71,7 +72,7 @@ function buildInsights(media, isHt) {
         detail: isHt
           ? `${t === 'video' ? 'Videyo' : 'Imaj'} sa a pa gen thumbnail — ajoute youn pou amelyore eksperyans.`
           : `This ${t === 'video' ? 'video' : 'image'} has no thumbnail — add one to improve user experience.`,
-        action: isHt ? 'Ajoute yon thumbnail' : 'Add a thumbnail',
+        action: isHt ? 'Ajoute yon thumbnail' : inlineText(lang, 'Add a thumbnail'),
       });
     }
   }
@@ -88,7 +89,7 @@ function buildInsights(media, isHt) {
         detail: isHt
           ? `Ajoute ${age} pase, poko itilize okenn kote.`
           : `Added ${age}, not used anywhere yet.`,
-        action: isHt ? 'Pibliye oswa efase' : 'Publish or delete',
+        action: isHt ? 'Pibliye oswa efase' : inlineText(lang, 'Publish or delete'),
       });
     }
   }
@@ -104,7 +105,7 @@ function buildInsights(media, isHt) {
         detail: isHt
           ? `Estati: ${s}. Ranplase URL la oswa re-upload fichye a.`
           : `Status: ${s}. Replace the URL or re-upload the file.`,
-        action: isHt ? 'Ranplase' : 'Replace',
+        action: isHt ? 'Ranplase' : inlineText(lang, 'Replace'),
       });
     }
   }
@@ -120,7 +121,7 @@ function buildInsights(media, isHt) {
         detail: isHt
           ? `${refs} referans — medya enpòtan.`
           : `${refs} references — important media.`,
-        action: isHt ? 'Verifye sante' : 'Verify health',
+        action: isHt ? 'Verifye sante' : inlineText(lang, 'Verify health'),
       });
     }
   }
@@ -136,8 +137,8 @@ function buildInsights(media, isHt) {
         title: m.title || m.name || m.url,
         detail: isHt
           ? 'Apwouve pou piblikasyon men pa itilize.'
-          : 'Approved for publishing but not used.',
-        action: isHt ? 'Pibliye kounye a' : 'Publish now',
+          : inlineText(lang, 'Approved for publishing but not used.'),
+        action: isHt ? 'Pibliye kounye a' : inlineText(lang, 'Publish now'),
       });
     }
   }
@@ -181,18 +182,18 @@ export default function SmartRecommendations({
   const isHt = lang === 'ht';
 
   const insights = useMemo(() => {
-    const built = buildInsights(media, isHt);
+    const built = buildInsights(media, isHt, lang);
     const bySeverity = { broken: 0, missingThumb: 1, unused: 2, approvedUnused: 3, reuse: 4, heavy: 5 };
     built.sort((a, b) => (bySeverity[a.kind] ?? 99) - (bySeverity[b.kind] ?? 99));
     return built.slice(0, maxItems);
-  }, [media, isHt, maxItems]);
+  }, [media, isHt, lang, maxItems]);
 
   return (
-    <section className={`smart-recommendations ${className}`} aria-label={isHt ? 'Sijesyon' : 'Recommendations'}>
+    <section className={`smart-recommendations ${className}`} aria-label={isHt ? 'Sijesyon' : inlineText(lang, 'Recommendations')}>
       <header className="smart-recommendations-header">
         <h3 className="smart-recommendations-title">
           <i className="fas fa-lightbulb" aria-hidden="true" />
-          {isHt ? 'Sijesyon' : 'Recommendations'}
+          {isHt ? 'Sijesyon' : inlineText(lang, 'Recommendations')}
         </h3>
         <span className="smart-recommendations-count">
           {insights.length}{' '}
@@ -204,11 +205,11 @@ export default function SmartRecommendations({
         // ─── Honest empty state (No Fake Content rule) ───
         <div className="smart-recommendations-empty">
           <i className="fas fa-seedling" aria-hidden="true" />
-          <h4>{isHt ? 'Pa gen sijesyon kounye a' : 'No insights yet'}</h4>
+          <h4>{isHt ? 'Pa gen sijesyon kounye a' : inlineText(lang, 'No insights yet')}</h4>
           <p>
             {isHt
               ? 'N ap analize medya ou yo. Sijesyon parèt lè genyen: medya ki pa itilize, ki kase, ki manke thumbnail, oswa ki ka reitilize sou lòt modil.'
-              : 'We analyze your media in real time. Insights appear when there are: unused media, broken media, missing thumbnails, or media that can be reused across modules.'}
+              : inlineText(lang, 'We analyze your media in real time. Insights appear when there are: unused media, broken media, missing thumbnails, or media that can be reused across modules.')}
           </p>
         </div>
       ) : (
@@ -224,7 +225,7 @@ export default function SmartRecommendations({
         <span>
           {isHt
             ? 'Sijesyon sa yo baze sèlman sou done reyèl medya ou yo. Pa gen envansyon.'
-            : 'These recommendations are based only on your real media data. Nothing is invented.'}
+            : inlineText(lang, 'These recommendations are based only on your real media data. Nothing is invented.')}
         </span>
       </footer>
     </section>

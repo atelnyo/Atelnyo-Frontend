@@ -19,6 +19,7 @@
  * shortcut hint chip. Hooking F2/Ctrl+C/etc. lives in the parent.
  */
 import React from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 export const MEDIA_COMMANDS = Object.freeze({
   // ─── Library ─────────────────────────────────────────────────────
@@ -55,7 +56,7 @@ export default function MediaCommandBar({
   compact = false,
 }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
 
   const handleClick = (cmdId) => {
     if (!onCommand) return;

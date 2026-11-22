@@ -18,6 +18,7 @@ import { mediaProviderService } from '../../services/api';
 import MediaBadge from '../media/MediaBadge';
 import MediaStatus from '../media/MediaStatus';
 import MediaHelp from '../media/MediaHelp';
+import { inlineText } from '../../utils/inlineI18n';
 
 function fmtCount(n) {
   if (n == null) return '0';
@@ -65,7 +66,7 @@ export default function AdminMediaMonitor({ lang = 'en', showToast }) {
         setRecentLogs(Array.isArray(data) ? data.slice(0, 20) : []);
       }
     } catch (err) {
-      showToast?.(isHt ? 'Pa kapab chaje done yo' : 'Failed to load data', 'exclamation-triangle');
+      showToast?.(isHt ? 'Pa kapab chaje done yo' : inlineText(lang, 'Failed to load data'), 'exclamation-triangle');
     } finally {
       setLoading(false);
     }
@@ -83,11 +84,11 @@ export default function AdminMediaMonitor({ lang = 'en', showToast }) {
       {/* Header */}
       <div className="admin-monitor-header">
         <h2 className="studio-section-title" style={{ margin: 0 }}>
-          <i className="fas fa-heartbeat" /> {isHt ? 'Siveyans Medya' : 'Media Monitoring'}
+          <i className="fas fa-heartbeat" /> {isHt ? 'Siveyans Medya' : inlineText(lang, 'Media Monitoring')}
         </h2>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <button type="button" className="btn-secondary" onClick={fetchData}>
-            <i className="fas fa-sync" /> {isHt ? 'Rafrechi' : 'Refresh'}
+            <i className="fas fa-sync" /> {isHt ? 'Rafrechi' : inlineText(lang, 'Refresh')}
           </button>
           <MediaHelp context="library" lang={lang} />
         </div>
@@ -95,18 +96,18 @@ export default function AdminMediaMonitor({ lang = 'en', showToast }) {
 
       {/* Stats Grid */}
       <div className="admin-monitor-grid">
-        <StatCard icon="fa-database" label={isHt ? 'Total validasyon' : 'Total Validations'} value={totalValidations} color="#38bdf8" />
-        <StatCard icon="fa-check-circle" label={isHt ? 'Valid' : 'Valid'} value={validCount} color="#10b981" subtitle={`${totalValidations > 0 ? ((validCount / totalValidations) * 100).toFixed(1) : '0'}%`} />
-        <StatCard icon="fa-times-circle" label={isHt ? 'Envalid' : 'Invalid'} value={invalidCount} color="#ef4444" subtitle={`${brokenRatio}%`} />
-        <StatCard icon="fa-cloud" label={isHt ? 'Providers' : 'Providers'} value={providers.length} color="#8b5cf6" />
-        <StatCard icon="fa-check-double" label={isHt ? 'Sante sistèm' : 'System Health'} value={brokenRatio < 10 ? 'Good' : brokenRatio < 30 ? 'Fair' : 'Poor'} color={brokenRatio < 10 ? '#10b981' : brokenRatio < 30 ? '#f59e0b' : '#ef4444'} />
+        <StatCard icon="fa-database" label={isHt ? 'Total validasyon' : inlineText(lang, 'Total Validations')} value={totalValidations} color="#38bdf8" />
+        <StatCard icon="fa-check-circle" label={isHt ? 'Valid' : inlineText(lang, 'Valid')} value={validCount} color="#10b981" subtitle={`${totalValidations > 0 ? ((validCount / totalValidations) * 100).toFixed(1) : '0'}%`} />
+        <StatCard icon="fa-times-circle" label={isHt ? 'Envalid' : inlineText(lang, 'Invalid')} value={invalidCount} color="#ef4444" subtitle={`${brokenRatio}%`} />
+        <StatCard icon="fa-cloud" label={isHt ? 'Providers' : inlineText(lang, 'Providers')} value={providers.length} color="#8b5cf6" />
+        <StatCard icon="fa-check-double" label={isHt ? 'Sante sistèm' : inlineText(lang, 'System Health')} value={brokenRatio < 10 ? 'Good' : brokenRatio < 30 ? 'Fair' : 'Poor'} color={brokenRatio < 10 ? '#10b981' : brokenRatio < 30 ? '#f59e0b' : '#ef4444'} />
       </div>
 
       {/* Provider Stats */}
       {validationStats?.by_provider && (
         <div className="admin-monitor-section">
           <h3 className="hub-section-subtitle">
-            <i className="fas fa-cloud" /> {isHt ? 'Estati pa Provider' : 'Status by Provider'}
+            <i className="fas fa-cloud" /> {isHt ? 'Estati pa Provider' : inlineText(lang, 'Status by Provider')}
           </h3>
           <div className="admin-monitor-providers">
             {Object.entries(validationStats.by_provider).map(([key, data]) => (
@@ -120,7 +121,7 @@ export default function AdminMediaMonitor({ lang = 'en', showToast }) {
                     <i className="fas fa-times-circle" /> {data.invalid || 0}
                   </span>
                   <span className="admin-monitor-metric-total">
-                    {data.total || 0} {isHt ? 'total' : 'total'}
+                    {data.total || 0} {isHt ? 'total' : inlineText(lang, 'total')}
                   </span>
                 </div>
               </div>
@@ -132,28 +133,28 @@ export default function AdminMediaMonitor({ lang = 'en', showToast }) {
       {/* Recent Validation Logs */}
       <div className="admin-monitor-section">
         <h3 className="hub-section-subtitle">
-          <i className="fas fa-list" /> {isHt ? 'Dènye Validasyon' : 'Recent Validations'}
+          <i className="fas fa-list" /> {isHt ? 'Dènye Validasyon' : inlineText(lang, 'Recent Validations')}
         </h3>
         <div className="admin-monitor-logs">
           {loading ? (
             <div className="admin-monitor-loading">
-              <i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap chaje...' : 'Loading...'}
+              <i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap chaje...' : inlineText(lang, 'Loading...')}
             </div>
           ) : recentLogs.length === 0 ? (
             <div className="admin-monitor-empty">
               <i className="fas fa-inbox" />
-              <p>{isHt ? 'Pa gen validasyon ankò.' : 'No validations yet.'}</p>
+              <p>{isHt ? 'Pa gen validasyon ankò.' : inlineText(lang, 'No validations yet.')}</p>
             </div>
           ) : (
             <table className="admin-monitor-table">
               <thead>
                 <tr>
-                  <th>{isHt ? 'URL' : 'URL'}</th>
-                  <th>{isHt ? 'Estati' : 'Status'}</th>
-                  <th>{isHt ? 'Sante' : 'Health'}</th>
-                  <th>{isHt ? 'Kòd' : 'Code'}</th>
-                  <th>{isHt ? 'Dat' : 'Date'}</th>
-                  <th>{isHt ? 'Itilizatè' : 'User'}</th>
+                  <th>{isHt ? 'URL' : inlineText(lang, 'URL')}</th>
+                  <th>{isHt ? 'Estati' : inlineText(lang, 'Status')}</th>
+                  <th>{isHt ? 'Sante' : inlineText(lang, 'Health')}</th>
+                  <th>{isHt ? 'Kòd' : inlineText(lang, 'Code')}</th>
+                  <th>{isHt ? 'Dat' : inlineText(lang, 'Date')}</th>
+                  <th>{isHt ? 'Itilizatè' : inlineText(lang, 'User')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -182,7 +183,7 @@ export default function AdminMediaMonitor({ lang = 'en', showToast }) {
       {/* Provider Health */}
       <div className="admin-monitor-section">
         <h3 className="hub-section-subtitle">
-          <i className="fas fa-stethoscope" /> {isHt ? 'Sante Providers' : 'Provider Health'}
+          <i className="fas fa-stethoscope" /> {isHt ? 'Sante Providers' : inlineText(lang, 'Provider Health')}
         </h3>
         <div className="admin-monitor-providers-health">
           {providers.map((p) => (

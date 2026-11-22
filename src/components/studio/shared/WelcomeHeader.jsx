@@ -9,6 +9,7 @@
  */
 import React from 'react';
 import styles from './shared.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function WelcomeHeader({ lang, user, summary, avatarUrl }) {
   const isHt = lang === 'ht';
@@ -17,7 +18,7 @@ export default function WelcomeHeader({ lang, user, summary, avatarUrl }) {
     user?.full_name ||
     `${user?.first_name || ''} ${user?.last_name || ''}`.trim() ||
     user?.username ||
-    (isHt ? 'Kreyatè' : 'Creator');
+    (isHt ? 'Kreyatè' : inlineText(lang, 'Creator'));
 
   const hasData =
     summary && (summary.total_revenue > 0 || summary.total_orders > 0);
@@ -43,16 +44,16 @@ export default function WelcomeHeader({ lang, user, summary, avatarUrl }) {
       </div>
       <div>
         <h2 className={styles.welcomeGreeting}>
-          {isHt ? 'Bonjou' : 'Good'}, {name}! 👋
+          {isHt ? 'Bonjou' : inlineText(lang, 'Good')}, {name}! 👋
         </h2>
         <p className={styles.welcomeSub}>
           {hasData
             ? (isHt
                 ? 'Men sa k ap pase jodi a.'
-                : "Here's what's happening today.")
+                : inlineText(lang, "Here's what's happening today."))
             : (isHt
                 ? 'Kòmanse kreye kontni ou kounye a.'
-                : 'Start creating your content now.')}
+                : inlineText(lang, 'Start creating your content now.'))}
         </p>
       </div>
     </div>

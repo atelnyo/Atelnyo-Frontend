@@ -39,6 +39,7 @@ import SaveIndicator from './SaveIndicator';
 import RecoveryBanner from './RecoveryBanner';
 import { saveSessionState as saveSession, loadSessionState as loadSession, clearSessionState as clearSession } from '../../services/learningSessionStore';
 import LearningCommandPalette from './LearningCommandPalette';
+import { inlineText } from '../../utils/inlineI18n';
 
 // Both workspaces are big, self-contained surfaces opened by a toggle.
 // Loading them lazily keeps the lesson path (open a course, move through
@@ -81,25 +82,25 @@ class ModuleSessionErrorBoundary extends React.Component {
   }
   render() {
     if (this.state.hasError) {
-      const { isHt, onRetry, onExit } = this.props;
+      const { isHt, lang = 'en', onRetry, onExit } = this.props;
       return (
         <div className="ls-session-crash" role="alert">
           <div className="ls-state ls-crash-state">
             <i className="fas fa-triangle-exclamation ls-crash-icon" aria-hidden="true" />
             <h3 className="ls-crash-title">
-              {isHt ? 'Yon erè rive nan aktivite sa a.' : 'Something went wrong in this activity.'}
+              {isHt ? 'Yon erè rive nan aktivite sa a.' : inlineText(lang, 'Something went wrong in this activity.')}
             </h3>
             <p className="ls-crash-desc">
               {isHt
                 ? 'Pwogrè ou deja anrejistre. Eseye ankò oswa retounen nan kou a.'
-                : 'Your progress is already saved. Try again or go back to the course.'}
+                : inlineText(lang, 'Your progress is already saved. Try again or go back to the course.')}
             </p>
             <div className="ls-state-actions ls-crash-actions">
               <button type="button" className="ls-btn" onClick={onExit}>
-                <i className="fas fa-arrow-left" aria-hidden="true" /> {isHt ? 'Retounen' : 'Back'}
+                <i className="fas fa-arrow-left" aria-hidden="true" /> {isHt ? 'Retounen' : inlineText(lang, 'Back')}
               </button>
               <button type="button" className="ls-btn ls-btn--primary" onClick={onRetry}>
-                <i className="fas fa-rotate-right" aria-hidden="true" /> {isHt ? 'Eseye ankò' : 'Try again'}
+                <i className="fas fa-rotate-right" aria-hidden="true" /> {isHt ? 'Eseye ankò' : inlineText(lang, 'Try again')}
               </button>
             </div>
           </div>
@@ -575,6 +576,7 @@ export default function LearningSpace({
     syllabus,
     showToast,
     isHt,
+    lang,
     enqueueProgress,
   });
 
@@ -603,7 +605,7 @@ export default function LearningSpace({
   const isModuleLocked = useCallback((mi) => paletteModuleState(mi).locked, [paletteModuleState]);
 
   const notifyLocked = useCallback(() => {
-    showToast?.(isHt ? 'Modil sa a poko louvri. Fini sa ki anvan yo.' : 'That module is not unlocked yet. Finish the earlier ones.', 'lock');
+    showToast?.(isHt ? 'Modil sa a poko louvri. Fini sa ki anvan yo.' : inlineText(lang, 'That module is not unlocked yet. Finish the earlier ones.'), 'lock');
   }, [isHt, showToast]);
 
   const jumpToModule = useCallback((mi) => {
@@ -629,12 +631,12 @@ export default function LearningSpace({
   const confirmLeaveSession = useCallback((action) => {
     if (learningNav.saveState === 'local_only' || learningNav.saveState === 'error') {
       setConfirmDialog({
-        title: isHt ? 'Travay ou pa anrejistre ankò' : 'Your work is not saved yet',
+        title: isHt ? 'Travay ou pa anrejistre ankò' : inlineText(lang, 'Your work is not saved yet'),
         message: isHt
           ? 'Ou gen travay ki pa t anrejistre sou sèvè a. Ou ka pèdi li si ou ale kounye a.'
-          : 'You have unsaved work on the server. You may lose it if you leave now.',
-        confirmLabel: isHt ? 'Ale kounye a' : 'Leave anyway',
-        cancelLabel: isHt ? 'Retounen' : 'Stay',
+          : inlineText(lang, 'You have unsaved work on the server. You may lose it if you leave now.'),
+        confirmLabel: isHt ? 'Ale kounye a' : inlineText(lang, 'Leave anyway'),
+        cancelLabel: isHt ? 'Retounen' : inlineText(lang, 'Stay'),
         onConfirm: () => { setConfirmDialog(null); action(); },
         onCancel: () => setConfirmDialog(null),
         variant: 'danger',
@@ -661,7 +663,7 @@ export default function LearningSpace({
   useEffect(() => {
     if (learningNav.saveState === 'error') {
       addNotification(
-        isHt ? '⚠️ Erè sove — travay ou sekirite lokalman.' : '⚠️ Save error — your work is safe locally.',
+        isHt ? '⚠️ Erè sove — travay ou sekirite lokalman.' : inlineText(lang, '⚠️ Save error — your work is safe locally.'),
         'error',
         'high',
       );
@@ -677,7 +679,7 @@ export default function LearningSpace({
       const moduleItem = syllabus[newMax];
       const modTitle = (typeof moduleItem === 'object' && moduleItem?.title)
         ? moduleItem.title
-        : `${isHt ? 'Modil' : 'Module'} ${newMax + 1}`;
+        : `${isHt ? 'Modil' : inlineText(lang, 'Module')} ${newMax + 1}`;
       setUnlockToast({
         id: Date.now(),
         text: isHt ? `🔓 ${modTitle} debloke!` : `🔓 ${modTitle} unlocked!`,
@@ -829,12 +831,12 @@ export default function LearningSpace({
         setNotes((prev) => prev.filter((n) => Number(n.id) !== Number(existing.id)));
         setNoteDrafts((d) => ({ ...d, [mi]: '' }));
         setNoteBusy((b) => ({ ...b, [mi]: false }));
-        setNoteStatus((s) => ({ ...s, [mi]: { kind: 'saved', text: isHt ? 'Nòt efase' : 'Note deleted' } }));
+        setNoteStatus((s) => ({ ...s, [mi]: { kind: 'saved', text: isHt ? 'Nòt efase' : inlineText(lang, 'Note deleted') } }));
         setTimeout(() => setNoteStatus((s) => { const c = { ...s }; delete c[mi]; return c; }), 2200);
       })
       .catch(() => {
         setNoteBusy((b) => ({ ...b, [mi]: false }));
-        setNoteStatus((s) => ({ ...s, [mi]: { kind: 'error', text: isHt ? 'Erè — nòt la pa t efase.' : 'Error — note not deleted.' } }));
+        setNoteStatus((s) => ({ ...s, [mi]: { kind: 'error', text: isHt ? 'Erè — nòt la pa t efase.' : inlineText(lang, 'Error — note not deleted.') } }));
       });
   }, [notesByModule, noteBusy, isHt]);
 
@@ -855,12 +857,12 @@ export default function LearningSpace({
         note,
       ]);
       setNoteBusy((b) => ({ ...b, [mi]: false }));
-      setNoteStatus((s) => ({ ...s, [mi]: { kind: 'saved', text: isHt ? '✅ Nòt anrejistre' : '✅ Note saved' } }));
+      setNoteStatus((s) => ({ ...s, [mi]: { kind: 'saved', text: isHt ? '✅ Nòt anrejistre' : inlineText(lang, '✅ Note saved') } }));
       setTimeout(() => setNoteStatus((s) => { const c = { ...s }; delete c[mi]; return c; }), 2200);
     };
     const fail = () => {
       setNoteBusy((b) => ({ ...b, [mi]: false }));
-      setNoteStatus((s) => ({ ...s, [mi]: { kind: 'error', text: isHt ? 'Erè — nòt la pa t anrejistre.' : 'Error — note not saved.' } }));
+      setNoteStatus((s) => ({ ...s, [mi]: { kind: 'error', text: isHt ? 'Erè — nòt la pa t anrejistre.' : inlineText(lang, 'Error — note not saved.') } }));
     };
     if (existing) {
       courseSupportService.updateNote(existing.id, { content }).then((r) => done(r.data)).catch(fail);
@@ -876,7 +878,7 @@ export default function LearningSpace({
     const mi = Number(progress.last_module_index) || 0;
     const item = syllabus[mi];
     if (!item) return null;
-    const moduleTitle = typeof item === 'object' && item.title ? item.title : `${isHt ? 'Modil' : 'Module'} ${mi + 1}`;
+    const moduleTitle = typeof item === 'object' && item.title ? item.title : `${isHt ? 'Modil' : inlineText(lang, 'Module')} ${mi + 1}`;
     let blockTitle = '';
     if (progress.last_block_id && typeof item === 'object' && Array.isArray(item.blocks)) {
       const b = item.blocks.find((x) => x.id === progress.last_block_id);
@@ -892,7 +894,7 @@ export default function LearningSpace({
     // with stepCount 0) or do nothing at all (syllabus empty).
     const target = syllabus[mi];
     if (!target) {
-      showToast?.(isHt ? 'Kou sa a pa gen okenn aktivite pou kounye a.' : 'This course has no activities yet.', 'info-circle');
+      showToast?.(isHt ? 'Kou sa a pa gen okenn aktivite pou kounye a.' : inlineText(lang, 'This course has no activities yet.'), 'info-circle');
       return;
     }
     const blocks = (typeof target === 'object' && Array.isArray(target.blocks)) ? target.blocks : [];
@@ -916,7 +918,7 @@ export default function LearningSpace({
           return;
         }
       }
-      showToast?.(isHt ? 'Kou sa a pa gen okenn aktivite. Ajoute aktivite nan Creator Studio.' : 'This course has no activities. Add activities in Creator Studio.', 'info-circle');
+      showToast?.(isHt ? 'Kou sa a pa gen okenn aktivite. Ajoute aktivite nan Creator Studio.' : inlineText(lang, 'This course has no activities. Add activities in Creator Studio.'), 'info-circle');
       return;
     }
     setSessionModule(mi);
@@ -930,7 +932,7 @@ export default function LearningSpace({
       kind: 'block',
       moduleIndex: resumeInfo.moduleIndex,
       blockId: progress.last_block_id || null,
-      label: isHt ? 'Kontinye kote w te ye' : 'Continue where you left off',
+      label: isHt ? 'Kontinye kote w te ye' : inlineText(lang, 'Continue where you left off'),
       meta: [resumeInfo.moduleTitle, resumeInfo.blockTitle].filter(Boolean).join(' · '),
       icon: 'fa-play',
       locked: false,
@@ -946,7 +948,7 @@ export default function LearningSpace({
     if (!inSession) {
       items.push({
         id: 'action-resume',
-        label: isHt ? 'Kontinye aprantisaj la' : 'Continue learning',
+        label: isHt ? 'Kontinye aprantisaj la' : inlineText(lang, 'Continue learning'),
         meta: resumeInfo ? resumeInfo.moduleTitle : '',
         icon: 'fa-play',
         keywords: 'continue kontinye resume start komanse',
@@ -954,21 +956,21 @@ export default function LearningSpace({
       });
       items.push({
         id: 'action-practice',
-        label: isHt ? 'Louvi Sant Pratik' : 'Open Practice Center',
+        label: isHt ? 'Louvi Sant Pratik' : inlineText(lang, 'Open Practice Center'),
         icon: 'fa-dumbbell',
         keywords: 'practice pratik exercice egzèsis',
         run: () => setMode((m) => (m === 'practice' ? 'curriculum' : 'practice')),
       });
       items.push({
         id: 'action-project',
-        label: isHt ? 'Pwojè Mwen' : 'My Project',
+        label: isHt ? 'Pwojè Mwen' : inlineText(lang, 'My Project'),
         icon: 'fa-folder-open',
         keywords: 'project pwoje workspace atelye',
         run: () => { setShowProjectWorkspace(true); },
       });
       items.push({
         id: 'action-business',
-        label: isHt ? 'Biznis Workspace' : 'Business Workspace',
+        label: isHt ? 'Biznis Workspace' : inlineText(lang, 'Business Workspace'),
         icon: 'fa-briefcase',
         keywords: 'business biznis workspace',
         run: () => { setShowWorkspace(true); },
@@ -977,8 +979,8 @@ export default function LearningSpace({
     items.push({
       id: 'action-focus',
       label: focusMode
-        ? (isHt ? 'Sòti nan mòd konsantrasyon' : 'Exit focus mode')
-        : (isHt ? 'Antre nan mòd konsantrasyon' : 'Enter focus mode'),
+        ? (isHt ? 'Sòti nan mòd konsantrasyon' : inlineText(lang, 'Exit focus mode'))
+        : (isHt ? 'Antre nan mòd konsantrasyon' : inlineText(lang, 'Enter focus mode')),
       icon: 'fa-moon',
       keywords: 'focus konsantrasyon distraction mode',
       run: () => setFocusMode((f) => !f),
@@ -1009,7 +1011,7 @@ export default function LearningSpace({
       await courseService.messageInstructor(courseId, messageBody.trim());
       setMessageOpen(false);
       setMessageBody('');
-      showToast?.(isHt ? '✅ Mesaj voye bay enstriktè a.' : '✅ Message sent to the instructor.', 'check-circle');
+      showToast?.(isHt ? '✅ Mesaj voye bay enstriktè a.' : inlineText(lang, '✅ Message sent to the instructor.'), 'check-circle');
     } catch (err) {
       const detail = err?.response?.data?.detail || err?.message;
       showToast?.(isHt ? `Erè: ${detail || 'mesaj la pa t voye.'}` : `Error: ${detail || 'message not sent.'}`, 'exclamation-triangle');
@@ -1045,7 +1047,7 @@ export default function LearningSpace({
     return {
       programId: course.language_program,
       nextLevel: next,
-      label: LEVEL_LABEL[next]?.[isHt ? 'ht' : 'en'] || next,
+      label: LEVEL_LABEL[next]?.[isHt ? 'ht' : inlineText(lang, 'en')] || next,
     };
   }, [course, isHt]);
 
@@ -1055,14 +1057,14 @@ export default function LearningSpace({
       <div className="ls-page">
         <div className="ls-state" role="alert">
           <i className="fas fa-triangle-exclamation" aria-hidden="true" />
-          <h3>{isHt ? 'Pa t kapab chaje kou a.' : 'Could not load the course.'}</h3>
-          <p>{isHt ? 'Tcheke koneksyon ou epi eseye ankò.' : 'Check your connection and try again.'}</p>
+          <h3>{isHt ? 'Pa t kapab chaje kou a.' : inlineText(lang, 'Could not load the course.')}</h3>
+          <p>{isHt ? 'Tcheke koneksyon ou epi eseye ankò.' : inlineText(lang, 'Check your connection and try again.')}</p>
           <div className="ls-state-actions">
             <button type="button" className="ls-btn" onClick={onBack}>
-              <i className="fas fa-arrow-left" aria-hidden="true" /> {isHt ? 'Retounen' : 'Back'}
+              <i className="fas fa-arrow-left" aria-hidden="true" /> {isHt ? 'Retounen' : inlineText(lang, 'Back')}
             </button>
             <button type="button" className="ls-btn ls-btn--primary" onClick={() => window.location.reload()}>
-              <i className="fas fa-rotate-right" aria-hidden="true" /> {isHt ? 'Eseye ankò' : 'Try again'}
+              <i className="fas fa-rotate-right" aria-hidden="true" /> {isHt ? 'Eseye ankò' : inlineText(lang, 'Try again')}
             </button>
           </div>
         </div>
@@ -1073,7 +1075,7 @@ export default function LearningSpace({
     // Skeleton mirrors the real layout (header + hero + panels + modules)
     // so loading feels fast — never a blank screen while data arrives.
     return (
-      <div className="ls-page" role="status" aria-busy="true" aria-label={isHt ? 'Ap chaje...' : 'Loading...'}>
+      <div className="ls-page" role="status" aria-busy="true" aria-label={isHt ? 'Ap chaje...' : inlineText(lang, 'Loading...')}>
         <div className="ls-skel-header" aria-hidden="true">
           <div className="ls-skeleton" />
           <div className="ls-skeleton" />
@@ -1107,7 +1109,7 @@ export default function LearningSpace({
             honest: the space is loading, not broken. */}
         <p className="ls-loading-label" role="status">
           <i className="fas fa-spinner fa-spin" aria-hidden="true" />
-          {isHt ? 'Ap chaje espas aprantisaj la...' : 'Loading your learning space...'}
+          {isHt ? 'Ap chaje espas aprantisaj la...' : inlineText(lang, 'Loading your learning space...')}
         </p>
       </div>
     );
@@ -1117,10 +1119,10 @@ export default function LearningSpace({
       <div className="ls-page">
         <div className="ls-state">
           <i className="fas fa-lock" aria-hidden="true" />
-          <h3>{isHt ? 'Ou poko gen aksè sou kou sa a.' : 'You do not have access to this course yet.'}</h3>
-          <p>{isHt ? 'Enskri oswa achte kou a pou antre nan Espas Aprantisaj la.' : 'Enroll or purchase the course to enter the Learning Space.'}</p>
+          <h3>{isHt ? 'Ou poko gen aksè sou kou sa a.' : inlineText(lang, 'You do not have access to this course yet.')}</h3>
+          <p>{isHt ? 'Enskri oswa achte kou a pou antre nan Espas Aprantisaj la.' : inlineText(lang, 'Enroll or purchase the course to enter the Learning Space.')}</p>
           <button type="button" className="ls-btn ls-btn--primary" onClick={() => onOpenCourse?.(course)}>
-            <i className="fas fa-graduation-cap" aria-hidden="true" /> {isHt ? 'Ale nan paj kou a' : 'Go to course page'}
+            <i className="fas fa-graduation-cap" aria-hidden="true" /> {isHt ? 'Ale nan paj kou a' : inlineText(lang, 'Go to course page')}
           </button>
         </div>
       </div>
@@ -1143,7 +1145,7 @@ export default function LearningSpace({
   }, 0);
   const doneOptional = doneBlocks - doneRequired;
   const totalModules = syllabus.length;
-  const levelLabel = LEVEL_LABEL[course.difficulty]?.[isHt ? 'ht' : 'en'];
+  const levelLabel = LEVEL_LABEL[course.difficulty]?.[isHt ? 'ht' : inlineText(lang, 'en')];
 
   // ─── Active step session ───────────────────────────────────────────
   const activeModule = reviewModule != null ? reviewModule : sessionModule;
@@ -1155,8 +1157,8 @@ export default function LearningSpace({
       <button
         type="button"
         className="ls-shell-header-btn"
-        title={isHt ? 'Ale vit — Ctrl+K' : 'Quick jump — Ctrl+K'}
-        aria-label={isHt ? 'Ale vit nan kou a' : 'Quick jump in the course'}
+        title={isHt ? 'Ale vit — Ctrl+K' : inlineText(lang, 'Quick jump — Ctrl+K')}
+        aria-label={isHt ? 'Ale vit nan kou a' : inlineText(lang, 'Quick jump in the course')}
         onClick={() => setPaletteOpen(true)}
       >
         <i className="fas fa-magnifying-glass" aria-hidden="true" />
@@ -1165,8 +1167,8 @@ export default function LearningSpace({
       <button
         type="button"
         className={`ls-shell-header-btn${mode === 'practice' ? ' is-active' : ''}`}
-        title={isHt ? 'Sant Pratik' : 'Practice Center'}
-        aria-label={isHt ? 'Sant Pratik' : 'Practice Center'}
+        title={isHt ? 'Sant Pratik' : inlineText(lang, 'Practice Center')}
+        aria-label={isHt ? 'Sant Pratik' : inlineText(lang, 'Practice Center')}
         aria-pressed={mode === 'practice'}
         onClick={() => setMode(mode === 'practice' ? 'curriculum' : 'practice')}
       >
@@ -1175,9 +1177,9 @@ export default function LearningSpace({
       <button
         type="button"
         className="ls-shell-header-btn"
-        title={isHt ? 'Kontakte enstriktè' : 'Contact instructor'}
-        aria-label={isHt ? 'Kontakte enstriktè' : 'Contact instructor'}
-        onClick={() => (hasInstructor ? setMessageOpen(true) : showToast?.(isHt ? 'Kou sa a pa gen enstriktè pou kontakte.' : 'This course has no instructor to contact.', 'info'))}
+        title={isHt ? 'Kontakte enstriktè' : inlineText(lang, 'Contact instructor')}
+        aria-label={isHt ? 'Kontakte enstriktè' : inlineText(lang, 'Contact instructor')}
+        onClick={() => (hasInstructor ? setMessageOpen(true) : showToast?.(isHt ? 'Kou sa a pa gen enstriktè pou kontakte.' : inlineText(lang, 'This course has no instructor to contact.'), 'info'))}
       >
         <i className="fas fa-comment-dots" aria-hidden="true" />
       </button>
@@ -1189,11 +1191,11 @@ export default function LearningSpace({
   const shellSidebarFooter = (
     <div className="ls-sidebar-footer">
       <div className="ls-sidebar-footer-row">
-        <span>{isHt ? 'Aktivite' : 'Activities'}</span>
+        <span>{isHt ? 'Aktivite' : inlineText(lang, 'Activities')}</span>
         <span>{doneBlocks}/{totalBlocks}</span>
       </div>
       <div className="ls-sidebar-footer-row">
-        <span>{isHt ? 'Modil' : 'Modules'}</span>
+        <span>{isHt ? 'Modil' : inlineText(lang, 'Modules')}</span>
         <span>{completedModules.length}/{totalModules}</span>
       </div>
       {/* Discoverability: a shortcut nobody knows about is a shortcut
@@ -1204,7 +1206,7 @@ export default function LearningSpace({
         onClick={() => setPaletteOpen(true)}
       >
         <i className="fas fa-magnifying-glass" aria-hidden="true" />
-        <span>{isHt ? 'Chèche nan kou a' : 'Search this course'}</span>
+        <span>{isHt ? 'Chèche nan kou a' : inlineText(lang, 'Search this course')}</span>
         <kbd>Ctrl K</kbd>
       </button>
     </div>
@@ -1237,7 +1239,7 @@ export default function LearningSpace({
             className="ls-btn"
             onClick={() => confirmLeaveSession(() => { setSessionModule(null); setReviewModule(null); setJumpTarget(null); clearSessionState(courseId); })}
           >
-            <i className="fas fa-arrow-left" aria-hidden="true" /> {isHt ? 'Kou a' : 'Course'}
+            <i className="fas fa-arrow-left" aria-hidden="true" /> {isHt ? 'Kou a' : inlineText(lang, 'Course')}
           </button>
           <div className="ls-action-area-spacer" />
           {learningNav.navState !== 'idle' && (
@@ -1278,7 +1280,7 @@ export default function LearningSpace({
           <i className="fas fa-wifi" aria-hidden="true" />
           {isHt
             ? 'Disponib offline — pwogrè ou ap senkronize lè koneksyon retounen.'
-            : 'Available offline — your progress will sync when you are back online.'}
+            : inlineText(lang, 'Available offline — your progress will sync when you are back online.')}
         </div>
       )}
 
@@ -1293,10 +1295,10 @@ export default function LearningSpace({
           <i className={`fas ${learningNav.saveState === 'local_only' ? 'fa-hard-drive' : learningNav.saveState === 'syncing' ? 'fa-cloud-arrow-up' : 'fa-triangle-exclamation'}`} aria-hidden="true" />
           <span>
             {learningNav.saveState === 'local_only'
-              ? (isHt ? '💾 Travay soke sou aparèy la. Ap senkronize lè koneksyon retounen.' : '💾 Saved on device. Will sync when online.')
+              ? (isHt ? '💾 Travay soke sou aparèy la. Ap senkronize lè koneksyon retounen.' : inlineText(lang, '💾 Saved on device. Will sync when online.'))
               : learningNav.saveState === 'syncing'
-                ? (isHt ? '🔄 Ap senkronize travay ou...' : '🔄 Syncing your work...')
-                : (isHt ? '⚠️ Erè sove — travay ou an sekirite lokalman.' : '⚠️ Save error — your work is safe locally.')}
+                ? (isHt ? '🔄 Ap senkronize travay ou...' : inlineText(lang, '🔄 Syncing your work...'))
+                : (isHt ? '⚠️ Erè sove — travay ou an sekirite lokalman.' : inlineText(lang, '⚠️ Save error — your work is safe locally.'))}
           </span>
         </div>
       )}
@@ -1306,7 +1308,7 @@ export default function LearningSpace({
         <div className="ls-welcome-back" role="status">
           <i className="fas fa-hand-wave ls-welcome-back-icon" aria-hidden="true" />
           <div>
-            <strong>{isHt ? 'Byenveni retoure!' : 'Welcome back!'}</strong>
+            <strong>{isHt ? 'Byenveni retoure!' : inlineText(lang, 'Welcome back!')}</strong>
             <span>
               {isHt
                 ? `Ou te rete nan modil ${resumeModuleIndex != null ? resumeModuleIndex + 1 : ''}. Kontinye la kote ou te rete.`
@@ -1318,7 +1320,7 @@ export default function LearningSpace({
               className="ls-welcome-back-btn"
               onClick={() => setSessionModule(resumeModuleIndex)}
             >
-              {isHt ? 'Kontinye' : 'Continue'}
+              {isHt ? 'Kontinye' : inlineText(lang, 'Continue')}
             </button>
           )}
         </div>
@@ -1352,6 +1354,7 @@ export default function LearningSpace({
         )}
         <ModuleSessionErrorBoundary
           isHt={isHt}
+          lang={lang}
           onRetry={() => { setSessionRetryKey((k) => k + 1); }}
           onExit={() => { setSessionModule(null); setReviewModule(null); setJumpTarget(null); setSessionRetryKey(0); clearSessionState(courseId); }}
           key={`${sessionRetryKey}:${jumpTarget?.nonce || 0}`}
@@ -1407,7 +1410,7 @@ export default function LearningSpace({
                   .map((s) => s.skill).join(', ')}. Review them in the Practice Center.`}
           </span>
           <button type="button" className="ls-skill-nudge-cta" onClick={() => setMode('practice')}>
-            {isHt ? 'Pratike' : 'Practice'}
+            {isHt ? 'Pratike' : inlineText(lang, 'Practice')}
           </button>
         </div>
       )}
@@ -1418,25 +1421,25 @@ export default function LearningSpace({
           <h1>{title}</h1>
           {isComplete ? (
             <div className="ls-complete-badge">
-              <i className="fas fa-trophy" aria-hidden="true" /> {isHt ? 'Kou fini — Félicitations!' : 'Course completed — congratulations!'}
+              <i className="fas fa-trophy" aria-hidden="true" /> {isHt ? 'Kou fini — Félicitations!' : inlineText(lang, 'Course completed — congratulations!')}
             </div>
           ) : totalBlocks > 0 ? (
             <button type="button" className="ls-continue-btn" onClick={handleContinue}>
               <i className="fas fa-play" aria-hidden="true" />
               {resumeInfo && pct > 0
-                ? (isHt ? 'Kontinye aprann' : 'Continue learning')
-                : (isHt ? 'Kòmanse kou a' : 'Start the course')}
+                ? (isHt ? 'Kontinye aprann' : inlineText(lang, 'Continue learning'))
+                : (isHt ? 'Kòmanse kou a' : inlineText(lang, 'Start the course'))}
             </button>
           ) : (
             <div className="ls-complete-badge ls-complete-badge--empty">
               <i className="fas fa-folder-open" aria-hidden="true" />
-              {isHt ? 'Kou sa a poko gen aktivite.' : 'This course has no activities yet.'}
+              {isHt ? 'Kou sa a poko gen aktivite.' : inlineText(lang, 'This course has no activities yet.')}
             </div>
           )}
           {resumeInfo && !isComplete && (
             <p className="ls-resume-hint">
               <i className="fas fa-location-dot" aria-hidden="true" />
-              {isHt ? 'Ou te sispann nan' : 'You stopped at'} <strong>{resumeInfo.moduleTitle}</strong>
+              {isHt ? 'Ou te sispann nan' : inlineText(lang, 'You stopped at')} <strong>{resumeInfo.moduleTitle}</strong>
               {resumeInfo.blockTitle ? ` · ${resumeInfo.blockTitle}` : ''}
             </p>
           )}
@@ -1450,17 +1453,17 @@ export default function LearningSpace({
       {mode === 'practice' && (
         <section className="ls-practice">
           <div className="ls-practice-head">
-            <h3 className="ls-panel-title"><i className="fas fa-dumbbell" aria-hidden="true" /> {isHt ? 'Sant Pratik' : 'Practice Center'}</h3>
+            <h3 className="ls-panel-title"><i className="fas fa-dumbbell" aria-hidden="true" /> {isHt ? 'Sant Pratik' : inlineText(lang, 'Practice Center')}</h3>
             <p>
               {isHt
                 ? 'Revize tout aktivite kou a, pa tip. Konplete yon aktivite anrejistre pwogrè ou reyèlman.'
-                : 'Review every activity in the course, by type. Completing an activity genuinely records your progress.'}
+                : inlineText(lang, 'Review every activity in the course, by type. Completing an activity genuinely records your progress.')}
             </p>
           </div>
           {practiceGroups.length === 0 ? (
             <div className="ls-state ls-state--small">
               <i className="fas fa-spa" aria-hidden="true" />
-              <p>{isHt ? 'Kou sa a pa gen aktivite pratik.' : 'This course has no practice activities.'}</p>
+              <p>{isHt ? 'Kou sa a pa gen aktivite pratik.' : inlineText(lang, 'This course has no practice activities.')}</p>
             </div>
           ) : (
             practiceGroups.map(({ type, items }) => (
@@ -1494,15 +1497,15 @@ export default function LearningSpace({
       {mode !== 'practice' && (<>
       {/* ─── Progress summary ─────────────────────────────── */}
       <section className="ls-panel ls-progress-summary">
-        <h3 className="ls-panel-title"><i className="fas fa-chart-simple" aria-hidden="true" /> {isHt ? 'Pwogrè ou' : 'Your progress'}</h3>
+        <h3 className="ls-panel-title"><i className="fas fa-chart-simple" aria-hidden="true" /> {isHt ? 'Pwogrè ou' : inlineText(lang, 'Your progress')}</h3>
         <div className="ls-progress-stats">
-          <div className="ls-stat"><strong>{pct}%</strong><span>{isHt ? 'Konple' : 'Complete'}</span></div>
-          <div className="ls-stat"><strong>{doneRequired}/{requiredBlocks}</strong><span>{isHt ? 'Aktivite obligatwa' : 'Required'}</span></div>
-          <div className="ls-stat"><strong>{completedModules.length}/{totalModules}</strong><span>{isHt ? 'Modil' : 'Modules'}</span></div>
+          <div className="ls-stat"><strong>{pct}%</strong><span>{isHt ? 'Konple' : inlineText(lang, 'Complete')}</span></div>
+          <div className="ls-stat"><strong>{doneRequired}/{requiredBlocks}</strong><span>{isHt ? 'Aktivite obligatwa' : inlineText(lang, 'Required')}</span></div>
+          <div className="ls-stat"><strong>{completedModules.length}/{totalModules}</strong><span>{isHt ? 'Modil' : inlineText(lang, 'Modules')}</span></div>
         </div>
         {/* §10-11 — Show optional progress separately when present */}
         {optionalBlocks > 0 && (            <div className="ls-progress-optional">
-              {isHt ? 'Resous optional' : 'Optional'}: {doneOptional}/{optionalBlocks}
+              {isHt ? 'Resous optional' : inlineText(lang, 'Optional')}: {doneOptional}/{optionalBlocks}
             </div>
         )}
         {/* §2 — Progress Domains: separate Learning vs Assessment vs Activity */}
@@ -1525,7 +1528,7 @@ export default function LearningSpace({
           className="ls-panel-title ls-workspace-toggle"
           onClick={() => setShowWorkspace(!showWorkspace)}
         >
-          <i className="fas fa-briefcase" aria-hidden="true" /> {isHt ? '💼 Biznis Workspace' : '💼 Business Workspace'}
+          <i className="fas fa-briefcase" aria-hidden="true" /> {isHt ? '💼 Biznis Workspace' : inlineText(lang, '💼 Business Workspace')}
           <span className="ls-workspace-arrow">{showWorkspace ? '▲' : '▼'}</span>
         </button>
         {showWorkspace && (
@@ -1544,7 +1547,7 @@ export default function LearningSpace({
           className="ls-panel-title ls-workspace-toggle"
           onClick={() => setShowProjectWorkspace(!showProjectWorkspace)}
         >
-          <i className="fas fa-folder-open" aria-hidden="true" /> {isHt ? '📂 Pwojè Mwen' : '📂 My Project'}
+          <i className="fas fa-folder-open" aria-hidden="true" /> {isHt ? '📂 Pwojè Mwen' : inlineText(lang, '📂 My Project')}
           <span className="ls-workspace-arrow">{showProjectWorkspace ? '▲' : '▼'}</span>
         </button>
         {showProjectWorkspace && (
@@ -1568,13 +1571,13 @@ export default function LearningSpace({
            owner/staff; shown INSIDE the Learning Space. ───────── */}
       {announcements.length > 0 && (
         <section className="ls-panel ls-announcements">
-          <h3 className="ls-panel-title"><i className="fas fa-bullhorn" aria-hidden="true" /> {isHt ? 'Anons' : 'Announcements'}</h3>
+          <h3 className="ls-panel-title"><i className="fas fa-bullhorn" aria-hidden="true" /> {isHt ? 'Anons' : inlineText(lang, 'Announcements')}</h3>
           <div className="ls-announcement-list">
             {announcements.map((a) => (
               <article key={a.id} className={`ls-announcement${a.is_pinned ? ' is-pinned' : ''}`}>
                 <div className="ls-announcement-head">
                   {a.is_pinned && (
-                    <span className="ls-announcement-pin"><i className="fas fa-thumbtack" aria-hidden="true" /> {isHt ? 'Pinned' : 'Pinned'}</span>
+                    <span className="ls-announcement-pin"><i className="fas fa-thumbtack" aria-hidden="true" /> {isHt ? 'Pinned' : inlineText(lang, 'Pinned')}</span>
                   )}
                   <strong>{a.title}</strong>
                   <span className="ls-announcement-meta">
@@ -1592,7 +1595,7 @@ export default function LearningSpace({
       {/* ─── Resources (spec §23) — owner/staff-added files & links. */}
       {resources.length > 0 && (
         <section className="ls-panel ls-resources">
-          <h3 className="ls-panel-title"><i className="fas fa-paperclip" aria-hidden="true" /> {isHt ? 'Resous' : 'Resources'}</h3>
+          <h3 className="ls-panel-title"><i className="fas fa-paperclip" aria-hidden="true" /> {isHt ? 'Resous' : inlineText(lang, 'Resources')}</h3>
           <ul className="ls-resource-list">
             {resources.map((r) => (
               <li key={r.id} className="ls-resource">
@@ -1613,15 +1616,15 @@ export default function LearningSpace({
       {/* ─── Orientation ──────────────────────────────────── */}
       {(course.description || course.learning_objective) && (
         <section className="ls-panel">
-          <h3 className="ls-panel-title"><i className="fas fa-compass" aria-hidden="true" /> {isHt ? 'Oryantasyon kou a' : 'Course orientation'}</h3>
+          <h3 className="ls-panel-title"><i className="fas fa-compass" aria-hidden="true" /> {isHt ? 'Oryantasyon kou a' : inlineText(lang, 'Course orientation')}</h3>
           {course.learning_objective && (
-            <p className="ls-objective"><strong>{isHt ? 'Kisa w pral aprann:' : 'What you will learn:'}</strong> {course.learning_objective}</p>
+            <p className="ls-objective"><strong>{isHt ? 'Kisa w pral aprann:' : inlineText(lang, 'What you will learn:')}</strong> {course.learning_objective}</p>
           )}
           {course.description && <p className="ls-desc">{course.description}</p>}
           {course.language_program && (
             <p className="ls-program-note">
               <i className="fas fa-graduation-cap" aria-hidden="true" />
-              {isHt ? 'Kou sa a fè pati yon pwogram ofisyèl atelnyo.' : 'This course is part of an official Atelnyo program.'}
+              {isHt ? 'Kou sa a fè pati yon pwogram ofisyèl atelnyo.' : inlineText(lang, 'This course is part of an official Atelnyo program.')}
             </p>
           )}
         </section>
@@ -1629,18 +1632,18 @@ export default function LearningSpace({
 
       {/* ─── Curriculum ───────────────────────────────────── */}
       <section className="ls-curriculum">
-        <h3 className="ls-panel-title"><i className="fas fa-list-check" aria-hidden="true" /> {isHt ? 'Kourikoulòm' : 'Curriculum'}</h3>
+        <h3 className="ls-panel-title"><i className="fas fa-list-check" aria-hidden="true" /> {isHt ? 'Kourikoulòm' : inlineText(lang, 'Curriculum')}</h3>
         {syllabus.length === 0 && (
           <div className="ls-state ls-state--small">
             <i className="fas fa-book-open" aria-hidden="true" />
-            <p>{isHt ? 'Kou sa a poko gen leson.' : 'This course has no lessons yet.'}</p>
+            <p>{isHt ? 'Kou sa a poko gen leson.' : inlineText(lang, 'This course has no lessons yet.')}</p>
           </div>
         )}
         {syllabus.map((item, mi) => {
           const st = moduleState(mi);
           const isFuture = mi > maxReached && st.status === 'available';
           const blocks = (typeof item === 'object' && Array.isArray(item.blocks)) ? item.blocks : [];
-          const modTitle = (typeof item === 'object' && item.title) ? item.title : `${isHt ? 'Modil' : 'Module'} ${mi + 1}`;
+          const modTitle = (typeof item === 'object' && item.title) ? item.title : `${isHt ? 'Modil' : inlineText(lang, 'Module')} ${mi + 1}`;
           // Per-module mini path: one dot per real block, filled only
           // when genuinely completed (real progress, never assumed).
           const doneDots = blocks.filter((b) => completedBlocksMap[String(mi)]?.has(b.id)).length;
@@ -1667,7 +1670,7 @@ export default function LearningSpace({
                 </span>
                 <span className="ls-module-title">
                   {modTitle}
-                  {st.status === 'current' && <em className="ls-module-now">{isHt ? 'Kounye a' : 'Current'}</em>}
+                  {st.status === 'current' && <em className="ls-module-now">{isHt ? 'Kounye a' : inlineText(lang, 'Current')}</em>}
                 </span>
                 <span className="ls-module-dots" aria-hidden="true">
                   {blocks.map((b, bi) => (
@@ -1679,7 +1682,7 @@ export default function LearningSpace({
                 </span>
                 <span className="ls-module-meta">
                   {st.total > 0 ? `${doneDots}/${st.total}` : ''}
-                  {isFuture && <em className="ls-module-lock-label">{isHt ? 'Fèt' : 'Future'}</em>}
+                  {isFuture && <em className="ls-module-lock-label">{isHt ? 'Fèt' : inlineText(lang, 'Future')}</em>}
                 </span>
                 {!isFuture && (
                   <span className="ls-module-go" aria-hidden="true">
@@ -1697,7 +1700,7 @@ export default function LearningSpace({
                   onClick={() => setReviewModule(mi)}
                   aria-label={isHt ? `Revizyon ${modTitle}` : `Review ${modTitle}`}
                 >
-                  <i className="fas fa-rotate-right" aria-hidden="true" /> {isHt ? 'Revizyon' : 'Review'}
+                  <i className="fas fa-rotate-right" aria-hidden="true" /> {isHt ? 'Revizyon' : inlineText(lang, 'Review')}
                 </button>
               )}
 
@@ -1712,15 +1715,15 @@ export default function LearningSpace({
                   aria-expanded={Boolean(noteOpen[mi])}
                 >
                   <i className="fas fa-note-sticky" aria-hidden="true" />
-                  {notesByModule[mi] ? (isHt ? 'Nòt ou' : 'Your note') : (isHt ? 'Nòt' : 'Note')}
+                  {notesByModule[mi] ? (isHt ? 'Nòt ou' : inlineText(lang, 'Your note')) : (isHt ? 'Nòt' : inlineText(lang, 'Note'))}
                   {notesByModule[mi] && <em className="ls-path-note-has">•</em>}
                 </button>
                 {noteOpen[mi] && (
                   <div className="ls-note">
                     <div className="ls-note-head">
                       <i className="fas fa-note-sticky" aria-hidden="true" />
-                      <span>{isHt ? 'Nòt ou' : 'Your note'}</span>
-                      <em>{isHt ? 'prive' : 'private'}</em>
+                      <span>{isHt ? 'Nòt ou' : inlineText(lang, 'Your note')}</span>
+                      <em>{isHt ? 'prive' : inlineText(lang, 'private')}</em>
                     </div>
                     <textarea
                       className="ls-textarea"
@@ -1728,7 +1731,7 @@ export default function LearningSpace({
                       onChange={(e) => setNoteDrafts((d) => ({ ...d, [mi]: e.target.value }))}
                       rows={2}
                       maxLength={2000}
-                      placeholder={isHt ? 'Ekri yon nòt pou ou menm...' : 'Write a private note for yourself...'}
+                      placeholder={isHt ? 'Ekri yon nòt pou ou menm...' : inlineText(lang, 'Write a private note for yourself...')}
                     />
                     <div className="ls-note-actions">
                       <button
@@ -1740,7 +1743,7 @@ export default function LearningSpace({
                         {noteBusy[mi]
                           ? <i className="fas fa-spinner fa-pulse" aria-hidden="true" />
                           : <i className="fas fa-floppy-disk" aria-hidden="true" />}
-                        {isHt ? 'Anrejistre' : 'Save'}
+                        {isHt ? 'Anrejistre' : inlineText(lang, 'Save')}
                       </button>
                       {notesByModule[mi] && (
                         <button
@@ -1750,7 +1753,7 @@ export default function LearningSpace({
                           disabled={noteBusy[mi]}
                         >
                           <i className="fas fa-trash-can" aria-hidden="true" />
-                          {isHt ? 'Efase' : 'Delete'}
+                          {isHt ? 'Efase' : inlineText(lang, 'Delete')}
                         </button>
                       )}
                     </div>
@@ -1768,7 +1771,7 @@ export default function LearningSpace({
       {/* ─── Next-level pathway ───────────────────────────── */}
       {pathway && isComplete && (
         <section className="ls-panel ls-pathway">
-          <h3 className="ls-panel-title"><i className="fas fa-arrow-up" aria-hidden="true" /> {isHt ? 'Nivo kap vini an' : 'Next level'}</h3>
+          <h3 className="ls-panel-title"><i className="fas fa-arrow-up" aria-hidden="true" /> {isHt ? 'Nivo kap vini an' : inlineText(lang, 'Next level')}</h3>
           <p>
             {isHt
               ? `Ou fini nivo ${LEVEL_LABEL[course.difficulty]?.ht || course.difficulty} a. Kontinye nan nivo ${pathway.label}.`
@@ -1776,7 +1779,7 @@ export default function LearningSpace({
           </p>
           <button type="button" className="ls-btn ls-btn--primary" onClick={() => onNavigate?.('/sheet/academy')}>
             <i className="fas fa-graduation-cap" aria-hidden="true" />
-            {isHt ? 'Gade pwogram an' : 'View the program'}
+            {isHt ? 'Gade pwogram an' : inlineText(lang, 'View the program')}
           </button>
         </section>
       )}
@@ -1784,7 +1787,7 @@ export default function LearningSpace({
       {/* ─── Certificate — verified completion only ──────── */}
       {isComplete && certificate && certificate !== 'none' && (
         <section className="ls-panel ls-certificate">
-          <h3 className="ls-panel-title"><i className="fas fa-certificate" aria-hidden="true" /> {isHt ? 'Sètifika ou' : 'Your certificate'}</h3>
+          <h3 className="ls-panel-title"><i className="fas fa-certificate" aria-hidden="true" /> {isHt ? 'Sètifika ou' : inlineText(lang, 'Your certificate')}</h3>
           <div className="ls-certificate-card">
             <span className="ls-certificate-seal"><i className="fas fa-award" aria-hidden="true" /></span>
             <div className="ls-certificate-body">
@@ -1802,54 +1805,54 @@ export default function LearningSpace({
               className="ls-btn ls-btn--primary"
               onClick={() => {
                 const certNumber = certificate.certificate_number || 'ATY-00000000-00000000';
-                const learnerName = certificate.learner_name || (isHt ? 'Elèv' : 'Learner');
+                const learnerName = certificate.learner_name || (isHt ? 'Elèv' : inlineText(lang, 'Learner'));
                 const courseTitle = certificate.course_title || '';
-                const issuedDate = certificate.issued_at ? new Date(certificate.issued_at).toLocaleDateString(isHt ? 'ht-HT' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+                const issuedDate = certificate.issued_at ? new Date(certificate.issued_at).toLocaleDateString(isHt ? 'ht-HT' : inlineText(lang, 'en-US'), { year: 'numeric', month: 'long', day: 'numeric' }) : '';
                 const verifyUrl = `https://atelnyo.site/verify?cert=${certNumber}`;
                 openCertificateWindow({
                   certNumber, learnerName, courseTitle, issuedDate,
-                  verifyUrl, isHt,
+                  verifyUrl, isHt, lang,
                 });
               }}
             >
-              <i className="fas fa-print" aria-hidden="true" /> {isHt ? 'Enprime Sètifika' : 'Print Certificate'}
+              <i className="fas fa-print" aria-hidden="true" /> {isHt ? 'Enprime Sètifika' : inlineText(lang, 'Print Certificate')}
             </button>
             <button
               type="button"
               className="ls-btn"
               onClick={() => {
                 const text = [
-                  `${isHt ? 'SÈTIFIKA KONPLÈT' : 'CERTIFICATE OF COMPLETION'}`,
-                  `${isHt ? 'Atelnyo — Espas Aprantisaj' : 'Atelnyo — Learning Platform'}`,
+                  `${isHt ? 'SÈTIFIKA KONPLÈT' : inlineText(lang, 'CERTIFICATE OF COMPLETION')}`,
+                  `${isHt ? 'Atelnyo — Espas Aprantisaj' : inlineText(lang, 'Atelnyo — Learning Platform')}`,
                   '',
-                  `${isHt ? 'Sètifye ke' : 'This certifies that'} ${certificate.learner_name || (isHt ? 'Elèv' : 'Learner')}`,
-                  `${isHt ? 'te konplete' : 'completed'} ${certificate.course_title}`,
-                  certificate.issued_at ? `${new Date(certificate.issued_at).toLocaleDateString(isHt ? 'ht-HT' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}` : '',
+                  `${isHt ? 'Sètifye ke' : inlineText(lang, 'This certifies that')} ${certificate.learner_name || (isHt ? 'Elèv' : inlineText(lang, 'Learner'))}`,
+                  `${isHt ? 'te konplete' : inlineText(lang, 'completed')} ${certificate.course_title}`,
+                  certificate.issued_at ? `${new Date(certificate.issued_at).toLocaleDateString(isHt ? 'ht-HT' : inlineText(lang, 'en-US'), { year: 'numeric', month: 'long', day: 'numeric' })}` : '',
                   '',
-                  `${isHt ? 'Nimewo:' : 'No.:'} ${certificate.certificate_number}`,
-                  `${isHt ? 'Verifie:' : 'Verify:'} https://atelnyo.site/verify?cert=${certificate.certificate_number}`,
+                  `${isHt ? 'Nimewo:' : inlineText(lang, 'No.:')} ${certificate.certificate_number}`,
+                  `${isHt ? 'Verifie:' : inlineText(lang, 'Verify:')} https://atelnyo.site/verify?cert=${certificate.certificate_number}`,
                   '',
                   'Atelnyo — atelnyo.site',
                 ].join('\n');
                 navigator.clipboard.writeText(text).then(() => {
-                  showToast?.(isHt ? '✅ Sètifika kope.' : '✅ Certificate copied.', 'check-circle');
+                  showToast?.(isHt ? '✅ Sètifika kope.' : inlineText(lang, '✅ Certificate copied.'), 'check-circle');
                 }).catch(() => {});
               }}
             >
-              <i className="fas fa-copy" aria-hidden="true" /> {isHt ? 'Kope' : 'Copy'}
+              <i className="fas fa-copy" aria-hidden="true" /> {isHt ? 'Kope' : inlineText(lang, 'Copy')}
             </button>
           </div>
           {/* Social share buttons */}
           <div className="ls-share-row">
             <span className="ls-share-label">
-              <i className="fas fa-share-nodes" aria-hidden="true" /> {isHt ? 'Pataje:' : 'Share:'}
+              <i className="fas fa-share-nodes" aria-hidden="true" /> {isHt ? 'Pataje:' : inlineText(lang, 'Share:')}
             </span>
             {(() => {
               const shareUrl = `https://atelnyo.site/verify?cert=${certificate.certificate_number}`;
               const shareText = isHt
                 ? `Mwen fini kou "${certificate.course_title}" sou Atelnyo! 🎓`
                 : `I completed "${certificate.course_title}" on Atelnyo! 🎓`;
-              const shareTitle = isHt ? 'Sètifika Atelnyo' : 'Atelnyo Certificate';
+              const shareTitle = isHt ? 'Sètifika Atelnyo' : inlineText(lang, 'Atelnyo Certificate');
               const handleNativeShare = () => {
                 if (navigator.share) {
                   navigator.share({ title: shareTitle, text: shareText, url: shareUrl }).catch(() => {});
@@ -1896,7 +1899,7 @@ export default function LearningSpace({
                   <button
                     type="button"
                     onClick={handleNativeShare}
-                    title={isHt ? 'Pataje' : 'Share'}
+                    title={isHt ? 'Pataje' : inlineText(lang, 'Share')}
                     className="ls-share-btn ls-share-btn--native"
                   >
                     <i className="fas fa-share-nodes" />
@@ -1913,7 +1916,7 @@ export default function LearningSpace({
            the non-session path: a running session stays full-focus. */}
       {similar && similar.length > 0 && (
         <section className="ls-panel">
-          <h3 className="ls-panel-title"><i className="fas fa-thumbs-up" aria-hidden="true" /> {isHt ? 'Kou menm jan' : 'Similar courses'}</h3>
+          <h3 className="ls-panel-title"><i className="fas fa-thumbs-up" aria-hidden="true" /> {isHt ? 'Kou menm jan' : inlineText(lang, 'Similar courses')}</h3>
           <div className="ls-similar-grid">
             {similar.map((c) => (
               <CourseCard key={c.id} course={c} lang={lang} t={t} onOpen={onOpenCourse} user={user} />
@@ -1927,8 +1930,8 @@ export default function LearningSpace({
       {/* ─── Message instructor modal ─────────────────────── */}
       {messageOpen && (
         <div className="ls-modal-backdrop" role="presentation" onClick={() => setMessageOpen(false)}>
-          <div className="ls-modal" role="dialog" aria-modal="true" aria-label={isHt ? 'Kontakte enstriktè' : 'Contact instructor'} onClick={(e) => e.stopPropagation()}>
-            <h3><i className="fas fa-comment-dots" aria-hidden="true" /> {isHt ? 'Kontakte enstriktè a' : 'Contact the instructor'}</h3>
+          <div className="ls-modal" role="dialog" aria-modal="true" aria-label={isHt ? 'Kontakte enstriktè' : inlineText(lang, 'Contact instructor')} onClick={(e) => e.stopPropagation()}>
+            <h3><i className="fas fa-comment-dots" aria-hidden="true" /> {isHt ? 'Kontakte enstriktè a' : inlineText(lang, 'Contact the instructor')}</h3>
             <p className="ls-modal-hint">
               {isHt
                 ? `Yon mesaj pral voye bay ${course.created_by_username || 'enstriktè a'} atravè mesaj atelnyo.`
@@ -1940,16 +1943,16 @@ export default function LearningSpace({
               onChange={(e) => setMessageBody(e.target.value)}
               rows={4}
               maxLength={4000}
-              placeholder={isHt ? 'Ekri mesaj ou...' : 'Write your message...'}
+              placeholder={isHt ? 'Ekri mesaj ou...' : inlineText(lang, 'Write your message...')}
               autoFocus
             />
             <div className="ls-modal-actions">
               <button type="button" className="ls-btn" onClick={() => setMessageOpen(false)} disabled={messageBusy}>
-                {isHt ? 'Annile' : 'Cancel'}
+                {isHt ? 'Annile' : inlineText(lang, 'Cancel')}
               </button>
               <button type="button" className="ls-btn ls-btn--primary" onClick={sendMessage} disabled={messageBusy || !messageBody.trim()}>
                 {messageBusy ? <i className="fas fa-spinner fa-pulse" aria-hidden="true" /> : <i className="fas fa-paper-plane" aria-hidden="true" />}
-                {isHt ? 'Voye' : 'Send'}
+                {isHt ? 'Voye' : inlineText(lang, 'Send')}
               </button>
             </div>
           </div>

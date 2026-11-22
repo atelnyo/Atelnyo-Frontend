@@ -20,6 +20,7 @@ import { learnerService, savedItemService, recommendedService, masteryService, g
 import CourseCard from '../../modules/explore/cards/CourseCard';
 import GamificationBar from './GamificationBar';
 import useLearnerStats from '../../hooks/useLearnerStats';
+import { inlineText } from '../../utils/inlineI18n';
 
 function ContinueCard({ row, lang, onOpenLearning }) {
   const isHt = lang === 'ht';
@@ -48,7 +49,7 @@ function ContinueCard({ row, lang, onOpenLearning }) {
         </span>
         <div className="ls-dash-progressbar"><div style={{ width: `${pct}%` }} /></div>
         <button type="button" className="ls-btn ls-btn--primary ls-dash-continue-btn">
-          <i className="fas fa-play" aria-hidden="true" /> {isHt ? 'Kontinye' : 'Continue'}
+          <i className="fas fa-play" aria-hidden="true" /> {isHt ? 'Kontinye' : inlineText(lang, 'Continue')}
         </button>
       </div>
     </div>
@@ -103,7 +104,7 @@ function GoalEditor({ goals, lang, onSave }) {
           {goals.map((g) => (
             <span key={g.id} className="ls-goal-chip">
               {g.goal}
-              <button type="button" className="ls-goal-chip-x" aria-label={isHt ? 'Retire objektif' : 'Remove goal'}
+              <button type="button" className="ls-goal-chip-x" aria-label={isHt ? 'Retire objektif' : inlineText(lang, 'Remove goal')}
                 onClick={() => onSave?.(null, g.id)}>
                 <i className="fas fa-xmark" aria-hidden="true" />
               </button>
@@ -116,8 +117,8 @@ function GoalEditor({ goals, lang, onSave }) {
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') submit(); }}
-          placeholder={isHt ? 'Ajoute yon objektif...' : 'Add a goal...'}
-          aria-label={isHt ? 'Nouvo objektif' : 'New goal'}
+          placeholder={isHt ? 'Ajoute yon objektif...' : inlineText(lang, 'Add a goal...')}
+          aria-label={isHt ? 'Nouvo objektif' : inlineText(lang, 'New goal')}
         />
         <button type="button" className="ls-btn ls-btn--sm" onClick={submit} disabled={busy || !draft.trim()}>
           <i className="fas fa-plus" aria-hidden="true" />
@@ -175,11 +176,11 @@ export default function LearnerDashboard({ lang = 'en', translations, user, show
     if (id) {
       return goalService.remove(id)
         .then(() => setGoals((prev) => (prev || []).filter((g) => g.id !== id)))
-        .catch(() => { showToast?.(isHt ? 'Pa t kapab retire objektif la.' : 'Could not remove goal.', 'error'); });
+        .catch(() => { showToast?.(isHt ? 'Pa t kapab retire objektif la.' : inlineText(lang, 'Could not remove goal.'), 'error'); });
     }
     return goalService.create({ goal: text })
       .then((r) => { if (r?.data) setGoals((prev) => [...(prev || []), r.data]); })
-      .catch(() => { showToast?.(isHt ? 'Pa t kapab anrejistre objektif la.' : 'Could not save goal.', 'error'); });
+      .catch(() => { showToast?.(isHt ? 'Pa t kapab anrejistre objektif la.' : inlineText(lang, 'Could not save goal.'), 'error'); });
   }, [isHt, showToast]);
 
   const savedCourses = (saved || [])
@@ -191,10 +192,10 @@ export default function LearnerDashboard({ lang = 'en', translations, user, show
       <div className="ls-page">
         <div className="ls-state" role="alert">
           <i className="fas fa-triangle-exclamation" aria-hidden="true" />
-          <h3>{isHt ? 'Pa t kapab chaje espas aprantisaj ou.' : 'Could not load your learning space.'}</h3>
-          <p>{isHt ? 'Tcheke koneksyon ou epi eseye ankò.' : 'Check your connection and try again.'}</p>
+          <h3>{isHt ? 'Pa t kapab chaje espas aprantisaj ou.' : inlineText(lang, 'Could not load your learning space.')}</h3>
+          <p>{isHt ? 'Tcheke koneksyon ou epi eseye ankò.' : inlineText(lang, 'Check your connection and try again.')}</p>
           <button type="button" className="ls-btn" onClick={load}>
-            <i className="fas fa-rotate-right" aria-hidden="true" /> {isHt ? 'Eseye ankò' : 'Try again'}
+            <i className="fas fa-rotate-right" aria-hidden="true" /> {isHt ? 'Eseye ankò' : inlineText(lang, 'Try again')}
           </button>
         </div>
       </div>
@@ -204,7 +205,7 @@ export default function LearnerDashboard({ lang = 'en', translations, user, show
     // Skeleton mirrors the real dashboard (header + continue cards + rails)
     // so the first paint feels instant — never a blank spinner screen.
     return (
-      <div className="ls-page ls-dash-page" role="status" aria-busy="true" aria-label={isHt ? 'Ap chaje...' : 'Loading...'}>
+      <div className="ls-page ls-dash-page" role="status" aria-busy="true" aria-label={isHt ? 'Ap chaje...' : inlineText(lang, 'Loading...')}>
         <div className="ls-skel-dash-header" aria-hidden="true">
           <div className="ls-skeleton" />
           <div className="ls-skel-dash-header-titles">
@@ -254,12 +255,12 @@ export default function LearnerDashboard({ lang = 'en', translations, user, show
   return (
     <div className="ls-page ls-dash-page">
       <header className="ls-dash-header">
-        <button type="button" className="ls-header-btn" onClick={onBack} aria-label={isHt ? 'Retounen' : 'Back'}>
+        <button type="button" className="ls-header-btn" onClick={onBack} aria-label={isHt ? 'Retounen' : inlineText(lang, 'Back')}>
           <i className="fas fa-arrow-left" aria-hidden="true" />
         </button>
         <div className="ls-dash-header-title">
-          <h1><i className="fas fa-book-open" aria-hidden="true" /> {isHt ? 'Espas Aprantisaj ou' : 'Your Learning Space'}</h1>
-          <p>{isHt ? 'Kontinye kote ou te sispann, jere kou ou yo, epi dekouvri pwochen etap ou.' : 'Resume where you left off, manage your courses, and discover your next step.'}</p>
+          <h1><i className="fas fa-book-open" aria-hidden="true" /> {isHt ? 'Espas Aprantisaj ou' : inlineText(lang, 'Your Learning Space')}</h1>
+          <p>{isHt ? 'Kontinye kote ou te sispann, jere kou ou yo, epi dekouvri pwochen etap ou.' : inlineText(lang, 'Resume where you left off, manage your courses, and discover your next step.')}</p>
         </div>
       </header>
 
@@ -276,10 +277,10 @@ export default function LearnerDashboard({ lang = 'en', translations, user, show
       {empty ? (
         <div className="ls-state">
           <i className="fas fa-graduation-cap" aria-hidden="true" />
-          <h3>{isHt ? 'Ou poko gen kou' : 'No courses yet'}</h3>
-          <p>{isHt ? 'Dekouvri yon kou epi enskri pou kòmanse aprann.' : 'Discover a course and enroll to start learning.'}</p>
+          <h3>{isHt ? 'Ou poko gen kou' : inlineText(lang, 'No courses yet')}</h3>
+          <p>{isHt ? 'Dekouvri yon kou epi enskri pou kòmanse aprann.' : inlineText(lang, 'Discover a course and enroll to start learning.')}</p>
           <button type="button" className="ls-btn ls-btn--primary" onClick={() => onOpenCourse?.(null)}>
-            <i className="fas fa-compass" aria-hidden="true" /> {isHt ? 'Dekouvri kou' : 'Discover courses'}
+            <i className="fas fa-compass" aria-hidden="true" /> {isHt ? 'Dekouvri kou' : inlineText(lang, 'Discover courses')}
           </button>
         </div>
       ) : (
@@ -289,21 +290,21 @@ export default function LearnerDashboard({ lang = 'en', translations, user, show
             <section className="ls-dash-rail">
               <h3 className="ls-panel-title">
                 <i className="fas fa-bolt" aria-hidden="true" />
-                {isHt ? 'Sesyon rapid' : 'Quick session'}
+                {isHt ? 'Sesyon rapid' : inlineText(lang, 'Quick session')}
               </h3>
               <div className="ls-dash-session-grid">
                 {practiceItems.length > 0 && (
                   <div className="ls-dash-session-card">
                     <span className="ls-dash-session-icon"><i className="fas fa-dumbbell" aria-hidden="true" /></span>
                     <div>
-                      <strong>{isHt ? 'Pratik pèsonalize' : 'Personalized practice'}</strong>
+                      <strong>{isHt ? 'Pratik pèsonalize' : inlineText(lang, 'Personalized practice')}</strong>
                       <p>{isHt
                         ? `${practiceItems.length} kou — fòtifye konpetans feblès ou yo.`
                         : `${practiceItems.length} items — strengthen your weakest skills.`}</p>
                     </div>
                     <button type="button" className="ls-btn ls-btn--sm ls-btn--primary"
                       onClick={() => onOpenCourseById?.(practiceItems[0].course?.id)}>
-                      {isHt ? 'Pratike' : 'Practice'}
+                      {isHt ? 'Pratike' : inlineText(lang, 'Practice')}
                     </button>
                   </div>
                 )}
@@ -311,14 +312,14 @@ export default function LearnerDashboard({ lang = 'en', translations, user, show
                   <div className="ls-dash-session-card">
                     <span className="ls-dash-session-icon"><i className="fas fa-rotate" aria-hidden="true" /></span>
                     <div>
-                      <strong>{isHt ? 'Revizyon akòz' : 'Review due'}</strong>
+                      <strong>{isHt ? 'Revizyon akòz' : inlineText(lang, 'Review due')}</strong>
                       <p>{isHt
                         ? `${dueCount} aktivite pou revize kounye a.`
                         : `${dueCount} activities to review now.`}</p>
                     </div>
                     <button type="button" className="ls-btn ls-btn--sm ls-btn--primary"
                       onClick={() => onOpenCourseById?.(dueReviews[0].course_id)}>
-                      {isHt ? 'Revize' : 'Review'}
+                      {isHt ? 'Revize' : inlineText(lang, 'Review')}
                     </button>
                   </div>
                 )}
@@ -331,7 +332,7 @@ export default function LearnerDashboard({ lang = 'en', translations, user, show
             <section className="ls-dash-rail">
               <h3 className="ls-panel-title">
                 <i className="fas fa-bullseye" aria-hidden="true" />
-                {isHt ? 'Objektif aprantisaj' : 'Learning goals'}
+                {isHt ? 'Objektif aprantisaj' : inlineText(lang, 'Learning goals')}
               </h3>
               <GoalEditor goals={goals} lang={lang} onSave={saveGoal} />
             </section>
@@ -342,7 +343,7 @@ export default function LearnerDashboard({ lang = 'en', translations, user, show
             <section className="ls-dash-rail">
               <h3 className="ls-panel-title">
                 <i className="fas fa-play-circle" aria-hidden="true" />
-                {isHt ? 'Kontinye aprann' : 'Continue learning'}
+                {isHt ? 'Kontinye aprann' : inlineText(lang, 'Continue learning')}
               </h3>
               <div className="ls-dash-continue-grid">
                 {continueRows.map((row) => (
@@ -353,7 +354,7 @@ export default function LearnerDashboard({ lang = 'en', translations, user, show
           )}
 
           <CourseRail
-            title={isHt ? 'Kou mwen yo' : 'My courses'}
+            title={isHt ? 'Kou mwen yo' : inlineText(lang, 'My courses')}
             icon="fa-layer-group"
             rows={myRows}
             lang={lang}
@@ -362,7 +363,7 @@ export default function LearnerDashboard({ lang = 'en', translations, user, show
           />
 
           <CourseRail
-            title={isHt ? 'Kou fini' : 'Completed'}
+            title={isHt ? 'Kou fini' : inlineText(lang, 'Completed')}
             icon="fa-trophy"
             rows={completedRows}
             lang={lang}
@@ -372,7 +373,7 @@ export default function LearnerDashboard({ lang = 'en', translations, user, show
 
           {savedCourses.length > 0 && (
             <CourseRail
-              title={isHt ? 'Sove' : 'Saved'}
+              title={isHt ? 'Sove' : inlineText(lang, 'Saved')}
               icon="fa-bookmark"
               rows={savedCourses.map((c) => ({ course: c }))}
               lang={lang}
@@ -383,7 +384,7 @@ export default function LearnerDashboard({ lang = 'en', translations, user, show
 
           {recommended && recommended.length > 0 && (
             <CourseRail
-              title={isHt ? 'Rekòmande pou ou' : 'Recommended for you'}
+              title={isHt ? 'Rekòmande pou ou' : inlineText(lang, 'Recommended for you')}
               icon="fa-star"
               rows={recommended.map((c) => ({ course: c }))}
               lang={lang}

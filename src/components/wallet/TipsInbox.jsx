@@ -6,6 +6,7 @@
  */
 import React, { useState, useCallback } from 'react';
 import SendTipModal from '../studio/modals/SendTipModal';
+import { inlineText } from '../../utils/inlineI18n';
 
 function fmtCurrency(n) {
   if (n == null) return '—';
@@ -61,7 +62,7 @@ export default function TipsInbox({
       <div className="wlt-tips-header">
         <h3 className="wlt-tips-title">
           <i className="fas fa-hand-holding-heart" />
-          {isHt ? 'Tips' : 'Tips'}
+          {isHt ? 'Tips' : inlineText(lang, 'Tips')}
         </h3>
         <div className="wlt-tips-actions">
           <form className="wlt-tips-send-form" onSubmit={handleOpenSendTip}>
@@ -69,7 +70,7 @@ export default function TipsInbox({
               type="text"
               value={sendTipTarget}
               onChange={(e) => setSendTipTarget(e.target.value)}
-              placeholder={isHt ? 'Username kreyatè...' : 'Creator username...'}
+              placeholder={isHt ? 'Username kreyatè...' : inlineText(lang, 'Creator username...')}
               disabled={!currentUserId}
             />
             <button type="submit" className="wlt-tips-send-btn" disabled={!currentUserId || !sendTipTarget.trim()}>
@@ -92,7 +93,7 @@ export default function TipsInbox({
           onClick={() => setTab('received')}
         >
           <i className="fas fa-hand-holding-heart" />
-          {isHt ? 'Resevwa' : 'Received'}
+          {isHt ? 'Resevwa' : inlineText(lang, 'Received')}
           {tipsReceived.length > 0 && <span className="wlt-tips-count">{tipsReceived.length}</span>}
         </button>
         <button
@@ -101,14 +102,14 @@ export default function TipsInbox({
           onClick={() => setTab('sent')}
         >
           <i className="fas fa-paper-plane" />
-          {isHt ? 'Voye' : 'Sent'}
+          {isHt ? 'Voye' : inlineText(lang, 'Sent')}
           {tipsSent.length > 0 && <span className="wlt-tips-count">{tipsSent.length}</span>}
         </button>
       </div>
 
       {/* Loading */}
       {loading && (
-        <div className="wlt-loading"><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap chaje...' : 'Loading...'}</div>
+        <div className="wlt-loading"><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap chaje...' : inlineText(lang, 'Loading...')}</div>
       )}
 
       {/* Empty */}
@@ -117,13 +118,13 @@ export default function TipsInbox({
           <i className={`fas ${tab === 'received' ? 'fa-hand-holding-heart' : 'fa-paper-plane'}`} />
           <h4>
             {tab === 'received'
-              ? (isHt ? 'Pa gen tips resevwa' : 'No tips received')
-              : (isHt ? 'Pa gen tips voye' : 'No tips sent')}
+              ? (isHt ? 'Pa gen tips resevwa' : inlineText(lang, 'No tips received'))
+              : (isHt ? 'Pa gen tips voye' : inlineText(lang, 'No tips sent'))}
           </h4>
           <p>
             {tab === 'received'
-              ? (isHt ? 'Lè yon moun voye w yon tip, li ap parèt isit la.' : 'When someone sends you a tip, it will appear here.')
-              : (isHt ? 'Lè ou voye yon tip, li ap parèt isit la.' : 'When you send a tip, it will appear here.')}
+              ? (isHt ? 'Lè yon moun voye w yon tip, li ap parèt isit la.' : inlineText(lang, 'When someone sends you a tip, it will appear here.'))
+              : (isHt ? 'Lè ou voye yon tip, li ap parèt isit la.' : inlineText(lang, 'When you send a tip, it will appear here.'))}
           </p>
         </div>
       )}
@@ -138,7 +139,7 @@ export default function TipsInbox({
               </div>
               <div className="wlt-tip-body">
                 <div className="wlt-tip-name">
-                  {tab === 'received' ? tip.tipper_username : tip.creator_username || (isHt ? 'Anonim' : 'Anonymous')}
+                  {tab === 'received' ? tip.tipper_username : tip.creator_username || (isHt ? 'Anonim' : inlineText(lang, 'Anonymous'))}
                 </div>
                 <div className="wlt-tip-meta">
                   {tip.message && <span className="wlt-tip-msg">"{tip.message}"</span>}

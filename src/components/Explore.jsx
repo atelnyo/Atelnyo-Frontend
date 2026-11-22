@@ -62,6 +62,7 @@ import {
   readExploreCache, writeExploreCache, clearExploreCache,
   readSearchState, writeSearchState,
 } from '../modules/explore/hooks/useExploreCache';
+import { inlineText } from '../utils/inlineI18n';
 
 // ─── Filter chips ───────────────────────────────────────────────────────────
 const CHIPS = [
@@ -106,13 +107,13 @@ function describeFetchError(err, fallbackMsg, lang = 'en') {
   if (!err?.response && (err?.message === 'Network Error' || err?.code === 'ERR_NETWORK')) {
     return lang === 'ht'
       ? 'Pa ka rive sèvè a. Tcheke koneksyon ou oswa eseye ankò pita.'
-      : 'Cannot reach the server. Check your connection or try again later.';
+      : inlineText(lang, 'Cannot reach the server. Check your connection or try again later.');
   }
   // Request timed out.
   if (err?.code === 'ECONNABORTED' || err?.message?.includes('timeout')) {
     return lang === 'ht'
       ? 'Sèvè a twò dousman reponn. Eseye ankò pita.'
-      : 'Server is too slow to respond. Try again later.';
+      : inlineText(lang, 'Server is too slow to respond. Try again later.');
   }
   // Server returned an HTTP error.
   if (err?.response) {
@@ -120,17 +121,17 @@ function describeFetchError(err, fallbackMsg, lang = 'en') {
     if (status === 503) {
       return lang === 'ht'
         ? 'Sèvè a an mantansyon. Eseye ankò pita.'
-        : 'Server is under maintenance. Try again later.';
+        : inlineText(lang, 'Server is under maintenance. Try again later.');
     }
     if (status === 429) {
       return lang === 'ht'
         ? 'Twòp rechèt. Tann yon ti tan epi eseye ankò.'
-        : 'Too many requests. Wait a moment and try again.';
+        : inlineText(lang, 'Too many requests. Wait a moment and try again.');
     }
     if (status >= 500) {
       return lang === 'ht'
         ? 'Erè sèvè. Eseye ankò pita.'
-        : 'Server error. Try again later.';
+        : inlineText(lang, 'Server error. Try again later.');
     }
     return err.response.data?.detail || fallbackMsg;
   }
@@ -139,7 +140,7 @@ function describeFetchError(err, fallbackMsg, lang = 'en') {
 }
 
 function getChipLabel(chip, lang) {
-  const langKey = ['ht', 'en', 'fr'].includes(lang) ? lang : 'en';
+  const langKey = ['ht', 'en', 'fr', 'es'].includes(lang) ? lang : 'en';
   return chip[langKey] || chip.en;
 }
 
@@ -389,7 +390,7 @@ export function Explore({
   useEffect(() => {
     const chip = CHIPS.find((c) => c.id === filter);
     const chipLabel = chip ? getChipLabel(chip, lang) : '';
-    const suffix = lang === 'ht' ? 'Atelnyo · Dekouvèt' : 'Atelnyo · Explore';
+    const suffix = lang === 'ht' ? 'Atelnyo · Dekouvèt' : inlineText(lang, 'Atelnyo · Explore');
     const trimmed = search.trim();
     document.title = [chipLabel && filter !== 'all' ? chipLabel : '', trimmed ? `"${trimmed}"` : '', suffix]
       .filter(Boolean)
@@ -675,7 +676,7 @@ export function Explore({
     if (!user) {
       showToast?.(t?.community_login_required || (lang === 'ht'
         ? 'Konekte pou w ka fonde yon kominote.'
-        : 'Log in to found a community.'), 'circle-exclamation');
+        : inlineText(lang, 'Log in to found a community.')), 'circle-exclamation');
       return;
     }
     try {
@@ -686,7 +687,7 @@ export function Explore({
       } else {
         showToast?.(t?.community_create_gated || (lang === 'ht'
           ? 'Sèlman kreyatè ki gen kontni pibliye ka fonde kominote. Pibliye yon kou, yon pwodwi, oswa yon mizik anvan.'
-          : 'Only creators with published content can found a community. Publish a course, product, or music first.'), 'circle-exclamation');
+          : inlineText(lang, 'Only creators with published content can found a community. Publish a course, product, or music first.')), 'circle-exclamation');
       }
     } catch {
       // Network/other failure — let the modal open; the server re-checks
@@ -1801,12 +1802,12 @@ export function Explore({
       <div className="explore-community-vision">
         <div className="explore-vision-badge">
           <i className="fas fa-users" aria-hidden="true" />
-          <span>{t.explore_community_vision_title || (lang === 'ht' ? 'Vizyon Kominote' : 'Community Vision')}</span>
+          <span>{t.explore_community_vision_title || (lang === 'ht' ? 'Vizyon Kominote' : inlineText(lang, 'Community Vision'))}</span>
         </div>
         <p className="explore-vision-msg">
           {t.explore_community_vision_msg || (lang === 'ht'
             ? 'Kreye espè, pataje konnenans, ak bati ponte nan yon kominote ki pi bon pou tout moun.'
-            : 'Create opportunity, share knowledge, and build bridges within a community better for everyone.')}
+            : inlineText(lang, 'Create opportunity, share knowledge, and build bridges within a community better for everyone.'))}
         </p>
         <div className="explore-vision-actions">
           <button
@@ -1815,7 +1816,7 @@ export function Explore({
             onClick={() => setFilter('communities')}
           >
             <i className="fas fa-arrow-right" aria-hidden="true" />
-            <span>{t.explore_community_vision_cta || (lang === 'ht' ? 'Jwenn Kominote' : 'Browse Communities')}</span>
+            <span>{t.explore_community_vision_cta || (lang === 'ht' ? 'Jwenn Kominote' : inlineText(lang, 'Browse Communities'))}</span>
           </button>
           <button
             type="button"
@@ -1823,7 +1824,7 @@ export function Explore({
             onClick={handleFoundCommunityClick}
           >
             <i className="fas fa-plus" aria-hidden="true" />
-            <span>{t.community_create_cta || (lang === 'ht' ? 'Fonde yon Kominote' : 'Found a Community')}</span>
+            <span>{t.community_create_cta || (lang === 'ht' ? 'Fonde yon Kominote' : inlineText(lang, 'Found a Community'))}</span>
           </button>
         </div>
       </div>
@@ -1838,7 +1839,7 @@ export function Explore({
           <>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <SectionLabel icon="fa-lightbulb" count={visibleSections.spotlight.length} accent="spotlight">
-                {t.explore_section_spotlight || (lang === 'ht' ? 'Spotlight · Envansyon' : 'Spotlight · Inventions')}
+                {t.explore_section_spotlight || (lang === 'ht' ? 'Spotlight · Envansyon' : inlineText(lang, 'Spotlight · Inventions'))}
               </SectionLabel>
               <button
                 type="button"
@@ -1846,7 +1847,7 @@ export function Explore({
                 onClick={() => setFilter('spotlight')}
                 style={{ color: 'var(--color-primary, #d81b60)' }}
               >
-                {lang === 'ht' ? 'Wè tout' : 'See all'} <i className="fas fa-arrow-right" aria-hidden="true" />
+                {lang === 'ht' ? 'Wè tout' : inlineText(lang, 'See all')} <i className="fas fa-arrow-right" aria-hidden="true" />
               </button>
             </div>
             <div className="explore-hscroll">
@@ -1872,7 +1873,7 @@ export function Explore({
         {loadingSections.spotlight && visibleSections.spotlight.length === 0 && (filter === 'all' || filter === 'spotlight') && (
           <>
             <SectionLabel icon="fa-lightbulb" accent="spotlight">
-              {t.explore_section_spotlight || (lang === 'ht' ? 'Spotlight · Envansyon' : 'Spotlight · Inventions')}
+              {t.explore_section_spotlight || (lang === 'ht' ? 'Spotlight · Envansyon' : inlineText(lang, 'Spotlight · Inventions'))}
             </SectionLabel>
             <div className="explore-hscroll">
               {Array.from({ length: 3 }).map((_, i) => <SkeletonCourseCard key={i} />)}
@@ -2012,7 +2013,7 @@ export function Explore({
       </header>
 
       {/* Sticky search — semantic <nav> with role="search" for crawlers */}
-      <nav className="explore-search-wrap" role="search" aria-label={lang === 'ht' ? 'Chèche' : 'Search'}>
+      <nav className="explore-search-wrap" role="search" aria-label={lang === 'ht' ? 'Chèche' : inlineText(lang, 'Search')}>
         <div className="explore-search">
           <i className="fas fa-search explore-search-leading" aria-hidden="true" />
           <input
@@ -2048,7 +2049,7 @@ export function Explore({
           className="explore-chips-nav explore-chips-nav--prev"
           onClick={() => scrollChips(-1)}
           disabled={!chipsScroll.prev}
-          aria-label={lang === 'ht' ? 'Filtè anvan yo' : 'Previous filters'}
+          aria-label={lang === 'ht' ? 'Filtè anvan yo' : inlineText(lang, 'Previous filters')}
           aria-controls="explore-chips-rail"
         >
           <i className="fas fa-chevron-left" aria-hidden="true" />
@@ -2079,7 +2080,7 @@ export function Explore({
           className="explore-chips-nav explore-chips-nav--next"
           onClick={() => scrollChips(1)}
           disabled={!chipsScroll.next}
-          aria-label={lang === 'ht' ? 'Plis filtè' : 'More filters'}
+          aria-label={lang === 'ht' ? 'Plis filtè' : inlineText(lang, 'More filters')}
           aria-controls="explore-chips-rail"
         >
           <i className="fas fa-chevron-right" aria-hidden="true" />
@@ -2094,7 +2095,7 @@ export function Explore({
             <i className={`fas ${CHIPS.find((c) => c.id === filter)?.icon || 'fa-filter'}`} aria-hidden="true" />
             {getChipLabel(CHIPS.find((c) => c.id === filter) || CHIPS[0], lang)}
             {' · '}
-            {resultCount} {lang === 'ht' ? 'rezilta' : 'results'}
+            {resultCount} {lang === 'ht' ? 'rezilta' : inlineText(lang, 'results')}
           </span>
           <button
             type="button"
@@ -2102,7 +2103,7 @@ export function Explore({
             onClick={() => { setFilter('all'); setSearch(''); setCatId(''); }}
           >
             <i className="fas fa-rotate-left" aria-hidden="true" />
-            <span>{t.explore_clear_filters || (lang === 'ht' ? 'Retire filtè' : 'Clear filters')}</span>
+            <span>{t.explore_clear_filters || (lang === 'ht' ? 'Retire filtè' : inlineText(lang, 'Clear filters'))}</span>
           </button>
         </div>
       )}
@@ -2112,7 +2113,7 @@ export function Explore({
         <div className="explore-cat-filter-wrap">
           <label htmlFor="explore-cat-select">
             <i className="fas fa-tags" aria-hidden="true" />
-            <span>{t.explore_category_filter || (lang === 'ht' ? 'Kategori' : 'Category')}</span>
+            <span>{t.explore_category_filter || (lang === 'ht' ? 'Kategori' : inlineText(lang, 'Category'))}</span>
           </label>
           <select
             id="explore-cat-select"
@@ -2121,7 +2122,7 @@ export function Explore({
             onChange={(e) => setCatId(e.target.value)}
             aria-label={t.explore_category_filter || 'Category'}
           >
-            <option value="">{t.explore_category_all || (lang === 'ht' ? 'Tout' : 'All')}</option>
+            <option value="">{t.explore_category_all || (lang === 'ht' ? 'Tout' : inlineText(lang, 'All'))}</option>
             {catOptions.map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
@@ -2138,19 +2139,19 @@ export function Explore({
             type="button"
             className={`deie-toggle-btn ${!useDEIE ? 'active' : ''}`}
             onClick={toggleDEIE}
-            title={lang === 'ht' ? 'Feed klasik' : 'Classic feed'}
+            title={lang === 'ht' ? 'Feed klasik' : inlineText(lang, 'Classic feed')}
           >
             <i className="fas fa-layer-group" />
-            <span>{lang === 'ht' ? 'Klasik' : 'Classic'}</span>
+            <span>{lang === 'ht' ? 'Klasik' : inlineText(lang, 'Classic')}</span>
           </button>
           <button
             type="button"
             className={`deie-toggle-btn ${useDEIE ? 'active' : ''}`}
             onClick={toggleDEIE}
-            title={lang === 'ht' ? 'Feed entelijan DEIE' : 'DEIE smart feed'}
+            title={lang === 'ht' ? 'Feed entelijan DEIE' : inlineText(lang, 'DEIE smart feed')}
           >
             <i className="fas fa-brain" />
-            <span>{lang === 'ht' ? 'DEIE Entelijan' : 'DEIE Smart'}</span>
+            <span>{lang === 'ht' ? 'DEIE Entelijan' : inlineText(lang, 'DEIE Smart')}</span>
           </button>
         </div>
       )}

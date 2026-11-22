@@ -10,6 +10,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { analyticsService, courseService } from '../../../services/api';
 import { StudioSkeleton, StatCard, SectionHeader, fmtCurrency, fmtCount } from '../shared';
 import styles from './sections.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function AnalyticsSection({ lang, t, showToast }) {
   const [summary, setSummary] = useState(null);
@@ -102,7 +103,7 @@ export default function AnalyticsSection({ lang, t, showToast }) {
         }}
         tip={lang === 'ht'
           ? 'Done yo ap mete ajou chak jou — tcheke peryòd 90 jou pou wè tandans reyèl yo.'
-          : 'Data refreshes daily — check the 90-day window for real trends.'}
+          : inlineText(lang, 'Data refreshes daily — check the 90-day window for real trends.')}
         action={
           <div className={styles.periodGroup}>
             {[7, 30, 90].map((d) => (

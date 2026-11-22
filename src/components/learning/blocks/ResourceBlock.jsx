@@ -17,6 +17,7 @@
  *   - required: boolean (whether this block affects completion)
  */
 import React, { useCallback, useState } from 'react';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const RESOURCE_TYPE_CONFIG = {
   link: { icon: 'fa-external-link-alt', label: { en: 'External Link', ht: 'Lyen Ekstèn' } },
@@ -57,7 +58,7 @@ export default function ResourceBlock({ block, lang = 'en', reportComplete, onCo
   const isHt = lang === 'ht';
   const [confirmedExternal, setConfirmedExternal] = useState(null); // URL waiting for confirmation
 
-  const title = block?.title || (isHt ? 'Resous' : 'Resources');
+  const title = block?.title || (isHt ? 'Resous' : inlineText(lang, 'Resources'));
   const description = block?.description || '';
   const resources = block?.resources || [];
 
@@ -149,7 +150,7 @@ export default function ResourceBlock({ block, lang = 'en', reportComplete, onCo
                   flexShrink: 0,
                 }}>
                   <i className="fas fa-external-link-alt" aria-hidden="true" style={{ marginRight: 4 }} />
-                  {isHt ? 'Ekstèn' : 'External'}
+                  {isHt ? 'Ekstèn' : inlineText(lang, 'External')}
                 </span>
               )}
             </button>
@@ -180,13 +181,13 @@ export default function ResourceBlock({ block, lang = 'en', reportComplete, onCo
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
               <i className="fas fa-external-link-alt" style={{ fontSize: '1.5rem', color: 'var(--color-primary, #3b82f6)' }} aria-hidden="true" />
               <h3 style={{ margin: 0, fontSize: '1.05rem' }}>
-                {isHt ? 'Lyen ekstèn' : 'External link'}
+                {isHt ? 'Lyen ekstèn' : inlineText(lang, 'External link')}
               </h3>
             </div>
             <p style={{ margin: '0 0 8px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
               {isHt
                 ? 'Ou pral ale sou yon sit ekstèn. Atelnyo pa kontwole sa ki nan lyen sa a.'
-                : 'You are about to visit an external site. Atelnyo does not control the content of external links.'}
+                : inlineText(lang, 'You are about to visit an external site. Atelnyo does not control the content of external links.')}
             </p>
             <p style={{ margin: '0 0 16px', fontSize: '0.85rem', wordBreak: 'break-all', color: 'var(--text-primary)' }}>
               <strong>{confirmedExternal.title || confirmedExternal.url}</strong>
@@ -197,14 +198,14 @@ export default function ResourceBlock({ block, lang = 'en', reportComplete, onCo
                 className="ls-btn"
                 onClick={() => setConfirmedExternal(null)}
               >
-                {isHt ? 'Anile' : 'Cancel'}
+                {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
               </button>
               <button
                 type="button"
                 className="ls-btn ls-btn--primary"
                 onClick={handleConfirmExternal}
               >
-                {isHt ? 'Continuer' : 'Continue'}
+                {isHt ? 'Continuer' : inlineText(lang, 'Continue')}
                 <i className="fas fa-arrow-right" style={{ marginLeft: 6 }} aria-hidden="true" />
               </button>
             </div>

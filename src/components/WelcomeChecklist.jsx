@@ -32,6 +32,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { inlineText } from '../utils/inlineI18n';
 
 const LS_DISMISSED = 'atelnyo_welcome_dismissed';
 const LS_LEGACY = 'atelnyo_welcome_checklist';  // old fake-completion key — cleaned on mount
@@ -194,14 +195,14 @@ export default function WelcomeChecklist({
   // All auto-detectable steps completed — compact status card
   if (allAutoDone) {
     return (
-      <div className="wcl-container wcl-container--done" role="region" aria-label={isHt ? 'Lis pou fè — fini' : 'Checklist — complete'}>
+      <div className="wcl-container wcl-container--done" role="region" aria-label={isHt ? 'Lis pou fè — fini' : inlineText(lang, 'Checklist — complete')}>
         <div className="wcl-header wcl-header--done">
           <i className="fas fa-circle-check" aria-hidden="true" style={{ color: 'var(--color-emerald, #10b981)', fontSize: '1.6rem' }} />
           <div>
-            <h3 className="wcl-title">{isHt ? 'Etap konfigirasyon fini' : 'Setup complete'}</h3>
-            <p className="wcl-subtitle">{isHt ? 'Tout etap yo fini. Klike sou yon etap pou w ale.' : 'All setup steps are done. Click a step to navigate.'}</p>
+            <h3 className="wcl-title">{isHt ? 'Etap konfigirasyon fini' : inlineText(lang, 'Setup complete')}</h3>
+            <p className="wcl-subtitle">{isHt ? 'Tout etap yo fini. Klike sou yon etap pou w ale.' : inlineText(lang, 'All setup steps are done. Click a step to navigate.')}</p>
           </div>
-          <button type="button" className="wcl-dismiss" onClick={handleDismiss} aria-label={isHt ? 'Fèmen' : 'Dismiss'}>
+          <button type="button" className="wcl-dismiss" onClick={handleDismiss} aria-label={isHt ? 'Fèmen' : inlineText(lang, 'Dismiss')}>
             <i className="fas fa-times" />
           </button>
         </div>
@@ -223,13 +224,13 @@ export default function WelcomeChecklist({
   }
 
   return (
-    <div className="wcl-container" role="region" aria-label={isHt ? 'Lis pou fè' : 'Checklist'}>
+    <div className="wcl-container" role="region" aria-label={isHt ? 'Lis pou fè' : inlineText(lang, 'Checklist')}>
       <div className="wcl-header">
         <div className="wcl-header-left">
           <i className="fas fa-clipboard-check" aria-hidden="true" />
           <div>
             <h3 className="wcl-title">
-              {isHt ? 'Kòmanse' : 'Getting Started'}
+              {isHt ? 'Kòmanse' : inlineText(lang, 'Getting Started')}
             </h3>
             <p className="wcl-subtitle">
               {isHt
@@ -254,7 +255,7 @@ export default function WelcomeChecklist({
             </svg>
           </div>
           <button type="button" className="wcl-dismiss" onClick={handleDismiss}
-            aria-label={isHt ? 'Fèmen' : 'Dismiss'}>
+            aria-label={isHt ? 'Fèmen' : inlineText(lang, 'Dismiss')}>
             <i className="fas fa-times" />
           </button>
         </div>
@@ -278,12 +279,12 @@ export default function WelcomeChecklist({
                   {isDone && (
                     <span className="wcl-step-done-label">
                       <i className="fas fa-check-circle" aria-hidden="true" />
-                      {isHt ? 'Fini ✓' : 'Done ✓'}
+                      {isHt ? 'Fini ✓' : inlineText(lang, 'Done ✓')}
                     </span>
                   )}
                   {!isDone && step.autoDetect && (
                     <span className="wcl-step-done-label" style={{ color: 'var(--text-secondary)' }}>
-                      {isHt ? 'Pokò fèt' : 'Not done yet'}
+                      {isHt ? 'Pokò fèt' : inlineText(lang, 'Not done yet')}
                     </span>
                   )}
                 </div>
@@ -294,14 +295,14 @@ export default function WelcomeChecklist({
                     type="button"
                     className="wcl-step-btn"
                     onClick={() => handleStepClick(step)}
-                    title={isHt ? 'Ale fè etap sa a' : 'Go do this step'}
+                    title={isHt ? 'Ale fè etap sa a' : inlineText(lang, 'Go do this step')}
                   >
                     {step.action === 'guide' ? (
-                      <><i className="fas fa-external-link-alt" aria-hidden="true" /> {isHt ? 'Li' : 'Read'}</>
+                      <><i className="fas fa-external-link-alt" aria-hidden="true" /> {isHt ? 'Li' : inlineText(lang, 'Read')}</>
                     ) : step.action?.endsWith('_modal') ? (
-                      <><i className="fas fa-plus" aria-hidden="true" /> {isHt ? 'Kreye' : 'Create'}</>
+                      <><i className="fas fa-plus" aria-hidden="true" /> {isHt ? 'Kreye' : inlineText(lang, 'Create')}</>
                     ) : (
-                      <><i className="fas fa-arrow-right" aria-hidden="true" /> {isHt ? 'Ale' : 'Go'}</>
+                      <><i className="fas fa-arrow-right" aria-hidden="true" /> {isHt ? 'Ale' : inlineText(lang, 'Go')}</>
                     )}
                   </button>
                 )}
@@ -320,7 +321,7 @@ export default function WelcomeChecklist({
       </div>
 
       <button type="button" className="wcl-dismiss-btn" onClick={handleDismiss}>
-        {isHt ? 'Kache lis sa a' : 'Hide this checklist'}
+        {isHt ? 'Kache lis sa a' : inlineText(lang, 'Hide this checklist')}
       </button>
     </div>
   );

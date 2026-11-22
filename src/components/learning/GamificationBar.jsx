@@ -14,6 +14,7 @@
  */
 import React, { useState } from 'react';
 import RewardedHeartOffer from './RewardedHeartOffer';
+import { inlineText } from '../../utils/inlineI18n';
 
 const GOAL_OPTIONS = [10, 20, 30, 50];
 
@@ -39,7 +40,7 @@ export default function GamificationBar({
       {/* ─── Daily streak (flame) ─────────────────────────────── */}
       <div
         className={`gami-chip gami-streak${Number(stats.daily_streak) > 0 ? ' is-lit' : ''}`}
-        title={isHt ? 'Jou konsekitif aprantisaj' : 'Consecutive days of learning'}
+        title={isHt ? 'Jou konsekitif aprantisaj' : inlineText(lang, 'Consecutive days of learning')}
       >
         <i className="fas fa-fire" aria-hidden="true" />
         <strong>{Number(stats.daily_streak) || 0}</strong>
@@ -48,7 +49,7 @@ export default function GamificationBar({
       {/* ─── XP + level ───────────────────────────────────────── */}
       <div
         className="gami-chip gami-xp"
-        title={isHt ? 'Pwen eksperyans' : 'Experience points'}
+        title={isHt ? 'Pwen eksperyans' : inlineText(lang, 'Experience points')}
       >
         <span className="gami-level-badge" aria-hidden="true">{Number(stats.level) || 1}</span>
         <span className="gami-xp-text">
@@ -66,11 +67,11 @@ export default function GamificationBar({
       <div
         className={`gami-chip gami-hearts${heartsEmpty ? ' is-empty' : ''}${heartsUnlimited ? ' is-unlimited' : ''}`}
         title={heartsUnlimited
-          ? (isHt ? 'Kè san limit (plan peye)' : 'Unlimited hearts (paid plan)')
-          : (isHt ? 'Kè — erè ki rete' : 'Hearts — mistakes left')}
+          ? (isHt ? 'Kè san limit (plan peye)' : inlineText(lang, 'Unlimited hearts (paid plan)'))
+          : (isHt ? 'Kè — erè ki rete' : inlineText(lang, 'Hearts — mistakes left'))}
       >
         {heartsUnlimited ? (
-          <span className="gami-hearts-unlimited" aria-label={isHt ? 'Kè san limit' : 'Unlimited hearts'}>
+          <span className="gami-hearts-unlimited" aria-label={isHt ? 'Kè san limit' : inlineText(lang, 'Unlimited hearts')}>
             <i className="fas fa-heart is-full" aria-hidden="true" />
             <strong aria-hidden="true">∞</strong>
           </span>
@@ -88,7 +89,7 @@ export default function GamificationBar({
         <p className="gami-hearts-empty-message" role="status">
           {isHt
             ? 'Ou pa gen kè ankò. Gade yon videyo pwomosyon pou jwenn 1 kè, oswa tann yo rejenerasyon.'
-            : 'You are out of hearts. Watch a promotional video to earn 1 heart, or wait for regeneration.'}
+            : inlineText(lang, 'You are out of hearts. Watch a promotional video to earn 1 heart, or wait for regeneration.')}
         </p>
       )}
       {heartsEmpty && (
@@ -124,12 +125,12 @@ export default function GamificationBar({
             </svg>
             <span className="gami-goal-label">
               <strong>{dailyXp}/{goal}</strong>
-              <em>{isHt ? 'XP jodi a' : 'XP today'}</em>
+              <em>{isHt ? 'XP jodi a' : inlineText(lang, 'XP today')}</em>
             </span>
           </button>
           {goalOpen && (
             <div className="gami-goal-menu">
-              <p>{isHt ? 'Objektif chak jou' : 'Daily goal'}</p>
+              <p>{isHt ? 'Objektif chak jou' : inlineText(lang, 'Daily goal')}</p>
               {GOAL_OPTIONS.map((g) => (
                 <button
                   key={g}

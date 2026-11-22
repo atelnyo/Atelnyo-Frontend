@@ -11,10 +11,11 @@ import HoverVideoPreview from '../components/HoverVideoPreview';
 import CardOpenButton from './CardOpenButton';
 import SaveCountChip from './SaveCountChip';
 import TrendingVelocity from './TrendingVelocity';
+import { inlineText } from '../../../utils/inlineI18n';
 
 /** SVG fallback — calendar-themed gradient, shown when an event has no
     cover (but a trailer that needs an image area to preview over). */
-function EventFallback({ title, isHt }) {
+function EventFallback({ title, isHt, lang = 'en' }) {
   return (
     <div className="explore-card-fallback">
       <svg viewBox="0 0 600 340" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -35,7 +36,7 @@ function EventFallback({ title, isHt }) {
         </g>
         <text x="300" y="270" textAnchor="middle" fill="#059669" opacity="0.5"
               fontFamily="system-ui, -apple-system, sans-serif" fontSize="14" fontWeight="600">
-          {title || (isHt ? 'Evènman' : 'Event')}
+          {title || (isHt ? 'Evènman' : inlineText(lang, 'Event'))}
         </text>
       </svg>
     </div>
@@ -192,7 +193,7 @@ export default function EventCard({ event, t, lang = 'en', onOpenCheckout, showT
             onError={() => setImgFailed(true)}
           />
         ) : (
-          <EventFallback title={event.title} isHt={lang === 'ht'} />
+          <EventFallback title={event.title} isHt={lang === 'ht'} lang={lang} />
         )}
         {showPreview && (
           <HoverVideoPreview videoSrc={videoSrc} title={event.title} />
@@ -279,11 +280,11 @@ export default function EventCard({ event, t, lang = 'en', onOpenCheckout, showT
                 type="button"
                 className="explore-card-tag"
                 style={{ cursor: 'pointer' }}
-                title={t.explore_event_add_calendar || (isHt ? 'Ajoute nan kalandriye' : 'Add to calendar')}
-                aria-label={t.explore_event_add_calendar || (isHt ? 'Ajoute nan kalandriye' : 'Add to calendar')}
+                title={t.explore_event_add_calendar || (isHt ? 'Ajoute nan kalandriye' : inlineText(lang, 'Add to calendar'))}
+                aria-label={t.explore_event_add_calendar || (isHt ? 'Ajoute nan kalandriye' : inlineText(lang, 'Add to calendar'))}
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (downloadICS(event)) showToast?.(t.explore_event_calendar_saved || (isHt ? 'Fichye kalandriye telechaje!' : 'Calendar file downloaded!'), 'calendar');
+                  if (downloadICS(event)) showToast?.(t.explore_event_calendar_saved || (isHt ? 'Fichye kalandriye telechaje!' : inlineText(lang, 'Calendar file downloaded!')), 'calendar');
                 }}
               >
                 <i className="fas fa-calendar-plus" aria-hidden="true" />
@@ -293,8 +294,8 @@ export default function EventCard({ event, t, lang = 'en', onOpenCheckout, showT
               type="button"
               className="explore-card-tag"
               style={{ cursor: 'pointer' }}
-              title={t.explore_share || (isHt ? 'Pataje' : 'Share')}
-              aria-label={t.explore_share || (isHt ? 'Pataje' : 'Share')}
+              title={t.explore_share || (isHt ? 'Pataje' : inlineText(lang, 'Share'))}
+              aria-label={t.explore_share || (isHt ? 'Pataje' : inlineText(lang, 'Share'))}
               onClick={async (e) => {
                 e.stopPropagation();
                 const url = `${window.location.origin}/community/${event.community_slug || ''}`;
@@ -303,7 +304,7 @@ export default function EventCard({ event, t, lang = 'en', onOpenCheckout, showT
                     await navigator.share({ title: event.title, text: event.description || event.title, url });
                   } else {
                     await navigator.clipboard.writeText(url);
-                    showToast?.(t.explore_link_copied || (isHt ? 'Lyen kopye!' : 'Link copied!'), 'link');
+                    showToast?.(t.explore_link_copied || (isHt ? 'Lyen kopye!' : inlineText(lang, 'Link copied!')), 'link');
                   }
                 } catch {
                   // User dismissed the share sheet — not an error.
@@ -317,7 +318,7 @@ export default function EventCard({ event, t, lang = 'en', onOpenCheckout, showT
         <div className="explore-event-action">
           {isCancelled ? (
             <span className="explore-event-cancelled-pill">
-              <i className="fas fa-ban" aria-hidden="true" /> {t.explore_event_cancelled || (isHt ? 'Anile' : 'Cancelled')}
+              <i className="fas fa-ban" aria-hidden="true" /> {t.explore_event_cancelled || (isHt ? 'Anile' : inlineText(lang, 'Cancelled'))}
             </span>
           ) : isFull ? (
             <span className="explore-event-full-pill">{t.explore_event_full || 'Full'}</span>

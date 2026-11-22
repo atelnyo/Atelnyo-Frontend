@@ -22,7 +22,7 @@ import { getUserIdentity } from '../utils/userIdentity';
 import { t2 } from '../utils/i18n';
 import { LANGUAGE_LABELS } from '../config/markets';
 
-const LANGUAGES = ['ht', 'en', 'fr'].map((code) => ({
+const LANGUAGES = ['ht', 'en', 'fr', 'es'].map((code) => ({
   code,
   label: LANGUAGE_LABELS[code].native,
 }));

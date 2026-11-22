@@ -31,6 +31,7 @@
 import React, { Component, useEffect, useRef, useState } from 'react';
 import { classNames } from '../shared';
 import styles from './editor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 // Error boundary — catches render errors so the editor shell never
 // shows a blank/black screen. Displays a clear recovery UI instead.
@@ -47,13 +48,14 @@ class EditorErrorBoundary extends Component {
   }
   render() {
     if (this.state.hasError) {
-      const isHt = this.props.lang === 'ht';
+      const lang = this.props.lang || 'en';
+      const isHt = lang === 'ht';
       return (
         <div className={styles.shell} role="dialog" aria-modal="true">
           <header className={styles.header}>
             <button type="button" className={styles.backBtn} onClick={this.props.onBack}>
               <i className="fas fa-arrow-left" />
-              <span>{isHt ? 'Retounen' : 'Back'}</span>
+              <span>{isHt ? 'Retounen' : inlineText(lang, 'Back')}</span>
             </button>
             <div className={styles.headerInfo}>
               <span className={styles.headerLabel}><i className="fas fa-pen" /> {this.props.title || 'Editor'}</span>
@@ -63,15 +65,15 @@ class EditorErrorBoundary extends Component {
             <div style={{ textAlign:'center', maxWidth:420 }}>
               <i className="fas fa-triangle-exclamation" style={{ fontSize:'2.5rem', color:'var(--color-error,#ef4444)', marginBottom:16 }} />
               <h2 style={{ fontSize:'1.1rem', color:'var(--text-primary,#e2e8f0)', marginBottom:8 }}>
-                {isHt ? 'Gen yon erè nan editè a' : 'Editor error'}
+                {isHt ? 'Gen yon erè nan editè a' : inlineText(lang, 'Editor error')}
               </h2>
               <p style={{ fontSize:'0.85rem', color:'var(--text-secondary,#94a3b8)', marginBottom:20, lineHeight:1.5 }}>
                 {isHt
                   ? 'Yon bagay pa mal pandan w ap modifye. Eseye reouvri editè a. Chanjman ki pa sove yo pèdi.'
-                  : 'Something went wrong while editing. Try reopening the editor. Unsaved changes are lost.'}
+                  : inlineText(lang, 'Something went wrong while editing. Try reopening the editor. Unsaved changes are lost.')}
               </p>
               <button type="button" onClick={this.props.onBack} style={{ padding:'8px 20px', borderRadius:8, border:'none', background:'var(--color-primary,#3b82f6)', color:'#fff', cursor:'pointer', fontWeight:600, fontSize:'0.85rem' }}>
-                <i className="fas fa-arrow-left" style={{ marginRight:6 }} />{isHt ? 'Retounen' : 'Go back'}
+                <i className="fas fa-arrow-left" style={{ marginRight:6 }} />{isHt ? 'Retounen' : inlineText(lang, 'Go back')}
               </button>
             </div>
           </div>
@@ -166,13 +168,13 @@ export default function StudioEditorShell({
       {onPreview && (
         <button type="button" className={styles.previewBtn} onClick={onPreview}>
           <i className="fas fa-eye" aria-hidden="true" />
-          {isHt ? 'Preview' : 'Preview'}
+          {isHt ? 'Preview' : inlineText(lang, 'Preview')}
         </button>
       )}
       {onVersionHistory && (
         <button type="button" className={styles.previewBtn} onClick={onVersionHistory}>
           <i className="fas fa-clock-rotate-left" aria-hidden="true" />
-          {isHt ? 'Vèsyon' : 'Versions'}
+          {isHt ? 'Vèsyon' : inlineText(lang, 'Versions')}
         </button>
       )}
       {onSave && (
@@ -183,9 +185,9 @@ export default function StudioEditorShell({
           disabled={saveState === 'saving' || !canSave}
         >
           {saveState === 'saving' ? (
-            <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {isHt ? 'Ap sove…' : 'Saving…'}</>
+            <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {isHt ? 'Ap sove…' : inlineText(lang, 'Saving…')}</>
           ) : (
-            <><i className="fas fa-save" aria-hidden="true" /> {saveLabel || (isHt ? 'Sove' : 'Save')}</>
+            <><i className="fas fa-save" aria-hidden="true" /> {saveLabel || (isHt ? 'Sove' : inlineText(lang, 'Save'))}</>
           )}
         </button>
       )}
@@ -197,7 +199,7 @@ export default function StudioEditorShell({
           disabled={saveState === 'saving'}
         >
           <i className="fas fa-rocket" aria-hidden="true" />
-          {publishLabel || (isHt ? 'Pibliye' : 'Publish')}
+          {publishLabel || (isHt ? 'Pibliye' : inlineText(lang, 'Publish'))}
         </button>
       )}
     </>
@@ -205,8 +207,8 @@ export default function StudioEditorShell({
 
   // ─── Mobile bottom bar (only the zone-relevant bits) ───────────────
   const bottomBar = (
-    <nav className={styles.bottomBar} aria-label={isHt ? 'Kontwòl editè' : 'Editor controls'}>
-      <div className={styles.bottomTabs} role="tablist" aria-label={isHt ? 'Zòn editè' : 'Editor zones'}>
+    <nav className={styles.bottomBar} aria-label={isHt ? 'Kontwòl editè' : inlineText(lang, 'Editor controls')}>
+      <div className={styles.bottomTabs} role="tablist" aria-label={isHt ? 'Zòn editè' : inlineText(lang, 'Editor zones')}>
         {structure && (
           <button
             type="button"
@@ -216,7 +218,7 @@ export default function StudioEditorShell({
             onClick={() => setZone('structure')}
           >
             <i className="fas fa-list-ul" aria-hidden="true" />
-            {isHt ? 'Estrikti' : 'Content'}
+            {isHt ? 'Estrikti' : inlineText(lang, 'Content')}
           </button>
         )}
         <button
@@ -227,7 +229,7 @@ export default function StudioEditorShell({
           onClick={() => setZone('editor')}
         >
           <i className="fas fa-pen-nib" aria-hidden="true" />
-          {isHt ? 'Editè' : 'Editor'}
+          {isHt ? 'Editè' : inlineText(lang, 'Editor')}
         </button>
         <button
           type="button"
@@ -237,17 +239,17 @@ export default function StudioEditorShell({
           onClick={() => setZone('props')}
         >
           <i className="fas fa-sliders-h" aria-hidden="true" />
-          {isHt ? 'Opsyon' : 'Properties'}
+          {isHt ? 'Opsyon' : inlineText(lang, 'Properties')}
         </button>
       </div>
       <div className={styles.bottomActions}>
         {onPreview && (
-          <button type="button" className={styles.previewBtn} onClick={onPreview} aria-label={isHt ? 'Preview' : 'Preview'}>
+          <button type="button" className={styles.previewBtn} onClick={onPreview} aria-label={isHt ? 'Preview' : inlineText(lang, 'Preview')}>
             <i className="fas fa-eye" aria-hidden="true" />
           </button>
         )}
         {onVersionHistory && (
-          <button type="button" className={styles.previewBtn} onClick={onVersionHistory} aria-label={isHt ? 'Vèsyon' : 'Versions'}>
+          <button type="button" className={styles.previewBtn} onClick={onVersionHistory} aria-label={isHt ? 'Vèsyon' : inlineText(lang, 'Versions')}>
             <i className="fas fa-clock-rotate-left" aria-hidden="true" />
           </button>
         )}
@@ -263,7 +265,7 @@ export default function StudioEditorShell({
             ) : (
               <i className="fas fa-save" aria-hidden="true" />
             )}
-            {saveLabel || (isHt ? 'Sove' : 'Save')}
+            {saveLabel || (isHt ? 'Sove' : inlineText(lang, 'Save'))}
           </button>
         )}
         {onPublish && (
@@ -274,7 +276,7 @@ export default function StudioEditorShell({
             disabled={saveState === 'saving'}
           >
             <i className="fas fa-rocket" aria-hidden="true" />
-            {publishLabel || (isHt ? 'Pibliye' : 'Publish')}
+            {publishLabel || (isHt ? 'Pibliye' : inlineText(lang, 'Publish'))}
           </button>
         )}
       </div>
@@ -292,7 +294,7 @@ export default function StudioEditorShell({
   const validationBar = validation.length > 0 && (
     <div className={styles.validationBar} role="status">
       <i className="fas fa-triangle-exclamation" aria-hidden="true" />
-      <span>{isHt ? 'Anvan w pibliye:' : 'Before publishing:'}</span>
+      <span>{isHt ? 'Anvan w pibliye:' : inlineText(lang, 'Before publishing:')}</span>
       <ul>
         {validation.map((v, i) => (
           <li key={i}>
@@ -329,17 +331,17 @@ export default function StudioEditorShell({
     <div className={styles.shell} role="dialog" aria-modal="true" aria-label={title} data-studio-editor>
       {/* ─── Header ─────────────────────────────────────────── */}
       <header className={styles.header}>
-        <button type="button" className={styles.backBtn} onClick={handleBack} aria-label={isHt ? 'Retounen' : 'Back'}>
+        <button type="button" className={styles.backBtn} onClick={handleBack} aria-label={isHt ? 'Retounen' : inlineText(lang, 'Back')}>
           <i className="fas fa-arrow-left" aria-hidden="true" />
-          <span>{isHt ? 'Retounen' : 'Back'}</span>
+          <span>{isHt ? 'Retounen' : inlineText(lang, 'Back')}</span>
         </button>
         {structure && (
           <button
             type="button"
             className={styles.structureToggle}
             onClick={() => setStructureOpen((o) => !o)}
-            aria-label={isHt ? 'Louvri estrikti kontni' : 'Open content structure'}
-            title={isHt ? 'Estrikti' : 'Structure'}
+            aria-label={isHt ? 'Louvri estrikti kontni' : inlineText(lang, 'Open content structure')}
+            title={isHt ? 'Estrikti' : inlineText(lang, 'Structure')}
           >
             <i className="fas fa-list-ul" aria-hidden="true" />
           </button>
@@ -351,7 +353,7 @@ export default function StudioEditorShell({
             {badge}
           </span>
           <span className={styles.headerDocTitle} title={docTitle}>
-            {docTitle || (isNew ? (isHt ? 'Nouvo kontni' : 'New content') : '')}
+            {docTitle || (isNew ? (isHt ? 'Nouvo kontni' : inlineText(lang, 'New content')) : '')}
           </span>
         </div>
         <span
@@ -404,7 +406,7 @@ export default function StudioEditorShell({
         )}
 
         {/* Main zone: editor (desktop/tablet + mobile 'editor' tab) */}
-        <main className={styles.main} aria-label={isHt ? 'Editè prensipal' : 'Main editor'}>
+        <main className={styles.main} aria-label={isHt ? 'Editè prensipal' : inlineText(lang, 'Main editor')}>
           {zone === 'props' ? (
             <div className={styles.mobileZone}>{properties}</div>
           ) : zone === 'structure' && structure ? (
@@ -425,18 +427,18 @@ export default function StudioEditorShell({
       {confirming && (
         <div className={styles.confirmWrap} role="alertdialog" aria-modal="true" aria-labelledby="editor-confirm-title">
           <div className={styles.confirmCard}>
-            <h3 id="editor-confirm-title">{isHt ? 'Gen chanjman ki pa sove' : 'Unsaved changes'}</h3>
+            <h3 id="editor-confirm-title">{isHt ? 'Gen chanjman ki pa sove' : inlineText(lang, 'Unsaved changes')}</h3>
             <p>
               {isHt
                 ? 'Gen chanjman ou fè ki poko sove. Si w kite editè a, yo p ap sove. W ap vle kite menm jan an?'
-                : 'You have unsaved changes. Leaving the editor will discard them. Leave anyway?'}
+                : inlineText(lang, 'You have unsaved changes. Leaving the editor will discard them. Leave anyway?')}
             </p>
             <div className={styles.confirmActions}>
               <button type="button" className={styles.confirmBtn} onClick={() => setConfirming(false)}>
-                {isHt ? 'Retounen nan editè' : 'Keep editing'}
+                {isHt ? 'Retounen nan editè' : inlineText(lang, 'Keep editing')}
               </button>
               <button type="button" className={`${styles.confirmBtn} ${styles.confirmBtnPrimary}`} onClick={handleConfirmLeave}>
-                {isHt ? 'Kite san sove' : 'Discard & leave'}
+                {isHt ? 'Kite san sove' : inlineText(lang, 'Discard & leave')}
               </button>
             </div>
           </div>

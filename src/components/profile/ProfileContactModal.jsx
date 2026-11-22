@@ -31,6 +31,7 @@
  */
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { creatorProfileService, walletService, paymentConfigService } from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── PayPal SDK loader (injected once, capture intent) ─────────────────
 // Mirrors DepositModal/CheckoutModal — the app loads the SDK from the
@@ -227,7 +228,7 @@ export default function ProfileContactModal({
     cfg.send({ username, creatorId }, payload)
       .then(() => {
         setSending(false);
-        showToast?.(t[cfg.sentKey] || (isHt ? 'Voye!' : 'Sent!'), 'check-circle');
+        showToast?.(t[cfg.sentKey] || (isHt ? 'Voye!' : inlineText(lang, 'Sent!')), 'check-circle');
         onClose();
       })
       .catch((err) => {
@@ -236,13 +237,13 @@ export default function ProfileContactModal({
         if (status === 401 || status === 403) {
           setError(t.profile_contact_need_auth || (isHt
             ? 'Ou dwe konekte pou voye mesaj.'
-            : 'Please log in to send messages.'));
+            : inlineText(lang, 'Please log in to send messages.')));
         } else if (status === 402 && mode === 'tip') {
           // Real tip path: wallet balance too low → offer a top-up.
           setNeedFunds(true);
           setError(t.profile_tip_need_funds || (isHt
             ? 'Balans bous ou pa ase pou tip sa a.'
-            : 'Insufficient wallet balance for this tip.'));
+            : inlineText(lang, 'Insufficient wallet balance for this tip.')));
         } else {
           // Surface the server's own message when it sends one (e.g. a
           // 400 "Project title is required.") instead of a generic line.
@@ -250,7 +251,7 @@ export default function ProfileContactModal({
             err?.response?.data?.error
             || err?.response?.data?.detail
             || t.profile_contact_error
-            || (isHt ? 'Erè voye. Eseye ankò.' : 'Error sending. Try again.')
+            || (isHt ? 'Erè voye. Eseye ankò.' : inlineText(lang, 'Error sending. Try again.'))
           );
         }
       });
@@ -263,12 +264,12 @@ export default function ProfileContactModal({
     if (!username) {
       setError(t.profile_contact_error || (isHt
         ? 'Erè voye. Eseye ankò.'
-        : 'Error sending. Try again.'));
+        : inlineText(lang, 'Error sending. Try again.')));
       return;
     }
     setTouched(true);
     if (missingRequired) {
-      setError(t.profile_contact_required || (isHt ? 'Champ obligatwa a vid.' : 'Required fields are empty.'));
+      setError(t.profile_contact_required || (isHt ? 'Champ obligatwa a vid.' : inlineText(lang, 'Required fields are empty.')));
       return;
     }
     // Tip mode: the amount must parse to a number ≥ $0.50 (the backend
@@ -279,7 +280,7 @@ export default function ProfileContactModal({
       if (!Number.isFinite(amt) || amt < 0.5) {
         setError(t.profile_tip_min || (isHt
           ? 'Tip minimòm se $0.50.'
-          : 'Minimum tip is $0.50.'));
+          : inlineText(lang, 'Minimum tip is $0.50.')));
         return;
       }
     }
@@ -322,7 +323,7 @@ export default function ProfileContactModal({
       if (!cfgData?.configured || !cfgData?.client_id) {
         throw new Error(t.profile_tip_paypal_unavailable || (isHt
           ? 'PayPal poko disponib kounye a.'
-          : 'PayPal is not available right now.'));
+          : inlineText(lang, 'PayPal is not available right now.')));
       }
       const pp = await loadPayPalScript(cfgData.client_id, cfgData.sandbox);
       setPaypal(pp);
@@ -340,7 +341,7 @@ export default function ProfileContactModal({
       setPpPhase('failed');
       setPpError(err?.response?.data?.error || err?.message || (isHt
         ? 'Pa t kapab kòmanse peman an.'
-        : 'Could not start the payment.'));
+        : inlineText(lang, 'Could not start the payment.')));
     }
   }, [user, creatorId, form, t, isHt]);
 
@@ -365,13 +366,13 @@ export default function ProfileContactModal({
             paypal_order_id: ppOrder.paypal_order_id,
             message: (form.message || '').slice(0, 280),
           });
-          showToast?.(t[cfg.sentKey] || (isHt ? 'Voye!' : 'Sent!'), 'check-circle');
+          showToast?.(t[cfg.sentKey] || (isHt ? 'Voye!' : inlineText(lang, 'Sent!')), 'check-circle');
           onClose();
         } catch (err) {
           setPpPhase('failed');
           setPpError(err?.response?.data?.error || err?.message || (isHt
             ? 'Peman echwe. Tanpri eseye ankò.'
-            : 'Payment failed. Please try again.'));
+            : inlineText(lang, 'Payment failed. Please try again.')));
         } finally {
           ppProcessingRef.current = false;
         }
@@ -381,7 +382,7 @@ export default function ProfileContactModal({
         setPpPhase('failed');
         setPpError(t.profile_tip_paypal_unavailable || (isHt
           ? 'PayPal poko disponib kounye a.'
-          : 'PayPal is not available right now.'));
+          : inlineText(lang, 'PayPal is not available right now.')));
       },
     });
     buttons.render(container).then(() => {
@@ -390,15 +391,15 @@ export default function ProfileContactModal({
       setPpPhase('failed');
       setPpError(t.profile_tip_paypal_unavailable || (isHt
         ? 'PayPal poko disponib kounye a.'
-        : 'PayPal is not available right now.'));
+        : inlineText(lang, 'PayPal is not available right now.')));
     });
     return () => { try { container.innerHTML = ''; } catch (_) {} };
   }, [ppPhase, paypal, ppOrder, form, t, showToast, onClose, isHt, cfg.sentKey]);
 
-  const title = t[cfg.titleKey] || (isHt ? 'Kontak' : 'Contact');
-  const sendLabel = t.profile_contact_send || (isHt ? 'Voye' : 'Send');
-  const sendingLabel = t.profile_contact_sending || (isHt ? 'Ap voye...' : 'Sending...');
-  const cancelLabel = t.profile_contact_cancel || (isHt ? 'Anile' : 'Cancel');
+  const title = t[cfg.titleKey] || (isHt ? 'Kontak' : inlineText(lang, 'Contact'));
+  const sendLabel = t.profile_contact_send || (isHt ? 'Voye' : inlineText(lang, 'Send'));
+  const sendingLabel = t.profile_contact_sending || (isHt ? 'Ap voye...' : inlineText(lang, 'Sending...'));
+  const cancelLabel = t.profile_contact_cancel || (isHt ? 'Anile' : inlineText(lang, 'Cancel'));
 
   return (
     <div className="csp-modal-overlay" onClick={handleClose} role="dialog" aria-modal="true" aria-label={title}>
@@ -445,7 +446,7 @@ export default function ProfileContactModal({
                     : <input ref={i === 0 ? firstFieldRef : undefined} {...fieldProps} />}
                   {invalid && (
                     <span className="csp-contact-field-error" role="alert">
-                      {t.profile_contact_required || (isHt ? 'Champ obligatwa.' : 'Required field.')}
+                      {t.profile_contact_required || (isHt ? 'Champ obligatwa.' : inlineText(lang, 'Required field.'))}
                     </span>
                   )}
                 </div>
@@ -469,7 +470,7 @@ export default function ProfileContactModal({
                     onClick={startPayPalFlow}
                     disabled={ppPhase === 'loading'}
                   >
-                    <i className="fab fa-paypal" aria-hidden="true" /> {t.profile_tip_paypal || (isHt ? 'Paye ak PayPal' : 'Pay with PayPal')}
+                    <i className="fab fa-paypal" aria-hidden="true" /> {t.profile_tip_paypal || (isHt ? 'Paye ak PayPal' : inlineText(lang, 'Pay with PayPal'))}
                   </button>
                 ) : ppPhase === 'ready' || ppPhase === 'processing' ? (
                   <div className="csp-tip-paypal-box">
@@ -486,7 +487,7 @@ export default function ProfileContactModal({
                     <div ref={ppContainerRef} className="csp-tip-paypal-buttons" />
                     {ppPhase === 'processing' && (
                       <div className="csp-tip-paypal-processing">
-                        <i className="fas fa-spinner fa-spin" aria-hidden="true" /> {t.profile_contact_sending || (isHt ? 'Ap voye...' : 'Sending...')}
+                        <i className="fas fa-spinner fa-spin" aria-hidden="true" /> {t.profile_contact_sending || (isHt ? 'Ap voye...' : inlineText(lang, 'Sending...'))}
                       </div>
                     )}
                   </div>
@@ -496,11 +497,11 @@ export default function ProfileContactModal({
                     className="csp-modal-btn csp-modal-btn--primary"
                     onClick={startPayPalFlow}
                   >
-                    <i className="fas fa-rotate-right" aria-hidden="true" /> {isHt ? 'Eseye ankò' : 'Retry'}
+                    <i className="fas fa-rotate-right" aria-hidden="true" /> {isHt ? 'Eseye ankò' : inlineText(lang, 'Retry')}
                   </button>
                 ) : (
                   <div className="csp-tip-paypal-loading">
-                    <i className="fas fa-spinner fa-spin" aria-hidden="true" /> {isHt ? 'Ap prepare PayPal...' : 'Preparing PayPal...'}
+                    <i className="fas fa-spinner fa-spin" aria-hidden="true" /> {isHt ? 'Ap prepare PayPal...' : inlineText(lang, 'Preparing PayPal...')}
                   </div>
                 )
               )
@@ -531,7 +532,7 @@ export default function ProfileContactModal({
                   className="csp-modal-btn csp-modal-btn--secondary csp-tip-wallet-link"
                   onClick={() => { handleClose(); onOpenWallet?.(); }}
                 >
-                  <i className="fas fa-wallet" aria-hidden="true" /> {t.profile_tip_topup || (isHt ? 'Oubyen ranpli bous la' : 'Or top up wallet')}
+                  <i className="fas fa-wallet" aria-hidden="true" /> {t.profile_tip_topup || (isHt ? 'Oubyen ranpli bous la' : inlineText(lang, 'Or top up wallet'))}
                 </button>
               )}
             </div>

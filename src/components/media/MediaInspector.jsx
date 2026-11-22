@@ -25,6 +25,7 @@ import MediaBadge from './MediaBadge';
 import MediaHelp from './MediaHelp';
 import SmartWarning from './SmartWarning';
 import MediaPanel from './panels';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function MediaInspector({
   media,
@@ -44,8 +45,8 @@ export default function MediaInspector({
     return (
       <div className="inspector-empty" role="status">
         <i className="fas fa-image" aria-hidden="true" />
-        <h3>{isHt ? 'Pa gen medya' : 'No media selected'}</h3>
-        <p>{isHt ? 'Chwazi yon medya pou wè detay yo' : 'Select a media item to view details'}</p>
+        <h3>{isHt ? 'Pa gen medya' : inlineText(lang, 'No media selected')}</h3>
+        <p>{isHt ? 'Chwazi yon medya pou wè detay yo' : inlineText(lang, 'Select a media item to view details')}</p>
       </div>
     );
   }
@@ -91,7 +92,7 @@ export default function MediaInspector({
         <div className="inspector-header-right">
           <MediaHelp context="detail" lang={lang} />
           {onClose && (
-            <button type="button" className="inspector-close" onClick={onClose} aria-label={isHt ? 'Fèmen' : 'Close'}>
+            <button type="button" className="inspector-close" onClick={onClose} aria-label={isHt ? 'Fèmen' : inlineText(lang, 'Close')}>
               <i className="fas fa-times" />
             </button>
           )}
@@ -99,17 +100,17 @@ export default function MediaInspector({
       </div>
 
       {healthScore != null && (
-        <div className="inspector-health-banner" aria-label={isHt ? 'Nòt sante' : 'Health score'}>
+        <div className="inspector-health-banner" aria-label={isHt ? 'Nòt sante' : inlineText(lang, 'Health score')}>
           <div className="inspector-health-bar">
             <div className="inspector-health-fill" style={{ width: `${healthScore}%` }} />
           </div>
           <span className="inspector-health-text">
-            {isHt ? 'Sante' : 'Health'}: <strong>{healthScore}%</strong>
+            {isHt ? 'Sante' : inlineText(lang, 'Health')}: <strong>{healthScore}%</strong>
           </span>
         </div>
       )}
 
-      <nav className="inspector-tabs" role="tablist" aria-label={isHt ? 'Seksyon enspektè' : 'Inspector sections'}>
+      <nav className="inspector-tabs" role="tablist" aria-label={isHt ? 'Seksyon enspektè' : inlineText(lang, 'Inspector sections')}>
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -138,10 +139,10 @@ export default function MediaInspector({
         />
       </div>
 
-      <div className="inspector-actions" aria-label={isHt ? 'Aksyon rapid' : 'Quick actions'}>
+      <div className="inspector-actions" aria-label={isHt ? 'Aksyon rapid' : inlineText(lang, 'Quick actions')}>
         {onReplace && (
           <button type="button" className="btn-secondary" onClick={() => onReplace(item)}>
-            <i className="fas fa-exchange-alt" /> {isHt ? 'Ranplase URL' : 'Replace URL'}
+            <i className="fas fa-exchange-alt" /> {isHt ? 'Ranplase URL' : inlineText(lang, 'Replace URL')}
           </button>
         )}
         <button
@@ -149,21 +150,21 @@ export default function MediaInspector({
           className="btn-secondary"
           onClick={() => { if (url && typeof navigator !== 'undefined' && navigator.clipboard) navigator.clipboard.writeText(url).catch(() => {}); }}
         >
-          <i className="fas fa-copy" /> {isHt ? 'Kopi URL' : 'Copy URL'}
+          <i className="fas fa-copy" /> {isHt ? 'Kopi URL' : inlineText(lang, 'Copy URL')}
         </button>
         {url && (
           <a href={url} target="_blank" rel="noopener noreferrer" className="btn-secondary">
-            <i className="fas fa-external-link-alt" /> {isHt ? 'Louvri' : 'Open'}
+            <i className="fas fa-external-link-alt" /> {isHt ? 'Louvri' : inlineText(lang, 'Open')}
           </a>
         )}
         {onArchive && (
           <button type="button" className="btn-secondary" onClick={() => onArchive(item)}>
-            <i className="fas fa-archive" /> {isHt ? 'Achive' : 'Archive'}
+            <i className="fas fa-archive" /> {isHt ? 'Achive' : inlineText(lang, 'Archive')}
           </button>
         )}
         {onDelete && (
           <button type="button" className="inspector-delete-btn" onClick={() => setShowDelete(true)}>
-            <i className="fas fa-trash" /> {isHt ? 'Efase' : 'Delete'}
+            <i className="fas fa-trash" /> {isHt ? 'Efase' : inlineText(lang, 'Delete')}
           </button>
         )}
       </div>

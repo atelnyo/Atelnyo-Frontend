@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RAIL_ITEMS } from './profileConstants';
+import { inlineText } from '../../utils/inlineI18n';
 
 /**
  * LeftNavRail — desktop profile sub-navigation rail.
@@ -26,12 +27,12 @@ export default function LeftNavRail({ activeTab, onChange, lang, items }) {
             type="button"
             className={`csp-rail-item ${isActive ? 'csp-rail-item--active' : ''}`}
             onClick={() => onChange(item.id)}
-            aria-label={lang === 'ht' ? item.labelHt : lang === 'fr' ? item.labelFr : item.label}
-            title={lang === 'ht' ? item.labelHt : lang === 'fr' ? item.labelFr : item.label}
+            aria-label={lang === 'ht' ? item.labelHt : lang === 'fr' ? item.labelFr : lang === 'es' ? item.labelEs : item.label}
+            title={lang === 'ht' ? item.labelHt : lang === 'fr' ? item.labelFr : lang === 'es' ? item.labelEs : item.label}
           >
             <i className={item.icon.startsWith('fab ') ? item.icon : `fas ${item.icon}`} aria-hidden="true" />
             <span className="csp-rail-tooltip">
-              {lang === 'ht' ? item.labelHt : lang === 'fr' ? item.labelFr : item.label}
+              {lang === 'ht' ? item.labelHt : lang === 'fr' ? item.labelFr : lang === 'es' ? item.labelEs : item.label}
             </span>
           </button>
         );
@@ -43,11 +44,11 @@ export default function LeftNavRail({ activeTab, onChange, lang, items }) {
         type="button"
         className="csp-rail-item"
         onClick={() => navigate('/help/profile')}
-        aria-label={lang === 'ht' ? 'Èd' : 'Help'}
-        title={lang === 'ht' ? 'Èd' : 'Help'}
+        aria-label={lang === 'ht' ? 'Èd' : inlineText(lang, 'Help')}
+        title={lang === 'ht' ? 'Èd' : inlineText(lang, 'Help')}
       >
         <i className="fas fa-circle-question" aria-hidden="true" />
-        <span className="csp-rail-tooltip">{lang === 'ht' ? 'Èd' : 'Help'}</span>
+        <span className="csp-rail-tooltip">{lang === 'ht' ? 'Èd' : inlineText(lang, 'Help')}</span>
       </button>
       <button
         type="button"

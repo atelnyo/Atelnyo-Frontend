@@ -18,19 +18,20 @@ import { SectionHeader } from '../shared';
 import { walletService } from '../../../services/api';
 import PrintifyConnectionCard from './PrintifyConnectionCard';
 import styles from './sections.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 // KYC status → badge label + variant class (lang-aware).
 function kycBadge(status, lang) {
   const isHt = lang === 'ht';
   switch (status) {
     case 'approved':
-      return { cls: styles.settingsStatusApproved, label: isHt ? 'Verifye' : 'Verified' };
+      return { cls: styles.settingsStatusApproved, label: isHt ? 'Verifye' : inlineText(lang, 'Verified') };
     case 'pending':
-      return { cls: styles.settingsStatusPending, label: isHt ? 'Ap tann' : 'Pending' };
+      return { cls: styles.settingsStatusPending, label: isHt ? 'Ap tann' : inlineText(lang, 'Pending') };
     case 'rejected':
-      return { cls: styles.settingsStatusRejected, label: isHt ? 'Rejete' : 'Rejected' };
+      return { cls: styles.settingsStatusRejected, label: isHt ? 'Rejete' : inlineText(lang, 'Rejected') };
     default:
-      return { cls: styles.settingsStatusNeutral, label: isHt ? 'Pa verifye' : 'Not verified' };
+      return { cls: styles.settingsStatusNeutral, label: isHt ? 'Pa verifye' : inlineText(lang, 'Not verified') };
   }
 }
 
@@ -96,7 +97,7 @@ export default function SettingsSection({
         }}
         tip={isHt
           ? 'Verifikasyon (KYC) nesesè pou debloke retrè ak fonksyonalite premium.'
-          : 'Verification (KYC) is required to unlock payouts and premium features.'}
+          : inlineText(lang, 'Verification (KYC) is required to unlock payouts and premium features.')}
       />
       <div className={styles.settingsGrid}>
         <SettingCard
@@ -130,8 +131,8 @@ export default function SettingsSection({
         />
         <SettingCard
           icon="fa-key"
-          title={isHt ? 'Modpas' : 'Password'}
-          desc={isHt ? 'Chanje modpas koneksyon ou an.' : 'Change your login password.'}
+          title={isHt ? 'Modpas' : inlineText(lang, 'Password')}
+          desc={isHt ? 'Chanje modpas koneksyon ou an.' : inlineText(lang, 'Change your login password.')}
           onOpen={() => setShowPasswordModal(true)}
           editLabel={editLabel}
         />

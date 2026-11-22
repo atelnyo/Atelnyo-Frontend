@@ -11,6 +11,7 @@ import React from 'react';
 import { SkeletonSection } from './ProfileSkeleton';
 import { fmtCount, isNewItem } from './profileUtils';
 import ProfileCatalogCard from './ProfileCatalogCard';
+import { inlineText } from '../../utils/inlineI18n';
 
 // 5-star rating row — now owned by ProfileCatalogCard; re-exported here
 // so ProfileProductsTab's existing import keeps working.
@@ -25,7 +26,7 @@ export default function CoursesTab({ courses, loading, onItemClick, lang }) {
         <p>
           {lang === 'ht'
             ? 'Kreyatè sa a poko pibliye kou pou kounye a.'
-            : 'No courses yet.'}
+            : inlineText(lang, 'No courses yet.')}
         </p>
       </div>
     );
@@ -39,19 +40,19 @@ export default function CoursesTab({ courses, loading, onItemClick, lang }) {
           image={course.image_url}
           description={course.description}
           icon="fa-graduation-cap"
-          typeLabel={lang === 'ht' ? 'Kou' : 'Course'}
+          typeLabel={lang === 'ht' ? 'Kou' : inlineText(lang, 'Course')}
           price={`$${course.price || 0}`}
-          freeLabel={lang === 'ht' ? 'Gratis' : 'Free'}
+          freeLabel={lang === 'ht' ? 'Gratis' : inlineText(lang, 'Free')}
           rating={course.rating}
           isFeatured={!!course.is_featured}
           isNew={isNewItem(course.created_at)}
           isPopular={course.student_count >= 25}
           badgeLabels={{
-            featured: lang === 'ht' ? 'Rekòmande' : 'Featured',
-            new: lang === 'ht' ? 'Nouvo' : 'New',
-            popular: lang === 'ht' ? 'Popilè' : 'Popular',
+            featured: lang === 'ht' ? 'Rekòmande' : inlineText(lang, 'Featured'),
+            new: lang === 'ht' ? 'Nouvo' : inlineText(lang, 'New'),
+            popular: lang === 'ht' ? 'Popilè' : inlineText(lang, 'Popular'),
           }}
-          extra={course.student_count > 0 ? <span>· {fmtCount(course.student_count)} {lang === 'ht' ? 'elèv' : 'students'}</span> : null}
+          extra={course.student_count > 0 ? <span>· {fmtCount(course.student_count)} {lang === 'ht' ? 'elèv' : inlineText(lang, 'students')}</span> : null}
           onOpen={() => onItemClick?.('course', course.id, course)}
         />
       ))}

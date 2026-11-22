@@ -330,7 +330,7 @@ export function organizationSchema() {
       '@type': 'ContactPoint',
       contactType: 'customer support',
       email: 'support@atelnyo.site',
-      availableLanguage: ['English', 'Haitian Creole', 'French'],
+      availableLanguage: ['English', 'Haitian Creole', 'French', 'Spanish'],
     },
   };
 }

@@ -9,11 +9,13 @@
  * If something is missing, show the list with explanation.
  */
 import React, { useMemo } from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function ContentQualityChecker({
   formData = {},
   steps = [],
   isHt = true,
+  lang = 'en',
   className = '',
 }) {
   const checks = useMemo(() => {
@@ -22,47 +24,47 @@ export default function ContentQualityChecker({
     // Title
     results.push({
       id: 'title',
-      label: isHt ? 'Tit' : 'Title',
+      label: isHt ? 'Tit' : inlineText(lang, 'Title'),
       icon: 'fa-heading',
       pass: formData.title?.trim().length > 0,
       message: formData.title?.trim()
         ? (isHt ? `${formData.title.slice(0, 50)}...` : `${formData.title.slice(0, 50)}...`)
-        : (isHt ? 'Tit la obligatwa' : 'Title is required'),
+        : (isHt ? 'Tit la obligatwa' : inlineText(lang, 'Title is required')),
     });
 
     // Title length
     results.push({
       id: 'title_len',
-      label: isHt ? 'Longè Tit' : 'Title Length',
+      label: isHt ? 'Longè Tit' : inlineText(lang, 'Title Length'),
       icon: 'fa-ruler',
       pass: (formData.title?.length || 0) >= 10,
       message: formData.title?.length >= 10
-        ? `${formData.title.length} ${isHt ? 'karaktè' : 'characters'} (min 10)`
-        : (isHt ? 'Tit la twò kout (min 10 karaktè)' : 'Title too short (min 10 characters)'),
+        ? `${formData.title.length} ${isHt ? 'karaktè' : inlineText(lang, 'characters')} (min 10)`
+        : (isHt ? 'Tit la twò kout (min 10 karaktè)' : inlineText(lang, 'Title too short (min 10 characters)')),
     });
 
     // Description
     results.push({
       id: 'description',
-      label: isHt ? 'Deskripsyon' : 'Description',
+      label: isHt ? 'Deskripsyon' : inlineText(lang, 'Description'),
       icon: 'fa-align-left',
       pass: formData.description?.trim().length >= 20,
       message: formData.description?.trim().length >= 20
-        ? `${formData.description.length} ${isHt ? 'karaktè' : 'characters'}`
-        : (isHt ? 'Deskripsyon twò kout (min 20)' : 'Description too short (min 20)'),
+        ? `${formData.description.length} ${isHt ? 'karaktè' : inlineText(lang, 'characters')}`
+        : (isHt ? 'Deskripsyon twò kout (min 20)' : inlineText(lang, 'Description too short (min 20)')),
     });
 
     // Media
     results.push({
       id: 'media',
-      label: isHt ? 'Medya' : 'Media',
+      label: isHt ? 'Medya' : inlineText(lang, 'Media'),
       icon: 'fa-photo-video',
       pass: (formData.media?.length || 0) > 0 || formData.featuredMedia != null,
       message: formData.media?.length > 0
-        ? `${formData.media.length} ${isHt ? 'medya' : 'media items'}`
+        ? `${formData.media.length} ${isHt ? 'medya' : inlineText(lang, 'media items')}`
         : formData.featuredMedia
-          ? (isHt ? '1 medya prensipal' : '1 featured media')
-          : (isHt ? 'Pa gen medya' : 'No media attached'),
+          ? (isHt ? '1 medya prensipal' : inlineText(lang, '1 featured media'))
+          : (isHt ? 'Pa gen medya' : inlineText(lang, 'No media attached')),
     });
 
     // Broken Links
@@ -71,52 +73,52 @@ export default function ContentQualityChecker({
     );
     results.push({
       id: 'broken',
-      label: isHt ? 'Lyen Kase' : 'Broken Links',
+      label: isHt ? 'Lyen Kase' : inlineText(lang, 'Broken Links'),
       icon: 'fa-unlink',
       pass: brokenMedia.length === 0,
       message: brokenMedia.length === 0
-        ? (isHt ? 'Pa gen lyen kase' : 'No broken links')
-        : `${brokenMedia.length} ${isHt ? 'lyen kase' : 'broken link(s)'}`,
+        ? (isHt ? 'Pa gen lyen kase' : inlineText(lang, 'No broken links'))
+        : `${brokenMedia.length} ${isHt ? 'lyen kase' : inlineText(lang, 'broken link(s)')}`,
     });
 
     // Visibility
     results.push({
       id: 'visibility',
-      label: isHt ? 'Vizibilite' : 'Visibility',
+      label: isHt ? 'Vizibilite' : inlineText(lang, 'Visibility'),
       icon: 'fa-eye',
       pass: !!formData.visibility,
       message: formData.visibility
         ? `${formData.visibility}`
-        : (isHt ? 'Pa gen vizibilite chwazi' : 'No visibility selected'),
+        : (isHt ? 'Pa gen vizibilite chwazi' : inlineText(lang, 'No visibility selected')),
     });
 
     // Category
     results.push({
       id: 'category',
-      label: isHt ? 'Kategori' : 'Category',
+      label: isHt ? 'Kategori' : inlineText(lang, 'Category'),
       icon: 'fa-tag',
       pass: !!formData.category,
-      message: formData.category || (isHt ? 'Pa gen kategori' : 'No category selected'),
+      message: formData.category || (isHt ? 'Pa gen kategori' : inlineText(lang, 'No category selected')),
     });
 
     // Language
     results.push({
       id: 'language',
-      label: isHt ? 'Lang' : 'Language',
+      label: isHt ? 'Lang' : inlineText(lang, 'Language'),
       icon: 'fa-language',
       pass: !!formData.language,
-      message: formData.language === 'ht' ? 'Kreyòl' : formData.language === 'fr' ? 'Français' : formData.language === 'en' ? 'English' : (isHt ? 'Pa gen lang' : 'No language'),
+      message: formData.language === 'ht' ? 'Kreyòl' : formData.language === 'fr' ? 'Français' : formData.language === 'es' ? 'Español' : formData.language === 'en' ? 'English' : (isHt ? 'Pa gen lang' : inlineText(lang, 'No language')),
     });
 
     // Tags
     results.push({
       id: 'tags',
-      label: isHt ? 'Tags' : 'Tags',
+      label: isHt ? 'Tags' : inlineText(lang, 'Tags'),
       icon: 'fa-tags',
       pass: (formData.tags?.length || 0) >= 1,
       message: formData.tags?.length > 0
         ? `${formData.tags.length} tag(s)`
-        : (isHt ? 'Pa gen tag' : 'No tags added'),
+        : (isHt ? 'Pa gen tag' : inlineText(lang, 'No tags added')),
     });
 
     // SEO Slug
@@ -127,32 +129,32 @@ export default function ContentQualityChecker({
       pass: formData.slug?.trim().length > 0,
       message: formData.slug?.trim()
         ? formData.slug
-        : (isHt ? 'Pa gen slug' : 'No slug set'),
+        : (isHt ? 'Pa gen slug' : inlineText(lang, 'No slug set')),
     });
 
     // SEO Meta Description
     results.push({
       id: 'seo_meta',
-      label: isHt ? 'Meta Deskripsyon' : 'Meta Description',
+      label: isHt ? 'Meta Deskripsyon' : inlineText(lang, 'Meta Description'),
       icon: 'fa-search',
       pass: (formData.metaDescription?.length || 0) >= 50,
       message: formData.metaDescription?.length >= 50
-        ? `${formData.metaDescription.length} ${isHt ? 'karaktè' : 'chars'} (bon)`
+        ? `${formData.metaDescription.length} ${isHt ? 'karaktè' : inlineText(lang, 'chars')} (bon)`
         : formData.metaDescription?.length > 0
-          ? `${formData.metaDescription.length} ${isHt ? 'karaktè' : 'chars'} (min 50 ${isHt ? 'rekòmande' : 'recommended'})`
-          : (isHt ? 'Pa gen meta deskripsyon' : 'No meta description'),
+          ? `${formData.metaDescription.length} ${isHt ? 'karaktè' : inlineText(lang, 'chars')} (min 50 ${isHt ? 'rekòmande' : inlineText(lang, 'recommended')})`
+          : (isHt ? 'Pa gen meta deskripsyon' : inlineText(lang, 'No meta description')),
     });
 
     // Schedule
     if (formData.visibility === 'schedule') {
       results.push({
         id: 'schedule',
-        label: isHt ? 'Dat Pwograme' : 'Schedule Date',
+        label: isHt ? 'Dat Pwograme' : inlineText(lang, 'Schedule Date'),
         icon: 'fa-clock',
         pass: !!formData.scheduleDate,
         message: formData.scheduleDate
           ? new Date(formData.scheduleDate).toLocaleString()
-          : (isHt ? 'Pa gen dat chwazi' : 'No date selected'),
+          : (isHt ? 'Pa gen dat chwazi' : inlineText(lang, 'No date selected')),
       });
     }
 
@@ -169,7 +171,7 @@ export default function ContentQualityChecker({
       <div className="cqc-header">
         <h3 className="cqc-title">
           <i className="fas fa-clipboard-check" />
-          {isHt ? 'Kontwòl Kalite' : 'Quality Check'}
+          {isHt ? 'Kontwòl Kalite' : inlineText(lang, 'Quality Check')}
         </h3>
         <div className="cqc-score">
           <div className="cqc-score-ring">
@@ -190,7 +192,7 @@ export default function ContentQualityChecker({
           </div>
           <div className="cqc-score-text">
             <strong>{passedCount}/{totalCount}</strong>
-            <span>{isHt ? 'tcheke pase' : 'checks passed'}</span>
+            <span>{isHt ? 'tcheke pase' : inlineText(lang, 'checks passed')}</span>
           </div>
         </div>
       </div>
@@ -198,8 +200,8 @@ export default function ContentQualityChecker({
       {allPassed ? (
         <div className="cqc-all-passed">
           <i className="fas fa-check-circle" />
-          <h4>{isHt ? 'Tout bagay pare pou pibliye!' : 'Everything ready to publish!'}</h4>
-          <p>{isHt ? 'Klike sou Pibliye anba a pou pibliye kontni w.' : 'Click Publish below to make your content live.'}</p>
+          <h4>{isHt ? 'Tout bagay pare pou pibliye!' : inlineText(lang, 'Everything ready to publish!')}</h4>
+          <p>{isHt ? 'Klike sou Pibliye anba a pou pibliye kontni w.' : inlineText(lang, 'Click Publish below to make your content live.')}</p>
         </div>
       ) : (
         <div className="cqc-warning">

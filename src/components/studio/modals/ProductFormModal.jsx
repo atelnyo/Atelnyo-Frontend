@@ -13,6 +13,7 @@ import {
 } from './shared';
 import { parseHashtags, hashtagsToInput } from '../../../utils/hashtags';
 import styles from './modals.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function ProductFormModal({ onClose, onSuccess, lang, showToast, item }) {
   const isEdit = Boolean(item);
@@ -31,9 +32,9 @@ export default function ProductFormModal({ onClose, onSuccess, lang, showToast, 
 
   const validate = () => {
     const errs = {};
-    if (!form.title.trim()) errs.title = lang === 'ht' ? 'Tit oblije' : 'Title required';
+    if (!form.title.trim()) errs.title = lang === 'ht' ? 'Tit oblije' : inlineText(lang, 'Title required');
     if (!form.price || isNaN(Number(form.price)) || Number(form.price) <= 0) {
-      errs.price = lang === 'ht' ? 'Pri valab oblije' : 'A valid price is required';
+      errs.price = lang === 'ht' ? 'Pri valab oblije' : inlineText(lang, 'A valid price is required');
     }
     return errs;
   };
@@ -67,15 +68,15 @@ if (isEdit) {
       }
       showToast?.(
         isEdit
-          ? (lang === 'ht' ? '✅ Pwodwi mete ajou!' : '✅ Product updated!')
-          : (lang === 'ht' ? '✅ Pwodwi kreye avèk siksè!' : '✅ Product created successfully!'),
+          ? (lang === 'ht' ? '✅ Pwodwi mete ajou!' : inlineText(lang, '✅ Product updated!'))
+          : (lang === 'ht' ? '✅ Pwodwi kreye avèk siksè!' : inlineText(lang, '✅ Product created successfully!')),
         'check-circle',
       );
       onSuccess?.(); onClose?.();
     } catch (err) {
       const detail = err?.response?.data?.detail || err?.response?.data?.title?.[0]
         || err?.message
-        || (lang === 'ht' ? 'Pa t kapab kreye pwodwi a.' : 'Could not create product.');
+        || (lang === 'ht' ? 'Pa t kapab kreye pwodwi a.' : inlineText(lang, 'Could not create product.'));
       setErrors((e) => ({ ...e, _api: detail }));
       showToast?.(detail, 'circle-exclamation');
     } finally { setLoading(false); }
@@ -83,64 +84,64 @@ if (isEdit) {
 
   return (
     <StudioModal onClose={onClose} icon="fa-cube"
-      title={lang === 'ht' ? 'Kreye yon Pwodwi' : 'Create a Product'}
+      title={lang === 'ht' ? 'Kreye yon Pwodwi' : inlineText(lang, 'Create a Product')}
       subtitle={isEdit
-        ? (lang === 'ht' ? 'Modifye pwodwi a' : 'Edit this product')
-        : (lang === 'ht' ? 'Vann yon pwodwi dijital sou Marketplace a' : 'Sell a digital product on the Marketplace')}>
+        ? (lang === 'ht' ? 'Modifye pwodwi a' : inlineText(lang, 'Edit this product'))
+        : (lang === 'ht' ? 'Vann yon pwodwi dijital sou Marketplace a' : inlineText(lang, 'Sell a digital product on the Marketplace'))}>
       <form onSubmit={handleSubmit} className={styles.form}>
         {errors._api && <div className={styles.apiError} role="alert">{errors._api}</div>}
         {isEdit && (
           <div className={styles.editBanner}>
-            <i className="fas fa-pen" aria-hidden="true" /> {lang === 'ht' ? 'Ap modifye' : 'Editing'} <strong>{form.title}</strong>
+            <i className="fas fa-pen" aria-hidden="true" /> {lang === 'ht' ? 'Ap modifye' : inlineText(lang, 'Editing')} <strong>{form.title}</strong>
           </div>
         )}
         <LoadingOverlay loading={loading}>
           <FormSection
             icon="fa-info-circle"
-            title={lang === 'ht' ? 'Enfòmasyon Pwodwi' : 'Product Information'}
-            hint={lang === 'ht' ? 'Sa w ap vann lan?' : 'What are you selling?'}
+            title={lang === 'ht' ? 'Enfòmasyon Pwodwi' : inlineText(lang, 'Product Information')}
+            hint={lang === 'ht' ? 'Sa w ap vann lan?' : inlineText(lang, 'What are you selling?')}
           >
-            <FormField label={lang === 'ht' ? 'Tit' : 'Title'} required error={errors.title}>
+            <FormField label={lang === 'ht' ? 'Tit' : inlineText(lang, 'Title')} required error={errors.title}>
               <input className={styles.input} value={form.title}
                 onChange={(e) => handleChange('title', e.target.value)}
-                placeholder={lang === 'ht' ? 'Antre non pwodwi a' : 'Enter product name'}
+                placeholder={lang === 'ht' ? 'Antre non pwodwi a' : inlineText(lang, 'Enter product name')}
                 maxLength={200} autoFocus />
             </FormField>
             <div className={styles.row}>
-              <FormField label={lang === 'ht' ? 'Pri ($)' : 'Price ($)'} required error={errors.price}>
+              <FormField label={lang === 'ht' ? 'Pri ($)' : inlineText(lang, 'Price ($)')} required error={errors.price}>
                 <input className={styles.input} type="number" min="0.50" step="0.50"
                   value={form.price} onChange={(e) => handleChange('price', e.target.value)}
                   placeholder="9.99" />
               </FormField>
-              <FormField label={lang === 'ht' ? 'Kalite' : 'Type'}>
+              <FormField label={lang === 'ht' ? 'Kalite' : inlineText(lang, 'Type')}>
                 <select className={styles.input} value={form.kind}
                   onChange={(e) => handleChange('kind', e.target.value)}>
-                  <option value="digital">{lang === 'ht' ? 'Dijital' : 'Digital'}</option>
-                  <option value="physical">{lang === 'ht' ? 'Fizik' : 'Physical'}</option>
-                  <option value="service">{lang === 'ht' ? 'Sèvis' : 'Service'}</option>
+                  <option value="digital">{lang === 'ht' ? 'Dijital' : inlineText(lang, 'Digital')}</option>
+                  <option value="physical">{lang === 'ht' ? 'Fizik' : inlineText(lang, 'Physical')}</option>
+                  <option value="service">{lang === 'ht' ? 'Sèvis' : inlineText(lang, 'Service')}</option>
                 </select>
               </FormField>
             </div>
-            <FormField label={lang === 'ht' ? 'Kategori' : 'Category'}>
+            <FormField label={lang === 'ht' ? 'Kategori' : inlineText(lang, 'Category')}>
               <input className={styles.input} value={form.category}
                 onChange={(e) => handleChange('category', e.target.value)}
-                placeholder={lang === 'ht' ? 'Modèl, Liv, Mizik...' : 'Template, Book, Music...'} />
+                placeholder={lang === 'ht' ? 'Modèl, Liv, Mizik...' : inlineText(lang, 'Template, Book, Music...')} />
             </FormField>
           </FormSection>
 
           <FormSection
             icon="fa-file-lines"
-            title={lang === 'ht' ? 'Deskripsyon' : 'Description'}
-            hint={lang === 'ht' ? 'Eksplike sa achtè a pral resevwa.' : 'Explain what the buyer receives.'}
+            title={lang === 'ht' ? 'Deskripsyon' : inlineText(lang, 'Description')}
+            hint={lang === 'ht' ? 'Eksplike sa achtè a pral resevwa.' : inlineText(lang, 'Explain what the buyer receives.')}
           >
-            <FormField label={lang === 'ht' ? 'Deskripsyon' : 'Description'}>
+            <FormField label={lang === 'ht' ? 'Deskripsyon' : inlineText(lang, 'Description')}>
               <textarea className={styles.textarea} value={form.description}
                 onChange={(e) => handleChange('description', e.target.value)}
-                placeholder={lang === 'ht' ? 'Dekri pwodwi a...' : 'Describe the product...'}
+                placeholder={lang === 'ht' ? 'Dekri pwodwi a...' : inlineText(lang, 'Describe the product...')}
                 rows={4} maxLength={5000} />
             </FormField>
-            <FormField label={lang === 'ht' ? 'Hashtags' : 'Hashtags'}
-              hint={lang === 'ht' ? 'Separe ak espas — #Kreyol #Art' : 'Separate with spaces — #Kreyol #Art'}>
+            <FormField label={lang === 'ht' ? 'Hashtags' : inlineText(lang, 'Hashtags')}
+              hint={lang === 'ht' ? 'Separe ak espas — #Kreyol #Art' : inlineText(lang, 'Separate with spaces — #Kreyol #Art')}>
               <div className={styles.inputWithHelp}>
                 <input className={styles.input} value={form.hashtags}
                   onChange={(e) => handleChange('hashtags', e.target.value)}
@@ -152,38 +153,38 @@ if (isEdit) {
 
           <FormSection
             icon="fa-image"
-            title={lang === 'ht' ? 'Imaj Pwodwi' : 'Product Image'}
-            hint={lang === 'ht' ? 'Yon bon foto fè pwodwi a parèt nan Explore.' : 'A strong photo makes the product stand out in Explore.'}
+            title={lang === 'ht' ? 'Imaj Pwodwi' : inlineText(lang, 'Product Image')}
+            hint={lang === 'ht' ? 'Yon bon foto fè pwodwi a parèt nan Explore.' : inlineText(lang, 'A strong photo makes the product stand out in Explore.')}
           >
             <FieldTip>
               {lang === 'ht'
                 ? 'Yon foto klè sou yon fon senp vann pi byen.'
-                : 'A clear photo on a simple background sells better.'}
+                : inlineText(lang, 'A clear photo on a simple background sells better.')}
             </FieldTip>
             <ImageUrlField
-              label={lang === 'ht' ? 'URL Imaj' : 'Image URL'}
+              label={lang === 'ht' ? 'URL Imaj' : inlineText(lang, 'Image URL')}
               value={form.image_url}
               onChange={(v) => handleChange('image_url', v)}
               placeholder="https://example.com/product.jpg"
               lang={lang}
               hint={lang === 'ht'
                 ? 'Kole yon URL imaj DIREK (.jpg, .png, .webp) — pa yon paj galri.'
-                : 'Paste a DIRECT image URL (.jpg, .png, .webp) — not a gallery page.'}
+                : inlineText(lang, 'Paste a DIRECT image URL (.jpg, .png, .webp) — not a gallery page.')}
               help={HELP_COPY.cover}
             />
           </FormSection>
         </LoadingOverlay>
         <div className={styles.actions}>
           <button type="button" className="btn-secondary" onClick={onClose} disabled={loading}>
-            {lang === 'ht' ? 'Anile' : 'Cancel'}
+            {lang === 'ht' ? 'Anile' : inlineText(lang, 'Cancel')}
           </button>
           <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? (
-              <><i className="fas fa-spinner fa-spin" /> {lang === 'ht' ? 'Ap sove...' : 'Saving...'}</>
+              <><i className="fas fa-spinner fa-spin" /> {lang === 'ht' ? 'Ap sove...' : inlineText(lang, 'Saving...')}</>
             ) : (
               <><i className={`fas ${isEdit ? 'fa-save' : 'fa-plus'}`} /> {isEdit
-                ? (lang === 'ht' ? 'Mete ajou' : 'Update')
-                : (lang === 'ht' ? 'Kreye Pwodwi' : 'Create Product')}</>
+                ? (lang === 'ht' ? 'Mete ajou' : inlineText(lang, 'Update'))
+                : (lang === 'ht' ? 'Kreye Pwodwi' : inlineText(lang, 'Create Product'))}</>
             )}
           </button>
         </div>

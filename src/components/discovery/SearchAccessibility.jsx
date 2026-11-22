@@ -10,6 +10,7 @@
  * Phase 13 + Phase 10 integration.
  */
 import React, { useEffect, useRef, useCallback } from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 /**
  * LiveRegion — announces dynamic content changes to screen readers.
@@ -37,7 +38,7 @@ export function SearchResultAnnouncer({ query, total, lang = 'en', loading }) {
 
   let message = '';
   if (loading) {
-    message = isHt ? 'Ap chèche...' : 'Searching...';
+    message = isHt ? 'Ap chèche...' : inlineText(lang, 'Searching...');
   } else if (query && total !== undefined) {
     const itemWord = isHt ? 'kou' : total === 1 ? 'result' : 'results';
     if (total === 0) {
@@ -62,7 +63,7 @@ export function AccessibleZeroResults({ query, suggestions = [], onSelectSuggest
   const isHt = lang === 'ht';
 
   return (
-    <div className="disc-zero-results" role="region" aria-label={isHt ? 'Pa gen rezilta' : 'No results'}>
+    <div className="disc-zero-results" role="region" aria-label={isHt ? 'Pa gen rezilta' : inlineText(lang, 'No results')}>
       <div className="disc-zero-icon">
         <i className="fas fa-search" aria-hidden="true" />
       </div>
@@ -74,13 +75,13 @@ export function AccessibleZeroResults({ query, suggestions = [], onSelectSuggest
       <p className="disc-zero-hint">
         {isHt
           ? 'Eseye yon lòt tèm, verifye pou egriy, oswa eksplore kategori yo.'
-          : 'Try a different term, check spelling, or browse categories.'}
+          : inlineText(lang, 'Try a different term, check spelling, or browse categories.')}
       </p>
 
       {suggestions.length > 0 && (
-        <div className="disc-zero-suggestions" role="group" aria-label={isHt ? 'Sijesyon' : 'Suggestions'}>
+        <div className="disc-zero-suggestions" role="group" aria-label={isHt ? 'Sijesyon' : inlineText(lang, 'Suggestions')}>
           <p className="disc-zero-suggestion-label">
-            {isHt ? 'Eseye:' : 'Try:'}
+            {isHt ? 'Eseye:' : inlineText(lang, 'Try:')}
           </p>
           <div className="disc-zero-suggestion-list">
             {suggestions.map((s, idx) => (
@@ -88,7 +89,7 @@ export function AccessibleZeroResults({ query, suggestions = [], onSelectSuggest
                 key={idx}
                 className="disc-zero-suggestion-btn"
                 onClick={() => onSelectSuggestion && onSelectSuggestion(s)}
-                aria-label={`${isHt ? 'Eseye' : 'Try'}: ${s}`}
+                aria-label={`${isHt ? 'Eseye' : inlineText(lang, 'Try')}: ${s}`}
               >
                 <i className="fas fa-search" aria-hidden="true" />
                 {s}

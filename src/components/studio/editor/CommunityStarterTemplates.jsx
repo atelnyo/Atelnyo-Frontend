@@ -14,6 +14,7 @@
 import React from 'react';
 import { COMMUNITY_TEMPLATES } from './communityTemplates';
 import styles from './communityEditor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const JOIN_LABELS = {
   public: { en: 'Public', ht: 'Piblik' },
@@ -23,7 +24,7 @@ const JOIN_LABELS = {
 
 export default function CommunityStarterTemplates({ lang = 'en', appliedId = '', onApply }) {
   const isHt = lang === 'ht';
-  const key = isHt ? 'ht' : 'en';
+  const key = isHt ? 'ht' : inlineText(lang, 'en');
 
   return (
     <section className={styles.templateSection} aria-labelledby="community-templates-title">
@@ -31,18 +32,18 @@ export default function CommunityStarterTemplates({ lang = 'en', appliedId = '',
         <div>
           <h3 className={styles.formTitle} id="community-templates-title">
             <i className="fas fa-wand-magic-sparkles" aria-hidden="true" />
-            {isHt ? 'Kòmanse ak yon modèl' : 'Start from a template'}
+            {isHt ? 'Kòmanse ak yon modèl' : inlineText(lang, 'Start from a template')}
           </h3>
           <p className={styles.hint} style={{ margin: 0 }}>
             {isHt
               ? 'Chwazi yon pwen depa. Nou ranpli deskripsyon, kategori, règ ak fason moun antre — ou ka chanje tout bagay apre.'
-              : 'Pick a starting point. We fill the description, category, rules, and join mode — you can change everything afterwards.'}
+              : inlineText(lang, 'Pick a starting point. We fill the description, category, rules, and join mode — you can change everything afterwards.')}
           </p>
         </div>
         {appliedId && (
           <span className={styles.templateAppliedPill}>
             <i className="fas fa-check" aria-hidden="true" />
-            {isHt ? 'Modèl aplike' : 'Template applied'}
+            {isHt ? 'Modèl aplike' : inlineText(lang, 'Template applied')}
           </span>
         )}
       </div>
@@ -66,7 +67,7 @@ export default function CommunityStarterTemplates({ lang = 'en', appliedId = '',
                 <span>{JOIN_LABELS[template.join_mode]?.[key] || template.join_mode}</span>
                 <span>·</span>
                 <span>
-                  {template.rules.length} {isHt ? 'règ' : 'rules'}
+                  {template.rules.length} {isHt ? 'règ' : inlineText(lang, 'rules')}
                 </span>
               </div>
               <button
@@ -77,8 +78,8 @@ export default function CommunityStarterTemplates({ lang = 'en', appliedId = '',
               >
                 <i className={`fas ${applied ? 'fa-check' : 'fa-arrow-down-to-bracket'}`} aria-hidden="true" />
                 {applied
-                  ? (isHt ? 'Aplike' : 'Applied')
-                  : (isHt ? 'Sèvi ak modèl sa a' : 'Use this template')}
+                  ? (isHt ? 'Aplike' : inlineText(lang, 'Applied'))
+                  : (isHt ? 'Sèvi ak modèl sa a' : inlineText(lang, 'Use this template'))}
               </button>
             </article>
           );
@@ -89,7 +90,7 @@ export default function CommunityStarterTemplates({ lang = 'en', appliedId = '',
         <i className="fas fa-pen" aria-hidden="true" />
         {isHt
           ? 'Oswa kòmanse nan zewo: pa chwazi anyen epi ranpli fòm nan pi ba a.'
-          : 'Or start from scratch: choose nothing and fill the form below.'}
+          : inlineText(lang, 'Or start from scratch: choose nothing and fill the form below.')}
       </p>
     </section>
   );

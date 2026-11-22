@@ -26,6 +26,7 @@ import MediaPicker from '../../media/MediaPicker';
 import MediaPickerButton from './MediaPickerButton';
 import AIAssistPanel from './AIAssistPanel';
 import styles from './editor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 /* ─── Build block type list from centralized registry ──────────────── */
 function buildBlockTypeList() {
@@ -474,9 +475,9 @@ export default function LessonEditor({ lesson, lang = 'en', onUpdate, showToast 
       await lessonService.update(lesson.id, { title: lessonTitle, description: lessonDesc });
       onUpdate?.(lesson.id, { title: lessonTitle, description: lessonDesc });
       setDirty(false);
-      showToast?.(isHt ? '✅ Leson sove!' : '✅ Lesson saved!', 'check-circle');
+      showToast?.(isHt ? '✅ Leson sove!' : inlineText(lang, '✅ Lesson saved!'), 'check-circle');
     } catch {
-      showToast?.(isHt ? '❌ Pa t kapab sove.' : '❌ Could not save.', 'circle-exclamation');
+      showToast?.(isHt ? '❌ Pa t kapab sove.' : inlineText(lang, '❌ Could not save.'), 'circle-exclamation');
     }
   }, [lesson?.id, lessonTitle, lessonDesc, onUpdate, isHt, showToast]);
 
@@ -487,7 +488,7 @@ export default function LessonEditor({ lesson, lang = 'en', onUpdate, showToast 
     _clipboard = { ...block, content: { ...block.content } };
     setCopySuccess(id);
     setTimeout(() => setCopySuccess(null), 1500);
-    showToast?.(isHt ? '📋 Blòk kopye!' : '📋 Block copied!', 'check-circle');
+    showToast?.(isHt ? '📋 Blòk kopye!' : inlineText(lang, '📋 Block copied!'), 'check-circle');
   }, [blocks, isHt, showToast]);
 
   const handlePasteBlock = useCallback(async () => {
@@ -501,7 +502,7 @@ export default function LessonEditor({ lesson, lang = 'en', onUpdate, showToast 
       });
       setBlocks((prev) => [...prev, res.data]);
       setActiveBlockId(res.data.id);
-      showToast?.(isHt ? '📋 Blòk kole!' : '📋 Block pasted!', 'check-circle');
+      showToast?.(isHt ? '📋 Blòk kole!' : inlineText(lang, '📋 Block pasted!'), 'check-circle');
     } catch (err) {
       showToast?.(err?.response?.data?.detail || 'Error', 'circle-exclamation');
     }
@@ -519,7 +520,7 @@ export default function LessonEditor({ lesson, lang = 'en', onUpdate, showToast 
       });
       setBlocks((prev) => [...prev, res.data]);
       setActiveBlockId(res.data.id);
-      showToast?.(isHt ? '📋 Blòk duplike!' : '📋 Block duplicated!', 'check-circle');
+      showToast?.(isHt ? '📋 Blòk duplike!' : inlineText(lang, '📋 Block duplicated!'), 'check-circle');
     } catch (err) {
       showToast?.(err?.response?.data?.detail || 'Error', 'circle-exclamation');
     }
@@ -580,7 +581,7 @@ export default function LessonEditor({ lesson, lang = 'en', onUpdate, showToast 
     return (
       <div className={styles.lessonEditorEmpty}>
         <i className="fas fa-arrow-left" aria-hidden="true" />
-        <p>{isHt ? 'Chwazi yon leson nan kou a pou modifye.' : 'Select a lesson from the course to edit.'}</p>
+        <p>{isHt ? 'Chwazi yon leson nan kou a pou modifye.' : inlineText(lang, 'Select a lesson from the course to edit.')}</p>
       </div>
     );
   }
@@ -593,18 +594,18 @@ export default function LessonEditor({ lesson, lang = 'en', onUpdate, showToast 
           className={styles.lessonEditorTitle}
           value={lessonTitle}
           onChange={(e) => { setLessonTitle(e.target.value); setDirty(true); }}
-          placeholder={isHt ? 'Tit leson...' : 'Lesson title...'}
+          placeholder={isHt ? 'Tit leson...' : inlineText(lang, 'Lesson title...')}
           maxLength={200}
         />
         <textarea
           className={styles.lessonEditorDesc}
           value={lessonDesc}
           onChange={(e) => { setLessonDesc(e.target.value); setDirty(true); }}
-          placeholder={isHt ? 'Deskripsyon leson...' : 'Lesson description...'}
+          placeholder={isHt ? 'Deskripsyon leson...' : inlineText(lang, 'Lesson description...')}
           rows={2}
           maxLength={500}
         />
-        {dirty && <span className={styles.savingIndicator}><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap sove...' : 'Saving...'}</span>}
+        {dirty && <span className={styles.savingIndicator}><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap sove...' : inlineText(lang, 'Saving...')}</span>}
       </div>
 
       {/* Undo/Redo toolbar */}
@@ -614,8 +615,8 @@ export default function LessonEditor({ lesson, lang = 'en', onUpdate, showToast 
           className={`${styles.toolbarBtn} ${!canUndo ? styles.toolbarBtnDisabled : ''}`}
           onClick={() => canUndo && undo()}
           disabled={!canUndo}
-          aria-label={isHt ? 'Anile (Ctrl+Z)' : 'Undo (Ctrl+Z)'}
-          title={isHt ? 'Anile (Ctrl+Z)' : 'Undo (Ctrl+Z)'}
+          aria-label={isHt ? 'Anile (Ctrl+Z)' : inlineText(lang, 'Undo (Ctrl+Z)')}
+          title={isHt ? 'Anile (Ctrl+Z)' : inlineText(lang, 'Undo (Ctrl+Z)')}
         >
           <i className="fas fa-undo" aria-hidden="true" />
         </button>
@@ -624,8 +625,8 @@ export default function LessonEditor({ lesson, lang = 'en', onUpdate, showToast 
           className={`${styles.toolbarBtn} ${!canRedo ? styles.toolbarBtnDisabled : ''}`}
           onClick={() => canRedo && redo()}
           disabled={!canRedo}
-          aria-label={isHt ? 'Repeche (Ctrl+Shift+Z)' : 'Redo (Ctrl+Shift+Z)'}
-          title={isHt ? 'Repeche (Ctrl+Shift+Z)' : 'Redo (Ctrl+Shift+Z)'}
+          aria-label={isHt ? 'Repeche (Ctrl+Shift+Z)' : inlineText(lang, 'Redo (Ctrl+Shift+Z)')}
+          title={isHt ? 'Repeche (Ctrl+Shift+Z)' : inlineText(lang, 'Redo (Ctrl+Shift+Z)')}
         >
           <i className="fas fa-redo" aria-hidden="true" />
         </button>
@@ -635,8 +636,8 @@ export default function LessonEditor({ lesson, lang = 'en', onUpdate, showToast 
           className={`${styles.toolbarBtn} ${activeBlockId ? '' : styles.toolbarBtnDisabled}`}
           onClick={() => activeBlockId && handleCopyBlock(activeBlockId)}
           disabled={!activeBlockId}
-          aria-label={isHt ? 'Kopye blòk (Ctrl+C)' : 'Copy block (Ctrl+C)'}
-          title={isHt ? 'Kopye blòk (Ctrl+C)' : 'Copy block (Ctrl+C)'}
+          aria-label={isHt ? 'Kopye blòk (Ctrl+C)' : inlineText(lang, 'Copy block (Ctrl+C)')}
+          title={isHt ? 'Kopye blòk (Ctrl+C)' : inlineText(lang, 'Copy block (Ctrl+C)')}
         >
           <i className="fas fa-copy" aria-hidden="true" />
         </button>
@@ -645,8 +646,8 @@ export default function LessonEditor({ lesson, lang = 'en', onUpdate, showToast 
           className={`${styles.toolbarBtn} ${_clipboard ? '' : styles.toolbarBtnDisabled}`}
           onClick={() => _clipboard && handlePasteBlock()}
           disabled={!_clipboard}
-          aria-label={isHt ? 'Kole blòk (Ctrl+V)' : 'Paste block (Ctrl+V)'}
-          title={isHt ? 'Kole blòk (Ctrl+V)' : 'Paste block (Ctrl+V)'}
+          aria-label={isHt ? 'Kole blòk (Ctrl+V)' : inlineText(lang, 'Paste block (Ctrl+V)')}
+          title={isHt ? 'Kole blòk (Ctrl+V)' : inlineText(lang, 'Paste block (Ctrl+V)')}
         >
           <i className="fas fa-paste" aria-hidden="true" />
         </button>
@@ -655,8 +656,8 @@ export default function LessonEditor({ lesson, lang = 'en', onUpdate, showToast 
           className={`${styles.toolbarBtn} ${activeBlockId ? '' : styles.toolbarBtnDisabled}`}
           onClick={() => activeBlockId && handleDuplicateBlock(activeBlockId)}
           disabled={!activeBlockId}
-          aria-label={isHt ? 'Duplike blòk (Ctrl+D)' : 'Duplicate block (Ctrl+D)'}
-          title={isHt ? 'Duplike blòk (Ctrl+D)' : 'Duplicate block (Ctrl+D)'}
+          aria-label={isHt ? 'Duplike blòk (Ctrl+D)' : inlineText(lang, 'Duplicate block (Ctrl+D)')}
+          title={isHt ? 'Duplike blòk (Ctrl+D)' : inlineText(lang, 'Duplicate block (Ctrl+D)')}
         >
           <i className="fas fa-clone" aria-hidden="true" />
         </button>
@@ -665,20 +666,20 @@ export default function LessonEditor({ lesson, lang = 'en', onUpdate, showToast 
           type="button"
           className={styles.toolbarBtn}
           onClick={handleSaveLesson}
-          aria-label={isHt ? 'Sove leson (Ctrl+S)' : 'Save lesson (Ctrl+S)'}
-          title={isHt ? 'Sove leson (Ctrl+S)' : 'Save lesson (Ctrl+S)'}
+          aria-label={isHt ? 'Sove leson (Ctrl+S)' : inlineText(lang, 'Save lesson (Ctrl+S)')}
+          title={isHt ? 'Sove leson (Ctrl+S)' : inlineText(lang, 'Save lesson (Ctrl+S)')}
         >
-          <i className="fas fa-save" aria-hidden="true" /> {isHt ? 'Sove' : 'Save'}
+          <i className="fas fa-save" aria-hidden="true" /> {isHt ? 'Sove' : inlineText(lang, 'Save')}
         </button>
       </div>
 
       {/* Blocks */}
       {loading ? (
         <div className={styles.lessonEditorLoading}>
-          <i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap chaje blòk yo...' : 'Loading blocks...'}
+          <i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap chaje blòk yo...' : inlineText(lang, 'Loading blocks...')}
         </div>
       ) : (
-        <div className={styles.lessonEditorBlocks} role="list" aria-label={isHt ? 'Blòk kontni leson an' : 'Lesson content blocks'}>
+        <div className={styles.lessonEditorBlocks} role="list" aria-label={isHt ? 'Blòk kontni leson an' : inlineText(lang, 'Lesson content blocks')}>
           {blocks.map((block, i) => (
             <BlockCard
               key={block.id}
@@ -715,7 +716,7 @@ export default function LessonEditor({ lesson, lang = 'en', onUpdate, showToast 
                   className={styles.blockTypeCancel}
                   onClick={() => setShowTypePicker(false)}
                 >
-                  <i className="fas fa-times" /> {isHt ? 'Anile' : 'Cancel'}
+                  <i className="fas fa-times" /> {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
                 </button>
               </div>
             ) : (
@@ -725,7 +726,7 @@ export default function LessonEditor({ lesson, lang = 'en', onUpdate, showToast 
                 onClick={() => setShowTypePicker(true)}
               >
                 <i className="fas fa-plus" aria-hidden="true" />
-                {isHt ? 'Ajoute blòk' : 'Add block'}
+                {isHt ? 'Ajoute blòk' : inlineText(lang, 'Add block')}
               </button>
             )}
           </div>
@@ -734,7 +735,7 @@ export default function LessonEditor({ lesson, lang = 'en', onUpdate, showToast 
             <p className={styles.lessonEditorEmptyHint}>
               {isHt
                 ? 'Pa gen blòk ankò. Ajoute premye blòk la pou kòmanse.'
-                : 'No blocks yet. Add the first block to start.'}
+                : inlineText(lang, 'No blocks yet. Add the first block to start.')}
             </p>
           )}
         </div>

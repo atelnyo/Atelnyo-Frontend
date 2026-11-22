@@ -1,4 +1,5 @@
 import React from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 /**
  * ActionBar — M3 buttons, all real actions.
@@ -149,7 +150,7 @@ export default function ActionBar({
           type="button"
           className="csp-btn csp-btn--ghost"
           title={t.profile_affiliate_offers || 'Affiliate'}
-          onClick={() => onMessage?.(lang === 'ht' ? 'Demann Afilyasyon' : 'Affiliate inquiry')}
+          onClick={() => onMessage?.(lang === 'ht' ? 'Demann Afilyasyon' : inlineText(lang, 'Affiliate inquiry'))}
         >
           <i className="fas fa-hand-holding-usd" aria-hidden="true" />
           {t.profile_affiliate_short || 'Affiliate'}
@@ -161,7 +162,7 @@ export default function ActionBar({
           type="button"
           className="csp-btn csp-btn--ghost"
           title={t.profile_campaigns || 'Campaigns'}
-          onClick={() => onMessage?.(lang === 'ht' ? 'Demann Kanpay' : 'Campaign inquiry')}
+          onClick={() => onMessage?.(lang === 'ht' ? 'Demann Kanpay' : inlineText(lang, 'Campaign inquiry'))}
         >
           <i className="fas fa-bullhorn" aria-hidden="true" />
           {t.profile_campaigns || 'Campaigns'}

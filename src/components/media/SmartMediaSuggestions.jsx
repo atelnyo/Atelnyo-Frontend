@@ -9,6 +9,7 @@
  */
 import React, { useState } from 'react';
 import MediaCard from './MediaCard';
+import { inlineText } from '../../utils/inlineI18n';
 
 const SUGGESTION_GROUPS = [
   { key: 'recent', icon: 'fa-clock', labelEn: 'Recently Used', labelHt: 'Dènye itilize', maxItems: 6 },
@@ -33,12 +34,12 @@ export default function SmartMediaSuggestions({
         <div className="cs-suggestions-header">
           <h3 className="cs-suggestions-title">
             <i className="fas fa-lightbulb" />
-            {isHt ? 'Sijesyon Medya' : 'Media Suggestions'}
+            {isHt ? 'Sijesyon Medya' : inlineText(lang, 'Media Suggestions')}
           </h3>
         </div>
         <div className="cs-suggestions-empty">
           <i className="fas fa-lightbulb" />
-          <p>{isHt ? 'Pa gen medya pou sijere' : 'No media to suggest'}</p>
+          <p>{isHt ? 'Pa gen medya pou sijere' : inlineText(lang, 'No media to suggest')}</p>
         </div>
       </div>
     );
@@ -74,7 +75,7 @@ export default function SmartMediaSuggestions({
       <div className="cs-suggestions-header">
         <h3 className="cs-suggestions-title">
           <i className="fas fa-lightbulb" />
-          {isHt ? 'Sijesyon Medya' : 'Media Suggestions'}
+          {isHt ? 'Sijesyon Medya' : inlineText(lang, 'Media Suggestions')}
         </h3>
       </div>
 
@@ -116,7 +117,7 @@ export default function SmartMediaSuggestions({
       ) : (
         <div className="cs-suggestions-empty">
           <i className="fas fa-inbox" />
-          <p>{isHt ? 'Pa gen medya nan kategori sa a' : 'No media in this category'}</p>
+          <p>{isHt ? 'Pa gen medya nan kategori sa a' : inlineText(lang, 'No media in this category')}</p>
         </div>
       )}
     </div>

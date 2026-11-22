@@ -11,6 +11,7 @@
  */
 import React from 'react';
 import { getStatusMeta, isValidStatus } from './MediaStatusEngine';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function MediaStatusBadge({
   status,
@@ -24,7 +25,7 @@ export default function MediaStatusBadge({
       <span
         className={`media-status-engine-badge media-status-engine-badge--unknown ${className}`}
         role="status"
-        title={lang === 'ht' ? 'Estati enkoni' : 'Unknown status'}
+        title={lang === 'ht' ? 'Estati enkoni' : inlineText(lang, 'Unknown status')}
         style={{
           display: 'inline-flex', alignItems: 'center', gap: '4px',
           padding: size === 'sm' ? '2px 8px' : '4px 10px',
@@ -36,7 +37,7 @@ export default function MediaStatusBadge({
         }}
       >
         <i className="fas fa-question-circle" aria-hidden="true" style={{ fontSize: size === 'sm' ? '0.55rem' : '0.65rem' }} />
-        {lang === 'ht' ? 'Enkoni' : 'Unknown'}
+        {lang === 'ht' ? 'Enkoni' : inlineText(lang, 'Unknown')}
       </span>
     );
   }

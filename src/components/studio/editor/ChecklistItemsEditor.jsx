@@ -10,10 +10,11 @@
  */
 import React, { useState, useCallback, useRef } from 'react';
 import styles from './editor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function ChecklistItemsEditor({ block, onChange, lang = 'en' }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
 
   const items = Array.isArray(block.items) ? block.items : [];
   const [editingItem, setEditingItem] = useState(null); // index of expanded item
@@ -109,7 +110,7 @@ export default function ChecklistItemsEditor({ block, onChange, lang = 'en' }) {
 
       {items.length > 0 && (
         <p className={styles.checkSummary}>
-          {requiredCount} {isHt ? 'oblije' : 'required'} · {items.length - requiredCount} {isHt ? 'opsyonèl' : 'optional'}
+          {requiredCount} {isHt ? 'oblije' : inlineText(lang, 'required')} · {items.length - requiredCount} {isHt ? 'opsyonèl' : inlineText(lang, 'optional')}
         </p>
       )}
 
@@ -118,7 +119,7 @@ export default function ChecklistItemsEditor({ block, onChange, lang = 'en' }) {
         <p className={styles.checkEmpty}>
           {isHt
             ? 'Pa gen bagay ankò. Klike "Ajoute Bagay" pou kòmanse.'
-            : 'No items yet. Click "Add Item" to start.'}
+            : inlineText(lang, 'No items yet. Click "Add Item" to start.')}
         </p>
       ) : (
         <div className={styles.checkItemsList}>
@@ -148,13 +149,13 @@ export default function ChecklistItemsEditor({ block, onChange, lang = 'en' }) {
 
                   <div className={styles.checkItemFields}>
                     <label className={styles.checkField}>
-                      <span className={styles.checkFieldLabel}>{isHt ? 'Tèks bagay la' : 'Item text'}</span>
+                      <span className={styles.checkFieldLabel}>{isHt ? 'Tèks bagay la' : inlineText(lang, 'Item text')}</span>
                       <input
                         type="text"
                         className={styles.checkFieldInput}
                         value={item.text || ''}
                         onChange={(e) => updateItem(i, 'text', e.target.value)}
-                        placeholder={isHt ? 'Ekri bagay la...' : 'Enter item text...'}
+                        placeholder={isHt ? 'Ekri bagay la...' : inlineText(lang, 'Enter item text...')}
                         autoFocus
                       />
                     </label>
@@ -165,7 +166,7 @@ export default function ChecklistItemsEditor({ block, onChange, lang = 'en' }) {
                         checked={item.required !== false}
                         onChange={() => toggleRequired(i)}
                       />
-                      <span>{isHt ? 'Oblije pou konplete' : 'Required to complete'}</span>
+                      <span>{isHt ? 'Oblije pou konplete' : inlineText(lang, 'Required to complete')}</span>
                     </label>
                   </div>
                 </div>
@@ -177,17 +178,17 @@ export default function ChecklistItemsEditor({ block, onChange, lang = 'en' }) {
                   </div>
                   <span className={styles.checkItemBadge}>{i + 1}</span>
                   <span className={styles.checkItemText}>
-                    {item.text || <em>{isHt ? 'Vid' : 'Empty'}</em>}
+                    {item.text || <em>{isHt ? 'Vid' : inlineText(lang, 'Empty')}</em>}
                   </span>
                   {item.required !== false && (
-                    <span className={styles.checkItemReq}>{isHt ? 'oblije' : 'req'}</span>
+                    <span className={styles.checkItemReq}>{isHt ? 'oblije' : inlineText(lang, 'req')}</span>
                   )}
                   <div className={styles.checkItemActions}>
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); moveItem(i, -1); }}
                       disabled={i === 0}
-                      title={isHt ? 'Monte' : 'Move up'}
+                      title={isHt ? 'Monte' : inlineText(lang, 'Move up')}
                     >
                       <i className="fas fa-chevron-up" />
                     </button>
@@ -195,14 +196,14 @@ export default function ChecklistItemsEditor({ block, onChange, lang = 'en' }) {
                       type="button"
                       onClick={(e) => { e.stopPropagation(); moveItem(i, 1); }}
                       disabled={i === items.length - 1}
-                      title={isHt ? 'Desann' : 'Move down'}
+                      title={isHt ? 'Desann' : inlineText(lang, 'Move down')}
                     >
                       <i className="fas fa-chevron-down" />
                     </button>
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); duplicateItem(i); }}
-                      title={isHt ? 'Diplike' : 'Duplicate'}
+                      title={isHt ? 'Diplike' : inlineText(lang, 'Duplicate')}
                     >
                       <i className="fas fa-copy" />
                     </button>
@@ -210,7 +211,7 @@ export default function ChecklistItemsEditor({ block, onChange, lang = 'en' }) {
                       type="button"
                       className={styles.checkItemDelete}
                       onClick={(e) => { e.stopPropagation(); removeItem(i); }}
-                      title={isHt ? 'Efase' : 'Delete'}
+                      title={isHt ? 'Efase' : inlineText(lang, 'Delete')}
                     >
                       <i className="fas fa-trash" />
                     </button>
@@ -226,7 +227,7 @@ export default function ChecklistItemsEditor({ block, onChange, lang = 'en' }) {
        <p className={styles.checkHint}>
           <i className="fas fa-info-circle" /> {isHt
             ? 'Klike sou yon bagay pou modifye l. Trike pou reòdone.'
-            : 'Click an item to edit. Drag to reorder.'}
+            : inlineText(lang, 'Click an item to edit. Drag to reorder.')}
         </p>
       )}
     </div>

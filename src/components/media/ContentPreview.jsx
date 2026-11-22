@@ -8,6 +8,7 @@
  */
 import React, { useState } from 'react';
 import MediaPreview from './MediaPreview';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function ContentPreview({
   formData = {},
@@ -25,19 +26,19 @@ export default function ContentPreview({
       <div className="cp-header">
         <h3 className="cp-title">
           <i className="fas fa-eye" />
-          {isHt ? 'Aperçu Kontni' : 'Content Preview'}
+          {isHt ? 'Aperçu Kontni' : inlineText(lang, 'Content Preview')}
         </h3>
         <p className="cp-hint">
           {isHt
             ? 'Wè egzakteman sa itilizatè w ap wè anvan piblikasyon.'
-            : 'See exactly what your audience will see before publishing.'}
+            : inlineText(lang, 'See exactly what your audience will see before publishing.')}
         </p>
       </div>
 
       {/* Toolbar */}
       <div className="cp-toolbar">
         <div className="cp-toolbar-group">
-          <span className="cp-toolbar-label">{isHt ? 'Ekipman' : 'Device'}</span>
+          <span className="cp-toolbar-label">{isHt ? 'Ekipman' : inlineText(lang, 'Device')}</span>
           <div className="cp-toolbar-btns">
             {[
               { id: 'mobile', icon: 'fa-mobile-alt' },
@@ -57,21 +58,21 @@ export default function ContentPreview({
           </div>
         </div>
         <div className="cp-toolbar-group">
-          <span className="cp-toolbar-label">{isHt ? 'Tèm' : 'Theme'}</span>
+          <span className="cp-toolbar-label">{isHt ? 'Tèm' : inlineText(lang, 'Theme')}</span>
           <div className="cp-toolbar-btns">
             <button
               type="button"
               className={`cp-toolbar-btn ${previewTheme === 'light' ? 'cp-toolbar-active' : ''}`}
               onClick={() => setPreviewTheme('light')}
             >
-              <i className="fas fa-sun" /> {isHt ? 'Limyè' : 'Light'}
+              <i className="fas fa-sun" /> {isHt ? 'Limyè' : inlineText(lang, 'Light')}
             </button>
             <button
               type="button"
               className={`cp-toolbar-btn ${previewTheme === 'dark' ? 'cp-toolbar-active' : ''}`}
               onClick={() => setPreviewTheme('dark')}
             >
-              <i className="fas fa-moon" /> {isHt ? 'Fè nwa' : 'Dark'}
+              <i className="fas fa-moon" /> {isHt ? 'Fè nwa' : inlineText(lang, 'Dark')}
             </button>
           </div>
         </div>
@@ -82,7 +83,7 @@ export default function ContentPreview({
         <div className="cp-content">
           {/* Title */}
           <h1 className="cp-content-title">
-            {formData.title || (isHt ? 'Tit Kontni' : 'Content Title')}
+            {formData.title || (isHt ? 'Tit Kontni' : inlineText(lang, 'Content Title'))}
           </h1>
 
           {/* Subtitle */}
@@ -96,7 +97,7 @@ export default function ContentPreview({
               <span className="cp-content-tag">{formData.category}</span>
             )}
             {formData.language && (
-              <span className="cp-content-tag">{formData.language === 'ht' ? 'Kreyòl' : formData.language === 'fr' ? 'Français' : 'English'}</span>
+              <span className="cp-content-tag">{formData.language === 'ht' ? 'Kreyòl' : formData.language === 'fr' ? 'Français' : formData.language === 'es' ? 'Español' : 'English'}</span>
             )}
             <span className="cp-content-date">{new Date().toLocaleDateString()}</span>
           </div>
@@ -113,7 +114,7 @@ export default function ContentPreview({
               </div>
               {formData.media.length > 6 && (
                 <p className="cp-media-more">
-                  +{formData.media.length - 6} {isHt ? 'plis medya' : 'more media'}
+                  +{formData.media.length - 6} {isHt ? 'plis medya' : inlineText(lang, 'more media')}
                 </p>
               )}
             </div>
@@ -133,7 +134,7 @@ export default function ContentPreview({
           {/* Description */}
           <div className="cp-content-body">
             <p className="cp-content-description">
-              {formData.description || (isHt ? 'Deskripsyon kontni w pral parèt isit la.' : 'Your content description will appear here.')}
+              {formData.description || (isHt ? 'Deskripsyon kontni w pral parèt isit la.' : inlineText(lang, 'Your content description will appear here.'))}
             </p>
           </div>
 
@@ -161,7 +162,7 @@ export default function ContentPreview({
         <i className="fas fa-info-circle" />
         {isHt
           ? 'Sa a se yon aperçu. Kontni final la ka parèt yon ti kòt diferan selon modil la.'
-          : 'This is a preview. The final content may appear slightly different depending on the module.'}
+          : inlineText(lang, 'This is a preview. The final content may appear slightly different depending on the module.')}
       </p>
     </div>
   );

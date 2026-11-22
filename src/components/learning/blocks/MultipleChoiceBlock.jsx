@@ -13,6 +13,7 @@
  */
 import React from 'react';
 import QuestionBase from './QuestionBase';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function MultipleChoiceBlock({ block, lang = 'en', reportComplete }) {
   const content = block.content || block;
@@ -30,8 +31,8 @@ export default function MultipleChoiceBlock({ block, lang = 'en', reportComplete
       correctIds={[String(correctIndex)]}
       multiple={false}
       feedback={{
-        correct: lang === 'ht' ? 'Repons ou korek!' : 'Correct!',
-        incorrect: lang === 'ht' ? 'Pa egzakteman.' : 'Not quite.',
+        correct: lang === 'ht' ? 'Repons ou korek!' : inlineText(lang, 'Correct!'),
+        incorrect: lang === 'ht' ? 'Pa egzakteman.' : inlineText(lang, 'Not quite.'),
         explanation: content.explanation,
       }}
       required={content.required !== false}

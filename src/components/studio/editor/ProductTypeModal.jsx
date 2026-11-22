@@ -18,6 +18,7 @@
  */
 import React from 'react';
 import styles from './editor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const KINDS = [
   {
@@ -57,7 +58,7 @@ export default function ProductTypeModal({ lang = 'en', onClose, onSelect }) {
       onClick={(e) => { if (e.target === e.currentTarget) onClose?.(); }}
       role="dialog"
       aria-modal="true"
-      aria-label={isHt ? 'Kreye yon Pwodwi' : 'Create a Product'}
+      aria-label={isHt ? 'Kreye yon Pwodwi' : inlineText(lang, 'Create a Product')}
     >
       <div className={styles.typeModal}>
         <header className={styles.typeModalHeader}>
@@ -65,11 +66,11 @@ export default function ProductTypeModal({ lang = 'en', onClose, onSelect }) {
             <i className="fas fa-cube" aria-hidden="true" />
           </span>
           <div>
-            <h2>{isHt ? 'Kreye yon Pwodwi' : 'Create a Product'}</h2>
+            <h2>{isHt ? 'Kreye yon Pwodwi' : inlineText(lang, 'Create a Product')}</h2>
             <p>
               {isHt
                 ? 'Kisa w ap vann lan?'
-                : 'What are you selling?'}
+                : inlineText(lang, 'What are you selling?')}
             </p>
           </div>
         </header>
@@ -99,7 +100,7 @@ export default function ProductTypeModal({ lang = 'en', onClose, onSelect }) {
 
         <button type="button" className={styles.typeModalBack} onClick={onClose}>
           <i className="fas fa-arrow-left" aria-hidden="true" />{' '}
-          {isHt ? 'Retounen' : 'Back'}
+          {isHt ? 'Retounen' : inlineText(lang, 'Back')}
         </button>
       </div>
     </div>

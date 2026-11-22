@@ -15,6 +15,7 @@
  */
 import React, { useEffect, useState, useCallback } from 'react';
 import { referralService } from '../services/api';
+import { inlineText } from '../utils/inlineI18n';
 
 function fmtCurrency(n) {
   if (n == null || !Number.isFinite(Number(n))) return '$0.00';
@@ -92,14 +93,14 @@ export default function ReferralDashboard({ lang, showToast }) {
         <div className="rd-loading">
           <i className="fas fa-spinner fa-spin fa-2x" aria-hidden="true" />
           <span>
-            {lang === 'ht' ? 'Ap chaje referans yo...' : 'Loading referral data...'}
+            {lang === 'ht' ? 'Ap chaje referans yo...' : inlineText(lang, 'Loading referral data...')}
           </span>
         </div>
       </div>
     );
   }
 
-  const t = (en, ht) => lang === 'ht' ? (ht || en) : en;
+  const t = (en, ht) => lang === 'ht' ? (ht || en) : inlineText(lang, en);
 
   return (
     <div className="rd-page">

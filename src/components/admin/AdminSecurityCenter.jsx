@@ -25,6 +25,7 @@ import { useHasAdminAccess } from '../../hooks/useHasAdminAccess';
 import { adminMediaService, mediaProviderService } from '../../services/api';
 import '../../styles/trust-center.css';
 import MediaHelp from '../media/MediaHelp';
+import { inlineText } from '../../utils/inlineI18n';
 
 function fmtCount(n) {
   if (n == null || !Number.isFinite(Number(n))) return '0';
@@ -87,7 +88,7 @@ export default function AdminSecurityCenter({ lang = 'en', showToast, user, onNa
   useEffect(() => {
     if (user && !permsLoading && !hasStaffAccess) {
       showToast?.(
-        isHt ? 'Aksè rezeve pou administratè.' : 'Staff access required.',
+        isHt ? 'Aksè rezeve pou administratè.' : inlineText(lang, 'Staff access required.'),
         'user-lock',
       );
       if (onNavigate) onNavigate('/', { replace: true });
@@ -101,7 +102,7 @@ export default function AdminSecurityCenter({ lang = 'en', showToast, user, onNa
       setData(res.data);
     } catch {
       showToast?.(
-        isHt ? 'Pa kapab chaje Security Center.' : 'Failed to load Security Center.',
+        isHt ? 'Pa kapab chaje Security Center.' : inlineText(lang, 'Failed to load Security Center.'),
         'exclamation-triangle',
       );
     } finally {
@@ -116,7 +117,7 @@ export default function AdminSecurityCenter({ lang = 'en', showToast, user, onNa
       <div className="asc-shell">
         <div className="asc-empty">
           <i className="fas fa-user-lock" />
-          <h3>{isHt ? 'Aksè Rezeve' : 'Staff Access Required'}</h3>
+          <h3>{isHt ? 'Aksè Rezeve' : inlineText(lang, 'Staff Access Required')}</h3>
         </div>
       </div>
     );
@@ -127,7 +128,7 @@ export default function AdminSecurityCenter({ lang = 'en', showToast, user, onNa
       <div className="asc-shell">
         <div className="asc-loading">
           <i className="fas fa-spinner fa-spin" />
-          <span>{isHt ? 'Ap chaje Security Center...' : 'Loading Security Center...'}</span>
+          <span>{isHt ? 'Ap chaje Security Center...' : inlineText(lang, 'Loading Security Center...')}</span>
         </div>
       </div>
     );
@@ -138,9 +139,9 @@ export default function AdminSecurityCenter({ lang = 'en', showToast, user, onNa
       <div className="asc-shell">
         <div className="asc-empty">
           <i className="fas fa-shield-halved" />
-          <h3>{isHt ? 'Pa gen done' : 'No data available'}</h3>
+          <h3>{isHt ? 'Pa gen done' : inlineText(lang, 'No data available')}</h3>
           <button type="button" className="asc-btn" onClick={fetchData}>
-            <i className="fas fa-sync" /> {isHt ? 'Eseye ankò' : 'Retry'}
+            <i className="fas fa-sync" /> {isHt ? 'Eseye ankò' : inlineText(lang, 'Retry')}
           </button>
         </div>
       </div>
@@ -163,17 +164,17 @@ export default function AdminSecurityCenter({ lang = 'en', showToast, user, onNa
         <div className="asc-header-center">
           <h1 className="asc-title">
             <i className="fas fa-shield-halved" />{' '}
-            {isHt ? 'Sant Sekirite Admin' : 'Admin Security Center'}
+            {isHt ? 'Sant Sekirite Admin' : inlineText(lang, 'Admin Security Center')}
           </h1>
           <p className="asc-subtitle">
             {isHt
               ? 'Siveyans sekirite medya avanse ak tout rapò yo.'
-              : 'Advanced media security monitoring with all reports.'}
+              : inlineText(lang, 'Advanced media security monitoring with all reports.')}
           </p>
         </div>
         <div className="asc-header-actions">
           <button type="button" className="asc-btn" onClick={fetchData}>
-            <i className="fas fa-sync" /> {isHt ? 'Rafrechi' : 'Refresh'}
+            <i className="fas fa-sync" /> {isHt ? 'Rafrechi' : inlineText(lang, 'Refresh')}
           </button>
           <MediaHelp context="library" lang={lang} />
         </div>
@@ -185,10 +186,10 @@ export default function AdminSecurityCenter({ lang = 'en', showToast, user, onNa
           {sh.overall_score || '—'}%
         </div>
         <div className="asc-health-detail">
-          <strong>{isHt ? 'Sante Sistèm' : 'System Health'}: {sh.label || 'Unknown'}</strong>
+          <strong>{isHt ? 'Sante Sistèm' : inlineText(lang, 'System Health')}: {sh.label || 'Unknown'}</strong>
           <span>
-            {sh.healthy_providers || 0}/{sh.total_providers || 0} {isHt ? 'provider an sante' : 'healthy providers'} —{' '}
-            {sh.avg_availability || 0}% {isHt ? 'disponib' : 'available'}
+            {sh.healthy_providers || 0}/{sh.total_providers || 0} {isHt ? 'provider an sante' : inlineText(lang, 'healthy providers')} —{' '}
+            {sh.avg_availability || 0}% {isHt ? 'disponib' : inlineText(lang, 'available')}
           </span>
         </div>
       </div>
@@ -197,53 +198,53 @@ export default function AdminSecurityCenter({ lang = 'en', showToast, user, onNa
       <div className="asc-stats-grid">
         <StatCard
           icon="fa-ban"
-          label={isHt ? 'URL Pa Sekirize' : 'Unsafe URLs'}
+          label={isHt ? 'URL Pa Sekirize' : inlineText(lang, 'Unsafe URLs')}
           value={unsafe.total}
           color="var(--state-error, #ef4444)"
-          subtitle={`${unsafe.recent_7d || 0} ${isHt ? 'semèn sa' : 'this week'}`}
+          subtitle={`${unsafe.recent_7d || 0} ${isHt ? 'semèn sa' : inlineText(lang, 'this week')}`}
         />
         <StatCard
           icon="fa-flag"
-          label={isHt ? 'Rapò Malveyan' : 'Malicious Reports'}
+          label={isHt ? 'Rapò Malveyan' : inlineText(lang, 'Malicious Reports')}
           value={reports.total}
           color="var(--pr-color-orange-500, #f97316)"
-          subtitle={`${reports.pending || 0} ${isHt ? 'annatant' : 'pending'}`}
+          subtitle={`${reports.pending || 0} ${isHt ? 'annatant' : inlineText(lang, 'pending')}`}
         />
         <StatCard
           icon="fa-shield"
-          label={isHt ? 'Domain Bloke' : 'Blocked Domains'}
+          label={isHt ? 'Domain Bloke' : inlineText(lang, 'Blocked Domains')}
           value={blocked.count}
           color="var(--state-error, #ef4444)"
         />
         <StatCard
           icon="fa-rotate-left"
-          label={isHt ? 'Echèk Repete' : 'Repeated Failures'}
+          label={isHt ? 'Echèk Repete' : inlineText(lang, 'Repeated Failures')}
           value={data.repeated_failures}
           color="var(--state-warning, #f59e0b)"
           onClick={() => onNavigate?.('/sheet/admin/validation-queue')}
         />
         <StatCard
           icon="fa-triangle-exclamation"
-          label={isHt ? 'Ensidan Aktif' : 'Active Incidents'}
+          label={isHt ? 'Ensidan Aktif' : inlineText(lang, 'Active Incidents')}
           value={data.active_incidents}
           color={data.active_incidents > 0 ? 'var(--state-error, #ef4444)' : 'var(--state-success, #10b981)'}
           onClick={() => onNavigate?.('/sheet/admin/incidents')}
         />
         <StatCard
           icon="fa-times-circle"
-          label={isHt ? 'Erè Validasyon (7j)' : 'Validation Errors (7d)'}
+          label={isHt ? 'Erè Validasyon (7j)' : inlineText(lang, 'Validation Errors (7d)')}
           value={data.validation_errors_7d}
           color="var(--state-error, #ef4444)"
         />
         <StatCard
           icon="fa-user-slash"
-          label={isHt ? 'Kreyatè ak Avètisman' : 'Creators w/ Warnings'}
+          label={isHt ? 'Kreyatè ak Avètisman' : inlineText(lang, 'Creators w/ Warnings')}
           value={data.creators_with_warnings}
           color="var(--state-warning, #f59e0b)"
         />
         <StatCard
           icon="fa-envelope-circle-check"
-          label={isHt ? 'Tantativ Spam' : 'Spam Attempts'}
+          label={isHt ? 'Tantativ Spam' : inlineText(lang, 'Spam Attempts')}
           value={data.spam_attempts}
           color="var(--pr-color-orange-500, #f97316)"
         />
@@ -254,7 +255,7 @@ export default function AdminSecurityCenter({ lang = 'en', showToast, user, onNa
         <div className="asc-section">
           <h3 className="asc-section-title">
             <i className="fas fa-ban" style={{ color: 'var(--state-error, #ef4444)' }} />{' '}
-            {isHt ? 'Domain Bloke' : 'Blocked Domains'}
+            {isHt ? 'Domain Bloke' : inlineText(lang, 'Blocked Domains')}
           </h3>
           <div className="asc-domain-list">
             {blocked.domains.map((d, i) => (
@@ -268,7 +269,7 @@ export default function AdminSecurityCenter({ lang = 'en', showToast, user, onNa
       <div className="asc-section">
         <h3 className="asc-section-title">
           <i className="fas fa-list" />{' '}
-          {isHt ? 'Evènman Sekirite Resan' : 'Recent Security Events'}
+          {isHt ? 'Evènman Sekirite Resan' : inlineText(lang, 'Recent Security Events')}
           {events.length > 0 && (
             <span className="asc-badge">{events.length}</span>
           )}
@@ -276,7 +277,7 @@ export default function AdminSecurityCenter({ lang = 'en', showToast, user, onNa
         {events.length === 0 ? (
           <div className="asc-empty-mini">
             <i className="fas fa-check-circle" style={{ color: 'var(--state-success, #10b981)' }} />
-            <span>{isHt ? 'Pa gen evènman resan.' : 'No recent events.'}</span>
+            <span>{isHt ? 'Pa gen evènman resan.' : inlineText(lang, 'No recent events.')}</span>
           </div>
         ) : (
           <div className="asc-events-table">
@@ -291,23 +292,23 @@ export default function AdminSecurityCenter({ lang = 'en', showToast, user, onNa
       <div className="asc-section">
         <h3 className="asc-section-title">
           <i className="fas fa-link" />{' '}
-          {isHt ? 'Lyen Rapid' : 'Quick Links'}
+          {isHt ? 'Lyen Rapid' : inlineText(lang, 'Quick Links')}
         </h3>
         <div className="asc-quick-links">
           <button type="button" className="asc-quick-link" onClick={() => onNavigate?.('/sheet/admin/broken-media')}>
-            <i className="fas fa-link-slash" /> {isHt ? 'Sant Medya Kase' : 'Broken Media Center'}
+            <i className="fas fa-link-slash" /> {isHt ? 'Sant Medya Kase' : inlineText(lang, 'Broken Media Center')}
           </button>
           <button type="button" className="asc-quick-link" onClick={() => onNavigate?.('/sheet/admin/validation-queue')}>
-            <i className="fas fa-list-check" /> {isHt ? 'Fil Validasyon' : 'Validation Queue'}
+            <i className="fas fa-list-check" /> {isHt ? 'Fil Validasyon' : inlineText(lang, 'Validation Queue')}
           </button>
           <button type="button" className="asc-quick-link" onClick={() => onNavigate?.('/sheet/admin/reports')}>
-            <i className="fas fa-flag" /> {isHt ? 'Sant Rapò' : 'Report Center'}
+            <i className="fas fa-flag" /> {isHt ? 'Sant Rapò' : inlineText(lang, 'Report Center')}
           </button>
           <button type="button" className="asc-quick-link" onClick={() => onNavigate?.('/sheet/admin/moderation')}>
-            <i className="fas fa-gavel" /> {isHt ? 'Moderasyon' : 'Moderation'}
+            <i className="fas fa-gavel" /> {isHt ? 'Moderasyon' : inlineText(lang, 'Moderation')}
           </button>
           <button type="button" className="asc-quick-link" onClick={() => onNavigate?.('/sheet/admin/incidents')}>
-            <i className="fas fa-triangle-exclamation" /> {isHt ? 'Sant Ensidan' : 'Incident Center'}
+            <i className="fas fa-triangle-exclamation" /> {isHt ? 'Sant Ensidan' : inlineText(lang, 'Incident Center')}
           </button>
         </div>
       </div>

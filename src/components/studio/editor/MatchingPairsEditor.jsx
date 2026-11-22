@@ -10,10 +10,11 @@
  */
 import React, { useState, useCallback, useRef } from 'react';
 import styles from './editor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function MatchingPairsEditor({ block, onChange, lang = 'en' }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
 
   const pairs = Array.isArray(block.pairs) ? block.pairs : [];
   const [editingPair, setEditingPair] = useState(null); // index of expanded pair
@@ -119,8 +120,8 @@ export default function MatchingPairsEditor({ block, onChange, lang = 'en' }) {
       {/* ─── Column labels ──────────────────────────────────────── */}
       {pairs.length > 0 && (
         <div className={styles.matchColumns}>
-          <span className={styles.matchColLabel}>{isHt ? 'Gòch' : 'Left'}</span>
-          <span className={styles.matchColLabel}>{isHt ? 'Dwat' : 'Right'}</span>
+          <span className={styles.matchColLabel}>{isHt ? 'Gòch' : inlineText(lang, 'Left')}</span>
+          <span className={styles.matchColLabel}>{isHt ? 'Dwat' : inlineText(lang, 'Right')}</span>
           <span className={styles.matchColSpacer} />
         </div>
       )}
@@ -130,7 +131,7 @@ export default function MatchingPairsEditor({ block, onChange, lang = 'en' }) {
         <p className={styles.matchEmpty}>
           {isHt
             ? 'Pa gen pè ankò. Klike "Ajoute Pè" pou kòmanse.'
-            : 'No pairs yet. Click "Add Pair" to start.'}
+            : inlineText(lang, 'No pairs yet. Click "Add Pair" to start.')}
         </p>
       ) : (
         <div className={styles.matchPairsList}>
@@ -160,13 +161,13 @@ export default function MatchingPairsEditor({ block, onChange, lang = 'en' }) {
 
                   <div className={styles.matchPairFields}>
                     <label className={styles.matchField}>
-                      <span className={styles.matchFieldLabel}>{isHt ? 'Gòch' : 'Left'}</span>
+                      <span className={styles.matchFieldLabel}>{isHt ? 'Gòch' : inlineText(lang, 'Left')}</span>
                       <input
                         type="text"
                         className={styles.matchFieldInput}
                         value={pair.left || ''}
                         onChange={(e) => updatePair(i, 'left', e.target.value)}
-                        placeholder={isHt ? 'Mo oswa fraz gòch...' : 'Left word or phrase...'}
+                        placeholder={isHt ? 'Mo oswa fraz gòch...' : inlineText(lang, 'Left word or phrase...')}
                         autoFocus
                       />
                     </label>
@@ -174,13 +175,13 @@ export default function MatchingPairsEditor({ block, onChange, lang = 'en' }) {
                     <span className={styles.matchArrow}><i className="fas fa-arrow-right" /></span>
 
                     <label className={styles.matchField}>
-                      <span className={styles.matchFieldLabel}>{isHt ? 'Dwat' : 'Right'}</span>
+                      <span className={styles.matchFieldLabel}>{isHt ? 'Dwat' : inlineText(lang, 'Right')}</span>
                       <input
                         type="text"
                         className={styles.matchFieldInput}
                         value={pair.right || ''}
                         onChange={(e) => updatePair(i, 'right', e.target.value)}
-                        placeholder={isHt ? 'Mo oswa fraz dwat...' : 'Right word or phrase...'}
+                        placeholder={isHt ? 'Mo oswa fraz dwat...' : inlineText(lang, 'Right word or phrase...')}
                       />
                     </label>
                   </div>
@@ -193,18 +194,18 @@ export default function MatchingPairsEditor({ block, onChange, lang = 'en' }) {
                   </div>
                   <span className={styles.matchPairBadge}>{i + 1}</span>
                   <span className={styles.matchPairLeft}>
-                    {pair.left || <em>{isHt ? 'Vid' : 'Empty'}</em>}
+                    {pair.left || <em>{isHt ? 'Vid' : inlineText(lang, 'Empty')}</em>}
                   </span>
                   <span className={styles.matchPairArrow}><i className="fas fa-arrow-right" /></span>
                   <span className={styles.matchPairRight}>
-                    {pair.right || <em>{isHt ? 'Vid' : 'Empty'}</em>}
+                    {pair.right || <em>{isHt ? 'Vid' : inlineText(lang, 'Empty')}</em>}
                   </span>
                   <div className={styles.matchPairActions}>
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); movePair(i, -1); }}
                       disabled={i === 0}
-                      title={isHt ? 'Monte' : 'Move up'}
+                      title={isHt ? 'Monte' : inlineText(lang, 'Move up')}
                     >
                       <i className="fas fa-chevron-up" />
                     </button>
@@ -212,14 +213,14 @@ export default function MatchingPairsEditor({ block, onChange, lang = 'en' }) {
                       type="button"
                       onClick={(e) => { e.stopPropagation(); movePair(i, 1); }}
                       disabled={i === pairs.length - 1}
-                      title={isHt ? 'Desann' : 'Move down'}
+                      title={isHt ? 'Desann' : inlineText(lang, 'Move down')}
                     >
                       <i className="fas fa-chevron-down" />
                     </button>
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); duplicatePair(i); }}
-                      title={isHt ? 'Diplike' : 'Duplicate'}
+                      title={isHt ? 'Diplike' : inlineText(lang, 'Duplicate')}
                     >
                       <i className="fas fa-copy" />
                     </button>
@@ -227,7 +228,7 @@ export default function MatchingPairsEditor({ block, onChange, lang = 'en' }) {
                       type="button"
                       className={styles.matchPairDelete}
                       onClick={(e) => { e.stopPropagation(); removePair(i); }}
-                      title={isHt ? 'Efase' : 'Delete'}
+                      title={isHt ? 'Efase' : inlineText(lang, 'Delete')}
                     >
                       <i className="fas fa-trash" />
                     </button>
@@ -243,7 +244,7 @@ export default function MatchingPairsEditor({ block, onChange, lang = 'en' }) {
         <p className={styles.matchHint}>
           <i className="fas fa-info-circle" /> {isHt
             ? 'Klike sou yon pè pou modifye l. Trike pou reòdone.'
-            : 'Click a pair to edit. Drag to reorder.'}
+            : inlineText(lang, 'Click a pair to edit. Drag to reorder.')}
         </p>
       )}
     </div>

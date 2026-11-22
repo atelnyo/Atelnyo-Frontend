@@ -18,6 +18,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { businessFaqService } from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 const STATUS_LABELS = {
   active: 'Active',
@@ -48,7 +49,7 @@ export default function BusinessFaqSection({ lang = 'en', t, showToast, profile 
       } catch {
         if (!cancelled) {
           showToast?.(
-            isHt ? 'Pa t kapab chaje FAQ yo.' : 'Could not load the FAQs.',
+            isHt ? 'Pa t kapab chaje FAQ yo.' : inlineText(lang, 'Could not load the FAQs.'),
             'circle-exclamation',
           );
         }
@@ -82,14 +83,14 @@ export default function BusinessFaqSection({ lang = 'en', t, showToast, profile 
     e.preventDefault();
     if ((form.question || '').trim().length < 3) {
       showToast?.(
-        isHt ? 'Kesyon an twò kout (3 karaktè minimòm).' : 'Question is too short (3+ characters).',
+        isHt ? 'Kesyon an twò kout (3 karaktè minimòm).' : inlineText(lang, 'Question is too short (3+ characters).'),
         'circle-exclamation',
       );
       return;
     }
     if (!(form.answer || '').trim()) {
       showToast?.(
-        isHt ? 'Repons lan obligatwa.' : 'Answer is required.',
+        isHt ? 'Repons lan obligatwa.' : inlineText(lang, 'Answer is required.'),
         'circle-exclamation',
       );
       return;
@@ -107,7 +108,7 @@ export default function BusinessFaqSection({ lang = 'en', t, showToast, profile 
         if (updated?.id) {
           setFaqs((prev) => prev.map((f) => (f.id === updated.id ? updated : f)).sort((a, b) => a.sort_order - b.sort_order));
         }
-        showToast?.(isHt ? '✅ FAQ mete ajou!' : '✅ FAQ updated!', 'check-circle');
+        showToast?.(isHt ? '✅ FAQ mete ajou!' : inlineText(lang, '✅ FAQ updated!'), 'check-circle');
       } else {
         const res = await businessFaqService.create({
           ...payload,
@@ -116,7 +117,7 @@ export default function BusinessFaqSection({ lang = 'en', t, showToast, profile 
         });
         const created = res?.data?.data ?? res?.data ?? null;
         if (created?.id) setFaqs((prev) => [...prev, created].sort((a, b) => a.sort_order - b.sort_order));
-        showToast?.(isHt ? '✅ FAQ ajoute!' : '✅ FAQ added!', 'check-circle');
+        showToast?.(isHt ? '✅ FAQ ajoute!' : inlineText(lang, '✅ FAQ added!'), 'check-circle');
       }
       setFormOpen(false);
       setEditing(null);
@@ -125,7 +126,7 @@ export default function BusinessFaqSection({ lang = 'en', t, showToast, profile 
         || err?.response?.data?.question?.[0]
         || err?.response?.data?.answer?.[0]
         || err?.response?.data?.business_profile?.[0]
-        || (isHt ? 'Pa t kapab sove FAQ la.' : 'Could not save the FAQ.');
+        || (isHt ? 'Pa t kapab sove FAQ la.' : inlineText(lang, 'Could not save the FAQ.'));
       showToast?.(detail, 'circle-exclamation');
     } finally {
       setSaving(false);
@@ -149,7 +150,7 @@ export default function BusinessFaqSection({ lang = 'en', t, showToast, profile 
         .sort((x, y) => x.sort_order - y.sort_order));
     } catch {
       showToast?.(
-        isHt ? 'Pa t kapab reyòdone FAQ yo.' : 'Could not reorder FAQs.',
+        isHt ? 'Pa t kapab reyòdone FAQ yo.' : inlineText(lang, 'Could not reorder FAQs.'),
         'circle-exclamation',
       );
     } finally {
@@ -166,13 +167,13 @@ export default function BusinessFaqSection({ lang = 'en', t, showToast, profile 
       if (updated?.id) setFaqs((prev) => prev.map((f) => (f.id === updated.id ? updated : f)));
       showToast?.(
         next === 'active'
-          ? (isHt ? 'FAQ la aktif ankò.' : 'FAQ is active again.')
-          : (isHt ? 'FAQ la achive.' : 'FAQ archived.'),
+          ? (isHt ? 'FAQ la aktif ankò.' : inlineText(lang, 'FAQ is active again.'))
+          : (isHt ? 'FAQ la achive.' : inlineText(lang, 'FAQ archived.')),
         next === 'active' ? 'circle-play' : 'box-archive',
       );
     } catch {
       showToast?.(
-        isHt ? 'Aksyon an pa t mache.' : 'The action failed.',
+        isHt ? 'Aksyon an pa t mache.' : inlineText(lang, 'The action failed.'),
         'circle-exclamation',
       );
     } finally {
@@ -185,10 +186,10 @@ export default function BusinessFaqSection({ lang = 'en', t, showToast, profile 
     try {
       await businessFaqService.remove(faq.id);
       setFaqs((prev) => prev.filter((f) => f.id !== faq.id));
-      showToast?.(isHt ? 'FAQ la efase.' : 'FAQ deleted.', 'trash');
+      showToast?.(isHt ? 'FAQ la efase.' : inlineText(lang, 'FAQ deleted.'), 'trash');
     } catch {
       showToast?.(
-        isHt ? 'Pa t kapab efase FAQ la.' : 'Could not delete the FAQ.',
+        isHt ? 'Pa t kapab efase FAQ la.' : inlineText(lang, 'Could not delete the FAQ.'),
         'circle-exclamation',
       );
     } finally {
@@ -202,12 +203,12 @@ export default function BusinessFaqSection({ lang = 'en', t, showToast, profile 
         <div>
           <h3 className="biz-catalog-title">
             <i className="fas fa-circle-question" aria-hidden="true" />
-            {t?.business_section_faqs || (isHt ? 'FAQ Biznis' : 'Business FAQs')}
+            {t?.business_section_faqs || (isHt ? 'FAQ Biznis' : inlineText(lang, 'Business FAQs'))}
           </h3>
           <p className="biz-catalog-hint">
             {t?.business_faqs_hint || (isHt
               ? 'Kesyon sou biznis la an jeneral (kote ou ye, èdtan, peman...). Kesyon sou yon atik espesifik ale nan katalòg la.'
-              : 'Questions about the business itself (location, hours, payments...). Item-specific questions live in the Catalog.')}
+              : inlineText(lang, 'Questions about the business itself (location, hours, payments...). Item-specific questions live in the Catalog.'))}
           </p>
         </div>
         <button
@@ -217,7 +218,7 @@ export default function BusinessFaqSection({ lang = 'en', t, showToast, profile 
           data-testid="business-faq-add"
         >
           <i className="fas fa-plus" aria-hidden="true" />
-          {t?.business_faq_add || (isHt ? 'Ajoute yon FAQ' : 'Add a FAQ')}
+          {t?.business_faq_add || (isHt ? 'Ajoute yon FAQ' : inlineText(lang, 'Add a FAQ'))}
         </button>
       </div>
 
@@ -228,11 +229,11 @@ export default function BusinessFaqSection({ lang = 'en', t, showToast, profile 
       ) : faqs.length === 0 ? (
         <div className="biz-catalog-empty" data-testid="business-faq-empty">
           <i className="fas fa-circle-question" aria-hidden="true" />
-          <h4>{t?.business_faq_empty || (isHt ? 'Pokò gen FAQ' : 'No FAQs yet')}</h4>
+          <h4>{t?.business_faq_empty || (isHt ? 'Pokò gen FAQ' : inlineText(lang, 'No FAQs yet'))}</h4>
           <p>
             {t?.business_faq_empty_hint || (isHt
               ? 'Ajoute kesyon moun yo poze souvan. FAQ aktif yo ap parèt sou paj piblik biznis ou.'
-              : 'Add the questions customers ask most. Active FAQs appear on your public business page.')}
+              : inlineText(lang, 'Add the questions customers ask most. Active FAQs appear on your public business page.'))}
           </p>
         </div>
       ) : (
@@ -259,7 +260,7 @@ export default function BusinessFaqSection({ lang = 'en', t, showToast, profile 
                     className="biz-btn biz-btn-ghost biz-btn-sm"
                     onClick={() => move(index, -1)}
                     disabled={busyId === faq.id || index === 0}
-                    aria-label={isHt ? 'Moute' : 'Move up'}
+                    aria-label={isHt ? 'Moute' : inlineText(lang, 'Move up')}
                     data-testid="business-faq-up"
                   >
                     <i className="fas fa-arrow-up" aria-hidden="true" />
@@ -269,7 +270,7 @@ export default function BusinessFaqSection({ lang = 'en', t, showToast, profile 
                     className="biz-btn biz-btn-ghost biz-btn-sm"
                     onClick={() => move(index, 1)}
                     disabled={busyId === faq.id || index === faqs.length - 1}
-                    aria-label={isHt ? 'Desann' : 'Move down'}
+                    aria-label={isHt ? 'Desann' : inlineText(lang, 'Move down')}
                     data-testid="business-faq-down"
                   >
                     <i className="fas fa-arrow-down" aria-hidden="true" />
@@ -279,7 +280,7 @@ export default function BusinessFaqSection({ lang = 'en', t, showToast, profile 
                     className="biz-btn biz-btn-ghost biz-btn-sm"
                     onClick={() => toggleStatus(faq)}
                     disabled={busyId === faq.id}
-                    title={faq.status === 'active' ? (isHt ? 'Achive' : 'Archive') : (isHt ? 'Aktive' : 'Activate')}
+                    title={faq.status === 'active' ? (isHt ? 'Achive' : inlineText(lang, 'Archive')) : (isHt ? 'Aktive' : inlineText(lang, 'Activate'))}
                   >
                     <i className={`fas ${faq.status === 'active' ? 'fa-box-archive' : 'fa-circle-play'}`} aria-hidden="true" />
                   </button>
@@ -295,7 +296,7 @@ export default function BusinessFaqSection({ lang = 'en', t, showToast, profile 
                   <button
                     type="button"
                     className="biz-btn biz-btn-danger biz-btn-sm"
-                    onClick={() => { if (window.confirm(isHt ? 'Efase FAQ sa a?' : 'Delete this FAQ?')) handleDelete(faq); }}
+                    onClick={() => { if (window.confirm(isHt ? 'Efase FAQ sa a?' : inlineText(lang, 'Delete this FAQ?'))) handleDelete(faq); }}
                     disabled={busyId === faq.id}
                     data-testid="business-faq-delete"
                   >
@@ -314,17 +315,17 @@ export default function BusinessFaqSection({ lang = 'en', t, showToast, profile 
             className="biz-modal"
             role="dialog"
             aria-modal="true"
-            aria-label={editing ? (isHt ? 'Modifye FAQ la' : 'Edit FAQ') : (isHt ? 'Ajoute yon FAQ' : 'Add a FAQ')}
+            aria-label={editing ? (isHt ? 'Modifye FAQ la' : inlineText(lang, 'Edit FAQ')) : (isHt ? 'Ajoute yon FAQ' : inlineText(lang, 'Add a FAQ'))}
             onClick={(ev) => ev.stopPropagation()}
           >
             <div className="biz-modal-header">
               <h3 className="biz-modal-title">
                 <i className="fas fa-circle-question" aria-hidden="true" />
                 {editing
-                  ? (t?.business_faq_edit || (isHt ? 'Modifye FAQ la' : 'Edit FAQ'))
-                  : (t?.business_faq_add || (isHt ? 'Ajoute yon FAQ' : 'Add a FAQ'))}
+                  ? (t?.business_faq_edit || (isHt ? 'Modifye FAQ la' : inlineText(lang, 'Edit FAQ')))
+                  : (t?.business_faq_add || (isHt ? 'Ajoute yon FAQ' : inlineText(lang, 'Add a FAQ')))}
               </h3>
-              <button type="button" className="biz-modal-close" onClick={() => { if (!saving) setFormOpen(false); }} aria-label={isHt ? 'Fèmen' : 'Close'}>
+              <button type="button" className="biz-modal-close" onClick={() => { if (!saving) setFormOpen(false); }} aria-label={isHt ? 'Fèmen' : inlineText(lang, 'Close')}>
                 <i className="fas fa-xmark" aria-hidden="true" />
               </button>
             </div>
@@ -332,7 +333,7 @@ export default function BusinessFaqSection({ lang = 'en', t, showToast, profile 
             <form onSubmit={handleSubmit} className="biz-form" data-testid="business-faq-form">
               <div className="biz-form-group">
                 <label className="biz-form-label">
-                  {t?.business_faq_question || (isHt ? 'Kesyon' : 'Question')} *
+                  {t?.business_faq_question || (isHt ? 'Kesyon' : inlineText(lang, 'Question'))} *
                 </label>
                 <input
                   type="text"
@@ -340,7 +341,7 @@ export default function BusinessFaqSection({ lang = 'en', t, showToast, profile 
                   value={form.question}
                   onChange={(e) => set('question', e.target.value)}
                   maxLength={300}
-                  placeholder={isHt ? 'Egzanp: Ki èdtan ouvèti yo?' : 'e.g. What are your opening hours?'}
+                  placeholder={isHt ? 'Egzanp: Ki èdtan ouvèti yo?' : inlineText(lang, 'e.g. What are your opening hours?')}
                   data-testid="business-faq-question"
                   required
                   autoFocus
@@ -348,7 +349,7 @@ export default function BusinessFaqSection({ lang = 'en', t, showToast, profile 
               </div>
               <div className="biz-form-group">
                 <label className="biz-form-label">
-                  {t?.business_faq_answer || (isHt ? 'Repons' : 'Answer')} *
+                  {t?.business_faq_answer || (isHt ? 'Repons' : inlineText(lang, 'Answer'))} *
                 </label>
                 <textarea
                   className="biz-form-input"
@@ -356,27 +357,27 @@ export default function BusinessFaqSection({ lang = 'en', t, showToast, profile 
                   value={form.answer}
                   onChange={(e) => set('answer', e.target.value)}
                   maxLength={2000}
-                  placeholder={isHt ? 'Repons klè ak kout...' : 'A clear, short answer...'}
+                  placeholder={isHt ? 'Repons klè ak kout...' : inlineText(lang, 'A clear, short answer...')}
                   data-testid="business-faq-answer"
                 />
               </div>
               <div className="biz-form-group">
                 <label className="biz-form-label">
-                  {t?.business_catalog_field_status || (isHt ? 'Estati' : 'Status')}
+                  {t?.business_catalog_field_status || (isHt ? 'Estati' : inlineText(lang, 'Status'))}
                 </label>
                 <select
                   className="biz-form-input"
                   value={form.status}
                   onChange={(e) => set('status', e.target.value)}
                 >
-                  <option value="active">{isHt ? 'Aktif (parèt sou paj piblik)' : 'Active (shows on public page)'}</option>
-                  <option value="draft">{isHt ? 'Brouyon' : 'Draft'}</option>
-                  <option value="archived">{isHt ? 'Achive' : 'Archived'}</option>
+                  <option value="active">{isHt ? 'Aktif (parèt sou paj piblik)' : inlineText(lang, 'Active (shows on public page)')}</option>
+                  <option value="draft">{isHt ? 'Brouyon' : inlineText(lang, 'Draft')}</option>
+                  <option value="archived">{isHt ? 'Achive' : inlineText(lang, 'Archived')}</option>
                 </select>
               </div>
               <div className="biz-form-actions">
                 <button type="button" className="biz-btn biz-btn-ghost" onClick={() => setFormOpen(false)} disabled={saving}>
-                  {isHt ? 'Anile' : 'Cancel'}
+                  {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
                 </button>
                 <button
                   type="submit"
@@ -386,8 +387,8 @@ export default function BusinessFaqSection({ lang = 'en', t, showToast, profile 
                 >
                   <i className={`fas ${saving ? 'fa-spinner fa-spin' : 'fa-save'}`} aria-hidden="true" />
                   {saving
-                    ? (isHt ? 'Ap sove...' : 'Saving...')
-                    : (editing ? (isHt ? 'Sove chanjman' : 'Save changes') : (isHt ? 'Ajoute FAQ' : 'Add FAQ'))}
+                    ? (isHt ? 'Ap sove...' : inlineText(lang, 'Saving...'))
+                    : (editing ? (isHt ? 'Sove chanjman' : inlineText(lang, 'Save changes')) : (isHt ? 'Ajoute FAQ' : inlineText(lang, 'Add FAQ')))}
                 </button>
               </div>
             </form>

@@ -15,6 +15,7 @@
  */
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { aiWorkerService } from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── Quick question templates ─────────────────────────────────────
 const QUICK_QUESTIONS = {
@@ -72,7 +73,7 @@ export default function CourseAIChat({
       const truncated = blockContent.slice(0, 1500);
       ctx += `Kontni aktyèl la:\n---\n${truncated}\n---\n`;
     }
-    ctx += `Reponn nan ${isHt ? 'kreyòl ayisyen' : 'English'}. Soye klè, kout, ak edikatif. Si ou pa sèten, di sa.`;
+    ctx += `Reponn nan ${isHt ? 'kreyòl ayisyen' : inlineText(lang, 'English')}. Soye klè, kout, ak edikatif. Si ou pa sèten, di sa.`;
     return ctx;
   }, [courseTitle, moduleTitle, lessonTitle, blockContent, isHt]);
 
@@ -96,11 +97,11 @@ export default function CourseAIChat({
         system_instruction: systemInstruction,
         lang,
       });
-      const answer = res?.data?.text || res?.text || (isHt ? 'M pa kapab repon kounye a.' : 'I cannot answer right now.');
+      const answer = res?.data?.text || res?.text || (isHt ? 'M pa kapab repon kounye a.' : inlineText(lang, 'I cannot answer right now.'));
       setMessages(prev => [...prev, { role: 'assistant', text: answer }]);
     } catch (err) {
       console.error('[CourseAIChat]', err);
-      setError(isHt ? 'Erè lè ap reponn. Eseye ankò.' : 'Error responding. Try again.');
+      setError(isHt ? 'Erè lè ap reponn. Eseye ankò.' : inlineText(lang, 'Error responding. Try again.'));
     } finally {
       setLoading(false);
     }
@@ -287,10 +288,10 @@ export default function CourseAIChat({
             </div>
             <div style={S.headerText}>
               <div style={S.headerTitle}>
-                {isHt ? 'Asistan Aprantisaj' : 'Learning Assistant'}
+                {isHt ? 'Asistan Aprantisaj' : inlineText(lang, 'Learning Assistant')}
               </div>
               <div style={S.headerSub}>
-                {courseTitle || (isHt ? 'Poze m yon kesyon' : 'Ask me a question')}
+                {courseTitle || (isHt ? 'Poze m yon kesyon' : inlineText(lang, 'Ask me a question'))}
               </div>
             </div>
             <button style={S.closeBtn} onClick={() => setOpen(false)} aria-label="Close">
@@ -305,7 +306,7 @@ export default function CourseAIChat({
                 <i className="fas fa-graduation-cap" style={{ fontSize: '1.5rem', marginBottom: 8, display: 'block' }} />
                 {isHt
                   ? 'Poze m yon kesyon sou sa w ap aprann la!'
-                  : 'Ask me a question about what you\'re learning!'}
+                  : inlineText(lang, 'Ask me a question about what you\'re learning!')}
               </div>
             )}
             {messages.map((msg, i) => (
@@ -315,7 +316,7 @@ export default function CourseAIChat({
             ))}
             {loading && (
               <div style={S.typing}>
-                <i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap panse...' : 'Thinking...'}
+                <i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap panse...' : inlineText(lang, 'Thinking...')}
               </div>
             )}
             {error && <div style={S.error}>{error}</div>}
@@ -325,7 +326,7 @@ export default function CourseAIChat({
           {/* Quick questions */}
           {messages.length === 0 && (
             <div style={S.quickBar}>
-              {QUICK_QUESTIONS[isHt ? 'ht' : 'en'].map((q) => (
+              {QUICK_QUESTIONS[isHt ? 'ht' : inlineText(lang, 'en')].map((q) => (
                 <button
                   key={q.key}
                   style={S.quickBtn}
@@ -346,7 +347,7 @@ export default function CourseAIChat({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-              placeholder={isHt ? 'Tape kesyon ou...' : 'Type your question...'}
+              placeholder={isHt ? 'Tape kesyon ou...' : inlineText(lang, 'Type your question...')}
               disabled={loading}
             />
             <button
@@ -364,7 +365,7 @@ export default function CourseAIChat({
       <button
         style={S.toggle}
         onClick={() => setOpen(!open)}
-        aria-label={isHt ? 'Ouvri asistan AI' : 'Open AI assistant'}
+        aria-label={isHt ? 'Ouvri asistan AI' : inlineText(lang, 'Open AI assistant')}
       >
         <i className={`fas ${open ? 'fa-times' : 'fa-robot'}`} />
       </button>

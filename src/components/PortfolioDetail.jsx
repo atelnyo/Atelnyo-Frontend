@@ -23,6 +23,7 @@ import { historyBack } from '../utils/history';
 import { resolvePortfolioVideo } from '../modules/explore/utils/cardHelpers';
 import { resolveVideoSource } from '../modules/explore/utils/videoSource';
 import VideoEmbedFrame from './media/VideoEmbedFrame';
+import { inlineText } from '../utils/inlineI18n';
 
 /* ─── Constants ────────────────────────────────────────────────── */
 function buildOGFallback() {
@@ -216,7 +217,7 @@ export default function PortfolioDetail({ lang = 'en', project: propProject, onB
   }, [project?.id]);
 
   /* ─── Meta tags ─────────────────────────────────────────────── */
-  const fallbackTitle = lang === 'ht' ? 'Pwojè · Atelnyo' : 'Portfolio · Atelnyo';
+  const fallbackTitle = lang === 'ht' ? 'Pwojè · Atelnyo' : inlineText(lang, 'Portfolio · Atelnyo');
   let pageTitle = fallbackTitle;
   if (project?.title) {
     pageTitle = `${project.title} · Atelnyo Portfolio`;
@@ -253,7 +254,7 @@ export default function PortfolioDetail({ lang = 'en', project: propProject, onB
     }
     try {
       await navigator.clipboard.writeText(url);
-      showToast?.(t.share_link_copied || (lang === 'ht' ? 'Lyen kopye!' : 'Link copied!'), 'check-circle');
+      showToast?.(t.share_link_copied || (lang === 'ht' ? 'Lyen kopye!' : inlineText(lang, 'Link copied!')), 'check-circle');
     } catch {
       // Clipboard not available — nothing else to do.
     }
@@ -284,11 +285,11 @@ export default function PortfolioDetail({ lang = 'en', project: propProject, onB
         <header className={`pd-sticky-header${scrolled ? ' pd-sticky-header--scrolled' : ''}`}>
           <div className="pd-sticky-header-inner">
             <button type="button" className="pd-header-back" onClick={handleBack}
-              aria-label={lang === 'ht' ? 'Retounen' : 'Back'}>
+              aria-label={lang === 'ht' ? 'Retounen' : inlineText(lang, 'Back')}>
               <i className="fas fa-arrow-left" aria-hidden="true" />
             </button>
             <span className={`pd-header-title${scrolled ? ' pd-header-title--visible' : ''}`}>
-              {project?.title || (lang === 'ht' ? 'Pwojè' : 'Project')}
+              {project?.title || (lang === 'ht' ? 'Pwojè' : inlineText(lang, 'Project'))}
             </span>
             <div className="pd-header-actions">
               <SaveHeartButton
@@ -344,13 +345,13 @@ export default function PortfolioDetail({ lang = 'en', project: propProject, onB
                 role="status" aria-live="polite">
                 <i className="fas fa-spinner fa-spin" style={{ fontSize: '2rem' }} aria-hidden="true" />
                 <span style={{ fontSize: '0.9rem' }}>
-                  {lang === 'ht' ? 'Ap chaje pwojè a...' : 'Loading project...'}
+                  {lang === 'ht' ? 'Ap chaje pwojè a...' : inlineText(lang, 'Loading project...')}
                 </span>
               </div>
             ) : errCode === 'not_found' ? (
-              <EmptyHero icon="fa-circle-question" msg={lang === 'ht' ? 'Pwojè a pa jwenn.' : 'Project not found.'} />
+              <EmptyHero icon="fa-circle-question" msg={lang === 'ht' ? 'Pwojè a pa jwenn.' : inlineText(lang, 'Project not found.')} />
             ) : errCode === 'load_error' ? (
-              <EmptyHero icon="fa-triangle-exclamation" msg={lang === 'ht' ? 'Nou pa t kapab chaje pwojè a.' : 'Could not load project.'} />
+              <EmptyHero icon="fa-triangle-exclamation" msg={lang === 'ht' ? 'Nou pa t kapab chaje pwojè a.' : inlineText(lang, 'Could not load project.')} />
             ) : project ? (
               <HeroContent project={project} t={t} lang={lang} />
             ) : (
@@ -371,7 +372,7 @@ export default function PortfolioDetail({ lang = 'en', project: propProject, onB
               <section className="pd-section">
                 <h2 className="pd-section-title">
                   <i className="fas fa-info-circle" aria-hidden="true" />
-                  {lang === 'ht' ? 'Enfòmasyon Pwojè' : 'Project Info'}
+                  {lang === 'ht' ? 'Enfòmasyon Pwojè' : inlineText(lang, 'Project Info')}
                 </h2>
                 <InfoGrid project={project} lang={lang} t={t} />
               </section>
@@ -381,7 +382,7 @@ export default function PortfolioDetail({ lang = 'en', project: propProject, onB
                 <section className="pd-section">
                   <h2 className="pd-section-title">
                     <i className="fas fa-align-left" aria-hidden="true" />
-                    {lang === 'ht' ? 'Deskripsyon' : 'Description'}
+                    {lang === 'ht' ? 'Deskripsyon' : inlineText(lang, 'Description')}
                   </h2>
                   <p className="pd-text" style={{ whiteSpace: 'pre-wrap' }}>{project.description}</p>
                 </section>
@@ -391,19 +392,19 @@ export default function PortfolioDetail({ lang = 'en', project: propProject, onB
               <section className="pd-section">
                 <h2 className="pd-section-title">
                   <i className="fas fa-chart-simple" aria-hidden="true" />
-                  {lang === 'ht' ? 'Estadistik' : 'Statistics'}
+                  {lang === 'ht' ? 'Estadistik' : inlineText(lang, 'Statistics')}
                 </h2>
                 <div className="pd-stats-grid">
-                  <StatTile icon="fa-eye" label={lang === 'ht' ? 'Vizit' : 'Views'}
+                  <StatTile icon="fa-eye" label={lang === 'ht' ? 'Vizit' : inlineText(lang, 'Views')}
                     value={project.views != null ? String(project.views) : '0'} />
-                  <StatTile icon="fa-calendar" label={lang === 'ht' ? 'Kreye' : 'Created'}
+                  <StatTile icon="fa-calendar" label={lang === 'ht' ? 'Kreye' : inlineText(lang, 'Created')}
                     value={formatDate(project.created_at, lang)} />
                   {project.updated_at && (
-                    <StatTile icon="fa-clock" label={lang === 'ht' ? 'Dènye Mizajou' : 'Updated'}
+                    <StatTile icon="fa-clock" label={lang === 'ht' ? 'Dènye Mizajou' : inlineText(lang, 'Updated')}
                       value={formatDate(project.updated_at, lang)} />
                   )}
                   {project.category && (
-                    <StatTile icon="fa-tag" label={lang === 'ht' ? 'Kategori' : 'Category'}
+                    <StatTile icon="fa-tag" label={lang === 'ht' ? 'Kategori' : inlineText(lang, 'Category')}
                       value={project.category} />
                   )}
                 </div>
@@ -419,7 +420,7 @@ export default function PortfolioDetail({ lang = 'en', project: propProject, onB
                   <section className="pd-section">
                     <h2 className="pd-section-title">
                       <i className="fas fa-video" aria-hidden="true" />
-                      {lang === 'ht' ? 'Videyo Demo' : 'Demo Video'}
+                      {lang === 'ht' ? 'Videyo Demo' : inlineText(lang, 'Demo Video')}
                     </h2>
                     {demo.kind === 'embed' ? (
                       <VideoEmbedFrame
@@ -440,7 +441,7 @@ export default function PortfolioDetail({ lang = 'en', project: propProject, onB
                       >
                         {lang === 'ht'
                           ? 'Navigatè w pa sipòte lekti videyo.'
-                          : 'Your browser does not support video playback.'}
+                          : inlineText(lang, 'Your browser does not support video playback.')}
                       </video>
                     )}
                   </section>
@@ -454,7 +455,7 @@ export default function PortfolioDetail({ lang = 'en', project: propProject, onB
                     <div className="pd-price-card-info">
                       <span className="pd-price-label">
                         <i className="fas fa-link" style={{ marginRight: 6 }} />
-                        {lang === 'ht' ? 'Lyen Pwojè' : 'Project Link'}
+                        {lang === 'ht' ? 'Lyen Pwojè' : inlineText(lang, 'Project Link')}
                       </span>
                       <span className="pd-url-display" style={{
                         fontSize: '0.8rem', color: 'var(--pd-text-secondary, #64748b)',
@@ -470,14 +471,14 @@ export default function PortfolioDetail({ lang = 'en', project: propProject, onB
                       className="pd-cta-btn"
                     >
                       <i className="fas fa-external-link-alt" aria-hidden="true" />
-                      {lang === 'ht' ? 'Vizite Pwojè' : 'Visit Project'}
+                      {lang === 'ht' ? 'Vizite Pwojè' : inlineText(lang, 'Visit Project')}
                     </a>
                   </div>
                   <p className="pd-price-disclaimer">
                     <i className="fas fa-shield-alt" style={{ marginRight: 4, opacity: 0.5 }} />
                     {lang === 'ht'
                       ? 'Ou pral kite Atelnyo pou w ale sou yon sit ekstèn.'
-                      : 'You will leave Atelnyo to visit an external site.'}
+                      : inlineText(lang, 'You will leave Atelnyo to visit an external site.')}
                   </p>
                 </div>
               )}
@@ -516,7 +517,7 @@ function HeroContent({ project, t, lang }) {
             WebkitBackdropFilter: 'blur(8px)',
           }}>
             <i className="fas fa-file-alt" style={{ fontSize: '0.65rem', marginRight: 4 }} />
-            {lang === 'ht' ? 'Pwojè' : 'Project'}
+            {lang === 'ht' ? 'Pwojè' : inlineText(lang, 'Project')}
           </span>
       </div>
 
@@ -543,7 +544,7 @@ function HeroContent({ project, t, lang }) {
             {initial}
           </div>
           <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.85rem' }}>
-            {lang === 'ht' ? 'Pa' : 'By'} <strong>{project.created_by_username}</strong>
+            {lang === 'ht' ? 'Pa' : inlineText(lang, 'By')} <strong>{project.created_by_username}</strong>
           </span>
         </div>
       )}
@@ -564,16 +565,16 @@ function CreatorCard({ project, lang }) {
       </div>
       <div className="pd-seller-info">
         <span className="pd-seller-label">
-          {lang === 'ht' ? 'Kreyatè' : 'Creator'}
+          {lang === 'ht' ? 'Kreyatè' : inlineText(lang, 'Creator')}
         </span>
         <span className="pd-seller-name">
-          {project.created_by_username || (lang === 'ht' ? 'Endikap' : 'Unknown')}
+          {project.created_by_username || (lang === 'ht' ? 'Endikap' : inlineText(lang, 'Unknown'))}
         </span>
       </div>
       {project.views > 0 && (
         <span className="pd-seller-badge">
           <i className="fas fa-eye" style={{ fontSize: '0.6rem', marginRight: 4 }} />
-          {project.views} {lang === 'ht' ? 'vizit' : 'views'}
+          {project.views} {lang === 'ht' ? 'vizit' : inlineText(lang, 'views')}
         </span>
       )}
     </div>
@@ -590,25 +591,25 @@ function InfoGrid({ project, lang, t }) {
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12 }}>
       <InfoTile
         icon={`fas ${accent.icon}`}
-        label={lang === 'ht' ? 'Kategori' : 'Category'}
+        label={lang === 'ht' ? 'Kategori' : inlineText(lang, 'Category')}
         value={project.category || '—'}
         iconColor={accent.color}
       />
       <InfoTile
         icon="fas fa-calendar-plus"
-        label={lang === 'ht' ? 'Kreye' : 'Created'}
+        label={lang === 'ht' ? 'Kreye' : inlineText(lang, 'Created')}
         value={formatDate(project.created_at, lang) || '—'}
       />
       {project.updated_at && (
         <InfoTile
           icon="fas fa-clock"
-          label={lang === 'ht' ? 'Mizajou' : 'Updated'}
+          label={lang === 'ht' ? 'Mizajou' : inlineText(lang, 'Updated')}
           value={formatDate(project.updated_at, lang)}
         />
       )}
       <InfoTile
         icon="fas fa-eye"
-        label={lang === 'ht' ? 'Vizit' : 'Views'}
+        label={lang === 'ht' ? 'Vizit' : inlineText(lang, 'Views')}
         value={project.views != null ? String(project.views) : '0'}
       />
     </div>

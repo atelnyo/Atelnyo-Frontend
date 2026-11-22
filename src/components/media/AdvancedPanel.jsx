@@ -9,6 +9,7 @@
  * NOT visible to beginners — hidden behind an "Advanced" toggle.
  */
 import React, { useState } from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 function fmtFileSize(bytes) {
   if (bytes == null) return '—';
@@ -57,7 +58,7 @@ export default function AdvancedPanel({ media, mediaData, lang = 'en', className
   if (!item || !item.id) {
     return (
       <div className="advanced-panel-empty">
-        <p>{isHt ? 'Chwazi yon medya pou wè detay avanse' : 'Select a media item to view advanced details'}</p>
+        <p>{isHt ? 'Chwazi yon medya pou wè detay avanse' : inlineText(lang, 'Select a media item to view advanced details')}</p>
       </div>
     );
   }
@@ -89,50 +90,50 @@ export default function AdvancedPanel({ media, mediaData, lang = 'en', className
       >
         <i className={`fas ${isOpen ? 'fa-chevron-down' : 'fa-chevron-right'}`} />
         <i className="fas fa-microchip" />
-        {isHt ? 'Detay Avanse' : 'Advanced Details'}
+        {isHt ? 'Detay Avanse' : inlineText(lang, 'Advanced Details')}
         <span className="advanced-toggle-badge">
-          {isHt ? 'Pou itilizatè avanse' : 'For advanced users'}
+          {isHt ? 'Pou itilizatè avanse' : inlineText(lang, 'For advanced users')}
         </span>
       </button>
 
       {isOpen && (
         <div className="advanced-content">
           {/* URL Info */}
-          <SectionBlock title={isHt ? 'URL & Reso' : 'URL & Network'} icon="fa-link">
-            <DetailRow label={isHt ? 'URL Orijinal' : 'Original URL'} value={url} mono />
-            <DetailRow label={isHt ? 'URL Normalize' : 'Normalized URL'} value={url} mono />
-            <DetailRow label={isHt ? 'Provider' : 'Provider'} value={provider} />
-            <DetailRow label={isHt ? 'Kòd Estati' : 'Status Code'} value={statusCode} mono />
+          <SectionBlock title={isHt ? 'URL & Reso' : inlineText(lang, 'URL & Network')} icon="fa-link">
+            <DetailRow label={isHt ? 'URL Orijinal' : inlineText(lang, 'Original URL')} value={url} mono />
+            <DetailRow label={isHt ? 'URL Normalize' : inlineText(lang, 'Normalized URL')} value={url} mono />
+            <DetailRow label={isHt ? 'Provider' : inlineText(lang, 'Provider')} value={provider} />
+            <DetailRow label={isHt ? 'Kòd Estati' : inlineText(lang, 'Status Code')} value={statusCode} mono />
             {responseTimeMs != null && (
-              <DetailRow label={isHt ? 'Tan Repons' : 'Response Time'} value={`${responseTimeMs}ms`} mono />
+              <DetailRow label={isHt ? 'Tan Repons' : inlineText(lang, 'Response Time')} value={`${responseTimeMs}ms`} mono />
             )}
             {fileSize != null && (
-              <DetailRow label={isHt ? 'Gwosè Fichye' : 'File Size'} value={fmtFileSize(fileSize)} />
+              <DetailRow label={isHt ? 'Gwosè Fichye' : inlineText(lang, 'File Size')} value={fmtFileSize(fileSize)} />
             )}
           </SectionBlock>
 
           {/* Content Info */}
-          <SectionBlock title={isHt ? 'Kontni & Metadone' : 'Content & Metadata'} icon="fa-file-alt">
-            <DetailRow label={isHt ? 'Kalite Medya' : 'Media Type'} value={mediaType} />
+          <SectionBlock title={isHt ? 'Kontni & Metadone' : inlineText(lang, 'Content & Metadata')} icon="fa-file-alt">
+            <DetailRow label={isHt ? 'Kalite Medya' : inlineText(lang, 'Media Type')} value={mediaType} />
             <DetailRow label="Content Type" value={contentTypeLabel(mimeType)} />
             <DetailRow label="MIME Type" value={mimeType} mono />
             {width && height && (
-              <DetailRow label={isHt ? 'Dimansyon' : 'Dimensions'} value={`${width} × ${height}px`} />
+              <DetailRow label={isHt ? 'Dimansyon' : inlineText(lang, 'Dimensions')} value={`${width} × ${height}px`} />
             )}
             {aspectRatio && (
-              <DetailRow label={isHt ? 'Rapò Aspè' : 'Aspect Ratio'} value={aspectRatio} />
+              <DetailRow label={isHt ? 'Rapò Aspè' : inlineText(lang, 'Aspect Ratio')} value={aspectRatio} />
             )}
             {duration != null && duration > 0 && (
-              <DetailRow label={isHt ? 'Dire' : 'Duration'} value={fmtDuration(duration)} />
+              <DetailRow label={isHt ? 'Dire' : inlineText(lang, 'Duration')} value={fmtDuration(duration)} />
             )}
           </SectionBlock>
 
           {/* Performance */}
-          <SectionBlock title={isHt ? 'Pèfòmans' : 'Performance'} icon="fa-tachometer-alt">
+          <SectionBlock title={isHt ? 'Pèfòmans' : inlineText(lang, 'Performance')} icon="fa-tachometer-alt">
             {healthScore != null && (
               <div className="advanced-health-bar">
                 <span className="advanced-health-label">
-                  {isHt ? 'Sante' : 'Health'}:
+                  {isHt ? 'Sante' : inlineText(lang, 'Health')}:
                 </span>
                 <div className="advanced-health-track">
                   <div
@@ -146,15 +147,15 @@ export default function AdvancedPanel({ media, mediaData, lang = 'en', className
                 <span className="advanced-health-value">{healthScore}%</span>
               </div>
             )}
-            <DetailRow label={isHt ? 'Latansi' : 'Latency'} value={responseTimeMs != null ? `${responseTimeMs}ms` : '—'} />
+            <DetailRow label={isHt ? 'Latansi' : inlineText(lang, 'Latency')} value={responseTimeMs != null ? `${responseTimeMs}ms` : '—'} />
             {lastValidated && (
-              <DetailRow label={isHt ? 'Dènye Validasyon' : 'Last Validation'} value={new Date(lastValidated).toLocaleString()} />
+              <DetailRow label={isHt ? 'Dènye Validasyon' : inlineText(lang, 'Last Validation')} value={new Date(lastValidated).toLocaleString()} />
             )}
           </SectionBlock>
 
           {/* Headers */}
           {Object.keys(headers).length > 0 && (
-            <SectionBlock title={isHt ? 'Headers' : 'Headers'} icon="fa-code">
+            <SectionBlock title={isHt ? 'Headers' : inlineText(lang, 'Headers')} icon="fa-code">
               {Object.entries(headers).slice(0, 10).map(([key, val]) => (
                 <DetailRow key={key} label={key} value={String(val).slice(0, 100)} mono />
               ))}
@@ -163,7 +164,7 @@ export default function AdvancedPanel({ media, mediaData, lang = 'en', className
 
           {/* Redirect Chain */}
           {redirectChain.length > 0 && (
-            <SectionBlock title={isHt ? 'Chain Redireksyon' : 'Redirect Chain'} icon="fa-arrows-alt-h">
+            <SectionBlock title={isHt ? 'Chain Redireksyon' : inlineText(lang, 'Redirect Chain')} icon="fa-arrows-alt-h">
               {redirectChain.map((url, i) => (
                 <DetailRow key={i} label={`${i + 1}`} value={url} mono />
               ))}
@@ -172,7 +173,7 @@ export default function AdvancedPanel({ media, mediaData, lang = 'en', className
 
           {/* Validation History */}
           {validationHistory.length > 0 && (
-            <SectionBlock title={isHt ? 'Istwa Validasyon' : 'Validation History'} icon="fa-history">
+            <SectionBlock title={isHt ? 'Istwa Validasyon' : inlineText(lang, 'Validation History')} icon="fa-history">
               {validationHistory.slice(0, 10).map((h, i) => (
                 <DetailRow
                   key={i}
@@ -185,7 +186,7 @@ export default function AdvancedPanel({ media, mediaData, lang = 'en', className
           )}
 
           {/* Raw Report */}
-          <SectionBlock title={isHt ? 'Rapò Sante' : 'Health Report'} icon="fa-heartbeat">
+          <SectionBlock title={isHt ? 'Rapò Sante' : inlineText(lang, 'Health Report')} icon="fa-heartbeat">
             <pre className="advanced-raw">{JSON.stringify({
               url, mediaType, mimeType, statusCode,
               responseTimeMs, healthScore, fileSize,

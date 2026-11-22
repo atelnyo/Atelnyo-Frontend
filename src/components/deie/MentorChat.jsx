@@ -12,6 +12,7 @@
  */
 import React, { useState, useRef, useEffect } from 'react';
 import { askMentor, getMentorLearningPath, getMentorCareerAdvice, getMentorSkillGaps } from '../../services/deie';
+import { inlineText } from '../../utils/inlineI18n';
 
 const QUICK_ACTIONS = [
   { key: 'learning', icon: 'fa-graduation-cap', label: { en: 'Learning Path', ht: 'Chimen Aprantisaj' }, action: 'learning-path' },
@@ -22,7 +23,7 @@ const QUICK_ACTIONS = [
 export default function MentorChat({ lang = 'en', className = '' }) {
   const isHt = lang === 'ht';
   const [messages, setMessages] = useState([
-    { role: 'mentor', text: isHt ? 'Bonjou! Mwen se mentò ou. Poze m yon kesyon oswa chwazi yon aksyon rapid.' : 'Hello! I am your AI mentor. Ask me a question or choose a quick action.' },
+    { role: 'mentor', text: isHt ? 'Bonjou! Mwen se mentò ou. Poze m yon kesyon oswa chwazi yon aksyon rapid.' : inlineText(lang, 'Hello! I am your AI mentor. Ask me a question or choose a quick action.') },
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -46,11 +47,11 @@ export default function MentorChat({ lang = 'en', className = '' }) {
 
     try {
       const res = await askMentor(question);
-      addMessage('mentor', res.data.answer || (isHt ? 'M pa kapab repon kounye a.' : 'I cannot answer right now.'));
+      addMessage('mentor', res.data.answer || (isHt ? 'M pa kapab repon kounye a.' : inlineText(lang, 'I cannot answer right now.')));
     } catch (err) {
       const errMsg = err.response?.data?.error || err.message || 'Failed to get response';
       setError(errMsg);
-      addMessage('mentor', isHt ? 'Mwen gen yon pwoblèm. Eseye ankò.' : 'I encountered a problem. Please try again.');
+      addMessage('mentor', isHt ? 'Mwen gen yon pwoblèm. Eseye ankò.' : inlineText(lang, 'I encountered a problem. Please try again.'));
     } finally {
       setLoading(false);
     }
@@ -62,9 +63,9 @@ export default function MentorChat({ lang = 'en', className = '' }) {
     setLoading(true);
 
     const labels = {
-      'learning-path': isHt ? 'Montre m chimen aprantisaj mwen' : 'Show my learning path',
-      'career-advice': isHt ? 'Ban m konsey karyè' : 'Give me career advice',
-      'skill-gaps': isHt ? 'Ki konpetans ki manke m' : 'What skills am I missing?',
+      'learning-path': isHt ? 'Montre m chimen aprantisaj mwen' : inlineText(lang, 'Show my learning path'),
+      'career-advice': isHt ? 'Ban m konsey karyè' : inlineText(lang, 'Give me career advice'),
+      'skill-gaps': isHt ? 'Ki konpetans ki manke m' : inlineText(lang, 'What skills am I missing?'),
     };
 
     addMessage('user', labels[action] || action);
@@ -76,11 +77,11 @@ export default function MentorChat({ lang = 'en', className = '' }) {
       else if (action === 'skill-gaps') res = await getMentorSkillGaps();
 
       const answer = res?.data?.recommendation || res?.data?.message ||
-        (isHt ? 'Pa gen enfòmasyon disponib.' : 'No information available.');
+        (isHt ? 'Pa gen enfòmasyon disponib.' : inlineText(lang, 'No information available.'));
       addMessage('mentor', answer);
     } catch (err) {
       setError(err.message);
-      addMessage('mentor', isHt ? 'Mwen pa ka jwenn enfòmasyon sa a kounye a.' : 'I cannot get this information right now.');
+      addMessage('mentor', isHt ? 'Mwen pa ka jwenn enfòmasyon sa a kounye a.' : inlineText(lang, 'I cannot get this information right now.'));
     } finally {
       setLoading(false);
     }
@@ -90,7 +91,7 @@ export default function MentorChat({ lang = 'en', className = '' }) {
     <div className={`mentor-chat ${className}`}>
       <div className="mentor-chat-header">
         <i className="fas fa-robot" />
-        <h3>{isHt ? 'Mentò AI' : 'AI Mentor'}</h3>
+        <h3>{isHt ? 'Mentò AI' : inlineText(lang, 'AI Mentor')}</h3>
       </div>
 
       {/* Quick actions */}
@@ -139,7 +140,7 @@ export default function MentorChat({ lang = 'en', className = '' }) {
         <input type="text" className="mentor-input" value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-          placeholder={isHt ? 'Poze yon kesyon...' : 'Ask a question...'}
+          placeholder={isHt ? 'Poze yon kesyon...' : inlineText(lang, 'Ask a question...')}
           disabled={loading} />
         <button className="mentor-send-btn" onClick={handleSend} disabled={loading || !input.trim()}>
           <i className="fas fa-paper-plane" />

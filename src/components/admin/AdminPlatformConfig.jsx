@@ -20,6 +20,7 @@
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { adminPlatformConfigService } from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── Human labels for known config keys (EN + HT) ─────────────────────
 const KEY_LABELS = {
@@ -192,8 +193,8 @@ export default function AdminPlatformConfig({ lang = 'en', showToast }) {
         const status = err?.response?.status;
         setError(
           status === 403
-            ? (isHt ? 'Aksè admin obligatwa.' : 'Admin access required.')
-            : (isHt ? 'Pa t kapab chaje konfigirasyon an.' : 'Could not load config.'),
+            ? (isHt ? 'Aksè admin obligatwa.' : inlineText(lang, 'Admin access required.'))
+            : (isHt ? 'Pa t kapab chaje konfigirasyon an.' : inlineText(lang, 'Could not load config.')),
         );
       })
       .finally(() => {
@@ -455,7 +456,7 @@ export default function AdminPlatformConfig({ lang = 'en', showToast }) {
                 checked={draft === 'true'}
                 onChange={(e) => setEditing((prev) => ({ ...prev, [row.key]: e.target.checked ? 'true' : 'false' }))}
               />
-              <span>{draft === 'true' ? (isHt ? 'Aktive' : 'Enabled') : (isHt ? 'Fèmen' : 'Disabled')}</span>
+              <span>{draft === 'true' ? (isHt ? 'Aktive' : inlineText(lang, 'Enabled')) : (isHt ? 'Fèmen' : inlineText(lang, 'Disabled'))}</span>
             </label>
           ) : MULTILINE_KEYS.has(row.key) ? (
             <>

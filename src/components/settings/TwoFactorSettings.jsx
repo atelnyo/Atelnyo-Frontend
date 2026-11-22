@@ -20,6 +20,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import QRCodeLib from 'qrcode';
 import { authService } from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 const CODE_LEN = 6;
 
@@ -266,7 +267,7 @@ export default function TwoFactorSettings({ user, lang = 'en', onUpdated }) {
             disabled={isBusy}
             data-testid="2fa-setup-cta"
           >
-            <i className="fas fa-qrcode" aria-hidden="true" /> {isBusy ? (lang === 'ht' ? 'Karg' : '…') : t2f(lang, 'setupBtn')}
+            <i className="fas fa-qrcode" aria-hidden="true" /> {isBusy ? (lang === 'ht' ? 'Karg' : inlineText(lang, '…')) : t2f(lang, 'setupBtn')}
           </button>
         )}
       </div>
@@ -301,7 +302,7 @@ export default function TwoFactorSettings({ user, lang = 'en', onUpdated }) {
             onClick={() => {
               navigator.clipboard.writeText(pending?.secret || '').catch(() => {});
             }}
-            title={lang === 'ht' ? 'Klike pou kopie' : 'Click to copy'}
+            title={lang === 'ht' ? 'Klike pou kopie' : inlineText(lang, 'Click to copy')}
           >
             {pending?.secret}
           </div>

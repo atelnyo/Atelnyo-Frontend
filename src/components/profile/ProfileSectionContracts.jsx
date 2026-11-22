@@ -21,6 +21,7 @@
 import React from 'react';
 import ProfileM3Section from './ProfileM3Section';
 import { fmtDate, languageEntry, ensureHttpUrl } from './profileUtils';
+import { inlineText } from '../../utils/inlineI18n';
 
 /* About section — bio + skills */
 export function AboutCard({ profile }) {
@@ -159,7 +160,7 @@ export function ActivityCard({ activities, lang }) {
   const list = Array.isArray(activities) ? activities : [];
   if (list.length === 0) return null;
   return (
-    <ProfileM3Section icon="fa-bolt" title={lang === 'ht' ? 'Aktivite' : 'Activity'} configId="activity">
+    <ProfileM3Section icon="fa-bolt" title={lang === 'ht' ? 'Aktivite' : inlineText(lang, 'Activity')} configId="activity">
       <div className="csp-timeline">
         {list.slice(0, 5).map((ev, i) => (
           <div key={ev.id || i} className="csp-timeline-item">
@@ -178,7 +179,7 @@ export function CampaignsCard({ campaigns, lang }) {
   const list = Array.isArray(campaigns) ? campaigns : [];
   if (list.length === 0) return null;
   return (
-    <ProfileM3Section icon="fa-bullhorn" title={lang === 'ht' ? 'Kanpay' : 'Campaigns'} configId="campaigns">
+    <ProfileM3Section icon="fa-bullhorn" title={lang === 'ht' ? 'Kanpay' : inlineText(lang, 'Campaigns')} configId="campaigns">
       {list.slice(0, 3).map((camp) => (
         <div key={camp.id} className="csp-compact-card">
           <span className="csp-compact-card-icon"><i className="fas fa-bullhorn" /></span>            <div className="csp-compact-card-body">
@@ -200,7 +201,7 @@ export function AffiliateCard({ offers, lang }) {
   const list = Array.isArray(offers) ? offers : [];
   if (list.length === 0) return null;
   return (
-    <ProfileM3Section icon="fa-hand-holding-usd" title={lang === 'ht' ? 'Afilye' : 'Affiliate'} configId="affiliate">
+    <ProfileM3Section icon="fa-hand-holding-usd" title={lang === 'ht' ? 'Afilye' : inlineText(lang, 'Affiliate')} configId="affiliate">
       {list.slice(0, 3).map((offer) => (
         <div key={offer.id} className="csp-compact-card">
           <span className="csp-compact-card-icon"><i className="fas fa-hand-holding-usd" /></span>

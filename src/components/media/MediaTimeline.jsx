@@ -5,6 +5,7 @@
  * Visibility Changed, Broken, Recovered, Archived, Deleted
  */
 import React from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 const TIMELINE_ICONS = {
   created: 'fa-plus-circle',
@@ -55,7 +56,7 @@ export default function MediaTimeline({ events = [], lang = 'en', className = ''
     return (
       <div className="media-timeline-empty">
         <i className="fas fa-history" />
-        <p>{isHt ? 'Pa gen istwa pou medya sa a.' : 'No history for this media.'}</p>
+        <p>{isHt ? 'Pa gen istwa pou medya sa a.' : inlineText(lang, 'No history for this media.')}</p>
       </div>
     );
   }
@@ -81,7 +82,7 @@ export default function MediaTimeline({ events = [], lang = 'en', className = ''
               </span>
               {by && (
                 <span className="media-timeline-by">
-                  {isHt ? 'pa' : 'by'} {by}
+                  {isHt ? 'pa' : inlineText(lang, 'by')} {by}
                 </span>
               )}
               {date && (

@@ -6,6 +6,7 @@
  */
 import React, { useState } from 'react';
 import styles from './sections.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function ProfileCompletenessCard({
   completeness,
@@ -31,7 +32,7 @@ export default function ProfileCompletenessCard({
       : `${missing.length} item${missing.length === 1 ? '' : 's'} missing to make your profile more complete.`)
     : (isHt
       ? 'Tout baz prensipal yo ranpli. Pwofil ou pare pou vizitè yo.'
-      : 'Every core field is filled in. Your profile is ready for visitors.');
+      : inlineText(lang, 'Every core field is filled in. Your profile is ready for visitors.'));
 
   return (
     <section className={styles.profileCompletenessCard} aria-labelledby="profile-completeness-title">
@@ -52,7 +53,7 @@ export default function ProfileCompletenessCard({
         {isDirty && (
           <span className={styles.profileCompletenessDirty}>
             <i className="fas fa-rotate" aria-hidden="true" />{' '}
-            {isHt ? 'Nòt la ap mete ajou apre sove' : 'Score updates after saving'}
+            {isHt ? 'Nòt la ap mete ajou apre sove' : inlineText(lang, 'Score updates after saving')}
           </span>
         )}
       </div>
@@ -68,7 +69,7 @@ export default function ProfileCompletenessCard({
                   className={`${styles.profileCompletenessChip} ${styles.profileCompletenessChipStatic}`}
                   title={isHt
                     ? 'Sa a pa modifye nan editè pwofil la.'
-                    : 'This is managed outside the profile editor.'}
+                    : inlineText(lang, 'This is managed outside the profile editor.')}
                 >
                   {label}
                 </span>
@@ -80,7 +81,7 @@ export default function ProfileCompletenessCard({
                 type="button"
                 className={styles.profileCompletenessChip}
                 onClick={() => onJump?.(item.tab)}
-                aria-label={`${isHt ? 'Ale nan' : 'Go to'} ${label}`}
+                aria-label={`${isHt ? 'Ale nan' : inlineText(lang, 'Go to')} ${label}`}
               >
                 <i className="fas fa-plus" aria-hidden="true" />
                 {label}
@@ -97,8 +98,8 @@ export default function ProfileCompletenessCard({
               aria-expanded={expanded}
             >
               {expanded
-                ? (isHt ? 'Mwens' : 'Show less')
-                : `+${missing.length - 4} ${isHt ? 'lòt' : 'more'}`}
+                ? (isHt ? 'Mwens' : inlineText(lang, 'Show less'))
+                : `+${missing.length - 4} ${isHt ? 'lòt' : inlineText(lang, 'more')}`}
             </button>
           )}
         </div>

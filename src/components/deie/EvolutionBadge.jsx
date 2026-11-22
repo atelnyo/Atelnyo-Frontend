@@ -8,6 +8,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { getMyEvolutionScore, recalculateEvolution } from '../../services/deie';
+import { inlineText } from '../../utils/inlineI18n';
 
 const TIER_CONFIG = {
   seed: { icon: 'fa-seedling', color: '#4caf50', min: 0, max: 100 },
@@ -64,7 +65,7 @@ export default function EvolutionBadge({ lang = 'en', showDetails = true, onRefr
       <div className="evo-badge evo-error">
         <i className="fas fa-exclamation-circle" />
         <button className="evo-retry-btn" onClick={loadScore}>
-          {isHt ? 'Rekòmanse' : 'Retry'}
+          {isHt ? 'Rekòmanse' : inlineText(lang, 'Retry')}
         </button>
       </div>
     );
@@ -89,12 +90,12 @@ export default function EvolutionBadge({ lang = 'en', showDetails = true, onRefr
         <div className="evo-score-number">
           {Math.round(total)}
           <span className="evo-score-label">
-            {isHt ? 'nòt evolisyon' : 'evolution score'}
+            {isHt ? 'nòt evolisyon' : inlineText(lang, 'evolution score')}
           </span>
         </div>
 
         <div className="evo-tier-label" style={{ color: config.color }}>
-          {score.tier_label || (isHt ? 'Grenn' : 'Seed')}
+          {score.tier_label || (isHt ? 'Grenn' : inlineText(lang, 'Seed'))}
         </div>
 
         {showDetails && (
@@ -118,7 +119,7 @@ export default function EvolutionBadge({ lang = 'en', showDetails = true, onRefr
       </div>
 
       <button className="evo-refresh-btn" onClick={handleRefresh} disabled={refreshing}
-              title={isHt ? 'Mete ajou' : 'Refresh score'}>
+              title={isHt ? 'Mete ajou' : inlineText(lang, 'Refresh score')}>
         <i className={`fas ${refreshing ? 'fa-spinner fa-spin' : 'fa-sync-alt'}`} />
       </button>
     </div>

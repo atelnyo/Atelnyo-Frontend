@@ -23,6 +23,7 @@ import { tiktokService } from '../../../services/tiktokService';
 import { StudioModal, FormField } from './shared';
 import styles from './modals.module.css';
 import css from './TikTokPublishModal.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const MAX_TITLE = 2200;
 
@@ -251,7 +252,7 @@ export default function TikTokPublishModal({ onClose, lang = 'en', showToast, on
             maxLength={MAX_TITLE}
             rows={3}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder={lang === 'ht' ? 'Kisa videyo a ye sou…' : 'What is this video about…'}
+            placeholder={lang === 'ht' ? 'Kisa videyo a ye sou…' : inlineText(lang, 'What is this video about…')}
           />
           <button
             type="button"

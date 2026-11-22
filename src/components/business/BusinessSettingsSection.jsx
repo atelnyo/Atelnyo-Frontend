@@ -13,6 +13,7 @@
 import React, { useState } from 'react';
 import { businessProfileService } from '../../services/api';
 import { BUSINESS_DAYS, businessDayLabel } from '../../utils/businessHours';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function BusinessSettingsSection({ lang = 'en', t, showToast, profile, onSaved }) {
   const isHt = lang === 'ht';
@@ -43,7 +44,7 @@ export default function BusinessSettingsSection({ lang = 'en', t, showToast, pro
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name.trim()) {
-      showToast?.(t?.business_name_required || (isHt ? 'Non biznis la obligatwa.' : 'Business name is required.'), 'circle-exclamation');
+      showToast?.(t?.business_name_required || (isHt ? 'Non biznis la obligatwa.' : inlineText(lang, 'Business name is required.')), 'circle-exclamation');
       return;
     }
     setSaving(true);
@@ -68,12 +69,12 @@ export default function BusinessSettingsSection({ lang = 'en', t, showToast, pro
         hours,
       });
       const updated = res?.data?.data ?? res?.data ?? null;
-      showToast?.(t?.business_saved || (isHt ? '✅ Business Profile mete ajou!' : '✅ Business Profile updated!'), 'check-circle');
+      showToast?.(t?.business_saved || (isHt ? '✅ Business Profile mete ajou!' : inlineText(lang, '✅ Business Profile updated!')), 'check-circle');
       onSaved?.(updated);
     } catch (err) {
       const detail = err?.response?.data?.detail
         || err?.response?.data?.name?.[0]
-        || (isHt ? 'Pa t kapab sove Business Profile la.' : 'Could not save the business profile.');
+        || (isHt ? 'Pa t kapab sove Business Profile la.' : inlineText(lang, 'Could not save the business profile.'));
       showToast?.(detail, 'circle-exclamation');
     } finally {
       setSaving(false);
@@ -84,7 +85,7 @@ export default function BusinessSettingsSection({ lang = 'en', t, showToast, pro
     <form onSubmit={handleSubmit} className="biz-form" data-testid="business-settings-form">
       <div className="biz-form-group">
         <label className="biz-form-label">
-          {t?.business_field_name || (isHt ? 'Non biznis / brand' : 'Business / brand name')} *
+          {t?.business_field_name || (isHt ? 'Non biznis / brand' : inlineText(lang, 'Business / brand name'))} *
         </label>
         <input
           type="text"
@@ -92,20 +93,20 @@ export default function BusinessSettingsSection({ lang = 'en', t, showToast, pro
           value={form.name}
           onChange={(e) => set('name', e.target.value)}
           maxLength={120}
-          placeholder={isHt ? 'Egzanp: Kreyatif Studio' : 'e.g. Creative Studio'}
+          placeholder={isHt ? 'Egzanp: Kreyatif Studio' : inlineText(lang, 'e.g. Creative Studio')}
           data-testid="business-settings-name"
           required
         />
         <p className="biz-form-hint">
           {t?.business_slug_hint || (isHt
             ? 'Slug la fiks apre kreyasyon — chanje non an pa chanje URL la.'
-            : 'The slug is fixed after creation — renaming never breaks the URL.')}
+            : inlineText(lang, 'The slug is fixed after creation — renaming never breaks the URL.'))}
         </p>
       </div>
 
       <div className="biz-form-group">
         <label className="biz-form-label">
-          {t?.business_field_tagline || (isHt ? 'Slogan / tagline' : 'Tagline')}
+          {t?.business_field_tagline || (isHt ? 'Slogan / tagline' : inlineText(lang, 'Tagline'))}
         </label>
         <input
           type="text"
@@ -113,14 +114,14 @@ export default function BusinessSettingsSection({ lang = 'en', t, showToast, pro
           value={form.tagline}
           onChange={(e) => set('tagline', e.target.value)}
           maxLength={200}
-          placeholder={isHt ? 'Yon fraz ki dekri biznis ou' : 'One line that describes your business'}
+          placeholder={isHt ? 'Yon fraz ki dekri biznis ou' : inlineText(lang, 'One line that describes your business')}
         />
       </div>
 
       <div className="biz-form-row">
         <div className="biz-form-group">
           <label className="biz-form-label">
-            {t?.business_field_logo || (isHt ? 'Logo (URL)' : 'Logo (URL)')}
+            {t?.business_field_logo || (isHt ? 'Logo (URL)' : inlineText(lang, 'Logo (URL)'))}
           </label>
           <input
             type="url"
@@ -135,7 +136,7 @@ export default function BusinessSettingsSection({ lang = 'en', t, showToast, pro
         </div>
         <div className="biz-form-group">
           <label className="biz-form-label">
-            {t?.business_field_cover || (isHt ? 'Kouvèti (URL)' : 'Cover (URL)')}
+            {t?.business_field_cover || (isHt ? 'Kouvèti (URL)' : inlineText(lang, 'Cover (URL)'))}
           </label>
           <input
             type="url"
@@ -149,7 +150,7 @@ export default function BusinessSettingsSection({ lang = 'en', t, showToast, pro
 
       <div className="biz-form-group">
         <label className="biz-form-label">
-          {t?.business_field_description || (isHt ? 'Deskripsyon biznis' : 'Business description')}
+          {t?.business_field_description || (isHt ? 'Deskripsyon biznis' : inlineText(lang, 'Business description'))}
         </label>
         <textarea
           className="biz-form-input"
@@ -157,7 +158,7 @@ export default function BusinessSettingsSection({ lang = 'en', t, showToast, pro
           value={form.description}
           onChange={(e) => set('description', e.target.value)}
           maxLength={3000}
-          placeholder={isHt ? 'Kisa biznis ou fè, pou kisa li egziste...' : 'What your business does, why it exists...'}
+          placeholder={isHt ? 'Kisa biznis ou fè, pou kisa li egziste...' : inlineText(lang, 'What your business does, why it exists...')}
         />
       </div>
 
@@ -167,17 +168,17 @@ export default function BusinessSettingsSection({ lang = 'en', t, showToast, pro
           <i className="fas fa-address-card" aria-hidden="true" />
           {t?.business_section_contact_info || (isHt
             ? 'Enfòmasyon kontak piblik'
-            : 'Public contact & information')}
+            : inlineText(lang, 'Public contact & information'))}
         </legend>
         <p className="biz-form-hint">
           {t?.business_contact_info_hint || (isHt
             ? 'Enfòmasyon sa yo ap parèt sou paj piblik biznis ou — se biznis la, pa enfòmasyon pèsonèl kont ou.'
-            : 'This info appears on your public business page — it is the business\'s, never your account\'s personal data.')}
+            : inlineText(lang, 'This info appears on your public business page — it is the business\'s, never your account\'s personal data.'))}
         </p>
 
         <div className="biz-form-group">
           <label className="biz-form-label" htmlFor="biz-settings-location">
-            {t?.business_field_location || (isHt ? 'Kote / zòn sèvis' : 'Location / service area')}
+            {t?.business_field_location || (isHt ? 'Kote / zòn sèvis' : inlineText(lang, 'Location / service area'))}
           </label>
           <input
             id="biz-settings-location"
@@ -186,7 +187,7 @@ export default function BusinessSettingsSection({ lang = 'en', t, showToast, pro
             value={form.location}
             onChange={(e) => set('location', e.target.value)}
             maxLength={120}
-            placeholder={isHt ? 'Egzanp: Pòtoprens, HT' : 'e.g. Port-au-Prince, HT'}
+            placeholder={isHt ? 'Egzanp: Pòtoprens, HT' : inlineText(lang, 'e.g. Port-au-Prince, HT')}
             data-testid="business-settings-location"
           />
         </div>
@@ -194,7 +195,7 @@ export default function BusinessSettingsSection({ lang = 'en', t, showToast, pro
         <div className="biz-form-row">
           <div className="biz-form-group">
             <label className="biz-form-label" htmlFor="biz-settings-email">
-              {t?.business_field_contact_email || (isHt ? 'Imèl kontak' : 'Contact email')}
+              {t?.business_field_contact_email || (isHt ? 'Imèl kontak' : inlineText(lang, 'Contact email'))}
             </label>
             <input
               id="biz-settings-email"
@@ -208,7 +209,7 @@ export default function BusinessSettingsSection({ lang = 'en', t, showToast, pro
           </div>
           <div className="biz-form-group">
             <label className="biz-form-label" htmlFor="biz-settings-phone">
-              {t?.business_field_phone || (isHt ? 'Telefòn' : 'Phone')}
+              {t?.business_field_phone || (isHt ? 'Telefòn' : inlineText(lang, 'Phone'))}
             </label>
             <input
               id="biz-settings-phone"
@@ -225,7 +226,7 @@ export default function BusinessSettingsSection({ lang = 'en', t, showToast, pro
 
         <div className="biz-form-group">
           <label className="biz-form-label" htmlFor="biz-settings-website">
-            {t?.business_field_website || (isHt ? 'Sit wèb' : 'Website')}
+            {t?.business_field_website || (isHt ? 'Sit wèb' : inlineText(lang, 'Website'))}
           </label>
           <input
             id="biz-settings-website"
@@ -241,7 +242,7 @@ export default function BusinessSettingsSection({ lang = 'en', t, showToast, pro
         {/* ─── Operating hours editor ─────────────────────── */}
         <div className="biz-form-group">
           <span className="biz-form-label">
-            {t?.business_field_hours || (isHt ? 'Èdtan operasyon' : 'Operating hours')}
+            {t?.business_field_hours || (isHt ? 'Èdtan operasyon' : inlineText(lang, 'Operating hours'))}
           </span>
           <div className="biz-hours-editor" data-testid="business-settings-hours">
             {DAYS.map((day) => (
@@ -256,7 +257,7 @@ export default function BusinessSettingsSection({ lang = 'en', t, showToast, pro
                   value={form.hours?.[day] || ''}
                   onChange={(e) => setHours(day, e.target.value)}
                   maxLength={40}
-                  placeholder={isHt ? 'Fèmen' : 'Closed'}
+                  placeholder={isHt ? 'Fèmen' : inlineText(lang, 'Closed')}
                   data-testid={`business-settings-hours-${day}`}
                 />
               </div>
@@ -274,8 +275,8 @@ export default function BusinessSettingsSection({ lang = 'en', t, showToast, pro
         >
           <i className={`fas ${saving ? 'fa-spinner fa-spin' : 'fa-save'}`} aria-hidden="true" />
           {saving
-            ? (isHt ? 'Ap sove...' : 'Saving...')
-            : (t?.business_save || (isHt ? 'Sove' : 'Save'))}
+            ? (isHt ? 'Ap sove...' : inlineText(lang, 'Saving...'))
+            : (t?.business_save || (isHt ? 'Sove' : inlineText(lang, 'Save')))}
         </button>
       </div>
     </form>

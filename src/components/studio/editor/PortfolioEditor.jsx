@@ -27,6 +27,7 @@ import StudioPropertiesPanel, {
 } from './StudioPropertiesPanel';
 import { ImageUrlField } from '../modals/shared';
 import styles from './editor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const DIFFICULTY_OPTIONS = [
   { value: 'beginner', ht: 'Debitan', en: 'Beginner' },
@@ -115,7 +116,7 @@ export default function PortfolioEditor({ onClose, onSuccess, onSaved, lang = 'e
 
   const validate = useCallback(() => {
     const errs = {};
-    if (!form.title.trim()) errs.title = isHt ? 'Tit oblije' : 'Title required';
+    if (!form.title.trim()) errs.title = isHt ? 'Tit oblije' : inlineText(lang, 'Title required');
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }, [form, isHt]);
@@ -154,11 +155,11 @@ export default function PortfolioEditor({ onClose, onSuccess, onSaved, lang = 'e
       }
       dirtyRef.current = false; setDirty(false); setSaveState('saved');
       onSaved?.();
-      showToast?.(isHt ? '✅ Pwojè sove' : '✅ Project saved', 'check-circle');
+      showToast?.(isHt ? '✅ Pwojè sove' : inlineText(lang, '✅ Project saved'), 'check-circle');
       setTimeout(() => setSaveState('idle'), 1500);
       return true;
     } catch (err) {
-      const detail = err?.response?.data?.detail || err?.response?.data?.title?.[0] || err?.message || (isHt ? 'Pa t kapab sove' : 'Could not save');
+      const detail = err?.response?.data?.detail || err?.response?.data?.title?.[0] || err?.message || (isHt ? 'Pa t kapab sove' : inlineText(lang, 'Could not save'));
       setErrors((e) => ({ ...e, _api: detail }));
       showToast?.(detail, 'circle-exclamation');
       setSaveState('error');
@@ -171,11 +172,11 @@ export default function PortfolioEditor({ onClose, onSuccess, onSaved, lang = 'e
   const handlePreview = useCallback(() => setPreviewOpen(true), []);
 
   const statusBadge = form.is_published
-    ? { label: isHt ? 'Pibliye' : 'Published', color: '#059669', bg: 'rgba(16,185,129,0.1)' }
-    : { label: isHt ? 'Bouyon' : 'Draft', color: '#d97706', bg: 'rgba(245,158,11,0.1)' };
+    ? { label: isHt ? 'Pibliye' : inlineText(lang, 'Published'), color: '#059669', bg: 'rgba(16,185,129,0.1)' }
+    : { label: isHt ? 'Bouyon' : inlineText(lang, 'Draft'), color: '#d97706', bg: 'rgba(245,158,11,0.1)' };
 
   const validationList = [];
-  if (!form.title.trim()) validationList.push({ id: 'title', label: isHt ? 'Tit obligatwa' : 'Title required', zone: 'editor' });
+  if (!form.title.trim()) validationList.push({ id: 'title', label: isHt ? 'Tit obligatwa' : inlineText(lang, 'Title required'), zone: 'editor' });
 
   const skills = form.skills_used ? form.skills_used.split(',').map((s) => s.trim()).filter(Boolean) : [];
 
@@ -183,19 +184,19 @@ export default function PortfolioEditor({ onClose, onSuccess, onSaved, lang = 'e
     <div className={styles.editorMain} style={{ padding: 24, maxWidth: 900, margin: '0 auto', width: '100%' }}>
       {errors._api && <div className={styles.apiError} role="alert" style={{ marginBottom: 16 }}>{errors._api}</div>}
       <div className={styles.formSection}>
-        <h3 className={styles.sectionTitle}><i className="fas fa-palette" /> {isHt ? 'Pwojè a' : 'The Piece'}</h3>
+        <h3 className={styles.sectionTitle}><i className="fas fa-palette" /> {isHt ? 'Pwojè a' : inlineText(lang, 'The Piece')}</h3>
         <div style={{ display: 'grid', gap: 16 }}>
-          <PropField label={isHt ? 'Tit' : 'Title'} required error={errors.title}>
-            <PropInput value={form.title} onChange={(e) => handleChange('title', e.target.value)} placeholder={isHt ? 'Non pwojè a' : 'Project name'} />
+          <PropField label={isHt ? 'Tit' : inlineText(lang, 'Title')} required error={errors.title}>
+            <PropInput value={form.title} onChange={(e) => handleChange('title', e.target.value)} placeholder={isHt ? 'Non pwojè a' : inlineText(lang, 'Project name')} />
           </PropField>
-          <PropField label={isHt ? 'Deskripsyon' : 'Description'}>
-            <textarea value={form.description} onChange={(e) => handleChange('description', e.target.value)} className={styles.textarea} rows={5} placeholder={isHt ? 'Rakonte istwa pwojè a...' : 'Tell the story of the piece...'} />
+          <PropField label={isHt ? 'Deskripsyon' : inlineText(lang, 'Description')}>
+            <textarea value={form.description} onChange={(e) => handleChange('description', e.target.value)} className={styles.textarea} rows={5} placeholder={isHt ? 'Rakonte istwa pwojè a...' : inlineText(lang, 'Tell the story of the piece...')} />
           </PropField>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            <PropField label={isHt ? 'Kategori' : 'Category'}>
-              <PropInput value={form.category} onChange={(e) => handleChange('category', e.target.value)} placeholder={isHt ? 'Web, Design, Mizik...' : 'Web, Design, Music...'} />
+            <PropField label={isHt ? 'Kategori' : inlineText(lang, 'Category')}>
+              <PropInput value={form.category} onChange={(e) => handleChange('category', e.target.value)} placeholder={isHt ? 'Web, Design, Mizik...' : inlineText(lang, 'Web, Design, Music...')} />
             </PropField>
-            <PropField label={isHt ? 'Nivo' : 'Difficulty'}>
+            <PropField label={isHt ? 'Nivo' : inlineText(lang, 'Difficulty')}>
               <select value={form.difficulty} onChange={(e) => handleChange('difficulty', e.target.value)} className={styles.select}>
                 {DIFFICULTY_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>{isHt ? o.ht : o.en}</option>
@@ -203,35 +204,35 @@ export default function PortfolioEditor({ onClose, onSuccess, onSaved, lang = 'e
               </select>
             </PropField>
           </div>
-          <PropField label={isHt ? 'Konpetans (separe ak vigil)' : 'Skills (comma separated)'}>
-            <PropInput value={form.skills_used} onChange={(e) => handleChange('skills_used', e.target.value)} placeholder={isHt ? 'React, Django, Design...' : 'React, Django, Design...'} />
+          <PropField label={isHt ? 'Konpetans (separe ak vigil)' : inlineText(lang, 'Skills (comma separated)')}>
+            <PropInput value={form.skills_used} onChange={(e) => handleChange('skills_used', e.target.value)} placeholder={isHt ? 'React, Django, Design...' : inlineText(lang, 'React, Django, Design...')} />
           </PropField>
-          <PropField label={isHt ? 'Dat finalizasyon' : 'Completion date'}>
+          <PropField label={isHt ? 'Dat finalizasyon' : inlineText(lang, 'Completion date')}>
             <input type="date" value={form.completion_date} onChange={(e) => handleChange('completion_date', e.target.value)} className={styles.input} />
           </PropField>
         </div>
       </div>
 
       <div className={styles.formSection} style={{ marginTop: 24 }}>
-        <h3 className={styles.sectionTitle}><i className="fas fa-image" /> {isHt ? 'Vizyèl' : 'Visuals'}</h3>
+        <h3 className={styles.sectionTitle}><i className="fas fa-image" /> {isHt ? 'Vizyèl' : inlineText(lang, 'Visuals')}</h3>
         <div style={{ display: 'grid', gap: 16 }}>
-          <ImageUrlField label={isHt ? 'URL Kouvèti' : 'Cover URL'} value={form.cover_url} onChange={(v) => handleChange('cover_url', v)} lang={lang} />
+          <ImageUrlField label={isHt ? 'URL Kouvèti' : inlineText(lang, 'Cover URL')} value={form.cover_url} onChange={(v) => handleChange('cover_url', v)} lang={lang} />
           <div>
             <div style={{ fontWeight: 600, fontSize: '0.85rem', marginBottom: 8 }}>
-              {isHt ? 'Galri medya' : 'Media gallery'}{' '}
+              {isHt ? 'Galri medya' : inlineText(lang, 'Media gallery')}{' '}
               <span style={{ fontWeight: 400, color: 'var(--text-secondary)' }}>
-                {isHt ? '(imaj + videyo demo)' : '(images + demo videos)'}
+                {isHt ? '(imaj + videyo demo)' : inlineText(lang, '(images + demo videos)')}
               </span>
             </div>
             {(form.media_gallery || []).map((g, i) => (
               <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 8, marginBottom: 8, alignItems: 'center' }}>
                 <PropInput value={g.url} onChange={(e) => handleGalleryChange(i, 'url', e.target.value)} placeholder="https://..." />
-                <PropInput value={g.caption} onChange={(e) => handleGalleryChange(i, 'caption', e.target.value)} placeholder={isHt ? 'Lejand (opsyonèl)' : 'Caption (optional)'} />
+                <PropInput value={g.caption} onChange={(e) => handleGalleryChange(i, 'caption', e.target.value)} placeholder={isHt ? 'Lejand (opsyonèl)' : inlineText(lang, 'Caption (optional)')} />
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                     <i className={g.type === 'video' ? 'fas fa-video' : 'fas fa-image'} aria-hidden="true" />
                   </span>
-                  <button type="button" onClick={() => removeGalleryItem(i)} aria-label={isHt ? 'Retire medya' : 'Remove media'}
+                  <button type="button" onClick={() => removeGalleryItem(i)} aria-label={isHt ? 'Retire medya' : inlineText(lang, 'Remove media')}
                     style={{ border: 'none', background: 'transparent', color: '#dc2626', cursor: 'pointer', fontSize: '0.9rem' }}>
                     <i className="fas fa-trash-can" aria-hidden="true" />
                   </button>
@@ -240,19 +241,19 @@ export default function PortfolioEditor({ onClose, onSuccess, onSaved, lang = 'e
             ))}
             <button type="button" onClick={addGalleryItem}
               style={{ border: '1px dashed var(--border-color, #cbd5e1)', background: 'transparent', borderRadius: 8, padding: '6px 12px', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', cursor: 'pointer', width: '100%' }}>
-              <i className="fas fa-plus" aria-hidden="true" /> {isHt ? 'Ajoute medya' : 'Add media'}
+              <i className="fas fa-plus" aria-hidden="true" /> {isHt ? 'Ajoute medya' : inlineText(lang, 'Add media')}
             </button>
           </div>
         </div>
       </div>
 
       <div className={styles.formSection} style={{ marginTop: 24 }}>
-        <h3 className={styles.sectionTitle}><i className="fas fa-link" /> {isHt ? 'Lyen' : 'Links'}</h3>
+        <h3 className={styles.sectionTitle}><i className="fas fa-link" /> {isHt ? 'Lyen' : inlineText(lang, 'Links')}</h3>
         <div style={{ display: 'grid', gap: 16 }}>
-          <PropField label={isHt ? 'URL Pwojè (demo/sit)' : 'Project URL (demo/site)'}>
+          <PropField label={isHt ? 'URL Pwojè (demo/sit)' : inlineText(lang, 'Project URL (demo/site)')}>
             <PropInput value={form.project_url} onChange={(e) => handleChange('project_url', e.target.value)} placeholder="https://..." />
           </PropField>
-          <PropField label={isHt ? 'URL Sous (GitHub)' : 'Source URL (GitHub)'}>
+          <PropField label={isHt ? 'URL Sous (GitHub)' : inlineText(lang, 'Source URL (GitHub)')}>
             <PropInput value={form.source_url} onChange={(e) => handleChange('source_url', e.target.value)} placeholder="https://github.com/..." />
           </PropField>
         </div>
@@ -262,8 +263,8 @@ export default function PortfolioEditor({ onClose, onSuccess, onSaved, lang = 'e
 
   const propertiesContent = (
     <StudioPropertiesPanel>
-      <PropertyGroup title={isHt ? 'Piblikasyon' : 'Publishing'} defaultOpen>
-        <PropField label={isHt ? 'Estati' : 'Status'}>
+      <PropertyGroup title={isHt ? 'Piblikasyon' : inlineText(lang, 'Publishing')} defaultOpen>
+        <PropField label={isHt ? 'Estati' : inlineText(lang, 'Status')}>
           <div style={{ display: 'flex', gap: 8 }}>
             <span style={{ fontSize: '0.78rem', fontWeight: 700, color: statusBadge.color, background: statusBadge.bg, borderRadius: 999, padding: '4px 12px' }}>
               {statusBadge.label}
@@ -272,17 +273,17 @@ export default function PortfolioEditor({ onClose, onSuccess, onSaved, lang = 'e
         </PropField>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0' }}>
           <div>
-            <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>{isHt ? 'Mete an vedèt' : 'Featured'}</div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{isHt ? 'Parèt an premye' : 'Shows first'}</div>
+            <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>{isHt ? 'Mete an vedèt' : inlineText(lang, 'Featured')}</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{isHt ? 'Parèt an premye' : inlineText(lang, 'Shows first')}</div>
           </div>
           <button type="button" onClick={() => handleChange('is_featured', !form.is_featured)}
-            aria-pressed={Boolean(form.is_featured)} aria-label={isHt ? 'Mete an vedèt' : 'Feature this project'}
+            aria-pressed={Boolean(form.is_featured)} aria-label={isHt ? 'Mete an vedèt' : inlineText(lang, 'Feature this project')}
             style={{ width: 44, height: 24, borderRadius: 12, border: 'none', background: form.is_featured ? 'var(--color-primary)' : 'var(--border-color)', position: 'relative', cursor: 'pointer' }}>
             <span style={{ position: 'absolute', top: 2, left: form.is_featured ? 22 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }} />
           </button>
         </div>
       </PropertyGroup>
-      <PropertyGroup title={isHt ? 'Vizibilite' : 'Visibility'} defaultOpen>
+      <PropertyGroup title={isHt ? 'Vizibilite' : inlineText(lang, 'Visibility')} defaultOpen>
         {VISIBILITY_OPTIONS.map((o) => (
           <label key={o.value} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 0', cursor: 'pointer' }}>
             <input type="radio" name="pf-visibility" value={o.value} checked={form.visibility === o.value}
@@ -301,7 +302,7 @@ export default function PortfolioEditor({ onClose, onSuccess, onSaved, lang = 'e
   );
 
   const previewProject = {
-    title: form.title || (isHt ? 'Pwojè san tit' : 'Untitled project'),
+    title: form.title || (isHt ? 'Pwojè san tit' : inlineText(lang, 'Untitled project')),
     description: form.description,
     category: form.category,
     cover_url: form.cover_url,
@@ -317,10 +318,10 @@ export default function PortfolioEditor({ onClose, onSuccess, onSaved, lang = 'e
   return (
     <>
       <StudioEditorShell
-        title={isHt ? 'Editè Pòtfolyo' : 'Portfolio Editor'}
+        title={isHt ? 'Editè Pòtfolyo' : inlineText(lang, 'Portfolio Editor')}
         icon="fa-palette"
         lang={lang}
-        docTitle={form.title || (isHt ? 'Pwojè san tit' : 'Untitled project')}
+        docTitle={form.title || (isHt ? 'Pwojè san tit' : inlineText(lang, 'Untitled project'))}
         isNew={!isEdit}
         badge={hasSaved ? (
           <span style={{ fontSize: '0.72rem', fontWeight: 700, color: statusBadge.color, background: statusBadge.bg, borderRadius: 999, padding: '3px 10px', marginLeft: 8 }}>
@@ -332,21 +333,21 @@ export default function PortfolioEditor({ onClose, onSuccess, onSaved, lang = 'e
         onBack={onClose}
         onPreview={handlePreview}
         onSave={handleSave}
-        saveLabel={hasSaved ? (isHt ? 'Sove' : 'Save') : (isHt ? 'Kreye Bouyon' : 'Create Draft')}
+        saveLabel={hasSaved ? (isHt ? 'Sove' : inlineText(lang, 'Save')) : (isHt ? 'Kreye Bouyon' : inlineText(lang, 'Create Draft'))}
         canSave
         onPublish={handlePublish}
-        publishLabel={isHt ? 'Pibliye' : 'Publish'}
+        publishLabel={isHt ? 'Pibliye' : inlineText(lang, 'Publish')}
         validation={validationList}
         editor={editorContent}
         properties={propertiesContent}
       />
 
       {previewOpen && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.72)', zIndex: 3000, overflowY: 'auto' }} role="dialog" aria-modal="true" aria-label={isHt ? 'Preview pwojè' : 'Project preview'}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.72)', zIndex: 3000, overflowY: 'auto' }} role="dialog" aria-modal="true" aria-label={isHt ? 'Preview pwojè' : inlineText(lang, 'Project preview')}>
           <div style={{ position: 'relative', maxWidth: 720, margin: '4vh auto', background: 'var(--bg-default, #0f172a)', borderRadius: 16, overflow: 'hidden', border: '1px solid var(--border-color, #1e293b)' }}>
             <button type="button" onClick={() => setPreviewOpen(false)}
               style={{ position: 'absolute', top: 12, right: 12, zIndex: 1, border: 'none', borderRadius: 999, width: 38, height: 38, background: 'rgba(15,23,42,0.72)', color: '#fff', fontSize: 16, cursor: 'pointer' }}
-              aria-label={isHt ? 'Fèmen preview' : 'Close preview'}>
+              aria-label={isHt ? 'Fèmen preview' : inlineText(lang, 'Close preview')}>
               <i className="fas fa-xmark" aria-hidden="true" />
             </button>
             {previewProject.cover_url ? (
@@ -360,7 +361,7 @@ export default function PortfolioEditor({ onClose, onSuccess, onSaved, lang = 'e
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
                 {previewProject.is_featured && (
                   <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#b45309', background: 'rgba(245,158,11,0.15)', borderRadius: 999, padding: '3px 10px' }}>
-                    {'⭐ '}{isHt ? 'Vedèt' : 'Featured'}
+                    {'⭐ '}{isHt ? 'Vedèt' : inlineText(lang, 'Featured')}
                   </span>
                 )}
                 {previewProject.category && (
@@ -388,25 +389,25 @@ export default function PortfolioEditor({ onClose, onSuccess, onSaved, lang = 'e
               {(previewProject.media_gallery || []).length > 0 && (
                 <p style={{ marginTop: 12, fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
                   <i className="fas fa-photo-video" aria-hidden="true" style={{ marginRight: 6 }} />
-                  {(previewProject.media_gallery || []).length}{isHt ? ' medya nan galri' : ' media in gallery'}
+                  {(previewProject.media_gallery || []).length}{isHt ? ' medya nan galri' : inlineText(lang, ' media in gallery')}
                 </p>
               )}
               <div style={{ display: 'flex', gap: 8, marginTop: 16, flexWrap: 'wrap' }}>
                 {previewProject.project_url && (
                   <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#fff', background: '#7c3aed', borderRadius: 8, padding: '8px 16px' }}>
                     <i className="fas fa-arrow-up-right-from-square" aria-hidden="true" style={{ marginRight: 6 }} />
-                    {isHt ? 'Wè pwojè a' : 'View project'}
+                    {isHt ? 'Wè pwojè a' : inlineText(lang, 'View project')}
                   </span>
                 )}
                 {previewProject.source_url && (
                   <span style={{ fontSize: '0.8rem', fontWeight: 600, border: '1px solid var(--border-color)', borderRadius: 8, padding: '8px 16px' }}>
                     <i className="fab fa-github" aria-hidden="true" style={{ marginRight: 6 }} />
-                    {isHt ? 'Kòd sous' : 'Source code'}
+                    {isHt ? 'Kòd sous' : inlineText(lang, 'Source code')}
                   </span>
                 )}
               </div>
               <p style={{ marginTop: 16, fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
-                {isHt ? 'Preview sèlman — lyen yo pa klike isit la.' : 'Preview only — links are not clickable here.'}
+                {isHt ? 'Preview sèlman — lyen yo pa klike isit la.' : inlineText(lang, 'Preview only — links are not clickable here.')}
               </p>
             </div>
           </div>

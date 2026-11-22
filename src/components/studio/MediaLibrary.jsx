@@ -17,6 +17,7 @@
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { mediaProviderService } from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
 
@@ -146,7 +147,7 @@ function MediaItemRow({ asset, lang, onReplace, onDisable, onArchive, onDelete, 
               onChange={(e) => setEditTitle(e.target.value)}
               onKeyDown={handleKeyDown}
               onBlur={handleSaveTitle}
-              placeholder={isHt ? 'Non imaj...' : 'Image name...'}
+              placeholder={isHt ? 'Non imaj...' : inlineText(lang, 'Image name...')}
               maxLength={256}
               style={{
                 flex: 1, padding: '4px 8px', borderRadius: '6px', border: '1.5px solid var(--studio-pink, #d81b60)',
@@ -160,14 +161,14 @@ function MediaItemRow({ asset, lang, onReplace, onDisable, onArchive, onDelete, 
             className="mlib-item-title-row"
             onClick={handleStartEdit}
             style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}
-            title={isHt ? 'Klike pou renome' : 'Click to rename'}
+            title={isHt ? 'Klike pou renome' : inlineText(lang, 'Click to rename')}
           >
             {displayTitle ? (
               <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>{displayTitle}</span>
             ) : (
               <span style={{ fontStyle: 'italic', fontSize: '0.85rem', color: 'var(--text-secondary, #94a3b8)' }}>
                 <i className="fas fa-pencil-alt" style={{ marginRight: '4px', fontSize: '0.65rem' }} />
-                {isHt ? 'Klike pou bay yon non...' : 'Click to name this media...'}
+                {isHt ? 'Klike pou bay yon non...' : inlineText(lang, 'Click to name this media...')}
               </span>
             )}
           </div>
@@ -195,7 +196,7 @@ function MediaItemRow({ asset, lang, onReplace, onDisable, onArchive, onDelete, 
           <div className="mlib-usage">
             <i className="fas fa-link" aria-hidden="true" />
             <span className="mlib-usage-text">
-              {isHt ? 'Itilize nan' : 'Used in'}: {usageList.map((u) => u.module).join(', ')}
+              {isHt ? 'Itilize nan' : inlineText(lang, 'Used in')}: {usageList.map((u) => u.module).join(', ')}
             </span>
           </div>
         )}
@@ -215,8 +216,8 @@ function MediaItemRow({ asset, lang, onReplace, onDisable, onArchive, onDelete, 
           type="button"
           className="mlib-action-btn mlib-action-replace"
           onClick={() => onReplace(asset)}
-          title={isHt ? 'Ranplase URL' : 'Replace URL'}
-          aria-label={isHt ? 'Ranplase URL' : 'Replace URL'}
+          title={isHt ? 'Ranplase URL' : inlineText(lang, 'Replace URL')}
+          aria-label={isHt ? 'Ranplase URL' : inlineText(lang, 'Replace URL')}
         >
           <i className="fas fa-exchange-alt" aria-hidden="true" />
         </button>
@@ -224,8 +225,8 @@ function MediaItemRow({ asset, lang, onReplace, onDisable, onArchive, onDelete, 
           type="button"
           className="mlib-action-btn mlib-action-disable"
           onClick={() => onDisable(asset)}
-          title={isHt ? 'Dezaktive' : 'Disable'}
-          aria-label={isHt ? 'Dezaktive' : 'Disable'}
+          title={isHt ? 'Dezaktive' : inlineText(lang, 'Disable')}
+          aria-label={isHt ? 'Dezaktive' : inlineText(lang, 'Disable')}
         >
           <i className={`fas ${asset.is_active ? 'fa-pause' : 'fa-play'}`} aria-hidden="true" />
         </button>
@@ -233,8 +234,8 @@ function MediaItemRow({ asset, lang, onReplace, onDisable, onArchive, onDelete, 
           type="button"
           className="mlib-action-btn mlib-action-archive"
           onClick={() => onArchive(asset)}
-          title={isHt ? 'Achive' : 'Archive'}
-          aria-label={isHt ? 'Achive' : 'Archive'}
+          title={isHt ? 'Achive' : inlineText(lang, 'Archive')}
+          aria-label={isHt ? 'Achive' : inlineText(lang, 'Archive')}
         >
           <i className="fas fa-archive" aria-hidden="true" />
         </button>
@@ -242,8 +243,8 @@ function MediaItemRow({ asset, lang, onReplace, onDisable, onArchive, onDelete, 
           type="button"
           className="mlib-action-btn mlib-action-delete"
           onClick={() => onDelete(asset)}
-          title={isHt ? 'Efase referans' : 'Delete Reference'}
-          aria-label={isHt ? 'Efase referans' : 'Delete Reference'}
+          title={isHt ? 'Efase referans' : inlineText(lang, 'Delete Reference')}
+          aria-label={isHt ? 'Efase referans' : inlineText(lang, 'Delete Reference')}
         >
           <i className="fas fa-trash" aria-hidden="true" />
         </button>
@@ -271,14 +272,14 @@ function ConfirmDialog({ open, title, message, confirmLabel, cancelLabel, onConf
         </div>
         <div className="mlib-modal-actions">
           <button type="button" className="btn-secondary" onClick={onCancel}>
-            {cancelLabel || (isHt ? 'Anile' : 'Cancel')}
+            {cancelLabel || (isHt ? 'Anile' : inlineText(lang, 'Cancel'))}
           </button>
           <button
             type="button"
             className={`mlib-btn-${variant === 'danger' ? 'danger' : 'primary'}`}
             onClick={onConfirm}
           >
-            {confirmLabel || (isHt ? 'Konfime' : 'Confirm')}
+            {confirmLabel || (isHt ? 'Konfime' : inlineText(lang, 'Confirm'))}
           </button>
         </div>
       </div>
@@ -297,7 +298,7 @@ function ReplaceUrlModal({ asset, onClose, onSave, lang }) {
 
   const handleValidate = async () => {
     if (!newUrl.trim()) {
-      setError(isHt ? 'Antre yon URL' : 'Enter a URL');
+      setError(isHt ? 'Antre yon URL' : inlineText(lang, 'Enter a URL'));
       return;
     }
     setLoading(true);
@@ -308,10 +309,10 @@ function ReplaceUrlModal({ asset, onClose, onSave, lang }) {
       if (res.data?.is_valid) {
         setValidationResult(res.data);
       } else {
-        setError(res.data?.error_message || (isHt ? 'URL pa valid' : 'Invalid URL'));
+        setError(res.data?.error_message || (isHt ? 'URL pa valid' : inlineText(lang, 'Invalid URL')));
       }
     } catch (err) {
-      setError(err.response?.data?.error || (isHt ? 'Erè validasyon' : 'Validation error'));
+      setError(err.response?.data?.error || (isHt ? 'Erè validasyon' : inlineText(lang, 'Validation error')));
     } finally {
       setLoading(false);
     }
@@ -325,7 +326,7 @@ function ReplaceUrlModal({ asset, onClose, onSave, lang }) {
       onSave(newUrl.trim());
       onClose();
     } catch (err) {
-      setError(err.response?.data?.error || (isHt ? 'Erè nan sove' : 'Save error'));
+      setError(err.response?.data?.error || (isHt ? 'Erè nan sove' : inlineText(lang, 'Save error')));
     } finally {
       setLoading(false);
     }
@@ -333,11 +334,11 @@ function ReplaceUrlModal({ asset, onClose, onSave, lang }) {
 
   return (
     <div className="mlib-modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="mlib-modal-card" role="dialog" aria-label={isHt ? 'Ranplase URL' : 'Replace URL'}>
+      <div className="mlib-modal-card" role="dialog" aria-label={isHt ? 'Ranplase URL' : inlineText(lang, 'Replace URL')}>
         <div className="mlib-modal-header">
           <h3 className="mlib-modal-title">
             <i className="fas fa-exchange-alt" aria-hidden="true" />
-            {isHt ? 'Ranplase URL' : 'Smart Replace'}
+            {isHt ? 'Ranplase URL' : inlineText(lang, 'Smart Replace')}
           </h3>
           <button type="button" className="mlib-modal-close" onClick={onClose}>
             <i className="fas fa-times" />
@@ -347,15 +348,15 @@ function ReplaceUrlModal({ asset, onClose, onSave, lang }) {
           <p className="mlib-modal-desc">
             {isHt
               ? 'Antre yon nouvo URL pou ranplase ansyen an. Tout referans yo pral mete ajou otomatikman.'
-              : 'Enter a new URL to replace the old one. All references will be updated automatically.'}
+              : inlineText(lang, 'Enter a new URL to replace the old one. All references will be updated automatically.')}
           </p>
           <div className="mlib-modal-url-display">
-            <span className="mlib-modal-url-label">{isHt ? 'Ansyen URL' : 'Old URL'}</span>
+            <span className="mlib-modal-url-label">{isHt ? 'Ansyen URL' : inlineText(lang, 'Old URL')}</span>
             <code className="mlib-modal-url-old">{asset?.url || '—'}</code>
           </div>
           <div className="mlib-modal-field">
             <label className="mlib-modal-field-label" htmlFor="mlib-new-url">
-              {isHt ? 'Nouvo URL' : 'New URL'}
+              {isHt ? 'Nouvo URL' : inlineText(lang, 'New URL')}
             </label>
             <input
               id="mlib-new-url"
@@ -369,7 +370,7 @@ function ReplaceUrlModal({ asset, onClose, onSave, lang }) {
           {validationResult?.is_valid && (
             <div className="mlib-modal-success">
               <i className="fas fa-check-circle" aria-hidden="true" />
-              {isHt ? 'URL la valid!' : 'URL is valid!'}
+              {isHt ? 'URL la valid!' : inlineText(lang, 'URL is valid!')}
             </div>
           )}
           {error && (
@@ -381,7 +382,7 @@ function ReplaceUrlModal({ asset, onClose, onSave, lang }) {
         </div>
         <div className="mlib-modal-actions">
           <button type="button" className="btn-secondary" onClick={onClose}>
-            {isHt ? 'Anile' : 'Cancel'}
+            {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
           </button>
           <button
             type="button"
@@ -390,8 +391,8 @@ function ReplaceUrlModal({ asset, onClose, onSave, lang }) {
             disabled={loading || !newUrl.trim()}
           >
             {loading && !validationResult
-              ? <><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap valide...' : 'Validating...'}</>
-              : <><i className="fas fa-search" /> {isHt ? 'Valide' : 'Validate'}</>
+              ? <><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap valide...' : inlineText(lang, 'Validating...')}</>
+              : <><i className="fas fa-search" /> {isHt ? 'Valide' : inlineText(lang, 'Validate')}</>
             }
           </button>
           <button
@@ -401,8 +402,8 @@ function ReplaceUrlModal({ asset, onClose, onSave, lang }) {
             disabled={loading || !validationResult?.is_valid}
           >
             {loading && validationResult
-              ? <><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap sove...' : 'Saving...'}</>
-              : <><i className="fas fa-save" /> {isHt ? 'Ranplase' : 'Replace & Update'}</>
+              ? <><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap sove...' : inlineText(lang, 'Saving...')}</>
+              : <><i className="fas fa-save" /> {isHt ? 'Ranplase' : inlineText(lang, 'Replace & Update')}</>
             }
           </button>
         </div>
@@ -418,11 +419,11 @@ function EmptyLibrary({ lang, onAddMedia }) {
   return (
     <div className="mlib-empty">
       <i className="fas fa-photo-video" aria-hidden="true" />
-      <h3>{isHt ? 'Pa gen medya' : 'No media assets'}</h3>
-      <p>{isHt ? 'Konekte yon provider epi ajoute URL medya ou yo.' : 'Connect a provider and add your media URLs.'}</p>
+      <h3>{isHt ? 'Pa gen medya' : inlineText(lang, 'No media assets')}</h3>
+      <p>{isHt ? 'Konekte yon provider epi ajoute URL medya ou yo.' : inlineText(lang, 'Connect a provider and add your media URLs.')}</p>
       <button type="button" className="btn-primary" onClick={onAddMedia}>
         <i className="fas fa-plus" aria-hidden="true" />
-        {isHt ? 'Ajoute Medya' : 'Add Media'}
+        {isHt ? 'Ajoute Medya' : inlineText(lang, 'Add Media')}
       </button>
     </div>
   );
@@ -450,7 +451,7 @@ export default function MediaLibrary({ lang = 'en', showToast, user }) {
       const data = res.data?.results || res.data || [];
       setAssets(Array.isArray(data) ? data : []);
     } catch (err) {
-      showToast?.(isHt ? 'Pa kapab chaje medya yo' : 'Failed to load media', 'exclamation-triangle');
+      showToast?.(isHt ? 'Pa kapab chaje medya yo' : inlineText(lang, 'Failed to load media'), 'exclamation-triangle');
       setAssets([]);
     } finally {
       setLoading(false);
@@ -491,7 +492,7 @@ export default function MediaLibrary({ lang = 'en', showToast, user }) {
     setAssets((prev) =>
       prev.map((a) => a.id === replaceAsset?.id ? { ...a, url: newUrl, health_status: 'checking' } : a)
     );
-    showToast?.(isHt ? 'URL ranplase ak siksè!' : 'URL replaced successfully!', 'check-circle');
+    showToast?.(isHt ? 'URL ranplase ak siksè!' : inlineText(lang, 'URL replaced successfully!'), 'check-circle');
   }, [replaceAsset, showToast, isHt]);
 
   const handleDisable = useCallback(async (asset) => {
@@ -500,9 +501,9 @@ export default function MediaLibrary({ lang = 'en', showToast, user }) {
       setAssets((prev) =>
         prev.map((a) => a.id === asset.id ? { ...a, is_active: !a.is_active } : a)
       );
-      showToast?.(isHt ? 'Medya dekonekte' : 'Media toggled', 'check');
+      showToast?.(isHt ? 'Medya dekonekte' : inlineText(lang, 'Media toggled'), 'check');
     } catch {
-      showToast?.(isHt ? 'Erè' : 'Error', 'exclamation-triangle');
+      showToast?.(isHt ? 'Erè' : inlineText(lang, 'Error'), 'exclamation-triangle');
     }
   }, [showToast, isHt]);
 
@@ -510,9 +511,9 @@ export default function MediaLibrary({ lang = 'en', showToast, user }) {
     try {
       await mediaProviderService.archiveMedia(asset.id);
       setAssets((prev) => prev.filter((a) => a.id !== asset.id));
-      showToast?.(isHt ? 'Medya achive' : 'Media archived', 'archive');
+      showToast?.(isHt ? 'Medya achive' : inlineText(lang, 'Media archived'), 'archive');
     } catch {
-      showToast?.(isHt ? 'Erè' : 'Error', 'exclamation-triangle');
+      showToast?.(isHt ? 'Erè' : inlineText(lang, 'Error'), 'exclamation-triangle');
     }
   }, [showToast, isHt]);
 
@@ -525,9 +526,9 @@ export default function MediaLibrary({ lang = 'en', showToast, user }) {
     try {
       await mediaProviderService.deleteMedia(confirmDelete.id);
       setAssets((prev) => prev.filter((a) => a.id !== confirmDelete.id));
-      showToast?.(isHt ? 'Referans efase' : 'Reference deleted', 'trash');
+      showToast?.(isHt ? 'Referans efase' : inlineText(lang, 'Reference deleted'), 'trash');
     } catch {
-      showToast?.(isHt ? 'Erè' : 'Error', 'exclamation-triangle');
+      showToast?.(isHt ? 'Erè' : inlineText(lang, 'Error'), 'exclamation-triangle');
     } finally {
       setConfirmDelete(null);
     }
@@ -544,7 +545,7 @@ export default function MediaLibrary({ lang = 'en', showToast, user }) {
       <div className="mlib-header">
         <h2 className="studio-section-title">
           <i className="fas fa-photo-video" aria-hidden="true" />
-          {isHt ? 'Bibliyotèk Medya' : 'Media Library'}
+          {isHt ? 'Bibliyotèk Medya' : inlineText(lang, 'Media Library')}
         </h2>
         <div className="mlib-header-right">
           <button type="button" className="btn-secondary" onClick={() => setFilterType('all')}>
@@ -557,16 +558,16 @@ export default function MediaLibrary({ lang = 'en', showToast, user }) {
       <div className="mlib-stats-bar">
         <div className="mlib-stat">
           <i className="fas fa-database" aria-hidden="true" />
-          <span><strong>{totalCount}</strong> {isHt ? 'total' : 'total'}</span>
+          <span><strong>{totalCount}</strong> {isHt ? 'total' : inlineText(lang, 'total')}</span>
         </div>
         <div className="mlib-stat">
           <i className="fas fa-check-circle" style={{ color: '#10b981' }} aria-hidden="true" />
-          <span><strong>{activeCount}</strong> {isHt ? 'aktif' : 'active'}</span>
+          <span><strong>{activeCount}</strong> {isHt ? 'aktif' : inlineText(lang, 'active')}</span>
         </div>
         {brokenCount > 0 && (
           <div className="mlib-stat mlib-stat-warn">
             <i className="fas fa-exclamation-circle" style={{ color: '#ef4444' }} aria-hidden="true" />
-            <span><strong>{brokenCount}</strong> {isHt ? 'kase' : 'broken'}</span>
+            <span><strong>{brokenCount}</strong> {isHt ? 'kase' : inlineText(lang, 'broken')}</span>
           </div>
         )}
       </div>
@@ -578,7 +579,7 @@ export default function MediaLibrary({ lang = 'en', showToast, user }) {
           <input
             type="text"
             className="mlib-search-input"
-            placeholder={isHt ? 'Chèche pa URL oswa provider...' : 'Search by URL or provider...'}
+            placeholder={isHt ? 'Chèche pa URL oswa provider...' : inlineText(lang, 'Search by URL or provider...')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -589,23 +590,23 @@ export default function MediaLibrary({ lang = 'en', showToast, user }) {
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
           >
-            <option value="all">{isHt ? 'Tout kalite' : 'All Types'}</option>
-            <option value="image">{isHt ? 'Imaj' : 'Images'}</option>
-            <option value="video">{isHt ? 'Videyo' : 'Videos'}</option>
-            <option value="audio">{isHt ? 'Odyo' : 'Audio'}</option>
-            <option value="document">{isHt ? 'Dokiman' : 'Documents'}</option>
+            <option value="all">{isHt ? 'Tout kalite' : inlineText(lang, 'All Types')}</option>
+            <option value="image">{isHt ? 'Imaj' : inlineText(lang, 'Images')}</option>
+            <option value="video">{isHt ? 'Videyo' : inlineText(lang, 'Videos')}</option>
+            <option value="audio">{isHt ? 'Odyo' : inlineText(lang, 'Audio')}</option>
+            <option value="document">{isHt ? 'Dokiman' : inlineText(lang, 'Documents')}</option>
           </select>
           <select
             className="mlib-filter-select"
             value={filterHealth}
             onChange={(e) => setFilterHealth(e.target.value)}
           >
-            <option value="all">{isHt ? 'Tout sante' : 'All Health'}</option>
-            <option value="healthy">{isHt ? 'An sante' : 'Healthy'}</option>
-            <option value="warning">{isHt ? 'Avètisman' : 'Warning'}</option>
-            <option value="broken">{isHt ? 'Kase' : 'Broken'}</option>
-            <option value="blocked">{isHt ? 'Bloke' : 'Blocked'}</option>
-            <option value="expired">{isHt ? 'Ekspire' : 'Expired'}</option>
+            <option value="all">{isHt ? 'Tout sante' : inlineText(lang, 'All Health')}</option>
+            <option value="healthy">{isHt ? 'An sante' : inlineText(lang, 'Healthy')}</option>
+            <option value="warning">{isHt ? 'Avètisman' : inlineText(lang, 'Warning')}</option>
+            <option value="broken">{isHt ? 'Kase' : inlineText(lang, 'Broken')}</option>
+            <option value="blocked">{isHt ? 'Bloke' : inlineText(lang, 'Blocked')}</option>
+            <option value="expired">{isHt ? 'Ekspire' : inlineText(lang, 'Expired')}</option>
           </select>
         </div>
       </div>
@@ -618,10 +619,10 @@ export default function MediaLibrary({ lang = 'en', showToast, user }) {
       ) : filtered.length === 0 ? (
         <div className="mlib-empty mlib-empty-search">
           <i className="fas fa-search-minus" aria-hidden="true" />
-          <p>{isHt ? 'Pa gen medya ki matche rechèch ou' : 'No media matches your search'}</p>
+          <p>{isHt ? 'Pa gen medya ki matche rechèch ou' : inlineText(lang, 'No media matches your search')}</p>
         </div>
       ) : (
-        <div className="mlib-list" role="list" aria-label={isHt ? 'Lis medya' : 'Media list'}>
+        <div className="mlib-list" role="list" aria-label={isHt ? 'Lis medya' : inlineText(lang, 'Media list')}>
           {filtered.map((asset) => (
             <MediaItemRow
               key={asset.id}
@@ -636,7 +637,7 @@ export default function MediaLibrary({ lang = 'en', showToast, user }) {
           ))}
           <div className="mlib-footer">
             <span className="mlib-footer-text">
-              {isHt ? 'Montre' : 'Showing'} {filtered.length} {isHt ? 'sou' : 'of'} {assets.length}
+              {isHt ? 'Montre' : inlineText(lang, 'Showing')} {filtered.length} {isHt ? 'sou' : inlineText(lang, 'of')} {assets.length}
             </span>
           </div>
         </div>
@@ -655,13 +656,13 @@ export default function MediaLibrary({ lang = 'en', showToast, user }) {
       {/* ── Confirm Delete Modal ──────────────────────────────────── */}
       <ConfirmDialog
         open={!!confirmDelete}
-        title={isHt ? 'Efase Referans' : 'Delete Reference'}
+        title={isHt ? 'Efase Referans' : inlineText(lang, 'Delete Reference')}
         message={isHt
           ? 'Efase referans medya sa a? (pa efase fichye orijinal la)'
-          : 'Delete this media reference? (This does NOT delete the original file from your provider.)'
+          : inlineText(lang, 'Delete this media reference? (This does NOT delete the original file from your provider.)')
         }
-        confirmLabel={isHt ? 'Efase' : 'Delete'}
-        cancelLabel={isHt ? 'Anile' : 'Cancel'}
+        confirmLabel={isHt ? 'Efase' : inlineText(lang, 'Delete')}
+        cancelLabel={isHt ? 'Anile' : inlineText(lang, 'Cancel')}
         variant="danger"
         onConfirm={handleConfirmDelete}
         onCancel={() => setConfirmDelete(null)}

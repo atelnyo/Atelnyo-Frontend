@@ -19,6 +19,7 @@
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import './LearningCommandPalette.css';
+import { inlineText } from '../../utils/inlineI18n';
 
 // Caps keep the closed → open transition cheap on long courses while
 // still showing a full curriculum (12 modules covers every course we
@@ -62,7 +63,9 @@ export function buildPaletteItems({
   completedModules = [],
   moduleState,
   isHt = false,
+  lang,
 } = {}) {
+  const activeLang = lang || (isHt ? 'ht' : 'en');
   const doneModules = new Set(completedModules.map(Number));
   const items = [];
 
@@ -91,7 +94,8 @@ export function buildPaletteItems({
 
     blocks.forEach((block, bi) => {
       if (!block || !block.id) return;
-      const typeLabel = (TYPE_LABEL[block.type] || { en: 'Activity', ht: 'Aktivite' })[isHt ? 'ht' : 'en'];
+      const typeMeta = TYPE_LABEL[block.type] || { en: 'Activity', ht: 'Aktivite' };
+      const typeLabel = typeMeta[activeLang] || typeMeta.en;
       const label = block.title || typeLabel;
       const done = Boolean((completedBlocksMap[String(mi)] || new Set()).has(block.id));
       items.push({
@@ -164,6 +168,7 @@ export default function LearningCommandPalette({
   open = false,
   onClose,
   isHt = false,
+  lang = 'en',
   syllabus = [],
   completedBlocksMap = {},
   completedModules = [],
@@ -180,8 +185,8 @@ export default function LearningCommandPalette({
   const [active, setActive] = useState(0);
 
   const allItems = useMemo(
-    () => buildPaletteItems({ syllabus, completedBlocksMap, completedModules, moduleState, isHt }),
-    [syllabus, completedBlocksMap, completedModules, moduleState, isHt],
+    () => buildPaletteItems({ syllabus, completedBlocksMap, completedModules, moduleState, isHt, lang }),
+    [syllabus, completedBlocksMap, completedModules, moduleState, isHt, lang],
   );
 
   const results = useMemo(() => {
@@ -265,7 +270,7 @@ export default function LearningCommandPalette({
         className="ls-cmd"
         role="dialog"
         aria-modal="true"
-        aria-label={isHt ? 'Ale vit nan kou a' : 'Quick jump in the course'}
+        aria-label={isHt ? 'Ale vit nan kou a' : inlineText(lang, 'Quick jump in the course')}
         onKeyDown={onKeyDown}
       >
         <div className="ls-cmd-input-row">
@@ -276,8 +281,8 @@ export default function LearningCommandPalette({
             type="text"
             value={query}
             onChange={(e) => { setQuery(e.target.value); setActive(0); }}
-            placeholder={isHt ? 'Chèche yon modil oswa yon aktivite…' : 'Search a module or an activity…'}
-            aria-label={isHt ? 'Chèche' : 'Search'}
+            placeholder={isHt ? 'Chèche yon modil oswa yon aktivite…' : inlineText(lang, 'Search a module or an activity…')}
+            aria-label={isHt ? 'Chèche' : inlineText(lang, 'Search')}
             aria-controls="ls-cmd-list"
             aria-activedescendant={flat[active] ? optionId(flat[active], active) : undefined}
             autoComplete="off"
@@ -289,7 +294,7 @@ export default function LearningCommandPalette({
         <div className="ls-cmd-list" id="ls-cmd-list" role="listbox" ref={listRef}>
           {flat.length === 0 && (
             <p className="ls-cmd-empty">
-              {isHt ? 'Anyen pa matche. Eseye yon lòt mo.' : 'Nothing matches. Try another word.'}
+              {isHt ? 'Anyen pa matche. Eseye yon lòt mo.' : inlineText(lang, 'Nothing matches. Try another word.')}
             </p>
           )}
           {flat.map((item, i) => (
@@ -310,15 +315,15 @@ export default function LearningCommandPalette({
                 {item.meta && <span className="ls-cmd-item-meta">{item.meta}</span>}
               </span>
               {item.locked && <i className="fas fa-lock ls-cmd-item-lock" aria-hidden="true" />}
-              {item.done && !item.locked && <span className="ls-cmd-item-done">{isHt ? 'fè' : 'done'}</span>}
+              {item.done && !item.locked && <span className="ls-cmd-item-done">{isHt ? 'fè' : inlineText(lang, 'done')}</span>}
             </button>
           ))}
         </div>
 
         <div className="ls-cmd-foot">
-          <span><kbd>↑</kbd><kbd>↓</kbd> {isHt ? 'navige' : 'navigate'}</span>
-          <span><kbd>↵</kbd> {isHt ? 'ouvri' : 'open'}</span>
-          <span><kbd>esc</kbd> {isHt ? 'fèmen' : 'close'}</span>
+          <span><kbd>↑</kbd><kbd>↓</kbd> {isHt ? 'navige' : inlineText(lang, 'navigate')}</span>
+          <span><kbd>↵</kbd> {isHt ? 'ouvri' : inlineText(lang, 'open')}</span>
+          <span><kbd>esc</kbd> {isHt ? 'fèmen' : inlineText(lang, 'close')}</span>
         </div>
       </div>
     </div>

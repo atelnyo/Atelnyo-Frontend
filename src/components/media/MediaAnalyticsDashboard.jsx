@@ -9,6 +9,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { mediaEnterpriseService } from '../../services/api';
 import MediaHelp from './MediaHelp';
+import { inlineText } from '../../utils/inlineI18n';
 
 function fmtCount(n) { if (n == null) return '0'; return Number(n).toLocaleString(); }
 
@@ -62,7 +63,7 @@ export default function MediaAnalyticsDashboard({ lang = 'en' }) {
     return (
       <div className="analytics-loading">
         <i className="fas fa-spinner fa-spin" />
-        <span>{isHt ? 'Ap chaje analitik...' : 'Loading analytics...'}</span>
+        <span>{isHt ? 'Ap chaje analitik...' : inlineText(lang, 'Loading analytics...')}</span>
       </div>
     );
   }
@@ -84,11 +85,11 @@ export default function MediaAnalyticsDashboard({ lang = 'en' }) {
       <div className="analytics-header">
         <h2 className="studio-section-title" style={{ margin: 0 }}>
           <i className="fas fa-chart-pie" />
-          {isHt ? 'Analitik Medya' : 'Media Analytics'}
+          {isHt ? 'Analitik Medya' : inlineText(lang, 'Media Analytics')}
         </h2>
         <div className="analytics-header-actions">
           <button type="button" className="btn-secondary" onClick={fetchData}>
-            <i className="fas fa-rotate" /> {isHt ? 'Rafrechi' : 'Refresh'}
+            <i className="fas fa-rotate" /> {isHt ? 'Rafrechi' : inlineText(lang, 'Refresh')}
           </button>
           <MediaHelp context="library" lang={lang} />
         </div>
@@ -96,28 +97,28 @@ export default function MediaAnalyticsDashboard({ lang = 'en' }) {
 
       {/* Stats Grid */}
       <div className="analytics-stats-grid">
-        <StatCard icon="fa-database" label={isHt ? 'Total URL' : 'Total URLs'} value={fmtCount(totalUrls)} color="var(--state-info, #38bdf8)" subtitle={`${fmtCount(totalUsages)} ${isHt ? 'itilizasyon' : 'usages'}`} />
-        <StatCard icon="fa-check-circle" label={isHt ? 'An sante' : 'Healthy'} value={fmtCount(healthyCount)} color="var(--state-success, #10b981)" subtitle={`${healthRate}% ${isHt ? 'sante' : 'health rate'}`} />
-        <StatCard icon="fa-times-circle" label={isHt ? 'Kase' : 'Broken'} value={fmtCount(brokenCount)} color="var(--state-error, #ef4444)" />
-        <StatCard icon="fa-hourglass-half" label={isHt ? 'Ap tcheke' : 'Checking'} value={fmtCount(checkingCount)} color="var(--state-warning, #f59e0b)" />
-        <StatCard icon="fa-archive" label={isHt ? 'Achive' : 'Archived'} value={fmtCount(archivedCount)} color="var(--text-secondary, #64748b)" />
-        <StatCard icon="fa-question-circle" label={isHt ? 'Enkoni' : 'Unknown'} value={fmtCount(unknownCount)} color="var(--text-secondary, #94a3b8)" />
-        <StatCard icon="fa-link" label={isHt ? 'Modil ak medya' : 'Modules w/ media'} value={fmtCount(ref.modules_with_usage || 0)} color="var(--pr-color-violet-500, #8b5cf6)" />
-        <StatCard icon="fa-star" label={isHt ? 'Sante mwayèn' : 'Avg Health'} value={health.average_score != null ? `${health.average_score}%` : '—'} color="var(--state-warning, #f59e0b)" />
+        <StatCard icon="fa-database" label={isHt ? 'Total URL' : inlineText(lang, 'Total URLs')} value={fmtCount(totalUrls)} color="var(--state-info, #38bdf8)" subtitle={`${fmtCount(totalUsages)} ${isHt ? 'itilizasyon' : inlineText(lang, 'usages')}`} />
+        <StatCard icon="fa-check-circle" label={isHt ? 'An sante' : inlineText(lang, 'Healthy')} value={fmtCount(healthyCount)} color="var(--state-success, #10b981)" subtitle={`${healthRate}% ${isHt ? 'sante' : inlineText(lang, 'health rate')}`} />
+        <StatCard icon="fa-times-circle" label={isHt ? 'Kase' : inlineText(lang, 'Broken')} value={fmtCount(brokenCount)} color="var(--state-error, #ef4444)" />
+        <StatCard icon="fa-hourglass-half" label={isHt ? 'Ap tcheke' : inlineText(lang, 'Checking')} value={fmtCount(checkingCount)} color="var(--state-warning, #f59e0b)" />
+        <StatCard icon="fa-archive" label={isHt ? 'Achive' : inlineText(lang, 'Archived')} value={fmtCount(archivedCount)} color="var(--text-secondary, #64748b)" />
+        <StatCard icon="fa-question-circle" label={isHt ? 'Enkoni' : inlineText(lang, 'Unknown')} value={fmtCount(unknownCount)} color="var(--text-secondary, #94a3b8)" />
+        <StatCard icon="fa-link" label={isHt ? 'Modil ak medya' : inlineText(lang, 'Modules w/ media')} value={fmtCount(ref.modules_with_usage || 0)} color="var(--pr-color-violet-500, #8b5cf6)" />
+        <StatCard icon="fa-star" label={isHt ? 'Sante mwayèn' : inlineText(lang, 'Avg Health')} value={health.average_score != null ? `${health.average_score}%` : '—'} color="var(--state-warning, #f59e0b)" />
       </div>
 
       {/* Health Distribution */}
       {health && health.by_label && Object.keys(health.by_label).length > 0 && (
         <div className="analytics-section">
           <h3 className="analytics-section-title">
-            <i className="fas fa-heartbeat" /> {isHt ? 'Distribisyon sante' : 'Health Distribution'}
+            <i className="fas fa-heartbeat" /> {isHt ? 'Distribisyon sante' : inlineText(lang, 'Health Distribution')}
           </h3>
           <div className="analytics-progress-list">
-            {health.excellent > 0 && <ProgressBar value={health.excellent} max={totalUrls} label={isHt ? 'Ekselan' : 'Excellent'} color="var(--state-success, #10b981)" />}
-            {health.good > 0 && <ProgressBar value={health.good} max={totalUrls} label={isHt ? 'Bon' : 'Good'} color="var(--state-info, #38bdf8)" />}
-            {health.fair > 0 && <ProgressBar value={health.fair} max={totalUrls} label={isHt ? 'Mwayen' : 'Fair'} color="var(--state-warning, #f59e0b)" />}
-            {health.poor > 0 && <ProgressBar value={health.poor} max={totalUrls} label={isHt ? 'Fèb' : 'Poor'} color="var(--pr-color-orange-500, #f97316)" />}
-            {health.critical > 0 && <ProgressBar value={health.critical} max={totalUrls} label={isHt ? 'Kritik' : 'Critical'} color="var(--state-error, #ef4444)" />}
+            {health.excellent > 0 && <ProgressBar value={health.excellent} max={totalUrls} label={isHt ? 'Ekselan' : inlineText(lang, 'Excellent')} color="var(--state-success, #10b981)" />}
+            {health.good > 0 && <ProgressBar value={health.good} max={totalUrls} label={isHt ? 'Bon' : inlineText(lang, 'Good')} color="var(--state-info, #38bdf8)" />}
+            {health.fair > 0 && <ProgressBar value={health.fair} max={totalUrls} label={isHt ? 'Mwayen' : inlineText(lang, 'Fair')} color="var(--state-warning, #f59e0b)" />}
+            {health.poor > 0 && <ProgressBar value={health.poor} max={totalUrls} label={isHt ? 'Fèb' : inlineText(lang, 'Poor')} color="var(--pr-color-orange-500, #f97316)" />}
+            {health.critical > 0 && <ProgressBar value={health.critical} max={totalUrls} label={isHt ? 'Kritik' : inlineText(lang, 'Critical')} color="var(--state-error, #ef4444)" />}
           </div>
         </div>
       )}
@@ -126,14 +127,14 @@ export default function MediaAnalyticsDashboard({ lang = 'en' }) {
       {totalUrls > 0 && (
         <div className="analytics-section">
           <h3 className="analytics-section-title">
-            <i className="fas fa-list" /> {isHt ? 'Estati' : 'Status Breakdown'}
+            <i className="fas fa-list" /> {isHt ? 'Estati' : inlineText(lang, 'Status Breakdown')}
           </h3>
           <div className="analytics-progress-list">
-            <ProgressBar value={healthyCount} max={totalUrls} label={isHt ? 'An sante' : 'Healthy'} color="var(--state-success, #10b981)" />
-            <ProgressBar value={brokenCount} max={totalUrls} label={isHt ? 'Kase' : 'Broken'} color="var(--state-error, #ef4444)" />
-            <ProgressBar value={checkingCount} max={totalUrls} label={isHt ? 'Ap tcheke' : 'Checking'} color="var(--state-warning, #f59e0b)" />
-            <ProgressBar value={archivedCount} max={totalUrls} label={isHt ? 'Achive' : 'Archived'} color="var(--text-secondary, #64748b)" />
-            <ProgressBar value={unknownCount} max={totalUrls} label={isHt ? 'Enkoni' : 'Unknown'} color="var(--text-secondary, #94a3b8)" />
+            <ProgressBar value={healthyCount} max={totalUrls} label={isHt ? 'An sante' : inlineText(lang, 'Healthy')} color="var(--state-success, #10b981)" />
+            <ProgressBar value={brokenCount} max={totalUrls} label={isHt ? 'Kase' : inlineText(lang, 'Broken')} color="var(--state-error, #ef4444)" />
+            <ProgressBar value={checkingCount} max={totalUrls} label={isHt ? 'Ap tcheke' : inlineText(lang, 'Checking')} color="var(--state-warning, #f59e0b)" />
+            <ProgressBar value={archivedCount} max={totalUrls} label={isHt ? 'Achive' : inlineText(lang, 'Archived')} color="var(--text-secondary, #64748b)" />
+            <ProgressBar value={unknownCount} max={totalUrls} label={isHt ? 'Enkoni' : inlineText(lang, 'Unknown')} color="var(--text-secondary, #94a3b8)" />
           </div>
         </div>
       )}
@@ -141,8 +142,8 @@ export default function MediaAnalyticsDashboard({ lang = 'en' }) {
       {totalUrls === 0 && (
         <div className="analytics-empty">
           <i className="fas fa-chart-pie" />
-          <h3>{isHt ? 'Pa gen done analitik' : 'No analytics data'}</h3>
-          <p>{isHt ? 'Kòmanse ajoute medya pou wè estatistik ou yo parèt isit la.' : 'Start adding media to see your analytics here.'}</p>
+          <h3>{isHt ? 'Pa gen done analitik' : inlineText(lang, 'No analytics data')}</h3>
+          <p>{isHt ? 'Kòmanse ajoute medya pou wè estatistik ou yo parèt isit la.' : inlineText(lang, 'Start adding media to see your analytics here.')}</p>
         </div>
       )}
     </div>

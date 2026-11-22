@@ -16,6 +16,7 @@
  */
 
 import React, { useEffect, useState, useCallback } from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 function classNames(...parts) { return parts.filter(Boolean).join(' '); }
 
@@ -64,42 +65,42 @@ export default function DailyCreatorCenter({ lang = 'en', showToast, apiGet }) {
       <section className="dcc-section">
         <h3 className="dcc-section-title">
           <i className="fas fa-calendar-day" aria-hidden="true" />
-          {isHt ? 'Jodi a' : 'Today'}
+          {isHt ? 'Jodi a' : inlineText(lang, 'Today')}
         </h3>
         <div className="dcc-stats-row">
           {today_progress?.earnings > 0 && (
             <div className="dcc-stat" data-accent="emerald">
               <i className="fas fa-dollar-sign" aria-hidden="true" />
               <span className="dcc-stat-value">{fmtCurrency(today_progress.earnings)}</span>
-              <span className="dcc-stat-label">{isHt ? 'Revni' : 'Earnings'}</span>
+              <span className="dcc-stat-label">{isHt ? 'Revni' : inlineText(lang, 'Earnings')}</span>
             </div>
           )}
           {today_progress?.sales > 0 && (
             <div className="dcc-stat" data-accent="sky">
               <i className="fas fa-shopping-cart" aria-hidden="true" />
               <span className="dcc-stat-value">{today_progress.sales}</span>
-              <span className="dcc-stat-label">{isHt ? 'Vant' : 'Sales'}</span>
+              <span className="dcc-stat-label">{isHt ? 'Vant' : inlineText(lang, 'Sales')}</span>
             </div>
           )}
           {today_progress?.new_students > 0 && (
             <div className="dcc-stat" data-accent="violet">
               <i className="fas fa-user-graduate" aria-hidden="true" />
               <span className="dcc-stat-value">{today_progress.new_students}</span>
-              <span className="dcc-stat-label">{isHt ? 'Nouvo Elèv' : 'New Students'}</span>
+              <span className="dcc-stat-label">{isHt ? 'Nouvo Elèv' : inlineText(lang, 'New Students')}</span>
             </div>
           )}
           {today_progress?.new_followers > 0 && (
             <div className="dcc-stat" data-accent="amber">
               <i className="fas fa-user-plus" aria-hidden="true" />
               <span className="dcc-stat-value">{today_progress.new_followers}</span>
-              <span className="dcc-stat-label">{isHt ? 'Nouvo Swivan' : 'New Followers'}</span>
+              <span className="dcc-stat-label">{isHt ? 'Nouvo Swivan' : inlineText(lang, 'New Followers')}</span>
             </div>
           )}
           {/* No activity yet */}
           {!today_progress?.earnings && !today_progress?.sales && !today_progress?.new_students && !today_progress?.new_followers && (
             <div className="dcc-no-activity">
               <i className="fas fa-coffee" aria-hidden="true" />
-              <span>{isHt ? 'Pa gen aktivite jodi a — kontinye kreye!' : 'No activity yet today — keep creating!'}</span>
+              <span>{isHt ? 'Pa gen aktivite jodi a — kontinye kreye!' : inlineText(lang, 'No activity yet today — keep creating!')}</span>
             </div>
           )}
         </div>
@@ -110,7 +111,7 @@ export default function DailyCreatorCenter({ lang = 'en', showToast, apiGet }) {
         <section className="dcc-section">
           <h3 className="dcc-section-title">
             <i className="fas fa-clock" aria-hidden="true" />
-            {isHt ? 'Annatant' : 'Pending'}
+            {isHt ? 'Annatant' : inlineText(lang, 'Pending')}
           </h3>
           <div className="dcc-pending-list">
             {pending_items.draft_courses > 0 && (
@@ -118,7 +119,7 @@ export default function DailyCreatorCenter({ lang = 'en', showToast, apiGet }) {
                 <i className="fas fa-graduation-cap" aria-hidden="true" />
                 <span>
                   <strong>{pending_items.draft_courses}</strong> {' '}
-                  {isHt ? 'kou nan bwouyon' : 'courses in draft'}
+                  {isHt ? 'kou nan bwouyon' : inlineText(lang, 'courses in draft')}
                 </span>
               </div>
             )}
@@ -127,7 +128,7 @@ export default function DailyCreatorCenter({ lang = 'en', showToast, apiGet }) {
                 <i className="fas fa-cube" aria-hidden="true" />
                 <span>
                   <strong>{pending_items.draft_products}</strong> {' '}
-                  {isHt ? 'pwodwi nan bwouyon' : 'products in draft'}
+                  {isHt ? 'pwodwi nan bwouyon' : inlineText(lang, 'products in draft')}
                 </span>
               </div>
             )}
@@ -140,7 +141,7 @@ export default function DailyCreatorCenter({ lang = 'en', showToast, apiGet }) {
         <section className="dcc-section">
           <h3 className="dcc-section-title">
             <i className="fas fa-bullseye" aria-hidden="true" />
-            {isHt ? 'Objektif' : 'Goals'}
+            {isHt ? 'Objektif' : inlineText(lang, 'Goals')}
           </h3>
           <div className="dcc-goals-mini">
             {goal_progress.slice(0, 3).map((goal) => (
@@ -166,7 +167,7 @@ export default function DailyCreatorCenter({ lang = 'en', showToast, apiGet }) {
         <section className="dcc-section">
           <h3 className="dcc-section-title">
             <i className="fas fa-lightbulb" aria-hidden="true" />
-            {isHt ? 'Sijesyon' : 'Suggestions'}
+            {isHt ? 'Sijesyon' : inlineText(lang, 'Suggestions')}
           </h3>
           <div className="dcc-suggestions">
             {suggested_tasks.map((task, i) => (
@@ -188,7 +189,7 @@ export default function DailyCreatorCenter({ lang = 'en', showToast, apiGet }) {
           <section className="dcc-section dcc-half">
             <h3 className="dcc-section-title">
               <i className="fas fa-bullhorn" aria-hidden="true" />
-              {isHt ? 'Anons' : 'Announcements'}
+              {isHt ? 'Anons' : inlineText(lang, 'Announcements')}
             </h3>
             <div className="dcc-announcements">
               {announcements.map((ann, i) => (
@@ -204,7 +205,7 @@ export default function DailyCreatorCenter({ lang = 'en', showToast, apiGet }) {
           <section className="dcc-section dcc-half">
             <h3 className="dcc-section-title">
               <i className="fas fa-lightbulb" aria-hidden="true" />
-              {isHt ? 'Konsèy' : 'Tips'}
+              {isHt ? 'Konsèy' : inlineText(lang, 'Tips')}
             </h3>
             <div className="dcc-tips">
               {tips.map((tip, i) => (

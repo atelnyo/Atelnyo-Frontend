@@ -251,30 +251,31 @@ class ChunkLoadErrorBoundary extends React.Component {
   };
   render() {
     if (this.state.hasError) {
-      const isHt = localStorage.getItem('atelnyo_lang') === 'ht';
+      const lang = localStorage.getItem('atelnyo_lang') || 'en';
+      const isHt = lang === 'ht';
       return (
         <div className="chunk-error-boundary" role="alert">
           <div className="chunk-error-card">
             <div className="chunk-error-icon">
               <i className="fas fa-exclamation-triangle" />
             </div>
-            <h2>{isHt ? 'Nouvo vèsyon disponib' : 'New version available'}</h2>
+            <h2>{isHt ? 'Nouvo vèsyon disponib' : inlineText(lang, 'New version available')}</h2>
             <p>
               {isHt
                 ? 'Yon nouvo vèsyon app la disponib. Rechaje paj la pou w jwenn dènye mizajou yo.'
-                : 'A new version of the app is available. Reload the page to get the latest updates.'}
+                : inlineText(lang, 'A new version of the app is available. Reload the page to get the latest updates.')}
             </p>
             <button
               type="button"
               className="chunk-error-btn"
               onClick={this.handleReload}
             >
-              <i className="fas fa-sync-alt" /> {isHt ? 'Rechaje paj la' : 'Reload page'}
+              <i className="fas fa-sync-alt" /> {isHt ? 'Rechaje paj la' : inlineText(lang, 'Reload page')}
             </button>
             <p className="chunk-error-tip">
               {isHt
                 ? "Si pwoblèm nan kontinye, netwaye cache navigatè a oswa ouvri app la nan yon nouvo tab."
-                : "If the issue persists, clear your browser cache or open the app in a new tab."}
+                : inlineText(lang, "If the issue persists, clear your browser cache or open the app in a new tab.")}
             </p>
           </div>
         </div>
@@ -303,7 +304,8 @@ class LearnerRouteErrorBoundary extends React.Component {
   }
   render() {
     if (this.state.hasError) {
-      const isHt = localStorage.getItem('atelnyo_lang') === 'ht';
+      const lang = localStorage.getItem('atelnyo_lang') || 'en';
+      const isHt = lang === 'ht';
       return (
         <div className="ls-page">
           <div className="ls-state" role="alert">
@@ -311,19 +313,19 @@ class LearnerRouteErrorBoundary extends React.Component {
             <h3>
               {isHt
                 ? 'Yon erè rive lè w ap chaje espas aprantisaj la.'
-                : 'Something went wrong loading the learning space.'}
+                : inlineText(lang, 'Something went wrong loading the learning space.')}
             </h3>
             <p>
               {isHt
                 ? 'Eseye ankò oswa retounen. Pwogrè ou anrejistre sou sèvè a.'
-                : 'Try again or go back. Your progress is saved on the server.'}
+                : inlineText(lang, 'Try again or go back. Your progress is saved on the server.')}
             </p>
             <div className="ls-state-actions">
               <button type="button" className="ls-btn" onClick={() => window.history.back()}>
-                <i className="fas fa-arrow-left" aria-hidden="true" /> {isHt ? 'Retounen' : 'Back'}
+                <i className="fas fa-arrow-left" aria-hidden="true" /> {isHt ? 'Retounen' : inlineText(lang, 'Back')}
               </button>
               <button type="button" className="ls-btn ls-btn--primary" onClick={() => window.location.reload()}>
-                <i className="fas fa-rotate-right" aria-hidden="true" /> {isHt ? 'Eseye ankò' : 'Try again'}
+                <i className="fas fa-rotate-right" aria-hidden="true" /> {isHt ? 'Eseye ankò' : inlineText(lang, 'Try again')}
               </button>
             </div>
           </div>
@@ -367,6 +369,7 @@ import {
   connectNotificationSocket,
   disconnectNotificationSocket,
 } from './services/notificationsSocket';
+import { inlineText } from './utils/inlineI18n';
 
 // ─── Init PWA update engine on module load ────────────────────────
 // Detects new SW versions automatically and dispatches
@@ -747,7 +750,7 @@ function CurriculumPlayerRoute({ lang, user, showToast }) {
         progressService.recordPosition(courseId, { module_index: 0, block_index: -1, block_id: String(blockId) }).catch(() => {});
       }}
       onLessonComplete={(lessonId) => {
-        showToast?.(lang === 'ht' ? '✅ Leson fini!' : '✅ Lesson complete!', 'check-circle');
+        showToast?.(lang === 'ht' ? '✅ Leson fini!' : inlineText(lang, '✅ Lesson complete!'), 'check-circle');
       }}
     />
   );
@@ -971,7 +974,7 @@ function App() {
     const stored = localStorage.getItem('atelnyo_lang');
     const savedLanguage = normalizeSupportedLanguage(stored);
     if (savedLanguage) {
-      // Upgrade legacy Spanish preference values in place.
+      // Normalize the stored preference value in place (e.g. 'ES' -> 'es').
       if (savedLanguage !== stored) {
         try { localStorage.setItem('atelnyo_lang', savedLanguage); } catch (_) {}
       }
@@ -2804,7 +2807,7 @@ function App() {
         </div>
       )}
 
-      <div id="toast-container" aria-label={lang === 'ht' ? 'Notifikasyon' : 'Notifications'}>
+      <div id="toast-container" aria-label={lang === 'ht' ? 'Notifikasyon' : inlineText(lang, 'Notifications')}>
         {toasts.map(toast => (
           <div
             key={toast.id}
@@ -2821,7 +2824,7 @@ function App() {
               onClick={() => {
                 setToasts(prev => prev.filter(t => t.id !== toast.id));
               }}
-              aria-label={lang === 'ht' ? 'Fèmen' : 'Dismiss'}
+              aria-label={lang === 'ht' ? 'Fèmen' : inlineText(lang, 'Dismiss')}
               style={{
                 background: 'none', border: 'none', color: 'inherit', cursor: 'pointer',
                 padding: '4px 8px', opacity: 0.6, fontSize: '0.8rem', minHeight: '32px',

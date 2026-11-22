@@ -10,6 +10,7 @@ import { exploreService, talentService } from '../../../services/api';
 import { StudioSkeleton, EmptyState, SectionHeader } from '../shared';
 import ConfirmModal from '../../common/ConfirmModal';
 import styles from './sections.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function TalentSection({ lang, t, showToast, setShowTalentModal, onEdit }) {
   const [confirm, setConfirm] = useState(null);
@@ -22,7 +23,7 @@ export default function TalentSection({ lang, t, showToast, setShowTalentModal, 
   const handleDeleteClick = (item) => {
     setConfirm({
       item,
-      title: lang === 'ht' ? 'Efase talan' : 'Delete talent',
+      title: lang === 'ht' ? 'Efase talan' : inlineText(lang, 'Delete talent'),
       message: lang === 'ht' ? `Eske w sèten ou vle efase "${item.name}"?` : `Are you sure you want to delete "${item.name}"?`,
       onConfirm: () => {
         // Optimistic + non-blocking: the row vanishes instantly AND the
@@ -36,9 +37,9 @@ export default function TalentSection({ lang, t, showToast, setShowTalentModal, 
         (async () => {
           try {
             await talentService.delete(item.id);
-            showToast?.(lang === 'ht' ? '✅ Talan efase!' : '✅ Talent deleted!', 'check-circle');
+            showToast?.(lang === 'ht' ? '✅ Talan efase!' : inlineText(lang, '✅ Talent deleted!'), 'check-circle');
           } catch (err) {
-            showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase.' : 'Could not delete.'), 'circle-exclamation');
+            showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase.' : inlineText(lang, 'Could not delete.')), 'circle-exclamation');
           }
           refetch();
         })();
@@ -52,13 +53,13 @@ export default function TalentSection({ lang, t, showToast, setShowTalentModal, 
       await talentService.update(item.id, { is_active: !item.is_active });
       showToast?.(
         !item.is_active
-          ? (lang === 'ht' ? '✅ Talan vizib kounye a!' : '✅ Talent is now visible!')
-          : (lang === 'ht' ? '🙈 Talan kache.' : '🙈 Talent hidden.'),
+          ? (lang === 'ht' ? '✅ Talan vizib kounye a!' : inlineText(lang, '✅ Talent is now visible!'))
+          : (lang === 'ht' ? '🙈 Talan kache.' : inlineText(lang, '🙈 Talent hidden.')),
         'eye',
       );
       refetch();
     } catch (err) {
-      showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab chanje vizibilite.' : 'Could not change visibility.'), 'circle-exclamation');
+      showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab chanje vizibilite.' : inlineText(lang, 'Could not change visibility.')), 'circle-exclamation');
     }
   };
 
@@ -70,7 +71,7 @@ export default function TalentSection({ lang, t, showToast, setShowTalentModal, 
     <div className={styles.section}>
       <SectionHeader
         icon="fa-star"
-        title={lang === 'ht' ? 'Talan mwen yo' : 'My Talents'}
+        title={lang === 'ht' ? 'Talan mwen yo' : inlineText(lang, 'My Talents')}
         lang={lang}
         help={{
           ht: 'Lised tout talan (chantè, dansè, atis...) ou te ajoute nan Explore. Yon bon avatè kare (1:1) fè talan an pi vizib sou kard la.',
@@ -83,18 +84,18 @@ export default function TalentSection({ lang, t, showToast, setShowTalentModal, 
             onClick={() => setShowTalentModal(true)}
           >
             <i className="fas fa-plus" aria-hidden="true" />
-            {lang === 'ht' ? 'Kreye Talan' : 'Create Talent'}
+            {lang === 'ht' ? 'Kreye Talan' : inlineText(lang, 'Create Talent')}
           </button>
         }
       />
       {isEmpty ? (
         <EmptyState
           icon="fa-star"
-          title={lang === 'ht' ? 'PokO gen talan' : 'No talents yet'}
+          title={lang === 'ht' ? 'PokO gen talan' : inlineText(lang, 'No talents yet')}
           hint={lang === 'ht'
             ? 'Kreye premye talan ou pou parèt nan Explore.'
-            : 'Create your first talent to appear in Explore.'}
-          ctaLabel={lang === 'ht' ? 'Kreye Premye Talan' : 'Create First Talent'}
+            : inlineText(lang, 'Create your first talent to appear in Explore.')}
+          ctaLabel={lang === 'ht' ? 'Kreye Premye Talan' : inlineText(lang, 'Create First Talent')}
           onCta={() => setShowTalentModal(true)}
         />
       ) : (
@@ -115,7 +116,7 @@ export default function TalentSection({ lang, t, showToast, setShowTalentModal, 
                   {talent.is_active === false && (
                     <span className={styles.inactiveBadge}>
                       <i className="fas fa-eye-slash" aria-hidden="true" />
-                      {lang === 'ht' ? 'Kache' : 'Hidden'}
+                      {lang === 'ht' ? 'Kache' : inlineText(lang, 'Hidden')}
                     </span>
                   )}
                 </div>
@@ -151,20 +152,20 @@ export default function TalentSection({ lang, t, showToast, setShowTalentModal, 
                   className={styles.editBtn}
                   onClick={() => handleToggleActive(talent)}
                   title={talent.is_active === false
-                    ? (lang === 'ht' ? 'Fè l vizib' : 'Make visible')
-                    : (lang === 'ht' ? 'Kache' : 'Hide')}
+                    ? (lang === 'ht' ? 'Fè l vizib' : inlineText(lang, 'Make visible'))
+                    : (lang === 'ht' ? 'Kache' : inlineText(lang, 'Hide'))}
                   aria-label={talent.is_active === false
-                    ? (lang === 'ht' ? 'Fè talan an vizib' : 'Make talent visible')
-                    : (lang === 'ht' ? 'Kache talan an' : 'Hide talent')}
+                    ? (lang === 'ht' ? 'Fè talan an vizib' : inlineText(lang, 'Make talent visible'))
+                    : (lang === 'ht' ? 'Kache talan an' : inlineText(lang, 'Hide talent'))}
                 >
                   <i className={talent.is_active === false ? 'fas fa-eye' : 'fas fa-eye-slash'} aria-hidden="true" />
                 </button>
                 <button type="button" className={styles.editBtn} onClick={() => onEdit?.(talent)}
-                  title={lang === 'ht' ? 'Modifye' : 'Edit'}>
+                  title={lang === 'ht' ? 'Modifye' : inlineText(lang, 'Edit')}>
                   <i className="fas fa-pen" aria-hidden="true" />
                 </button>
                 <button type="button" className={styles.deleteBtn} onClick={() => handleDeleteClick(talent)}
-                  title={lang === 'ht' ? 'Efase' : 'Delete'}>
+                  title={lang === 'ht' ? 'Efase' : inlineText(lang, 'Delete')}>
                   <i className="fas fa-trash-can" aria-hidden="true" />
                 </button>
               </div>

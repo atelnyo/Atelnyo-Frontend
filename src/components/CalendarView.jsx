@@ -15,6 +15,7 @@
  */
 import React, { useEffect, useMemo, useState } from 'react';
 import { eventsService } from '../services/api';
+import { inlineText } from '../utils/inlineI18n';
 
 const MONTH_NAMES = [
   'Janvye', 'Fevriye', 'Mas', 'Avril', 'Me', 'Jen',
@@ -169,7 +170,7 @@ export default function CalendarView({ lang = 'en', t, showToast }) {
             type="button"
             className="calendar-nav-btn"
             onClick={prevMonth}
-            aria-label={lang === 'ht' ? 'Mwa anvan' : 'Previous month'}
+            aria-label={lang === 'ht' ? 'Mwa anvan' : inlineText(lang, 'Previous month')}
           >
             <i className="fas fa-chevron-left" />
           </button>
@@ -178,13 +179,13 @@ export default function CalendarView({ lang = 'en', t, showToast }) {
             className="calendar-nav-btn calendar-today-btn"
             onClick={goToday}
           >
-            {lang === 'ht' ? 'Jodi a' : 'Today'}
+            {lang === 'ht' ? 'Jodi a' : inlineText(lang, 'Today')}
           </button>
           <button
             type="button"
             className="calendar-nav-btn"
             onClick={nextMonth}
-            aria-label={lang === 'ht' ? 'Mwa apre' : 'Next month'}
+            aria-label={lang === 'ht' ? 'Mwa apre' : inlineText(lang, 'Next month')}
           >
             <i className="fas fa-chevron-right" />
           </button>
@@ -193,7 +194,7 @@ export default function CalendarView({ lang = 'en', t, showToast }) {
 
       {loading && (
         <div className="calendar-loading">
-          <i className="fas fa-spinner fa-spin" /> {lang === 'ht' ? 'Ap chaje...' : 'Loading...'}
+          <i className="fas fa-spinner fa-spin" /> {lang === 'ht' ? 'Ap chaje...' : inlineText(lang, 'Loading...')}
         </div>
       )}
 
@@ -298,10 +299,10 @@ export default function CalendarView({ lang = 'en', t, showToast }) {
         <div className="calendar-empty">
           <i className="fas fa-calendar-alt calendar-empty-icon" />
           <p className="calendar-empty-title">
-            {t?.explore_event_empty || (lang === 'ht' ? 'Pa gen evènman ki ap vini' : 'No upcoming events')}
+            {t?.explore_event_empty || (lang === 'ht' ? 'Pa gen evènman ki ap vini' : inlineText(lang, 'No upcoming events'))}
           </p>
           <p className="calendar-empty-hint">
-            {t?.explore_event_empty_hint || (lang === 'ht' ? 'Tounen pita pou wè evènman k ap vini yo.' : 'Check back soon for upcoming events.')}
+            {t?.explore_event_empty_hint || (lang === 'ht' ? 'Tounen pita pou wè evènman k ap vini yo.' : inlineText(lang, 'Check back soon for upcoming events.'))}
           </p>
         </div>
       )}

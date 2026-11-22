@@ -14,6 +14,7 @@
  * 8. Payment Integration — Stripe/PayPal for business
  */
 import React, { useState } from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 const BUSINESS_HOURS_DEFAULT = {
   mon: '09:00–17:00',
@@ -40,7 +41,7 @@ export function BusinessHoursEditor({ hours = {}, onChange, lang = 'en' }) {
   const [editing, setEditing] = useState(false);
   const currentHours = { ...BUSINESS_HOURS_DEFAULT, ...hours };
 
-  const t = (ht, en) => lang === 'ht' ? ht : en;
+  const t = (ht, en) => lang === 'ht' ? ht : inlineText(lang, en);
 
   if (!editing) {
     return (
@@ -182,7 +183,7 @@ export function ServiceCatalogEditor({ services = [], onChange, lang = 'en' }) {
   const [adding, setAdding] = useState(false);
   const [newService, setNewService] = useState({ name: '', description: '', price: '', duration: '' });
 
-  const t = (ht, en) => lang === 'ht' ? ht : en;
+  const t = (ht, en) => lang === 'ht' ? ht : inlineText(lang, en);
 
   const addService = () => {
     if (!newService.name) return;
@@ -374,7 +375,7 @@ export function ServiceCatalogEditor({ services = [], onChange, lang = 'en' }) {
 
 // ─── 3. Invoice Generator ──────────────────────────────────────────
 export function InvoiceGenerator({ businessName, lang = 'en' }) {
-  const t = (ht, en) => lang === 'ht' ? ht : en;
+  const t = (ht, en) => lang === 'ht' ? ht : inlineText(lang, en);
 
   return (
     <div style={{
@@ -422,7 +423,7 @@ export function InvoiceGenerator({ businessName, lang = 'en' }) {
 
 // ─── 4. Client Portal ──────────────────────────────────────────────
 export function ClientPortal({ lang = 'en' }) {
-  const t = (ht, en) => lang === 'ht' ? ht : en;
+  const t = (ht, en) => lang === 'ht' ? ht : inlineText(lang, en);
 
   return (
     <div style={{

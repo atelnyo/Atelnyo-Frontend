@@ -13,6 +13,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import api, { courseService } from '../../../../services/api';
 import useAutosave from '../../../../hooks/useAutosave';
 import { buildCoursePayload } from './buildCoursePayload';
+import { inlineText } from '../../../../utils/inlineI18n';
 
 export function useCoursePersistence({
   form, setForm,
@@ -20,7 +21,7 @@ export function useCoursePersistence({
   dirtyRef, clearDirty, setDirty,
   saveState, setSaveState, setSaveError,
   setErrors,
-  validate, isExternal, isHt, showToast, onSaved,
+  validate, isExternal, isHt, lang = 'en', showToast, onSaved,
   adminManaged = false,
 }) {
   const updateCourse = useCallback((id, payload) => (
@@ -56,7 +57,7 @@ export function useCoursePersistence({
     const draft = autosave.recoverDraft();
     if (draft) {
       setForm(draft);
-      showToast?.(isHt ? '📋 Bouyon an retounen!' : '📋 Draft recovered!', 'check-circle');
+      showToast?.(isHt ? '📋 Bouyon an retounen!' : inlineText(lang, '📋 Draft recovered!'), 'check-circle');
     }
   }, [autosave, setForm, isHt, showToast]);
 
@@ -68,7 +69,7 @@ export function useCoursePersistence({
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
       setSaveState('dirty');
-      setSaveError(isHt ? 'Gen jaden ki pa konplè — tcheke yo anvan w sove.' : 'Some fields are incomplete — check them before saving.');
+      setSaveError(isHt ? 'Gen jaden ki pa konplè — tcheke yo anvan w sove.' : inlineText(lang, 'Some fields are incomplete — check them before saving.'));
       return false;
     }
     setErrors({});
@@ -97,7 +98,7 @@ export function useCoursePersistence({
       const detail = err?.response?.data?.detail
         || err?.response?.data?.title?.[0]
         || err?.message
-        || (isHt ? 'Pa t kapab sove kou a.' : 'Could not save the course.');
+        || (isHt ? 'Pa t kapab sove kou a.' : inlineText(lang, 'Could not save the course.'));
       setSaveState('error');
       setSaveError(detail);
       showToast?.(detail, 'circle-exclamation');

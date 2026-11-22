@@ -10,6 +10,7 @@
  */
 import React from 'react';
 import { fmtFileSize, fmtCount } from '../../../utils/formatMedia';
+import { inlineText } from '../../../utils/inlineI18n';
 
 function StatBox({ icon, label, value, color }) {
   return (
@@ -35,49 +36,49 @@ export default function MediaGeneralPanel({ media, lang = 'en' }) {
       <div className="inspector-stats-grid">
         <StatBox
           icon="fa-database"
-          label={isHt ? 'Referans' : 'References'}
+          label={isHt ? 'Referans' : inlineText(lang, 'References')}
           value={fmtCount(usages.length)}
           color="#38bdf8"
         />
         <StatBox
           icon="fa-check-circle"
-          label={isHt ? 'Validé' : 'Validated'}
-          value={item.is_valid ? (isHt ? 'Wi' : 'Yes') : (isHt ? 'Non' : 'No')}
+          label={isHt ? 'Validé' : inlineText(lang, 'Validated')}
+          value={item.is_valid ? (isHt ? 'Wi' : inlineText(lang, 'Yes')) : (isHt ? 'Non' : inlineText(lang, 'No'))}
           color="#10b981"
         />
         <StatBox
           icon="fa-clock"
-          label={isHt ? 'Dènye tcheke' : 'Last Checked'}
+          label={isHt ? 'Dènye tcheke' : inlineText(lang, 'Last Checked')}
           value={lastChecked ? new Date(lastChecked).toLocaleDateString() : '—'}
           color="#f59e0b"
         />
         <StatBox
           icon="fa-tachometer-alt"
-          label={isHt ? 'Repons' : 'Response'}
+          label={isHt ? 'Repons' : inlineText(lang, 'Response')}
           value={item.response_time_ms != null ? `${item.response_time_ms}ms` : '—'}
           color="#8b5cf6"
         />
         <StatBox
           icon="fa-eye"
-          label={isHt ? 'Fwa itilize' : 'View Count'}
+          label={isHt ? 'Fwa itilize' : inlineText(lang, 'View Count')}
           value={fmtCount(item.view_count)}
           color="#0ea5e9"
         />
         <StatBox
           icon="fa-calendar-plus"
-          label={isHt ? 'Kreye' : 'Created'}
+          label={isHt ? 'Kreye' : inlineText(lang, 'Created')}
           value={item.created_at ? new Date(item.created_at).toLocaleDateString() : '—'}
           color="#ec4899"
         />
         <StatBox
           icon="fa-pen"
-          label={isHt ? 'Mete ajou' : 'Updated'}
+          label={isHt ? 'Mete ajou' : inlineText(lang, 'Updated')}
           value={item.updated_at ? new Date(item.updated_at).toLocaleDateString() : '—'}
           color="#14b8a6"
         />
         <StatBox
           icon="fa-hard-drive"
-          label={isHt ? 'Gwosè' : 'File Size'}
+          label={isHt ? 'Gwosè' : inlineText(lang, 'File Size')}
           value={fmtFileSize(item.file_size || item.size_bytes || item.content_length)}
           color="#f97316"
         />
@@ -90,8 +91,8 @@ export default function MediaGeneralPanel({ media, lang = 'en' }) {
             type="button"
             className="media-panel-copybtn"
             onClick={() => { if (typeof navigator !== 'undefined' && navigator.clipboard) navigator.clipboard.writeText(url).catch(() => {}); }}
-            title={isHt ? 'Kopi URL' : 'Copy URL'}
-            aria-label={isHt ? 'Kopi URL' : 'Copy URL'}
+            title={isHt ? 'Kopi URL' : inlineText(lang, 'Copy URL')}
+            aria-label={isHt ? 'Kopi URL' : inlineText(lang, 'Copy URL')}
           >
             <i className="fas fa-copy" />
           </button>

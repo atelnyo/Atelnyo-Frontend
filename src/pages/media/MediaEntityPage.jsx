@@ -51,6 +51,7 @@ import {
   MediaMetadataPanel,
 } from '../../components/media/panels/index.jsx';
 import { AdvancedPanel } from '../../components/media';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── Section registry (drives the collapsible layout) ────────────────
 const SECTIONS = [
@@ -173,7 +174,7 @@ export default function MediaEntityPage({ lang = 'en', user, media: mediaProp, s
   const onCommand = useCallback((cmdId) => {
     if (!media) {
       openToast(
-        isHt ? 'Pa gen chaj pou medya a.' : 'No media payload available.',
+        isHt ? 'Pa gen chaj pou medya a.' : inlineText(lang, 'No media payload available.'),
         'exclamation-triangle',
       );
       return;
@@ -196,12 +197,12 @@ export default function MediaEntityPage({ lang = 'en', user, media: mediaProp, s
       case 'openOriginal': {
         const url = media.original_url || media.url || media.preview_url;
         if (url) window.open(url, '_blank', 'noopener,noreferrer');
-        else openToast(isHt ? 'Pa gen URL orijinal.' : 'No original URL.', 'link-slash');
+        else openToast(isHt ? 'Pa gen URL orijinal.' : inlineText(lang, 'No original URL.'), 'link-slash');
         break;
       }
       case 'replaceUrl':
         openToast(
-          isHt ? 'Fonksyon ranplasman URL pa disponib pou kounye a.' : 'Replace URL is not available yet.',
+          isHt ? 'Fonksyon ranplasman URL pa disponib pou kounye a.' : inlineText(lang, 'Replace URL is not available yet.'),
           'arrow-right-arrow-left',
         );
         break;
@@ -210,20 +211,20 @@ export default function MediaEntityPage({ lang = 'en', user, media: mediaProp, s
         setTimeout(() => {
           setCmdFlag('validate', { busy: false });
           openToast(
-            isHt ? 'Validasyon kòmanse.' : 'Validation started.',
+            isHt ? 'Validasyon kòmanse.' : inlineText(lang, 'Validation started.'),
             'shield-halved',
           );
         }, 600);
         break;
       case 'refresh':
         openToast(
-          isHt ? 'Rechaj demare.' : 'Refresh started.',
+          isHt ? 'Rechaj demare.' : inlineText(lang, 'Refresh started.'),
           'arrows-rotate',
         );
         break;
       case 'archive':
         openToast(
-          isHt ? 'Achiv demare.' : 'Archive requested.',
+          isHt ? 'Achiv demare.' : inlineText(lang, 'Archive requested.'),
           'box-archive',
         );
         break;
@@ -239,14 +240,14 @@ export default function MediaEntityPage({ lang = 'en', user, media: mediaProp, s
           || (typeof window !== 'undefined'
             ? window.location.origin + '/m/' + (media.id || media.slug || '')
             : '');
-        copyToClipboard(url, isHt ? 'URL piblik' : 'Public URL');
+        copyToClipboard(url, isHt ? 'URL piblik' : inlineText(lang, 'Public URL'));
         break;
       }
       case 'copyAtelnyo': {
         const url = (typeof window !== 'undefined'
           ? window.location.origin + '/sheet/media/' + (media.id || media.slug || '')
           : '');
-        copyToClipboard(url, isHt ? 'Lyen Atelnyo' : 'Atelnyo link');
+        copyToClipboard(url, isHt ? 'Lyen Atelnyo' : inlineText(lang, 'Atelnyo link'));
         break;
       }
       case 'share':
@@ -260,13 +261,13 @@ export default function MediaEntityPage({ lang = 'en', user, media: mediaProp, s
           // Fallback — copy URL instead
           copyToClipboard(
             media.public_url || (typeof window !== 'undefined' ? window.location.href : ''),
-            isHt ? 'Lyen' : 'Link',
+            isHt ? 'Lyen' : inlineText(lang, 'Link'),
           );
         }
         break;
       case 'favorite':
         openToast(
-          isHt ? 'Favori toggle.' : 'Favorite toggled.',
+          isHt ? 'Favori toggle.' : inlineText(lang, 'Favorite toggled.'),
           'heart',
         );
         break;
@@ -274,10 +275,10 @@ export default function MediaEntityPage({ lang = 'en', user, media: mediaProp, s
         if (typeof window !== 'undefined' && window.confirm(
           isHt
             ? 'Efase referans lan? Medya a rete.'
-            : 'Delete this reference? Media will remain.',
+            : inlineText(lang, 'Delete this reference? Media will remain.'),
         )) {
           openToast(
-            isHt ? 'Referans efase.' : 'Reference deleted.',
+            isHt ? 'Referans efase.' : inlineText(lang, 'Reference deleted.'),
             'link-slash',
           );
         }
@@ -294,7 +295,7 @@ export default function MediaEntityPage({ lang = 'en', user, media: mediaProp, s
     onCopyUrl: () => onCommand('copyPublicUrl'),
     onCopyAtelnyoLink: () => onCommand('copyAtelnyo'),
     onDelete: () => onCommand('archive'),
-    onRename: () => openToast(isHt ? 'Renome klike.' : 'Rename clicked.', 'i-cursor'),
+    onRename: () => openToast(isHt ? 'Renome klike.' : inlineText(lang, 'Rename clicked.'), 'i-cursor'),
     onShare: () => onCommand('share'),
     onEscape: () => navigate(-1),
   });
@@ -306,18 +307,18 @@ export default function MediaEntityPage({ lang = 'en', user, media: mediaProp, s
         <MediaBreadcrumbs media={null} lang={lang} />
         <div className="media-entity-empty-state" role="status">
           <i className="fas fa-photo-video" aria-hidden="true" />
-          <h2>{isHt ? 'Pa gen medya chaje' : 'No media loaded'}</h2>
+          <h2>{isHt ? 'Pa gen medya chaje' : inlineText(lang, 'No media loaded')}</h2>
           <p>
             {isHt
               ? 'Idantifyan medya a pa nan memwa a. Ouvri medya a nan yon kat oswa galeri.'
-              : 'Media identifier is not in memory. Open a media from a card or gallery.'}
+              : inlineText(lang, 'Media identifier is not in memory. Open a media from a card or gallery.')}
           </p>
           <button
             type="button"
             className="btn-action"
             onClick={() => navigate(SHEETS.STUDIO)}
           >
-            {isHt ? 'Retounen nan Studio' : 'Back to Studio'}
+            {isHt ? 'Retounen nan Studio' : inlineText(lang, 'Back to Studio')}
           </button>
         </div>
       </div>
@@ -332,10 +333,10 @@ export default function MediaEntityPage({ lang = 'en', user, media: mediaProp, s
           type="button"
           className="media-entity-back"
           onClick={() => navigate(-1)}
-          aria-label={isHt ? 'Retounen' : 'Back'}
+          aria-label={isHt ? 'Retounen' : inlineText(lang, 'Back')}
         >
           <i className="fas fa-arrow-left" aria-hidden="true" />
-          <span>{isHt ? 'Retounen' : 'Back'}</span>
+          <span>{isHt ? 'Retounen' : inlineText(lang, 'Back')}</span>
         </button>
         <MediaBreadcrumbs media={media} collection={media.collection || media.module} lang={lang} />
       </div>
@@ -383,26 +384,26 @@ export default function MediaEntityPage({ lang = 'en', user, media: mediaProp, s
                 onToggle={() => toggleSection(section.id)}
                 locked={false}
               >
-                <div className="media-entity-quick-actions" role="group" aria-label={isHt ? 'Aksyon rapid' : 'Quick Actions'}>
+                <div className="media-entity-quick-actions" role="group" aria-label={isHt ? 'Aksyon rapid' : inlineText(lang, 'Quick Actions')}>
                   <button type="button" className="media-entity-qa-btn" onClick={() => onCommand('validate')}>
                     <i className="fas fa-shield-halved" aria-hidden="true" />
-                    <span>{isHt ? 'Valide' : 'Validate'}</span>
+                    <span>{isHt ? 'Valide' : inlineText(lang, 'Validate')}</span>
                   </button>
                   <button type="button" className="media-entity-qa-btn" onClick={() => onCommand('refresh')}>
                     <i className="fas fa-arrows-rotate" aria-hidden="true" />
-                    <span>{isHt ? 'Rechaje' : 'Refresh'}</span>
+                    <span>{isHt ? 'Rechaje' : inlineText(lang, 'Refresh')}</span>
                   </button>
                   <button type="button" className="media-entity-qa-btn" onClick={() => onCommand('history')}>
                     <i className="fas fa-clock-rotate-left" aria-hidden="true" />
-                    <span>{isHt ? 'Istwa' : 'History'}</span>
+                    <span>{isHt ? 'Istwa' : inlineText(lang, 'History')}</span>
                   </button>
                   <button type="button" className="media-entity-qa-btn" onClick={() => onCommand('share')}>
                     <i className="fas fa-share" aria-hidden="true" />
-                    <span>{isHt ? 'Pataje' : 'Share'}</span>
+                    <span>{isHt ? 'Pataje' : inlineText(lang, 'Share')}</span>
                   </button>
                   <button type="button" className="media-entity-qa-btn media-entity-qa-btn-danger" onClick={() => onCommand('archive')}>
                     <i className="fas fa-box-archive" aria-hidden="true" />
-                    <span>{isHt ? 'Achiv' : 'Archive'}</span>
+                    <span>{isHt ? 'Achiv' : inlineText(lang, 'Archive')}</span>
                   </button>
                 </div>
               </CollapsibleSection>

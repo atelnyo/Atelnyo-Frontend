@@ -1,5 +1,6 @@
 import React from 'react';
 import { fmtCount, useCountUp } from './profileUtils';
+import { inlineText } from '../../utils/inlineI18n';
 
 /**
  * AnimatedStat — animated counter tile (uses useCountUp hook).
@@ -35,21 +36,21 @@ export function AnimatedStat({ value, icon, label, format }) {
  */
 export default function GlassStatsCard({ profile, picksCount, lang, isOwner, tipTotalAmount = 0, tipTotalCount = 0 }) {
   const stats = [
-    { value: picksCount,      label: lang === 'ht' ? 'Picks'    : 'Picks',     icon: 'fa-bookmark' },
+    { value: picksCount,      label: lang === 'ht' ? 'Picks'    : inlineText(lang, 'Picks'),     icon: 'fa-bookmark' },
     // Real, persistent view count from CreatorPublicProfile.view_count
     // (backend increments it atomically on every public visit).
     // PRIVACY: only the profile owner sees the visit count — visitors
     // must not learn how popular (or not) a creator is.
-    ...(isOwner ? [{ value: profile.view_count || 0, label: lang === 'ht' ? 'Vizit' : 'Views', icon: 'fa-eye' }] : []),
-    { value: profile.students_count, label: lang === 'ht' ? 'Etidyan' : 'Students', icon: 'fa-user-graduate' },
-    { value: profile.courses_count,  label: lang === 'ht' ? 'Kou'    : 'Courses',  icon: 'fa-graduation-cap' },
-    { value: profile.products_count, label: lang === 'ht' ? 'Pwodwi'   : 'Products', icon: 'fa-cube' },
+    ...(isOwner ? [{ value: profile.view_count || 0, label: lang === 'ht' ? 'Vizit' : inlineText(lang, 'Views'), icon: 'fa-eye' }] : []),
+    { value: profile.students_count, label: lang === 'ht' ? 'Etidyan' : inlineText(lang, 'Students'), icon: 'fa-user-graduate' },
+    { value: profile.courses_count,  label: lang === 'ht' ? 'Kou'    : inlineText(lang, 'Courses'),  icon: 'fa-graduation-cap' },
+    { value: profile.products_count, label: lang === 'ht' ? 'Pwodwi'   : inlineText(lang, 'Products'), icon: 'fa-cube' },
     // All-time tips received — PUBLIC social proof (tip_received events
     // are public and the leaderboard is public). Hidden while zero so a
     // fresh creator doesn't show a bare "$0.00" tile.
     ...(tipTotalAmount > 0 ? [{
       value: tipTotalAmount,
-      label: lang === 'ht' ? 'Tip resevwa' : 'Tips',
+      label: lang === 'ht' ? 'Tip resevwa' : inlineText(lang, 'Tips'),
       icon: 'fa-hand-holding-heart',
       format: (n) => `$${Number(n).toFixed(2)}`,
     }] : []),

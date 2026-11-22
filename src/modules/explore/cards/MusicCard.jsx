@@ -4,6 +4,7 @@
  * Music card with inline audio preview — now with music-themed SVG fallback.
  */
 import React, { useEffect, useRef, useState } from 'react';
+import { inlineText } from '../../../utils/inlineI18n';
 import api from '../../../services/api';
 import { classNames, formatPlays } from '../utils/cardHelpers';
 import { coverWithFallback } from '../utils/videoSource';
@@ -15,7 +16,7 @@ import SaveCountChip from './SaveCountChip';
 import TrendingVelocity from './TrendingVelocity';
 
 /** SVG fallback — music-themed gradient with note icon */
-function MusicFallback({ title, isHt }) {
+function MusicFallback({ title, isHt, lang = 'en' }) {
   return (
     <div className="explore-card-fallback" style={{ aspectRatio: '1/1' }}>
       <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -35,7 +36,7 @@ function MusicFallback({ title, isHt }) {
         </g>
         <text x="200" y="320" textAnchor="middle" fill="#8b5cf6" opacity="0.5"
               fontFamily="system-ui, -apple-system, sans-serif" fontSize="13" fontWeight="600">
-          {title || (isHt ? 'Mizik' : 'Music')}
+          {title || (isHt ? 'Mizik' : inlineText(lang, 'Music'))}
         </text>
       </svg>
     </div>
@@ -176,7 +177,7 @@ export default function MusicCard({ track, onOpen, showToast, t, isSaved, onSave
             onError={() => setImgFailed(true)}
           />
         ) : (
-          <MusicFallback title={track.title} isHt={false} />
+          <MusicFallback title={track.title} isHt={false} lang={lang} />
         )}
         {/* Hover video preview — shared overlay (native <video> or
             iframe embed). pointer-events:none keeps the card's onClick

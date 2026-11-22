@@ -12,6 +12,7 @@ import useFetch from '../../../hooks/useFetch';
 import { StudioSkeleton, EmptyState, SectionHeader, fmtCount } from '../shared';
 import ConfirmModal from '../../common/ConfirmModal';
 import styles from './sections.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function MusicSection({ lang, t, showToast, setShowMusicModal, onEdit }) {
   const [confirm, setConfirm] = useState(null);
@@ -30,20 +31,20 @@ export default function MusicSection({ lang, t, showToast, setShowMusicModal, on
       await musicService.update(item.id, { is_active: !item.is_active });
       showToast?.(
         !item.is_active
-          ? (lang === 'ht' ? '✅ Mizik vizib kounye a!' : '✅ Track is now visible!')
-          : (lang === 'ht' ? '🙈 Mizik kache.' : '🙈 Track hidden.'),
+          ? (lang === 'ht' ? '✅ Mizik vizib kounye a!' : inlineText(lang, '✅ Track is now visible!'))
+          : (lang === 'ht' ? '🙈 Mizik kache.' : inlineText(lang, '🙈 Track hidden.')),
         'eye',
       );
       refetch();
     } catch (err) {
-      showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab chanje vizibilite.' : 'Could not change visibility.'), 'circle-exclamation');
+      showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab chanje vizibilite.' : inlineText(lang, 'Could not change visibility.')), 'circle-exclamation');
     }
   };
 
   const handleDeleteClick = (item) => {
     setConfirm({
       item,
-      title: lang === 'ht' ? 'Efase mizik' : 'Delete track',
+      title: lang === 'ht' ? 'Efase mizik' : inlineText(lang, 'Delete track'),
       message: lang === 'ht' ? `Eske w sèten ou vle efase "${item.title}"?` : `Are you sure you want to delete "${item.title}"?`,
       onConfirm: () => {
         // Optimistic + non-blocking: the row vanishes instantly AND the
@@ -57,9 +58,9 @@ export default function MusicSection({ lang, t, showToast, setShowMusicModal, on
         (async () => {
           try {
             await musicService.delete(item.id);
-            showToast?.(lang === 'ht' ? '✅ Mizik efase!' : '✅ Track deleted!', 'check-circle');
+            showToast?.(lang === 'ht' ? '✅ Mizik efase!' : inlineText(lang, '✅ Track deleted!'), 'check-circle');
           } catch (err) {
-            showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase.' : 'Could not delete.'), 'circle-exclamation');
+            showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase.' : inlineText(lang, 'Could not delete.')), 'circle-exclamation');
           }
           refetch();
         })();
@@ -83,7 +84,7 @@ export default function MusicSection({ lang, t, showToast, setShowMusicModal, on
         }}
         tip={lang === 'ht'
           ? 'Preview odyo ak videyo gen deteksyon dire otomatik — pa bezwen kalkile anyen.'
-          : 'Audio and video previews get auto-detected durations — no math needed.'}
+          : inlineText(lang, 'Audio and video previews get auto-detected durations — no math needed.')}
         action={
           <button
             type="button"
@@ -121,7 +122,7 @@ export default function MusicSection({ lang, t, showToast, setShowMusicModal, on
                   {track.is_active === false && (
                     <span className={styles.inactiveBadge}>
                       <i className="fas fa-eye-slash" aria-hidden="true" />
-                      {lang === 'ht' ? 'Kache' : 'Hidden'}
+                      {lang === 'ht' ? 'Kache' : inlineText(lang, 'Hidden')}
                     </span>
                   )}
                 </div>
@@ -138,20 +139,20 @@ export default function MusicSection({ lang, t, showToast, setShowMusicModal, on
                   className={styles.editBtn}
                   onClick={() => handleToggleActive(track)}
                   title={track.is_active === false
-                    ? (lang === 'ht' ? 'Fè l vizib' : 'Make visible')
-                    : (lang === 'ht' ? 'Kache' : 'Hide')}
+                    ? (lang === 'ht' ? 'Fè l vizib' : inlineText(lang, 'Make visible'))
+                    : (lang === 'ht' ? 'Kache' : inlineText(lang, 'Hide'))}
                   aria-label={track.is_active === false
-                    ? (lang === 'ht' ? 'Fè mizik la vizib' : 'Make track visible')
-                    : (lang === 'ht' ? 'Kache mizik la' : 'Hide track')}
+                    ? (lang === 'ht' ? 'Fè mizik la vizib' : inlineText(lang, 'Make track visible'))
+                    : (lang === 'ht' ? 'Kache mizik la' : inlineText(lang, 'Hide track'))}
                 >
                   <i className={track.is_active === false ? 'fas fa-eye' : 'fas fa-eye-slash'} aria-hidden="true" />
                 </button>
                 <button type="button" className={styles.editBtn} onClick={() => onEdit?.(track)}
-                  title={lang === 'ht' ? 'Modifye' : 'Edit'}>
+                  title={lang === 'ht' ? 'Modifye' : inlineText(lang, 'Edit')}>
                   <i className="fas fa-pen" aria-hidden="true" />
                 </button>
                 <button type="button" className={styles.deleteBtn} onClick={() => handleDeleteClick(track)}
-                  title={lang === 'ht' ? 'Efase' : 'Delete'}>
+                  title={lang === 'ht' ? 'Efase' : inlineText(lang, 'Delete')}>
                   <i className="fas fa-trash-can" aria-hidden="true" />
                 </button>
               </div>

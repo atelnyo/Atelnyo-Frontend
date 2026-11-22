@@ -17,6 +17,7 @@ import { t as t4 } from '../../utils/i18n';
 import ChatBox from './ChatBox';
 import { POST_MAX_LENGTH, countPostChars, validatePostDraft } from './postRules';
 import './CommunityGroups.css';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── Helpers ───────────────────────────────────────────────────────
 
@@ -54,11 +55,11 @@ function GroupCard({ group, onJoin, onLeave, onClick, lang }) {
         <div className="group-card-meta">
           <span className="group-members">
             <i className="fas fa-users" />
-            {formatMemberCount(memberCount)} {lang === 'ht' ? 'manm' : 'members'}
+            {formatMemberCount(memberCount)} {lang === 'ht' ? 'manm' : inlineText(lang, 'members')}
           </span>
           <span className="group-posts">
             <i className="fas fa-comment" />
-            {group.post_count || 0} {lang === 'ht' ? 'pòs' : 'posts'}
+            {group.post_count || 0} {lang === 'ht' ? 'pòs' : inlineText(lang, 'posts')}
           </span>
         </div>
 
@@ -66,15 +67,15 @@ function GroupCard({ group, onJoin, onLeave, onClick, lang }) {
           {isMember ? (
             <>
               <button className="group-btn group-btn-secondary" onClick={(e) => { e.stopPropagation(); onLeave?.(group); }}>
-                {lang === 'ht' ? 'Kite' : 'Leave'}
+                {lang === 'ht' ? 'Kite' : inlineText(lang, 'Leave')}
               </button>
               <span className="group-member-badge">
-                <i className="fas fa-check" /> {lang === 'ht' ? 'Manm' : 'Member'}
+                <i className="fas fa-check" /> {lang === 'ht' ? 'Manm' : inlineText(lang, 'Member')}
               </span>
             </>
           ) : (
             <button className="group-btn group-btn-primary" onClick={(e) => { e.stopPropagation(); onJoin?.(group); }}>
-              <i className="fas fa-plus" /> {lang === 'ht' ? 'Antre' : 'Join'}
+              <i className="fas fa-plus" /> {lang === 'ht' ? 'Antre' : inlineText(lang, 'Join')}
             </button>
           )}
         </div>
@@ -106,27 +107,27 @@ function CreateGroupForm({ onSubmit, onCancel, lang }) {
     <form className="group-form" onSubmit={handleSubmit}>
       <h3>
         <i className="fas fa-plus-circle" />
-        {lang === 'ht' ? 'Kreye yon gwoup' : 'Create a Group'}
+        {lang === 'ht' ? 'Kreye yon gwoup' : inlineText(lang, 'Create a Group')}
       </h3>
 
       <div className="group-form-group">
-        <label>{lang === 'ht' ? 'Non' : 'Name'} *</label>
+        <label>{lang === 'ht' ? 'Non' : inlineText(lang, 'Name')} *</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder={lang === 'ht' ? 'Non gwoup la' : 'Group name'}
+          placeholder={lang === 'ht' ? 'Non gwoup la' : inlineText(lang, 'Group name')}
           required
           maxLength={100}
         />
       </div>
 
       <div className="group-form-group">
-        <label>{lang === 'ht' ? 'Deskripsyon' : 'Description'}</label>
+        <label>{lang === 'ht' ? 'Deskripsyon' : inlineText(lang, 'Description')}</label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder={lang === 'ht' ? 'Kisa gwoup sa a ye?' : 'What is this group about?'}
+          placeholder={lang === 'ht' ? 'Kisa gwoup sa a ye?' : inlineText(lang, 'What is this group about?')}
           rows={3}
         />
       </div>
@@ -138,16 +139,16 @@ function CreateGroupForm({ onSubmit, onCancel, lang }) {
             checked={isPrivate}
             onChange={(e) => setIsPrivate(e.target.checked)}
           />
-          <span>{lang === 'ht' ? 'Gwoup prive' : 'Private group'}</span>
+          <span>{lang === 'ht' ? 'Gwoup prive' : inlineText(lang, 'Private group')}</span>
         </label>
       </div>
 
       <div className="group-form-actions">
         <button type="button" className="group-btn group-btn-secondary" onClick={onCancel}>
-          {lang === 'ht' ? 'Anile' : 'Cancel'}
+          {lang === 'ht' ? 'Anile' : inlineText(lang, 'Cancel')}
         </button>
         <button type="submit" className="group-btn group-btn-primary">
-          <i className="fas fa-plus" /> {lang === 'ht' ? 'Kreye' : 'Create'}
+          <i className="fas fa-plus" /> {lang === 'ht' ? 'Kreye' : inlineText(lang, 'Create')}
         </button>
       </div>
     </form>
@@ -237,7 +238,7 @@ function GroupDetail({ group, onBack, onJoin, onLeave, lang, user, showToast }) 
   return (
     <div className="group-detail">
       <button className="group-back-btn" onClick={onBack}>
-        <i className="fas fa-arrow-left" /> {lang === 'ht' ? 'Retounen' : 'Back'}
+        <i className="fas fa-arrow-left" /> {lang === 'ht' ? 'Retounen' : inlineText(lang, 'Back')}
       </button>
 
       <div className="group-detail-header">
@@ -264,16 +265,16 @@ function GroupDetail({ group, onBack, onJoin, onLeave, lang, user, showToast }) 
       <div className="group-detail-actions">
         {group.is_member && (
           <button className="group-btn group-btn-chat" onClick={() => setShowChat(!showChat)}>
-            <i className="fas fa-comments" /> {lang === 'ht' ? 'Chat' : 'Chat'}
+            <i className="fas fa-comments" /> {lang === 'ht' ? 'Chat' : inlineText(lang, 'Chat')}
           </button>
         )}
         {group.is_member ? (
           <button className="group-btn group-btn-secondary" onClick={() => onLeave?.(group)}>
-            {lang === 'ht' ? 'Kite Gwoup sa a' : 'Leave Group'}
+            {lang === 'ht' ? 'Kite Gwoup sa a' : inlineText(lang, 'Leave Group')}
           </button>
         ) : (
           <button className="group-btn group-btn-primary" onClick={() => onJoin?.(group)}>
-            <i className="fas fa-plus" /> {lang === 'ht' ? 'Antre nan Gwoup' : 'Join Group'}
+            <i className="fas fa-plus" /> {lang === 'ht' ? 'Antre nan Gwoup' : inlineText(lang, 'Join Group')}
           </button>
         )}
       </div>
@@ -331,7 +332,7 @@ function GroupDetail({ group, onBack, onJoin, onLeave, lang, user, showToast }) 
       )}
 
       <div className="group-posts-section">
-        <h3>{lang === 'ht' ? 'Pòs' : 'Posts'}</h3>
+        <h3>{lang === 'ht' ? 'Pòs' : inlineText(lang, 'Posts')}</h3>
 
         {loading ? (
           <div
@@ -410,9 +411,9 @@ export default function CommunityGroups({ community, lang = 'en', showToast, use
       });
       setShowForm(false);
       fetchGroups();
-      showToast?.(lang === 'ht' ? 'Gwoup kreye!' : 'Group created!', 'success');
+      showToast?.(lang === 'ht' ? 'Gwoup kreye!' : inlineText(lang, 'Group created!'), 'success');
     } catch (err) {
-      showToast?.(lang === 'ht' ? 'Erè nan kreyasyon' : 'Error creating group', 'error');
+      showToast?.(lang === 'ht' ? 'Erè nan kreyasyon' : inlineText(lang, 'Error creating group'), 'error');
     }
   };
 
@@ -420,9 +421,9 @@ export default function CommunityGroups({ community, lang = 'en', showToast, use
     try {
       await api.post(`/communities/groups/${group.id}/join/`);
       fetchGroups();
-      showToast?.(lang === 'ht' ? 'Ou antre nan gwoup la!' : 'Joined the group!', 'success');
+      showToast?.(lang === 'ht' ? 'Ou antre nan gwoup la!' : inlineText(lang, 'Joined the group!'), 'success');
     } catch (err) {
-      showToast?.(lang === 'ht' ? 'Erè' : 'Error', 'error');
+      showToast?.(lang === 'ht' ? 'Erè' : inlineText(lang, 'Error'), 'error');
     }
   };
 
@@ -430,9 +431,9 @@ export default function CommunityGroups({ community, lang = 'en', showToast, use
     try {
       await api.post(`/communities/groups/${group.id}/leave/`);
       fetchGroups();
-      showToast?.(lang === 'ht' ? 'Ou kite gwoup la' : 'Left the group', 'success');
+      showToast?.(lang === 'ht' ? 'Ou kite gwoup la' : inlineText(lang, 'Left the group'), 'success');
     } catch (err) {
-      showToast?.(lang === 'ht' ? 'Erè' : 'Error', 'error');
+      showToast?.(lang === 'ht' ? 'Erè' : inlineText(lang, 'Error'), 'error');
     }
   };
 
@@ -455,10 +456,10 @@ export default function CommunityGroups({ community, lang = 'en', showToast, use
       <div className="group-header">
         <h2>
           <i className="fas fa-layer-group" />
-          {lang === 'ht' ? 'Gwoup' : 'Groups'}
+          {lang === 'ht' ? 'Gwoup' : inlineText(lang, 'Groups')}
         </h2>
         <button className="group-btn group-btn-primary" onClick={() => setShowForm(!showForm)}>
-          <i className="fas fa-plus" /> {lang === 'ht' ? 'Kreye Gwoup' : 'Create Group'}
+          <i className="fas fa-plus" /> {lang === 'ht' ? 'Kreye Gwoup' : inlineText(lang, 'Create Group')}
         </button>
       </div>
 
@@ -473,14 +474,14 @@ export default function CommunityGroups({ community, lang = 'en', showToast, use
       {loading ? (
         <div className="group-loading">
           <i className="fas fa-spinner fa-spin" />
-          <span>{lang === 'ht' ? 'Ap chaje...' : 'Loading...'}</span>
+          <span>{lang === 'ht' ? 'Ap chaje...' : inlineText(lang, 'Loading...')}</span>
         </div>
       ) : groups.length === 0 ? (
         <div className="group-empty">
           <i className="fas fa-layer-group" />
-          <p>{lang === 'ht' ? 'Pa gen gwoup ankò' : 'No groups yet'}</p>
+          <p>{lang === 'ht' ? 'Pa gen gwoup ankò' : inlineText(lang, 'No groups yet')}</p>
           <button className="group-btn group-btn-primary" onClick={() => setShowForm(true)}>
-            {lang === 'ht' ? 'Kreye premye gwoup la' : 'Create the first group'}
+            {lang === 'ht' ? 'Kreye premye gwoup la' : inlineText(lang, 'Create the first group')}
           </button>
         </div>
       ) : (

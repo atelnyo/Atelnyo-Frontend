@@ -12,14 +12,15 @@
  */
 import React from 'react';
 import QuestionBase from './QuestionBase';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function TrueFalseBlock({ block, lang = 'en', reportComplete }) {
   const content = block.content || block;
   const isTrueCorrect = content.correct === true;
 
   const options = [
-    { id: 'true', text: lang === 'ht' ? 'Vrè' : 'True' },
-    { id: 'false', text: lang === 'ht' ? 'Fo' : 'False' },
+    { id: 'true', text: lang === 'ht' ? 'Vrè' : inlineText(lang, 'True') },
+    { id: 'false', text: lang === 'ht' ? 'Fo' : inlineText(lang, 'False') },
   ];
 
   return (
@@ -30,8 +31,8 @@ export default function TrueFalseBlock({ block, lang = 'en', reportComplete }) {
       correctIds={[isTrueCorrect ? 'true' : 'false']}
       multiple={false}
       feedback={{
-        correct: lang === 'ht' ? 'Egzakteman!' : 'Exactly!',
-        incorrect: lang === 'ht' ? 'Sa pa vre. Sonje byen.' : 'Not true. Think carefully.',
+        correct: lang === 'ht' ? 'Egzakteman!' : inlineText(lang, 'Exactly!'),
+        incorrect: lang === 'ht' ? 'Sa pa vre. Sonje byen.' : inlineText(lang, 'Not true. Think carefully.'),
         explanation: content.explanation,
       }}
       required={content.required !== false}

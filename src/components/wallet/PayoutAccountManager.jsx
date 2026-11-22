@@ -12,6 +12,7 @@
  */
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { walletService } from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 const PAYPAL_ICON = 'fa-paypal';
 
@@ -47,7 +48,7 @@ export default function PayoutAccountManager({
         // Refresh accounts list by triggering onAdd (which re-fetches)
         onAdd?.({ _refresh: true, method: 'paypal', paypal_email: data.message });
       } else {
-        setConnectError(data.message || (isHt ? 'Erè konekte PayPal' : 'PayPal connection failed'));
+        setConnectError(data.message || (isHt ? 'Erè konekte PayPal' : inlineText(lang, 'PayPal connection failed')));
       }
     }
   }, [onAdd, isHt]);
@@ -77,7 +78,7 @@ export default function PayoutAccountManager({
         setConnecting(false);
         setConnectError(isHt
           ? 'Pa resevwa lyen otorizasyon PayPal.'
-          : 'No PayPal authorization URL received.');
+          : inlineText(lang, 'No PayPal authorization URL received.'));
         return;
       }
       // Open PayPal in a popup (600x700 centered)
@@ -93,7 +94,7 @@ export default function PayoutAccountManager({
       setConnecting(false);
       setConnectError(err?.response?.data?.error || err?.message || (isHt
         ? 'Erè lansman koneksyon PayPal.'
-        : 'Failed to start PayPal connection.'));
+        : inlineText(lang, 'Failed to start PayPal connection.')));
     }
   }, [isHt]);
 
@@ -103,23 +104,23 @@ export default function PayoutAccountManager({
       <div className="wlt-payout-header">
         <h3 className="wlt-payout-title">
           <i className={`fab ${PAYPAL_ICON}`} />
-          {isHt ? 'Kont Peman' : 'Payout Accounts'}
+          {isHt ? 'Kont Peman' : inlineText(lang, 'Payout Accounts')}
         </h3>
       </div>
 
       {/* Loading */}
       {loading && (
-        <div className="wlt-loading"><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap chaje...' : 'Loading...'}</div>
+        <div className="wlt-loading"><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap chaje...' : inlineText(lang, 'Loading...')}</div>
       )}
 
       {/* Empty state */}
       {!loading && accounts.length === 0 && (
         <div className="wlt-empty">
           <i className={`fab ${PAYPAL_ICON}`} style={{ fontSize: '2rem', opacity: 0.5 }} />
-          <h4>{isHt ? 'Pa gen kont peman' : 'No payout accounts'}</h4>
+          <h4>{isHt ? 'Pa gen kont peman' : inlineText(lang, 'No payout accounts')}</h4>
           <p>{isHt
             ? 'Konekte kont PayPal ou pou retire lajan ou.'
-            : 'Connect your PayPal account to withdraw your funds.'}</p>
+            : inlineText(lang, 'Connect your PayPal account to withdraw your funds.')}</p>
         </div>
       )}
 
@@ -133,9 +134,9 @@ export default function PayoutAccountManager({
             disabled={connecting}
           >
             {connecting ? (
-              <><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap konekte...' : 'Connecting...'}</>
+              <><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap konekte...' : inlineText(lang, 'Connecting...')}</>
             ) : (
-              <><i className={`fab ${PAYPAL_ICON}`} /> {isHt ? 'Konekte ak PayPal' : 'Connect with PayPal'}</>
+              <><i className={`fab ${PAYPAL_ICON}`} /> {isHt ? 'Konekte ak PayPal' : inlineText(lang, 'Connect with PayPal')}</>
             )}
           </button>
           {connectError && (
@@ -144,7 +145,7 @@ export default function PayoutAccountManager({
           <p className="wlt-paypal-connect-hint">
             {isHt
               ? 'Ou pral konekte sou paypal.com pou verifye kont ou.'
-              : 'You\'ll authenticate on PayPal.com to verify your account.'}
+              : inlineText(lang, 'You\'ll authenticate on PayPal.com to verify your account.')}
           </p>
         </div>
       )}
@@ -157,9 +158,9 @@ export default function PayoutAccountManager({
           </div>
           <div className="wlt-payout-body">
             <div className="wlt-payout-label">
-              {account.label || account.paypal_email || (isHt ? 'Kont' : 'Account')}
+              {account.label || account.paypal_email || (isHt ? 'Kont' : inlineText(lang, 'Account'))}
               {account.is_default && (
-                <span className="wlt-payout-default-badge">{isHt ? 'Defo' : 'Default'}</span>
+                <span className="wlt-payout-default-badge">{isHt ? 'Defo' : inlineText(lang, 'Default')}</span>
               )}
             </div>
             <div className="wlt-payout-method">
@@ -168,24 +169,24 @@ export default function PayoutAccountManager({
           </div>
           <div className="wlt-payout-actions">
             {!account.is_default && (
-              <button type="button" className="wlt-payout-icon-btn" onClick={() => onSetDefault?.(account.id)} title={isHt ? 'Defo' : 'Set default'}>
+              <button type="button" className="wlt-payout-icon-btn" onClick={() => onSetDefault?.(account.id)} title={isHt ? 'Defo' : inlineText(lang, 'Set default')}>
                 <i className="fas fa-star" />
               </button>
             )}
-            <button type="button" className="wlt-payout-icon-btn wlt-payout-icon-danger" onClick={() => setDeleteConfirm(account.id)} title={isHt ? 'Efase' : 'Delete'}>
+            <button type="button" className="wlt-payout-icon-btn wlt-payout-icon-danger" onClick={() => setDeleteConfirm(account.id)} title={isHt ? 'Efase' : inlineText(lang, 'Delete')}>
               <i className="fas fa-trash" />
             </button>
           </div>
           {/* Delete confirmation */}
           {deleteConfirm === account.id && (
             <div className="wlt-payout-delete-confirm" onClick={(e) => e.stopPropagation()}>
-              <span className="wlt-payout-delete-text">{isHt ? 'Sijè ou efase kont sa a?' : 'Delete this account?'}</span>
+              <span className="wlt-payout-delete-text">{isHt ? 'Sijè ou efase kont sa a?' : inlineText(lang, 'Delete this account?')}</span>
               <div className="wlt-payout-delete-btns">
                 <button type="button" className="wlt-payout-delete-yes" onClick={() => { onDelete?.(account.id); setDeleteConfirm(null); }}>
-                  {isHt ? 'Wi' : 'Yes'}
+                  {isHt ? 'Wi' : inlineText(lang, 'Yes')}
                 </button>
                 <button type="button" className="wlt-payout-delete-no" onClick={() => setDeleteConfirm(null)}>
-                  {isHt ? 'Non' : 'No'}
+                  {isHt ? 'Non' : inlineText(lang, 'No')}
                 </button>
               </div>
             </div>

@@ -17,6 +17,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 // Authorization header the interceptor attaches. Raw fetch() without
 // the token made the whole dashboard 401 and render empty panels.
 import api, { API_URL } from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ═══════════════════════════════════════════════════════════════════
 
@@ -78,18 +79,18 @@ export default function SecurityDashboard({ lang = 'en' }) {
   };
 
   const T = {
-    title: isHt ? 'Sekirite' : 'Security',
-    alerts: isHt ? 'Alèt' : 'Alerts',
-    logins: isHt ? 'Koneksyon' : 'Logins',
-    rateLimit: isHt ? 'Limit Pousantaj' : 'Rate Limits',
-    banned: isHt ? 'IP Bloke' : 'Banned IPs',
-    resolve: isHt ? 'Rezoud' : 'Resolve',
-    ban: isHt ? 'Bloke' : 'Ban',
-    unban: isHt ? 'Debloke' : 'Unban',
-    noAlerts: isHt ? 'Okenn alèt sekirite aktif.' : 'No active security alerts.',
-    total: isHt ? 'Total' : 'Total',
-    failures: isHt ? 'Echèk' : 'Failures',
-    success: isHt ? 'Siksè' : 'Success',
+    title: isHt ? 'Sekirite' : inlineText(lang, 'Security'),
+    alerts: isHt ? 'Alèt' : inlineText(lang, 'Alerts'),
+    logins: isHt ? 'Koneksyon' : inlineText(lang, 'Logins'),
+    rateLimit: isHt ? 'Limit Pousantaj' : inlineText(lang, 'Rate Limits'),
+    banned: isHt ? 'IP Bloke' : inlineText(lang, 'Banned IPs'),
+    resolve: isHt ? 'Rezoud' : inlineText(lang, 'Resolve'),
+    ban: isHt ? 'Bloke' : inlineText(lang, 'Ban'),
+    unban: isHt ? 'Debloke' : inlineText(lang, 'Unban'),
+    noAlerts: isHt ? 'Okenn alèt sekirite aktif.' : inlineText(lang, 'No active security alerts.'),
+    total: isHt ? 'Total' : inlineText(lang, 'Total'),
+    failures: isHt ? 'Echèk' : inlineText(lang, 'Failures'),
+    success: isHt ? 'Siksè' : inlineText(lang, 'Success'),
   };
 
   if (loading) {
@@ -107,7 +108,7 @@ export default function SecurityDashboard({ lang = 'en' }) {
       <div className="security-dash-header">
         <h2><i className="fas fa-shield-haltered" /> {T.title}</h2>
         <button type="button" className="perm-btn perm-btn--small" onClick={refresh}>
-          <i className="fas fa-sync-alt" /> {isHt ? 'Rafrechi' : 'Refresh'}
+          <i className="fas fa-sync-alt" /> {isHt ? 'Rafrechi' : inlineText(lang, 'Refresh')}
         </button>
       </div>
 
@@ -164,7 +165,7 @@ export default function SecurityDashboard({ lang = 'en' }) {
               <div className="diag-card"><div className="diag-card-label">{T.success}</div><div className="diag-card-value" style={{ color: 'var(--color-success, #2ecc71)' }}>{loginStats.success || '—'}</div></div>
               <div className="diag-card"><div className="diag-card-label">{T.failures}</div><div className="diag-card-value" style={{ color: 'var(--color-error, #e74c3c)' }}>{loginStats.failures || '—'}</div></div>
             </div>
-          ) : <p className="perm-card-why">{isHt ? 'Pa ka chaje estatistik koneksyon.' : 'Cannot load login statistics.'}</p>}
+          ) : <p className="perm-card-why">{isHt ? 'Pa ka chaje estatistik koneksyon.' : inlineText(lang, 'Cannot load login statistics.')}</p>}
         </div>
       )}
 
@@ -181,7 +182,7 @@ export default function SecurityDashboard({ lang = 'en' }) {
                 </div>
               ))}
             </div>
-          ) : <p className="perm-card-why">{isHt ? 'Okenn limit pousantaj depase.' : 'No rate limits exceeded.'}</p>}
+          ) : <p className="perm-card-why">{isHt ? 'Okenn limit pousantaj depase.' : inlineText(lang, 'No rate limits exceeded.')}</p>}
         </div>
       )}
 
@@ -201,7 +202,7 @@ export default function SecurityDashboard({ lang = 'en' }) {
                 </div>
               ))}
             </div>
-          ) : <p className="perm-card-why">{isHt ? 'Okenn IP bloke.' : 'No banned IPs.'}</p>}
+          ) : <p className="perm-card-why">{isHt ? 'Okenn IP bloke.' : inlineText(lang, 'No banned IPs.')}</p>}
         </div>
       )}
     </div>

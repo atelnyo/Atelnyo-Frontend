@@ -11,6 +11,7 @@
  * Never claims "Saved" when only local persistence occurred.
  */
 import React from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 const STATES = {
   idle: { icon: '', text: { en: '', ht: '' }, color: 'transparent' },
@@ -93,16 +94,16 @@ export default function SaveStateIndicator({
       <span>{text}</span>
       {pendingCount > 0 && state !== 'saving' && state !== 'syncing' && (
         <span style={{ fontSize: '11px', opacity: 0.7 }}>
-          ({pendingCount} {lang === 'ht' ? 'k ap tann' : 'pending'})
+          ({pendingCount} {lang === 'ht' ? 'k ap tann' : inlineText(lang, 'pending')})
         </span>
       )}
       {state === 'failed' && onRetry && (
         <button
           onClick={onRetry}
           style={STYLES.retryBtn}
-          aria-label={lang === 'ht' ? 'Eseye ankò' : 'Retry save'}
+          aria-label={lang === 'ht' ? 'Eseye ankò' : inlineText(lang, 'Retry save')}
         >
-          {lang === 'ht' ? 'Eseye ankò' : 'Retry'}
+          {lang === 'ht' ? 'Eseye ankò' : inlineText(lang, 'Retry')}
         </button>
       )}
     </div>

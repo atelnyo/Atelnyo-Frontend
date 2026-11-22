@@ -1,3 +1,4 @@
+import { inlineText } from './inlineI18n';
 /**
  * langBackendStub.js — Tiny i18n helper for Creator Experience surfaces.
  *
@@ -77,7 +78,7 @@ const STRINGS = {
 export function t(lang = 'en', key, vars = {}) {
   const entry = STRINGS[key];
   if (!entry) return key;
-  const raw = entry[lang === 'ht' ? 'ht' : 'en'] || entry.en || key;
+  const raw = entry[lang === 'ht' ? 'ht' : inlineText(lang, 'en')] || entry.en || key;
   return raw.replace(/\{(\w+)\}/g, (_, k) => (vars[k] != null ? String(vars[k]) : `{${k}}`));
 }
 

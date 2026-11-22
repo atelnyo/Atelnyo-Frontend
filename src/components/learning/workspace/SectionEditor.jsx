@@ -13,12 +13,14 @@
  */
 import React, { useCallback, useState } from 'react';
 import FieldRenderer from './FieldRenderer';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function SectionEditor({
   section,
   onSave,
   onComplete,
   isHt,
+  lang = 'en',
   isSectionCompleted,
 }) {
   const [completionAttempted, setCompletionAttempted] = useState(false);
@@ -53,7 +55,7 @@ export default function SectionEditor({
         {requiredFields.length > 0 && (
           <div className="pw-section-progress">
             <span className="pw-field-count">
-              {filledRequired}/{requiredFields.length} {isHt ? 'chanp obligatwa ranpli' : 'required fields filled'}
+              {filledRequired}/{requiredFields.length} {isHt ? 'chanp obligatwa ranpli' : inlineText(lang, 'required fields filled')}
             </span>
           </div>
         )}
@@ -66,7 +68,7 @@ export default function SectionEditor({
           <span>
             {isHt
               ? 'Leson ki gen rapò: '
-              : 'Related lessons: '}
+              : inlineText(lang, 'Related lessons: ')}
             {section.related_lessons.join(', ')}
           </span>
         </div>
@@ -84,6 +86,7 @@ export default function SectionEditor({
                 onSave(field.id, valueText, valueNumber, valueDate, valueJson)
               }
               isHt={isHt}
+              lang={lang}
             />
           ))}
       </div>
@@ -94,7 +97,7 @@ export default function SectionEditor({
           {isSectionCompleted ? (
             <div className="pw-section-complete">
               <i className="fas fa-check-circle" aria-hidden="true" />
-              {isHt ? ' Seksyon fini' : ' Section complete'}
+              {isHt ? ' Seksyon fini' : inlineText(lang, ' Section complete')}
             </div>
           ) : (
             <button
@@ -102,11 +105,11 @@ export default function SectionEditor({
               onClick={handleComplete}
               disabled={!allRequiredFilled}
               title={!allRequiredFilled
-                ? (isHt ? 'Tanpri ranpli tout chanp obligatwa' : 'Please fill all required fields')
+                ? (isHt ? 'Tanpri ranpli tout chanp obligatwa' : inlineText(lang, 'Please fill all required fields'))
                 : undefined}
             >
               <i className="fas fa-check" aria-hidden="true" />
-              {isHt ? 'Mwen fini seksyon sa a' : 'Mark section complete'}
+              {isHt ? 'Mwen fini seksyon sa a' : inlineText(lang, 'Mark section complete')}
             </button>
           )}
           {completionAttempted && !allRequiredFilled && (

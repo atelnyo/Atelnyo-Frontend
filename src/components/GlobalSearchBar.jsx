@@ -24,6 +24,7 @@
  */
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import api from '../services/api';
+import { inlineText } from '../utils/inlineI18n';
 
 // Debounce helper
 function useDebounce(value, delay = 200) {
@@ -103,18 +104,18 @@ const GlobalSearchBar = ({
 
   // Translations
   const t = {
-    search_placeholder: lang === 'ht' ? 'Chèche kou, kreyatè, mizik...' : 'Search courses, creators, music...',
-    recent: lang === 'ht' ? 'Rechèch Resan' : 'Recent Searches',
-    trending: lang === 'ht' ? 'Tandans' : 'Trending',
-    suggestions: lang === 'ht' ? 'Sijesyon' : 'Suggestions',
-    clear_all: lang === 'ht' ? 'Efase Tout' : 'Clear All',
-    no_results: lang === 'ht' ? 'Pa gen rezilta' : 'No results found',
-    try_different: lang === 'ht' ? 'Eseye yon lòt tèm' : 'Try a different search term',
-    view_all: lang === 'ht' ? 'Wè Tout' : 'View All',
-    search: lang === 'ht' ? 'Chèche' : 'Search',
-    close: lang === 'ht' ? 'Fèmen' : 'Close',
-    filters: lang === 'ht' ? 'Filtè' : 'Filters',
-    all: lang === 'ht' ? 'Tout' : 'All',
+    search_placeholder: lang === 'ht' ? 'Chèche kou, kreyatè, mizik...' : inlineText(lang, 'Search courses, creators, music...'),
+    recent: lang === 'ht' ? 'Rechèch Resan' : inlineText(lang, 'Recent Searches'),
+    trending: lang === 'ht' ? 'Tandans' : inlineText(lang, 'Trending'),
+    suggestions: lang === 'ht' ? 'Sijesyon' : inlineText(lang, 'Suggestions'),
+    clear_all: lang === 'ht' ? 'Efase Tout' : inlineText(lang, 'Clear All'),
+    no_results: lang === 'ht' ? 'Pa gen rezilta' : inlineText(lang, 'No results found'),
+    try_different: lang === 'ht' ? 'Eseye yon lòt tèm' : inlineText(lang, 'Try a different search term'),
+    view_all: lang === 'ht' ? 'Wè Tout' : inlineText(lang, 'View All'),
+    search: lang === 'ht' ? 'Chèche' : inlineText(lang, 'Search'),
+    close: lang === 'ht' ? 'Fèmen' : inlineText(lang, 'Close'),
+    filters: lang === 'ht' ? 'Filtè' : inlineText(lang, 'Filters'),
+    all: lang === 'ht' ? 'Tout' : inlineText(lang, 'All'),
   };
 
   // Focus input when opened

@@ -16,6 +16,7 @@ import CourseAnalyticsModal from './CourseAnalyticsModal';
 import CurriculumAnalyticsModal from './CurriculumAnalyticsModal';
 import CourseExportImportModal from './CourseExportImportModal';
 import styles from './sections.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 // Course has six lifecycle states. Labelling everything that is not
 // "draft" as "Published" made review/building/archived courses look
@@ -55,17 +56,17 @@ export default function CoursesSection({ lang, t, showToast, setShowCourseModal,
     if (!confirmed) return;
     try {
       await courseService.delete(item.id);
-      showToast?.(lang === 'ht' ? '✅ Kou efase!' : '✅ Course deleted!', 'check-circle');
+      showToast?.(lang === 'ht' ? '✅ Kou efase!' : inlineText(lang, '✅ Course deleted!'), 'check-circle');
       refetch();
     } catch (err) {
-      showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase.' : 'Could not delete.'), 'circle-exclamation');
+      showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase.' : inlineText(lang, 'Could not delete.')), 'circle-exclamation');
     }
   };
 
   const handleDeleteClick = (item) => {
     setConfirm({
       item,
-      title: lang === 'ht' ? 'Efase kou' : 'Delete course',
+      title: lang === 'ht' ? 'Efase kou' : inlineText(lang, 'Delete course'),
       message: lang === 'ht' ? `Eske w sèten ou vle efase "${item.title}"?` : `Are you sure you want to delete "${item.title}"?`,
       onConfirm: () => {
         // Optimistic + non-blocking: the row vanishes instantly AND the
@@ -79,9 +80,9 @@ export default function CoursesSection({ lang, t, showToast, setShowCourseModal,
         (async () => {
           try {
             await courseService.delete(item.id);
-            showToast?.(lang === 'ht' ? '✅ Kou efase!' : '✅ Course deleted!', 'check-circle');
+            showToast?.(lang === 'ht' ? '✅ Kou efase!' : inlineText(lang, '✅ Course deleted!'), 'check-circle');
           } catch (err) {
-            showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase.' : 'Could not delete.'), 'circle-exclamation');
+            showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase.' : inlineText(lang, 'Could not delete.')), 'circle-exclamation');
           }
           refetch();
         })();
@@ -99,17 +100,17 @@ export default function CoursesSection({ lang, t, showToast, setShowCourseModal,
     try {
       const res = await courseService.publish(item.id);
       if (res?.data?.status === 'published') {
-        showToast?.(lang === 'ht' ? '🚀 Kou pibliye! Vizitè yo ka wè l kounye a.' : '🚀 Course published! Visitors can see it now.', 'check-circle');
+        showToast?.(lang === 'ht' ? '🚀 Kou pibliye! Vizitè yo ka wè l kounye a.' : inlineText(lang, '🚀 Course published! Visitors can see it now.'), 'check-circle');
         refetch();
       }
     } catch (err) {
       const gate = err?.response?.data?.errors;
       if (gate) {
         const map = {
-          title: lang === 'ht' ? 'Ajoute yon tit' : 'Add a title',
-          description: lang === 'ht' ? 'Deskripsyon an dwe gen 20+ karaktè' : 'Description must be 20+ characters',
-          image_url: lang === 'ht' ? 'Ajoute yon imaj kouvèti' : 'Add a cover image',
-          external_url: lang === 'ht' ? 'Ajoute URL kou ekstèn lan' : 'Add the external course URL',
+          title: lang === 'ht' ? 'Ajoute yon tit' : inlineText(lang, 'Add a title'),
+          description: lang === 'ht' ? 'Deskripsyon an dwe gen 20+ karaktè' : inlineText(lang, 'Description must be 20+ characters'),
+          image_url: lang === 'ht' ? 'Ajoute yon imaj kouvèti' : inlineText(lang, 'Add a cover image'),
+          external_url: lang === 'ht' ? 'Ajoute URL kou ekstèn lan' : inlineText(lang, 'Add the external course URL'),
         };
         const missing = Object.keys(gate).map((k) => map[k] || gate[k]).join(' · ');
         showToast?.(
@@ -117,7 +118,7 @@ export default function CoursesSection({ lang, t, showToast, setShowCourseModal,
           'circle-exclamation',
         );
       } else {
-        showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab pibliye.' : 'Could not publish.'), 'circle-exclamation');
+        showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab pibliye.' : inlineText(lang, 'Could not publish.')), 'circle-exclamation');
       }
     } finally {
       setPublishingId(null);
@@ -143,7 +144,7 @@ export default function CoursesSection({ lang, t, showToast, setShowCourseModal,
         }}
         tip={lang === 'ht'
           ? 'Kou yo parèt nan Explore epi sou pwofil piblik ou.'
-          : 'Courses appear in Explore and on your public profile.'}
+          : inlineText(lang, 'Courses appear in Explore and on your public profile.')}
         action={
           <button
             type="button"
@@ -159,7 +160,7 @@ export default function CoursesSection({ lang, t, showToast, setShowCourseModal,
         <div className={styles.printifyCard} role="alert">
           <p className={styles.printifyError}>
             <i className="fas fa-triangle-exclamation" aria-hidden="true" />{' '}
-            {lang === 'ht' ? 'Pa t kapab chaje kou ou yo.' : 'Could not load your courses.'}
+            {lang === 'ht' ? 'Pa t kapab chaje kou ou yo.' : inlineText(lang, 'Could not load your courses.')}
           </p>
           <p className={styles.printifyText}>
             {error?.response?.data?.detail || error?.message || ''}
@@ -167,7 +168,7 @@ export default function CoursesSection({ lang, t, showToast, setShowCourseModal,
           <div className={styles.printifyRow}>
             <button type="button" className={styles.secondaryBtn} onClick={refetch}>
               <i className="fas fa-rotate" aria-hidden="true" />{' '}
-              {lang === 'ht' ? 'Eseye ankò' : 'Retry'}
+              {lang === 'ht' ? 'Eseye ankò' : inlineText(lang, 'Retry')}
             </button>
           </div>
         </div>
@@ -177,7 +178,7 @@ export default function CoursesSection({ lang, t, showToast, setShowCourseModal,
           title={t.studio_no_courses || 'No courses yet'}
           hint={lang === 'ht'
             ? 'Kou ou kreye yo parèt isit la, bouyon yo gen ladan yo. Explore sèlman montre kou pibliye.'
-            : 'Courses you create appear here, including drafts. Explore only shows published courses.'}
+            : inlineText(lang, 'Courses you create appear here, including drafts. Explore only shows published courses.')}
           ctaLabel={t.studio_create_first || 'Create First Course'}
           onCta={() => setShowCourseModal(true)}
         />
@@ -199,19 +200,19 @@ export default function CoursesSection({ lang, t, showToast, setShowCourseModal,
                   {course.delivery_type === 'external' && (
                     <span className={`${styles.badge} ${styles.badgeExternal}`} style={{ marginLeft: 8 }}>
                       <i className="fas fa-globe" aria-hidden="true" />
-                      {lang === 'ht' ? 'Ekstèn' : 'External'}
+                      {lang === 'ht' ? 'Ekstèn' : inlineText(lang, 'External')}
                     </span>
                   )}
                 </div>
                 <div className={styles.listMeta}>
                   <span className={`${styles.badge} ${course.status === 'published' ? styles.badgePublished : styles.badgeDraft}`}>
                     <i className={`fas ${courseStatus(course.status, lang).icon}`} aria-hidden="true" />{' '}
-                    {courseStatus(course.status, lang)[lang === 'ht' ? 'ht' : 'en']}
+                    {courseStatus(course.status, lang)[lang === 'ht' ? 'ht' : inlineText(lang, 'en')]}
                   </span>
                   <span>${course.price || 0}</span>
                   {course.enrollment_count > 0 && (
                     <span>
-                      · <i className="fas fa-user-graduate" aria-hidden="true" /> {fmtCount(course.enrollment_count)} {lang === 'ht' ? 'elèv' : 'students'}
+                      · <i className="fas fa-user-graduate" aria-hidden="true" /> {fmtCount(course.enrollment_count)} {lang === 'ht' ? 'elèv' : inlineText(lang, 'students')}
                     </span>
                   )}
                 </div>
@@ -236,22 +237,22 @@ export default function CoursesSection({ lang, t, showToast, setShowCourseModal,
                 <a
                   className={styles.statsBtn}
                   href={`/sheet/course/${course.id}`}
-                  title={lang === 'ht' ? 'Aperçu kou a' : 'Preview course'}
-                  aria-label={lang === 'ht' ? 'Aperçu kou a' : 'Preview course'}
+                  title={lang === 'ht' ? 'Aperçu kou a' : inlineText(lang, 'Preview course')}
+                  aria-label={lang === 'ht' ? 'Aperçu kou a' : inlineText(lang, 'Preview course')}
                   style={{ textDecoration: 'none' }}
                 >
                   <i className="fas fa-eye" aria-hidden="true" />
                 </a>
                 <button type="button" className={styles.statsBtn} onClick={() => setAnalyticsCourse(course)}
-                  title={lang === 'ht' ? 'Analitik ak elèv' : 'Analytics & students'}>
+                  title={lang === 'ht' ? 'Analitik ak elèv' : inlineText(lang, 'Analytics & students')}>
                   <i className="fas fa-chart-line" aria-hidden="true" />
                 </button>
                 <button type="button" className={styles.statsBtn} onClick={() => setCurriculumAnalyticsCourse(course)}
-                  title={lang === 'ht' ? 'Analitik kurikilom' : 'Curriculum analytics'}>
+                  title={lang === 'ht' ? 'Analitik kurikilom' : inlineText(lang, 'Curriculum analytics')}>
                   <i className="fas fa-sitemap" aria-hidden="true" />
                 </button>
                 <button type="button" className={styles.statsBtn} onClick={() => setExportImportCourse(course)}
-                  title={lang === 'ht' ? 'Ekspòt/Enpòt' : 'Export/Import'}>
+                  title={lang === 'ht' ? 'Ekspòt/Enpòt' : inlineText(lang, 'Export/Import')}>
                   <i className="fas fa-exchange-alt" aria-hidden="true" />
                 </button>
                 {course.status === 'draft' && (
@@ -260,17 +261,17 @@ export default function CoursesSection({ lang, t, showToast, setShowCourseModal,
                     className={styles.publishBtn}
                     onClick={() => handlePublish(course)}
                     disabled={publishingId === course.id}
-                    title={lang === 'ht' ? 'Pibliye kou a' : 'Publish course'}
+                    title={lang === 'ht' ? 'Pibliye kou a' : inlineText(lang, 'Publish course')}
                   >
                     <i className="fas fa-rocket" aria-hidden="true" />
                   </button>
                 )}
                 <button type="button" className={styles.editBtn} onClick={() => onEdit?.(course)}
-                  title={lang === 'ht' ? 'Modifye' : 'Edit'}>
+                  title={lang === 'ht' ? 'Modifye' : inlineText(lang, 'Edit')}>
                   <i className="fas fa-pen" aria-hidden="true" />
                 </button>
                 <button type="button" className={styles.deleteBtn} onClick={() => handleDeleteClick(course)}
-                  title={lang === 'ht' ? 'Efase' : 'Delete'}>
+                  title={lang === 'ht' ? 'Efase' : inlineText(lang, 'Delete')}>
                   <i className="fas fa-trash-can" aria-hidden="true" />
                 </button>
               </div>

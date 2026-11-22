@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { rewardedAdService } from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
-function messageFor(reason, isHt) {
+function messageFor(reason, isHt, lang = 'en') {
   if (reason === 'daily_limit') {
     return isHt
       ? 'Ou rive nan limit 3 reklam pou jodi a. Tann kè yo rejenerasyon.'
-      : 'You reached today’s limit of 3 ads. Wait for hearts to regenerate.';
+      : inlineText(lang, 'You reached today’s limit of 3 ads. Wait for hearts to regenerate.');
   }
   if (reason === 'no_ads') {
-    return isHt ? 'Pa gen videyo pwomosyon disponib kounye a.' : 'No promotional videos are available right now.';
+    return isHt ? 'Pa gen videyo pwomosyon disponib kounye a.' : inlineText(lang, 'No promotional videos are available right now.');
   }
   return '';
 }
@@ -29,7 +30,7 @@ export default function RewardedHeartOffer({ lang = 'en', hearts, heartsUnlimite
     rewardedAdService.next()
       .then((res) => { if (active) setOffer(res?.data || null); })
       .catch(() => {
-        if (active) setError(isHt ? 'Pa t kapab chaje videyo a. Eseye ankò.' : 'Could not load a video. Please try again.');
+        if (active) setError(isHt ? 'Pa t kapab chaje videyo a. Eseye ankò.' : inlineText(lang, 'Could not load a video. Please try again.'));
       })
       .finally(() => { if (active) setChecking(false); });
     return () => { active = false; };
@@ -46,8 +47,8 @@ export default function RewardedHeartOffer({ lang = 'en', hearts, heartsUnlimite
     } catch (e) {
       const reason = e?.response?.data?.detail;
       setError(reason === 'daily_limit_reached'
-        ? messageFor('daily_limit', isHt)
-        : (isHt ? 'Pa t kapab kòmanse videyo a. Eseye ankò.' : 'Could not start the video. Please try again.'));
+        ? messageFor('daily_limit', isHt, lang)
+        : (isHt ? 'Pa t kapab kòmanse videyo a. Eseye ankò.' : inlineText(lang, 'Could not start the video. Please try again.')));
     } finally {
       setBusy(false);
     }
@@ -63,13 +64,13 @@ export default function RewardedHeartOffer({ lang = 'en', hearts, heartsUnlimite
       if (data.gamification) onGamification?.(data.gamification);
       setWatch(null);
       setMessage(data.awarded
-        ? (isHt ? 'Ou jwenn 1 kè!' : 'You earned 1 heart!')
-        : (isHt ? 'Kè a te deja ajoute.' : 'The heart was already added.'));
+        ? (isHt ? 'Ou jwenn 1 kè!' : inlineText(lang, 'You earned 1 heart!'))
+        : (isHt ? 'Kè a te deja ajoute.' : inlineText(lang, 'The heart was already added.')));
     } catch (e) {
       const reason = e?.response?.data?.detail;
       setError(reason === 'ad_not_watched'
-        ? (isHt ? 'Gade videyo a nèt anvan ou reklame kè a.' : 'Watch the full video before claiming the heart.')
-        : (isHt ? 'Pa t kapab valide videyo a. Eseye ankò.' : 'Could not verify the video. Please try again.'));
+        ? (isHt ? 'Gade videyo a nèt anvan ou reklame kè a.' : inlineText(lang, 'Watch the full video before claiming the heart.'))
+        : (isHt ? 'Pa t kapab valide videyo a. Eseye ankò.' : inlineText(lang, 'Could not verify the video. Please try again.')));
     } finally {
       setBusy(false);
     }
@@ -82,13 +83,13 @@ export default function RewardedHeartOffer({ lang = 'en', hearts, heartsUnlimite
       {offer?.available ? (
         <button type="button" className="gami-refill-btn" onClick={start} disabled={busy || checking}>
           <i className={`fas ${busy ? 'fa-spinner fa-spin' : 'fa-circle-play'}`} aria-hidden="true" />
-          {isHt ? 'Gade videyo a pou 1 kè' : 'Watch video for 1 heart'}
+          {isHt ? 'Gade videyo a pou 1 kè' : inlineText(lang, 'Watch video for 1 heart')}
         </button>
       ) : (
         <span className="gami-rewarded-ad-info" role="status">
           {checking
-            ? (isHt ? 'Ap chèche videyo…' : 'Checking for a video…')
-            : messageFor(offer?.reason, isHt)}
+            ? (isHt ? 'Ap chèche videyo…' : inlineText(lang, 'Checking for a video…'))
+            : messageFor(offer?.reason, isHt, lang)}
         </span>
       )}
       {message && <span className="gami-rewarded-ad-success" role="status">{message}</span>}
@@ -97,7 +98,7 @@ export default function RewardedHeartOffer({ lang = 'en', hearts, heartsUnlimite
         <div className="gami-ad-backdrop">
           <section className="gami-ad-dialog" role="dialog" aria-modal="true" aria-labelledby="gami-ad-title">
             <h3 id="gami-ad-title">{watch.promotion.title}</h3>
-            <p>{isHt ? 'Gade videyo a nèt pou jwenn 1 kè.' : 'Watch the full video to earn 1 heart.'}</p>
+            <p>{isHt ? 'Gade videyo a nèt pou jwenn 1 kè.' : inlineText(lang, 'Watch the full video to earn 1 heart.')}</p>
             <video
               src={watch.promotion.video_url}
               autoPlay
@@ -105,16 +106,16 @@ export default function RewardedHeartOffer({ lang = 'en', hearts, heartsUnlimite
               controls
               preload="auto"
               onEnded={complete}
-              onError={() => setError(isHt ? 'Videyo a pa t kapab jwe.' : 'The video could not be played.')}
+              onError={() => setError(isHt ? 'Videyo a pa t kapab jwe.' : inlineText(lang, 'The video could not be played.'))}
             />
             {watch.promotion.destination_url && (
               <a href={watch.promotion.destination_url} target="_blank" rel="noreferrer">
-                {isHt ? 'Aprann plis' : 'Learn more'}
+                {isHt ? 'Aprann plis' : inlineText(lang, 'Learn more')}
               </a>
             )}
             {error && <p role="alert" className="gami-hearts-error">{error}</p>}
             <button type="button" className="gami-ad-close" onClick={() => setWatch(null)} disabled={busy}>
-              {isHt ? 'Fèmen' : 'Close'}
+              {isHt ? 'Fèmen' : inlineText(lang, 'Close')}
             </button>
           </section>
         </div>

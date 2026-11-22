@@ -107,6 +107,7 @@
  * ``<form data-testid="spotlightreply-form">``.
  */
 import React from 'react';
+import { inlineText } from '../utils/inlineI18n';
 
 /**
  * Derive the urgency level + matched CSS class for a given
@@ -283,7 +284,7 @@ function resolveSenderLabel(msg, t, lang, user) {
   }
   // Fallback for unexpected sender_role values — show a
   // neutral label.
-  return t?.settings_spotlight_sender_unknown || (lang === 'ht' ? 'Endiskitab' : 'Unknown');
+  return t?.settings_spotlight_sender_unknown || (lang === 'ht' ? 'Endiskitab' : inlineText(lang, 'Unknown'));
 }
 
 /**
@@ -388,7 +389,7 @@ export function SpotlightThread({
           type="button"
           className="spotlight-thread-back-btn"
           onClick={onBack}
-          aria-label={t?.common_close || (lang === 'ht' ? 'Fèmen fil la' : 'Close thread')}
+          aria-label={t?.common_close || (lang === 'ht' ? 'Fèmen fil la' : inlineText(lang, 'Close thread'))}
           data-testid="spotlight-thread-back-btn"
         >
           <i className="fas fa-times" aria-hidden="true" />
@@ -537,7 +538,7 @@ export function SpotlightThread({
           type="submit"
           className="btn-primary"
           disabled={replySubmitting || !String(replyBody || '').trim()}
-          aria-label={t?.common_send || (lang === 'ht' ? 'Voye repons' : 'Send reply')}
+          aria-label={t?.common_send || (lang === 'ht' ? 'Voye repons' : inlineText(lang, 'Send reply'))}
           data-testid="spotlight-reply-send-btn"
         >
           {replySubmitting

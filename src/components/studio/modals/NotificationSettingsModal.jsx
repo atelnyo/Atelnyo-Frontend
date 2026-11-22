@@ -10,6 +10,7 @@ import api from '../../../services/api';
 import { ensureBrowserNotificationPermission } from '../../../services/notificationPermission';
 import { StudioModal, LoadingOverlay } from './shared';
 import styles from './modals.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function NotificationSettingsModal({ onClose, onSuccess, lang, showToast }) {
   const [prefs, setPrefs] = useState({
@@ -32,7 +33,7 @@ export default function NotificationSettingsModal({ onClose, onSuccess, lang, sh
           if (!granted) {
             showToast?.(
               lang === 'ht' ? '❌ Navigatè a pa t bay pèmisyon pou notifikasyon push.'
-                : '❌ The browser did not grant push notification permission.',
+                : inlineText(lang, '❌ The browser did not grant push notification permission.'),
               'circle-exclamation',
             );
             return;
@@ -40,7 +41,7 @@ export default function NotificationSettingsModal({ onClose, onSuccess, lang, sh
         } catch {
           showToast?.(
             lang === 'ht' ? '❌ Navigatè a pa t reponn pou pèmisyon notifikasyon.'
-              : '❌ The browser did not respond to the permission request.',
+              : inlineText(lang, '❌ The browser did not respond to the permission request.'),
             'circle-exclamation',
           );
           return;
@@ -57,13 +58,13 @@ export default function NotificationSettingsModal({ onClose, onSuccess, lang, sh
       catch (_) { /* unavailable */ }
       await api.patch('session/me/', { notification_prefs: prefs });
       showToast?.(
-        lang === 'ht' ? '✅ Preferans notifikasyon mete ajou!' : '✅ Notification preferences updated!',
+        lang === 'ht' ? '✅ Preferans notifikasyon mete ajou!' : inlineText(lang, '✅ Notification preferences updated!'),
         'check-circle',
       );
       onSuccess?.(); onClose?.();
     } catch {
       showToast?.(
-        lang === 'ht' ? '💾 Preferans yo sove lokalman.' : '💾 Preferences saved locally.',
+        lang === 'ht' ? '💾 Preferans yo sove lokalman.' : inlineText(lang, '💾 Preferences saved locally.'),
         'info-circle',
       );
       onSuccess?.(); onClose?.();
@@ -84,48 +85,48 @@ export default function NotificationSettingsModal({ onClose, onSuccess, lang, sh
 
   return (
     <StudioModal onClose={onClose} icon="fa-bell"
-      title={lang === 'ht' ? 'Notifikasyon' : 'Notifications'}
-      subtitle={lang === 'ht' ? 'Kontwole kisa ou vle resevwa' : 'Control what you want to receive'}>
+      title={lang === 'ht' ? 'Notifikasyon' : inlineText(lang, 'Notifications')}
+      subtitle={lang === 'ht' ? 'Kontwole kisa ou vle resevwa' : inlineText(lang, 'Control what you want to receive')}>
       <form onSubmit={handleSubmit} className={styles.form}>
         <LoadingOverlay loading={loading}>
           <div className={styles.toggleGroup}>
             <h4 className={styles.toggleSectionTitle}>
-              {lang === 'ht' ? '💼 Biznis' : '💼 Business'}
+              {lang === 'ht' ? '💼 Biznis' : inlineText(lang, '💼 Business')}
             </h4>
-            {toggle('new_sales', lang === 'ht' ? 'Nouvo Vant' : 'New Sales')}
-            {toggle('new_students', lang === 'ht' ? 'Nouvo Elèv' : 'New Students')}
-            {toggle('new_reviews', lang === 'ht' ? 'Nouvo Revizyon' : 'New Reviews')}
+            {toggle('new_sales', lang === 'ht' ? 'Nouvo Vant' : inlineText(lang, 'New Sales'))}
+            {toggle('new_students', lang === 'ht' ? 'Nouvo Elèv' : inlineText(lang, 'New Students'))}
+            {toggle('new_reviews', lang === 'ht' ? 'Nouvo Revizyon' : inlineText(lang, 'New Reviews'))}
 
             <h4 className={styles.toggleSectionTitle} style={{ marginTop: 12 }}>
-              {lang === 'ht' ? '📚 Kou' : '📚 Courses'}
+              {lang === 'ht' ? '📚 Kou' : inlineText(lang, '📚 Courses')}
             </h4>
-            {toggle('course_approved', lang === 'ht' ? 'Kou Apwouve' : 'Course Approved')}
-            {toggle('course_rejected', lang === 'ht' ? 'Kou Rejete' : 'Course Rejected')}
-            {toggle('payout_updates', lang === 'ht' ? 'Mizajou Peman' : 'Payout Updates')}
+            {toggle('course_approved', lang === 'ht' ? 'Kou Apwouve' : inlineText(lang, 'Course Approved'))}
+            {toggle('course_rejected', lang === 'ht' ? 'Kou Rejete' : inlineText(lang, 'Course Rejected'))}
+            {toggle('payout_updates', lang === 'ht' ? 'Mizajou Peman' : inlineText(lang, 'Payout Updates'))}
 
             <h4 className={styles.toggleSectionTitle} style={{ marginTop: 12 }}>
-              {lang === 'ht' ? '📬 Metòd' : '📬 Delivery'}
+              {lang === 'ht' ? '📬 Metòd' : inlineText(lang, '📬 Delivery')}
             </h4>
             {toggle('email_notifications', 'Email')}
             {/* Phase 10: accessible push notification explanation */}
             <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: '4px 0 8px', lineHeight: 1.4 }}>
               {lang === 'ht'
                 ? 'Atelnyo bezwen pèmisyon navigatè a sèlman lè ou chwazi resevwa notifikasyon push.'
-                : 'Atelnyo needs browser permission only when you choose to receive push notifications.'}
+                : inlineText(lang, 'Atelnyo needs browser permission only when you choose to receive push notifications.')}
             </p>
             {toggle('push_notifications', 'Push')}
-            {toggle('weekly_digest', lang === 'ht' ? 'Rezime chak Semèn' : 'Weekly Digest')}
+            {toggle('weekly_digest', lang === 'ht' ? 'Rezime chak Semèn' : inlineText(lang, 'Weekly Digest'))}
           </div>
         </LoadingOverlay>
         <div className={styles.actions}>
           <button type="button" className="btn-secondary" onClick={onClose} disabled={loading}>
-            {lang === 'ht' ? 'Fèmen' : 'Close'}
+            {lang === 'ht' ? 'Fèmen' : inlineText(lang, 'Close')}
           </button>
           <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? (
-              <><i className="fas fa-spinner fa-spin" /> {lang === 'ht' ? 'Ap sove...' : 'Saving...'}</>
+              <><i className="fas fa-spinner fa-spin" /> {lang === 'ht' ? 'Ap sove...' : inlineText(lang, 'Saving...')}</>
             ) : (
-              <><i className="fas fa-save" /> {lang === 'ht' ? 'Sove Preferans' : 'Save Preferences'}</>
+              <><i className="fas fa-save" /> {lang === 'ht' ? 'Sove Preferans' : inlineText(lang, 'Save Preferences')}</>
             )}
           </button>
         </div>

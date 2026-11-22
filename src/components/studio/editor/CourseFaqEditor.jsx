@@ -19,6 +19,7 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { courseFaqService } from '../../../services/api';
 import styles from './editor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const SCOPE_OPTIONS = [
   { value: 'course', labelEn: 'Course', labelHt: 'Kou' },
@@ -51,7 +52,7 @@ const EMPTY_FORM = {
 
 export default function CourseFaqEditor({ courseId, modules = [], lang = 'en', showToast }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
   const [faqs, setFaqs] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);

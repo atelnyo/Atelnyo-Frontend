@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { PROFILE_TABS } from './profileConstants';
+import { inlineText } from '../../utils/inlineI18n';
 
 /**
  * TabsBar — glass sticky, swipe-friendly on mobile.
@@ -14,7 +15,7 @@ export default function TabsBar({ activeTab, onChange, lang, badges, items }) {
   const [touchStart, setTouchStart] = useState(null);
   const tablistLabel = lang === 'ht'
     ? 'Onglet pwofil'
-    : lang === 'fr' ? 'Onglets du profil' : 'Profile tabs';
+    : lang === 'fr' ? 'Onglets du profil' : inlineText(lang, 'Profile tabs');
 
   const handleTouchStart = useCallback((e) => {
     const touch = e.touches?.[0];
@@ -103,7 +104,7 @@ export default function TabsBar({ activeTab, onChange, lang, badges, items }) {
             onKeyDown={(event) => handleTabKeyDown(event, tab)}
           >
             <i className={tab.icon.startsWith('fab ') ? tab.icon : `fas ${tab.icon}`} aria-hidden="true" />{' '}
-            {lang === 'ht' ? tab.labelHt : lang === 'fr' ? tab.labelFr : tab.label}
+            {lang === 'ht' ? tab.labelHt : lang === 'fr' ? tab.labelFr : lang === 'es' ? tab.labelEs : tab.label}
             {badges?.[tab.id] != null && badges[tab.id] > 0 && (
               <span className="csp-tab-badge">{badges[tab.id]}</span>
             )}

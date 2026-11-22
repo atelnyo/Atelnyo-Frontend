@@ -11,10 +11,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { courseService } from '../../../services/api';
 import styles from './sections.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function CourseOverview({ lang = 'en', onNavigate }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
 
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);

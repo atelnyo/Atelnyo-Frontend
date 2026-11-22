@@ -18,10 +18,11 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { checkoutService } from '../../../services/api';
 import { StudioModal, FormField, LoadingOverlay } from './shared';
 import styles from './modals.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function RefundModal({ txn, onClose, onSuccess, lang, showToast }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? (ht || en) : en);
+  const t = (en, ht) => (isHt ? (ht || en) : inlineText(lang, en));
 
   const total = useMemo(() => Number(txn?.amount || 0), [txn]);
   const refundedSoFar = useMemo(() => Number(txn?.refunded_amount || 0), [txn]);

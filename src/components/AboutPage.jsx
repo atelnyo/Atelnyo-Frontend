@@ -9,6 +9,7 @@
  */
 import React from 'react';
 import SEOHead from './shared/SEOHead';
+import { inlineText } from '../utils/inlineI18n';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    MULTILINGUAL CONTENT
@@ -112,11 +113,12 @@ const PAGE = {
 
     /* ── Languages ── */
     languagesTitle: 'Supported Languages',
-    languagesBody: 'Atelnyo is available in Haitian Creole, English, and French:',
+    languagesBody: 'Atelnyo is available in Haitian Creole, English, French, and Spanish:',
     languagesList: [
       { lang: 'Haitian Creole', code: 'ht', note: 'Primary language' },
       { lang: 'English', code: 'en', note: 'International default' },
       { lang: 'French', code: 'fr', note: 'Supported' },
+      { lang: 'Spanish', code: 'es', note: 'Supported' },
     ],
     languagesNote: 'Course creators can publish content in any language; these are the languages currently available for the platform interface.',
 
@@ -203,11 +205,12 @@ const PAGE = {
     accessibilityBody: 'Atelnyo fèt pou òt bezwen itilizatè ak divès kapasite. Platfòm la swiv pi bon pratik aksesibilite entènèt ki enkli HTML semantik, navigasyon ak kle, sipò lecteur ekran, kontras koulè adekwat, ak desen reponn pou mobil ak aparèl asistif.',
 
     languagesTitle: 'Lang ki Sipòte',
-    languagesBody: 'Atelnyo disponib an kreyòl ayisyen, anglè, ak franse:',
+    languagesBody: 'Atelnyo disponib an kreyòl ayisyen, anglè, franse, ak panyòl:',
     languagesList: [
       { lang: 'Kreyòl Ayisyen', code: 'ht', note: 'Lang primè' },
       { lang: 'English', code: 'en', note: 'Defò entènasyonal' },
       { lang: 'Français', code: 'fr', note: 'Sipòte' },
+      { lang: 'Español', code: 'es', note: 'Sipòte' },
     ],
     languagesNote: 'Kreyatè kou ka pibliye kontni nan nenpòt lang; lang sa yo se lang koòdone platfòm la disponib kounye a.',
 
@@ -292,11 +295,12 @@ const PAGE = {
     accessibilityBody: 'Atelnyo est conçu pour être accessible aux utilisateurs capacités diverses. La plateforme suit les meilleures pratiques d\'accessibilité web.',
 
     languagesTitle: 'Langues supportées',
-    languagesBody: 'Atelnyo est disponible en créole haïtien, anglais et français :',
+    languagesBody: 'Atelnyo est disponible en créole haïtien, anglais, français et espagnol :',
     languagesList: [
       { lang: 'Créole haïtien', code: 'ht', note: 'Langue principale' },
       { lang: 'English', code: 'en', note: 'Défaut international' },
       { lang: 'Français', code: 'fr', note: 'Supporté' },
+      { lang: 'Espagnol', code: 'es', note: 'Supporté' },
     ],
     languagesNote: 'Les créateurs de cours peuvent publier du contenu dans toutes les langues ; celles-ci sont les langues actuellement disponibles pour l’interface.',
 
@@ -335,7 +339,7 @@ const PAGE = {
     trustTitle: 'Confianza, seguridad y prácticas responsables', trustItems: ['Atelnyo se compromete a mantener un entorno seguro y respetuoso.','Las políticas de moderación garantizan que el contenido dañino sea identificado.','Las cuentas están protegidas por sistemas de autenticación y prevención de abuso.','Las transacciones de e-commerce están aseguradas por procesadores de pago establecidos.'],
     privacyTitle: 'Privacidad y principios de datos', privacyItems: ['Atelnyo solo recopila los datos necesarios.','Los datos de usuarios no se venden a terceros.','La plataforma proporciona herramientas de gestión de cuenta.','Atelnyo implementa medidas de seguridad estándar.'],
     accessibilityTitle: 'Accesibilidad', accessibilityBody: 'Atelnyo está diseñado para ser accesible a usuarios con diversas capacidades. La plataforma sigue las mejores prácticas de accesibilidad web.',
-    languagesTitle: 'Idiomas soportados', languagesBody: 'La interfaz de Atelnyo está disponible en criollo haitiano, inglés y francés:', languagesList: [{lang:'Criollo haitiano',code:'ht',note:'Idioma principal'},{lang:'English',code:'en',note:'Idioma internacional'},{lang:'Français',code:'fr',note:'Disponible'}], languagesNote: 'Los creadores pueden publicar contenido de cursos en cualquier idioma.',
+    languagesTitle: 'Idiomas soportados', languagesBody: 'La interfaz de Atelnyo está disponible en criollo haitiano, inglés, francés y español:', languagesList: [{lang:'Criollo haitiano',code:'ht',note:'Idioma principal'},{lang:'English',code:'en',note:'Idioma internacional'},{lang:'Français',code:'fr',note:'Disponible'},{lang:'Español',code:'es',note:'Disponible'}], languagesNote: 'Los creadores pueden publicar contenido de cursos en cualquier idioma.',
     longTermTitle: 'Visión a largo plazo', longTermBody: ['Atelnyo está construido para durar.','Nuestro objetivo es construir infraestructura que sirva a las comunidades por años.','Creemos en un crecimiento sostenible y prácticas transparentes.'],
     ctaTitle: '¿Quieres saber más?', ctaBody: 'Explora Atelnyo o contáctanos directamente.', ctaExplore: 'Explorar Atelnyo', ctaContact: 'Contáctanos',
   },
@@ -463,9 +467,9 @@ export default function AboutPage({ lang = 'en', market = '' }) {
           <table style={styles.table}>
             <thead>
               <tr>
-                <th style={styles.th}>{lang === 'ht' ? 'Lang' : 'Language'}</th>
+                <th style={styles.th}>{lang === 'ht' ? 'Lang' : inlineText(lang, 'Language')}</th>
                 <th style={styles.th}>Code</th>
-                <th style={styles.th}>{lang === 'ht' ? 'Estati' : 'Status'}</th>
+                <th style={styles.th}>{lang === 'ht' ? 'Estati' : inlineText(lang, 'Status')}</th>
               </tr>
             </thead>
             <tbody>

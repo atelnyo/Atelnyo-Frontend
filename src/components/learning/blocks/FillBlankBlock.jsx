@@ -11,6 +11,7 @@
  * If no blank marker is provided, the answer is appended at the end.
  */
 import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function FillBlankBlock({
   block,
@@ -71,8 +72,8 @@ export default function FillBlankBlock({
     <div className="ls-block ls-block--fill-blank" data-block-type="fill_blank">
       {/* Header */}
       <div className="ls-block-header">
-        <span className="ls-block-badge">📝 {isHt ? 'Ranpli nan vid' : 'Fill in the Blank'}</span>
-        <h3 className="ls-block-title">{block.title || (isHt ? 'Ranpli espas la' : 'Fill the blank')}</h3>
+        <span className="ls-block-badge">📝 {isHt ? 'Ranpli nan vid' : inlineText(lang, 'Fill in the Blank')}</span>
+        <h3 className="ls-block-title">{block.title || (isHt ? 'Ranpli espas la' : inlineText(lang, 'Fill the blank'))}</h3>
       </div>
 
       {/* Sentence with blank */}
@@ -102,7 +103,7 @@ export default function FillBlankBlock({
             </React.Fragment>
           ))
         ) : (
-          <span>{sentence || (isHt ? 'Egzanp: The cat ___ on the mat.' : 'Example: The cat ___ on the mat.')}</span>
+          <span>{sentence || (isHt ? 'Egzanp: The cat ___ on the mat.' : inlineText(lang, 'Example: The cat ___ on the mat.'))}</span>
         )}
       </div>
 
@@ -136,7 +137,7 @@ export default function FillBlankBlock({
           onChange={(e) => setUserAnswer(e.target.value)}
           onKeyDown={handleKeyDown}
           disabled={submitted && correct}
-          placeholder={isHt ? 'Ekri repons ou...' : 'Type your answer...'}
+          placeholder={isHt ? 'Ekri repons ou...' : inlineText(lang, 'Type your answer...')}
           style={{
             flex: 1, minWidth: 200, padding: '10px 14px',
             borderRadius: 8, border: '1px solid var(--border-subtle, #e2e8f0)',
@@ -144,7 +145,7 @@ export default function FillBlankBlock({
             fontSize: '1rem',
             borderColor: submitted ? (correct ? '#10b981' : '#ef4444') : undefined,
           }}
-          aria-label={isHt ? 'Repons' : 'Answer'}
+          aria-label={isHt ? 'Repons' : inlineText(lang, 'Answer')}
         />
         {!submitted ? (
           <button
@@ -158,7 +159,7 @@ export default function FillBlankBlock({
               opacity: userAnswer.trim() ? 1 : 0.5,
             }}
           >
-            {isHt ? 'Verifye' : 'Check'}
+            {isHt ? 'Verifye' : inlineText(lang, 'Check')}
           </button>
         ) : (
           <button
@@ -170,7 +171,7 @@ export default function FillBlankBlock({
               fontWeight: 600, cursor: 'pointer',
             }}
           >
-            {isHt ? 'Eseye ankò' : 'Try again'}
+            {isHt ? 'Eseye ankò' : inlineText(lang, 'Try again')}
           </button>
         )}
       </div>
@@ -184,7 +185,7 @@ export default function FillBlankBlock({
           fontSize: '0.9rem', fontWeight: 600,
         }}>
           {correct
-            ? (isHt ? '✅ Brav! Repons lan kòrèk.' : '✅ Correct! Well done.')
+            ? (isHt ? '✅ Brav! Repons lan kòrèk.' : inlineText(lang, '✅ Correct! Well done.'))
             : (isHt ? `❌ Repons lan se: ${answer}` : `❌ The answer is: ${answer}`)}
         </div>
       )}

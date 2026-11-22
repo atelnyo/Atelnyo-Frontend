@@ -13,6 +13,7 @@
  * All chip clicks trigger instant filter changes — no dead buttons.
  */
 import React from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 const TYPE_CHIPS = [
   { value: 'all', icon: 'fa-th-large', labelEn: 'All', labelHt: 'Tout', color: '#64748b' },
@@ -77,7 +78,7 @@ export default function MediaToolbar({
             border: 'none', background: 'none', outline: 'none', flex: 1,
             padding: '8px 0', fontSize: '0.85rem', color: 'var(--text-primary)',
           }}
-          placeholder={isHt ? 'Chèche pa tit oswa URL...' : 'Search by title or URL...'}
+          placeholder={isHt ? 'Chèche pa tit oswa URL...' : inlineText(lang, 'Search by title or URL...')}
           value={searchQuery}
           onChange={(e) => onSearchChange?.(e.target.value)}
         />
@@ -194,7 +195,7 @@ export default function MediaToolbar({
               fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px',
             }}>
             <i className="fas fa-plus" style={{ fontSize: '0.7rem' }} />
-            {isHt ? 'Ajoute' : 'Add Media'}
+            {isHt ? 'Ajoute' : inlineText(lang, 'Add Media')}
           </button>
         )}
 

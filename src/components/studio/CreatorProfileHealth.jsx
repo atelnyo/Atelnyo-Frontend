@@ -17,6 +17,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { creatorProfileHealthService, courseService, marketplaceService, portfolioService } from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 const TIER_LABELS = {
   excellent: { en: 'Excellent', ht: 'Ekselan' },
@@ -71,14 +72,14 @@ export default function CreatorProfileHealth({ lang = 'en', showToast, user }) {
       const payload = {};
       payload[field] = value || null;
       await creatorProfileHealthService.pin(payload);
-      showToast?.(isHt ? 'Ansekle aktyalize!' : 'Pin updated!', 'check-circle');
+      showToast?.(isHt ? 'Ansekle aktyalize!' : inlineText(lang, 'Pin updated!'), 'check-circle');
       // Update local state only — no need to refetch everything
       setData((prev) => prev ? {
         ...prev,
         featured_pins: { ...prev.featured_pins, [field]: value || null },
       } : prev);
     } catch {
-      showToast?.(isHt ? 'Erè' : 'Error', 'exclamation-triangle');
+      showToast?.(isHt ? 'Erè' : inlineText(lang, 'Error'), 'exclamation-triangle');
     } finally {
       setPinSubmitting(false);
     }
@@ -98,9 +99,9 @@ export default function CreatorProfileHealth({ lang = 'en', showToast, user }) {
     return (
       <div className="cph-error" role="alert">
         <i className="fas fa-triangle-exclamation" />
-        <span>{isHt ? 'Pa ka chaje sante pwofil' : 'Cannot load profile health'}</span>
+        <span>{isHt ? 'Pa ka chaje sante pwofil' : inlineText(lang, 'Cannot load profile health')}</span>
         <button type="button" className="cph-retry-btn" onClick={fetchData}>
-          <i className="fas fa-rotate" /> {isHt ? 'Reye' : 'Retry'}
+          <i className="fas fa-rotate" /> {isHt ? 'Reye' : inlineText(lang, 'Retry')}
         </button>
       </div>
     );
@@ -113,9 +114,9 @@ export default function CreatorProfileHealth({ lang = 'en', showToast, user }) {
         <div className="cph-empty-icon">
           <i className="fas fa-user-plus" style={{ fontSize: '2rem', color: 'var(--text-secondary)' }} />
         </div>
-        <span>{isHt ? 'Kreye pwofil piblik ou an premye nan seksyon "Pwofil Piblik".' : 'Create your public profile first in the "Public Profile" section.'}</span>
+        <span>{isHt ? 'Kreye pwofil piblik ou an premye nan seksyon "Pwofil Piblik".' : inlineText(lang, 'Create your public profile first in the "Public Profile" section.')}</span>
         <button type="button" className="cph-retry-btn" onClick={fetchData}>
-          <i className="fas fa-rotate" /> {isHt ? 'Verifye' : 'Check again'}
+          <i className="fas fa-rotate" /> {isHt ? 'Verifye' : inlineText(lang, 'Check again')}
         </button>
       </div>
     );
@@ -125,9 +126,9 @@ export default function CreatorProfileHealth({ lang = 'en', showToast, user }) {
     return (
       <div className="cph-error" role="alert">
         <i className="fas fa-triangle-exclamation" />
-        <span>{isHt ? 'Pa ka chaje sante pwofil' : 'Cannot load profile health'}</span>
+        <span>{isHt ? 'Pa ka chaje sante pwofil' : inlineText(lang, 'Cannot load profile health')}</span>
         <button type="button" className="cph-retry-btn" onClick={fetchData}>
-          <i className="fas fa-rotate" /> {isHt ? 'Reye' : 'Retry'}
+          <i className="fas fa-rotate" /> {isHt ? 'Reye' : inlineText(lang, 'Retry')}
         </button>
       </div>
     );
@@ -157,14 +158,14 @@ export default function CreatorProfileHealth({ lang = 'en', showToast, user }) {
               {health?.score || 0}
             </text>
             <text x="60" y="75" textAnchor="middle" className="cph-ring-label">
-              {isHt ? 'Sante' : 'Health'}
+              {isHt ? 'Sante' : inlineText(lang, 'Health')}
             </text>
           </svg>
         </div>
         <div className="cph-header-info">
           <h3 className="cph-title">
             <i className="fas fa-heart-pulse" style={{ color: health?.tier_color }} aria-hidden="true" />
-            {isHt ? 'Sante Pwofil' : 'Profile Health'}
+            {isHt ? 'Sante Pwofil' : inlineText(lang, 'Profile Health')}
           </h3>
           <span
             className="cph-tier-badge"
@@ -182,7 +183,7 @@ export default function CreatorProfileHealth({ lang = 'en', showToast, user }) {
       <section className="cph-section">
         <h4 className="cph-section-title">
           <i className="fas fa-clipboard-list" aria-hidden="true" />
-          {isHt ? 'Konple Pwofil' : 'Profile Completeness'} — {completeness?.score || 0}%
+          {isHt ? 'Konple Pwofil' : inlineText(lang, 'Profile Completeness')} — {completeness?.score || 0}%
         </h4>
         <div className="cph-progress-bar">
           <div className="cph-progress-fill" style={{ width: `${completeness?.score || 0}%` }} />
@@ -192,7 +193,7 @@ export default function CreatorProfileHealth({ lang = 'en', showToast, user }) {
         {completeness?.missing?.length > 0 && (
           <div className="cph-checklist">
             <span className="cph-checklist-label" style={{ color: '#ef4444' }}>
-              <i className="fas fa-circle-exclamation" /> {isHt ? 'Sa ki manke:' : 'Missing:'}
+              <i className="fas fa-circle-exclamation" /> {isHt ? 'Sa ki manke:' : inlineText(lang, 'Missing:')}
             </span>
             <div className="cph-checklist-items">
               {completeness.missing.map((item) => (
@@ -227,7 +228,7 @@ export default function CreatorProfileHealth({ lang = 'en', showToast, user }) {
       <section className="cph-section">
         <h4 className="cph-section-title">
           <i className="fas fa-chart-simple" aria-hidden="true" />
-          {isHt ? 'Faktè Sante' : 'Health Factors'}
+          {isHt ? 'Faktè Sante' : inlineText(lang, 'Health Factors')}
         </h4>
         <div className="cph-factors">
           {Object.entries(health?.factors || {}).map(([key, factor]) => (
@@ -249,17 +250,17 @@ export default function CreatorProfileHealth({ lang = 'en', showToast, user }) {
       <section className="cph-section">
         <h4 className="cph-section-title">
           <i className="fas fa-thumbtack" aria-hidden="true" />
-          {isHt ? 'Kontni An vedèt' : 'Featured Content'}
+          {isHt ? 'Kontni An vedèt' : inlineText(lang, 'Featured Content')}
         </h4>
         <p className="cph-section-sub">
-          {isHt ? 'Chwazi ki kontni ki parèt premye sou pwofil piblik ou.' : 'Choose which content shows first on your public profile.'}
+          {isHt ? 'Chwazi ki kontni ki parèt premye sou pwofil piblik ou.' : inlineText(lang, 'Choose which content shows first on your public profile.')}
         </p>
 
         <div className="cph-pins">
           {/* Featured Course */}
           <div className="cph-pin-field">
             <label className="cph-pin-label">
-              <i className="fas fa-graduation-cap" /> {isHt ? 'Kou An vedèt' : 'Featured Course'}
+              <i className="fas fa-graduation-cap" /> {isHt ? 'Kou An vedèt' : inlineText(lang, 'Featured Course')}
             </label>
             <select
               className="cph-pin-select"
@@ -267,7 +268,7 @@ export default function CreatorProfileHealth({ lang = 'en', showToast, user }) {
               onChange={(e) => handlePin('featured_course_id', e.target.value ? parseInt(e.target.value, 10) : null)}
               disabled={pinSubmitting}
             >
-              <option value="">{isHt ? '— Okenn —' : '— None —'}</option>
+              <option value="">{isHt ? '— Okenn —' : inlineText(lang, '— None —')}</option>
               {Array.isArray(courses) && courses.map((c) => (
                 <option key={c.id} value={c.id}>{c.title}</option>
               ))}
@@ -277,7 +278,7 @@ export default function CreatorProfileHealth({ lang = 'en', showToast, user }) {
           {/* Featured Product */}
           <div className="cph-pin-field">
             <label className="cph-pin-label">
-              <i className="fas fa-cube" /> {isHt ? 'Pwodwi An vedèt' : 'Featured Product'}
+              <i className="fas fa-cube" /> {isHt ? 'Pwodwi An vedèt' : inlineText(lang, 'Featured Product')}
             </label>
             <select
               className="cph-pin-select"
@@ -285,7 +286,7 @@ export default function CreatorProfileHealth({ lang = 'en', showToast, user }) {
               onChange={(e) => handlePin('featured_product_id', e.target.value ? parseInt(e.target.value, 10) : null)}
               disabled={pinSubmitting}
             >
-              <option value="">{isHt ? '— Okenn —' : '— None —'}</option>
+              <option value="">{isHt ? '— Okenn —' : inlineText(lang, '— None —')}</option>
               {Array.isArray(products) && products.map((p) => (
                 <option key={p.id} value={p.id}>{p.title}</option>
               ))}
@@ -295,7 +296,7 @@ export default function CreatorProfileHealth({ lang = 'en', showToast, user }) {
           {/* Featured Portfolio */}
           <div className="cph-pin-field">
             <label className="cph-pin-label">
-              <i className="fas fa-briefcase" /> {isHt ? 'Pòtfolyo An vedèt' : 'Featured Portfolio'}
+              <i className="fas fa-briefcase" /> {isHt ? 'Pòtfolyo An vedèt' : inlineText(lang, 'Featured Portfolio')}
             </label>
             <select
               className="cph-pin-select"
@@ -303,7 +304,7 @@ export default function CreatorProfileHealth({ lang = 'en', showToast, user }) {
               onChange={(e) => handlePin('featured_portfolio_id', e.target.value ? parseInt(e.target.value, 10) : null)}
               disabled={pinSubmitting}
             >
-              <option value="">{isHt ? '— Okenn —' : '— None —'}</option>
+              <option value="">{isHt ? '— Okenn —' : inlineText(lang, '— None —')}</option>
               {Array.isArray(portfolios) && portfolios.map((p) => (
                 <option key={p.id} value={p.id}>{p.title}</option>
               ))}

@@ -24,6 +24,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { businessOrderService } from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 const MONTH_LABELS = {
   ht: ['Jan', 'Fev', 'Mas', 'Avr', 'Me', 'Jin', 'Jiy', 'Out', 'Sep', 'Okt', 'Nov', 'Des'],
@@ -44,16 +45,16 @@ const PAY_LABEL = {
 };
 
 function money(n, lang) {
-  return Number(n ?? 0).toLocaleString(lang === 'ht' ? 'fr-HT' : 'en-US', {
+  return Number(n ?? 0).toLocaleString(lang === 'ht' ? 'fr-HT' : inlineText(lang, 'en-US'), {
     minimumFractionDigits: 2,
   });
 }
 
-function monthShort(monthStr, isHt) {
+function monthShort(monthStr, lang = 'en') {
   // monthStr = 'YYYY-MM'
   const m = Number(String(monthStr || '').split('-')[1]);
   if (!m || m < 1 || m > 12) return String(monthStr || '').slice(5);
-  return (MONTH_LABELS[isHt ? 'ht' : 'en'][m - 1]);
+  return ((MONTH_LABELS[lang] || MONTH_LABELS.en)[m - 1]);
 }
 
 export default function BusinessAnalyticsSection({
@@ -73,7 +74,7 @@ export default function BusinessAnalyticsSection({
     } catch {
       setData(null);
       showToast?.(
-        isHt ? 'Pa t ka chaje analitik yo.' : 'Could not load analytics.',
+        isHt ? 'Pa t ka chaje analitik yo.' : inlineText(lang, 'Could not load analytics.'),
         'circle-exclamation',
       );
     } finally {
@@ -107,31 +108,31 @@ export default function BusinessAnalyticsSection({
   const kpis = [
     {
       icon: 'fa-sack-dollar',
-      label: t?.business_analytics_revenue || (isHt ? 'Revni total' : 'Total revenue'),
+      label: t?.business_analytics_revenue || (isHt ? 'Revni total' : inlineText(lang, 'Total revenue')),
       value: `${money(data?.total_revenue, lang)} ${data?.currency || 'USD'}`,
       accent: '#34d399',
     },
     {
       icon: 'fa-cart-shopping',
-      label: t?.business_analytics_orders_paid || (isHt ? 'Kòmand peye' : 'Paid orders'),
+      label: t?.business_analytics_orders_paid || (isHt ? 'Kòmand peye' : inlineText(lang, 'Paid orders')),
       value: String(data?.total_paid_orders ?? 0),
       accent: '#38bdf8',
     },
     {
       icon: 'fa-boxes-stacked',
-      label: t?.business_analytics_units || (isHt ? 'Inite vann' : 'Units sold'),
+      label: t?.business_analytics_units || (isHt ? 'Inite vann' : inlineText(lang, 'Units sold')),
       value: String(data?.total_units_sold ?? 0),
       accent: '#a78bfa',
     },
     {
       icon: 'fa-users',
-      label: t?.business_analytics_customers || (isHt ? 'Kliyan' : 'Customers'),
+      label: t?.business_analytics_customers || (isHt ? 'Kliyan' : inlineText(lang, 'Customers')),
       value: String(data?.customers ?? 0),
       accent: '#fbbf24',
     },
     {
       icon: 'fa-receipt',
-      label: t?.business_analytics_avg_order || (isHt ? 'Valè mwayèn kòmand' : 'Avg order value'),
+      label: t?.business_analytics_avg_order || (isHt ? 'Valè mwayèn kòmand' : inlineText(lang, 'Avg order value')),
       value: `${money(data?.avg_order_value, lang)} ${data?.currency || 'USD'}`,
       accent: '#f472b6',
     },
@@ -143,12 +144,12 @@ export default function BusinessAnalyticsSection({
         <div>
           <h3 className="biz-catalog-title">
             <i className="fas fa-chart-pie" aria-hidden="true" />
-            {t?.business_section_analytics || (isHt ? 'Analitik' : 'Analytics')}
+            {t?.business_section_analytics || (isHt ? 'Analitik' : inlineText(lang, 'Analytics'))}
           </h3>
           <p className="biz-catalog-hint">
             {t?.business_analytics_hint || (isHt
               ? 'Kliyan, revni pa mwa, ak atik ki pi vann — baze sou kòmand ki peye yo.'
-              : 'Customers, monthly revenue, and top items — built from your paid orders.')}
+              : inlineText(lang, 'Customers, monthly revenue, and top items — built from your paid orders.'))}
           </p>
         </div>
       </div>
@@ -174,13 +175,13 @@ export default function BusinessAnalyticsSection({
       <div className="biz-ws-card biz-analytics-chart-card">
         <h3 className="biz-ws-card-title">
           <i className="fas fa-chart-column" aria-hidden="true" />
-          {t?.business_analytics_monthly || (isHt ? 'Revni pa mwa' : 'Revenue by month')}
+          {t?.business_analytics_monthly || (isHt ? 'Revni pa mwa' : inlineText(lang, 'Revenue by month'))}
         </h3>
         {months.length === 0 ? (
           <div className="biz-analytics-empty">
             <i className="fas fa-chart-simple" aria-hidden="true" />
             <p>{t?.business_analytics_empty || (isHt
-              ? 'Pokò gen revni peye pou montre.' : 'No paid revenue to show yet.')}</p>
+              ? 'Pokò gen revni peye pou montre.' : inlineText(lang, 'No paid revenue to show yet.'))}</p>
           </div>
         ) : (
           <>
@@ -192,17 +193,17 @@ export default function BusinessAnalyticsSection({
                   <div
                     className="biz-analytics-bar-col"
                     key={`${m.month || i}-${m.currency}`}
-                    title={`${m.month} · ${money(m.revenue, lang)} ${m.currency} · ${m.orders} ${isHt ? 'kòmand' : 'orders'}`}
+                    title={`${m.month} · ${money(m.revenue, lang)} ${m.currency} · ${m.orders} ${isHt ? 'kòmand' : inlineText(lang, 'orders')}`}
                   >
                     <div className="biz-analytics-bar" style={{ height: `${h}%` }} />
-                    <span className="biz-analytics-bar-label">{monthShort(m.month, isHt)}</span>
+                    <span className="biz-analytics-bar-label">{monthShort(m.month, lang)}</span>
                     <span className="biz-analytics-bar-currency">{m.currency}</span>
                   </div>
                 );
               })}
             </div>
             <div className="biz-analytics-chart-total">
-              {isHt ? 'Total' : 'Total'}: {money(data?.total_revenue, lang)} {data?.currency || 'USD'}
+              {isHt ? 'Total' : inlineText(lang, 'Total')}: {money(data?.total_revenue, lang)} {data?.currency || 'USD'}
             </div>
           </>
         )}
@@ -212,13 +213,13 @@ export default function BusinessAnalyticsSection({
       <div className="biz-ws-card">
         <h3 className="biz-ws-card-title">
           <i className="fas fa-crown" aria-hidden="true" />
-          {t?.business_analytics_top_items || (isHt ? 'Atik ki pi vann' : 'Top selling items')}
+          {t?.business_analytics_top_items || (isHt ? 'Atik ki pi vann' : inlineText(lang, 'Top selling items'))}
         </h3>
         {topItems.length === 0 ? (
           <div className="biz-analytics-empty">
             <i className="fas fa-box-open" aria-hidden="true" />
             <p>{t?.business_analytics_empty || (isHt
-              ? 'Pokò gen atik peye.' : 'No paid items yet.')}</p>
+              ? 'Pokò gen atik peye.' : inlineText(lang, 'No paid items yet.'))}</p>
           </div>
         ) : (
           <div className="biz-analytics-top-list" data-testid="business-analytics-top">
@@ -238,7 +239,7 @@ export default function BusinessAnalyticsSection({
                       <div className="biz-analytics-top-bar" style={{ width: `${w}%` }} />
                     </div>
                     <div className="biz-analytics-top-meta">
-                      {item.units} {isHt ? 'inite' : 'units'} · {item.orders} {isHt ? 'kòmand' : 'orders'}
+                      {item.units} {isHt ? 'inite' : inlineText(lang, 'units')} · {item.orders} {isHt ? 'kòmand' : inlineText(lang, 'orders')}
                     </div>
                   </div>
                 </div>
@@ -252,13 +253,13 @@ export default function BusinessAnalyticsSection({
       <div className="biz-ws-card">
         <h3 className="biz-ws-card-title">
           <i className="fas fa-filter" aria-hidden="true" />
-          {t?.business_analytics_funnel || (isHt ? 'Antòn kòmand' : 'Order funnel')}
+          {t?.business_analytics_funnel || (isHt ? 'Antòn kòmand' : inlineText(lang, 'Order funnel'))}
         </h3>
         <div className="biz-analytics-funnel">
           {Object.entries(data?.orders_by_status || {}).map(([key, count]) => (
             <div className="biz-analytics-funnel-chip" key={key}>
               <span className="biz-analytics-funnel-count">{count}</span>
-              {STATUS_FLOW_LABEL[key]?.[isHt ? 'ht' : 'en'] || key}
+              {STATUS_FLOW_LABEL[key]?.[isHt ? 'ht' : inlineText(lang, 'en')] || key}
             </div>
           ))}
           <span className="biz-analytics-funnel-sep" aria-hidden="true" />
@@ -268,7 +269,7 @@ export default function BusinessAnalyticsSection({
               key={key}
             >
               <span className="biz-analytics-funnel-count">{count}</span>
-              {PAY_LABEL[key]?.[isHt ? 'ht' : 'en'] || key}
+              {PAY_LABEL[key]?.[isHt ? 'ht' : inlineText(lang, 'en')] || key}
             </div>
           ))}
         </div>

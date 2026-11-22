@@ -12,6 +12,7 @@ import { jobService } from '../../../services/api';
 import { StudioSkeleton, EmptyState, SectionHeader } from '../shared';
 import ConfirmModal from '../../common/ConfirmModal';
 import styles from './sections.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 function formatBudget(j) {
   if (!j || j.budget_min == null) return '';
@@ -45,7 +46,7 @@ export default function JobsSection({ lang, t, showToast, setShowJobModal, onEdi
   const handleDeleteClick = (item) => {
     setConfirm({
       item,
-      title: lang === 'ht' ? 'Efase travay' : 'Delete job',
+      title: lang === 'ht' ? 'Efase travay' : inlineText(lang, 'Delete job'),
       message: lang === 'ht' ? `Eske w sèten ou vle efase "${item.title}"?` : `Are you sure you want to delete "${item.title}"?`,
       onConfirm: () => {
         // Optimistic + non-blocking: the row vanishes instantly AND the
@@ -59,9 +60,9 @@ export default function JobsSection({ lang, t, showToast, setShowJobModal, onEdi
         (async () => {
           try {
             await jobService.delete(item.id);
-            showToast?.(lang === 'ht' ? '✅ Travay efase!' : '✅ Job deleted!', 'check-circle');
+            showToast?.(lang === 'ht' ? '✅ Travay efase!' : inlineText(lang, '✅ Job deleted!'), 'check-circle');
           } catch (err) {
-            showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase.' : 'Could not delete.'), 'circle-exclamation');
+            showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase.' : inlineText(lang, 'Could not delete.')), 'circle-exclamation');
           }
           refetch();
         })();
@@ -72,10 +73,10 @@ export default function JobsSection({ lang, t, showToast, setShowJobModal, onEdi
   const handlePublish = async (item) => {
     try {
       await jobService.publish(item.id);
-      showToast?.(lang === 'ht' ? 'Travay pibliye!' : 'Job published!', 'check-circle');
+      showToast?.(lang === 'ht' ? 'Travay pibliye!' : inlineText(lang, 'Job published!'), 'check-circle');
       refetch();
     } catch (err) {
-      showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab pibliye.' : 'Could not publish.'), 'circle-exclamation');
+      showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab pibliye.' : inlineText(lang, 'Could not publish.')), 'circle-exclamation');
     }
   };
 
@@ -87,7 +88,7 @@ export default function JobsSection({ lang, t, showToast, setShowJobModal, onEdi
     <div className={styles.section}>
       <SectionHeader
         icon="fa-briefcase"
-        title={lang === 'ht' ? 'Travay mwen yo' : 'My Jobs'}
+        title={lang === 'ht' ? 'Travay mwen yo' : inlineText(lang, 'My Jobs')}
         lang={lang}
         help={{
           ht: 'Travay ou pibliye yo parèt nan Explore Travay. Yon imaj kouvèti (opsyonèl) fè yon travay parèt pi byen epi atire plis kandida.',
@@ -95,7 +96,7 @@ export default function JobsSection({ lang, t, showToast, setShowJobModal, onEdi
         }}
         tip={lang === 'ht'
           ? 'Nouvo: ou ka ajoute yon imaj kouvèti a chak travay.'
-          : 'New: you can add a cover image to every job post.'}
+          : inlineText(lang, 'New: you can add a cover image to every job post.')}
         action={
           <button
             type="button"
@@ -103,18 +104,18 @@ export default function JobsSection({ lang, t, showToast, setShowJobModal, onEdi
             onClick={() => setShowJobModal(true)}
           >
             <i className="fas fa-plus" aria-hidden="true" />
-            {lang === 'ht' ? 'Kreye Travay' : 'Create Job'}
+            {lang === 'ht' ? 'Kreye Travay' : inlineText(lang, 'Create Job')}
           </button>
         }
       />
       {isEmpty ? (
         <EmptyState
           icon="fa-briefcase"
-          title={lang === 'ht' ? 'PokO gen travay' : 'No jobs yet'}
+          title={lang === 'ht' ? 'PokO gen travay' : inlineText(lang, 'No jobs yet')}
           hint={lang === 'ht'
             ? 'Kreye premye travay ou pou parèt nan Explore Travay.'
-            : 'Create your first job to appear in Explore Jobs.'}
-          ctaLabel={lang === 'ht' ? 'Kreye Premye Travay' : 'Create First Job'}
+            : inlineText(lang, 'Create your first job to appear in Explore Jobs.')}
+          ctaLabel={lang === 'ht' ? 'Kreye Premye Travay' : inlineText(lang, 'Create First Job')}
           onCta={() => setShowJobModal(true)}
         />
       ) : (
@@ -153,7 +154,7 @@ export default function JobsSection({ lang, t, showToast, setShowJobModal, onEdi
                       <span> · {job.proposal_count} {t.explore_job_proposals || 'proposals'}</span>
                     )}
                     {(job.positions || 1) > 1 && (
-                      <span> · 👥 {job.hired_count ?? 0}/{job.positions} {lang === 'ht' ? 'anboche' : 'hired'}</span>
+                      <span> · 👥 {job.hired_count ?? 0}/{job.positions} {lang === 'ht' ? 'anboche' : inlineText(lang, 'hired')}</span>
                     )}
                   </div>
                   {Array.isArray(job.skills_required) && job.skills_required.length > 0 && (
@@ -170,16 +171,16 @@ export default function JobsSection({ lang, t, showToast, setShowJobModal, onEdi
                 <div className={styles.itemActions}>
                   {status === 'draft' && (
                     <button type="button" className={styles.editBtn} onClick={() => handlePublish(job)}
-                      title={lang === 'ht' ? 'Pibliye' : 'Publish'}>
+                      title={lang === 'ht' ? 'Pibliye' : inlineText(lang, 'Publish')}>
                       <i className="fas fa-rocket" aria-hidden="true" />
                     </button>
                   )}
                   <button type="button" className={styles.editBtn} onClick={() => onEdit?.(job)}
-                    title={lang === 'ht' ? 'Modifye' : 'Edit'}>
+                    title={lang === 'ht' ? 'Modifye' : inlineText(lang, 'Edit')}>
                     <i className="fas fa-pen" aria-hidden="true" />
                   </button>
                   <button type="button" className={styles.deleteBtn} onClick={() => handleDeleteClick(job)}
-                    title={lang === 'ht' ? 'Efase' : 'Delete'}>
+                    title={lang === 'ht' ? 'Efase' : inlineText(lang, 'Delete')}>
                     <i className="fas fa-trash-can" aria-hidden="true" />
                   </button>
                 </div>

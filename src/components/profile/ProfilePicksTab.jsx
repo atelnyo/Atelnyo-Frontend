@@ -13,6 +13,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SkeletonSection } from './ProfileSkeleton';
 import ProfileCardImage from './ProfileCardImage';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function PicksTab({ picks, loading, lang, onItemClick }) {
   if (loading) return <SkeletonSection />;
@@ -22,7 +23,7 @@ export default function PicksTab({ picks, loading, lang, onItemClick }) {
     return (
       <div className="csp-empty">
         <i className="fas fa-bookmark" aria-hidden="true" />
-        <p>{lang === 'ht' ? "Kreyatè sa a poko sove anyen." : "This creator hasn't saved any picks yet."}</p>
+        <p>{lang === 'ht' ? "Kreyatè sa a poko sove anyen." : inlineText(lang, "This creator hasn't saved any picks yet.")}</p>
       </div>
     );
   }
@@ -32,7 +33,7 @@ export default function PicksTab({ picks, loading, lang, onItemClick }) {
         <div className="csp-card-m3" style={{ marginBottom: 16 }}>
           <div className="csp-card-m3-header">
             <span className="csp-card-m3-icon"><i className="fas fa-star" /></span>
-            <span className="csp-card-m3-title">{lang === 'ht' ? 'Talan' : 'Talents'}</span>
+            <span className="csp-card-m3-title">{lang === 'ht' ? 'Talan' : inlineText(lang, 'Talents')}</span>
           </div>
           <div className="csp-picks-grid">
             {picks.talents.map((row) => {

@@ -16,6 +16,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { chapterService, lessonService, contentBlockService } from '../../../services/api';
 import styles from './editor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 /* ─── Icons ───────────────────────────────────────────────────────── */
 const Icon = ({ name, className }) => (
@@ -76,7 +77,7 @@ function InlineTitle({ value, onChange, placeholder, className, onConfirm }) {
 }
 
 /* ─── Lesson row ──────────────────────────────────────────────────── */
-function LessonRow({ lesson, index, isActive, onSelect, onUpdate, onDelete, onMoveUp, onMoveDown, isHt, dragHandlers }) {
+function LessonRow({ lesson, index, isActive, onSelect, onUpdate, onDelete, onMoveUp, onMoveDown, isHt, lang = 'en', dragHandlers }) {
   const [expanded, setExpanded] = useState(false);
 
   const blockCount = lesson.block_count || (lesson.blocks || []).length;
@@ -110,8 +111,8 @@ function LessonRow({ lesson, index, isActive, onSelect, onUpdate, onDelete, onMo
           />
           <span className={styles.lessonMeta}>
             {blockCount > 0
-              ? `${blockCount} ${isHt ? 'blòk' : 'blocks'}`
-              : (isHt ? 'Pa gen kontni' : 'No content')}
+              ? `${blockCount} ${isHt ? 'blòk' : inlineText(lang, 'blocks')}`
+              : (isHt ? 'Pa gen kontni' : inlineText(lang, 'No content'))}
             {lesson.estimated_duration && ` · ${lesson.estimated_duration}`}
           </span>
         </span>
@@ -123,7 +124,7 @@ function LessonRow({ lesson, index, isActive, onSelect, onUpdate, onDelete, onMo
           className={styles.lessonCtrl}
           onClick={() => onMoveUp(index)}
           disabled={index === 0}
-          title={isHt ? 'Monte' : 'Move up'}
+          title={isHt ? 'Monte' : inlineText(lang, 'Move up')}
         >
           <Icon name="chevron-up" />
         </button>
@@ -131,7 +132,7 @@ function LessonRow({ lesson, index, isActive, onSelect, onUpdate, onDelete, onMo
           type="button"
           className={styles.lessonCtrl}
           onClick={() => onMoveDown(index)}
-          title={isHt ? 'Desann' : 'Move down'}
+          title={isHt ? 'Desann' : inlineText(lang, 'Move down')}
         >
           <Icon name="chevron-down" />
         </button>
@@ -139,7 +140,7 @@ function LessonRow({ lesson, index, isActive, onSelect, onUpdate, onDelete, onMo
           type="button"
           className={`${styles.lessonCtrl} ${styles.lessonCtrlDanger}`}
           onClick={() => onDelete(lesson.id)}
-          title={isHt ? 'Efase' : 'Delete'}
+          title={isHt ? 'Efase' : inlineText(lang, 'Delete')}
         >
           <Icon name="trash" />
         </button>
@@ -203,7 +204,7 @@ function ChapterCard({
           type="button"
           className={styles.chapterCollapse}
           onClick={() => setCollapsed(!collapsed)}
-          aria-label={collapsed ? (isHt ? 'Deplwaye' : 'Expand') : (isHt ? 'Pliye' : 'Collapse')}
+          aria-label={collapsed ? (isHt ? 'Deplwaye' : inlineText(lang, 'Expand')) : (isHt ? 'Pliye' : inlineText(lang, 'Collapse'))}
         >
           <Icon name={collapsed ? 'chevron-right' : 'chevron-down'} />
         </button>
@@ -223,17 +224,17 @@ function ChapterCard({
         </button>
 
         <span className={styles.chapterLessonCount}>
-          {lessons.length} {isHt ? 'leson' : 'lessons'}
+          {lessons.length} {isHt ? 'leson' : inlineText(lang, 'lessons')}
         </span>
 
         <div className={styles.chapterControls}>
-          <button type="button" className={styles.chapterCtrl} onClick={() => onMoveChapterUp(index)} disabled={index === 0} title={isHt ? 'Monte' : 'Up'}>
+          <button type="button" className={styles.chapterCtrl} onClick={() => onMoveChapterUp(index)} disabled={index === 0} title={isHt ? 'Monte' : inlineText(lang, 'Up')}>
             <Icon name="chevron-up" />
           </button>
-          <button type="button" className={styles.chapterCtrl} onClick={() => onMoveChapterDown(index)} title={isHt ? 'Desann' : 'Down'}>
+          <button type="button" className={styles.chapterCtrl} onClick={() => onMoveChapterDown(index)} title={isHt ? 'Desann' : inlineText(lang, 'Down')}>
             <Icon name="chevron-down" />
           </button>
-          <button type="button" className={`${styles.chapterCtrl} ${styles.chapterCtrlDanger}`} onClick={() => onDeleteChapter(chapter.id)} title={isHt ? 'Efase' : 'Delete'}>
+          <button type="button" className={`${styles.chapterCtrl} ${styles.chapterCtrlDanger}`} onClick={() => onDeleteChapter(chapter.id)} title={isHt ? 'Efase' : inlineText(lang, 'Delete')}>
             <Icon name="trash" />
           </button>
         </div>
@@ -258,6 +259,7 @@ function ChapterCard({
                 if (i < lessons.length - 1) onReorderLessons(chapter.id, lessons, i, i + 1);
               }}
               isHt={isHt}
+              lang={lang}
               dragHandlers={{
                 ...lessonDragHandlers,
                 onDragStart: (e) => lessonDragHandlers.onDragStart(e, i),
@@ -275,7 +277,7 @@ function ChapterCard({
               value={newLessonTitle}
               onChange={(e) => setNewLessonTitle(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') handleCreateLesson(); }}
-              placeholder={isHt ? 'Tit nouvo leson...' : 'New lesson title...'}
+              placeholder={isHt ? 'Tit nouvo leson...' : inlineText(lang, 'New lesson title...')}
               maxLength={200}
               disabled={creating}
             />
@@ -284,7 +286,7 @@ function ChapterCard({
               className={styles.addLessonBtn}
               onClick={handleCreateLesson}
               disabled={creating || !newLessonTitle.trim()}
-              title={isHt ? 'Ajoute leson' : 'Add lesson'}
+              title={isHt ? 'Ajoute leson' : inlineText(lang, 'Add lesson')}
             >
               <Icon name={creating ? 'spinner fa-spin' : 'plus'} />
             </button>
@@ -327,7 +329,7 @@ export default function CurriculumBuilder({ courseId, lang = 'en', onSelectLesso
       }));
       setLessonsMap(map);
     } catch (err) {
-      showToast?.(err?.response?.data?.detail || (isHt ? 'Pa t kapab chaje chapit yo.' : 'Could not load chapters.'), 'circle-exclamation');
+      showToast?.(err?.response?.data?.detail || (isHt ? 'Pa t kapab chaje chapit yo.' : inlineText(lang, 'Could not load chapters.')), 'circle-exclamation');
     } finally {
       setLoading(false);
     }
@@ -348,9 +350,9 @@ export default function CurriculumBuilder({ courseId, lang = 'en', onSelectLesso
       setLessonsMap((prev) => ({ ...prev, [res.data.id]: [] }));
       setNewChapterTitle('');
       setSelectedChapterId(res.data.id);
-      showToast?.(isHt ? '✅ Chapit kreye!' : '✅ Chapter created!', 'check-circle');
+      showToast?.(isHt ? '✅ Chapit kreye!' : inlineText(lang, '✅ Chapter created!'), 'check-circle');
     } catch (err) {
-      showToast?.(err?.response?.data?.detail || (isHt ? 'Pa t kapab kreye chapit.' : 'Could not create chapter.'), 'circle-exclamation');
+      showToast?.(err?.response?.data?.detail || (isHt ? 'Pa t kapab kreye chapit.' : inlineText(lang, 'Could not create chapter.')), 'circle-exclamation');
     } finally {
       setCreatingChapter(false);
     }
@@ -367,13 +369,13 @@ export default function CurriculumBuilder({ courseId, lang = 'en', onSelectLesso
   }, [showToast, loadChapters]);
 
   const handleDeleteChapter = useCallback(async (id) => {
-    if (!window.confirm(isHt ? 'Efase chapit sa a ak tout leson li yo?' : 'Delete this chapter and all its lessons?')) return;
+    if (!window.confirm(isHt ? 'Efase chapit sa a ak tout leson li yo?' : inlineText(lang, 'Delete this chapter and all its lessons?'))) return;
     try {
       await chapterService.delete(id);
       setChapters((prev) => prev.filter((ch) => ch.id !== id));
       setLessonsMap((prev) => { const n = { ...prev }; delete n[id]; return n; });
       if (selectedChapterId === id) setSelectedChapterId(null);
-      showToast?.(isHt ? '✅ Chapit efase!' : '✅ Chapter deleted!', 'check-circle');
+      showToast?.(isHt ? '✅ Chapit efase!' : inlineText(lang, '✅ Chapter deleted!'), 'check-circle');
     } catch (err) {
       showToast?.(err?.response?.data?.detail || 'Error', 'circle-exclamation');
     }
@@ -417,7 +419,7 @@ export default function CurriculumBuilder({ courseId, lang = 'en', onSelectLesso
   }, [showToast, loadChapters]);
 
   const handleDeleteLesson = useCallback(async (id) => {
-    if (!window.confirm(isHt ? 'Efase leson sa a?' : 'Delete this lesson?')) return;
+    if (!window.confirm(isHt ? 'Efase leson sa a?' : inlineText(lang, 'Delete this lesson?'))) return;
     try {
       await lessonService.delete(id);
       setLessonsMap((prev) => {
@@ -428,7 +430,7 @@ export default function CurriculumBuilder({ courseId, lang = 'en', onSelectLesso
         return next;
       });
       if (selectedLessonId === id) onSelectLesson?.(null);
-      showToast?.(isHt ? '✅ Leson efase!' : '✅ Lesson deleted!', 'check-circle');
+      showToast?.(isHt ? '✅ Leson efase!' : inlineText(lang, '✅ Lesson deleted!'), 'check-circle');
     } catch (err) {
       showToast?.(err?.response?.data?.detail || 'Error', 'circle-exclamation');
     }
@@ -450,7 +452,7 @@ export default function CurriculumBuilder({ courseId, lang = 'en', onSelectLesso
   if (loading) {
     return (
       <div className={styles.curriculumLoading}>
-        <Icon name="spinner fa-spin" /> {isHt ? 'Ap chaje...' : 'Loading...'}
+        <Icon name="spinner fa-spin" /> {isHt ? 'Ap chaje...' : inlineText(lang, 'Loading...')}
       </div>
     );
   }
@@ -460,10 +462,10 @@ export default function CurriculumBuilder({ courseId, lang = 'en', onSelectLesso
       <div className={styles.curriculumHeader}>
         <Icon name="sitemap" className={styles.curriculumHeaderIcon} />
         <span className={styles.curriculumHeaderText}>
-          {isHt ? 'Kurikilom' : 'Curriculum'}
+          {isHt ? 'Kurikilom' : inlineText(lang, 'Curriculum')}
         </span>
         <span className={styles.curriculumHeaderCount}>
-          {chapters.length} {isHt ? 'chapit' : 'chapters'}
+          {chapters.length} {isHt ? 'chapit' : inlineText(lang, 'chapters')}
         </span>
       </div>
 
@@ -503,7 +505,7 @@ export default function CurriculumBuilder({ courseId, lang = 'en', onSelectLesso
           value={newChapterTitle}
           onChange={(e) => setNewChapterTitle(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') handleCreateChapter(); }}
-          placeholder={isHt ? 'Tit nouvo chapit...' : 'New chapter title...'}
+          placeholder={isHt ? 'Tit nouvo chapit...' : inlineText(lang, 'New chapter title...')}
           maxLength={200}
           disabled={creatingChapter}
         />
@@ -512,10 +514,10 @@ export default function CurriculumBuilder({ courseId, lang = 'en', onSelectLesso
           className={styles.addChapterBtn}
           onClick={handleCreateChapter}
           disabled={creatingChapter || !newChapterTitle.trim()}
-          title={isHt ? 'Ajoute chapit' : 'Add chapter'}
+          title={isHt ? 'Ajoute chapit' : inlineText(lang, 'Add chapter')}
         >
           <Icon name={creatingChapter ? 'spinner fa-spin' : 'plus'} />
-          {isHt ? 'Ajoute Chapit' : 'Add Chapter'}
+          {isHt ? 'Ajoute Chapit' : inlineText(lang, 'Add Chapter')}
         </button>
       </div>
 
@@ -523,7 +525,7 @@ export default function CurriculumBuilder({ courseId, lang = 'en', onSelectLesso
         <p className={styles.curriculumEmpty}>
           {isHt
             ? 'Pa gen chapit ankò. Kreye premye chapit la pou kòmanse bati kurikilom lan.'
-            : 'No chapters yet. Create the first chapter to start building the curriculum.'}
+            : inlineText(lang, 'No chapters yet. Create the first chapter to start building the curriculum.')}
         </p>
       )}
     </div>

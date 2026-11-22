@@ -27,6 +27,7 @@ import StudioPropertiesPanel, {
 import { ImageUrlField, MediaUrlField, HelpTip, HELP_COPY } from '../modals/shared';
 import { youtubeThumbnail } from '../../../modules/explore/utils/videoSource';
 import styles from './editor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 function secondsToDuration(secs) {
   const total = Math.max(0, Math.round(secs));
@@ -246,24 +247,24 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'en', 
   // ─── Validation (mirrors MusicUploadModal) ───────────────────────────
   const validate = useCallback(() => {
     const errs = {};
-    if (!form.title.trim()) errs.title = isHt ? 'Tit oblije' : 'Title required';
-    if (!form.artist.trim()) errs.artist = isHt ? 'Non atis oblije' : 'Artist name required';
-    if (!form.duration.trim()) errs.duration = isHt ? 'Dire oblije' : 'Duration required';
+    if (!form.title.trim()) errs.title = isHt ? 'Tit oblije' : inlineText(lang, 'Title required');
+    if (!form.artist.trim()) errs.artist = isHt ? 'Non atis oblije' : inlineText(lang, 'Artist name required');
+    if (!form.duration.trim()) errs.duration = isHt ? 'Dire oblije' : inlineText(lang, 'Duration required');
     if (form.duration.trim() && !/^\d{1,2}:[0-5]\d$/.test(form.duration.trim())) {
-      errs.duration = isHt ? 'Fòma: M:SS (egzanp: 3:42)' : 'Format: M:SS (e.g. 3:42)';
+      errs.duration = isHt ? 'Fòma: M:SS (egzanp: 3:42)' : inlineText(lang, 'Format: M:SS (e.g. 3:42)');
     }
     // Cover is required only when the video can't supply one: a YouTube
     // video_url already carries artwork via its thumbnail.
-    if (!form.cover_url.trim() && !youtubeThumbnail(form.video_url || '')) errs.cover_url = isHt ? 'URL kouvèti oblije (oswa kole yon videyo YouTube)' : 'Cover URL required (or paste a YouTube video)';
+    if (!form.cover_url.trim() && !youtubeThumbnail(form.video_url || '')) errs.cover_url = isHt ? 'URL kouvèti oblije (oswa kole yon videyo YouTube)' : inlineText(lang, 'Cover URL required (or paste a YouTube video)');
     return errs;
   }, [form.title, form.artist, form.duration, form.cover_url, isHt]);
 
   const readiness = useCallback(() => {
     const items = [];
-    if (!form.title.trim()) items.push({ message: isHt ? 'Ajoute tit mizik la' : 'Add the track title', target: 'canvas' });
-    if (!form.artist.trim()) items.push({ message: isHt ? 'Ajoute non atis la' : 'Add the artist name', target: 'canvas' });
-    if (!form.cover_url.trim() && !youtubeThumbnail(form.video_url || '')) items.push({ message: isHt ? 'Ajoute yon kouvèti (oswa yon videyo YouTube)' : 'Add cover art (or a YouTube video)', target: 'props' });
-    if (!form.duration.trim()) items.push({ message: isHt ? 'Ajoute dire a (M:SS)' : 'Add the duration (M:SS)', target: 'props' });
+    if (!form.title.trim()) items.push({ message: isHt ? 'Ajoute tit mizik la' : inlineText(lang, 'Add the track title'), target: 'canvas' });
+    if (!form.artist.trim()) items.push({ message: isHt ? 'Ajoute non atis la' : inlineText(lang, 'Add the artist name'), target: 'canvas' });
+    if (!form.cover_url.trim() && !youtubeThumbnail(form.video_url || '')) items.push({ message: isHt ? 'Ajoute yon kouvèti (oswa yon videyo YouTube)' : inlineText(lang, 'Add cover art (or a YouTube video)'), target: 'props' });
+    if (!form.duration.trim()) items.push({ message: isHt ? 'Ajoute dire a (M:SS)' : inlineText(lang, 'Add the duration (M:SS)'), target: 'props' });
     return items;
   }, [form.title, form.artist, form.cover_url, form.duration, isHt]);
 
@@ -309,7 +310,7 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'en', 
         || err?.response?.data?.artist?.[0]
         || err?.response?.data?.cover_url?.[0]
         || err?.message
-        || (isHt ? 'Pa t kapab sove mizik la.' : 'Could not save the music track.');
+        || (isHt ? 'Pa t kapab sove mizik la.' : inlineText(lang, 'Could not save the music track.'));
       setSaveState('error');
       showToast?.(detail, 'circle-exclamation');
       return false;
@@ -336,8 +337,8 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'en', 
   const handlePreview = useCallback(() => {
     const draftTrack = {
       id: savedIdRef.current || 'draft-music',
-      title: form.title.trim() || (isHt ? 'Mizik Sans Tit' : 'Untitled track'),
-      artist: form.artist.trim() || (isHt ? 'Atis Enkoni' : 'Unknown artist'),
+      title: form.title.trim() || (isHt ? 'Mizik Sans Tit' : inlineText(lang, 'Untitled track')),
+      artist: form.artist.trim() || (isHt ? 'Atis Enkoni' : inlineText(lang, 'Unknown artist')),
       genre: form.genre.trim(),
       cover: form.cover_url.trim(),
       cover_url: form.cover_url.trim(),
@@ -362,24 +363,24 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'en', 
           <i className="fas fa-music" aria-hidden="true" />
         </span>
         <div>
-          <h2 className={styles.editorSectionTitle}>{isHt ? 'Workshop Mizik' : 'Music Workspace'}</h2>
+          <h2 className={styles.editorSectionTitle}>{isHt ? 'Workshop Mizik' : inlineText(lang, 'Music Workspace')}</h2>
           <p className={styles.editorSectionHint}>
-            {isHt ? 'Kouvèti, tit ak preview — pataje mizik ou vit.' : 'Cover art, title and preview — share your track fast.'}
+            {isHt ? 'Kouvèti, tit ak preview — pataje mizik ou vit.' : inlineText(lang, 'Cover art, title and preview — share your track fast.')}
           </p>
         </div>
       </header>
       <div className={`${styles.canvas} ${styles.mediaCanvas}`}>
         <div className={styles.mediaPreview}>
           {form.cover_url ? (
-            <img src={form.cover_url} alt={isHt ? 'Kouvèti mizik' : 'Track cover'} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+            <img src={form.cover_url} alt={isHt ? 'Kouvèti mizik' : inlineText(lang, 'Track cover')} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
           ) : (
             <div className={styles.mediaPreviewPlaceholder}>
               <i className="fas fa-compact-disc" aria-hidden="true" />
-              <span>{isHt ? 'Ajoute yon kouvèti (jaden Media a)' : 'Add cover art (via the Media panel)'}</span>
+              <span>{isHt ? 'Ajoute yon kouvèti (jaden Media a)' : inlineText(lang, 'Add cover art (via the Media panel)')}</span>
             </div>
           )}
           <span className={styles.mediaPreviewBadge}>
-            {form.duration ? <><i className="fas fa-clock" aria-hidden="true" /> {form.duration}</> : isHt ? 'Kouvèti' : 'Cover'}
+            {form.duration ? <><i className="fas fa-clock" aria-hidden="true" /> {form.duration}</> : isHt ? 'Kouvèti' : inlineText(lang, 'Cover')}
           </span>
         </div>
 
@@ -387,7 +388,7 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'en', 
           <div className={styles.mediaPreview}>
             <audio controls src={form.preview_url} style={{ width: '100%', margin: 'var(--sp-2xl)' }} />
             <span className={styles.mediaPreviewBadge}>
-              <i className="fas fa-headphones" aria-hidden="true" /> {isHt ? 'Preview odyo' : 'Audio preview'}
+              <i className="fas fa-headphones" aria-hidden="true" /> {isHt ? 'Preview odyo' : inlineText(lang, 'Audio preview')}
             </span>
           </div>
         )}
@@ -396,7 +397,7 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'en', 
           className={styles.canvasTitle}
           value={form.title}
           onChange={(e) => handleChange('title', e.target.value)}
-          placeholder={isHt ? 'Tit mizik la...' : 'Track title…'}
+          placeholder={isHt ? 'Tit mizik la...' : inlineText(lang, 'Track title…')}
           maxLength={200}
           aria-invalid={errors.title ? 'true' : 'false'}
         />
@@ -409,7 +410,7 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'en', 
           className={styles.canvasTitle}
           value={form.artist}
           onChange={(e) => handleChange('artist', e.target.value)}
-          placeholder={isHt ? 'Non atis la...' : 'Artist name…'}
+          placeholder={isHt ? 'Non atis la...' : inlineText(lang, 'Artist name…')}
           maxLength={200}
           style={{ fontSize: 'var(--text-xl)', borderBottom: '1px solid var(--border-color)' }}
           aria-invalid={errors.artist ? 'true' : 'false'}
@@ -431,7 +432,7 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'en', 
           <PropInput
             value={form.genre}
             onChange={(e) => handleChange('genre', e.target.value)}
-            placeholder={isHt ? 'Rap, Kompa, Jazz...' : 'Rap, Kompa, Jazz…'}
+            placeholder={isHt ? 'Rap, Kompa, Jazz...' : inlineText(lang, 'Rap, Kompa, Jazz…')}
           />
         </PropField>
         <PropField
@@ -443,10 +444,10 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'en', 
           hint={detectStatus === 'ok'
             ? (isHt ? `Detekte otomatikman: ${form.duration} ✓` : `Auto-detected: ${form.duration} ✓`)
             : detectStatus === 'failed'
-              ? (isHt ? 'Pa t kapab detekte — antre l manyèlman (M:SS)' : 'Could not detect — enter manually (M:SS)')
+              ? (isHt ? 'Pa t kapab detekte — antre l manyèlman (M:SS)' : inlineText(lang, 'Could not detect — enter manually (M:SS)'))
               : detectStatus === 'detecting'
-                ? (isHt ? 'Ap detekte dire a...' : 'Detecting duration…')
-                : (isHt ? 'M:SS (3:42) — oswa kole preview/YouTube pou detekte l' : 'M:SS (3:42) — or paste a preview/YouTube link to detect it')}
+                ? (isHt ? 'Ap detekte dire a...' : inlineText(lang, 'Detecting duration…'))
+                : (isHt ? 'M:SS (3:42) — oswa kole preview/YouTube pou detekte l' : inlineText(lang, 'M:SS (3:42) — or paste a preview/YouTube link to detect it'))}
         >
           <div style={{ display: 'flex', gap: 'var(--sp-sm)', alignItems: 'stretch' }}>
             <PropInput
@@ -463,14 +464,14 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'en', 
                 const audioUrl = form.preview_url.trim();
                 const videoUrl = form.video_url.trim();
                 if (!audioUrl && !extractYouTubeId(videoUrl)) {
-                  showToast?.(isHt ? 'Antre URL preview a oswa yon videyo YouTube an premye' : 'Add the preview URL or a YouTube video first', 'circle-exclamation');
+                  showToast?.(isHt ? 'Antre URL preview a oswa yon videyo YouTube an premye' : inlineText(lang, 'Add the preview URL or a YouTube video first'), 'circle-exclamation');
                   return;
                 }
                 if (detectTimerRef.current) { clearTimeout(detectTimerRef.current); detectTimerRef.current = null; }
                 runDetection(audioUrl, videoUrl, true);
               }}
               disabled={detectStatus === 'detecting' || (!form.preview_url.trim() && !extractYouTubeId(form.video_url || ''))}
-              title={isHt ? 'Detekte dire a otomatikman' : 'Auto-detect the duration'}
+              title={isHt ? 'Detekte dire a otomatikman' : inlineText(lang, 'Auto-detect the duration')}
             >
               {detectStatus === 'detecting' ? (
                 <i className="fas fa-spinner fa-spin" aria-hidden="true" />
@@ -487,7 +488,7 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'en', 
           value={form.cover_url}
           onChange={(v) => handleChange('cover_url', v)}
           kind="image"
-          label={isHt ? 'Imaj Kouvèti' : 'Cover Image'}
+          label={isHt ? 'Imaj Kouvèti' : inlineText(lang, 'Cover Image')}
           placeholder="https://example.com/cover.jpg"
           isPremium={isPremium}
           required={!youtubeThumbnail(form.video_url || '')}
@@ -502,9 +503,9 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'en', 
               <img src={thumb} alt="" aria-hidden="true" style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover' }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
               <button type="button" className="btn-secondary" onClick={() => handleChange('cover_url', thumb)} style={{ fontSize: '0.8rem' }}>
                 <i className="fab fa-youtube" aria-hidden="true" style={{ marginRight: 6 }} />
-                {isHt ? 'Sèvi ak imaj videyo a' : 'Use video thumbnail'}
+                {isHt ? 'Sèvi ak imaj videyo a' : inlineText(lang, 'Use video thumbnail')}
               </button>
-              <HelpTip help={isHt ? 'Videyo YouTube la deja gen yon imaj — ou ka sèvi ak li olye ou kole yon lòt URL.' : 'This YouTube video already has artwork — use it instead of pasting another URL.'} lang={lang} />
+              <HelpTip help={isHt ? 'Videyo YouTube la deja gen yon imaj — ou ka sèvi ak li olye ou kole yon lòt URL.' : inlineText(lang, 'This YouTube video already has artwork — use it instead of pasting another URL.')} lang={lang} />
             </div>
           );
         })()}
@@ -512,7 +513,7 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'en', 
           label="Preview URL"
           labelHt="URL Preview"
           lang={lang}
-          hint={isHt ? 'Lyen dirèk nan fichye odyo a (MP3, OGG) — opsyonèl' : 'Direct audio file link (MP3, OGG) — optional'}
+          hint={isHt ? 'Lyen dirèk nan fichye odyo a (MP3, OGG) — opsyonèl' : inlineText(lang, 'Direct audio file link (MP3, OGG) — optional')}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-sm)' }}>
             <div style={{ flex: 1 }}>
@@ -520,7 +521,7 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'en', 
                 value={form.preview_url}
                 onChange={(v) => handleChange('preview_url', v)}
                 kind="audio"
-                label={isHt ? 'Preview Odyo' : 'Audio Preview'}
+                label={isHt ? 'Preview Odyo' : inlineText(lang, 'Audio Preview')}
                 placeholder="https://storage.example.com/track.mp3"
                 isPremium={isPremium}
                 lang={lang}
@@ -530,11 +531,11 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'en', 
               type="button"
               className="btn-secondary"
               onClick={() => setShowLibrary(true)}
-              title={isHt ? 'Chwazi odyo nan bibliyotèk la' : 'Choose audio from your library'}
+              title={isHt ? 'Chwazi odyo nan bibliyotèk la' : inlineText(lang, 'Choose audio from your library')}
               style={{ minWidth: 90 }}
             >
               <i className="fas fa-folder-music" aria-hidden="true" /> {' '}
-              {isHt ? 'Bibliyotèk' : 'Library'}
+              {isHt ? 'Bibliyotèk' : inlineText(lang, 'Library')}
             </button>
             <HelpTip help={HELP_COPY.audio} lang={lang} />
           </div>
@@ -543,7 +544,7 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'en', 
           value={form.video_url}
           onChange={(v) => handleChange('video_url', v)}
           kind="video"
-          label={isHt ? 'Videyo' : 'Video'}
+          label={isHt ? 'Videyo' : inlineText(lang, 'Video')}
           placeholder="https://www.youtube.com/watch?v=..."
           isPremium={isPremium}
           lang={lang}
@@ -552,7 +553,7 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'en', 
           label="External Link"
           labelHt="Lyen Ekstèn"
           lang={lang}
-          hint={isHt ? 'Paj ofisyèl mizik la (Spotify, YouTube, SoundCloud) — bouton «Louvri» sou fich la' : 'Official track page (Spotify, YouTube, SoundCloud) — “Open” button on the sheet'}
+          hint={isHt ? 'Paj ofisyèl mizik la (Spotify, YouTube, SoundCloud) — bouton «Louvri» sou fich la' : inlineText(lang, 'Official track page (Spotify, YouTube, SoundCloud) — “Open” button on the sheet')}
         >
           <PropInput
             type="url"
@@ -568,7 +569,7 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'en', 
           label="Hashtags"
           labelHt="Hashtags"
           lang={lang}
-          hint={isHt ? 'Separe ak espas — #Kreyol #Music' : 'Separate with spaces — #Kreyol #Music'}
+          hint={isHt ? 'Separe ak espas — #Kreyol #Music' : inlineText(lang, 'Separate with spaces — #Kreyol #Music')}
         >
           <PropInput
             value={form.hashtags}
@@ -583,7 +584,7 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'en', 
         <p className={styles.propsHint}>
           {isHt
             ? 'Mizik pibliye imedyatman lè w sove — pa gen eta bouyon pou mizik.'
-            : 'Music publishes immediately on save — there is no draft state for tracks.'}
+            : inlineText(lang, 'Music publishes immediately on save — there is no draft state for tracks.')}
         </p>
       </PropertyGroup>
     </>
@@ -592,7 +593,7 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'en', 
   return (
     <>
       <StudioEditorShell
-        title={isHt ? 'Editè Mizik' : 'Music Editor'}
+        title={isHt ? 'Editè Mizik' : inlineText(lang, 'Music Editor')}
         icon="fa-music"
         lang={lang}
         docTitle={form.title.trim()}
@@ -602,7 +603,7 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'en', 
         onBack={onClose}
         onPreview={handlePreview}
         onSave={handleSave}
-        saveLabel={hasSaved ? (isHt ? 'Sove' : 'Save') : (isHt ? 'Kreye Mizik' : 'Create Track')}
+        saveLabel={hasSaved ? (isHt ? 'Sove' : inlineText(lang, 'Save')) : (isHt ? 'Kreye Mizik' : inlineText(lang, 'Create Track'))}
         canSave
         validation={readiness()}
         onFixValidation={() => {}}
@@ -617,7 +618,7 @@ export default function MusicEditor({ onClose, onSuccess, onSaved, lang = 'en', 
               type="button"
               onClick={() => setPreviewOpen(false)}
               style={{ position: 'absolute', top: 18, right: 18, zIndex: 1, border: 'none', borderRadius: 999, width: 42, height: 42, background: 'rgba(15,23,42,0.72)', color: '#fff', fontSize: 18, cursor: 'pointer' }}
-              aria-label={isHt ? 'Fèmen preview' : 'Close preview'}
+              aria-label={isHt ? 'Fèmen preview' : inlineText(lang, 'Close preview')}
             >
               <i className="fas fa-xmark" aria-hidden="true" />
             </button>

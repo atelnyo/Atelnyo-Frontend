@@ -24,6 +24,7 @@ import CheckoutModal from '../../CheckoutModal';
 import { StudioSkeleton, EmptyState, SectionHeader } from '../shared';
 import ConfirmModal from '../../common/ConfirmModal';
 import styles from './sections.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const STATUS_LABEL = {
   active: 'Active',
@@ -97,7 +98,7 @@ export default function ContractsSection({ lang, t, showToast, user }) {
       refetch();
     } catch (err) {
       const detail = err?.response?.data?.detail;
-      showToast?.(detail || (lang === 'ht' ? 'Pa t kapab fè aksyon an.' : 'Could not perform action.'), 'circle-exclamation');
+      showToast?.(detail || (lang === 'ht' ? 'Pa t kapab fè aksyon an.' : inlineText(lang, 'Could not perform action.')), 'circle-exclamation');
     } finally {
       setBusyId(null);
     }
@@ -117,22 +118,22 @@ export default function ContractsSection({ lang, t, showToast, user }) {
   const handleComplete = useCallback((contract) => {
     const msg = lang === 'ht'
       ? `Maké kontra a kòm completed? (Tout milestones yo dwe apwouve.)`
-      : 'Mark this contract as completed? (All milestones must be approved.)';
-    runAction(contract, 'complete', msg, lang === 'ht' ? '✅ Kontra completed!' : '✅ Contract completed!');
+      : inlineText(lang, 'Mark this contract as completed? (All milestones must be approved.)');
+    runAction(contract, 'complete', msg, lang === 'ht' ? '✅ Kontra completed!' : inlineText(lang, '✅ Contract completed!'));
   }, [lang, runAction]);
 
   const handleDispute = useCallback((contract) => {
     const msg = lang === 'ht'
       ? `Louvri yon dispit sou kontra sa a? Yon moderatè ap antre.`
-      : 'Open a dispute on this contract? A moderator will step in.';
-    runAction(contract, 'dispute', msg, lang === 'ht' ? 'Dispit louvri.' : 'Dispute opened.');
+      : inlineText(lang, 'Open a dispute on this contract? A moderator will step in.');
+    runAction(contract, 'dispute', msg, lang === 'ht' ? 'Dispit louvri.' : inlineText(lang, 'Dispute opened.'));
   }, [lang, runAction]);
 
   const handleCancel = useCallback((contract) => {
     const msg = lang === 'ht'
       ? `Anile kontra sa a? (Aksyon final — job la ap maké cancelled.)`
-      : 'Cancel this contract? (Final — the job will be marked cancelled.)';
-    runAction(contract, 'cancel', msg, lang === 'ht' ? 'Kontra anile.' : 'Contract cancelled.');
+      : inlineText(lang, 'Cancel this contract? (Final — the job will be marked cancelled.)');
+    runAction(contract, 'cancel', msg, lang === 'ht' ? 'Kontra anile.' : inlineText(lang, 'Contract cancelled.'));
   }, [lang, runAction]);
 
   // ─── Milestones — the per-contract workspace ────────────────────────
@@ -156,7 +157,7 @@ export default function ContractsSection({ lang, t, showToast, user }) {
         : (Array.isArray(res?.data?.results) ? res.data.results : []);
       setMilestones((m) => ({ ...m, [contractId]: rows }));
     } catch {
-      if (!silent) showToast?.(lang === 'ht' ? 'Pa t kapab chaje milestones yo.' : 'Could not load milestones.', 'circle-exclamation');
+      if (!silent) showToast?.(lang === 'ht' ? 'Pa t kapab chaje milestones yo.' : inlineText(lang, 'Could not load milestones.'), 'circle-exclamation');
     } finally {
       if (!silent) setMsLoading((m) => ({ ...m, [contractId]: false }));
     }
@@ -177,12 +178,12 @@ export default function ContractsSection({ lang, t, showToast, user }) {
   const handleCreateMilestone = useCallback(async (contract) => {
     const f = msForm[contract.id] || {};
     if (!f.title?.trim()) {
-      showToast?.(lang === 'ht' ? 'Bay milestone lan yon tit.' : 'Give the milestone a title.', 'circle-exclamation');
+      showToast?.(lang === 'ht' ? 'Bay milestone lan yon tit.' : inlineText(lang, 'Give the milestone a title.'), 'circle-exclamation');
       return;
     }
     const amount = Number(f.amount);
     if (!Number.isFinite(amount) || amount <= 0) {
-      showToast?.(lang === 'ht' ? 'Mete yon montan valid (> 0).' : 'Enter a valid amount (> 0).', 'circle-exclamation');
+      showToast?.(lang === 'ht' ? 'Mete yon montan valid (> 0).' : inlineText(lang, 'Enter a valid amount (> 0).'), 'circle-exclamation');
       return;
     }
     setMsBusy(`create:${contract.id}`);
@@ -197,11 +198,11 @@ export default function ContractsSection({ lang, t, showToast, user }) {
       });
       setMsForm((m) => ({ ...m, [contract.id]: {} }));
       setMsFormOpen((m) => ({ ...m, [contract.id]: false }));
-      showToast?.(lang === 'ht' ? '✅ Milestone kreye!' : '✅ Milestone created!', 'check-circle');
+      showToast?.(lang === 'ht' ? '✅ Milestone kreye!' : inlineText(lang, '✅ Milestone created!'), 'check-circle');
       await loadMilestones(contract.id, true);
       refetch();
     } catch (err) {
-      showToast?.(err?.response?.data?.detail || err?.response?.data?.title?.[0] || (lang === 'ht' ? 'Pa t kapab kreye milestone lan.' : 'Could not create the milestone.'), 'circle-exclamation');
+      showToast?.(err?.response?.data?.detail || err?.response?.data?.title?.[0] || (lang === 'ht' ? 'Pa t kapab kreye milestone lan.' : inlineText(lang, 'Could not create the milestone.')), 'circle-exclamation');
     } finally {
       setMsBusy(null);
     }
@@ -214,16 +215,16 @@ export default function ContractsSection({ lang, t, showToast, user }) {
       await milestoneService[action](milestone.id);
       showToast?.(
         action === 'submit'
-          ? (lang === 'ht' ? '✅ Milestone soumèt pou revizyon!' : '✅ Milestone submitted for review!')
+          ? (lang === 'ht' ? '✅ Milestone soumèt pou revizyon!' : inlineText(lang, '✅ Milestone submitted for review!'))
           : action === 'markPaid'
-            ? (lang === 'ht' ? '✅ Milestone make peye!' : '✅ Milestone marked paid!')
-            : (lang === 'ht' ? '✅ Milestone apwouve!' : '✅ Milestone approved!'),
+            ? (lang === 'ht' ? '✅ Milestone make peye!' : inlineText(lang, '✅ Milestone marked paid!'))
+            : (lang === 'ht' ? '✅ Milestone apwouve!' : inlineText(lang, '✅ Milestone approved!')),
         'check-circle',
       );
       await loadMilestones(contractId, true);
       refetch();
     } catch (err) {
-      showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab fè aksyon an.' : 'Could not perform action.'), 'circle-exclamation');
+      showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab fè aksyon an.' : inlineText(lang, 'Could not perform action.')), 'circle-exclamation');
     } finally {
       setMsBusy(null);
     }
@@ -248,7 +249,7 @@ export default function ContractsSection({ lang, t, showToast, user }) {
     <div className={styles.section}>
       <SectionHeader
         icon="fa-handshake"
-        title={lang === 'ht' ? 'Kontra yo' : 'Contracts'}
+        title={lang === 'ht' ? 'Kontra yo' : inlineText(lang, 'Contracts')}
         lang={lang}
         help={{
           ht: 'Kontra yo kouvri tou de bò yon akò travay — ou kòm kliyan oswa freelancer. Yon kontra kreye otomatikman lè yon proposal aksepte, epi li swiv milestones li yo isit la.',
@@ -256,16 +257,16 @@ export default function ContractsSection({ lang, t, showToast, user }) {
         }}
         tip={lang === 'ht'
           ? 'Tou de pati yo ka maké completed oswa louvri yon dispit; sèlman kliyan an ka anile.'
-          : 'Either party can mark completed or open a dispute; only the client can cancel.'}
+          : inlineText(lang, 'Either party can mark completed or open a dispute; only the client can cancel.')}
       />
 
       {isEmpty ? (
         <EmptyState
           icon="fa-handshake"
-          title={lang === 'ht' ? 'Pokò gen kontra' : 'No contracts yet'}
+          title={lang === 'ht' ? 'Pokò gen kontra' : inlineText(lang, 'No contracts yet')}
           hint={lang === 'ht'
             ? 'Lè yon proposal aksepte, yon kontra kreye epi li ap parèt isit la.'
-            : 'When a proposal is accepted, a contract is created and will appear here.'}
+            : inlineText(lang, 'When a proposal is accepted, a contract is created and will appear here.')}
         />
       ) : (
         <div className={styles.list}>
@@ -309,7 +310,7 @@ export default function ContractsSection({ lang, t, showToast, user }) {
                     >
                       <i className={`fas ${isClient ? 'fa-user-tie' : 'fa-laptop-code'}`} aria-hidden="true" />
                       {' '}{isClient
-                        ? (lang === 'ht' ? 'Kliyan' : 'Client')
+                        ? (lang === 'ht' ? 'Kliyan' : inlineText(lang, 'Client'))
                         : 'Freelancer'}
                     </span>
                     <span style={{ fontWeight: 700, color: '#2563eb' }}>
@@ -337,7 +338,7 @@ export default function ContractsSection({ lang, t, showToast, user }) {
                         }}
                       >
                         <span>
-                          {lang === 'ht' ? 'Milestones' : 'Milestones'}:{' '}
+                          {lang === 'ht' ? 'Milestones' : inlineText(lang, 'Milestones')}:{' '}
                           {contract.completed_milestone_count || 0}/{contract.milestone_count}
                         </span>
                         <span>{pct}%</span>
@@ -365,7 +366,7 @@ export default function ContractsSection({ lang, t, showToast, user }) {
                   {contract.paid_amount > 0 && (
                     <div className={styles.listMeta} style={{ marginTop: 6 }}>
                       <span style={{ color: '#059669' }}>
-                        {lang === 'ht' ? 'Peye' : 'Paid'}: {contract.paid_amount} {contract.currency || 'USD'}
+                        {lang === 'ht' ? 'Peye' : inlineText(lang, 'Paid')}: {contract.paid_amount} {contract.currency || 'USD'}
                       </span>
                     </div>
                   )}
@@ -378,7 +379,7 @@ export default function ContractsSection({ lang, t, showToast, user }) {
                       aria-expanded={Boolean(expandedMs[contract.id])}
                     >
                       <i className="fas fa-list-check" aria-hidden="true" />
-                      {lang === 'ht' ? 'Milestones' : 'Milestones'}
+                      {lang === 'ht' ? 'Milestones' : inlineText(lang, 'Milestones')}
                       {' '}({contract.milestone_count ?? (milestones[contract.id] || []).length})
                       <i className={`fas fa-chevron-${expandedMs[contract.id] ? 'up' : 'down'}`} aria-hidden="true" />
                     </button>
@@ -387,11 +388,11 @@ export default function ContractsSection({ lang, t, showToast, user }) {
                     <div style={{ marginTop: 8, border: '1px solid var(--border-color, #e5e7eb)', borderRadius: 10, padding: 10, background: 'var(--bg-subtle, rgba(148,163,184,0.06))' }}>
                       {msLoading[contract.id] ? (
                         <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #64748b)' }}>
-                          <i className="fas fa-spinner fa-spin" aria-hidden="true" /> {lang === 'ht' ? 'Ap chaje…' : 'Loading…'}
+                          <i className="fas fa-spinner fa-spin" aria-hidden="true" /> {lang === 'ht' ? 'Ap chaje…' : inlineText(lang, 'Loading…')}
                         </div>
                       ) : (milestones[contract.id] || []).length === 0 ? (
                         <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #64748b)' }}>
-                          {lang === 'ht' ? 'Pokò gen milestone. Defini premye etap peman an anba a.' : 'No milestones yet. Define the first payment checkpoint below.'}
+                          {lang === 'ht' ? 'Pokò gen milestone. Defini premye etap peman an anba a.' : inlineText(lang, 'No milestones yet. Define the first payment checkpoint below.')}
                         </div>
                       ) : (
                         (milestones[contract.id] || []).map((ms) => {
@@ -412,25 +413,25 @@ export default function ContractsSection({ lang, t, showToast, user }) {
                                 </div>
                               </div>
                               {status === 'active' && msIsFreelancer && (msStatus === 'pending' || msStatus === 'in_progress') && (
-                                <button type="button" className={styles.acceptBtn} disabled={msBusy === `submit:${ms.id}`} title={lang === 'ht' ? 'Soumèt pou revizyon' : 'Submit for review'} aria-label={lang === 'ht' ? 'Soumèt milestone lan' : 'Submit milestone'}
+                                <button type="button" className={styles.acceptBtn} disabled={msBusy === `submit:${ms.id}`} title={lang === 'ht' ? 'Soumèt pou revizyon' : inlineText(lang, 'Submit for review')} aria-label={lang === 'ht' ? 'Soumèt milestone lan' : inlineText(lang, 'Submit milestone')}
                                   onClick={() => handleMilestoneAction(contract.id, ms, 'submit')}>
                                   {msBusy === `submit:${ms.id}` ? <i className="fas fa-spinner fa-spin" aria-hidden="true" /> : <i className="fas fa-paper-plane" aria-hidden="true" />}
                                 </button>
                               )}
                               {status === 'active' && msIsClient && msStatus === 'submitted' && (
-                                <button type="button" className={styles.acceptBtn} disabled={msBusy === `approve:${ms.id}`} title={lang === 'ht' ? 'Apwouve milestone lan' : 'Approve milestone'} aria-label={lang === 'ht' ? 'Apwouve milestone lan' : 'Approve milestone'}
+                                <button type="button" className={styles.acceptBtn} disabled={msBusy === `approve:${ms.id}`} title={lang === 'ht' ? 'Apwouve milestone lan' : inlineText(lang, 'Approve milestone')} aria-label={lang === 'ht' ? 'Apwouve milestone lan' : inlineText(lang, 'Approve milestone')}
                                   onClick={() => handleMilestoneAction(contract.id, ms, 'approve')}>
                                   {msBusy === `approve:${ms.id}` ? <i className="fas fa-spinner fa-spin" aria-hidden="true" /> : <i className="fas fa-thumbs-up" aria-hidden="true" />}
                                 </button>
                               )}
                               {status === 'active' && (msIsClient || user?.is_staff) && msStatus === 'approved' && ms.linked_transaction_status === 'succeeded' && (
-                                <button type="button" className={styles.acceptBtn} disabled={msBusy === `markPaid:${ms.id}`} title={lang === 'ht' ? 'Make peye (lajan konfime)' : 'Mark paid (funds confirmed)'} aria-label={lang === 'ht' ? 'Make milestone lan peye' : 'Mark milestone paid'}
+                                <button type="button" className={styles.acceptBtn} disabled={msBusy === `markPaid:${ms.id}`} title={lang === 'ht' ? 'Make peye (lajan konfime)' : inlineText(lang, 'Mark paid (funds confirmed)')} aria-label={lang === 'ht' ? 'Make milestone lan peye' : inlineText(lang, 'Mark milestone paid')}
                                   onClick={() => handleMilestoneAction(contract.id, ms, 'markPaid')}>
                                   {msBusy === `markPaid:${ms.id}` ? <i className="fas fa-spinner fa-spin" aria-hidden="true" /> : <i className="fas fa-money-bill-wave" aria-hidden="true" />}
                                 </button>
                               )}
                               {status === 'active' && msIsClient && (msStatus === 'pending' || msStatus === 'in_progress') && (
-                                <button type="button" className={styles.editBtn} title={lang === 'ht' ? 'Fonde nan escrow (PayPal)' : 'Fund in escrow (PayPal)'} aria-label={lang === 'ht' ? 'Fonde milestone lan' : 'Fund milestone'}
+                                <button type="button" className={styles.editBtn} title={lang === 'ht' ? 'Fonde nan escrow (PayPal)' : inlineText(lang, 'Fund in escrow (PayPal)')} aria-label={lang === 'ht' ? 'Fonde milestone lan' : inlineText(lang, 'Fund milestone')}
                                   onClick={() => setFundTarget({ ...ms, contractId: contract.id })}>
                                   <i className="fas fa-vault" aria-hidden="true" />
                                 </button>
@@ -444,30 +445,30 @@ export default function ContractsSection({ lang, t, showToast, user }) {
                           {!msFormOpen[contract.id] ? (
                             <button type="button" onClick={() => setMsFormOpen((m) => ({ ...m, [contract.id]: true }))}
                               style={{ border: '1px dashed var(--border-color, #cbd5e1)', background: 'transparent', borderRadius: 8, padding: '6px 12px', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary, #64748b)', cursor: 'pointer', width: '100%' }}>
-                              <i className="fas fa-plus" aria-hidden="true" /> {lang === 'ht' ? 'Ajoute yon milestone' : 'Add a milestone'}
+                              <i className="fas fa-plus" aria-hidden="true" /> {lang === 'ht' ? 'Ajoute yon milestone' : inlineText(lang, 'Add a milestone')}
                             </button>
                           ) : (
                             <div style={{ display: 'grid', gap: 8 }}>
                               <input value={msForm[contract.id]?.title || ''} onChange={(e) => setFormField(contract.id, 'title', e.target.value)}
-                                placeholder={lang === 'ht' ? 'Tit milestone lan *' : 'Milestone title *'}
+                                placeholder={lang === 'ht' ? 'Tit milestone lan *' : inlineText(lang, 'Milestone title *')}
                                 style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border-color, #cbd5e1)', fontSize: '0.82rem', background: 'var(--bg-default, #fff)', color: 'inherit' }} />
                               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                                 <input type="number" min="0" step="0.01" value={msForm[contract.id]?.amount || ''} onChange={(e) => setFormField(contract.id, 'amount', e.target.value)}
-                                  placeholder={lang === 'ht' ? 'Montan *' : 'Amount *'}
+                                  placeholder={lang === 'ht' ? 'Montan *' : inlineText(lang, 'Amount *')}
                                   style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border-color, #cbd5e1)', fontSize: '0.82rem', background: 'var(--bg-default, #fff)', color: 'inherit' }} />
                                 <input type="datetime-local" value={msForm[contract.id]?.due_date || ''} onChange={(e) => setFormField(contract.id, 'due_date', e.target.value)}
-                                  style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border-color, #cbd5e1)', fontSize: '0.82rem', background: 'var(--bg-default, #fff)', color: 'inherit' }} aria-label={lang === 'ht' ? 'Dat limit' : 'Due date'} />
+                                  style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border-color, #cbd5e1)', fontSize: '0.82rem', background: 'var(--bg-default, #fff)', color: 'inherit' }} aria-label={lang === 'ht' ? 'Dat limit' : inlineText(lang, 'Due date')} />
                               </div>
                               <textarea value={msForm[contract.id]?.description || ''} onChange={(e) => setFormField(contract.id, 'description', e.target.value)}
-                                placeholder={lang === 'ht' ? 'Deskripsyon (opsyonèl)' : 'Description (optional)'} rows={2}
+                                placeholder={lang === 'ht' ? 'Deskripsyon (opsyonèl)' : inlineText(lang, 'Description (optional)')} rows={2}
                                 style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border-color, #cbd5e1)', fontSize: '0.82rem', background: 'var(--bg-default, #fff)', color: 'inherit', resize: 'vertical' }} />
                               <div style={{ display: 'flex', gap: 8 }}>
                                 <button type="button" className={styles.acceptBtn} disabled={msBusy === `create:${contract.id}`} onClick={() => handleCreateMilestone(contract)}>
                                   {msBusy === `create:${contract.id}` ? <i className="fas fa-spinner fa-spin" aria-hidden="true" /> : <i className="fas fa-check" aria-hidden="true" />}
-                                  {' '}{lang === 'ht' ? 'Kreye' : 'Create'}
+                                  {' '}{lang === 'ht' ? 'Kreye' : inlineText(lang, 'Create')}
                                 </button>
                                 <button type="button" className={styles.deleteBtn} onClick={() => { setMsFormOpen((m) => ({ ...m, [contract.id]: false })); setMsForm((m) => ({ ...m, [contract.id]: {} })); }}>
-                                  {lang === 'ht' ? 'Anile' : 'Cancel'}
+                                  {lang === 'ht' ? 'Anile' : inlineText(lang, 'Cancel')}
                                 </button>
                               </div>
                             </div>
@@ -488,8 +489,8 @@ export default function ContractsSection({ lang, t, showToast, user }) {
                         className={styles.acceptBtn}
                         onClick={() => handleComplete(contract)}
                         disabled={busyId === `${contract.id}:complete`}
-                        title={lang === 'ht' ? 'Maké completed' : 'Mark completed'}
-                        aria-label={lang === 'ht' ? 'Maké kontra a completed' : 'Mark contract completed'}
+                        title={lang === 'ht' ? 'Maké completed' : inlineText(lang, 'Mark completed')}
+                        aria-label={lang === 'ht' ? 'Maké kontra a completed' : inlineText(lang, 'Mark contract completed')}
                       >
                         {busyId === `${contract.id}:complete`
                           ? <i className="fas fa-spinner fa-spin" aria-hidden="true" />
@@ -502,8 +503,8 @@ export default function ContractsSection({ lang, t, showToast, user }) {
                         className={styles.deleteBtn}
                         onClick={() => handleDispute(contract)}
                         disabled={busyId === `${contract.id}:dispute`}
-                        title={lang === 'ht' ? 'Louvri dispit' : 'Open dispute'}
-                        aria-label={lang === 'ht' ? 'Louvri yon dispit' : 'Open a dispute'}
+                        title={lang === 'ht' ? 'Louvri dispit' : inlineText(lang, 'Open dispute')}
+                        aria-label={lang === 'ht' ? 'Louvri yon dispit' : inlineText(lang, 'Open a dispute')}
                       >
                         {busyId === `${contract.id}:dispute`
                           ? <i className="fas fa-spinner fa-spin" aria-hidden="true" />
@@ -516,8 +517,8 @@ export default function ContractsSection({ lang, t, showToast, user }) {
                         className={styles.deleteBtn}
                         onClick={() => handleCancel(contract)}
                         disabled={busyId === `${contract.id}:cancel`}
-                        title={lang === 'ht' ? 'Anile' : 'Cancel'}
-                        aria-label={lang === 'ht' ? 'Anile kontra a' : 'Cancel contract'}
+                        title={lang === 'ht' ? 'Anile' : inlineText(lang, 'Cancel')}
+                        aria-label={lang === 'ht' ? 'Anile kontra a' : inlineText(lang, 'Cancel contract')}
                       >
                         {busyId === `${contract.id}:cancel`
                           ? <i className="fas fa-spinner fa-spin" aria-hidden="true" />
@@ -536,7 +537,7 @@ export default function ContractsSection({ lang, t, showToast, user }) {
         <p className={styles.sectionDescription} style={{ marginTop: 16 }}>
           {lang === 'ht'
             ? '💡 Tou de pati yo ka maké completed oswa louvri yon dispit. Sèlman kliyan an ka anile. Tout aksyon yo fèt ak konfimasyon.'
-            : '💡 Either party can mark completed or open a dispute. Only the client can cancel. All actions require confirmation.'}
+            : inlineText(lang, '💡 Either party can mark completed or open a dispute. Only the client can cancel. All actions require confirmation.')}
         </p>
       )}
       {/* Escrow funding — PayPal AUTHORIZE hold on the milestone. The
@@ -551,7 +552,7 @@ export default function ContractsSection({ lang, t, showToast, user }) {
           user={user}
           showToast={showToast}
           onClose={handleFundClose}
-          onSuccess={() => showToast?.(lang === 'ht' ? '✅ Escrow fande — lajan an kenbe!' : '✅ Escrow funded — amount held!', 'check-circle')}
+          onSuccess={() => showToast?.(lang === 'ht' ? '✅ Escrow fande — lajan an kenbe!' : inlineText(lang, '✅ Escrow funded — amount held!'), 'check-circle')}
         />
       )}
       {/* ConfirmModal for actions */}
@@ -559,11 +560,11 @@ export default function ContractsSection({ lang, t, showToast, user }) {
         <ConfirmModal
           title={lang === 'ht'
             ? 'Konfime aksyon'
-            : 'Confirm action'}
+            : inlineText(lang, 'Confirm action')}
           message={confirm.confirmMsg}
           lang={lang}
           variant={confirm.action === 'cancel' ? 'danger' : confirm.action === 'dispute' ? 'warning' : 'info'}
-          confirmText={lang === 'ht' ? 'Wi, konfime' : 'Yes, confirm'}
+          confirmText={lang === 'ht' ? 'Wi, konfime' : inlineText(lang, 'Yes, confirm')}
           onConfirm={handleConfirm}
           onCancel={handleCancelConfirm}
           loading={busyId !== null}

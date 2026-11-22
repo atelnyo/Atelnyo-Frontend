@@ -24,6 +24,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { walletService } from '../../../services/api';
 import { StudioModal, FormField, LoadingOverlay } from './shared';
 import styles from './modals.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const ID_DOCUMENT_TYPES = [
   { value: 'passport', en: 'Passport', ht: 'Paspo' },
@@ -34,7 +35,7 @@ const ID_DOCUMENT_TYPES = [
 
 export default function VerificationModal({ onClose, lang, showToast, onSuccess }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? (ht || en) : en);
+  const t = (en, ht) => (isHt ? (ht || en) : inlineText(lang, en));
 
   // status: null=loading | approved | pending | rejected | unverified
   const [status, setStatus] = useState(null);

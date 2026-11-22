@@ -18,20 +18,19 @@
 
 /**
  * Map-based lookup. Pass an object keyed by language code.
- * @param {string} lang - Current supported language code ('ht', 'en', 'fr')
+ * @param {string} lang - Current supported language code ('ht', 'en', 'fr', 'es')
  * @param {Object} map  - { ht: '...', en: '...', fr: '...' }
  * @returns {string}
  */
 export function normalizeSupportedLanguage(lang) {
   const code = String(lang || '').trim().toLowerCase().split('-')[0];
-  if (code === 'es') return 'en';
   return SUPPORTED_LANGUAGES.includes(code) ? code : null;
 }
 
 export function t2(lang, map) {
   if (!map) return '';
   const language = normalizeSupportedLanguage(lang);
-  return map[language] || map.en || map.ht || map.fr || Object.values(map)[0] || '';
+  return map[language] || map.en || map.ht || map.fr || map.es || Object.values(map)[0] || '';
 }
 
 /**
@@ -40,13 +39,14 @@ export function t2(lang, map) {
  * @param {string} ht  - Haitian Creole
  * @param {string} en  - English (fallback)
  * @param {string} [fr] - French
- * @param {string} [_legacySpanish] - Ignored legacy positional argument.
+ * @param {string} [es] - Spanish
  * @returns {string}
  */
-export function t(lang, ht, en, fr) {
+export function t(lang, ht, en, fr, es) {
   switch (normalizeSupportedLanguage(lang)) {
     case 'ht': return ht || en || '';
     case 'fr': return fr || en || ht || '';
+    case 'es': return es || en || ht || '';
     default:   return en || ht || '';
   }
 }

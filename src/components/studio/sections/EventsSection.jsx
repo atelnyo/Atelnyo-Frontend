@@ -12,6 +12,7 @@ import { communityEventsService } from '../../../services/api';
 import { StudioSkeleton, EmptyState, SectionHeader } from '../shared';
 import ConfirmModal from '../../common/ConfirmModal';
 import styles from './sections.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const STATUS_LABEL = {
   draft: 'Draft',
@@ -25,7 +26,7 @@ function formatWhen(ev, lang) {
   const d = new Date(ev.start_time);
   if (Number.isNaN(d.getTime())) return '';
   const opts = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-  return d.toLocaleString(lang === 'ht' ? 'fr-HT' : 'en-US', opts);
+  return d.toLocaleString(lang === 'ht' ? 'fr-HT' : inlineText(lang, 'en-US'), opts);
 }
 
 export default function EventsSection({ lang, t, showToast, setShowEventModal, onEdit, user }) {
@@ -43,7 +44,7 @@ export default function EventsSection({ lang, t, showToast, setShowEventModal, o
   const handleDeleteClick = (item) => {
     setConfirm({
       item,
-      title: lang === 'ht' ? 'Efase evènman' : 'Delete event',
+      title: lang === 'ht' ? 'Efase evènman' : inlineText(lang, 'Delete event'),
       message: lang === 'ht'
         ? `Eske w sèten ou vle efase "${item.title}"?`
         : `Are you sure you want to delete "${item.title}"?`,
@@ -59,9 +60,9 @@ export default function EventsSection({ lang, t, showToast, setShowEventModal, o
         (async () => {
           try {
             await communityEventsService.delete(item.id);
-            showToast?.(lang === 'ht' ? '✅ Evènman efase!' : '✅ Event deleted!', 'check-circle');
+            showToast?.(lang === 'ht' ? '✅ Evènman efase!' : inlineText(lang, '✅ Event deleted!'), 'check-circle');
           } catch (err) {
-            showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase.' : 'Could not delete.'), 'circle-exclamation');
+            showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase.' : inlineText(lang, 'Could not delete.')), 'circle-exclamation');
           }
           refetch();
         })();
@@ -72,10 +73,10 @@ export default function EventsSection({ lang, t, showToast, setShowEventModal, o
   const handlePublish = async (item) => {
     try {
       await communityEventsService.update(item.id, { status: 'published' });
-      showToast?.(lang === 'ht' ? 'Evènman pibliye!' : 'Event published!', 'check-circle');
+      showToast?.(lang === 'ht' ? 'Evènman pibliye!' : inlineText(lang, 'Event published!'), 'check-circle');
       refetch();
     } catch (err) {
-      showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab pibliye.' : 'Could not publish.'), 'circle-exclamation');
+      showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab pibliye.' : inlineText(lang, 'Could not publish.')), 'circle-exclamation');
     }
   };
 
@@ -97,7 +98,7 @@ export default function EventsSection({ lang, t, showToast, setShowEventModal, o
         setAttendees((m) => ({ ...m, [ev.id]: rows }));
       } catch (err) {
         setAttendees((m) => ({ ...m, [ev.id]: [] }));
-        showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab wè envite yo.' : 'Could not load guests.'), 'circle-exclamation');
+        showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab wè envite yo.' : inlineText(lang, 'Could not load guests.')), 'circle-exclamation');
       } finally {
         setAttLoading((m) => ({ ...m, [ev.id]: false }));
       }
@@ -112,7 +113,7 @@ export default function EventsSection({ lang, t, showToast, setShowEventModal, o
     <div className={styles.section}>
       <SectionHeader
         icon="fa-calendar-check"
-        title={lang === 'ht' ? 'Evènman mwen yo' : 'My Events'}
+        title={lang === 'ht' ? 'Evènman mwen yo' : inlineText(lang, 'My Events')}
         lang={lang}
         help={{
           ht: 'Evènman kominote ou yo parèt sou paj kominote a. Chwazi yon kominote ak yon dat kòmansman pou pibliye yon evènman.',
@@ -120,7 +121,7 @@ export default function EventsSection({ lang, t, showToast, setShowEventModal, o
         }}
         tip={lang === 'ht'
           ? 'Yon evènman pibliye parèt imedyatman sou paj kominote a — chwazi yon dat nan fiti.'
-          : 'A published event shows up immediately on the community page — pick a future start time.'}
+          : inlineText(lang, 'A published event shows up immediately on the community page — pick a future start time.')}
         action={
           <button
             type="button"
@@ -128,18 +129,18 @@ export default function EventsSection({ lang, t, showToast, setShowEventModal, o
             onClick={() => setShowEventModal(true)}
           >
             <i className="fas fa-plus" aria-hidden="true" />
-            {lang === 'ht' ? 'Kreye Evènman' : 'Create Event'}
+            {lang === 'ht' ? 'Kreye Evènman' : inlineText(lang, 'Create Event')}
           </button>
         }
       />
       {isEmpty ? (
         <EmptyState
           icon="fa-calendar-check"
-          title={lang === 'ht' ? 'Poko gen evènman' : 'No events yet'}
+          title={lang === 'ht' ? 'Poko gen evènman' : inlineText(lang, 'No events yet')}
           hint={lang === 'ht'
             ? 'Kreye premye evènman ou pou kominote a.'
-            : 'Create your first event for the community.'}
-          ctaLabel={lang === 'ht' ? 'Kreye Premye Evènman' : 'Create First Event'}
+            : inlineText(lang, 'Create your first event for the community.')}
+          ctaLabel={lang === 'ht' ? 'Kreye Premye Evènman' : inlineText(lang, 'Create First Event')}
           onCta={() => setShowEventModal(true)}
         />
       ) : (
@@ -196,7 +197,7 @@ export default function EventsSection({ lang, t, showToast, setShowEventModal, o
                       aria-expanded={Boolean(expandedAtt[ev.id])}
                     >
                       <i className="fas fa-users" aria-hidden="true" />
-                      {lang === 'ht' ? 'Envite' : 'Guests'}{' '}({ev.attendee_count ?? (attendees[ev.id] || []).length})
+                      {lang === 'ht' ? 'Envite' : inlineText(lang, 'Guests')}{' '}({ev.attendee_count ?? (attendees[ev.id] || []).length})
                       <i className={`fas fa-chevron-${expandedAtt[ev.id] ? 'up' : 'down'}`} aria-hidden="true" />
                     </button>
                   </div>
@@ -204,11 +205,11 @@ export default function EventsSection({ lang, t, showToast, setShowEventModal, o
                     <div style={{ marginTop: 6, border: '1px solid var(--border-color, #e5e7eb)', borderRadius: 8, padding: 8, fontSize: '0.8rem' }}>
                       {attLoading[ev.id] ? (
                         <span style={{ color: 'var(--text-secondary, #64748b)' }}>
-                          <i className="fas fa-spinner fa-spin" aria-hidden="true" /> {lang === 'ht' ? ' Ap chaje…' : ' Loading…'}
+                          <i className="fas fa-spinner fa-spin" aria-hidden="true" /> {lang === 'ht' ? ' Ap chaje…' : inlineText(lang, ' Loading…')}
                         </span>
                       ) : (attendees[ev.id] || []).length === 0 ? (
                         <span style={{ color: 'var(--text-secondary, #64748b)' }}>
-                          {lang === 'ht' ? 'Pokò gen envite konfime.' : 'No confirmed guests yet.'}
+                          {lang === 'ht' ? 'Pokò gen envite konfime.' : inlineText(lang, 'No confirmed guests yet.')}
                         </span>
                       ) : (
                         (attendees[ev.id] || []).map((a) => (
@@ -226,16 +227,16 @@ export default function EventsSection({ lang, t, showToast, setShowEventModal, o
                 <div className={styles.itemActions}>
                   {status === 'draft' && (
                     <button type="button" className={styles.editBtn} onClick={() => handlePublish(ev)}
-                      title={lang === 'ht' ? 'Pibliye' : 'Publish'}>
+                      title={lang === 'ht' ? 'Pibliye' : inlineText(lang, 'Publish')}>
                       <i className="fas fa-rocket" aria-hidden="true" />
                     </button>
                   )}
                   <button type="button" className={styles.editBtn} onClick={() => onEdit?.(ev)}
-                    title={lang === 'ht' ? 'Modifye' : 'Edit'}>
+                    title={lang === 'ht' ? 'Modifye' : inlineText(lang, 'Edit')}>
                     <i className="fas fa-pen" aria-hidden="true" />
                   </button>
                   <button type="button" className={styles.deleteBtn} onClick={() => handleDeleteClick(ev)}
-                    title={lang === 'ht' ? 'Efase' : 'Delete'}>
+                    title={lang === 'ht' ? 'Efase' : inlineText(lang, 'Delete')}>
                     <i className="fas fa-trash-can" aria-hidden="true" />
                   </button>
                 </div>
@@ -249,8 +250,8 @@ export default function EventsSection({ lang, t, showToast, setShowEventModal, o
           lang={lang}
           title={confirm.title}
           message={confirm.message}
-          confirmText={lang === 'ht' ? 'Efase' : 'Delete'}
-          cancelText={lang === 'ht' ? 'Anile' : 'Cancel'}
+          confirmText={lang === 'ht' ? 'Efase' : inlineText(lang, 'Delete')}
+          cancelText={lang === 'ht' ? 'Anile' : inlineText(lang, 'Cancel')}
           loading={confirmBusy}
           onConfirm={confirm.onConfirm}
           onCancel={() => { if (!confirmBusy) setConfirm(null); }}

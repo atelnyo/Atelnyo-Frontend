@@ -14,6 +14,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { creatorGoalService } from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 const CATEGORY_ICONS = {
   creation: 'fa-lightbulb',
@@ -64,7 +65,7 @@ export default function CreatorGoals({ lang = 'en', showToast }) {
 
   const handleCreate = async () => {
     if (!newGoal.title.trim()) {
-      showToast?.(isHt ? 'Antre yon tit objektif' : 'Enter a goal title', 'exclamation-circle');
+      showToast?.(isHt ? 'Antre yon tit objektif' : inlineText(lang, 'Enter a goal title'), 'exclamation-circle');
       return;
     }
     setSaving(true);
@@ -76,12 +77,12 @@ export default function CreatorGoals({ lang = 'en', showToast }) {
         target_value: newGoal.target_value ? parseInt(newGoal.target_value, 10) : null,
         unit: newGoal.unit,
       });
-      showToast?.(isHt ? 'Objektif kreye! 🎯' : 'Goal created! 🎯', 'check-circle');
+      showToast?.(isHt ? 'Objektif kreye! 🎯' : inlineText(lang, 'Goal created! 🎯'), 'check-circle');
       setNewGoal({ title: '', description: '', category: 'other', target_value: '', unit: '' });
       setShowAdd(false);
       fetchGoals();
     } catch {
-      showToast?.(isHt ? 'Erè nan kreye objektif' : 'Error creating goal', 'exclamation-triangle');
+      showToast?.(isHt ? 'Erè nan kreye objektif' : inlineText(lang, 'Error creating goal'), 'exclamation-triangle');
     } finally {
       setSaving(false);
     }
@@ -90,10 +91,10 @@ export default function CreatorGoals({ lang = 'en', showToast }) {
   const handleComplete = async (goalId) => {
     try {
       await creatorGoalService.complete(goalId);
-      showToast?.(isHt ? 'Objektif fini! ✅' : 'Goal completed! ✅', 'trophy');
+      showToast?.(isHt ? 'Objektif fini! ✅' : inlineText(lang, 'Goal completed! ✅'), 'trophy');
       fetchGoals();
     } catch {
-      showToast?.(isHt ? 'Erè' : 'Error', 'exclamation-triangle');
+      showToast?.(isHt ? 'Erè' : inlineText(lang, 'Error'), 'exclamation-triangle');
     }
   };
 
@@ -102,7 +103,7 @@ export default function CreatorGoals({ lang = 'en', showToast }) {
       await creatorGoalService.archive(goalId);
       fetchGoals();
     } catch {
-      showToast?.(isHt ? 'Erè' : 'Error', 'exclamation-triangle');
+      showToast?.(isHt ? 'Erè' : inlineText(lang, 'Error'), 'exclamation-triangle');
     }
   };
 
@@ -134,15 +135,15 @@ export default function CreatorGoals({ lang = 'en', showToast }) {
       <div className="cg-header">
         <div className="cg-header-left">
           <i className="fas fa-bullseye" aria-hidden="true" />
-          <h3 className="cg-title">{isHt ? 'Objektif Kreyatè' : 'Creator Goals'}</h3>
+          <h3 className="cg-title">{isHt ? 'Objektif Kreyatè' : inlineText(lang, 'Creator Goals')}</h3>
         </div>
         <button
           type="button"
           className="cg-add-btn"
           onClick={() => setShowAdd(true)}
-          aria-label={isHt ? 'Ajoute objektif' : 'Add goal'}
+          aria-label={isHt ? 'Ajoute objektif' : inlineText(lang, 'Add goal')}
         >
-          <i className="fas fa-plus" /> {isHt ? 'Ajoute' : 'Add'}
+          <i className="fas fa-plus" /> {isHt ? 'Ajoute' : inlineText(lang, 'Add')}
         </button>
       </div>
 
@@ -150,10 +151,10 @@ export default function CreatorGoals({ lang = 'en', showToast }) {
       {goals && activeGoals.length === 0 && completedGoals.length === 0 && (
         <div className="cg-empty" role="status">
           <i className="fas fa-flag-checkered" aria-hidden="true" />
-          <h4>{isHt ? 'Pa gen objektif ankò' : 'No goals yet'}</h4>
-          <p>{isHt ? 'Mete objektif pou swiv vwayaj kreyatè ou.' : 'Set goals to track your creator journey.'}</p>
+          <h4>{isHt ? 'Pa gen objektif ankò' : inlineText(lang, 'No goals yet')}</h4>
+          <p>{isHt ? 'Mete objektif pou swiv vwayaj kreyatè ou.' : inlineText(lang, 'Set goals to track your creator journey.')}</p>
           <div className="cg-templates">
-            <span className="cg-templates-label">{isHt ? 'Sijesyon:' : 'Suggestions:'}</span>
+            <span className="cg-templates-label">{isHt ? 'Sijesyon:' : inlineText(lang, 'Suggestions:')}</span>
             <div className="cg-template-chips">
               {templates.slice(0, 4).map((tmpl, i) => (
                 <button
@@ -188,8 +189,8 @@ export default function CreatorGoals({ lang = 'en', showToast }) {
                     type="button"
                     className="cg-goal-complete-btn"
                     onClick={() => handleComplete(goal.id)}
-                    title={isHt ? 'Fini' : 'Complete'}
-                    aria-label={isHt ? 'Fini objektif' : 'Complete goal'}
+                    title={isHt ? 'Fini' : inlineText(lang, 'Complete')}
+                    aria-label={isHt ? 'Fini objektif' : inlineText(lang, 'Complete goal')}
                   >
                     <i className="fas fa-check" />
                   </button>
@@ -227,7 +228,7 @@ export default function CreatorGoals({ lang = 'en', showToast }) {
         <details className="cg-completed-section">
           <summary className="cg-completed-toggle">
             <i className="fas fa-trophy" aria-hidden="true" style={{ color: '#f59e0b' }} />
-            <span>{isHt ? 'Objektif Fini' : 'Completed Goals'} ({completedGoals.length})</span>
+            <span>{isHt ? 'Objektif Fini' : inlineText(lang, 'Completed Goals')} ({completedGoals.length})</span>
             <i className="fas fa-chevron-down" aria-hidden="true" />
           </summary>
           <div className="cg-completed-list">
@@ -241,7 +242,7 @@ export default function CreatorGoals({ lang = 'en', showToast }) {
                   type="button"
                   className="cg-archive-btn"
                   onClick={() => handleArchive(goal.id)}
-                  title={isHt ? 'Archive' : 'Archive'}
+                  title={isHt ? 'Archive' : inlineText(lang, 'Archive')}
                 >
                   <i className="fas fa-box-archive" />
                 </button>
@@ -253,58 +254,58 @@ export default function CreatorGoals({ lang = 'en', showToast }) {
 
       {/* Add Goal Overlay */}
       {showAdd && (
-        <div className="cg-overlay" role="dialog" aria-modal="true" aria-label={isHt ? 'Ajoute objektif' : 'Add goal'}>
+        <div className="cg-overlay" role="dialog" aria-modal="true" aria-label={isHt ? 'Ajoute objektif' : inlineText(lang, 'Add goal')}>
           <div className="cg-overlay-card">
             <div className="cg-overlay-header">
-              <h3>{isHt ? 'Nouvo Objektif' : 'New Goal'}</h3>
+              <h3>{isHt ? 'Nouvo Objektif' : inlineText(lang, 'New Goal')}</h3>
               <button
                 type="button"
                 className="cg-overlay-close"
                 onClick={() => setShowAdd(false)}
-                aria-label={isHt ? 'Fèmen' : 'Close'}
+                aria-label={isHt ? 'Fèmen' : inlineText(lang, 'Close')}
               >
                 <i className="fas fa-times" />
               </button>
             </div>
             <div className="cg-overlay-body">
               <label className="cg-field">
-                <span>{isHt ? 'Tit' : 'Title'} *</span>
+                <span>{isHt ? 'Tit' : inlineText(lang, 'Title')} *</span>
                 <input
                   type="text"
                   value={newGoal.title}
                   onChange={(e) => setNewGoal(p => ({ ...p, title: e.target.value }))}
-                  placeholder={isHt ? 'Egzanp: Rive jwenn 100 elèv' : 'e.g., Reach 100 students'}
+                  placeholder={isHt ? 'Egzanp: Rive jwenn 100 elèv' : inlineText(lang, 'e.g., Reach 100 students')}
                   className="cg-input"
                 />
               </label>
               <label className="cg-field">
-                <span>{isHt ? 'Deskripsyon' : 'Description'}</span>
+                <span>{isHt ? 'Deskripsyon' : inlineText(lang, 'Description')}</span>
                 <textarea
                   value={newGoal.description}
                   onChange={(e) => setNewGoal(p => ({ ...p, description: e.target.value }))}
-                  placeholder={isHt ? 'Plis detay...' : 'More details...'}
+                  placeholder={isHt ? 'Plis detay...' : inlineText(lang, 'More details...')}
                   className="cg-input cg-textarea"
                   rows={2}
                 />
               </label>
               <div className="cg-field-row">
                 <label className="cg-field">
-                  <span>{isHt ? 'Kategori' : 'Category'}</span>
+                  <span>{isHt ? 'Kategori' : inlineText(lang, 'Category')}</span>
                   <select
                     value={newGoal.category}
                     onChange={(e) => setNewGoal(p => ({ ...p, category: e.target.value }))}
                     className="cg-input"
                   >
-                    <option value="creation">{isHt ? 'Kreyasyon' : 'Creation'}</option>
-                    <option value="revenue">{isHt ? 'Revni' : 'Revenue'}</option>
-                    <option value="audience">{isHt ? 'Odyans' : 'Audience'}</option>
-                    <option value="growth">{isHt ? 'Kwasans' : 'Growth'}</option>
-                    <option value="learning">{isHt ? 'Aprantisaj' : 'Learning'}</option>
-                    <option value="other">{isHt ? 'Lòt' : 'Other'}</option>
+                    <option value="creation">{isHt ? 'Kreyasyon' : inlineText(lang, 'Creation')}</option>
+                    <option value="revenue">{isHt ? 'Revni' : inlineText(lang, 'Revenue')}</option>
+                    <option value="audience">{isHt ? 'Odyans' : inlineText(lang, 'Audience')}</option>
+                    <option value="growth">{isHt ? 'Kwasans' : inlineText(lang, 'Growth')}</option>
+                    <option value="learning">{isHt ? 'Aprantisaj' : inlineText(lang, 'Learning')}</option>
+                    <option value="other">{isHt ? 'Lòt' : inlineText(lang, 'Other')}</option>
                   </select>
                 </label>
                 <label className="cg-field">
-                  <span>{isHt ? 'Sib (si genyen)' : 'Target (optional)'}</span>
+                  <span>{isHt ? 'Sib (si genyen)' : inlineText(lang, 'Target (optional)')}</span>
                   <input
                     type="number"
                     value={newGoal.target_value}
@@ -316,12 +317,12 @@ export default function CreatorGoals({ lang = 'en', showToast }) {
                 </label>
               </div>
               <label className="cg-field">
-                <span>{isHt ? 'Inite' : 'Unit'} ({isHt ? 'si gen sib' : 'if target set'})</span>
+                <span>{isHt ? 'Inite' : inlineText(lang, 'Unit')} ({isHt ? 'si gen sib' : inlineText(lang, 'if target set')})</span>
                 <input
                   type="text"
                   value={newGoal.unit}
                   onChange={(e) => setNewGoal(p => ({ ...p, unit: e.target.value }))}
-                  placeholder={isHt ? 'elèv, kou, USD' : 'students, courses, USD'}
+                  placeholder={isHt ? 'elèv, kou, USD' : inlineText(lang, 'students, courses, USD')}
                   className="cg-input"
                 />
               </label>
@@ -329,7 +330,7 @@ export default function CreatorGoals({ lang = 'en', showToast }) {
               {/* Templates */}
               {templates.length > 0 && (
                 <div className="cg-templates-inline">
-                  <span className="cg-templates-label">{isHt ? 'Oswa chwazi yon sijesyon:' : 'Or pick a suggestion:'}</span>
+                  <span className="cg-templates-label">{isHt ? 'Oswa chwazi yon sijesyon:' : inlineText(lang, 'Or pick a suggestion:')}</span>
                   <div className="cg-template-chips">
                     {templates.slice(0, 6).map((tmpl, i) => (
                       <button
@@ -347,7 +348,7 @@ export default function CreatorGoals({ lang = 'en', showToast }) {
             </div>
             <div className="cg-overlay-footer">
               <button type="button" className="btn-secondary" onClick={() => setShowAdd(false)}>
-                {isHt ? 'Anile' : 'Cancel'}
+                {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
               </button>
               <button
                 type="button"
@@ -356,9 +357,9 @@ export default function CreatorGoals({ lang = 'en', showToast }) {
                 disabled={saving || !newGoal.title.trim()}
               >
                 {saving ? (
-                  <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {isHt ? 'Ap kreye...' : 'Creating...'}</>
+                  <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {isHt ? 'Ap kreye...' : inlineText(lang, 'Creating...')}</>
                 ) : (
-                  <><i className="fas fa-plus" aria-hidden="true" /> {isHt ? 'Kreye Objektif' : 'Create Goal'}</>
+                  <><i className="fas fa-plus" aria-hidden="true" /> {isHt ? 'Kreye Objektif' : inlineText(lang, 'Create Goal')}</>
                 )}
               </button>
             </div>

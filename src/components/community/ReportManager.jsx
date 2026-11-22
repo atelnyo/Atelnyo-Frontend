@@ -13,6 +13,7 @@
  */
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import api from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── Constants ────────────────────────────────────────────────────
 
@@ -135,16 +136,16 @@ function ReportCard({ report, selected, onSelect, onAction, onExpand, expanded, 
 
           <div className="rm-report-actions">
             <button className="rm-btn rm-btn-resolve" onClick={() => onAction?.('resolve', report)}>
-              <i className="fas fa-check" /> {lang === 'ht' ? 'Rezoud' : 'Resolve'}
+              <i className="fas fa-check" /> {lang === 'ht' ? 'Rezoud' : inlineText(lang, 'Resolve')}
             </button>
             <button className="rm-btn rm-btn-dismiss" onClick={() => onAction?.('dismiss', report)}>
-              <i className="fas fa-times" /> {lang === 'ht' ? 'Rejte' : 'Dismiss'}
+              <i className="fas fa-times" /> {lang === 'ht' ? 'Rejte' : inlineText(lang, 'Dismiss')}
             </button>
             <button className="rm-btn rm-btn-escalate" onClick={() => onAction?.('escalate', report)}>
-              <i className="fas fa-arrow-up" /> {lang === 'ht' ? 'Eskale' : 'Escalate'}
+              <i className="fas fa-arrow-up" /> {lang === 'ht' ? 'Eskale' : inlineText(lang, 'Escalate')}
             </button>
             <button className="rm-btn rm-btn-ban" onClick={() => onAction?.('ban', report)}>
-              <i className="fas fa-ban" /> {lang === 'ht' ? 'Bloke' : 'Ban User'}
+              <i className="fas fa-ban" /> {lang === 'ht' ? 'Bloke' : inlineText(lang, 'Ban User')}
             </button>
           </div>
         </div>
@@ -167,31 +168,31 @@ function ReportAnalytics({ stats, lang }) {
     <div className="rm-analytics">
       <h4>
         <i className="fas fa-chart-bar" />
-        {lang === 'ht' ? 'Analiz Rapò' : 'Report Analytics'}
+        {lang === 'ht' ? 'Analiz Rapò' : inlineText(lang, 'Report Analytics')}
       </h4>
 
       <div className="rm-analytics-grid">
         <div className="rm-analytics-card">
           <div className="rm-analytics-value">{total}</div>
-          <div className="rm-analytics-label">{lang === 'ht' ? 'Tout Rapò' : 'Total Reports'}</div>
+          <div className="rm-analytics-label">{lang === 'ht' ? 'Tout Rapò' : inlineText(lang, 'Total Reports')}</div>
         </div>
         <div className="rm-analytics-card">
           <div className="rm-analytics-value">{stats.pending || 0}</div>
-          <div className="rm-analytics-label">{lang === 'ht' ? 'An atant' : 'Pending'}</div>
+          <div className="rm-analytics-label">{lang === 'ht' ? 'An atant' : inlineText(lang, 'Pending')}</div>
         </div>
         <div className="rm-analytics-card">
           <div className="rm-analytics-value">{stats.escalated || 0}</div>
-          <div className="rm-analytics-label">{lang === 'ht' ? 'Eskale' : 'Escalated'}</div>
+          <div className="rm-analytics-label">{lang === 'ht' ? 'Eskale' : inlineText(lang, 'Escalated')}</div>
         </div>
         <div className="rm-analytics-card">
           <div className="rm-analytics-value">{stats.resolved_today || 0}</div>
-          <div className="rm-analytics-label">{lang === 'ht' ? 'Rezoud Jodi a' : 'Resolved Today'}</div>
+          <div className="rm-analytics-label">{lang === 'ht' ? 'Rezoud Jodi a' : inlineText(lang, 'Resolved Today')}</div>
         </div>
       </div>
 
       {/* By Reason */}
       <div className="rm-analytics-section">
-        <h5>{lang === 'ht' ? 'Pa Rezon' : 'By Reason'}</h5>
+        <h5>{lang === 'ht' ? 'Pa Rezon' : inlineText(lang, 'By Reason')}</h5>
         <div className="rm-bar-chart">
           {Object.entries(byReason).map(([reason, count]) => {
             const r = REPORT_REASONS[reason] || REPORT_REASONS.other;
@@ -214,7 +215,7 @@ function ReportAnalytics({ stats, lang }) {
       {/* Top Reported Users */}
       {topReported.length > 0 && (
         <div className="rm-analytics-section">
-          <h5>{lang === 'ht' ? 'Plis Rapòte' : 'Most Reported'}</h5>
+          <h5>{lang === 'ht' ? 'Plis Rapòte' : inlineText(lang, 'Most Reported')}</h5>
           <div className="rm-top-list">
             {topReported.slice(0, 5).map((user, idx) => (
               <div key={idx} className="rm-top-item">
@@ -239,7 +240,7 @@ function BulkActionsBar({ selectedCount, onBulkAction, onClear, lang }) {
     <div className="rm-bulk-bar">
       <div className="rm-bulk-info">
         <span className="rm-bulk-count">{selectedCount}</span>
-        {lang === 'ht' ? ' seleksyone' : ' selected'}
+        {lang === 'ht' ? ' seleksyone' : inlineText(lang, ' selected')}
       </div>
       <div className="rm-bulk-actions">
         <button className="rm-btn rm-btn-resolve" onClick={() => onBulkAction('resolve')}>
@@ -319,11 +320,11 @@ export default function ReportManager({ community, lang = 'en', showToast }) {
       });
       fetchReports();
       showToast?.(
-        lang === 'ht' ? 'Aksyon reyisi!' : 'Action completed!',
+        lang === 'ht' ? 'Aksyon reyisi!' : inlineText(lang, 'Action completed!'),
         'success'
       );
     } catch (err) {
-      showToast?.(lang === 'ht' ? 'Erè' : 'Error', 'error');
+      showToast?.(lang === 'ht' ? 'Erè' : inlineText(lang, 'Error'), 'error');
     }
   }, [community?.id, lang, showToast, fetchReports]);
 
@@ -340,7 +341,7 @@ export default function ReportManager({ community, lang = 'en', showToast }) {
         'success'
       );
     } catch (err) {
-      showToast?.(lang === 'ht' ? 'Erè' : 'Error', 'error');
+      showToast?.(lang === 'ht' ? 'Erè' : inlineText(lang, 'Error'), 'error');
     }
   }, [community?.id, selectedIds, lang, showToast, fetchReports]);
 
@@ -353,7 +354,7 @@ export default function ReportManager({ community, lang = 'en', showToast }) {
       <div className="rm-header">
         <h3>
           <i className="fas fa-flag" />
-          {lang === 'ht' ? 'Jesyon Rapò' : 'Report Manager'}
+          {lang === 'ht' ? 'Jesyon Rapò' : inlineText(lang, 'Report Manager')}
         </h3>
         <div className="rm-header-actions">
           <button className="rm-btn rm-btn-analytics" onClick={() => setShowAnalytics(!showAnalytics)}>
@@ -395,7 +396,7 @@ export default function ReportManager({ community, lang = 'en', showToast }) {
         {sortedReports.length === 0 && !loading ? (
           <div className="rm-empty">
             <i className="fas fa-check-circle" />
-            <p>{lang === 'ht' ? 'Pa gen rapò nan atant' : 'No pending reports'}</p>
+            <p>{lang === 'ht' ? 'Pa gen rapò nan atant' : inlineText(lang, 'No pending reports')}</p>
           </div>
         ) : (
           sortedReports.map((report) => (
@@ -415,7 +416,7 @@ export default function ReportManager({ community, lang = 'en', showToast }) {
         {loading && (
           <div className="rm-loading">
             <i className="fas fa-spinner fa-spin" />
-            <span>{lang === 'ht' ? 'Ap chaje...' : 'Loading...'}</span>
+            <span>{lang === 'ht' ? 'Ap chaje...' : inlineText(lang, 'Loading...')}</span>
           </div>
         )}
       </div>

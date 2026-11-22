@@ -18,6 +18,7 @@ import SaveHeartButton from './SaveHeartButton';
 import { buildContentUrl, buildContentShareUrl, isLegacyContentUrl } from '../utils/contentUrl';
 import { resolveVideoSource } from '../modules/explore/utils/videoSource';
 import VideoEmbedFrame from './media/VideoEmbedFrame';
+import { inlineText } from '../utils/inlineI18n';
 
 const ITEM_LABELS = {
   course: { ht: 'Kou', en: 'Course' },
@@ -92,7 +93,7 @@ export default function ProfileItemDetail({ lang = 'en', type, contentId, user, 
       <div className="sheet-page">
         <div className="sheet-page-header">
           <button type="button" className="sheet-back-btn" onClick={() => navigate(-1)}>
-            <i className="fas fa-arrow-left" /> {lang === 'ht' ? 'Retounen' : 'Back'}
+            <i className="fas fa-arrow-left" /> {lang === 'ht' ? 'Retounen' : inlineText(lang, 'Back')}
           </button>
           <span className="sheet-page-title">{label}</span>
         </div>
@@ -108,14 +109,14 @@ export default function ProfileItemDetail({ lang = 'en', type, contentId, user, 
       <div className="sheet-page">
         <div className="sheet-page-header">
           <button type="button" className="sheet-back-btn" onClick={() => navigate(-1)}>
-            <i className="fas fa-arrow-left" /> {lang === 'ht' ? 'Retounen' : 'Back'}
+            <i className="fas fa-arrow-left" /> {lang === 'ht' ? 'Retounen' : inlineText(lang, 'Back')}
           </button>
           <span className="sheet-page-title">{label}</span>
         </div>
         <div className="sheet-page-body" style={{ textAlign: 'center', padding: '60px 20px' }}>
           <i className="fas fa-exclamation-triangle" style={{ fontSize: '3rem', color: 'var(--text-secondary)', marginBottom: 20, display: 'block' }} />
-          <h2>{label} {lang === 'ht' ? 'pa jwenn' : 'not found'}</h2>
-          <p style={{ color: 'var(--text-secondary)' }}>{lang === 'ht' ? 'ID:' : 'ID:'} {id}</p>
+          <h2>{label} {lang === 'ht' ? 'pa jwenn' : inlineText(lang, 'not found')}</h2>
+          <p style={{ color: 'var(--text-secondary)' }}>{lang === 'ht' ? 'ID:' : inlineText(lang, 'ID:')} {id}</p>
         </div>
       </div>
     );
@@ -125,7 +126,7 @@ export default function ProfileItemDetail({ lang = 'en', type, contentId, user, 
     <div className="sheet-page">
       <div className="sheet-page-header">
         <button type="button" className="sheet-back-btn" onClick={() => navigate(-1)}>
-          <i className="fas fa-arrow-left" /> {lang === 'ht' ? 'Retounen' : 'Back'}
+          <i className="fas fa-arrow-left" /> {lang === 'ht' ? 'Retounen' : inlineText(lang, 'Back')}
         </button>
         <h2 className="sheet-page-title">{item?.title || item?.name || `${label} #${id}`}</h2>
         <SaveHeartButton
@@ -137,14 +138,14 @@ export default function ProfileItemDetail({ lang = 'en', type, contentId, user, 
           onToggle={handleToggleSave}
           disabled={!item?.id}
           t={{
-            mwen_save: lang === 'ht' ? 'Anrejistre' : 'Save',
-            mwen_unsave: lang === 'ht' ? 'Retire' : 'Remove',
+            mwen_save: lang === 'ht' ? 'Anrejistre' : inlineText(lang, 'Save'),
+            mwen_unsave: lang === 'ht' ? 'Retire' : inlineText(lang, 'Remove'),
           }}
         />
         <button type="button" className="sheet-share-btn" onClick={handleShare}
           style={{ marginLeft: 0 }}
-          aria-label={lang === 'ht' ? 'Pataje' : 'Share'}
-          title={lang === 'ht' ? 'Pataje' : 'Share'}>
+          aria-label={lang === 'ht' ? 'Pataje' : inlineText(lang, 'Share')}
+          title={lang === 'ht' ? 'Pataje' : inlineText(lang, 'Share')}>
           <i className="fas fa-share-alt" aria-hidden="true" />
         </button>
       </div>

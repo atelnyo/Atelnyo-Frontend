@@ -18,6 +18,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { businessProfileService } from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function BusinessSellerSection({
   lang = 'en', t = {}, showToast, profile,
@@ -44,12 +45,12 @@ export default function BusinessSellerSection({
   useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [profile?.id]);
 
   const kycLabel = (status) => ({
-    approved: isHt ? 'Apwouve ✓' : 'Approved ✓',
-    pending: isHt ? 'An revizyon' : 'Pending review',
-    rejected: isHt ? 'Refize' : 'Rejected',
-    unverified: isHt ? 'Pa verifye' : 'Unverified',
-    expired: isHt ? 'Ekspire' : 'Expired',
-  }[status] || (isHt ? 'Pa konplete' : 'Not completed'));
+    approved: isHt ? 'Apwouve ✓' : inlineText(lang, 'Approved ✓'),
+    pending: isHt ? 'An revizyon' : inlineText(lang, 'Pending review'),
+    rejected: isHt ? 'Refize' : inlineText(lang, 'Rejected'),
+    unverified: isHt ? 'Pa verifye' : inlineText(lang, 'Unverified'),
+    expired: isHt ? 'Ekspire' : inlineText(lang, 'Expired'),
+  }[status] || (isHt ? 'Pa konplete' : inlineText(lang, 'Not completed')));
 
   const kycColor = {
     approved: '#34d399',
@@ -70,8 +71,8 @@ export default function BusinessSellerSection({
       if (data?.id) setSeller(data);
       showToast?.(
         activate
-          ? (isHt ? 'Seller aktive — kliyan kapab peye kounye a!' : 'Seller active — customers can pay now!')
-          : (isHt ? 'Seller dezaktive — kòmand yo tounen lead.' : 'Seller deactivated — orders are leads again.'),
+          ? (isHt ? 'Seller aktive — kliyan kapab peye kounye a!' : inlineText(lang, 'Seller active — customers can pay now!'))
+          : (isHt ? 'Seller dezaktive — kòmand yo tounen lead.' : inlineText(lang, 'Seller deactivated — orders are leads again.')),
         'check-circle',
       );
     } catch (err) {
@@ -80,7 +81,7 @@ export default function BusinessSellerSection({
         showToast?.(detail, 'circle-exclamation');
       } else {
         showToast?.(
-          isHt ? 'Aksyon an pa t mache.' : 'The action failed.',
+          isHt ? 'Aksyon an pa t mache.' : inlineText(lang, 'The action failed.'),
           'circle-exclamation',
         );
       }
@@ -110,7 +111,7 @@ export default function BusinessSellerSection({
         <div>
           <h3 className="biz-catalog-title">
             <i className="fas fa-hand-holding-dollar" aria-hidden="true" />
-            {t?.business_seller_title || (isHt ? 'Seller Capability' : 'Seller Capability')}
+            {t?.business_seller_title || (isHt ? 'Seller Capability' : inlineText(lang, 'Seller Capability'))}
           </h3>
           <p className="biz-catalog-hint">
             {t?.business_seller_hint || (isHt
@@ -136,33 +137,33 @@ export default function BusinessSellerSection({
           >
             <i className={`fas ${suspended ? 'fa-circle-stop' : (active ? 'fa-circle-check' : 'fa-circle-pause')}`} aria-hidden="true" />
             {suspended
-              ? (t?.business_seller_suspended || (isHt ? 'Seller Sispann' : 'Seller Suspended'))
+              ? (t?.business_seller_suspended || (isHt ? 'Seller Sispann' : inlineText(lang, 'Seller Suspended')))
               : (active
-                ? (t?.business_seller_active || (isHt ? 'Seller Aktif' : 'Seller Active'))
-                : (t?.business_seller_inactive || (isHt ? 'Seller Inaktif' : 'Seller Inactive')))}
+                ? (t?.business_seller_active || (isHt ? 'Seller Aktif' : inlineText(lang, 'Seller Active')))
+                : (t?.business_seller_inactive || (isHt ? 'Seller Inaktif' : inlineText(lang, 'Seller Inactive'))))}
           </span>
         </div>
 
         <p className="biz-ws-card-line" style={{ marginTop: 12 }}>
-          <strong>{isHt ? 'KYC (Verifikasyon Idantite):' : 'KYC (Identity Verification):'}</strong>{' '}
+          <strong>{isHt ? 'KYC (Verifikasyon Idantite):' : inlineText(lang, 'KYC (Identity Verification):')}</strong>{' '}
           <span style={{ color: kycColor, fontWeight: 700 }}>{kycLabel(seller?.kyc_status)}</span>
         </p>
         <p className="biz-ws-card-line">
           {suspended
             ? (isHt
               ? 'Seller la sispann pa modération platfòm lan — kliyan yo pa ka peye kounye a. Kontakte sipò Atelnyo pou chèche konnen plis.'
-              : 'Seller was suspended by platform moderation — customers cannot pay right now. Contact Atelnyo support for details.')
+              : inlineText(lang, 'Seller was suspended by platform moderation — customers cannot pay right now. Contact Atelnyo support for details.'))
             : active
               ? (isHt
                 ? 'Kliyan yo ka peye kòmand yo kounye a. Revni a ale nan Wallet ou (peman yo soti nan sistem Wallet platfòm lan).'
-                : 'Customers can pay orders now. Revenue lands in your Wallet (payments settle through the platform wallet system).')
+                : inlineText(lang, 'Customers can pay orders now. Revenue lands in your Wallet (payments settle through the platform wallet system).'))
               : kycOk
                 ? (isHt
                   ? 'KYC ou apwouve — ou ka aktive Seller nenpòt lè.'
-                  : 'Your KYC is approved — you can activate Seller anytime.')
+                  : inlineText(lang, 'Your KYC is approved — you can activate Seller anytime.'))
                 : (isHt
                   ? 'Ou bezwen KYC apwouve anvan ou ka aktive Seller. Konplete verifikasyon nan anviwònman Wallet ou.'
-                  : 'You need an approved KYC before activating Seller. Complete verification in your wallet settings.')}
+                  : inlineText(lang, 'You need an approved KYC before activating Seller. Complete verification in your wallet settings.'))}
         </p>
 
         <div className="biz-form-actions" style={{ marginTop: 14 }}>
@@ -171,7 +172,7 @@ export default function BusinessSellerSection({
               <i className="fas fa-shield-halved" aria-hidden="true" />{' '}
               {isHt
                 ? 'Aksyon Seller yo fèmen pandan sispansyon an. Lè yo leve l, ou ka re-aktive.'
-                : 'Seller actions are locked during the suspension. Once lifted, you can reactivate.'}
+                : inlineText(lang, 'Seller actions are locked during the suspension. Once lifted, you can reactivate.')}
             </span>
           ) : active ? (
             <button
@@ -182,7 +183,7 @@ export default function BusinessSellerSection({
               data-testid="business-seller-deactivate"
             >
               <i className={`fas ${busy ? 'fa-spinner fa-spin' : 'fa-circle-pause'}`} aria-hidden="true" />
-              {t?.business_seller_deactivate || (isHt ? 'Dezaktive Seller' : 'Deactivate Seller')}
+              {t?.business_seller_deactivate || (isHt ? 'Dezaktive Seller' : inlineText(lang, 'Deactivate Seller'))}
             </button>
           ) : (
             <button
@@ -191,12 +192,12 @@ export default function BusinessSellerSection({
               onClick={() => runToggle(true)}
               disabled={busy || (!kycOk && !active)}
               title={!kycOk && !active
-                ? (isHt ? 'KYC apwouve obligatwa' : 'Approved KYC required')
+                ? (isHt ? 'KYC apwouve obligatwa' : inlineText(lang, 'Approved KYC required'))
                 : undefined}
               data-testid="business-seller-activate"
             >
               <i className={`fas ${busy ? 'fa-spinner fa-spin' : 'fa-circle-play'}`} aria-hidden="true" />
-              {t?.business_seller_activate || (isHt ? 'Aktive Seller' : 'Activate Seller')}
+              {t?.business_seller_activate || (isHt ? 'Aktive Seller' : inlineText(lang, 'Activate Seller'))}
             </button>
           )}
         </div>
@@ -206,7 +207,7 @@ export default function BusinessSellerSection({
             <i className="fas fa-shield-halved" aria-hidden="true" />{' '}
             {isHt
               ? 'KYC se menm verifikasyon ki deja pwoteje peman (Payout) ou yo — pa gen okenn dosye PII anplis.'
-              : 'KYC is the same verification that already protects your payouts — no extra PII records.'}
+              : inlineText(lang, 'KYC is the same verification that already protects your payouts — no extra PII records.')}
           </p>
         )}
       </div>

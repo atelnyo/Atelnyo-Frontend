@@ -22,6 +22,7 @@ import { BlockRenderer } from './blocks';
 import { getBlockMeta } from './blocks/registry';
 import SEOHead, { courseSchema } from '../shared/SEOHead';
 import CourseAIChat from './CourseAIChat';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── Course color themes by category ──────────────────────────────
 const CATEGORY_COLORS = {
@@ -309,14 +310,14 @@ export default function CurriculumPlayer({
 
   // ─── SEO ────────────────────────────────────────────────────
   const seoTitle = useMemo(() => {
-    if (!courseData) return isHt ? 'Kou' : 'Course';
+    if (!courseData) return isHt ? 'Kou' : inlineText(lang, 'Course');
     return `${courseData.title} — Atelnyo`;
   }, [courseData, isHt]);
   const seoDescription = courseData?.description?.slice(0, 160) || '';
   const seoImage = courseData?.image_url || '';
   const seoUrl = typeof window !== 'undefined' ? window.location.href : '';
   const breadcrumbs = useMemo(() => {
-    const crumbs = [{ name: 'Atelnyo', url: '/' }, { name: isHt ? 'Kou' : 'Courses', url: '/explore' }];
+    const crumbs = [{ name: 'Atelnyo', url: '/' }, { name: isHt ? 'Kou' : inlineText(lang, 'Courses'), url: '/explore' }];
     if (courseData?.title) crumbs.push({ name: courseData.title });
     if (activeChapter?.title) crumbs.push({ name: activeChapter.title });
     if (activeLesson?.title) crumbs.push({ name: activeLesson.title });
@@ -329,7 +330,7 @@ export default function CurriculumPlayer({
       <div style={{ ...base.container, alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ width: 40, height: 40, borderRadius: '50%', border: `3px solid ${theme.primary}33`, borderTopColor: theme.primary, animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
-          <p style={{ color: '#94a3b8', fontSize: '0.85rem' }}>{isHt ? 'Ap chaje kou a...' : 'Loading course...'}</p>
+          <p style={{ color: '#94a3b8', fontSize: '0.85rem' }}>{isHt ? 'Ap chaje kou a...' : inlineText(lang, 'Loading course...')}</p>
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
       </div>
@@ -343,8 +344,8 @@ export default function CurriculumPlayer({
         <SEOHead title={seoTitle} description={seoDescription} image={seoImage} url={seoUrl} type="course" lang={lang} breadcrumbs={breadcrumbs} />
         <div style={base.empty}>
           <div style={{ fontSize: '3rem', marginBottom: 16, opacity: 0.2 }}>📚</div>
-          <div style={base.emptyTitle}>{isHt ? 'Kou sa a poko gen chapit' : 'This course has no chapters yet'}</div>
-          <div style={base.emptyDesc}>{isHt ? 'Kreyatè a ap prepare kontni an. Tann yon ti pleasantly!' : 'The creator is preparing content. Check back soon!'}</div>
+          <div style={base.emptyTitle}>{isHt ? 'Kou sa a poko gen chapit' : inlineText(lang, 'This course has no chapters yet')}</div>
+          <div style={base.emptyDesc}>{isHt ? 'Kreyatè a ap prepare kontni an. Tann yon ti pleasantly!' : inlineText(lang, 'The creator is preparing content. Check back soon!')}</div>
         </div>
       </div>
     );
@@ -363,22 +364,22 @@ export default function CurriculumPlayer({
 
       {/* Skip to content */}
       <a href="#cp-main-content" style={{ position: 'absolute', left: -9999, top: 0, zIndex: 9999, padding: '8px 16px', background: theme.primary, color: '#fff', borderRadius: 8, fontSize: '0.85rem', fontWeight: 600 }} onFocus={(e) => { e.target.style.left = 8; e.target.style.top = 8; }} onBlur={(e) => { e.target.style.left = -9999; }}>
-        {isHt ? 'Pase nan kontni an' : 'Skip to content'}
+        {isHt ? 'Pase nan kontni an' : inlineText(lang, 'Skip to content')}
       </a>
 
       {/* Screen reader live region */}
       <div aria-live="polite" aria-atomic="true" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}>
-        {activeLesson && `${isHt ? 'Leson aktif:' : 'Active lesson:'} ${activeLesson.title || ''}`}
+        {activeLesson && `${isHt ? 'Leson aktif:' : inlineText(lang, 'Active lesson:')} ${activeLesson.title || ''}`}
       </div>
 
       {/* ═══ Sidebar ═══ */}
       <nav
-        aria-label={isHt ? 'Kurikilom kou a' : 'Course curriculum'}
+        aria-label={isHt ? 'Kurikilom kou a' : inlineText(lang, 'Course curriculum')}
         style={{ ...base.sidebar, ...(typeof window !== 'undefined' && window.innerWidth < 768 && !sidebarOpen ? { display: 'none' } : {}) }}
       >
         {/* Header + Progress */}
         <div style={base.sidebarHeader}>
-          <div style={base.sidebarCourseTitle}>{courseData?.title || (isHt ? 'Kou' : 'Course')}</div>
+          <div style={base.sidebarCourseTitle}>{courseData?.title || (isHt ? 'Kou' : inlineText(lang, 'Course'))}</div>
           <div style={base.progressContainer}>
             <div style={base.progressTrack}>
               <div style={base.progressFill(progressPct, theme.primary)} />
@@ -406,7 +407,7 @@ export default function CurriculumPlayer({
                   <div style={base.chapterIcon(theme.primary)}>
                     {chDone ? <i className="fas fa-check" /> : <i className={`fas fa-${String(ci + 1)}`} style={{ fontSize: '0.65rem' }} />}
                   </div>
-                  <span style={base.chapterTitle}>{ch.title || `${isHt ? 'Chapit' : 'Chapter'} ${ci + 1}`}</span>
+                  <span style={base.chapterTitle}>{ch.title || `${isHt ? 'Chapit' : inlineText(lang, 'Chapter')} ${ci + 1}`}</span>
                   <span style={base.chapterCount}>{lessons.length}</span>
                 </button>
 
@@ -426,7 +427,7 @@ export default function CurriculumPlayer({
                           onClick={() => goToLesson(l.id)}
                         >
                           <div style={base.lessonDot(lessonDone, isLessonActive, theme.primary)} />
-                          <span style={base.lessonTitle}>{l.title || `${isHt ? 'Leson' : 'Lesson'} ${lessons.indexOf(l) + 1}`}</span>
+                          <span style={base.lessonTitle}>{l.title || `${isHt ? 'Leson' : inlineText(lang, 'Lesson')} ${lessons.indexOf(l) + 1}`}</span>
                           {lessonDone && <i className="fas fa-check-circle" style={base.lessonCheck} />}
                         </button>
                       );
@@ -440,7 +441,7 @@ export default function CurriculumPlayer({
       </nav>
 
       {/* ═══ Main content ═══ */}
-      <main id="cp-main-content" style={base.main} aria-label={activeLesson ? `${isHt ? 'Kontni leson' : 'Lesson content'}: ${activeLesson.title}` : ''}>
+      <main id="cp-main-content" style={base.main} aria-label={activeLesson ? `${isHt ? 'Kontni leson' : inlineText(lang, 'Lesson content')}: ${activeLesson.title}` : ''}>
         {activeLesson ? (
           <>
             {/* Sticky header */}
@@ -453,8 +454,8 @@ export default function CurriculumPlayer({
                 <i className="fas fa-bars" />
               </button>
               <div style={{ flex: 1 }}>
-                <div style={base.mainTitle}>{activeLesson.title || `${isHt ? 'Leson' : 'Lesson'} ${currentIdx + 1}`}</div>
-                <div style={base.mainMeta}>{activeChapter?.title || ''} · {activeBlocks.length} {isHt ? 'blòk' : 'blocks'}</div>
+                <div style={base.mainTitle}>{activeLesson.title || `${isHt ? 'Leson' : inlineText(lang, 'Lesson')} ${currentIdx + 1}`}</div>
+                <div style={base.mainMeta}>{activeChapter?.title || ''} · {activeBlocks.length} {isHt ? 'blòk' : inlineText(lang, 'blocks')}</div>
               </div>
               <span style={{ fontSize: '0.78rem', color: '#64748b', background: '#1e293b', padding: '4px 10px', borderRadius: 6, fontWeight: 600 }}>
                 {currentIdx + 1} / {flatLessons.length}
@@ -473,8 +474,8 @@ export default function CurriculumPlayer({
               {activeBlocks.length === 0 ? (
                 <div style={base.empty}>
                   <div style={{ fontSize: '2rem', marginBottom: 12, opacity: 0.2 }}>📝</div>
-                  <div style={base.emptyTitle}>{isHt ? 'Leson sa a pa gen kontni ankò' : 'This lesson has no content yet'}</div>
-                  <div style={base.emptyDesc}>{isHt ? 'Kreyatè a ap prepare kontni an. Tann yon ti pleasant!' : 'Content is being prepared. Check back soon!'}</div>
+                  <div style={base.emptyTitle}>{isHt ? 'Leson sa a pa gen kontni ankò' : inlineText(lang, 'This lesson has no content yet')}</div>
+                  <div style={base.emptyDesc}>{isHt ? 'Kreyatè a ap prepare kontni an. Tann yon ti pleasant!' : inlineText(lang, 'Content is being prepared. Check back soon!')}</div>
                 </div>
               ) : (
                 activeBlocks.map((block, bi) => (
@@ -506,7 +507,7 @@ export default function CurriculumPlayer({
                 onClick={goPrev}
                 disabled={currentIdx <= 0}
               >
-                <i className="fas fa-arrow-left" /> {isHt ? 'Anvan' : 'Previous'}
+                <i className="fas fa-arrow-left" /> {isHt ? 'Anvan' : inlineText(lang, 'Previous')}
               </button>
               <div style={{ flex: 1 }} />
               {currentIdx < flatLessons.length - 1 ? (
@@ -515,7 +516,7 @@ export default function CurriculumPlayer({
                   style={{ ...base.navBtn, ...base.navBtnPrimary(theme.primary) }}
                   onClick={goNext}
                 >
-                  {isHt ? 'Pwochen' : 'Next'} <i className="fas fa-arrow-right" />
+                  {isHt ? 'Pwochen' : inlineText(lang, 'Next')} <i className="fas fa-arrow-right" />
                 </button>
               ) : (
                 <button
@@ -523,7 +524,7 @@ export default function CurriculumPlayer({
                   style={{ ...base.navBtn, ...base.navBtnPrimary('#10b981') }}
                   onClick={() => { triggerCelebration(); onLessonComplete?.(activeLessonId); }}
                 >
-                  <i className="fas fa-check" /> {isHt ? 'Fini kou a' : 'Complete course'}
+                  <i className="fas fa-check" /> {isHt ? 'Fini kou a' : inlineText(lang, 'Complete course')}
                 </button>
               )}
             </nav>
@@ -531,8 +532,8 @@ export default function CurriculumPlayer({
         ) : (
           <div style={{ ...base.empty, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
             <div style={{ fontSize: '3rem', marginBottom: 16, opacity: 0.15 }}>👆</div>
-            <div style={base.emptyTitle}>{isHt ? 'Chwazi yon leson' : 'Select a lesson'}</div>
-            <div style={base.emptyDesc}>{isHt ? 'Klike sou yon leson nan tablo bò gòch la pou kòmanse aprann.' : 'Click a lesson in the sidebar to start learning.'}</div>
+            <div style={base.emptyTitle}>{isHt ? 'Chwazi yon leson' : inlineText(lang, 'Select a lesson')}</div>
+            <div style={base.emptyDesc}>{isHt ? 'Klike sou yon leson nan tablo bò gòch la pou kòmanse aprann.' : inlineText(lang, 'Click a lesson in the sidebar to start learning.')}</div>
           </div>
         )}
       </main>
@@ -557,7 +558,7 @@ export default function CurriculumPlayer({
         type="button"
         style={base.mobileToggle}
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        aria-label={isHt ? 'Tablo leson' : 'Lesson list'}
+        aria-label={isHt ? 'Tablo leson' : inlineText(lang, 'Lesson list')}
       >
         <i className={`fas ${sidebarOpen ? 'fa-times' : 'fa-book-open'}`} />
       </button>

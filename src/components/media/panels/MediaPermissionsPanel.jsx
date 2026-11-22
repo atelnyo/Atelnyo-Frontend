@@ -14,6 +14,7 @@
  */
 import React from 'react';
 import { VISIBILITY_LABELS, moduleLabel } from '../../../constants/media';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function MediaPermissionsPanel({ media, lang = 'en' }) {
   const item = media || {};
@@ -29,14 +30,14 @@ export default function MediaPermissionsPanel({ media, lang = 'en' }) {
         <div className="media-panel-perms-tile" style={{ borderColor: visMeta.color }}>
           <i className={`fas ${visMeta.icon}`} style={{ color: visMeta.color }} aria-hidden="true" />
           <div className="media-panel-perms-tile-body">
-            <span className="media-panel-perms-label">{isHt ? 'Vizibilite' : 'Visibility'}</span>
+            <span className="media-panel-perms-label">{isHt ? 'Vizibilite' : inlineText(lang, 'Visibility')}</span>
             <span className="media-panel-perms-value">{isHt ? visMeta.ht : visMeta.en}</span>
           </div>
         </div>
         <div className="media-panel-perms-tile">
           <i className="fas fa-user-shield" aria-hidden="true" />
           <div className="media-panel-perms-tile-body">
-            <span className="media-panel-perms-label">{isHt ? 'Pwopriyetè' : 'Owner'}</span>
+            <span className="media-panel-perms-label">{isHt ? 'Pwopriyetè' : inlineText(lang, 'Owner')}</span>
             <span className="media-panel-perms-value">{owner}</span>
           </div>
         </div>
@@ -44,7 +45,7 @@ export default function MediaPermissionsPanel({ media, lang = 'en' }) {
 
       <h4 className="media-panel-perms-section-title">
         <i className="fas fa-users" aria-hidden="true" />
-        {isHt ? 'Ròl ki gen aksè' : 'Roles with access'}
+        {isHt ? 'Ròl ki gen aksè' : inlineText(lang, 'Roles with access')}
       </h4>
       <ul className="media-panel-perms-role-list">
         {allowedRoles.map((role) => (
@@ -61,7 +62,7 @@ export default function MediaPermissionsPanel({ media, lang = 'en' }) {
 
       <h4 className="media-panel-perms-section-title">
         <i className="fas fa-cubes" aria-hidden="true" />
-        {isHt ? 'Modil kote medya a parèt' : 'Modules where media appears'}
+        {isHt ? 'Modil kote medya a parèt' : inlineText(lang, 'Modules where media appears')}
       </h4>
       <ul className="media-panel-perms-module-list">
         {(Array.isArray(item.usages) ? item.usages : []).slice(0, 10).map((u) => (
@@ -71,10 +72,10 @@ export default function MediaPermissionsPanel({ media, lang = 'en' }) {
           </li>
         ))}
         {Array.isArray(item.usages) && item.usages.length > 10 && (
-          <li className="media-panel-perms-more">+{item.usages.length - 10} {isHt ? 'plis' : 'more'}</li>
+          <li className="media-panel-perms-more">+{item.usages.length - 10} {isHt ? 'plis' : inlineText(lang, 'more')}</li>
         )}
         {!Array.isArray(item.usages) || item.usages.length === 0 && (
-          <li className="media-panel-perms-empty">{isHt ? 'Pa gen modil ki itilize medya sa a.' : 'No modules use this media.'}</li>
+          <li className="media-panel-perms-empty">{isHt ? 'Pa gen modil ki itilize medya sa a.' : inlineText(lang, 'No modules use this media.')}</li>
         )}
       </ul>
     </div>

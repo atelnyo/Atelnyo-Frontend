@@ -9,13 +9,13 @@ import {
 } from './ruleTemplates';
 
 describe('rule template library', () => {
-  it('ships the six requested categories with complete ht/en/fr copy', () => {
+  it('ships the six requested categories with complete ht/en/fr/es copy', () => {
     expect(RULE_TEMPLATE_CATEGORIES.map((category) => category.id)).toEqual([
       'respect', 'content', 'spam', 'privacy', 'participation', 'commerce',
     ]);
 
     for (const category of RULE_TEMPLATE_CATEGORIES) {
-      for (const language of ['ht', 'en', 'fr']) {
+      for (const language of ['ht', 'en', 'fr', 'es']) {
         expect(category.label[language]).toBeTruthy();
         for (const rule of category.rules) {
           expect(rule.title[language]).toBeTruthy();
@@ -31,7 +31,7 @@ describe('rule template library', () => {
     expect(new Set(keys).size).toBe(keys.length);
     expect(rules[0].key).toBe('respect:be-respectful');
     expect(rules[0].title).toBe('Soyez respectueux');
-    expect(listTemplateRules('es')[0].title).toBe('Be respectful');
+    expect(listTemplateRules('es')[0].title).toBe('Sé respetuoso');
   });
 
   it('keeps selection order independent from click order', () => {
@@ -55,7 +55,7 @@ describe('rule template library', () => {
 
   it('normalizes language codes and titles for comparison', () => {
     expect(ruleTemplateLang('fr-CA')).toBe('fr');
-    expect(ruleTemplateLang('es')).toBe('en');
+    expect(ruleTemplateLang('es')).toBe('es');
     expect(normalizeRuleTitle('  No   SPAM ')).toBe('no spam');
   });
 });

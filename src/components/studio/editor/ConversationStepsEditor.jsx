@@ -12,6 +12,7 @@
  */
 import React, { useState, useCallback, useRef } from 'react';
 import styles from './editor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const DEFAULT_SPEAKER_LABELS = {
   en: { speaker1: 'Speaker A', speaker2: 'Speaker B' },
@@ -25,8 +26,8 @@ function newStep(speaker1, speaker2, index) {
 
 export default function ConversationStepsEditor({ block, onChange, lang = 'en' }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
-  const defaults = DEFAULT_SPEAKER_LABELS[isHt ? 'ht' : 'en'];
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
+  const defaults = DEFAULT_SPEAKER_LABELS[isHt ? 'ht' : inlineText(lang, 'en')];
 
   const steps = Array.isArray(block.steps) ? block.steps : [];
   const scenario = block.scenario || '';
@@ -117,7 +118,7 @@ export default function ConversationStepsEditor({ block, onChange, lang = 'en' }
           onChange={(e) => patch({ scenario: e.target.value })}
           placeholder={isHt
             ? 'Dekri sitiyasyon an... (eg: Ou nan yon restoran, ou vle manje.)'
-            : 'Describe the situation... (e.g. You are at a restaurant, ordering food.)'}
+            : inlineText(lang, 'Describe the situation... (e.g. You are at a restaurant, ordering food.)')}
           rows={2}
         />
       </label>
@@ -160,7 +161,7 @@ export default function ConversationStepsEditor({ block, onChange, lang = 'en' }
         <p className={styles.convEmpty}>
           {isHt
             ? 'Pa gen etap ankò. Klike "Ajoute Etap" pou kreye yon dialog.'
-            : 'No steps yet. Click "Add Step" to create a dialog.'}
+            : inlineText(lang, 'No steps yet. Click "Add Step" to create a dialog.')}
         </p>
       ) : (
         <div className={styles.convStepsList}>
@@ -196,7 +197,7 @@ export default function ConversationStepsEditor({ block, onChange, lang = 'en' }
                         className={styles.convFieldInput}
                         value={step.speaker || ''}
                         onChange={(e) => updateStep(i, 'speaker', e.target.value)}
-                        placeholder={isHt ? 'eg: Kasye, Kliyan...' : 'e.g. Cashier, Customer...'}
+                        placeholder={isHt ? 'eg: Kasye, Kliyan...' : inlineText(lang, 'e.g. Cashier, Customer...')}
                       />
                     </label>
 
@@ -206,7 +207,7 @@ export default function ConversationStepsEditor({ block, onChange, lang = 'en' }
                         className={styles.convFieldInput}
                         value={step.prompt || ''}
                         onChange={(e) => updateStep(i, 'prompt', e.target.value)}
-                        placeholder={isHt ? 'Fraz la...' : 'The line...'}
+                        placeholder={isHt ? 'Fraz la...' : inlineText(lang, 'The line...')}
                         rows={2}
                       />
                     </label>
@@ -235,7 +236,7 @@ export default function ConversationStepsEditor({ block, onChange, lang = 'en' }
                   <div className={styles.convStepContent}>
                     <span className={styles.convStepSpeaker}>{step.speaker || t('Moun k ap pale', 'Speaker')}</span>
                     <span className={styles.convStepPrompt}>
-                      {step.prompt || <em>{isHt ? 'Pa gen tèks' : 'No text'}</em>}
+                      {step.prompt || <em>{isHt ? 'Pa gen tèks' : inlineText(lang, 'No text')}</em>}
                     </span>
                   </div>
                   {step.audio && (
@@ -248,7 +249,7 @@ export default function ConversationStepsEditor({ block, onChange, lang = 'en' }
                       type="button"
                       onClick={(e) => { e.stopPropagation(); moveStep(i, -1); }}
                       disabled={i === 0}
-                      title={isHt ? 'Monte' : 'Move up'}
+                      title={isHt ? 'Monte' : inlineText(lang, 'Move up')}
                     >
                       <i className="fas fa-chevron-up" />
                     </button>
@@ -256,14 +257,14 @@ export default function ConversationStepsEditor({ block, onChange, lang = 'en' }
                       type="button"
                       onClick={(e) => { e.stopPropagation(); moveStep(i, 1); }}
                       disabled={i === steps.length - 1}
-                      title={isHt ? 'Desann' : 'Move down'}
+                      title={isHt ? 'Desann' : inlineText(lang, 'Move down')}
                     >
                       <i className="fas fa-chevron-down" />
                     </button>
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); duplicateStep(i); }}
-                      title={isHt ? 'Diplike' : 'Duplicate'}
+                      title={isHt ? 'Diplike' : inlineText(lang, 'Duplicate')}
                     >
                       <i className="fas fa-copy" />
                     </button>
@@ -271,7 +272,7 @@ export default function ConversationStepsEditor({ block, onChange, lang = 'en' }
                       type="button"
                       className={styles.convStepDelete}
                       onClick={(e) => { e.stopPropagation(); removeStep(i); }}
-                      title={isHt ? 'Efase' : 'Delete'}
+                      title={isHt ? 'Efase' : inlineText(lang, 'Delete')}
                     >
                       <i className="fas fa-trash" />
                     </button>
@@ -287,7 +288,7 @@ export default function ConversationStepsEditor({ block, onChange, lang = 'en' }
         <p className={styles.convHint}>
           <i className="fas fa-info-circle" /> {isHt
             ? 'Klike sou yon etap pou modifye l. Trike pou reòdone.'
-            : 'Click a step to edit. Drag to reorder.'}
+            : inlineText(lang, 'Click a step to edit. Drag to reorder.')}
         </p>
       )}
     </div>

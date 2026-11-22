@@ -16,6 +16,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
 import { DiscussionPolls, PollPreview } from './DiscussionPoll';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── Helpers ───────────────────────────────────────────────────────
 
@@ -82,7 +83,7 @@ function DiscussionCard({ discussion, onClick, lang }) {
           </span>
           <span className="disc-replies">
             <i className="fas fa-comment" />
-            {formatCount(discussion.reply_count || 0)} {lang === 'ht' ? 'repons' : 'replies'}
+            {formatCount(discussion.reply_count || 0)} {lang === 'ht' ? 'repons' : inlineText(lang, 'replies')}
           </span>
           <span className="disc-votes">
             <i className="fas fa-arrow-up" />
@@ -93,7 +94,7 @@ function DiscussionCard({ discussion, onClick, lang }) {
         {hasPoll && (
           <div className="disc-card-poll">
             <i className="fas fa-chart-bar" />
-            <span>{discussion.polls.length} {lang === 'ht' ? 'sondaj' : 'polls'}</span>
+            <span>{discussion.polls.length} {lang === 'ht' ? 'sondaj' : inlineText(lang, 'polls')}</span>
             {discussion.polls[0] && <PollPreview poll={discussion.polls[0]} lang={lang} />}
           </div>
         )}
@@ -139,7 +140,7 @@ function ReplyCard({ reply, onVote, lang }) {
         <div className="disc-reply-body">{reply.content}</div>
         {reply.is_solution && (
           <div className="disc-solution-badge">
-            <i className="fas fa-check-circle" /> {lang === 'ht' ? 'Solisyon' : 'Solution'}
+            <i className="fas fa-check-circle" /> {lang === 'ht' ? 'Solisyon' : inlineText(lang, 'Solution')}
           </div>
         )}
       </div>
@@ -171,48 +172,48 @@ function CreateDiscussionForm({ onSubmit, onCancel, lang }) {
     <form className="disc-form" onSubmit={handleSubmit}>
       <h3>
         <i className="fas fa-plus-circle" />
-        {lang === 'ht' ? 'Kreye yon diskisyon' : 'Start a Discussion'}
+        {lang === 'ht' ? 'Kreye yon diskisyon' : inlineText(lang, 'Start a Discussion')}
       </h3>
 
       <div className="disc-form-group">
-        <label>{lang === 'ht' ? 'Tit' : 'Title'} *</label>
+        <label>{lang === 'ht' ? 'Tit' : inlineText(lang, 'Title')} *</label>
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder={lang === 'ht' ? 'Kisa ou vle diskite?' : 'What do you want to discuss?'}
+          placeholder={lang === 'ht' ? 'Kisa ou vle diskite?' : inlineText(lang, 'What do you want to discuss?')}
           required
           maxLength={200}
         />
       </div>
 
       <div className="disc-form-group">
-        <label>{lang === 'ht' ? 'Kontni' : 'Content'} *</label>
+        <label>{lang === 'ht' ? 'Kontni' : inlineText(lang, 'Content')} *</label>
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder={lang === 'ht' ? 'Ekri detay diskisyon ou an...' : 'Write the details of your discussion...'}
+          placeholder={lang === 'ht' ? 'Ekri detay diskisyon ou an...' : inlineText(lang, 'Write the details of your discussion...')}
           rows={6}
           required
         />
       </div>
 
       <div className="disc-form-group">
-        <label>{lang === 'ht' ? 'Tay' : 'Tags'} (optional)</label>
+        <label>{lang === 'ht' ? 'Tay' : inlineText(lang, 'Tags')} (optional)</label>
         <input
           type="text"
           value={tags}
           onChange={(e) => setTags(e.target.value)}
-          placeholder={lang === 'ht' ? 'separe ak virgül: kreyòl, edikasyon' : 'comma-separated: kreyol, education'}
+          placeholder={lang === 'ht' ? 'separe ak virgül: kreyòl, edikasyon' : inlineText(lang, 'comma-separated: kreyol, education')}
         />
       </div>
 
       <div className="disc-form-actions">
         <button type="button" className="disc-btn disc-btn-secondary" onClick={onCancel}>
-          {lang === 'ht' ? 'Anile' : 'Cancel'}
+          {lang === 'ht' ? 'Anile' : inlineText(lang, 'Cancel')}
         </button>
         <button type="submit" className="disc-btn disc-btn-primary">
-          <i className="fas fa-paper-plane" /> {lang === 'ht' ? 'Pibliye' : 'Post'}
+          <i className="fas fa-paper-plane" /> {lang === 'ht' ? 'Pibliye' : inlineText(lang, 'Post')}
         </button>
       </div>
     </form>
@@ -260,7 +261,7 @@ function DiscussionDetail({ discussion, onBack, onReply, onVote, lang }) {
   return (
     <div className="disc-detail">
       <button className="disc-back-btn" onClick={onBack}>
-        <i className="fas fa-arrow-left" /> {lang === 'ht' ? 'Retounen' : 'Back'}
+        <i className="fas fa-arrow-left" /> {lang === 'ht' ? 'Retounen' : inlineText(lang, 'Back')}
       </button>
 
       <div className="disc-detail-header">
@@ -301,7 +302,7 @@ function DiscussionDetail({ discussion, onBack, onReply, onVote, lang }) {
 
       <div className="disc-replies-section">
         <h3>
-          {replies.length} {lang === 'ht' ? 'repons' : 'replies'}
+          {replies.length} {lang === 'ht' ? 'repons' : inlineText(lang, 'replies')}
         </h3>
 
         {loading ? (
@@ -325,12 +326,12 @@ function DiscussionDetail({ discussion, onBack, onReply, onVote, lang }) {
           <textarea
             value={replyContent}
             onChange={(e) => setReplyContent(e.target.value)}
-            placeholder={lang === 'ht' ? 'Ekri repons ou an...' : 'Write your reply...'}
+            placeholder={lang === 'ht' ? 'Ekri repons ou an...' : inlineText(lang, 'Write your reply...')}
             rows={3}
             required
           />
           <button type="submit" className="disc-btn disc-btn-primary">
-            <i className="fas fa-reply" /> {lang === 'ht' ? 'Reponn' : 'Reply'}
+            <i className="fas fa-reply" /> {lang === 'ht' ? 'Reponn' : inlineText(lang, 'Reply')}
           </button>
         </form>
       </div>
@@ -378,9 +379,9 @@ export default function CommunityDiscussions({ community, lang = 'en', showToast
       });
       setShowForm(false);
       fetchDiscussions();
-      showToast?.(lang === 'ht' ? 'Diskisyon kreye!' : 'Discussion created!', 'success');
+      showToast?.(lang === 'ht' ? 'Diskisyon kreye!' : inlineText(lang, 'Discussion created!'), 'success');
     } catch (err) {
-      showToast?.(lang === 'ht' ? 'Erè nan kreyasyon' : 'Error creating discussion', 'error');
+      showToast?.(lang === 'ht' ? 'Erè nan kreyasyon' : inlineText(lang, 'Error creating discussion'), 'error');
     }
   };
 
@@ -414,10 +415,10 @@ export default function CommunityDiscussions({ community, lang = 'en', showToast
       <div className="disc-header">
         <h2>
           <i className="fas fa-comments" />
-          {lang === 'ht' ? 'Diskisyon' : 'Discussions'}
+          {lang === 'ht' ? 'Diskisyon' : inlineText(lang, 'Discussions')}
         </h2>
         <button className="disc-btn disc-btn-primary" onClick={() => setShowForm(!showForm)}>
-          <i className="fas fa-plus" /> {lang === 'ht' ? 'Nouvo Diskisyon' : 'New Discussion'}
+          <i className="fas fa-plus" /> {lang === 'ht' ? 'Nouvo Diskisyon' : inlineText(lang, 'New Discussion')}
         </button>
       </div>
 
@@ -435,7 +436,7 @@ export default function CommunityDiscussions({ community, lang = 'en', showToast
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={lang === 'ht' ? 'Chèche diskisyon...' : 'Search discussions...'}
+            placeholder={lang === 'ht' ? 'Chèche diskisyon...' : inlineText(lang, 'Search discussions...')}
           />
           <button type="submit">
             <i className="fas fa-search" />
@@ -444,9 +445,9 @@ export default function CommunityDiscussions({ community, lang = 'en', showToast
 
         <div className="disc-sort">
           <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-            <option value="latest">{lang === 'ht' ? 'Dènye' : 'Latest'}</option>
-            <option value="popular">{lang === 'ht' ? 'Popilè' : 'Popular'}</option>
-            <option value="unanswered">{lang === 'ht' ? 'San repons' : 'Unanswered'}</option>
+            <option value="latest">{lang === 'ht' ? 'Dènye' : inlineText(lang, 'Latest')}</option>
+            <option value="popular">{lang === 'ht' ? 'Popilè' : inlineText(lang, 'Popular')}</option>
+            <option value="unanswered">{lang === 'ht' ? 'San repons' : inlineText(lang, 'Unanswered')}</option>
           </select>
         </div>
       </div>
@@ -454,14 +455,14 @@ export default function CommunityDiscussions({ community, lang = 'en', showToast
       {loading ? (
         <div className="disc-loading">
           <i className="fas fa-spinner fa-spin" />
-          <span>{lang === 'ht' ? 'Ap chaje...' : 'Loading...'}</span>
+          <span>{lang === 'ht' ? 'Ap chaje...' : inlineText(lang, 'Loading...')}</span>
         </div>
       ) : discussions.length === 0 ? (
         <div className="disc-empty">
           <i className="fas fa-comments" />
-          <p>{lang === 'ht' ? 'Pa gen diskisyon ankò' : 'No discussions yet'}</p>
+          <p>{lang === 'ht' ? 'Pa gen diskisyon ankò' : inlineText(lang, 'No discussions yet')}</p>
           <button className="disc-btn disc-btn-primary" onClick={() => setShowForm(true)}>
-            {lang === 'ht' ? 'Kreye premye diskisyon an' : 'Start the first discussion'}
+            {lang === 'ht' ? 'Kreye premye diskisyon an' : inlineText(lang, 'Start the first discussion')}
           </button>
         </div>
       ) : (

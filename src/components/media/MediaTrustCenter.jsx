@@ -23,6 +23,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { mediaTrustCenterService } from '../../services/api';
 import '../../styles/trust-center.css';
 import MediaHelp from './MediaHelp';
+import { inlineText } from '../../utils/inlineI18n';
 
 function fmtCount(n) { if (n == null) return '0'; return Number(n).toLocaleString(); }
 
@@ -140,7 +141,7 @@ export default function MediaTrustCenter({ lang = 'en', showToast, compact = fal
       setData(res.data);
     } catch {
       showToast?.(
-        isHt ? 'Pa kapab chaje Trust Center.' : 'Failed to load Trust Center.',
+        isHt ? 'Pa kapab chaje Trust Center.' : inlineText(lang, 'Failed to load Trust Center.'),
         'exclamation-triangle',
       );
     } finally {
@@ -154,7 +155,7 @@ export default function MediaTrustCenter({ lang = 'en', showToast, compact = fal
     return (
       <div className="trust-loading">
         <i className="fas fa-spinner fa-spin" />
-        <span>{isHt ? 'Ap chaje Trust Center...' : 'Loading Trust Center...'}</span>
+        <span>{isHt ? 'Ap chaje Trust Center...' : inlineText(lang, 'Loading Trust Center...')}</span>
       </div>
     );
   }
@@ -163,9 +164,9 @@ export default function MediaTrustCenter({ lang = 'en', showToast, compact = fal
     return (
       <div className="trust-empty">
         <i className="fas fa-shield-halved" />
-        <h3>{isHt ? 'Trust Center pa disponib' : 'Trust Center unavailable'}</h3>
+        <h3>{isHt ? 'Trust Center pa disponib' : inlineText(lang, 'Trust Center unavailable')}</h3>
         <button type="button" className="btn-secondary" onClick={fetchData}>
-          <i className="fas fa-sync" /> {isHt ? 'Eseye ankò' : 'Retry'}
+          <i className="fas fa-sync" /> {isHt ? 'Eseye ankò' : inlineText(lang, 'Retry')}
         </button>
       </div>
     );
@@ -186,17 +187,17 @@ export default function MediaTrustCenter({ lang = 'en', showToast, compact = fal
       <div className="trust-header">
         <div className="trust-header-left">
           <h2 className="trust-title">
-            <i className="fas fa-shield-halved" /> {isHt ? 'Sant Konfyans Medya' : 'Media Trust Center'}
+            <i className="fas fa-shield-halved" /> {isHt ? 'Sant Konfyans Medya' : inlineText(lang, 'Media Trust Center')}
           </h2>
           <p className="trust-subtitle">
             {isHt
               ? 'Siveyans sante, sekirite, ak konfyans tout medya ou yo.'
-              : 'Health, security, and trust overview for all your media.'}
+              : inlineText(lang, 'Health, security, and trust overview for all your media.')}
           </p>
         </div>
         <div className="trust-header-actions">
           <button type="button" className="btn-secondary" onClick={fetchData}>
-            <i className="fas fa-sync" /> {isHt ? 'Rafrechi' : 'Refresh'}
+            <i className="fas fa-sync" /> {isHt ? 'Rafrechi' : inlineText(lang, 'Refresh')}
           </button>
           <MediaHelp context="library" lang={lang} />
         </div>
@@ -206,7 +207,7 @@ export default function MediaTrustCenter({ lang = 'en', showToast, compact = fal
       <div className="trust-scores-row">
         <ScoreRing
           score={oh.overall_score || 0}
-          label={isHt ? 'Sante Jeneral' : 'Overall Health'}
+          label={isHt ? 'Sante Jeneral' : inlineText(lang, 'Overall Health')}
           color={oh.color || 'var(--text-secondary, #94a3b8)'}
           size={100}
         />
@@ -218,12 +219,12 @@ export default function MediaTrustCenter({ lang = 'en', showToast, compact = fal
               : oh.label}
           </div>
           <span className="trust-meta-line">
-            <i className="fas fa-cloud" /> {oh.total_providers || 0} {isHt ? 'provider' : 'providers'}{' — '}
-            {oh.healthy_providers || 0} {isHt ? 'an sante' : 'healthy'}
+            <i className="fas fa-cloud" /> {oh.total_providers || 0} {isHt ? 'provider' : inlineText(lang, 'providers')}{' — '}
+            {oh.healthy_providers || 0} {isHt ? 'an sante' : inlineText(lang, 'healthy')}
           </span>
           {oh.avg_response_time_ms && (
             <span className="trust-meta-line">
-              <i className="fas fa-clock" /> {oh.avg_response_time_ms}ms {isHt ? 'mwayèn' : 'avg'}
+              <i className="fas fa-clock" /> {oh.avg_response_time_ms}ms {isHt ? 'mwayèn' : inlineText(lang, 'avg')}
             </span>
           )}
         </div>
@@ -232,12 +233,12 @@ export default function MediaTrustCenter({ lang = 'en', showToast, compact = fal
       {/* Stats Grid */}
       {!compact && (
         <div className="trust-stats-grid">
-          <StatTile icon="fa-database" label={isHt ? 'Total Medya' : 'Total Media'} value={us.total_media} color="var(--state-info, #38bdf8)" />
-          <StatTile icon="fa-check-circle" label={isHt ? 'An Sante' : 'Healthy'} value={us.healthy} color="var(--state-success, #10b981)" />
-          <StatTile icon="fa-link-slash" label={isHt ? 'Kase' : 'Broken'} value={us.broken} color="var(--state-error, #ef4444)" />
-          <StatTile icon="fa-pen-to-square" label={isHt ? 'Bouyon' : 'Drafts'} value={us.drafts} color="var(--state-warning, #f59e0b)" />
-          <StatTile icon="fa-percent" label={isHt ? 'Validasyon' : 'Validation'} value={`${us.validation_success_rate}%`} color="var(--pr-color-violet-500, #8b5cf6)" />
-          <StatTile icon="fa-users" label={isHt ? 'Piblik' : 'Public'} value={perms.public} color="var(--state-success, #10b981)" subtitle={`${perms.restricted || 0} ${isHt ? 'restriksyon' : 'restricted'}`} />
+          <StatTile icon="fa-database" label={isHt ? 'Total Medya' : inlineText(lang, 'Total Media')} value={us.total_media} color="var(--state-info, #38bdf8)" />
+          <StatTile icon="fa-check-circle" label={isHt ? 'An Sante' : inlineText(lang, 'Healthy')} value={us.healthy} color="var(--state-success, #10b981)" />
+          <StatTile icon="fa-link-slash" label={isHt ? 'Kase' : inlineText(lang, 'Broken')} value={us.broken} color="var(--state-error, #ef4444)" />
+          <StatTile icon="fa-pen-to-square" label={isHt ? 'Bouyon' : inlineText(lang, 'Drafts')} value={us.drafts} color="var(--state-warning, #f59e0b)" />
+          <StatTile icon="fa-percent" label={isHt ? 'Validasyon' : inlineText(lang, 'Validation')} value={`${us.validation_success_rate}%`} color="var(--pr-color-violet-500, #8b5cf6)" />
+          <StatTile icon="fa-users" label={isHt ? 'Piblik' : inlineText(lang, 'Public')} value={perms.public} color="var(--state-success, #10b981)" subtitle={`${perms.restricted || 0} ${isHt ? 'restriksyon' : inlineText(lang, 'restricted')}`} />
         </div>
       )}
 
@@ -246,7 +247,7 @@ export default function MediaTrustCenter({ lang = 'en', showToast, compact = fal
         <div className="trust-section">
           <h3 className="trust-section-title">
             <i className="fas fa-link-slash" style={{ color: 'var(--state-error, #ef4444)' }} />{' '}
-            {isHt ? 'Lyen Kase' : 'Broken Links'}{' '}
+            {isHt ? 'Lyen Kase' : inlineText(lang, 'Broken Links')}{' '}
             <span className="trust-badge trust-badge-danger">{broken.total}</span>
           </h3>
           <div className="trust-progress">
@@ -256,7 +257,7 @@ export default function MediaTrustCenter({ lang = 'en', showToast, compact = fal
                 style={{ width: `${broken.pct}%` }}
               />
             </div>
-            <span className="trust-progress-label">{broken.pct}% {isHt ? 'kase' : 'broken'}</span>
+            <span className="trust-progress-label">{broken.pct}% {isHt ? 'kase' : inlineText(lang, 'broken')}</span>
           </div>
         </div>
       )}
@@ -266,7 +267,7 @@ export default function MediaTrustCenter({ lang = 'en', showToast, compact = fal
         <div className="trust-section">
           <h3 className="trust-section-title">
             <i className="fas fa-cloud" />{' '}
-            {isHt ? 'Konfyans Provider' : 'Provider Trust'}
+            {isHt ? 'Konfyans Provider' : inlineText(lang, 'Provider Trust')}
           </h3>
           <div className="trust-provider-list">
             {providers.map((p) => (
@@ -281,7 +282,7 @@ export default function MediaTrustCenter({ lang = 'en', showToast, compact = fal
         <div className="trust-section">
           <h3 className="trust-section-title">
             <i className="fas fa-triangle-exclamation" style={{ color: 'var(--state-warning, #f59e0b)' }} />{' '}
-            {isHt ? 'Avètisman' : 'Warnings'}{' '}
+            {isHt ? 'Avètisman' : inlineText(lang, 'Warnings')}{' '}
             <span className="trust-badge trust-badge-warn">{warnings.length}</span>
           </h3>
           <div className="trust-warning-list">
@@ -297,7 +298,7 @@ export default function MediaTrustCenter({ lang = 'en', showToast, compact = fal
         <div className="trust-section">
           <h3 className="trust-section-title">
             <i className="fas fa-lightbulb" style={{ color: 'var(--pr-color-violet-500, #8b5cf6)' }} />{' '}
-            {isHt ? 'Rekomandasyon' : 'Recommendations'}
+            {isHt ? 'Rekomandasyon' : inlineText(lang, 'Recommendations')}
           </h3>
           <div className="trust-rec-list">
             {recs.map((r, i) => (
@@ -312,7 +313,7 @@ export default function MediaTrustCenter({ lang = 'en', showToast, compact = fal
         <div className="trust-section">
           <h3 className="trust-section-title">
             <i className="fas fa-shield-alt" />{' '}
-            {isHt ? 'Evènman Sekirite Resan' : 'Recent Security Events'}
+            {isHt ? 'Evènman Sekirite Resan' : inlineText(lang, 'Recent Security Events')}
           </h3>
           <div className="trust-events-list">
             {events.map((e, i) => (
@@ -334,7 +335,7 @@ export default function MediaTrustCenter({ lang = 'en', showToast, compact = fal
       {warnings.length === 0 && broken.total === 0 && (
         <div className="trust-all-clear">
           <i className="fas fa-check-circle" style={{ color: 'var(--state-success, #10b981)', fontSize: '2rem' }} />
-          <p>{isHt ? 'Tout medya ou yo an sante! 🎉' : 'All your media is healthy! 🎉'}</p>
+          <p>{isHt ? 'Tout medya ou yo an sante! 🎉' : inlineText(lang, 'All your media is healthy! 🎉')}</p>
         </div>
       )}
     </div>

@@ -73,7 +73,7 @@ function extractApiErrorMessage(data) {
 const SETTINGS_CATEGORIES = [
   { id: 'account',       icon: 'fa-user',         ht: 'Kont',                    en: 'Account',       fr: 'Compte',        descHt: 'Pwofil, dekonekte, abònman Premium',       descEn: 'Profile, sign out, Premium plan', descFr: 'Profil, déconnexion, abonnement Premium' },
   { id: 'appearance',    icon: 'fa-palette',      ht: 'Aparans',                 en: 'Appearance',    fr: 'Apparence',     descHt: 'Tèm, koulè, font, efè vizyèl',           descEn: 'Theme, color, font, visual effects', descFr: 'Thème, couleurs, police et effets visuels' },
-  { id: 'language',      icon: 'fa-language',     ht: 'Lang',                    en: 'Language',      fr: 'Langue',        descHt: 'Kreyòl, English, Français',      descEn: 'Haitian Creole, English, French', descFr: 'Créole haïtien, anglais, français' },
+  { id: 'language',      icon: 'fa-language',     ht: 'Lang',                    en: 'Language',      fr: 'Langue',        descHt: 'Kreyòl, English, Français, Español', descEn: 'Haitian Creole, English, French, Spanish', descFr: 'Créole haïtien, anglais, français, espagnol' },
   { id: 'notifications', icon: 'fa-bell',         ht: 'Notifikasyon',            en: 'Notifications', fr: 'Notifications', descHt: 'Son, imel, push, preview',                descEn: 'Sounds, email, push, preview', descFr: 'Sons, e-mail, notifications push, aperçu' },
   { id: 'location',      icon: 'fa-map-location-dot', ht: 'Lokalizasyon',         en: 'Location',      fr: 'Localisation',  descHt: 'Peyi/region kont ou — deteksyon otomatik', descEn: 'Your account country/region — auto detection', descFr: 'Pays/région du compte — détection automatique' },
   { id: 'storage',       icon: 'fa-database',     ht: 'Depo & Enstalasyon',      en: 'Storage & Install', fr: 'Stockage & Installation', descHt: 'Jere depo, enstalasyon PWA',               descEn: 'Manage storage, PWA install', descFr: 'Gérer le stockage et l’installation PWA' },
@@ -83,8 +83,24 @@ const SETTINGS_CATEGORIES = [
   { id: 'creator',       icon: 'fa-crown',        ht: 'Kreyatè',                 en: 'Creator',       fr: 'Créateur',       descHt: 'Plan Kreyatif, aplike kreyatè, Spotlight', descEn: 'Plan Kreyatif, creator apply, Spotlight', descFr: 'Plan Kreyatif, candidature créateur, Spotlight' },
   { id: 'atelier',       icon: 'fa-flask',        ht: 'Atelye Envantè',          en: 'Inventor\'s Atelier', fr: 'Atelier de l\'Inventeur', descHt: '5 envansyon ou pa jwenn okenn lòt kote',   descEn: '5 inventions found nowhere else', descFr: '5 inventions uniques à découvrir' },
 ];
-const categoryLabel = (cat, lang) => t2(lang, { ht: cat.ht, fr: cat.fr, en: cat.en });
-const categoryDesc = (cat, lang) => t2(lang, { ht: cat.descHt, en: cat.descEn, fr: cat.descFr });
+// Spanish copy for the settings hub (the category descriptors above
+// still carry ht/en/fr inline; keeping the Spanish arm here avoids
+// rewriting every row while giving es users a fully localized hub).
+const ES_CATEGORY_COPY = {
+  account: ['Cuenta', 'Perfil, cerrar sesión, plan Premium'],
+  appearance: ['Apariencia', 'Tema, color, tipografía, efectos visuales'],
+  language: ['Idioma', 'Criollo haitiano, inglés, francés, español'],
+  notifications: ['Notificaciones', 'Sonidos, correo, push, vista previa'],
+  location: ['Ubicación', 'País/región de tu cuenta — detección automática'],
+  storage: ['Almacenamiento e instalación', 'Gestiona el almacenamiento y la instalación PWA'],
+  security: ['Seguridad y cuenta', 'Verificación en dos pasos (2FA)'],
+  legal: ['Legal y privacidad', 'Términos, políticas, RGPD'],
+  navigation: ['Navegación de paneles', 'Todas las páginas /sheet/ en un solo lugar'],
+  creator: ['Creador', 'Plan Kreyatif, postulación de creador, Spotlight'],
+  atelier: ['Atelier del inventor', '5 inventos que no encontrarás en ningún otro lugar'],
+};
+const categoryLabel = (cat, lang) => (lang === 'es' ? ES_CATEGORY_COPY[cat.id][0] : t2(lang, { ht: cat.ht, fr: cat.fr, en: cat.en }));
+const categoryDesc = (cat, lang) => (lang === 'es' ? ES_CATEGORY_COPY[cat.id][1] : t2(lang, { ht: cat.descHt, en: cat.descEn, fr: cat.descFr }));
 
 const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onMarketChange, toggleTheme, darkMode, fontSize, setFontSize, user, onLogout, translations, showToast, onProfileUpdate, onOpenCheckout }) => {
   const t = translations[lang];
@@ -1211,6 +1227,7 @@ const Settings = ({ isOpen, onClose, onAuthOpen, lang, onLangChange, market, onM
     { id: 'ht', label: LANGUAGE_LABELS.ht.native, icon: 'fa-language' },
     { id: 'en', label: LANGUAGE_LABELS.en.native, icon: 'fa-globe' },
     { id: 'fr', label: LANGUAGE_LABELS.fr.native, icon: 'fa-globe-europe' },
+    { id: 'es', label: LANGUAGE_LABELS.es.native, icon: 'fa-globe-americas' },
   ];
 
   return (

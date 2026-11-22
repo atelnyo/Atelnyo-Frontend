@@ -28,6 +28,7 @@ import {
   moduleLabel,
   visibilityLabel,
 } from '../../constants/media';
+import { inlineText } from '../../utils/inlineI18n';
 // ─── Module / visibility labels are sourced from the shared
 // constants/media.js. Anything added to the backend's vocabulary
 // should also land there first, then import here. ───
@@ -141,7 +142,7 @@ export default function MediaList({
       <div className={`media-list media-list--error ${className}`}>
         <div className="media-list-empty">
           <i className="fas fa-exclamation-triangle" aria-hidden="true" />
-          <h3>{isHt ? 'Erè' : 'Error'}</h3>
+          <h3>{isHt ? 'Erè' : inlineText(lang, 'Error')}</h3>
           <p>{error}</p>
         </div>
       </div>
@@ -155,11 +156,11 @@ export default function MediaList({
       <div className={`media-list media-list--empty ${className}`}>
         <div className="media-list-empty">
           <i className="fas fa-photo-video" aria-hidden="true" />
-          <h3>{isHt ? 'Pa gen medya' : 'No media yet'}</h3>
+          <h3>{isHt ? 'Pa gen medya' : inlineText(lang, 'No media yet')}</h3>
           <p>
             {isHt
               ? 'Konekte yon provider epi ajoute URL medya ou yo pou wè yo nan liste sa a.'
-              : 'Connect a media provider and add your media URLs to see them here.'}
+              : inlineText(lang, 'Connect a media provider and add your media URLs to see them here.')}
           </p>
         </div>
       </div>
@@ -206,7 +207,7 @@ export default function MediaList({
 
   return (
     <div className={`media-list ${className}`}>
-      <div className="media-list-table" role="table" aria-label={isHt ? 'Lis medya' : 'Media list'}>
+      <div className="media-list-table" role="table" aria-label={isHt ? 'Lis medya' : inlineText(lang, 'Media list')}>
         {/* ─── Header row ─────────────────────────────── */}
         <div className="media-list-row media-list-header-row" role="row">
           {selectionEnabled && (
@@ -215,7 +216,7 @@ export default function MediaList({
                 type="checkbox"
                 checked={allSelected}
                 onChange={toggleAll}
-                aria-label={isHt ? 'Chwazi tout' : 'Select all'}
+                aria-label={isHt ? 'Chwazi tout' : inlineText(lang, 'Select all')}
               />
             </div>
           )}
@@ -263,7 +264,7 @@ export default function MediaList({
                     type="checkbox"
                     checked={isRowSelected}
                     onChange={() => toggleRow(item)}
-                    aria-label={isHt ? 'Chwazi' : 'Select'}
+                    aria-label={isHt ? 'Chwazi' : inlineText(lang, 'Select')}
                   />
                 </div>
               )}
@@ -281,7 +282,7 @@ export default function MediaList({
               </div>
 
               <div className="media-list-cell media-list-cell-name" role="cell">
-                {item.title || item.name || item.url || (isHt ? 'San tit' : 'Untitled')}
+                {item.title || item.name || item.url || (isHt ? 'San tit' : inlineText(lang, 'Untitled'))}
               </div>
 
               <div className="media-list-cell media-list-cell-provider" role="cell">
@@ -321,8 +322,8 @@ export default function MediaList({
                   type="button"
                   className="media-list-row-action"
                   onClick={() => onAction?.('preview', item)}
-                  title={isHt ? 'Aperçu' : 'Preview'}
-                  aria-label={isHt ? 'Aperçu' : 'Preview'}
+                  title={isHt ? 'Aperçu' : inlineText(lang, 'Preview')}
+                  aria-label={isHt ? 'Aperçu' : inlineText(lang, 'Preview')}
                 >
                   <i className="fas fa-eye" aria-hidden="true" />
                 </button>
@@ -330,8 +331,8 @@ export default function MediaList({
                   type="button"
                   className="media-list-row-action"
                   onClick={() => onAction?.('inspect', item)}
-                  title={isHt ? 'Enspekte' : 'Inspect'}
-                  aria-label={isHt ? 'Enspekte' : 'Inspect'}
+                  title={isHt ? 'Enspekte' : inlineText(lang, 'Inspect')}
+                  aria-label={isHt ? 'Enspekte' : inlineText(lang, 'Inspect')}
                 >
                   <i className="fas fa-search-plus" aria-hidden="true" />
                 </button>
@@ -339,8 +340,8 @@ export default function MediaList({
                   type="button"
                   className="media-list-row-action media-list-row-action-more"
                   onClick={() => onAction?.('menu', item)}
-                  title={isHt ? 'Plis' : 'More'}
-                  aria-label={isHt ? 'Plis' : 'More'}
+                  title={isHt ? 'Plis' : inlineText(lang, 'More')}
+                  aria-label={isHt ? 'Plis' : inlineText(lang, 'More')}
                   aria-haspopup="true"
                 >
                   <i className="fas fa-ellipsis-v" aria-hidden="true" />

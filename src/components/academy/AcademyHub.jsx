@@ -19,6 +19,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { languageProgramService, courseService } from '../../services/api';
 import CourseCard from '../../modules/explore/cards/CourseCard';
+import { inlineText } from '../../utils/inlineI18n';
 
 const LEVELS = [
   { key: 'beginner', icon: 'fa-seedling' },
@@ -27,24 +28,24 @@ const LEVELS = [
 ];
 
 function levelLabel(key, lang) {
-  if (key === 'beginner') return lang === 'ht' ? 'Debitan' : 'Beginner';
-  if (key === 'intermediate') return lang === 'ht' ? 'Mwayen' : 'Intermediate';
-  return lang === 'ht' ? 'Avanse' : 'Advanced';
+  if (key === 'beginner') return lang === 'ht' ? 'Debitan' : inlineText(lang, 'Beginner');
+  if (key === 'intermediate') return lang === 'ht' ? 'Mwayen' : inlineText(lang, 'Intermediate');
+  return lang === 'ht' ? 'Avanse' : inlineText(lang, 'Advanced');
 }
 
-function AcademyEmpty({ isHt, onBack }) {
+function AcademyEmpty({ isHt, lang = 'en', onBack }) {
   return (
     <div className="academy-empty">
       <i className="fas fa-graduation-cap" aria-hidden="true" />
-      <h3>{isHt ? 'Akademi a poko louvri' : 'The academy is not open yet'}</h3>
+      <h3>{isHt ? 'Akademi a poko louvri' : inlineText(lang, 'The academy is not open yet')}</h3>
       <p>
         {isHt
           ? 'Nou ap prepare pwogram ofisyèl yo. Tcheke ankò byento.'
-          : 'We are preparing the official programs. Check back soon.'}
+          : inlineText(lang, 'We are preparing the official programs. Check back soon.')}
       </p>
       <button type="button" className="academy-btn" onClick={onBack}>
         <i className="fas fa-arrow-left" aria-hidden="true" />
-        {isHt ? 'Retounen' : 'Back'}
+        {isHt ? 'Retounen' : inlineText(lang, 'Back')}
       </button>
     </div>
   );
@@ -96,7 +97,7 @@ export default function AcademyHub({ lang = 'en', translations, onOpenCourse, on
         setCourses({ beginner: [], intermediate: [], advanced: [] });
         if (showToast) {
           showToast(
-            isHt ? 'Pa t kapab chaje kou yo.' : 'Could not load the courses.',
+            isHt ? 'Pa t kapab chaje kou yo.' : inlineText(lang, 'Could not load the courses.'),
             'exclamation-triangle',
           );
         }
@@ -120,7 +121,7 @@ export default function AcademyHub({ lang = 'en', translations, onOpenCourse, on
       <div className="academy-page">
         <div className="academy-loading">
           <i className="fas fa-spinner fa-pulse" aria-hidden="true" />
-          <span>{isHt ? 'Ap chaje Akademi a...' : 'Loading the Academy...'}</span>
+          <span>{isHt ? 'Ap chaje Akademi a...' : inlineText(lang, 'Loading the Academy...')}</span>
         </div>
       </div>
     );
@@ -132,10 +133,10 @@ export default function AcademyHub({ lang = 'en', translations, onOpenCourse, on
       <div className="academy-page">
         <div className="academy-error">
           <i className="fas fa-triangle-exclamation" aria-hidden="true" />
-          <h3>{isHt ? 'Pa t kapab chaje Akademi a.' : 'Could not load the Academy.'}</h3>
+          <h3>{isHt ? 'Pa t kapab chaje Akademi a.' : inlineText(lang, 'Could not load the Academy.')}</h3>
           <button type="button" className="academy-btn" onClick={loadPrograms}>
             <i className="fas fa-rotate-right" aria-hidden="true" />
-            {isHt ? 'Eseye ankò' : 'Try again'}
+            {isHt ? 'Eseye ankò' : inlineText(lang, 'Try again')}
           </button>
         </div>
       </div>
@@ -146,7 +147,7 @@ export default function AcademyHub({ lang = 'en', translations, onOpenCourse, on
   if (!selected && programs.length === 0) {
     return (
       <div className="academy-page">
-        <AcademyEmpty isHt={isHt} onBack={onBack} />
+        <AcademyEmpty isHt={isHt} lang={lang} onBack={onBack} />
       </div>
     );
   }
@@ -159,7 +160,7 @@ export default function AcademyHub({ lang = 'en', translations, onOpenCourse, on
       <div className="academy-page">
         <button type="button" className="academy-back" onClick={() => setSelected(null)}>
           <i className="fas fa-arrow-left" aria-hidden="true" />
-          {isHt ? 'Tout pwogram yo' : 'All programs'}
+          {isHt ? 'Tout pwogram yo' : inlineText(lang, 'All programs')}
         </button>
 
         <header className="academy-hero">
@@ -182,7 +183,7 @@ export default function AcademyHub({ lang = 'en', translations, onOpenCourse, on
         </header>
 
         {/* Level tabs */}
-        <div className="academy-tabs" role="tablist" aria-label={isHt ? 'Nivo' : 'Levels'}>
+        <div className="academy-tabs" role="tablist" aria-label={isHt ? 'Nivo' : inlineText(lang, 'Levels')}>
           {LEVELS.map(({ key, icon }) => (
             <button
               type="button"
@@ -204,12 +205,12 @@ export default function AcademyHub({ lang = 'en', translations, onOpenCourse, on
           {coursesLoading ? (
             <div className="academy-loading">
               <i className="fas fa-spinner fa-pulse" aria-hidden="true" />
-              <span>{isHt ? 'Ap chaje kou yo...' : 'Loading courses...'}</span>
+              <span>{isHt ? 'Ap chaje kou yo...' : inlineText(lang, 'Loading courses...')}</span>
             </div>
           ) : activeCourses.length === 0 ? (
             <div className="academy-empty academy-empty--small">
               <i className="fas fa-book-open" aria-hidden="true" />
-              <p>{isHt ? 'Poko gen kou nan nivo sa a.' : 'No courses in this level yet.'}</p>
+              <p>{isHt ? 'Poko gen kou nan nivo sa a.' : inlineText(lang, 'No courses in this level yet.')}</p>
             </div>
           ) : (
             <div className="academy-grid">
@@ -235,17 +236,17 @@ export default function AcademyHub({ lang = 'en', translations, onOpenCourse, on
       <header className="academy-page-header">
         <h2>
           <i className="fas fa-graduation-cap" aria-hidden="true" />
-          {t.academy_title || (isHt ? 'Akademi Lang Atelnyo' : 'Atelnyo Language Academy')}
+          {t.academy_title || (isHt ? 'Akademi Lang Atelnyo' : inlineText(lang, 'Atelnyo Language Academy'))}
         </h2>
         <p>
           {t.academy_subtitle || (isHt
             ? 'Pwogram ofisyèl pou aprann yon lang — nivo Debitan, Mwayen ak Avanse.'
-            : 'Official programs to learn a language — Beginner, Intermediate and Advanced levels.')}
+            : inlineText(lang, 'Official programs to learn a language — Beginner, Intermediate and Advanced levels.'))}
         </p>
       </header>
 
       {programs.length === 0 ? (
-        <AcademyEmpty isHt={isHt} onBack={onBack} />
+        <AcademyEmpty isHt={isHt} lang={lang} onBack={onBack} />
       ) : (
         <div className="academy-program-grid">
           {programs.map((prog) => {
@@ -260,7 +261,7 @@ export default function AcademyHub({ lang = 'en', translations, onOpenCourse, on
                 <div className="academy-program-card-top">
                   <span className="academy-program-icon"><i className="fas fa-language" aria-hidden="true" /></span>
                   <span className="academy-program-badge">
-                    {isHt ? 'Ofisyèl' : 'Official'}
+                    {isHt ? 'Ofisyèl' : inlineText(lang, 'Official')}
                   </span>
                 </div>
                 <h3>{title}</h3>
@@ -280,7 +281,7 @@ export default function AcademyHub({ lang = 'en', translations, onOpenCourse, on
                   })}
                 </div>
                 <span className="academy-program-cta">
-                  {isHt ? 'Gade kou yo' : 'View courses'}
+                  {isHt ? 'Gade kou yo' : inlineText(lang, 'View courses')}
                   <i className="fas fa-chevron-right" aria-hidden="true" />
                 </span>
               </button>

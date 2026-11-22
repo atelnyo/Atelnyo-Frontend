@@ -14,6 +14,7 @@
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { blockSubmissionService } from '../../../services/api';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function AssignmentBlock({ block, lang = 'en', index, courseId, moduleIndex, onComplete, onViewed }) {
   const isHt = lang === 'ht';
@@ -109,7 +110,7 @@ export default function AssignmentBlock({ block, lang = 'en', index, courseId, m
             padding: 12, borderRadius: 8, background: '#ecfdf5', color: '#065f46',
             fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8,
           }}>
-            <i className="fas fa-check-circle" /> {isHt ? 'Tach soumèt!' : 'Assignment submitted!'}
+            <i className="fas fa-check-circle" /> {isHt ? 'Tach soumèt!' : inlineText(lang, 'Assignment submitted!')}
           </div>
           {submission && (
             <div style={{
@@ -122,7 +123,7 @@ export default function AssignmentBlock({ block, lang = 'en', index, courseId, m
           )}
           {score != null && (
             <div style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: 6 }}>
-              📊 {isHt ? 'Nòt' : 'Score'}: {score}{maxScore ? ` / ${maxScore}` : ''}
+              📊 {isHt ? 'Nòt' : inlineText(lang, 'Score')}: {score}{maxScore ? ` / ${maxScore}` : ''}
             </div>
           )}
           {feedback && (
@@ -141,7 +142,7 @@ export default function AssignmentBlock({ block, lang = 'en', index, courseId, m
               background: 'transparent', cursor: 'pointer', fontSize: '0.8rem',
             }}
           >
-            {isHt ? 'Edit repons' : 'Edit answer'}
+            {isHt ? 'Edit repons' : inlineText(lang, 'Edit answer')}
           </button>
         </div>
       ) : (
@@ -149,7 +150,7 @@ export default function AssignmentBlock({ block, lang = 'en', index, courseId, m
           <textarea
             value={submission}
             onChange={(e) => setSubmission(e.target.value)}
-            placeholder={isHt ? 'Ekri repons ou isitä...' : 'Write your answer here...'}
+            placeholder={isHt ? 'Ekri repons ou isitä...' : inlineText(lang, 'Write your answer here...')}
             rows={4}
             style={{
               width: '100%', padding: 12, borderRadius: 8, border: '1px solid var(--border-color, #e5e7eb)',
@@ -167,8 +168,8 @@ export default function AssignmentBlock({ block, lang = 'en', index, courseId, m
             }}
           >
             {submitting
-              ? (isHt ? 'Ap voye...' : 'Submitting…')
-              : (isHt ? 'Soumèt' : 'Submit')}
+              ? (isHt ? 'Ap voye...' : inlineText(lang, 'Submitting…'))
+              : (isHt ? 'Soumèt' : inlineText(lang, 'Submit'))}
           </button>
         </>
       )}

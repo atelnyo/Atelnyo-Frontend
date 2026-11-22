@@ -10,10 +10,11 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { courseService } from '../../../services/api';
 import styles from './sections.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function CourseExportImportModal({ course, lang = 'en', onClose, onImportSuccess }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
   const [mode, setMode] = useState(course ? 'export' : 'import'); // 'export' | 'import'
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);

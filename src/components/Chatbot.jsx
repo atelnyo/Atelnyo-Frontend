@@ -46,6 +46,7 @@ import {
   getMentorCareerAdvice,
   getMentorSkillGaps,
 } from '../services/deie';
+import { inlineText } from '../utils/inlineI18n';
 
 // ─── Chat Themes ────────────────────────────────────────────────
 const THEMES = {
@@ -265,7 +266,7 @@ async function _executeCommand(command, lang) {
         }
         return { executed: false, message: isHt
           ? '❓ Mwen pa t jwenn sa ou chèche a.'
-          : "I couldn't find what you're looking for." };
+          : inlineText(lang, "I couldn't find what you're looking for.") };
       } catch { return { executed: false, message: '' }; }
     }
     case 'course_search': {
@@ -335,7 +336,7 @@ async function _executeCommand(command, lang) {
         if (result.success) {
           return { executed: true, message: isHt
             ? '🎓 **Ou enskri!** Mwen ouvri kou a pou ou.'
-            : '🎓 **Enrolled!** Opening the course for you.' };
+            : inlineText(lang, '🎓 **Enrolled!** Opening the course for you.') };
         }
       }
       // No course ID — show search results with enroll buttons
@@ -351,7 +352,7 @@ async function _executeCommand(command, lang) {
       window.location.href = '/explore';
       return { executed: true, message: isHt
         ? '🎓 Mwen mennen ou sou Explore pou chwazi yon kou!'
-        : '🎓 Taking you to Explore to pick a course!' };
+        : inlineText(lang, '🎓 Taking you to Explore to pick a course!') };
     }
     case 'save': {
       // Try to extract item type and ID from the message
@@ -359,7 +360,7 @@ async function _executeCommand(command, lang) {
       if (saveMatch) {
         const result = await executeToggleSave(saveMatch[1].toLowerCase(), saveMatch[2]);
         if (result.success) {
-          const status = result.saved ? (isHt ? 'sove' : 'saved') : (isHt ? 'pañ sove' : 'unsaved');
+          const status = result.saved ? (isHt ? 'sove' : inlineText(lang, 'saved')) : (isHt ? 'pañ sove' : inlineText(lang, 'unsaved'));
           return { executed: true, message: isHt
             ? `⭐ Mwen **${status}** sa pou ou!`
             : `⭐ **${status.charAt(0).toUpperCase() + status.slice(1)}** for you!` };
@@ -367,7 +368,7 @@ async function _executeCommand(command, lang) {
       }
       return { executed: true, message: isHt
         ? '⭐ Chèche sa ou vle sove sou Explore epi voye lyen an ba mwen — mwen pral sove l pou ou!'
-        : '⭐ Find what you want to save on Explore and send me the link — I\'ll save it for you!' };
+        : inlineText(lang, '⭐ Find what you want to save on Explore and send me the link — I\'ll save it for you!') };
     }
     case 'progress': {
       try {
@@ -385,7 +386,7 @@ async function _executeCommand(command, lang) {
         }
         return { executed: true, message: isHt
           ? '📊 Ou pa enskri nan okenn kou ankò. [Eksplore kou yo](https://atelnyo.site/explore) pou kòmanse aprann!'
-          : `📊 You're not enrolled in any courses yet. [Browse courses](https://atelnyo.site/explore) to start learning!` };
+          : inlineText(lang, `📊 You're not enrolled in any courses yet. [Browse courses](https://atelnyo.site/explore) to start learning!`) };
       } catch { return { executed: false, message: '' }; }
     }
     case 'calendar': {
@@ -403,7 +404,7 @@ async function _executeCommand(command, lang) {
         }
         return { executed: true, message: isHt
           ? '📅 Pa gen evènman ki ap vini kounye a. Tcheke ankò pita!'
-          : '📅 No upcoming events right now. Check back later!' };
+          : inlineText(lang, '📅 No upcoming events right now. Check back later!') };
       } catch { return { executed: false, message: '' }; }
     }
     case 'wallet': {
@@ -431,7 +432,7 @@ async function _executeCommand(command, lang) {
         const talents = talentsRes.status === 'fulfilled' ? (talentsRes.value.data?.results || []) : [];
         const totalSaved = courses.length + music.length + talents.length;
         if (totalSaved > 0) {
-          let msg = isHt ? '⭐ **MOUN OU SOVE:**\n' : '⭐ **YOUR SAVED ITEMS:**\n';
+          let msg = isHt ? '⭐ **MOUN OU SOVE:**\n' : inlineText(lang, '⭐ **YOUR SAVED ITEMS:**\n');
           if (courses.length > 0) msg += `\n📚 **Kou (${courses.length}):**\n` + courses.map(c => `- ${c.title || c.course_title || 'Kou'}`).join('\n');
           if (music.length > 0) msg += `\n🎵 **Mizik (${music.length}):**\n` + music.map(m => `- ${m.title || 'Mizik'}`).join('\n');
           if (talents.length > 0) msg += `\n🌟 **Talan (${talents.length}):**\n` + talents.map(t => `- ${t.name || t.display_name || 'Talan'}`).join('\n');
@@ -439,7 +440,7 @@ async function _executeCommand(command, lang) {
         }
         return { executed: true, message: isHt
           ? '⭐ Ou pa gen anyen sove ankò. Eksplore [Explore](https://atelnyo.site/explore) epi klike ⭐ sou sa ou renmen!'
-          : "⭐ You haven't saved anything yet. Explore [Atelnyo](https://atelnyo.site/explore) and click ⭐ on what you like!" };
+          : inlineText(lang, "⭐ You haven't saved anything yet. Explore [Atelnyo](https://atelnyo.site/explore) and click ⭐ on what you like!") };
       } catch { return { executed: false, message: '' }; }
     }
     case 'notifications': {
@@ -469,7 +470,7 @@ async function _executeCommand(command, lang) {
         await executeMarkAllRead();
         return { executed: true, message: isHt
           ? '✅ Tout notifikasyon yo make kom li!'
-          : '✅ All notifications marked as read!' };
+          : inlineText(lang, '✅ All notifications marked as read!') };
       } catch { return { executed: false, message: '' }; }
     }
     case 'my_posts': {
@@ -477,7 +478,7 @@ async function _executeCommand(command, lang) {
       if (!isCreator) {
         return { executed: true, message: isHt
           ? '📝 Ou pa gen pwofil kreyatè ankò — se sèlman kreyatè ki ka pibliye post. [Vin yon kreyatè](https://atelnyo.site/explore) pou kòmanse pataje!'
-          : '📝 You don\'t have a creator profile yet — only creators can publish posts. [Become a creator](https://atelnyo.site/explore) to start sharing!' };
+          : inlineText(lang, '📝 You don\'t have a creator profile yet — only creators can publish posts. [Become a creator](https://atelnyo.site/explore) to start sharing!') };
       }
       if (posts.length === 0) {
         return { executed: true, message: isHt
@@ -497,7 +498,7 @@ async function _executeCommand(command, lang) {
       if (posts.length === 0) {
         return { executed: true, message: isHt
           ? '📰 Pa gen post resan pou kounye a. Tcheke ankò pita!'
-          : '📰 No recent posts right now. Check back later!' };
+          : inlineText(lang, '📰 No recent posts right now. Check back later!') };
       }
       const items = posts.map(p => {
         const date = p.published_at ? new Date(p.published_at).toLocaleDateString() : '';
@@ -526,16 +527,16 @@ async function _executeCommand(command, lang) {
       if (res.reason === 'rate_limited') {
         return { executed: true, message: isHt
           ? '⏳ Twòp verifikasyon youn dèyè lòt. Rete tann yon ti moman epi re-eseye.'
-          : '⏳ Too many verifications in a row. Wait a moment and try again.' };
+          : inlineText(lang, '⏳ Too many verifications in a row. Wait a moment and try again.') };
       }
       return { executed: true, message: isHt
         ? '⚠️ Mwen pa ka verifye kòd la kounye a. Eseye ankò pita.'
-        : '⚠️ I cannot verify the code right now. Try again later.' };
+        : inlineText(lang, '⚠️ I cannot verify the code right now. Try again later.') };
     }
     case 'clear_chat': {
       return { executed: true, action: 'clear', message: isHt
         ? '✨ Konvèsasyon an efase — nou kòmanse fre! Kijan mwen ka ede ou?'
-        : '✨ Conversation cleared — fresh start! How can I help you?' };
+        : inlineText(lang, '✨ Conversation cleared — fresh start! How can I help you?') };
     }
     case 'url': {
       // Fetch SEO meta for the URL and show preview
@@ -836,9 +837,9 @@ function _getFollowUpSuggestions(lastBotText, lang) {
 
   if (/course|kou|learn|approndi/i.test(text)) {
     suggestions.push(
-      { icon: '🔍', text: lang === 'ht' ? 'Chèche kou sou pwogramasyon' : 'Search courses on programming' },
+      { icon: '🔍', text: lang === 'ht' ? 'Chèche kou sou pwogramasyon' : inlineText(lang, 'Search courses on programming') },
       { icon: '🔗', text: lang === 'ht' ? 'Mwen vle wè tout kou yo' : lang === 'fr' ? 'Je veux voir tous les cours' : lang === 'es' ? 'Quiero ver todos los cursos' : 'Show me all courses' },
-      { icon: '💰', text: lang === 'ht' ? 'Ki kou gratis?' : 'What free courses are there?' },
+      { icon: '💰', text: lang === 'ht' ? 'Ki kou gratis?' : inlineText(lang, 'What free courses are there?') },
     );
   } else if (/premium|plan|abone/i.test(text)) {
     suggestions.push(
@@ -882,10 +883,10 @@ function _getFollowUpSuggestions(lastBotText, lang) {
   // Mentor follow-ups — personalized guidance
   if (/skill|konpetans|learn|approndi|career|karye/i.test(text)) {
     suggestions.push(
-      { icon: '🎓', text: lang === 'ht' ? 'Ki sa mwen dwe aprann?' : 'What should I learn next?', _mentor: 'learning-path' },
+      { icon: '🎓', text: lang === 'ht' ? 'Ki sa mwen dwe aprann?' : inlineText(lang, 'What should I learn next?'), _mentor: 'learning-path' },
     );
     suggestions.push(
-      { icon: '🔧', text: lang === 'ht' ? 'Ki konpetans ki manke m?' : 'What skills am I missing?', _mentor: 'skill-gaps' },
+      { icon: '🔧', text: lang === 'ht' ? 'Ki konpetans ki manke m?' : inlineText(lang, 'What skills am I missing?'), _mentor: 'skill-gaps' },
     );
   }
 
@@ -924,8 +925,8 @@ function CopyButton({ text, lang }) {
     <button
       className="msg-copy-btn"
       onClick={() => _copyToClipboard(text, setIsCopied)}
-      title={isCopied ? (isHt ? 'Kopye!' : 'Copied!') : (isHt ? 'Kopye repons lan' : 'Copy response')}
-      aria-label={isHt ? 'Kopye repons lan' : 'Copy response'}
+      title={isCopied ? (isHt ? 'Kopye!' : inlineText(lang, 'Copied!')) : (isHt ? 'Kopye repons lan' : inlineText(lang, 'Copy response'))}
+      aria-label={isHt ? 'Kopye repons lan' : inlineText(lang, 'Copy response')}
     >
       <i className={isCopied ? 'fas fa-check' : 'fas fa-copy'} />
     </button>
@@ -950,7 +951,7 @@ const Chatbot = React.memo(({ lang = 'en', translations }) => {
 
   const welcomeMsg = useMemo(() => ({
     role: 'bot',
-    text: t.bot_welcome || (isHt ? 'Bonjou! Mwen se Atelnyo AI 🤖. Mwen ka ede ou jwenn kou, kreye kontni, oswa reponn kesyon ou. Kijan mwen ka ede ou jodi a?' : 'Hello! I\'m Atelnyo AI 🤖. I can help you find courses, create content, or answer your questions. How can I help you today?'),
+    text: t.bot_welcome || (isHt ? 'Bonjou! Mwen se Atelnyo AI 🤖. Mwen ka ede ou jwenn kou, kreye kontni, oswa reponn kesyon ou. Kijan mwen ka ede ou jodi a?' : inlineText(lang, 'Hello! I\'m Atelnyo AI 🤖. I can help you find courses, create content, or answer your questions. How can I help you today?')),
     timestamp: Date.now(),
   }), [t.bot_welcome, isHt]);
 
@@ -1003,7 +1004,7 @@ const Chatbot = React.memo(({ lang = 'en', translations }) => {
       // Add as a system message (not from AI)
       setMessages(prev => [...prev, {
         role: 'bot',
-        text: `🔔 **${isHt ? 'Notifikasyon' : 'Notification'}:** ${notifText}`,
+        text: `🔔 **${isHt ? 'Notifikasyon' : inlineText(lang, 'Notification')}:** ${notifText}`,
         timestamp: Date.now(),
         isNotification: true,
       }]);
@@ -1035,7 +1036,7 @@ const Chatbot = React.memo(({ lang = 'en', translations }) => {
       // User logged out — clear chat and show goodbye
       setMessages([{
         role: 'bot',
-        text: isHt ? 'Ou dekonekte. Lè ou rekonekte, mwen ap remember konvèsasyon an! 👋' : 'You logged out. When you log back in, I\'ll remember our conversation! 👋',
+        text: isHt ? 'Ou dekonekte. Lè ou rekonekte, mwen ap remember konvèsasyon an! 👋' : inlineText(lang, 'You logged out. When you log back in, I\'ll remember our conversation! 👋'),
         timestamp: Date.now(),
       }]);
     };
@@ -1089,9 +1090,9 @@ const Chatbot = React.memo(({ lang = 'en', translations }) => {
     setIsThinking(true);
 
     const actionLabels = {
-      'learning-path': isHt ? '🎓 Montre m chimen aprantisaj mwen' : '🎓 Show my learning path',
-      'career-advice': isHt ? '💼 Ban m konsèy karyè' : '💼 Give me career advice',
-      'skill-gaps': isHt ? '🔧 Ki konpetans ki manke m' : '🔧 What skills am I missing',
+      'learning-path': isHt ? '🎓 Montre m chimen aprantisaj mwen' : inlineText(lang, '🎓 Show my learning path'),
+      'career-advice': isHt ? '💼 Ban m konsèy karyè' : inlineText(lang, '💼 Give me career advice'),
+      'skill-gaps': isHt ? '🔧 Ki konpetans ki manke m' : inlineText(lang, '🔧 What skills am I missing'),
     };
 
     const userText = actionLabels[action] || action;
@@ -1104,7 +1105,7 @@ const Chatbot = React.memo(({ lang = 'en', translations }) => {
       else if (action === 'skill-gaps') res = await getMentorSkillGaps();
 
       const answer = res?.data?.recommendation || res?.data?.message ||
-        (isHt ? 'Pa gen enfòmasyon disponib.' : 'No information available.');
+        (isHt ? 'Pa gen enfòmasyon disponib.' : inlineText(lang, 'No information available.'));
       setMessages(prev => [...prev, {
         role: 'bot',
         text: answer,
@@ -1116,7 +1117,7 @@ const Chatbot = React.memo(({ lang = 'en', translations }) => {
       console.warn('[chatbot] Mentor action failed:', err.message);
       setMessages(prev => [...prev, {
         role: 'bot',
-        text: isHt ? 'Mwen pa ka jwenn enfòmasyon sa a kounye a. Eseye ankò.' : 'I cannot get this information right now. Please try again.',
+        text: isHt ? 'Mwen pa ka jwenn enfòmasyon sa a kounye a. Eseye ankò.' : inlineText(lang, 'I cannot get this information right now. Please try again.'),
         timestamp: Date.now(),
       }]);
     } finally {
@@ -1242,7 +1243,7 @@ const Chatbot = React.memo(({ lang = 'en', translations }) => {
 
       setMessages(prev => [...prev, {
         role: 'bot',
-        text: data.text || (isHt ? 'Pa gen repons.' : 'No response.'),
+        text: data.text || (isHt ? 'Pa gen repons.' : inlineText(lang, 'No response.')),
         model: data.model,
         duration_ms: data.duration_ms,
         timestamp: Date.now(),
@@ -1251,7 +1252,7 @@ const Chatbot = React.memo(({ lang = 'en', translations }) => {
     } catch (err) {
       if (abortRef.current?.signal.aborted) return;
       console.error('[chatbot] AI error:', err);
-      setError(isHt ? 'Erè nan konekte ak AI a.' : 'Error connecting to AI.');
+      setError(isHt ? 'Erè nan konekte ak AI a.' : inlineText(lang, 'Error connecting to AI.'));
     } finally {
       if (!abortRef.current?.signal.aborted) setIsThinking(false);
     }
@@ -1280,7 +1281,7 @@ const Chatbot = React.memo(({ lang = 'en', translations }) => {
     setIsThinking(false);
     setMessages(prev => [...prev, {
       role: 'bot',
-      text: isHt ? '⏹️ Repons lan kanpe.' : '⏹️ Reply stopped.',
+      text: isHt ? '⏹️ Repons lan kanpe.' : inlineText(lang, '⏹️ Reply stopped.'),
       timestamp: Date.now(),
       isStopped: true,
     }]);
@@ -1289,20 +1290,20 @@ const Chatbot = React.memo(({ lang = 'en', translations }) => {
   // Handle quick action clicks
   const handleQuickAction = useCallback((action) => {
     const prompts = {
-      browse_courses: isHt ? 'Montre m tout kou ki disponib sou Atelnyo' : 'Show me all available courses on Atelnyo',
-      browse_explore: isHt ? 'Mwen vle eksplore tout sa Atelnyo genyen' : 'I want to explore everything Atelnyo offers',
-      show_premium: isHt ? 'Explike m sou Premium ak ki jan li mache' : 'Tell me about Premium and how it works',
-      get_help: isHt ? 'Mwen bezwen èd pou kòmanse sou platfòm lan' : 'I need help getting started on the platform',
-      creator_info: isHt ? 'Mwen vle kòmanse kreye kontni sou Atelnyo' : 'I want to start creating content on Atelnyo',
-      show_progress: isHt ? 'Ki kou mwen ap suiv kounye a?' : 'What courses am I taking right now?',
-      show_calendar: isHt ? 'Ki evènman ki ap vini sou Atelnyo?' : 'What events are coming up on Atelnyo?',
-      show_wallet: isHt ? 'Ki solde bous mwen?' : 'What is my wallet balance?',
-      show_saved: isHt ? 'Ban m wè sa mwen sove a' : 'Show me my saved items',
-      follow_creator: isHt ? 'Follow @Atelnyo' : 'Follow @Atelnyo',
-      send_message: isHt ? 'Voye mesaj bay @Atelnyo' : 'Send message to @Atelnyo',
-      join_community: isHt ? 'Rejwine kominote' : 'Join a community',
-      notifications: isHt ? 'Ban m wè notifikasyon mwen' : 'Show my notifications',
-      mark_read: isHt ? 'Make tout notifikasyon kom li' : 'Mark all notifications read',
+      browse_courses: isHt ? 'Montre m tout kou ki disponib sou Atelnyo' : inlineText(lang, 'Show me all available courses on Atelnyo'),
+      browse_explore: isHt ? 'Mwen vle eksplore tout sa Atelnyo genyen' : inlineText(lang, 'I want to explore everything Atelnyo offers'),
+      show_premium: isHt ? 'Explike m sou Premium ak ki jan li mache' : inlineText(lang, 'Tell me about Premium and how it works'),
+      get_help: isHt ? 'Mwen bezwen èd pou kòmanse sou platfòm lan' : inlineText(lang, 'I need help getting started on the platform'),
+      creator_info: isHt ? 'Mwen vle kòmanse kreye kontni sou Atelnyo' : inlineText(lang, 'I want to start creating content on Atelnyo'),
+      show_progress: isHt ? 'Ki kou mwen ap suiv kounye a?' : inlineText(lang, 'What courses am I taking right now?'),
+      show_calendar: isHt ? 'Ki evènman ki ap vini sou Atelnyo?' : inlineText(lang, 'What events are coming up on Atelnyo?'),
+      show_wallet: isHt ? 'Ki solde bous mwen?' : inlineText(lang, 'What is my wallet balance?'),
+      show_saved: isHt ? 'Ban m wè sa mwen sove a' : inlineText(lang, 'Show me my saved items'),
+      follow_creator: isHt ? 'Follow @Atelnyo' : inlineText(lang, 'Follow @Atelnyo'),
+      send_message: isHt ? 'Voye mesaj bay @Atelnyo' : inlineText(lang, 'Send message to @Atelnyo'),
+      join_community: isHt ? 'Rejwine kominote' : inlineText(lang, 'Join a community'),
+      notifications: isHt ? 'Ban m wè notifikasyon mwen' : inlineText(lang, 'Show my notifications'),
+      mark_read: isHt ? 'Make tout notifikasyon kom li' : inlineText(lang, 'Mark all notifications read'),
     };
     handleSend(prompts[action] || 'Hello');
   }, [handleSend, isHt]);
@@ -1370,7 +1371,7 @@ const Chatbot = React.memo(({ lang = 'en', translations }) => {
                 </div>
               )}
             </div>
-            <button className="chat-header-btn" onClick={handleClear} title={isHt ? 'Efase konvèsasyon' : 'Clear conversation'}>
+            <button className="chat-header-btn" onClick={handleClear} title={isHt ? 'Efase konvèsasyon' : inlineText(lang, 'Clear conversation')}>
               <i className="fas fa-trash" />
             </button>
             <button className="chat-header-btn" onClick={toggleChat} aria-label="Close chat">
@@ -1440,7 +1441,7 @@ const Chatbot = React.memo(({ lang = 'en', translations }) => {
                   {error}
                 </div>
                 <button className="msg-retry-btn" onClick={handleRetry}>
-                  <i className="fas fa-redo" /> {isHt ? 'Eseye ankò' : 'Retry'}
+                  <i className="fas fa-redo" /> {isHt ? 'Eseye ankò' : inlineText(lang, 'Retry')}
                 </button>
               </div>
             </div>
@@ -1464,7 +1465,7 @@ const Chatbot = React.memo(({ lang = 'en', translations }) => {
           {showSuggestions && (
             <div className="chat-suggestions">
               <div className="chat-suggestions-label">
-                {isHt ? '💡 Eseye poze kesyon sa yo:' : lang === 'fr' ? '💡 Essayez ces questions :' : '💡 Try asking:'}
+                {isHt ? '💡 Eseye poze kesyon sa yo:' : lang === 'fr' ? '💡 Essayez ces questions :' : inlineText(lang, '💡 Try asking:')}
               </div>
               {suggestions.map((s, i) => (
                 <button key={i} className="chat-suggestion-btn" onClick={() => { if (s._mentor) { _handleMentorAction(s._mentor); } else { handleSend(s.text); } }} style={{ '--hover-bg': theme.light, '--hover-border': theme.primary }}>
@@ -1495,7 +1496,7 @@ const Chatbot = React.memo(({ lang = 'en', translations }) => {
         {detectedIntent && !isThinking && (
           <div className="chat-intent-banner" style={{ background: theme.light, borderColor: theme.primary + '30' }}>
             <span className="chat-intent-icon">{detectedIntent.key === 'course' ? '📚' : detectedIntent.key === 'explore' ? '🔍' : detectedIntent.key === 'premium' ? '⭐' : detectedIntent.key === 'help' ? '💡' : '🎨'}</span>
-            <span className="chat-intent-text">{isHt ? 'Mwen panse ou ap chèche:' : 'I think you\'re looking for:'}</span>
+            <span className="chat-intent-text">{isHt ? 'Mwen panse ou ap chèche:' : inlineText(lang, 'I think you\'re looking for:')}</span>
             <button className="chat-intent-action" onClick={() => handleQuickAction(detectedIntent.action)} style={{ color: theme.primary }}>
               {detectedIntent.label[lang] || detectedIntent.label.en}
             </button>
@@ -1533,8 +1534,8 @@ const Chatbot = React.memo(({ lang = 'en', translations }) => {
             onClick={isThinking ? handleStop : () => handleSend()}
             disabled={!isThinking && !input.trim()}
             style={{ background: theme.gradient, boxShadow: `0 2px 8px ${theme.shadow}` }}
-            aria-label={isThinking ? (isHt ? 'Kanpe' : 'Stop') : (isHt ? 'Voye' : 'Send')}
-            title={isThinking ? (isHt ? 'Kanpe repons lan' : 'Stop the reply') : (isHt ? 'Voye' : 'Send')}
+            aria-label={isThinking ? (isHt ? 'Kanpe' : inlineText(lang, 'Stop')) : (isHt ? 'Voye' : inlineText(lang, 'Send'))}
+            title={isThinking ? (isHt ? 'Kanpe repons lan' : inlineText(lang, 'Stop the reply')) : (isHt ? 'Voye' : inlineText(lang, 'Send'))}
           >
             <i className={isThinking ? 'fas fa-stop' : 'fas fa-paper-plane'} />
           </button>

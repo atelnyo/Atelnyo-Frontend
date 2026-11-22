@@ -1,115 +1,241 @@
 {
-  "supportedLanguages": ["ht", "en", "fr"],
+  "supportedLanguages": [
+    "ht",
+    "en",
+    "fr",
+    "es"
+  ],
   "defaultMarket": "HT",
   "defaultLanguage": "en",
   "languageLabels": {
-    "ht": { "label": "Kreyòl", "native": "Kreyòl", "flag": "🇭🇹" },
-    "en": { "label": "English", "native": "English", "flag": "🇬🇧" },
-    "fr": { "label": "Français", "native": "Français", "flag": "🇫🇷" }
+    "ht": {
+      "label": "Kreyòl",
+      "native": "Kreyòl",
+      "flag": "🇭🇹"
+    },
+    "en": {
+      "label": "English",
+      "native": "English",
+      "flag": "🇬🇧"
+    },
+    "fr": {
+      "label": "Français",
+      "native": "Français",
+      "flag": "🇫🇷"
+    },
+    "es": {
+      "label": "Español",
+      "native": "Español",
+      "flag": "🇪🇸"
+    }
   },
   "marketLabels": {
-    "HT": { "name": "Ayiti", "flag": "🇭🇹" },
-    "DO": { "name": "República Dominicana", "flag": "🇩🇴" },
-    "CU": { "name": "Cuba", "flag": "🇨🇺" },
-    "CA": { "name": "Canada", "flag": "🇨🇦" },
-    "US": { "name": "United States", "flag": "🇺🇸" },
-    "FR": { "name": "France", "flag": "🇫🇷" },
-    "BS": { "name": "Bahamas", "flag": "🇧🇸" },
-    "TC": { "name": "Turks & Caicos", "flag": "🇹🇨" },
-    "GP": { "name": "Guadeloupe", "flag": "🇬🇵" },
-    "MQ": { "name": "Martinique", "flag": "🇲🇶" },
-    "CH": { "name": "Switzerland", "flag": "🇨🇭" },
-    "BE": { "name": "Belgium", "flag": "🇧🇪" },
-    "BR": { "name": "Brazil", "flag": "🇧🇷" }
+    "HT": {
+      "name": "Ayiti",
+      "flag": "🇭🇹"
+    },
+    "DO": {
+      "name": "República Dominicana",
+      "flag": "🇩🇴"
+    },
+    "CU": {
+      "name": "Cuba",
+      "flag": "🇨🇺"
+    },
+    "CA": {
+      "name": "Canada",
+      "flag": "🇨🇦"
+    },
+    "US": {
+      "name": "United States",
+      "flag": "🇺🇸"
+    },
+    "FR": {
+      "name": "France",
+      "flag": "🇫🇷"
+    },
+    "BS": {
+      "name": "Bahamas",
+      "flag": "🇧🇸"
+    },
+    "TC": {
+      "name": "Turks & Caicos",
+      "flag": "🇹🇨"
+    },
+    "GP": {
+      "name": "Guadeloupe",
+      "flag": "🇬🇵"
+    },
+    "MQ": {
+      "name": "Martinique",
+      "flag": "🇲🇶"
+    },
+    "CH": {
+      "name": "Switzerland",
+      "flag": "🇨🇭"
+    },
+    "BE": {
+      "name": "Belgium",
+      "flag": "🇧🇪"
+    },
+    "BR": {
+      "name": "Brazil",
+      "flag": "🇧🇷"
+    }
   },
   "markets": {
     "HT": {
       "defaultLanguage": "ht",
-      "supportedLanguages": ["ht", "en", "fr"],
+      "supportedLanguages": [
+        "ht",
+        "en",
+        "fr",
+        "es"
+      ],
       "currency": "USD",
       "timezone": "America/Port-au-Prince",
       "marketEnabled": true
     },
     "DO": {
       "defaultLanguage": "en",
-      "supportedLanguages": ["ht", "en", "fr"],
+      "supportedLanguages": [
+        "ht",
+        "en",
+        "fr",
+        "es"
+      ],
       "currency": "DOP",
       "timezone": "America/Santo_Domingo",
       "marketEnabled": true
     },
     "CU": {
       "defaultLanguage": "en",
-      "supportedLanguages": ["ht", "en", "fr"],
+      "supportedLanguages": [
+        "ht",
+        "en",
+        "fr",
+        "es"
+      ],
       "currency": "CUP",
       "timezone": "America/Havana",
       "marketEnabled": true
     },
     "CA": {
       "defaultLanguage": "en",
-      "supportedLanguages": ["en", "fr", "ht"],
+      "supportedLanguages": [
+        "en",
+        "fr",
+        "ht",
+        "es"
+      ],
       "currency": "CAD",
       "timezone": "America/Toronto",
       "marketEnabled": true
     },
     "US": {
       "defaultLanguage": "en",
-      "supportedLanguages": ["ht", "en", "fr"],
+      "supportedLanguages": [
+        "ht",
+        "en",
+        "fr",
+        "es"
+      ],
       "currency": "USD",
       "timezone": "America/New_York",
       "marketEnabled": true
     },
     "FR": {
       "defaultLanguage": "fr",
-      "supportedLanguages": ["fr", "ht", "en"],
+      "supportedLanguages": [
+        "fr",
+        "ht",
+        "en",
+        "es"
+      ],
       "currency": "EUR",
       "timezone": "Europe/Paris",
       "marketEnabled": true
     },
     "BS": {
       "defaultLanguage": "en",
-      "supportedLanguages": ["en", "ht", "fr"],
+      "supportedLanguages": [
+        "en",
+        "ht",
+        "fr",
+        "es"
+      ],
       "currency": "BSD",
       "timezone": "America/Nassau",
       "marketEnabled": true
     },
     "TC": {
       "defaultLanguage": "en",
-      "supportedLanguages": ["en", "ht", "fr"],
+      "supportedLanguages": [
+        "en",
+        "ht",
+        "fr",
+        "es"
+      ],
       "currency": "USD",
       "timezone": "America/Grand_Turk",
       "marketEnabled": true
     },
     "GP": {
       "defaultLanguage": "fr",
-      "supportedLanguages": ["fr", "ht", "en"],
+      "supportedLanguages": [
+        "fr",
+        "ht",
+        "en",
+        "es"
+      ],
       "currency": "EUR",
       "timezone": "America/Guadeloupe",
       "marketEnabled": true
     },
     "MQ": {
       "defaultLanguage": "fr",
-      "supportedLanguages": ["fr", "ht", "en"],
+      "supportedLanguages": [
+        "fr",
+        "ht",
+        "en",
+        "es"
+      ],
       "currency": "EUR",
       "timezone": "America/Martinique",
       "marketEnabled": true
     },
     "CH": {
       "defaultLanguage": "fr",
-      "supportedLanguages": ["fr", "ht", "en"],
+      "supportedLanguages": [
+        "fr",
+        "ht",
+        "en",
+        "es"
+      ],
       "currency": "CHF",
       "timezone": "Europe/Zurich",
       "marketEnabled": true
     },
     "BE": {
       "defaultLanguage": "fr",
-      "supportedLanguages": ["fr", "ht", "en"],
+      "supportedLanguages": [
+        "fr",
+        "ht",
+        "en",
+        "es"
+      ],
       "currency": "EUR",
       "timezone": "Europe/Brussels",
       "marketEnabled": true
     },
     "BR": {
       "defaultLanguage": "ht",
-      "supportedLanguages": ["ht", "fr", "en"],
+      "supportedLanguages": [
+        "ht",
+        "fr",
+        "en",
+        "es"
+      ],
       "currency": "BRL",
       "timezone": "America/Manaus",
       "marketEnabled": true

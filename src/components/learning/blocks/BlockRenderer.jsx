@@ -20,6 +20,7 @@ import React, { Suspense, useCallback, useEffect, useMemo } from 'react';
 import { getBlockComponent, getBlockMeta, getBlockDefaultLayout } from './registry';
 import { BlockErrorBoundary } from '../LearningShell';
 import useBlockAnalytics from '../../../hooks/useBlockAnalytics';
+import { inlineText } from '../../../utils/inlineI18n';
 
 // §51-52 — Lazy-loaded heavy blocks. These are only imported when a
 // block of this type is actually rendered. A simple lesson should not
@@ -139,7 +140,7 @@ function BlockRendererInner({
     return (
       <div className="ls-block-placement ls-block-placement--content">
         <div className="ls-block-width ls-block-width--content" style={{ padding: 12, color: 'var(--text-secondary)', fontStyle: 'italic', fontSize: '0.85rem' }}>
-          {lang === 'ht' ? 'Bloc enkoni.' : 'Unknown block.'}
+          {lang === 'ht' ? 'Bloc enkoni.' : inlineText(lang, 'Unknown block.')}
         </div>
       </div>
     );
@@ -156,7 +157,7 @@ function BlockRendererInner({
           <i className={`fas ${meta.icon}`} style={{ fontSize: '1.2rem', marginBottom: 8, display: 'block', opacity: 0.5 }} aria-hidden="true" />
           <div>{meta.label[lang] || meta.label.en || blockType}</div>
           <div style={{ fontSize: '0.75rem', marginTop: 4, opacity: 0.7 }}>
-            {lang === 'ht' ? 'Kalite bloc sa a poko disponib.' : 'This block type is not yet available.'}
+            {lang === 'ht' ? 'Kalite bloc sa a poko disponib.' : inlineText(lang, 'This block type is not yet available.')}
           </div>
         </div>
       </div>

@@ -12,6 +12,7 @@
  * state once (role="status"), and motion respects prefers-reduced-motion.
  */
 import React from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 // One card-shaped placeholder: image block + title + description lines.
 // Mirrors the real ProfileCatalogCard proportions (16/10 image, body).
@@ -48,7 +49,7 @@ function SidebarCard({ lines = 3 }) {
 }
 
 export default function ProfileSkeleton({ lang = 'en' }) {
-  const label = lang === 'ht' ? 'Ap chaje pwofil la' : 'Loading profile';
+  const label = lang === 'ht' ? 'Ap chaje pwofil la' : inlineText(lang, 'Loading profile');
   return (
     <div className="csp" role="status" aria-busy="true" aria-label={label}>
       <div className="csp-layout csp-skel-layout">

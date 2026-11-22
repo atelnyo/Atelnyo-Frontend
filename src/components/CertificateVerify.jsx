@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 
 import api from '../services/api';
+import { inlineText } from '../utils/inlineI18n';
 
 const en = {
   title: 'Certificate Verification',
@@ -53,8 +54,11 @@ export default function CertificateVerify() {
   const [error, setError] = useState(null);
 
   // Detect language
-  const isHt = typeof navigator !== 'undefined'
-    && navigator.language?.startsWith('ht');
+  const storedLang = typeof localStorage !== 'undefined' ? localStorage.getItem('atelnyo_lang') : '';
+  const browserLang = typeof navigator !== 'undefined' ? (navigator.language || '') : '';
+  const lang = storedLang
+    || (browserLang.startsWith('ht') ? 'ht' : browserLang.startsWith('es') ? 'es' : browserLang.startsWith('fr') ? 'fr' : 'en');
+  const isHt = lang === 'ht';
   const t = isHt ? ht : en;
 
   useEffect(() => {
@@ -270,7 +274,7 @@ export default function CertificateVerify() {
             <p style={{ color: '#64748b', fontSize: '15px', lineHeight: 1.6 }}>
               {isHt
                 ? 'Erè rezo. Tanpri eseye ankò.'
-                : 'Network error. Please try again.'}
+                : inlineText(lang, 'Network error. Please try again.')}
             </p>
           </div>
           <div style={footerStyle}>
@@ -311,7 +315,7 @@ export default function CertificateVerify() {
                 background: '#ecfdf5',
                 color: '#059669',
               }}>
-                {isHt ? 'Sètifika Ofisyèl' : 'Official Certificate'}
+                {isHt ? 'Sètifika Ofisyèl' : inlineText(lang, 'Official Certificate')}
               </span>
             </div>
 
@@ -332,7 +336,7 @@ export default function CertificateVerify() {
               <span style={fieldLabel}>{t.issued}</span>
               <span style={fieldValue}>
                 {new Date(result.issued_at).toLocaleDateString(
-                  isHt ? 'ht-HT' : 'en-US',
+                  lang === 'ht' ? 'ht-HT' : lang === 'es' ? 'es-ES' : lang === 'fr' ? 'fr-FR' : inlineText(lang, 'en-US'),
                   { year: 'numeric', month: 'long', day: 'numeric' }
                 )}
               </span>
@@ -351,7 +355,7 @@ export default function CertificateVerify() {
             }}>
               {isHt
                 ? 'Sètifika sa a pa egziste oswa nimewo a pa kòrèk.'
-                : 'This certificate does not exist or the number is incorrect.'}
+                : inlineText(lang, 'This certificate does not exist or the number is incorrect.')}
             </p>
           </div>
         )}

@@ -11,10 +11,11 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { exactMatch } from '../../modules/learning/speech';
 import styles from './learning.module.css';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function VocabularyBlock({ block, lang = 'en', reportComplete }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
   const [typed, setTyped] = useState('');
   const [typedResult, setTypedResult] = useState(null);
   const [showAnswer, setShowAnswer] = useState(false);
@@ -75,7 +76,7 @@ export default function VocabularyBlock({ block, lang = 'en', reportComplete }) 
           fontSize: '0.9rem', color: 'var(--text-secondary)',
         }}>
           <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-            {isHt ? 'Egzanp:' : 'Example:'}
+            {isHt ? 'Egzanp:' : inlineText(lang, 'Example:')}
           </span>{' '}
           {example}
         </div>

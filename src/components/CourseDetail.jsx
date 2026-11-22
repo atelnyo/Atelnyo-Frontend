@@ -10,6 +10,7 @@ import LanguagePracticeBlock from './learning/LanguagePracticeBlock';
 import QuizBlock from './learning/QuizBlock';
 import SEOHead, { courseSchema } from './shared/SEOHead';
 import { SHEETS } from '../routes/sheets';
+import { inlineText } from '../utils/inlineI18n';
 
 /**
  * CourseDetail — full-viewport course detail page.
@@ -170,7 +171,7 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
       if (body.has_access) {
         setIsEnrolled(true);
         showToast?.(isHt
-          ? '✅ Ou gen aksè sou kou a!' : '✅ You have access to this course!', 'check-circle');
+          ? '✅ Ou gen aksè sou kou a!' : inlineText(lang, '✅ You have access to this course!'), 'check-circle');
         if (body.promo_code && body.final_price == 0) {
           setPromoMsg(isHt
             ? `Promo ${body.promo_code} aplike — kou a gratis pou ou!`
@@ -192,7 +193,7 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
         setPromoErr('');
         setPromoMsg(isHt
           ? '✅ Promo aplike! Fini peman an pou gen aksè sou kou a.'
-          : '✅ Promo applied! Complete payment to access the course.');
+          : inlineText(lang, '✅ Promo applied! Complete payment to access the course.'));
         if (typeof onOpenCheckout === 'function') {
           onOpenCheckout('order', Number(body.final_price) || Number(course.price) || 0, {
             order_id: body.order_id,
@@ -211,17 +212,17 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
           // honest: access is NOT granted until payment completes.
           setPromoMsg(isHt
             ? '✅ Promo aplike! Peman sou entènèt disponib sou paj kou a. Kontakte yon admin si w gen pwoblèm.'
-            : '✅ Promo applied! Online payment is available on the course page. Contact an admin if you have trouble.');
+            : inlineText(lang, '✅ Promo applied! Online payment is available on the course page. Contact an admin if you have trouble.'));
         }
       } else {
         // Neither access nor order — enrollment didn't succeed.
         // Surface the server message so the user knows what happened.
-        const msg = body.detail || body.error || (isHt ? 'Enskripsyon an pa t reyisi.' : 'Enrollment did not succeed.');
+        const msg = body.detail || body.error || (isHt ? 'Enskripsyon an pa t reyisi.' : inlineText(lang, 'Enrollment did not succeed.'));
         setPromoErr(msg);
       }
     } catch (err) {
       const detail = err?.response?.data?.detail || err?.message
-        || (isHt ? 'Pa t kapab fè enskripsyon an.' : 'Could not complete enrollment.');
+        || (isHt ? 'Pa t kapab fè enskripsyon an.' : inlineText(lang, 'Could not complete enrollment.'));
       setPromoErr(detail);
     } finally {
       setCheckoutBusy(false);
@@ -293,7 +294,7 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
 
   // ─── Helper: format price ─────────────────────────────────────────
   const fmtPrice = (price) => {
-    if (price == null || price === 0) return isHt ? 'Gratis' : 'Free';
+    if (price == null || price === 0) return isHt ? 'Gratis' : inlineText(lang, 'Free');
     return `$${Number(price).toFixed(2)}`;
   };
 
@@ -445,10 +446,10 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
             {course.difficulty && (
               <span className={`cd-tag cd-tag-${course.difficulty}`}>
                 {course.difficulty === 'beginner'
-                  ? (isHt ? 'Debitan' : 'Beginner')
+                  ? (isHt ? 'Debitan' : inlineText(lang, 'Beginner'))
                   : course.difficulty === 'intermediate'
-                    ? (isHt ? 'Mwayen' : 'Intermediate')
-                    : (isHt ? 'Avanse' : 'Advanced')}
+                    ? (isHt ? 'Mwayen' : inlineText(lang, 'Intermediate'))
+                    : (isHt ? 'Avanse' : inlineText(lang, 'Advanced'))}
               </span>
             )}
             {course.category && (
@@ -460,13 +461,13 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
             {course.is_featured && (
               <span className="cd-tag cd-tag-featured">
                 <i className="fas fa-star" aria-hidden="true" />
-                {isHt ? 'Rekòmande' : 'Featured'}
+                {isHt ? 'Rekòmande' : inlineText(lang, 'Featured')}
               </span>
             )}
             {isExternal && (
               <span className="cd-tag cd-tag-external">
                 <i className="fas fa-globe" aria-hidden="true" />
-                {isHt ? 'Kou sa a anseye deyò Atelnyo' : 'Taught outside Atelnyo'}
+                {isHt ? 'Kou sa a anseye deyò Atelnyo' : inlineText(lang, 'Taught outside Atelnyo')}
               </span>
             )}
           </div>
@@ -481,8 +482,8 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
               <i className={`fas ${isExternal ? 'fa-globe' : 'fa-graduation-cap'}`} aria-hidden="true" />
               <span>
                 {isExternal
-                  ? (isHt ? 'Kou ekstèn — aprann yon lòt kote' : 'External course — learn elsewhere')
-                  : (isHt ? 'Kou sou entènèt' : 'Online Course')}
+                  ? (isHt ? 'Kou ekstèn — aprann yon lòt kote' : inlineText(lang, 'External course — learn elsewhere'))
+                  : (isHt ? 'Kou sou entènèt' : inlineText(lang, 'Online Course'))}
               </span>
             </div>
             {isExternal && course.external_format && (
@@ -498,7 +499,7 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
                   <span>
                     <span style={{ textDecoration: 'line-through', opacity: 0.5, marginRight: 6 }}>${Number(course.price).toFixed(2)}</span>
                     {premiumPrice === 0
-                      ? (isHt ? 'Gratis pou Premium' : 'Free for Premium')
+                      ? (isHt ? 'Gratis pou Premium' : inlineText(lang, 'Free for Premium'))
                       : `$${premiumPrice.toFixed(2)}`}
                     <span style={{ marginLeft: 4, fontSize: '0.65em', color: 'var(--pr-color-orange-500, #f97316)', fontWeight: 600 }}>Premium</span>
                   </span>
@@ -511,7 +512,7 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
               <div className="cd-hero-stat">
                 <i className="fas fa-list" aria-hidden="true" />
                 <span>
-                  {syllabus.length} {isHt ? 'modil' : 'modules'}
+                  {syllabus.length} {isHt ? 'modil' : inlineText(lang, 'modules')}
                 </span>
               </div>
             )}
@@ -533,10 +534,10 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
               </div>
               <div className="cd-creator-info">
                 <span className="cd-creator-label">
-                  {isHt ? 'Kreyatè' : 'Instructor'}
+                  {isHt ? 'Kreyatè' : inlineText(lang, 'Instructor')}
                 </span>
                 <span className="cd-creator-name">
-                  {course.created_by_username || (isHt ? 'Enstriktè' : 'Instructor')}
+                  {course.created_by_username || (isHt ? 'Enstriktè' : inlineText(lang, 'Instructor'))}
                 </span>
               </div>
             </div>
@@ -546,7 +547,7 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
           <section className="cd-section">
             <h2 className="cd-section-title">
               <i className="fas fa-info-circle" aria-hidden="true" />
-              {isHt ? 'Apwopo Kou Sa a' : 'About This Course'}
+              {isHt ? 'Apwopo Kou Sa a' : inlineText(lang, 'About This Course')}
             </h2>
             <div className="cd-section-body">
               <p className="cd-text">{course.description}</p>
@@ -560,15 +561,15 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
                 <span className="cd-resume-icon"><i className="fas fa-rotate-right" aria-hidden="true" /></span>
                 <div className="cd-resume-info">
                   <span className="cd-resume-label">
-                    {isHt ? 'Kontinye kote ou soti' : 'Continue where you left off'}
+                    {isHt ? 'Kontinye kote ou soti' : inlineText(lang, 'Continue where you left off')}
                   </span>
                   <span className="cd-resume-target">
                     {syllabus[resumeModule]
                       ? (typeof syllabus[resumeModule] === 'string'
                         ? syllabus[resumeModule]
-                        : (syllabus[resumeModule]?.title || `${isHt ? 'Modil' : 'Module'} ${resumeModule + 1}`))
-                      : (isHt ? 'Kòmansman kou a' : 'Course start')}
-                    {resumeBlockId ? ` · ${isHt ? 'Pratik' : 'Practice'}` : ''}
+                        : (syllabus[resumeModule]?.title || `${isHt ? 'Modil' : inlineText(lang, 'Module')} ${resumeModule + 1}`))
+                      : (isHt ? 'Kòmansman kou a' : inlineText(lang, 'Course start'))}
+                    {resumeBlockId ? ` · ${isHt ? 'Pratik' : inlineText(lang, 'Practice')}` : ''}
                   </span>
                   <div className="cd-resume-progress">
                     <div className="cd-resume-track">
@@ -578,7 +579,7 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
                   </div>
                 </div>
                 <button type="button" className="cd-resume-btn" onClick={() => scrollToModule(resumeModule)}>
-                  <i className="fas fa-arrow-right" aria-hidden="true" /> {isHt ? 'Kontinye' : 'Continue'}
+                  <i className="fas fa-arrow-right" aria-hidden="true" /> {isHt ? 'Kontinye' : inlineText(lang, 'Continue')}
                 </button>
               </div>
             </section>
@@ -589,12 +590,12 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
             <section className="cd-section">
               <h2 className="cd-section-title">
                 <i className="fas fa-language" aria-hidden="true" />
-                {isHt ? 'Enfòmasyon Lang' : 'Language Information'}
+                {isHt ? 'Enfòmasyon Lang' : inlineText(lang, 'Language Information')}
               </h2>
               <div className="cd-section-body">
                 {course.learning_objective && (
                   <p className="cd-text">
-                    <strong>{isHt ? 'Objektif:' : 'Objective:'}</strong> {course.learning_objective}
+                    <strong>{isHt ? 'Objektif:' : inlineText(lang, 'Objective:')}</strong> {course.learning_objective}
                   </p>
                 )}
                 <div className="cd-hero-meta">
@@ -602,7 +603,7 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
                     <div className="cd-hero-stat">
                       <i className="fas fa-graduation-cap" aria-hidden="true" />
                       <span>
-                        {isHt ? 'Lang ansèyman:' : 'Teaching language:'} <strong>{course.teaching_language}</strong>
+                        {isHt ? 'Lang ansèyman:' : inlineText(lang, 'Teaching language:')} <strong>{course.teaching_language}</strong>
                       </span>
                     </div>
                   )}
@@ -610,7 +611,7 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
                     <div className="cd-hero-stat">
                       <i className="fas fa-user-graduate" aria-hidden="true" />
                       <span>
-                        {isHt ? 'Lang elèv:' : 'Learner language:'} <strong>{course.learner_language}</strong>
+                        {isHt ? 'Lang elèv:' : inlineText(lang, 'Learner language:')} <strong>{course.learner_language}</strong>
                       </span>
                     </div>
                   )}
@@ -624,7 +625,7 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
             <section className="cd-section">
               <h2 className="cd-section-title">
                 <i className="fas fa-video" aria-hidden="true" />
-                {t.explore_video_title || (isHt ? 'Videyo Prezantasyon' : 'Promo Video')}
+                {t.explore_video_title || (isHt ? 'Videyo Prezantasyon' : inlineText(lang, 'Promo Video'))}
               </h2>
               {promoVideo.kind === 'embed' ? (
                 <VideoEmbedFrame
@@ -648,7 +649,7 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
                 >
                   {isHt
                     ? 'Navigatè w pa sipòte lekti videyo.'
-                    : 'Your browser does not support video playback.'}
+                    : inlineText(lang, 'Your browser does not support video playback.')}
                 </video>
               )}
             </section>
@@ -659,8 +660,8 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
             <section className="cd-section">
               <h2 className="cd-section-title">
                 <i className="fas fa-list-ol" aria-hidden="true" />
-                {t.syllabus_title || (isHt ? 'Kourikoulòm' : 'Curriculum')}
-                <span className="cd-section-count">{syllabus.length} {isHt ? 'modil' : 'modules'}</span>
+                {t.syllabus_title || (isHt ? 'Kourikoulòm' : inlineText(lang, 'Curriculum'))}
+                <span className="cd-section-count">{syllabus.length} {isHt ? 'modil' : inlineText(lang, 'modules')}</span>
               </h2>
               <div className="cd-syllabus">
                 {syllabus.map((item, index) => {
@@ -695,7 +696,7 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
                         aria-expanded={locked ? false : isExpanded}
                         aria-disabled={locked || undefined}
                         title={locked
-                          ? (isHt ? 'Enskri nan kou sa a pou w ouvri modil la.' : 'Enroll in this course to open this module.')
+                          ? (isHt ? 'Enskri nan kou sa a pou w ouvri modil la.' : inlineText(lang, 'Enroll in this course to open this module.'))
                           : undefined}
                       >
                         <span className="cd-syllabus-number">
@@ -727,7 +728,7 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
                                 />
                               </div>
                               <span className="cd-module-progress-label">
-                                {stats.done}/{stats.total} {isHt ? 'blòk konplete' : 'blocks complete'}
+                                {stats.done}/{stats.total} {isHt ? 'blòk konplete' : inlineText(lang, 'blocks complete')}
                               </span>
                             </div>
                           )}
@@ -749,7 +750,7 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
                                   onClick={() => onEnterLearning(course, index)}
                                 >
                                   <i className="fas fa-graduation-cap" aria-hidden="true" />
-                                  {isHt ? 'Ouvri modil la nan Espas Aprantisaj' : 'Open this module in the Learning Space'}
+                                  {isHt ? 'Ouvri modil la nan Espas Aprantisaj' : inlineText(lang, 'Open this module in the Learning Space')}
                                 </button>
                               )}
                               {blocks.map((block, bi) => (
@@ -765,7 +766,7 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
                                   />
                                   {isBlockDone(index, block.id) && (
                                     <span className="cd-block-done-badge">
-                                      <i className="fas fa-check" aria-hidden="true" /> {isHt ? 'Konplete' : 'Complete'}
+                                      <i className="fas fa-check" aria-hidden="true" /> {isHt ? 'Konplete' : inlineText(lang, 'Complete')}
                                     </span>
                                   )}
                                 </div>
@@ -788,7 +789,7 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
                               <p>
                                 {isHt
                                   ? 'Enskri nan kou a pou w fè pratik ak kiz yo.'
-                                  : 'Enroll in this course to take the practice activities and quizzes.'}
+                                  : inlineText(lang, 'Enroll in this course to take the practice activities and quizzes.')}
                               </p>
                             </div>
                           ) : null}
@@ -809,22 +810,22 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
                   <div className="cd-price-card-info">
                     <span className="cd-price-label">
                       {isCreatorViewer
-                        ? (isHt ? 'Kreyatè kou sa a' : 'Creator of this course')
-                        : (isHt ? 'Apèsi ekip' : 'Team preview')}
+                        ? (isHt ? 'Kreyatè kou sa a' : inlineText(lang, 'Creator of this course'))
+                        : (isHt ? 'Apèsi ekip' : inlineText(lang, 'Team preview'))}
                     </span>
                     <span className="cd-price-amount cd-price-amount--free">
-                      {isHt ? 'Aksè konplè' : 'Full access'}
+                      {isHt ? 'Aksè konplè' : inlineText(lang, 'Full access')}
                     </span>
                   </div>
                   {isCreatorViewer ? (
                     <a className="cd-cta-btn" href={SHEETS.STUDIO} data-testid="cd-manage-course">
                       <i className="fas fa-sliders" aria-hidden="true" />
-                      {isHt ? 'Jere kou a' : 'Manage course'}
+                      {isHt ? 'Jere kou a' : inlineText(lang, 'Manage course')}
                     </a>
                   ) : onEnterLearning ? (
                     <button type="button" className="cd-cta-btn" onClick={() => onEnterLearning(course)}>
                       <i className="fas fa-graduation-cap" aria-hidden="true" />
-                      {isHt ? 'Antre nan Espas Aprantisaj' : 'Enter Learning Space'}
+                      {isHt ? 'Antre nan Espas Aprantisaj' : inlineText(lang, 'Enter Learning Space')}
                     </button>
                   ) : null}
                 </div>
@@ -833,10 +834,10 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
                   {isCreatorViewer
                     ? (isHt
                       ? 'Se ou menm ki kreye kou sa a — ou pa bezwen enskri.'
-                      : 'You created this course — no enrollment required.')
+                      : inlineText(lang, 'You created this course — no enrollment required.'))
                     : (isHt
                       ? 'Ou gen aksè ekip sou kou sa a — ou pa bezwen enskri.'
-                      : 'You have team access to this course — no enrollment required.')}
+                      : inlineText(lang, 'You have team access to this course — no enrollment required.'))}
                 </p>
               </div>
             </section>
@@ -854,12 +855,12 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
                     <span className={`cd-price-amount ${Number(course.price) === 0 ? 'cd-price-amount--free' : ''}`}>
                       {Number(course.price) === 0 ? (
                         <span className="cd-free-badge">
-                          <i className="fas fa-gift" aria-hidden="true" /> {isHt ? 'GRATIS' : 'FREE'}
+                          <i className="fas fa-gift" aria-hidden="true" /> {isHt ? 'GRATIS' : inlineText(lang, 'FREE')}
                         </span>
                       ) : premiumPrice !== null ? (
                         <>
                           <span style={{ textDecoration: 'line-through', opacity: 0.5, fontSize: '0.85em' }}>${Number(course.price).toFixed(2)}</span>
-                          <span style={{ marginLeft: 8 }}>{premiumPrice === 0 ? (isHt ? 'Gratis' : 'Free') : `$${premiumPrice.toFixed(2)}`}</span>
+                          <span style={{ marginLeft: 8 }}>{premiumPrice === 0 ? (isHt ? 'Gratis' : inlineText(lang, 'Free')) : `$${premiumPrice.toFixed(2)}`}</span>
                           <span style={{ marginLeft: 6, fontSize: '0.65em', color: 'var(--pr-color-orange-500, #f97316)', fontWeight: 600, verticalAlign: 'middle' }}>
                             <i className="fas fa-crown" style={{ marginRight: 2 }} />Premium
                           </span>
@@ -876,7 +877,7 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
                         </span>
                         <span className="cd-ltd-price">${Number(course.price_ltd).toFixed(2)}</span>
                         <span className="cd-ltd-label">
-                          {isHt ? 'pou toujou' : 'forever'}
+                          {isHt ? 'pou toujou' : inlineText(lang, 'forever')}
                         </span>
                       </div>
                     )}
@@ -889,20 +890,20 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
                       className="cd-cta-btn"
                     >
                       <i className="fas fa-external-link-alt" aria-hidden="true" />
-                      {isHt ? 'Ale sou kou a' : 'Go to course'}
+                      {isHt ? 'Ale sou kou a' : inlineText(lang, 'Go to course')}
                     </a>
                   ) : isEnrolled ? (
                     onEnterLearning ? (
                       <button type="button" className="cd-cta-btn" onClick={() => onEnterLearning(course)}>
                         <i className="fas fa-graduation-cap" aria-hidden="true" />
                         {Number(progress?.percentage) > 0
-                          ? (isHt ? 'Kontinye Aprantisaj' : 'Continue Learning')
-                          : (isHt ? 'Antre nan Espas Aprantisaj' : 'Enter Learning Space')}
+                          ? (isHt ? 'Kontinye Aprantisaj' : inlineText(lang, 'Continue Learning'))
+                          : (isHt ? 'Antre nan Espas Aprantisaj' : inlineText(lang, 'Enter Learning Space'))}
                       </button>
                     ) : (
                       <button type="button" className="cd-cta-btn" disabled aria-disabled="true">
                         <i className="fas fa-check" aria-hidden="true" />
-                        {isHt ? 'Enskri ✓' : 'Enrolled'}
+                        {isHt ? 'Enskri ✓' : inlineText(lang, 'Enrolled')}
                       </button>
                     )
                   ) : Number(course.price) === 0 ? (
@@ -919,7 +920,7 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
                       ) : (
                         <i className="fas fa-arrow-right" aria-hidden="true" />
                       )}
-                      {isHt ? 'Enskri nan kou sa a — Gratis' : 'Enroll in this course — Free'}
+                      {isHt ? 'Enskri nan kou sa a — Gratis' : inlineText(lang, 'Enroll in this course — Free')}
                     </button>
                   ) : (
                     // Paid course — promo code + real checkout. Promo
@@ -936,7 +937,7 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
                       ) : (
                         <i className="fas fa-arrow-right" aria-hidden="true" />
                       )}
-                      {isHt ? 'Enskri nan kou sa a' : 'Enroll in this course'}
+                      {isHt ? 'Enskri nan kou sa a' : inlineText(lang, 'Enroll in this course')}
                     </button>
                   )}
                 </div>
@@ -951,8 +952,8 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
                           setPromoErr('');
                           setPromoMsg('');
                         }}
-                        placeholder={isHt ? 'Kòd promosyon (eg. WELCOME20)' : 'Promo code (e.g. WELCOME20)'}
-                        aria-label={isHt ? 'Kòd promosyon' : 'Promo code'}
+                        placeholder={isHt ? 'Kòd promosyon (eg. WELCOME20)' : inlineText(lang, 'Promo code (e.g. WELCOME20)')}
+                        aria-label={isHt ? 'Kòd promosyon' : inlineText(lang, 'Promo code')}
                       />
                     )}
                     {/* Mesaj siksè/erè yo toujou parèt — yon enskripsyon
@@ -967,26 +968,26 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
                     <i className="fas fa-globe" aria-hidden="true" />{' '}
                     {isHt
                       ? 'Aprantisaj la fèt sou yon lòt platfòm — klike sou bouton an pou w ale dirèkteman sou kou a.'
-                      : 'Learning happens on another platform — click the button to go directly to the course.'}
+                      : inlineText(lang, 'Learning happens on another platform — click the button to go directly to the course.')}
                   </p>
                 ) : isEnrolled ? (
                   <p className="cd-price-disclaimer">
                     <i className="fas fa-check-circle" aria-hidden="true" />{' '}
                     {isHt
                       ? 'Ou enskri nan kou sa a. Ou gen aksè konplè.'
-                      : 'You are enrolled in this course. You have full access.'}
+                      : inlineText(lang, 'You are enrolled in this course. You have full access.')}
                   </p>
                 ) : Number(course.price) === 0 ? (
                   <p className="cd-price-disclaimer">
                     {isHt
                       ? 'Jwenn aksè konplè imedyatman apre enskripsyon.'
-                      : 'Get full access immediately after enrolling.'}
+                      : inlineText(lang, 'Get full access immediately after enrolling.')}
                   </p>
                 ) : (
                   <p className="cd-price-disclaimer">
                     {isHt
                       ? 'Jwenn aksè konplè imedyatman apre peman an.'
-                      : 'Get full access immediately after payment.'}
+                      : inlineText(lang, 'Get full access immediately after payment.')}
                   </p>
                 )}
               </div>
@@ -1006,7 +1007,7 @@ export default function CourseDetail({ course, lang, translations, onBack, user,
           type="button"
           className="cd-scroll-top"
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          aria-label={isHt ? 'Retounen anwo' : 'Back to top'}
+          aria-label={isHt ? 'Retounen anwo' : inlineText(lang, 'Back to top')}
         >
           <i className="fas fa-arrow-up" aria-hidden="true" />
         </button>

@@ -9,6 +9,7 @@
  *   • QR code → public verification endpoint
  *   • Unique certificate number: ATY-{user_id:08d}-{course_id:08d}
  */
+import { inlineText } from '../../utils/inlineI18n';
 
 export function openCertificateWindow({
   certNumber,
@@ -18,6 +19,7 @@ export function openCertificateWindow({
   verifyUrl,
   verifyHash,
   isHt,
+  lang = 'en',
 }) {
   const printWindow = window.open('', '_blank');
   if (!printWindow) return;
@@ -240,26 +242,26 @@ export function openCertificateWindow({
     </div>
     <div class="brand-divider"></div>
   </div>
-  <div class="cert-title">${isHt ? 'Sètifika Konplete' : 'Certificate of Completion'}</div>
-  <div class="cert-subtitle">${isHt ? 'SÈTIFIKA OFISYÈL' : 'OFFICIAL CERTIFICATE'}</div>
+  <div class="cert-title">${isHt ? 'Sètifika Konplete' : inlineText(lang, 'Certificate of Completion')}</div>
+  <div class="cert-subtitle">${isHt ? 'SÈTIFIKA OFISYÈL' : inlineText(lang, 'OFFICIAL CERTIFICATE')}</div>
   <div class="cert-body">
-    <p class="cert-text">${isHt ? 'Avèk anpil fyè, Atelnyo sètifye ke' : 'Atelnyo hereby certifies that'}</p>
+    <p class="cert-text">${isHt ? 'Avèk anpil fyè, Atelnyo sètifye ke' : inlineText(lang, 'Atelnyo hereby certifies that')}</p>
     <div class="learner-name">${learnerName}</div>
-    <p class="cert-text">${isHt ? 'te konplete avèk siksè kou a' : 'has successfully completed the course'}</p>
+    <p class="cert-text">${isHt ? 'te konplete avèk siksè kou a' : inlineText(lang, 'has successfully completed the course')}</p>
     <div class="course-title">${courseTitle}</div>
-    <p class="date-line">${issuedDate ? `${isHt ? 'Dat konplete:' : 'Date of Completion:'} ${issuedDate}` : ''}</p>
+    <p class="date-line">${issuedDate ? `${isHt ? 'Dat konplete:' : inlineText(lang, 'Date of Completion:')} ${issuedDate}` : ''}</p>
   </div>
   <div class="cert-footer">
     <div class="qr-block">
       <div class="qr-code" id="qrcode"></div>
-      <div class="qr-label">${isHt ? 'Verifie' : 'Scan to Verify'}</div>
+      <div class="qr-label">${isHt ? 'Verifie' : inlineText(lang, 'Scan to Verify')}</div>
     </div>
     <div class="cert-number-block">
-      <div class="cert-number-label">${isHt ? 'Nimewo Sètifika' : 'Certificate Number'}</div>
+      <div class="cert-number-label">${isHt ? 'Nimewo Sètifika' : inlineText(lang, 'Certificate Number')}</div>
       <div class="cert-number">${certNumber}</div>
     </div>
     <div class="verify-block">
-      <div class="verify-text">${isHt ? 'Verifie sou' : 'Verify at'}</div>
+      <div class="verify-text">${isHt ? 'Verifie sou' : inlineText(lang, 'Verify at')}</div>
       <div class="verify-url">${verifyUrl}</div>
     </div>
   </div>
@@ -267,21 +269,21 @@ export function openCertificateWindow({
 </div>
 <div class="controls">
   <button class="btn-print" onclick="window.print()">
-    ${isHt ? '🖨️ Enprime / PDF' : '🖨️ Print / Save PDF'}
+    ${isHt ? '🖨️ Enprime / PDF' : inlineText(lang, '🖨️ Print / Save PDF')}
   </button>
   <button class="btn-download" onclick="downloadPNG()">
-    ${isHt ? '📥 Telechaje PNG' : '📥 Download PNG'}
+    ${isHt ? '📥 Telechaje PNG' : inlineText(lang, '📥 Download PNG')}
   </button>
   <button class="btn-copy" onclick="copyCertText()">
-    ${isHt ? '📋 Kope Tèks' : '📋 Copy Text'}
+    ${isHt ? '📋 Kope Tèks' : inlineText(lang, '📋 Copy Text')}
   </button>
 </div>
-<div class="share-label">${isHt ? 'Pataje Sètifika:' : 'Share Certificate:'}</div>
+<div class="share-label">${isHt ? 'Pataje Sètifika:' : inlineText(lang, 'Share Certificate:')}</div>
 <div class="share-buttons">
   <button style="background:#1877f2;color:#fff" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent('${verifyUrl}')+'&quote='+encodeURIComponent('I completed ${courseTitle} on Atelnyo! 🎓'),'_blank','width=600,height=400')">📘 Facebook</button>
-  <button style="background:#000;color:#fff" onclick="window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent('🎓 I completed \\\"${courseTitle}\\\" on @Atelnyo! #Atelnyo #Certificate')+'&url='+encodeURIComponent('${verifyUrl}'),'_blank','width=600,height=400')">🐦 ${isHt ? 'Chirye' : 'X / Twitter'}</button>
+  <button style="background:#000;color:#fff" onclick="window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent('🎓 I completed \\\"${courseTitle}\\\" on @Atelnyo! #Atelnyo #Certificate')+'&url='+encodeURIComponent('${verifyUrl}'),'_blank','width=600,height=400')">🐦 ${isHt ? 'Chirye' : inlineText(lang, 'X / Twitter')}</button>
   <button style="background:#0a66c2;color:#fff" onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url='+encodeURIComponent('${verifyUrl}'),'_blank','width=600,height=400')">💼 LinkedIn</button>
-  <button style="background:#25d366;color:#fff" onclick="window.open('https://wa.me/?text='+encodeURIComponent('🎓 ${isHt ? 'Mwen fini kou' : 'I completed'} \\\"${courseTitle}\\\" ${isHt ? 'sou' : 'on'} Atelnyo! ${verifyUrl}'),'_blank','width=600,height=400')">💬 WhatsApp</button>
+  <button style="background:#25d366;color:#fff" onclick="window.open('https://wa.me/?text='+encodeURIComponent('🎓 ${isHt ? 'Mwen fini kou' : inlineText(lang, 'I completed')} \\\"${courseTitle}\\\" ${isHt ? 'sou' : inlineText(lang, 'on')} Atelnyo! ${verifyUrl}'),'_blank','width=600,height=400')">💬 WhatsApp</button>
 </div>
 <script>
   new QRCode(document.getElementById('qrcode'), {
@@ -304,16 +306,16 @@ export function openCertificateWindow({
       + '       CERTIFICATE OF COMPLETION\\n'
       + '              ATELNYO\\n'
       + '═══════════════════════════════════════\\n\\n'
-      + '${isHt ? 'Sètifye ke' : 'This certifies that'}\\n'
+      + '${isHt ? 'Sètifye ke' : inlineText(lang, 'This certifies that')}\\n'
       + '  ${learnerName}\\n\\n'
-      + '${isHt ? 'te konplete' : 'has completed'}\\n'
+      + '${isHt ? 'te konplete' : inlineText(lang, 'has completed')}\\n'
       + '  ${courseTitle}\\n\\n'
-      + '${isHt ? 'Nan dat' : 'On'} ${issuedDate}\\n\\n'
+      + '${isHt ? 'Nan dat' : inlineText(lang, 'On')} ${issuedDate}\\n\\n'
       + 'Certificate No: ${certNumber}\\n'
       + 'Verify: ${verifyUrl}\\n'
       + '═══════════════════════════════════════';
     navigator.clipboard.writeText(t).then(function() {
-      alert('${isHt ? '✅ Sètifika kope!' : '✅ Certificate copied!'}');
+      alert('${isHt ? '✅ Sètifika kope!' : inlineText(lang, '✅ Certificate copied!')}');
     });
   }
 <\/script>

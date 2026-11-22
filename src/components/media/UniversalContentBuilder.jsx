@@ -21,6 +21,7 @@ import SmartMediaSuggestions from './SmartMediaSuggestions';
 import ContentPreview from './ContentPreview';
 import ContentQualityChecker from './ContentQualityChecker';
 import MediaPicker from './MediaPicker';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── Default Steps ─────────────────────────────────────────────────────
 
@@ -141,16 +142,16 @@ export default function UniversalContentBuilder({
             <i className="fas fa-check-circle" />
           </div>
           <h2 className="cb-published-title">
-            {isHt ? 'Pibliye avèk siksè!' : 'Published successfully!'}
+            {isHt ? 'Pibliye avèk siksè!' : inlineText(lang, 'Published successfully!')}
           </h2>
           <p className="cb-published-desc">
             {isHt
               ? 'Kontni ou te kreye a kounye a disponib sou platfòm nan.'
-              : 'Your content is now available on the platform.'}
+              : inlineText(lang, 'Your content is now available on the platform.')}
           </p>
           <button type="button" className="btn-primary" onClick={onCancel}>
             <i className="fas fa-th-large" />
-            {isHt ? 'Retounen nan tablo' : 'Back to dashboard'}
+            {isHt ? 'Retounen nan tablo' : inlineText(lang, 'Back to dashboard')}
           </button>
         </div>
       );
@@ -166,54 +167,55 @@ export default function UniversalContentBuilder({
           <div className="cb-step">
             <div className="cb-field">
               <label className="cb-label">
-                {isHt ? 'Tit' : 'Title'} <span className="cb-required">*</span>
+                {isHt ? 'Tit' : inlineText(lang, 'Title')} <span className="cb-required">*</span>
               </label>
               <input
                 type="text"
                 className="cb-input"
                 value={formData.title}
                 onChange={(e) => updateField('title', e.target.value)}
-                placeholder={isHt ? 'Antre yon tit pou kontni w...' : 'Enter a title for your content...'}
+                placeholder={isHt ? 'Antre yon tit pou kontni w...' : inlineText(lang, 'Enter a title for your content...')}
                 autoFocus
               />
             </div>
             <div className="cb-field">
-              <label className="cb-label">{isHt ? 'Sou-tit' : 'Subtitle'}</label>
+              <label className="cb-label">{isHt ? 'Sou-tit' : inlineText(lang, 'Subtitle')}</label>
               <input
                 type="text"
                 className="cb-input"
                 value={formData.subtitle}
                 onChange={(e) => updateField('subtitle', e.target.value)}
-                placeholder={isHt ? 'Yon sou-tit si ou vle...' : 'An optional subtitle...'}
+                placeholder={isHt ? 'Yon sou-tit si ou vle...' : inlineText(lang, 'An optional subtitle...')}
               />
             </div>
             <div className="cb-field-row">
               <div className="cb-field cb-field-half">
-                <label className="cb-label">{isHt ? 'Kategori' : 'Category'}</label>
+                <label className="cb-label">{isHt ? 'Kategori' : inlineText(lang, 'Category')}</label>
                 <select
                   className="cb-input"
                   value={formData.category}
                   onChange={(e) => updateField('category', e.target.value)}
                 >
-                  <option value="">{isHt ? '— Chwazi —' : '— Select —'}</option>
-                  <option value="education">{isHt ? 'Edikasyon' : 'Education'}</option>
-                  <option value="entertainment">{isHt ? 'Divètisman' : 'Entertainment'}</option>
-                  <option value="music">{isHt ? 'Mizik' : 'Music'}</option>
-                  <option value="technology">{isHt ? 'Teknoloji' : 'Technology'}</option>
-                  <option value="art">{isHt ? 'Atis' : 'Art'}</option>
-                  <option value="business">{isHt ? 'Biznis' : 'Business'}</option>
+                  <option value="">{isHt ? '— Chwazi —' : inlineText(lang, '— Select —')}</option>
+                  <option value="education">{isHt ? 'Edikasyon' : inlineText(lang, 'Education')}</option>
+                  <option value="entertainment">{isHt ? 'Divètisman' : inlineText(lang, 'Entertainment')}</option>
+                  <option value="music">{isHt ? 'Mizik' : inlineText(lang, 'Music')}</option>
+                  <option value="technology">{isHt ? 'Teknoloji' : inlineText(lang, 'Technology')}</option>
+                  <option value="art">{isHt ? 'Atis' : inlineText(lang, 'Art')}</option>
+                  <option value="business">{isHt ? 'Biznis' : inlineText(lang, 'Business')}</option>
                 </select>
               </div>
               <div className="cb-field cb-field-half">
-                <label className="cb-label">{isHt ? 'Lang' : 'Language'}</label>
+                <label className="cb-label">{isHt ? 'Lang' : inlineText(lang, 'Language')}</label>
                 <select
                   className="cb-input"
                   value={formData.language}
                   onChange={(e) => updateField('language', e.target.value)}
                 >
-                  <option value="ht">{isHt ? 'Kreyòl' : 'Creole'}</option>
+                  <option value="ht">{isHt ? 'Kreyòl' : inlineText(lang, 'Creole')}</option>
                   <option value="en">English</option>
                   <option value="fr">Français</option>
+                  <option value="es">Español</option>
                 </select>
               </div>
             </div>
@@ -230,7 +232,7 @@ export default function UniversalContentBuilder({
               lang={lang}
             />
             <div className="cb-media-divider">
-              <span>{isHt ? ' Oswa ' : ' OR '}</span>
+              <span>{isHt ? ' Oswa ' : inlineText(lang, ' OR ')}</span>
             </div>
             <button
               type="button"
@@ -238,7 +240,7 @@ export default function UniversalContentBuilder({
               onClick={() => setShowMediaPicker(true)}
             >
               <i className="fas fa-plus" />
-              {isHt ? 'Ajoute Nouvo Medya' : 'Add New Media'}
+              {isHt ? 'Ajoute Nouvo Medya' : inlineText(lang, 'Add New Media')}
             </button>
             {formData.media.length > 0 && (
               <div className="cb-media-list">
@@ -270,23 +272,23 @@ export default function UniversalContentBuilder({
           <div className="cb-step">
             <div className="cb-field">
               <label className="cb-label">
-                {isHt ? 'Deskripsyon' : 'Description'} <span className="cb-required">*</span>
+                {isHt ? 'Deskripsyon' : inlineText(lang, 'Description')} <span className="cb-required">*</span>
               </label>
               <textarea
                 className="cb-textarea"
                 value={formData.description}
                 onChange={(e) => updateField('description', e.target.value)}
-                placeholder={isHt ? 'Dekri kontni w an detay...' : 'Describe your content in detail...'}
+                placeholder={isHt ? 'Dekri kontni w an detay...' : inlineText(lang, 'Describe your content in detail...')}
                 rows={6}
               />
             </div>
             <div className="cb-field">
-              <label className="cb-label">{isHt ? 'Tags' : 'Tags'}</label>
+              <label className="cb-label">{isHt ? 'Tags' : inlineText(lang, 'Tags')}</label>
               <div className="cb-tags">
                 <input
                   type="text"
                   className="cb-input"
-                  placeholder={isHt ? 'Antre yon tag epi peze Enter' : 'Type a tag and press Enter'}
+                  placeholder={isHt ? 'Antre yon tag epi peze Enter' : inlineText(lang, 'Type a tag and press Enter')}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
@@ -318,7 +320,7 @@ export default function UniversalContentBuilder({
         return (
           <div className="cb-step">
             <p className="cb-step-hint">
-              {isHt ? 'Chwazi ki moun ki kapab wè kontni w:' : 'Choose who can see your content:'}
+              {isHt ? 'Chwazi ki moun ki kapab wè kontni w:' : inlineText(lang, 'Choose who can see your content:')}
             </p>
             <div className="cb-visibility-grid">
               {VISIBILITY_OPTIONS.map((opt) => (
@@ -348,7 +350,7 @@ export default function UniversalContentBuilder({
             </div>
             {formData.visibility === 'schedule' && (
               <div className="cb-field">
-                <label className="cb-label">{isHt ? 'Dat piblikasyon' : 'Publish date'}</label>
+                <label className="cb-label">{isHt ? 'Dat piblikasyon' : inlineText(lang, 'Publish date')}</label>
                 <input
                   type="datetime-local"
                   className="cb-input"
@@ -365,7 +367,7 @@ export default function UniversalContentBuilder({
         return (
           <div className="cb-step">
             <div className="cb-field">
-              <label className="cb-label">{isHt ? 'Slug URL' : 'URL Slug'}</label>
+              <label className="cb-label">{isHt ? 'Slug URL' : inlineText(lang, 'URL Slug')}</label>
               <div className="cb-input-prefix">
                 <span className="cb-prefix">atelnyo.site/</span>
                 <input
@@ -378,12 +380,12 @@ export default function UniversalContentBuilder({
               </div>
             </div>
             <div className="cb-field">
-              <label className="cb-label">{isHt ? 'Deskripsyon Meta' : 'Meta Description'}</label>
+              <label className="cb-label">{isHt ? 'Deskripsyon Meta' : inlineText(lang, 'Meta Description')}</label>
               <textarea
                 className="cb-textarea"
                 value={formData.metaDescription}
                 onChange={(e) => updateField('metaDescription', e.target.value)}
-                placeholder={isHt ? 'Kout deskripsyon pou motè rechèch...' : 'Brief description for search engines...'}
+                placeholder={isHt ? 'Kout deskripsyon pou motè rechèch...' : inlineText(lang, 'Brief description for search engines...')}
                 rows={3}
                 maxLength={160}
               />
@@ -404,12 +406,12 @@ export default function UniversalContentBuilder({
       case 'publish':
         return (
           <div className="cb-step">
-            <ContentQualityChecker formData={formData} steps={steps} isHt={isHt} />
+            <ContentQualityChecker formData={formData} steps={steps} isHt={isHt} lang={lang} />
           </div>
         );
 
       default:
-        return <p className="cb-unknown">{isHt ? 'Etap sa poko pare' : 'This step is not ready yet'}</p>;
+        return <p className="cb-unknown">{isHt ? 'Etap sa poko pare' : inlineText(lang, 'This step is not ready yet')}</p>;
     }
   };
 
@@ -420,14 +422,14 @@ export default function UniversalContentBuilder({
         <div className="cb-header-left">
           <h2 className="cb-title">
             <i className={`fas ${moduleIcon}`} />
-            {moduleName || (isHt ? 'Kreye Kontni' : 'Create Content')}
+            {moduleName || (isHt ? 'Kreye Kontni' : inlineText(lang, 'Create Content'))}
           </h2>
         </div>
         <div className="cb-header-right">
           {onCancel && (
             <button type="button" className="btn-secondary" onClick={onCancel}>
               <i className="fas fa-times" />
-              {isHt ? 'Fèmen' : 'Close'}
+              {isHt ? 'Fèmen' : inlineText(lang, 'Close')}
             </button>
           )}
         </div>
@@ -473,7 +475,7 @@ export default function UniversalContentBuilder({
             disabled={currentStep === 0}
           >
             <i className="fas fa-chevron-left" />
-            {isHt ? 'Retou' : 'Back'}
+            {isHt ? 'Retou' : inlineText(lang, 'Back')}
           </button>
 
           <div className="cb-footer-right">
@@ -487,12 +489,12 @@ export default function UniversalContentBuilder({
                 {publishing ? (
                   <>
                     <i className="fas fa-spinner fa-spin" />
-                    {isHt ? 'Ap pibliye...' : 'Publishing...'}
+                    {isHt ? 'Ap pibliye...' : inlineText(lang, 'Publishing...')}
                   </>
                 ) : (
                   <>
                     <i className="fas fa-globe" />
-                    {isHt ? 'Pibliye' : 'Publish'}
+                    {isHt ? 'Pibliye' : inlineText(lang, 'Publish')}
                   </>
                 )}
               </button>
@@ -503,7 +505,7 @@ export default function UniversalContentBuilder({
                 onClick={() => setCurrentStep((prev) => Math.min(steps.length - 1, prev + 1))}
                 disabled={!canProceed}
               >
-                {isHt ? 'Kontinye' : 'Continue'}
+                {isHt ? 'Kontinye' : inlineText(lang, 'Continue')}
                 <i className="fas fa-chevron-right" />
               </button>
             )}

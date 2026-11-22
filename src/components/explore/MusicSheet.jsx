@@ -17,6 +17,7 @@ import { resolveVideoSource, coverWithFallback } from '../../modules/explore/uti
 import VideoEmbedFrame from '../media/VideoEmbedFrame';
 import SEOHead, { musicSchema } from '../shared/SEOHead';
 import { t2 } from '../../utils/i18n';
+import { inlineText } from '../../utils/inlineI18n';
 
 function classNames(...parts) {
   return parts.filter(Boolean).join(' ');
@@ -483,7 +484,7 @@ export function MusicSheet({ lang = 'en', showToast, user, contentId, track: ini
                 >
                   {lang === 'ht'
                     ? 'Navigatè w pa sipòte lekti videyo.'
-                    : 'Your browser does not support video playback.'}
+                    : inlineText(lang, 'Your browser does not support video playback.')}
                 </video>
               )}
             </section>

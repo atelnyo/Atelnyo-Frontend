@@ -27,6 +27,7 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { SPEECH_CAPS } from '../../modules/learning/speech';
 import styles from './learning.module.css';
+import { inlineText } from '../../utils/inlineI18n';
 
 // Longest single take: 90s. Language-practice answers are seconds long;
 // this only stops runaway recordings (learner walks away mid-take).
@@ -142,7 +143,7 @@ export default function SpeechRecorder({
       setState('error');
       setErrorMsg(isHt
         ? 'Anrejistreman vwa pa sipòte nan navigatè sa a.'
-        : 'Voice recording is not supported in this browser.');
+        : inlineText(lang, 'Voice recording is not supported in this browser.'));
       return;
     }
     setPermissionAsked(true);
@@ -195,20 +196,20 @@ export default function SpeechRecorder({
         // settings for something the SERVER had disabled.
         setErrorMsg(isHt
           ? 'Mikwo a bloke. Si w pa t refize l, se yon politik sit oswa yon ekstansyon navigatè ki bloke l — eseye nan yon fenèt nòmal (pa incognito) epi re-aktive pèmisyon an.'
-          : 'Microphone is blocked. If you did not decline it, a site policy or a browser extension is blocking it — try a normal (non-private) window and re-enable the permission.');
+          : inlineText(lang, 'Microphone is blocked. If you did not decline it, a site policy or a browser extension is blocking it — try a normal (non-private) window and re-enable the permission.'));
       } else if (name === 'SecurityError') {
         setState('error');
         setErrorMsg(isHt
           ? 'Navigatè a bloke mikwo a sou paj sa a (politik sit oswa iframe). Louvri leson an nan yon onglet dirèk epi eseye ankò.'
-          : 'The browser blocked the microphone on this page (site policy or iframe). Open the lesson in a normal tab and try again.');
+          : inlineText(lang, 'The browser blocked the microphone on this page (site policy or iframe). Open the lesson in a normal tab and try again.'));
       } else if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
         setState('error');
-        setErrorMsg(isHt ? 'Pa jwenn okenn mikro.' : 'No microphone was found.');
+        setErrorMsg(isHt ? 'Pa jwenn okenn mikro.' : inlineText(lang, 'No microphone was found.'));
       } else {
         setState('error');
         setErrorMsg(isHt
           ? 'Pa t kapab kòmanse anrejistreman an. Tcheke mikro ou epi eseye ankò.'
-          : 'Could not start recording. Check your microphone and try again.');
+          : inlineText(lang, 'Could not start recording. Check your microphone and try again.'));
       }
     }
   }, [supported, isHt, onRecorded, onStart, recordingUrl, stopTracks, startMeter, stopTimer, stopMeter]);
@@ -247,7 +248,7 @@ export default function SpeechRecorder({
     }
   }, [recordingUrl, playing]);
 
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
 
   if (!supported) {
     return (

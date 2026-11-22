@@ -9,6 +9,7 @@
  * no generic "something failed" dead end.
  */
 import { parseApiError } from '../../utils/errors';
+import { inlineText } from '../../utils/inlineI18n';
 
 const FIELD_META = {
   artist_name: { en: 'Artist name', ht: 'Non atis', tab: 'appearance' },
@@ -71,7 +72,7 @@ export function parseProfileSaveError(error, lang = 'en') {
     || parseApiError(error || {}, lang).message
     || (isHt
       ? 'Nou pa t kapab sove pwofil la. Eseye ankò.'
-      : 'We could not save your profile. Please try again.');
+      : inlineText(lang, 'We could not save your profile. Please try again.'));
 
   if (!data) {
     return { message: fallback, fields: [] };

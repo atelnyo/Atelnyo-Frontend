@@ -19,6 +19,7 @@ import { jobService, proposalService } from '../../../services/api';
 import { StudioSkeleton, EmptyState, SectionHeader } from '../shared';
 import ProposalDecisionModal from '../modals/ProposalDecisionModal';
 import styles from './sections.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const STATUS_LABEL = {
   pending: 'Pending',
@@ -83,8 +84,8 @@ export default function ProposalsSection({ lang, t, showToast }) {
     setDecision(null);
     showToast?.(
       mode === 'accept'
-        ? (lang === 'ht' ? '✅ Proposal aksepte — kontra kreye!' : '✅ Proposal accepted — contract created!')
-        : (lang === 'ht' ? 'Proposal rejte.' : 'Proposal rejected.'),
+        ? (lang === 'ht' ? '✅ Proposal aksepte — kontra kreye!' : inlineText(lang, '✅ Proposal accepted — contract created!'))
+        : (lang === 'ht' ? 'Proposal rejte.' : inlineText(lang, 'Proposal rejected.')),
       mode === 'accept' ? 'check-circle' : 'ban',
     );
     refetch();
@@ -100,7 +101,7 @@ export default function ProposalsSection({ lang, t, showToast }) {
     <div className={styles.section}>
       <SectionHeader
         icon="fa-file-signature"
-        title={lang === 'ht' ? 'Proposal yo' : 'Proposals'}
+        title={lang === 'ht' ? 'Proposal yo' : inlineText(lang, 'Proposals')}
         lang={lang}
         help={{
           ht: 'Freelancers yo voye proposal sou travay ou yo. Ou ka filtre pa travay, epi aksepte oswa rejte chak ofi — aksepte yon proposal kreye yon kontra otomatikman.',
@@ -108,17 +109,17 @@ export default function ProposalsSection({ lang, t, showToast }) {
         }}
         tip={lang === 'ht'
           ? 'Chak òf aksepte kreye pwòp kontra pa l (pwòp milestone + escrow). Lè dènye plas la pran, lòt òf yo rejte otomatikman.'
-          : 'Each accepted offer gets its own contract (own milestones + escrow). Taking the last slot auto-rejects the other bids.'}
+          : inlineText(lang, 'Each accepted offer gets its own contract (own milestones + escrow). Taking the last slot auto-rejects the other bids.')}
         action={
           jobs.length > 0 ? (
             <select
               className={`${styles.filterSelect}`}
               value={selectedJob}
               onChange={(e) => setSelectedJob(e.target.value)}
-              aria-label={lang === 'ht' ? 'Filtre pa travay' : 'Filter by job'}
+              aria-label={lang === 'ht' ? 'Filtre pa travay' : inlineText(lang, 'Filter by job')}
             >
               <option value="all">
-                {lang === 'ht' ? 'Tout travay' : 'All jobs'}
+                {lang === 'ht' ? 'Tout travay' : inlineText(lang, 'All jobs')}
                 {pendingCount > 0 ? ` (${pendingCount} pendan)` : ''}
               </option>
               {jobs.map((j) => {
@@ -152,14 +153,14 @@ export default function ProposalsSection({ lang, t, showToast }) {
       {isEmpty ? (
         <EmptyState
           icon="fa-file-signature"
-          title={lang === 'ht' ? 'Pokò gen proposal' : 'No proposals yet'}
+          title={lang === 'ht' ? 'Pokò gen proposal' : inlineText(lang, 'No proposals yet')}
           hint={selectedJob !== 'all'
             ? (lang === 'ht'
               ? 'Travay sa a poko resevwa proposal.'
-              : 'This job has not received proposals yet.')
+              : inlineText(lang, 'This job has not received proposals yet.'))
             : (lang === 'ht'
               ? 'Lè freelancers yo voye proposal sou travay ou yo, yo ap parèt isit la.'
-              : 'When freelancers bid on your jobs, they will appear here.')}
+              : inlineText(lang, 'When freelancers bid on your jobs, they will appear here.'))}
         />
       ) : (
         <div className={styles.list}>
@@ -186,7 +187,7 @@ export default function ProposalsSection({ lang, t, showToast }) {
                     </span>
                     {proposal.estimated_duration_days != null && (
                       <span>
-                        · {proposal.estimated_duration_days} {lang === 'ht' ? 'jou' : 'days'}
+                        · {proposal.estimated_duration_days} {lang === 'ht' ? 'jou' : inlineText(lang, 'days')}
                       </span>
                     )}
                     <span
@@ -206,7 +207,7 @@ export default function ProposalsSection({ lang, t, showToast }) {
                   )}
                   {proposal.client_note && (
                     <p style={{ margin: '6px 0 0', fontSize: '0.8rem', color: '#dc2626', fontStyle: 'italic' }}>
-                      {lang === 'ht' ? 'Nòt kliyan:' : 'Client note:'} {proposal.client_note}
+                      {lang === 'ht' ? 'Nòt kliyan:' : inlineText(lang, 'Client note:')} {proposal.client_note}
                     </p>
                   )}
                 </div>
@@ -216,8 +217,8 @@ export default function ProposalsSection({ lang, t, showToast }) {
                       type="button"
                       className={styles.acceptBtn}
                       onClick={() => handleAccept(proposal)}
-                      title={lang === 'ht' ? 'Aksepte' : 'Accept'}
-                      aria-label={lang === 'ht' ? 'Aksepte proposal sa a' : 'Accept this proposal'}
+                      title={lang === 'ht' ? 'Aksepte' : inlineText(lang, 'Accept')}
+                      aria-label={lang === 'ht' ? 'Aksepte proposal sa a' : inlineText(lang, 'Accept this proposal')}
                     >
                       <i className="fas fa-check" aria-hidden="true" />
                     </button>
@@ -225,8 +226,8 @@ export default function ProposalsSection({ lang, t, showToast }) {
                       type="button"
                       className={styles.deleteBtn}
                       onClick={() => handleReject(proposal)}
-                      title={lang === 'ht' ? 'Rejte' : 'Reject'}
-                      aria-label={lang === 'ht' ? 'Rejte proposal sa a' : 'Reject this proposal'}
+                      title={lang === 'ht' ? 'Rejte' : inlineText(lang, 'Reject')}
+                      aria-label={lang === 'ht' ? 'Rejte proposal sa a' : inlineText(lang, 'Reject this proposal')}
                     >
                       <i className="fas fa-xmark" aria-hidden="true" />
                     </button>
@@ -242,7 +243,7 @@ export default function ProposalsSection({ lang, t, showToast }) {
         <p className={styles.sectionDescription} style={{ marginTop: 16 }}>
           {lang === 'ht'
             ? '💡 Aksepte yon proposal kreye yon kontra. Lòt òf yo rejte otomatikman sèlman lè tout plas yo plen.'
-            : '💡 Accepting a proposal creates a contract. Other bids auto-reject only once all slots are filled.'}
+            : inlineText(lang, '💡 Accepting a proposal creates a contract. Other bids auto-reject only once all slots are filled.')}
         </p>
       )}
 

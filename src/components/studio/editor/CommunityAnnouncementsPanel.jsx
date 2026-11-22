@@ -19,6 +19,7 @@ import PanelSkeleton, {
   ExpandableText, PanelEmpty, PanelError, PanelHeader,
 } from './communityPanelUI';
 import styles from './communityEditor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const asArray = (data) => (Array.isArray(data) ? data : (data?.results || []));
 const PAGE_SIZE = 20;
@@ -151,7 +152,7 @@ export default function CommunityAnnouncementsPanel({ slug, lang = 'en', showToa
   };
 
   const applyTemplate = (tpl) => {
-    const key = isHt ? 'ht' : 'en';
+    const key = isHt ? 'ht' : inlineText(lang, 'en');
     setForm({
       title: tpl.title[key] || tpl.title.en || '',
       content: tpl.content[key] || tpl.content.en || '',
@@ -173,7 +174,7 @@ export default function CommunityAnnouncementsPanel({ slug, lang = 'en', showToa
     const title = form.title.trim();
     const content = form.content.trim();
     if (!title || !content) {
-      showToast?.(isHt ? 'Tit ak kontni obligatwa.' : 'Title and content are required.', 'circle-exclamation');
+      showToast?.(isHt ? 'Tit ak kontni obligatwa.' : inlineText(lang, 'Title and content are required.'), 'circle-exclamation');
       return;
     }
     setBusy(true);
@@ -195,13 +196,13 @@ export default function CommunityAnnouncementsPanel({ slug, lang = 'en', showToa
       refetch();
       showToast?.(
         editingId
-          ? (isHt ? '✅ Anons lan mete ajou.' : '✅ Announcement updated.')
-          : (isHt ? '✅ Anons pibliye — manm yo notifye.' : '✅ Announcement published — members notified.'),
+          ? (isHt ? '✅ Anons lan mete ajou.' : inlineText(lang, '✅ Announcement updated.'))
+          : (isHt ? '✅ Anons pibliye — manm yo notifye.' : inlineText(lang, '✅ Announcement published — members notified.')),
         'check-circle',
       );
     } catch (err) {
       showToast?.(
-        err?.response?.data?.detail || (isHt ? 'Pa t kapab sove anons lan.' : 'Could not save the announcement.'),
+        err?.response?.data?.detail || (isHt ? 'Pa t kapab sove anons lan.' : inlineText(lang, 'Could not save the announcement.')),
         'circle-exclamation',
       );
     } finally {
@@ -217,13 +218,13 @@ export default function CommunityAnnouncementsPanel({ slug, lang = 'en', showToa
       refetch();
       showToast?.(
         announcement.is_pinned
-          ? (isHt ? 'Anons lan dekloure.' : 'Announcement unpinned.')
-          : (isHt ? 'Anons lan kloure anlè.' : 'Announcement pinned to the top.'),
+          ? (isHt ? 'Anons lan dekloure.' : inlineText(lang, 'Announcement unpinned.'))
+          : (isHt ? 'Anons lan kloure anlè.' : inlineText(lang, 'Announcement pinned to the top.')),
         'thumbtack',
       );
     } catch (err) {
       showToast?.(
-        err?.response?.data?.detail || (isHt ? 'Pa t kapab chanje kloure a.' : 'Could not change the pin.'),
+        err?.response?.data?.detail || (isHt ? 'Pa t kapab chanje kloure a.' : inlineText(lang, 'Could not change the pin.')),
         'circle-exclamation',
       );
     } finally {
@@ -240,10 +241,10 @@ export default function CommunityAnnouncementsPanel({ slug, lang = 'en', showToa
       await communitiesService.deleteAnnouncement(target.id);
       if (editingId === target.id) resetComposer();
       refetch();
-      showToast?.(isHt ? 'Anons lan efase.' : 'Announcement deleted.', 'trash-can');
+      showToast?.(isHt ? 'Anons lan efase.' : inlineText(lang, 'Announcement deleted.'), 'trash-can');
     } catch (err) {
       showToast?.(
-        err?.response?.data?.detail || (isHt ? 'Pa t kapab efase anons lan.' : 'Could not delete the announcement.'),
+        err?.response?.data?.detail || (isHt ? 'Pa t kapab efase anons lan.' : inlineText(lang, 'Could not delete the announcement.')),
         'circle-exclamation',
       );
     } finally {
@@ -252,28 +253,28 @@ export default function CommunityAnnouncementsPanel({ slug, lang = 'en', showToa
   }, [deleteTarget, editingId, isHt, refetch, showToast]);
 
   if (initialLoading) {
-    return <PanelSkeleton variant="form" label={isHt ? 'Ap chaje anons yo' : 'Loading announcements'} />;
+    return <PanelSkeleton variant="form" label={isHt ? 'Ap chaje anons yo' : inlineText(lang, 'Loading announcements')} />;
   }
 
   return (
     <div>
       <PanelHeader
         icon="fa-bullhorn"
-        title={isHt ? 'Anons kominote a' : 'Community announcements'}
+        title={isHt ? 'Anons kominote a' : inlineText(lang, 'Community announcements')}
         count={typeof totalCount === 'number' ? totalCount : announcements.length}
         subtitle={isHt
           ? 'Anons parèt sou paj akèy kominote a. Kloure youn pou l rete anlè.'
-          : 'Announcements appear on the community home page. Pin one to keep it on top.'}
+          : inlineText(lang, 'Announcements appear on the community home page. Pin one to keep it on top.')}
         refreshing={loading && loadedOnce}
         onRefresh={refetch}
-        refreshLabel={isHt ? 'Rafrechi anons yo' : 'Refresh announcements'}
+        refreshLabel={isHt ? 'Rafrechi anons yo' : inlineText(lang, 'Refresh announcements')}
       />
 
       {error && (
         <PanelError
-          message={isHt ? 'Pat kapab chaje anons yo.' : 'Could not load announcements.'}
+          message={isHt ? 'Pat kapab chaje anons yo.' : inlineText(lang, 'Could not load announcements.')}
           onRetry={refetch}
-          retryLabel={isHt ? 'Reyese' : 'Retry'}
+          retryLabel={isHt ? 'Reyese' : inlineText(lang, 'Retry')}
         />
       )}
 
@@ -282,16 +283,16 @@ export default function CommunityAnnouncementsPanel({ slug, lang = 'en', showToa
         <div className={styles.composerHead}>
           <span>
             {editingId
-              ? (isHt ? 'Modifye anons lan' : 'Edit announcement')
-              : (isHt ? 'Nouvo anons' : 'New announcement')}
+              ? (isHt ? 'Modifye anons lan' : inlineText(lang, 'Edit announcement'))
+              : (isHt ? 'Nouvo anons' : inlineText(lang, 'New announcement'))}
           </span>
           {editingId && (
             <button
               type="button"
               className={styles.iconBtn}
               onClick={resetComposer}
-              title={isHt ? 'Anile modifikasyon' : 'Cancel edit'}
-              aria-label={isHt ? 'Anile modifikasyon' : 'Cancel edit'}
+              title={isHt ? 'Anile modifikasyon' : inlineText(lang, 'Cancel edit')}
+              aria-label={isHt ? 'Anile modifikasyon' : inlineText(lang, 'Cancel edit')}
             >
               <i className="fas fa-xmark" aria-hidden="true" />
             </button>
@@ -300,7 +301,7 @@ export default function CommunityAnnouncementsPanel({ slug, lang = 'en', showToa
         {!editingId && (
           <div style={{ marginBottom: 10 }}>
             <div className={styles.fieldLabel} style={{ marginBottom: 6 }}>
-              {isHt ? 'Modèl rapid' : 'Quick templates'}
+              {isHt ? 'Modèl rapid' : inlineText(lang, 'Quick templates')}
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {ANNOUNCEMENT_TEMPLATES.map((tpl) => (
@@ -309,7 +310,7 @@ export default function CommunityAnnouncementsPanel({ slug, lang = 'en', showToa
                   type="button"
                   className={styles.secondaryBtn}
                   onClick={() => applyTemplate(tpl)}
-                  title={isHt ? 'Ranpli fòm lan ak modèl sa a' : 'Fill the form with this template'}
+                  title={isHt ? 'Ranpli fòm lan ak modèl sa a' : inlineText(lang, 'Fill the form with this template')}
                 >
                   <i className={`fas ${tpl.icon}`} aria-hidden="true" />
                   {isHt ? tpl.label.ht : tpl.label.en}
@@ -324,8 +325,8 @@ export default function CommunityAnnouncementsPanel({ slug, lang = 'en', showToa
           value={form.title}
           maxLength={200}
           onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-          placeholder={isHt ? 'Tit anons lan' : 'Announcement title'}
-          aria-label={isHt ? 'Tit anons lan' : 'Announcement title'}
+          placeholder={isHt ? 'Tit anons lan' : inlineText(lang, 'Announcement title')}
+          aria-label={isHt ? 'Tit anons lan' : inlineText(lang, 'Announcement title')}
         />
         <textarea
           className={styles.textarea}
@@ -333,8 +334,8 @@ export default function CommunityAnnouncementsPanel({ slug, lang = 'en', showToa
           value={form.content}
           maxLength={10000}
           onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
-          placeholder={isHt ? 'Kisa manm yo bezwen konnen?' : 'What do members need to know?'}
-          aria-label={isHt ? 'Kontni anons lan' : 'Announcement content'}
+          placeholder={isHt ? 'Kisa manm yo bezwen konnen?' : inlineText(lang, 'What do members need to know?')}
+          aria-label={isHt ? 'Kontni anons lan' : inlineText(lang, 'Announcement content')}
         />
         <label className={styles.checkboxRow}>
           <input
@@ -342,7 +343,7 @@ export default function CommunityAnnouncementsPanel({ slug, lang = 'en', showToa
             checked={form.is_pinned}
             onChange={(e) => setForm((f) => ({ ...f, is_pinned: e.target.checked }))}
           />
-          {isHt ? 'Kloure anlè paj kominote a' : 'Pin to the top of the community page'}
+          {isHt ? 'Kloure anlè paj kominote a' : inlineText(lang, 'Pin to the top of the community page')}
         </label>
         <div className={styles.composerActions}>
           <button
@@ -353,8 +354,8 @@ export default function CommunityAnnouncementsPanel({ slug, lang = 'en', showToa
           >
             <i className={`fas ${busy ? 'fa-spinner fa-spin' : 'fa-paper-plane'}`} aria-hidden="true" />
             {editingId
-              ? (isHt ? 'Sove chanjman yo' : 'Save changes')
-              : (isHt ? 'Pibliye anons' : 'Publish announcement')}
+              ? (isHt ? 'Sove chanjman yo' : inlineText(lang, 'Save changes'))
+              : (isHt ? 'Pibliye anons' : inlineText(lang, 'Publish announcement'))}
           </button>
         </div>
       </div>
@@ -363,10 +364,10 @@ export default function CommunityAnnouncementsPanel({ slug, lang = 'en', showToa
       {announcements.length === 0 ? (
         <PanelEmpty
           icon="fa-bullhorn"
-          title={isHt ? 'Poko gen anons.' : 'No announcements yet.'}
+          title={isHt ? 'Poko gen anons.' : inlineText(lang, 'No announcements yet.')}
           description={isHt
             ? 'Ekri premye a anwo a — manm yo pral wè l sou paj kominote a.'
-            : 'Write the first one above — members will see it on the community page.'}
+            : inlineText(lang, 'Write the first one above — members will see it on the community page.')}
         />
       ) : (
         <>
@@ -391,7 +392,7 @@ export default function CommunityAnnouncementsPanel({ slug, lang = 'en', showToa
                   <div className={styles.rowName}>
                     {a.is_pinned && <i className="fas fa-thumbtack" style={{ color: '#f59e0b' }} aria-hidden="true" />}
                     {a.title}
-                    {isEditing && <span className={`${styles.pill} ${styles.pillStaff}`}>{isHt ? 'Ap modifye' : 'Editing'}</span>}
+                    {isEditing && <span className={`${styles.pill} ${styles.pillStaff}`}>{isHt ? 'Ap modifye' : inlineText(lang, 'Editing')}</span>}
                   </div>
                   <div className={styles.rowMeta}>
                     {a.created_by_username ? `@${a.created_by_username}` : ''}
@@ -410,7 +411,7 @@ export default function CommunityAnnouncementsPanel({ slug, lang = 'en', showToa
                     className={styles.iconBtn}
                     onClick={() => startEdit(a)}
                     disabled={busy}
-                    title={isHt ? 'Modifye' : 'Edit'}
+                    title={isHt ? 'Modifye' : inlineText(lang, 'Edit')}
                     aria-label={isHt ? `Modifye ${a.title}` : `Edit ${a.title}`}
                   >
                     <i className="fas fa-pen" aria-hidden="true" />
@@ -420,8 +421,8 @@ export default function CommunityAnnouncementsPanel({ slug, lang = 'en', showToa
                     className={styles.iconBtn}
                     onClick={() => togglePin(a)}
                     disabled={busy}
-                    title={a.is_pinned ? (isHt ? 'Dekloure' : 'Unpin') : (isHt ? 'Kloure' : 'Pin')}
-                    aria-label={a.is_pinned ? (isHt ? 'Dekloure anons lan' : 'Unpin announcement') : (isHt ? 'Kloure anons lan' : 'Pin announcement')}
+                    title={a.is_pinned ? (isHt ? 'Dekloure' : inlineText(lang, 'Unpin')) : (isHt ? 'Kloure' : inlineText(lang, 'Pin'))}
+                    aria-label={a.is_pinned ? (isHt ? 'Dekloure anons lan' : inlineText(lang, 'Unpin announcement')) : (isHt ? 'Kloure anons lan' : inlineText(lang, 'Pin announcement'))}
                   >
                     <i className={`fas ${a.is_pinned ? 'fa-thumbtack' : 'fa-thumbtack-slash'}`} aria-hidden="true" />
                   </button>
@@ -430,8 +431,8 @@ export default function CommunityAnnouncementsPanel({ slug, lang = 'en', showToa
                     className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
                     onClick={() => setDeleteTarget(a)}
                     disabled={busy}
-                    title={isHt ? 'Efase' : 'Delete'}
-                    aria-label={isHt ? 'Efase anons lan' : 'Delete announcement'}
+                    title={isHt ? 'Efase' : inlineText(lang, 'Delete')}
+                    aria-label={isHt ? 'Efase anons lan' : inlineText(lang, 'Delete announcement')}
                   >
                     <i className="fas fa-trash-can" aria-hidden="true" />
                   </button>
@@ -449,8 +450,8 @@ export default function CommunityAnnouncementsPanel({ slug, lang = 'en', showToa
               disabled={loadingMore}
             >
               {loadingMore
-                ? (isHt ? 'Ap chaje…' : 'Loading…')
-                : (isHt ? 'Chaje plis anons' : 'Load more announcements')}
+                ? (isHt ? 'Ap chaje…' : inlineText(lang, 'Loading…'))
+                : (isHt ? 'Chaje plis anons' : inlineText(lang, 'Load more announcements'))}
             </button>
           </div>
         )}
@@ -460,12 +461,12 @@ export default function CommunityAnnouncementsPanel({ slug, lang = 'en', showToa
       {deleteTarget && (
         <ConfirmModal
           lang={lang}
-          title={isHt ? 'Efase anons lan?' : 'Delete announcement?'}
+          title={isHt ? 'Efase anons lan?' : inlineText(lang, 'Delete announcement?')}
           message={isHt
             ? `« ${deleteTarget.title} » ap disparèt nèt pou tout manm yo. Aksyon sa a pa ka defèt.`
             : `"${deleteTarget.title}" will be removed for all members. This cannot be undone.`}
-          confirmText={isHt ? 'Efase' : 'Delete'}
-          cancelText={isHt ? 'Anile' : 'Cancel'}
+          confirmText={isHt ? 'Efase' : inlineText(lang, 'Delete')}
+          cancelText={isHt ? 'Anile' : inlineText(lang, 'Cancel')}
           onConfirm={confirmDelete}
           onCancel={() => setDeleteTarget(null)}
         />

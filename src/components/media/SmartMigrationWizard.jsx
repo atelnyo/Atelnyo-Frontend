@@ -13,6 +13,7 @@ import React, { useState, useCallback } from 'react';
 import MediaPreview from './MediaPreview';
 import MediaStatus from './MediaStatus';
 import { mediaEnterpriseService } from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function SmartMigrationWizard({
   media = {},
@@ -88,7 +89,7 @@ export default function SmartMigrationWizard({
       <div className="smw-header">
         <h3 className="smw-title">
           <i className="fas fa-exchange-alt" />
-          {isHt ? 'Ranplase Medya' : 'Replace Media'}
+          {isHt ? 'Ranplase Medya' : inlineText(lang, 'Replace Media')}
         </h3>
         {step !== 'done' && onCancel && (
           <button type="button" className="smw-close" onClick={onCancel}>
@@ -100,10 +101,10 @@ export default function SmartMigrationWizard({
       {/* Steps Indicator */}
       <div className="smw-steps">
         {[
-          { id: 'replace', icon: 'fa-paste', label: isHt ? 'Nouvo URL' : 'New URL' },
-          { id: 'validate', icon: 'fa-stethoscope', label: isHt ? 'Validasyon' : 'Validate' },
-          { id: 'preview', icon: 'fa-eye', label: isHt ? 'Aperçu' : 'Preview' },
-          { id: 'confirm', icon: 'fa-sync', label: isHt ? 'Konfime' : 'Confirm' },
+          { id: 'replace', icon: 'fa-paste', label: isHt ? 'Nouvo URL' : inlineText(lang, 'New URL') },
+          { id: 'validate', icon: 'fa-stethoscope', label: isHt ? 'Validasyon' : inlineText(lang, 'Validate') },
+          { id: 'preview', icon: 'fa-eye', label: isHt ? 'Aperçu' : inlineText(lang, 'Preview') },
+          { id: 'confirm', icon: 'fa-sync', label: isHt ? 'Konfime' : inlineText(lang, 'Confirm') },
         ].map((s, i) => {
           const stepIds = ['replace', 'validate', 'preview', 'confirm'];
           const currentIdx = stepIds.indexOf(step);
@@ -124,14 +125,14 @@ export default function SmartMigrationWizard({
       {/* Current Media Info */}
       {step !== 'done' && mediaUrl && (
         <div className="smw-current-media">
-          <div className="smw-current-label">{isHt ? 'Medya aktyèl' : 'Current Media'}</div>
+          <div className="smw-current-label">{isHt ? 'Medya aktyèl' : inlineText(lang, 'Current Media')}</div>
           <div className="smw-current-details">
             <span className="smw-current-badge">{provider || mediaType || 'Media'}</span>
             <code className="smw-current-url">{mediaUrl.slice(0, 80)}...</code>
             {usageCount > 0 && (
               <span className="smw-current-usage">
                 <i className="fas fa-link" />
-                {usageCount} {isHt ? 'referans' : 'references'}
+                {usageCount} {isHt ? 'referans' : inlineText(lang, 'references')}
               </span>
             )}
           </div>
@@ -144,10 +145,10 @@ export default function SmartMigrationWizard({
           <p className="smw-instruction">
             {isHt
               ? 'Kole nouvo URL piblik la soti nan provider ou. Sistèm nan pral otomatikman detekte provider a epi verifye li.'
-              : 'Paste the new public URL from your provider. The system will automatically detect the provider and validate it.'}
+              : inlineText(lang, 'Paste the new public URL from your provider. The system will automatically detect the provider and validate it.')}
           </p>
           <div className="smw-field">
-            <label className="smw-label">{isHt ? 'Nouvo URL' : 'New URL'}</label>
+            <label className="smw-label">{isHt ? 'Nouvo URL' : inlineText(lang, 'New URL')}</label>
             <textarea
               className="smw-input"
               value={newUrl}
@@ -159,7 +160,7 @@ export default function SmartMigrationWizard({
           </div>
           <div className="smw-actions">
             <button type="button" className="btn-secondary" onClick={onCancel}>
-              {isHt ? 'Anile' : 'Cancel'}
+              {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
             </button>
             <button
               type="button"
@@ -167,7 +168,7 @@ export default function SmartMigrationWizard({
               onClick={() => setStep('validate')}
               disabled={!newUrl.trim()}
             >
-              {isHt ? 'Kontinye' : 'Continue'}
+              {isHt ? 'Kontinye' : inlineText(lang, 'Continue')}
               <i className="fas fa-chevron-right" />
             </button>
           </div>
@@ -180,7 +181,7 @@ export default function SmartMigrationWizard({
           <p className="smw-instruction">
             {isHt
               ? 'Klike sou "Verifye" pou tcheke si URL la aksesib epi detekte provider a.'
-              : 'Click "Validate" to check if the URL is accessible and detect the provider.'}
+              : inlineText(lang, 'Click "Validate" to check if the URL is accessible and detect the provider.')}
           </p>
           <div className="smw-url-display">
             <code>{newUrl}</code>
@@ -194,7 +195,7 @@ export default function SmartMigrationWizard({
           <div className="smw-actions">
             <button type="button" className="btn-secondary" onClick={() => setStep('replace')}>
               <i className="fas fa-chevron-left" />
-              {isHt ? 'Retou' : 'Back'}
+              {isHt ? 'Retou' : inlineText(lang, 'Back')}
             </button>
             <button
               type="button"
@@ -203,9 +204,9 @@ export default function SmartMigrationWizard({
               disabled={validating}
             >
               {validating ? (
-                <><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap verifye...' : 'Validating...'}</>
+                <><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap verifye...' : inlineText(lang, 'Validating...')}</>
               ) : (
-                <><i className="fas fa-stethoscope" /> {isHt ? 'Verifye' : 'Validate'}</>
+                <><i className="fas fa-stethoscope" /> {isHt ? 'Verifye' : inlineText(lang, 'Validate')}</>
               )}
             </button>
           </div>
@@ -218,7 +219,7 @@ export default function SmartMigrationWizard({
           <p className="smw-instruction">
             {isHt
               ? 'Verifye ke nouvo medya a pwop. Si tout bagay bon, kontinye pou mete ajou tout referans yo.'
-              : 'Verify the new media looks correct. If everything looks good, continue to update all references.'}
+              : inlineText(lang, 'Verify the new media looks correct. If everything looks good, continue to update all references.')}
           </p>
           <div className="smw-preview">
             <MediaPreview data={validationResult} lang={lang} />
@@ -231,14 +232,14 @@ export default function SmartMigrationWizard({
           <div className="smw-actions">
             <button type="button" className="btn-secondary" onClick={() => setStep('validate')}>
               <i className="fas fa-chevron-left" />
-              {isHt ? 'Retou' : 'Back'}
+              {isHt ? 'Retou' : inlineText(lang, 'Back')}
             </button>
             <button
               type="button"
               className="btn-primary"
               onClick={() => setStep('confirm')}
             >
-              {isHt ? 'Kontinye' : 'Continue'}
+              {isHt ? 'Kontinye' : inlineText(lang, 'Continue')}
               <i className="fas fa-chevron-right" />
             </button>
           </div>
@@ -251,11 +252,11 @@ export default function SmartMigrationWizard({
           <div className="smw-confirm-warning">
             <i className="fas fa-exclamation-triangle" />
             <div>
-              <strong>{isHt ? 'Atansyon!' : 'Warning!'}</strong>
+              <strong>{isHt ? 'Atansyon!' : inlineText(lang, 'Warning!')}</strong>
               <p>
                 {isHt
                   ? 'Sa pral ranplase URL la nan tout kote li itilize. Asire w nouvo URL la kòrèk.'
-                  : 'This will replace the URL everywhere it is used. Make sure the new URL is correct.'}
+                  : inlineText(lang, 'This will replace the URL everywhere it is used. Make sure the new URL is correct.')}
               </p>
             </div>
           </div>
@@ -269,14 +270,14 @@ export default function SmartMigrationWizard({
           )}
           <div className="smw-compare">
             <div className="smw-compare-item">
-              <div className="smw-compare-label">{isHt ? 'Ansyen URL' : 'Old URL'}</div>
+              <div className="smw-compare-label">{isHt ? 'Ansyen URL' : inlineText(lang, 'Old URL')}</div>
               <code className="smw-compare-url smw-compare-old">{mediaUrl.slice(0, 80)}</code>
             </div>
             <div className="smw-compare-arrow">
               <i className="fas fa-arrow-right" />
             </div>
             <div className="smw-compare-item">
-              <div className="smw-compare-label">{isHt ? 'Nouvo URL' : 'New URL'}</div>
+              <div className="smw-compare-label">{isHt ? 'Nouvo URL' : inlineText(lang, 'New URL')}</div>
               <code className="smw-compare-url smw-compare-new">{newUrl.slice(0, 80)}</code>
             </div>
           </div>
@@ -289,7 +290,7 @@ export default function SmartMigrationWizard({
           <div className="smw-actions">
             <button type="button" className="btn-secondary" onClick={() => setStep('preview')}>
               <i className="fas fa-chevron-left" />
-              {isHt ? 'Retou' : 'Back'}
+              {isHt ? 'Retou' : inlineText(lang, 'Back')}
             </button>
             <button
               type="button"
@@ -298,9 +299,9 @@ export default function SmartMigrationWizard({
               disabled={updating}
             >
               {updating ? (
-                <><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap mete ajou...' : 'Updating...'}</>
+                <><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap mete ajou...' : inlineText(lang, 'Updating...')}</>
               ) : (
-                <><i className="fas fa-sync" /> {isHt ? 'Ranplase tout referans' : 'Replace all references'}</>
+                <><i className="fas fa-sync" /> {isHt ? 'Ranplase tout referans' : inlineText(lang, 'Replace all references')}</>
               )}
             </button>
           </div>
@@ -312,24 +313,24 @@ export default function SmartMigrationWizard({
         <div className="smb-body">
           <div className="smw-success">
             <i className="fas fa-check-circle" />
-            <h3>{isHt ? 'Siksè!' : 'Success!'}</h3>
+            <h3>{isHt ? 'Siksè!' : inlineText(lang, 'Success!')}</h3>
             <p>
               {isHt
                 ? 'URL la te ranplase avèk siksè nan tout referans yo. Pa gen lòt aksyon nesesè.'
-                : 'The URL was successfully replaced in all references. No further action needed.'}
+                : inlineText(lang, 'The URL was successfully replaced in all references. No further action needed.')}
             </p>
             {updateResult && (
               <div className="smw-update-details">
                 {updateResult.updated_count != null && (
                   <span className="smw-detail-badge">
                     <i className="fas fa-link" />
-                    {updateResult.updated_count} {isHt ? 'referans mete ajou' : 'references updated'}
+                    {updateResult.updated_count} {isHt ? 'referans mete ajou' : inlineText(lang, 'references updated')}
                   </span>
                 )}
                 {updateResult.failed_count > 0 && (
                   <span className="smw-detail-badge smw-detail-warn">
                     <i className="fas fa-exclamation-circle" />
-                    {updateResult.failed_count} {isHt ? 'echèk' : 'failed'}
+                    {updateResult.failed_count} {isHt ? 'echèk' : inlineText(lang, 'failed')}
                   </span>
                 )}
               </div>
@@ -339,12 +340,12 @@ export default function SmartMigrationWizard({
             {onComplete && (
               <button type="button" className="btn-primary" onClick={() => onComplete(updateResult)}>
                 <i className="fas fa-check" />
-                {isHt ? 'Fèmen' : 'Done'}
+                {isHt ? 'Fèmen' : inlineText(lang, 'Done')}
               </button>
             )}
             <button type="button" className="btn-secondary" onClick={handleReset}>
               <i className="fas fa-redo" />
-              {isHt ? 'Ranplase yon lòt' : 'Replace another'}
+              {isHt ? 'Ranplase yon lòt' : inlineText(lang, 'Replace another')}
             </button>
           </div>
         </div>

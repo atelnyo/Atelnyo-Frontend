@@ -19,6 +19,7 @@
  *   </AccessibleLockedContent>
  */
 import React from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function AccessibleLockedContent({
   children,
@@ -29,7 +30,7 @@ export default function AccessibleLockedContent({
   const isHt = lang === 'ht';
   const defaultReason = isHt
     ? 'Konplete leson anvan pou kontinye.'
-    : 'Complete the previous lesson to continue.';
+    : inlineText(lang, 'Complete the previous lesson to continue.');
 
   const displayReason = reason || defaultReason;
 
@@ -37,7 +38,7 @@ export default function AccessibleLockedContent({
     <div
       className={`a11y-locked-content ${className}`}
       role="region"
-      aria-label={isHt ? 'Kontni bloke' : 'Locked content'}
+      aria-label={isHt ? 'Kontni bloke' : inlineText(lang, 'Locked content')}
       aria-disabled="true"
       style={{
         position: 'relative',
@@ -85,7 +86,7 @@ export default function AccessibleLockedContent({
             maxWidth: '300px',
           }}
         >
-          {isHt ? 'Kontni bloke' : 'Content locked'}
+          {isHt ? 'Kontni bloke' : inlineText(lang, 'Content locked')}
         </p>
         <p
           style={{

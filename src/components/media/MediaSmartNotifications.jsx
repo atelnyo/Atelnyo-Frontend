@@ -8,6 +8,7 @@
  * All notifications are clickable and navigate to the relevant media page.
  */
 import React, { useState, useCallback } from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 const NOTIFICATION_ICONS = {
   media_ready: 'fa-check-circle',
@@ -88,7 +89,7 @@ export default function MediaSmartNotifications({
         type="button"
         className="smart-notif-bell"
         onClick={() => setIsOpen(!isOpen)}
-        aria-label={isHt ? 'Notifikasyon' : 'Notifications'}
+        aria-label={isHt ? 'Notifikasyon' : inlineText(lang, 'Notifications')}
         aria-expanded={isOpen}
       >
         <i className="fas fa-bell" aria-hidden="true" />
@@ -106,16 +107,16 @@ export default function MediaSmartNotifications({
           <div className="smart-notif-header">
             <h3 className="smart-notif-title">
               <i className="fas fa-bell" aria-hidden="true" />
-              {isHt ? 'Notifikasyon' : 'Notifications'}
+              {isHt ? 'Notifikasyon' : inlineText(lang, 'Notifications')}
             </h3>
             <div className="smart-notif-header-actions">
               <span className="smart-notif-count">
-                {unreadCount} {isHt ? 'nouvo' : 'new'}
+                {unreadCount} {isHt ? 'nouvo' : inlineText(lang, 'new')}
               </span>
               {onDismissAll && notifications.length > 0 && (
                 <button type="button" className="smart-notif-dismiss-all" onClick={onDismissAll}>
                   <i className="fas fa-check-double" />
-                  {isHt ? 'Make tout li' : 'Mark all read'}
+                  {isHt ? 'Make tout li' : inlineText(lang, 'Mark all read')}
                 </button>
               )}
             </div>
@@ -126,7 +127,7 @@ export default function MediaSmartNotifications({
             {notifications.length === 0 ? (
               <div className="smart-notif-empty">
                 <i className="fas fa-bell-slash" />
-                <p>{isHt ? 'Pa gen notifikasyon' : 'No notifications'}</p>
+                <p>{isHt ? 'Pa gen notifikasyon' : inlineText(lang, 'No notifications')}</p>
               </div>
             ) : (
               notifications.map((notif, i) => {
@@ -171,7 +172,7 @@ export default function MediaSmartNotifications({
                         type="button"
                         className="smart-notif-dismiss"
                         onClick={(e) => { e.stopPropagation(); onDismiss(notif.id || notif._id); }}
-                        title={isHt ? 'Fèmen' : 'Dismiss'}
+                        title={isHt ? 'Fèmen' : inlineText(lang, 'Dismiss')}
                       >
                         <i className="fas fa-times" />
                       </button>
@@ -186,7 +187,7 @@ export default function MediaSmartNotifications({
           {notifications.length > 0 && (
             <div className="smart-notif-footer">
               <span className="smart-notif-footer-text">
-                {notifications.length} {isHt ? 'total' : 'total'}
+                {notifications.length} {isHt ? 'total' : inlineText(lang, 'total')}
               </span>
             </div>
           )}

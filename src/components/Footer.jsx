@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { t2 } from '../utils/i18n';
 import legalService from '../services/legalService';
+import { inlineText } from '../utils/inlineI18n';
 
 /**
  * Footer — social links + legal policy links.
@@ -150,7 +151,7 @@ const Footer = ({ lang, translations }) => {
   ];
 
   return (
-    <footer className="app-footer" role="contentinfo" aria-label={lang === 'ht' ? 'Pyè paj la' : 'Page footer'}>
+    <footer className="app-footer" role="contentinfo" aria-label={lang === 'ht' ? 'Pyè paj la' : inlineText(lang, 'Page footer')}>
       <div className="app-footer-social">
         {socialLinks.map((link) => (
           <a

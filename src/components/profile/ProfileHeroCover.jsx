@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fmtCount, fmtDate, languageEntry } from './profileUtils';
+import { inlineText } from '../../utils/inlineI18n';
 
 /**
  * PremiumHero — cinematic cover + ringed avatar + identity bar.
@@ -76,8 +77,8 @@ export default function PremiumHero({ profile, lang, followersCount }) {
                 Atelnyo (gold = the rose-center identity colour). */}
             {profile.is_verified && (
               <span className="csp-verified-seal"
-                title={lang === 'ht' ? 'Creator verifye' : 'Verified creator'}
-                aria-label={lang === 'ht' ? 'Creator verifye' : 'Verified creator'}>
+                title={lang === 'ht' ? 'Creator verifye' : inlineText(lang, 'Verified creator')}
+                aria-label={lang === 'ht' ? 'Creator verifye' : inlineText(lang, 'Verified creator')}>
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <defs>
                     {/* Frosted-glass disc — translucent emerald so the cover
@@ -121,7 +122,7 @@ export default function PremiumHero({ profile, lang, followersCount }) {
             <div className="csp-identity-followers">
               <i className="fas fa-users" aria-hidden="true" />
               <strong>{fmtCount(followersCount)}</strong>
-              <span>{lang === 'ht' ? 'abonnés' : 'followers'}</span>
+              <span>{lang === 'ht' ? 'abonnés' : inlineText(lang, 'followers')}</span>
             </div>
           )}
 
@@ -182,7 +183,7 @@ export default function PremiumHero({ profile, lang, followersCount }) {
             {profile.created_at && (
               <span className="csp-identity-meta-item">
                 <i className="fas fa-calendar" aria-hidden="true" />
-                {lang === 'ht' ? 'Depi' : 'Since'} {fmtDate(profile.created_at, lang)}
+                {lang === 'ht' ? 'Depi' : inlineText(lang, 'Since')} {fmtDate(profile.created_at, lang)}
               </span>
             )}
             {profile.trust_score != null && (

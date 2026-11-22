@@ -5,6 +5,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../../services/api';
 import './ResourceLibrary.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const RESOURCE_TYPES = [
   { key: 'image', label: '🖼️ Imaj', accept: 'image/*' },
@@ -54,7 +55,7 @@ export default function ResourceLibrary({ lang = 'en', courseId, onInsert }) {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm(isHt ? 'Efase resous sa a?' : 'Delete this resource?')) return;
+    if (!confirm(isHt ? 'Efase resous sa a?' : inlineText(lang, 'Delete this resource?'))) return;
     try {
       await api.delete(`/api/resources/${id}/`);
       loadResources();
@@ -72,9 +73,9 @@ export default function ResourceLibrary({ lang = 'en', courseId, onInsert }) {
   return (
     <div className="resource-library">
       <div className="rl-header">
-        <h3>📚 {isHt ? 'Bibliyotèk Resous' : 'Resource Library'}</h3>
+        <h3>📚 {isHt ? 'Bibliyotèk Resous' : inlineText(lang, 'Resource Library')}</h3>
         <button className="rl-add-btn" onClick={() => setShowAdd(!showAdd)}>
-          {showAdd ? '✕' : '+ ' + (isHt ? 'Ajoute' : 'Add')}
+          {showAdd ? '✕' : '+ ' + (isHt ? 'Ajoute' : inlineText(lang, 'Add'))}
         </button>
       </div>
 
@@ -87,17 +88,17 @@ export default function ResourceLibrary({ lang = 'en', courseId, onInsert }) {
               <option key={t.key} value={t.key}>{t.label}</option>
             ))}
           </select>
-          <input placeholder={isHt ? 'Tit resous' : 'Resource title'}
+          <input placeholder={isHt ? 'Tit resous' : inlineText(lang, 'Resource title')}
             value={newResource.title}
             onChange={e => setNewResource(p => ({ ...p, title: e.target.value }))} />
-          <input placeholder={isHt ? 'URL oswa lyen' : 'URL or link'}
+          <input placeholder={isHt ? 'URL oswa lyen' : inlineText(lang, 'URL or link')}
             value={newResource.url}
             onChange={e => setNewResource(p => ({ ...p, url: e.target.value }))} />
-          <input placeholder={isHt ? 'Tags (separe ak virgul)' : 'Tags (comma separated)'}
+          <input placeholder={isHt ? 'Tags (separe ak virgul)' : inlineText(lang, 'Tags (comma separated)')}
             value={newResource.tags}
             onChange={e => setNewResource(p => ({ ...p, tags: e.target.value }))} />
           <button className="rl-save-btn" onClick={handleCreate}>
-            💾 {isHt ? 'Sove' : 'Save'}
+            💾 {isHt ? 'Sove' : inlineText(lang, 'Save')}
           </button>
         </div>
       )}
@@ -105,7 +106,7 @@ export default function ResourceLibrary({ lang = 'en', courseId, onInsert }) {
       {/* Filter */}
       <div className="rl-filters">
         <button className={`rl-filter-btn ${filter === 'all' ? 'active' : ''}`}
-          onClick={() => setFilter('all')}>{isHt ? 'Tout' : 'All'}</button>
+          onClick={() => setFilter('all')}>{isHt ? 'Tout' : inlineText(lang, 'All')}</button>
         {RESOURCE_TYPES.map(t => (
           <button key={t.key}
             className={`rl-filter-btn ${filter === t.key ? 'active' : ''}`}
@@ -120,8 +121,8 @@ export default function ResourceLibrary({ lang = 'en', courseId, onInsert }) {
         <div className="rl-loading">Chaje...</div>
       ) : filtered.length === 0 ? (
         <div className="rl-empty">
-          <p>{isHt ? 'Pa gen resous ankò.' : 'No resources yet.'}</p>
-          <p>{isHt ? 'Ajoute premye resous ou pou itilize nan tout kou ou.' : 'Add your first resource to use across all your courses.'}</p>
+          <p>{isHt ? 'Pa gen resous ankò.' : inlineText(lang, 'No resources yet.')}</p>
+          <p>{isHt ? 'Ajoute premye resous ou pou itilize nan tout kou ou.' : inlineText(lang, 'Add your first resource to use across all your courses.')}</p>
         </div>
       ) : (
         <div className="rl-grid">
@@ -139,7 +140,7 @@ export default function ResourceLibrary({ lang = 'en', courseId, onInsert }) {
               <div className="rl-card-actions">
                 {onInsert && (
                   <button className="rl-insert-btn" onClick={() => handleInsert(r)}>
-                    📥 {isHt ? 'Itilize' : 'Use'}
+                    📥 {isHt ? 'Itilize' : inlineText(lang, 'Use')}
                   </button>
                 )}
                 {r.url && (

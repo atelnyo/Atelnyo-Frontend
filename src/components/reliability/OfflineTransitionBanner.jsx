@@ -12,6 +12,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { networkState, NetworkStatus } from '../../utils/networkState';
 import { offlineQueue } from '../../utils/offlineQueue';
+import { inlineText } from '../../utils/inlineI18n';
 
 const BANNER_STYLES = {
   base: {
@@ -165,7 +166,7 @@ export default function OfflineTransitionBanner({ lang = 'en' }) {
       <span>{message}</span>
       {pendingCount > 0 && status !== NetworkStatus.OFFLINE && (
         <span style={{ fontSize: '12px', opacity: 0.8 }}>
-          ({pendingCount} {lang === 'ht' ? 'k ap tann' : 'pending'})
+          ({pendingCount} {lang === 'ht' ? 'k ap tann' : inlineText(lang, 'pending')})
         </span>
       )}
     </div>

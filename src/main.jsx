@@ -42,6 +42,7 @@ import './styles/accessibility.css'
 import { ThemeProvider } from './context/ThemeContext.jsx'
 
 import { androidBridge } from './services/androidBridge'
+import { inlineText } from './utils/inlineI18n';
 
 // ─── Global AppErrorBoundary ────────────────────────────────────────
 // Without this, ANY uncaught render error anywhere in <App /> (a
@@ -71,7 +72,8 @@ class AppErrorBoundary extends React.Component {
   };
   render() {
     if (this.state.hasError) {
-      const isHt = (localStorage.getItem('atelnyo_lang') || 'en') === 'ht';
+      const lang = localStorage.getItem('atelnyo_lang') || 'en';
+      const isHt = lang === 'ht';
       return (
         <div role="alert" style={{
           minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -84,12 +86,12 @@ class AppErrorBoundary extends React.Component {
           }}>
             <div style={{ fontSize: 40, marginBottom: 12 }} aria-hidden="true">🛠️</div>
             <h2 style={{ margin: '0 0 8px', color: 'var(--text-main, #1f2937)' }}>
-              {isHt ? 'Yon erè inatandi rive' : 'Something unexpected happened'}
+              {isHt ? 'Yon erè inatandi rive' : inlineText(lang, 'Something unexpected happened')}
             </h2>
             <p style={{ margin: '0 0 20px', color: 'var(--text-secondary, #64748b)', fontSize: '0.9rem' }}>
               {isHt
                 ? 'App la pa t kapab afiche paj sa a. Rechaje — done ou yo an sekirite.'
-                : 'The page could not be displayed. Reload — your data is safe.'}
+                : inlineText(lang, 'The page could not be displayed. Reload — your data is safe.')}
             </p>
             <button
               type="button"
@@ -102,7 +104,7 @@ class AppErrorBoundary extends React.Component {
                 fontWeight: 650, cursor: 'pointer', touchAction: 'manipulation',
               }}
             >
-              <i className="fas fa-rotate-right" aria-hidden="true" /> {isHt ? 'Rechaje' : 'Reload'}
+              <i className="fas fa-rotate-right" aria-hidden="true" /> {isHt ? 'Rechaje' : inlineText(lang, 'Reload')}
             </button>
             <button
               type="button"
@@ -114,7 +116,7 @@ class AppErrorBoundary extends React.Component {
                 touchAction: 'manipulation',
               }}
             >
-              {isHt ? 'Retounen sou Explore' : 'Back to Explore'}
+              {isHt ? 'Retounen sou Explore' : inlineText(lang, 'Back to Explore')}
             </button>
           </div>
         </div>

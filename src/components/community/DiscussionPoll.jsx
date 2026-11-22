@@ -13,6 +13,7 @@
  */
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import api from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── Constants ────────────────────────────────────────────────────
 
@@ -144,23 +145,23 @@ function PollCreator({ onSubmit, onCancel, lang }) {
     <form className="poll-creator" onSubmit={handleSubmit}>
       <h4>
         <i className="fas fa-chart-bar" />
-        {lang === 'ht' ? 'Kreye yon Sondaj' : 'Create a Poll'}
+        {lang === 'ht' ? 'Kreye yon Sondaj' : inlineText(lang, 'Create a Poll')}
       </h4>
 
       <div className="poll-form-group">
-        <label>{lang === 'ht' ? 'Kesyon' : 'Question'} *</label>
+        <label>{lang === 'ht' ? 'Kesyon' : inlineText(lang, 'Question')} *</label>
         <input
           type="text"
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
-          placeholder={lang === 'ht' ? 'Eskri kesyon ou a...' : 'Enter your question...'}
+          placeholder={lang === 'ht' ? 'Eskri kesyon ou a...' : inlineText(lang, 'Enter your question...')}
           required
           maxLength={300}
         />
       </div>
 
       <div className="poll-form-group">
-        <label>{lang === 'ht' ? 'Kalite Sondaj' : 'Poll Type'}</label>
+        <label>{lang === 'ht' ? 'Kalite Sondaj' : inlineText(lang, 'Poll Type')}</label>
         <div className="poll-type-selector">
           {Object.entries(POLL_TYPES).map(([key, val]) => (
             <button
@@ -176,7 +177,7 @@ function PollCreator({ onSubmit, onCancel, lang }) {
       </div>
 
       <div className="poll-form-group">
-        <label>{lang === 'ht' ? 'Opsyon' : 'Options'} *</label>
+        <label>{lang === 'ht' ? 'Opsyon' : inlineText(lang, 'Options')} *</label>
         <div className="poll-options-editor">
           {options.map((opt, idx) => (
             <div key={idx} className="poll-option-input">
@@ -198,14 +199,14 @@ function PollCreator({ onSubmit, onCancel, lang }) {
           ))}
           {options.length < POLL_TYPES[pollType].maxOptions && pollType !== 'yes_no' && (
             <button type="button" className="poll-add-option" onClick={handleAddOption}>
-              <i className="fas fa-plus" /> {lang === 'ht' ? 'Ajoute Opsyon' : 'Add Option'}
+              <i className="fas fa-plus" /> {lang === 'ht' ? 'Ajoute Opsyon' : inlineText(lang, 'Add Option')}
             </button>
           )}
         </div>
       </div>
 
       <div className="poll-form-group">
-        <label>{lang === 'ht' ? 'Opsyon Ekstra' : 'Extra Options'}</label>
+        <label>{lang === 'ht' ? 'Opsyon Ekstra' : inlineText(lang, 'Extra Options')}</label>
         <div className="poll-checkboxes">
           <label className="poll-checkbox">
             <input
@@ -213,7 +214,7 @@ function PollCreator({ onSubmit, onCancel, lang }) {
               checked={anonymous}
               onChange={(e) => setAnonymous(e.target.checked)}
             />
-            <span>{lang === 'ht' ? 'Anonim' : 'Anonymous voting'}</span>
+            <span>{lang === 'ht' ? 'Anonim' : inlineText(lang, 'Anonymous voting')}</span>
           </label>
           <label className="poll-checkbox">
             <input
@@ -221,17 +222,17 @@ function PollCreator({ onSubmit, onCancel, lang }) {
               value={expiresAt}
               onChange={(e) => setExpiresAt(e.target.value)}
             />
-            <span>{lang === 'ht' ? 'Ekspire' : 'Expires at'}</span>
+            <span>{lang === 'ht' ? 'Ekspire' : inlineText(lang, 'Expires at')}</span>
           </label>
         </div>
       </div>
 
       <div className="poll-form-actions">
         <button type="button" className="poll-btn poll-btn-cancel" onClick={onCancel}>
-          {lang === 'ht' ? 'Anile' : 'Cancel'}
+          {lang === 'ht' ? 'Anile' : inlineText(lang, 'Cancel')}
         </button>
         <button type="submit" className="poll-btn poll-btn-submit">
-          <i className="fas fa-chart-bar" /> {lang === 'ht' ? 'Kreye Sondaj' : 'Create Poll'}
+          <i className="fas fa-chart-bar" /> {lang === 'ht' ? 'Kreye Sondaj' : inlineText(lang, 'Create Poll')}
         </button>
       </div>
     </form>
@@ -336,7 +337,7 @@ export function DiscussionPoll({ poll, onVote, onDelete, currentUserId, lang = '
       <div className="poll-footer">
         <div className="poll-stats">
           <span className="poll-total-votes">
-            <i className="fas fa-users" /> {totalVotes} {lang === 'ht' ? 'vòt' : 'votes'}
+            <i className="fas fa-users" /> {totalVotes} {lang === 'ht' ? 'vòt' : inlineText(lang, 'votes')}
           </span>
           {timeRemaining && !isEnded && (
             <span className="poll-time-remaining">
@@ -350,12 +351,12 @@ export function DiscussionPoll({ poll, onVote, onDelete, currentUserId, lang = '
             <>
               {selectedOptions.length > 0 && (
                 <button className="poll-btn poll-btn-vote" onClick={handleSubmitVote}>
-                  <i className="fas fa-check" /> {lang === 'ht' ? 'Vòte' : 'Vote'}
+                  <i className="fas fa-check" /> {lang === 'ht' ? 'Vòte' : inlineText(lang, 'Vote')}
                 </button>
               )}
               {!showResults && (
                 <button className="poll-btn poll-btn-results" onClick={handleShowResults}>
-                  {lang === 'ht' ? 'Wè Rezilta' : 'View Results'}
+                  {lang === 'ht' ? 'Wè Rezilta' : inlineText(lang, 'View Results')}
                 </button>
               )}
             </>
@@ -385,9 +386,9 @@ export function DiscussionPolls({ polls, community, discussionId, onPollCreated,
       });
       setShowCreator(false);
       onPollCreated?.(res.data);
-      showToast?.(lang === 'ht' ? 'Sondaj kreye!' : 'Poll created!', 'success');
+      showToast?.(lang === 'ht' ? 'Sondaj kreye!' : inlineText(lang, 'Poll created!'), 'success');
     } catch (err) {
-      showToast?.(lang === 'ht' ? 'Erè nan kreyasyon' : 'Error creating poll', 'error');
+      showToast?.(lang === 'ht' ? 'Erè nan kreyasyon' : inlineText(lang, 'Error creating poll'), 'error');
     }
   };
 
@@ -395,9 +396,9 @@ export function DiscussionPolls({ polls, community, discussionId, onPollCreated,
     try {
       await api.delete(`/communities/polls/${pollId}/`);
       onPollDeleted?.(pollId);
-      showToast?.(lang === 'ht' ? 'Sondaj efase!' : 'Poll deleted!', 'success');
+      showToast?.(lang === 'ht' ? 'Sondaj efase!' : inlineText(lang, 'Poll deleted!'), 'success');
     } catch (err) {
-      showToast?.(lang === 'ht' ? 'Erè' : 'Error', 'error');
+      showToast?.(lang === 'ht' ? 'Erè' : inlineText(lang, 'Error'), 'error');
     }
   };
 
@@ -406,11 +407,11 @@ export function DiscussionPolls({ polls, community, discussionId, onPollCreated,
       <div className="polls-header">
         <h4>
           <i className="fas fa-chart-bar" />
-          {lang === 'ht' ? 'Sondaj' : 'Polls'} ({polls?.length || 0})
+          {lang === 'ht' ? 'Sondaj' : inlineText(lang, 'Polls')} ({polls?.length || 0})
         </h4>
         {!showCreator && (
           <button className="poll-btn poll-btn-add" onClick={() => setShowCreator(true)}>
-            <i className="fas fa-plus" /> {lang === 'ht' ? 'Ajoute Sondaj' : 'Add Poll'}
+            <i className="fas fa-plus" /> {lang === 'ht' ? 'Ajoute Sondaj' : inlineText(lang, 'Add Poll')}
           </button>
         )}
       </div>
@@ -439,7 +440,7 @@ export function DiscussionPolls({ polls, community, discussionId, onPollCreated,
       ) : !showCreator ? (
         <div className="polls-empty">
           <i className="fas fa-chart-bar" />
-          <p>{lang === 'ht' ? 'Pa gen sondaj' : 'No polls yet'}</p>
+          <p>{lang === 'ht' ? 'Pa gen sondaj' : inlineText(lang, 'No polls yet')}</p>
         </div>
       ) : null}
     </div>
@@ -459,7 +460,7 @@ export function PollPreview({ poll, lang = 'en' }) {
         <i className="fas fa-chart-bar" /> {poll.question}
       </div>
       <div className="poll-preview-stats">
-        <span>{totalVotes} {lang === 'ht' ? 'vòt' : 'votes'}</span>
+        <span>{totalVotes} {lang === 'ht' ? 'vòt' : inlineText(lang, 'votes')}</span>
         <span className="poll-preview-winner">
           <i className="fas fa-trophy" /> {topOption.text}
         </span>

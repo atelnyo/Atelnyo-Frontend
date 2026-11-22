@@ -13,6 +13,7 @@
  */
 import React from 'react';
 import QuestionBase from './QuestionBase';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function MultipleAnswerBlock({ block, lang = 'en', reportComplete }) {
   const content = block.content || block;
@@ -25,7 +26,7 @@ export default function MultipleAnswerBlock({ block, lang = 'en', reportComplete
   return (
     <div>
       <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: 8, fontStyle: 'italic' }}>
-        {lang === 'ht' ? '⚠️ Chwazi TOUT repons ki korek.' : '⚠️ Select ALL correct answers.'}
+        {lang === 'ht' ? '⚠️ Chwazi TOUT repons ki korek.' : inlineText(lang, '⚠️ Select ALL correct answers.')}
       </div>
       <QuestionBase
         question={content.question || content.title || ''}
@@ -34,8 +35,8 @@ export default function MultipleAnswerBlock({ block, lang = 'en', reportComplete
         correctIds={correctIndices.map(String)}
         multiple={true}
         feedback={{
-          correct: lang === 'ht' ? 'Bravo! Tout repons yo korek.' : 'Well done! All correct answers selected.',
-          incorrect: lang === 'ht' ? 'Pa egzakteman. Sonje: chwazi tout repons ki korek.' : 'Not quite. Remember: select all correct answers.',
+          correct: lang === 'ht' ? 'Bravo! Tout repons yo korek.' : inlineText(lang, 'Well done! All correct answers selected.'),
+          incorrect: lang === 'ht' ? 'Pa egzakteman. Sonje: chwazi tout repons ki korek.' : inlineText(lang, 'Not quite. Remember: select all correct answers.'),
           explanation: content.explanation,
         }}
         required={content.required !== false}

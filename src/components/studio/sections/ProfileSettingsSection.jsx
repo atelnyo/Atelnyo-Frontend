@@ -28,6 +28,7 @@ import {
 } from '../../profile/profileTemplates';
 import { getUserIdentity } from '../../../utils/userIdentity';
 import styles from './sections.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 // ─── Available sections ──────────────────────────────────────────────
 const ALL_SECTIONS = [
@@ -134,7 +135,7 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
       setPortfolios(Array.isArray(portsRes.value?.data?.results || portsRes.value?.data)
         ? (portsRes.value?.data?.results || portsRes.value?.data) : []);
     } catch {
-      showToast?.(isHt ? 'Erè nan chaje paramèt' : 'Error loading settings', 'exclamation-triangle');
+      showToast?.(isHt ? 'Erè nan chaje paramèt' : inlineText(lang, 'Error loading settings'), 'exclamation-triangle');
     } finally {
       setLoading(false);
     }
@@ -293,9 +294,9 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
       payload[field] = value || null;
       await creatorProfileHealthService.pin(payload);
       setFeaturedPins(prev => ({ ...prev, [field]: value || null }));
-      showToast?.(isHt ? 'Ansekle aktyalize!' : 'Pin updated!', 'check-circle');
+      showToast?.(isHt ? 'Ansekle aktyalize!' : inlineText(lang, 'Pin updated!'), 'check-circle');
     } catch {
-      showToast?.(isHt ? 'Erè' : 'Error', 'exclamation-triangle');
+      showToast?.(isHt ? 'Erè' : inlineText(lang, 'Error'), 'exclamation-triangle');
     } finally {
       setPinSubmitting(false);
     }
@@ -308,7 +309,7 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
       showToast?.(
         isHt
           ? 'Chwazi Retabli oswa Efase bouyon an anvan w sove.'
-          : 'Recover or discard the local draft before saving.',
+          : inlineText(lang, 'Recover or discard the local draft before saving.'),
         'exclamation-triangle',
       );
       return;
@@ -333,7 +334,7 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
       setSavedSubscriptionPrice(normalizedPrice);
       if (draftKey) { removeFormDraft(draftKey).catch(() => {}); }
       showToast?.(
-        isHt ? 'Anviwònman pwofil sove!' : 'Profile settings saved!',
+        isHt ? 'Anviwònman pwofil sove!' : inlineText(lang, 'Profile settings saved!'),
         'check-circle',
       );
     } catch {
@@ -341,8 +342,8 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
         configSaved
           ? (isHt
             ? 'Layout sove, men pri abònman an pa t kapab mete ajou. Eseye ankò.'
-            : 'Layout saved, but the subscription price could not be updated. Try again.')
-          : (isHt ? 'Erè nan sove anviwònman yo.' : 'Error saving settings.'),
+            : inlineText(lang, 'Layout saved, but the subscription price could not be updated. Try again.'))
+          : (isHt ? 'Erè nan sove anviwònman yo.' : inlineText(lang, 'Error saving settings.')),
         'exclamation-triangle',
       );
     } finally {
@@ -398,7 +399,7 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
             showToast?.(
               isHt
                 ? 'Espas stokaj la plen — bouyon lokal la pa ka sovgade. Sove manyèlman pou pa pèdi travay ou.'
-                : 'Local storage is full — the safety draft cannot be saved. Save manually so you do not lose work.',
+                : inlineText(lang, 'Local storage is full — the safety draft cannot be saved. Save manually so you do not lose work.'),
               'exclamation-triangle',
             );
           }
@@ -462,7 +463,7 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
     setSubscriptionPrice(recoverDraft.subscriptionPrice || '');
     setRecoverDraft(null);
     showToast?.(
-      isHt ? 'Bouyon retabli — verifye epi sove.' : 'Draft recovered — review and save.',
+      isHt ? 'Bouyon retabli — verifye epi sove.' : inlineText(lang, 'Draft recovered — review and save.'),
       'check-circle',
     );
   };
@@ -471,7 +472,7 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
     if (draftKey) { removeFormDraft(draftKey).catch(() => {}); }
     setRecoverDraft(null);
     showToast?.(
-      isHt ? 'Bouyon efase. Anviwònman yo rete jan yo te sove a.' : 'Draft discarded. Settings are back to the saved version.',
+      isHt ? 'Bouyon efase. Anviwònman yo rete jan yo te sove a.' : inlineText(lang, 'Draft discarded. Settings are back to the saved version.'),
       'check-circle',
     );
   };
@@ -482,7 +483,7 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
     <div className={styles.section}>
       <SectionHeader
         icon="fa-sliders-h"
-        title={isHt ? 'Anviwònman Pwofil' : 'Profile Settings'}
+        title={isHt ? 'Anviwònman Pwofil' : inlineText(lang, 'Profile Settings')}
         lang={lang}
         help={{
           ht: 'Kontwole fason pwofil piblik ou a parèt: lòd seksyon yo, vizibilite chak seksyon, ak kontni an vedèt (kou, pwodwi, pòtfolyo). Tout chanjman aplike sèlman lè w klike "Sove tout".',
@@ -490,7 +491,7 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
         }}
         tip={isHt
           ? 'Trennen seksyon yo pou reòganize, oswa sèvi ak bouton flèch yo. Ctrl/⌘+S sove chanjman yo.'
-          : 'Drag sections to reorder, or use the arrow buttons. Ctrl/⌘+S saves your changes.'}
+          : inlineText(lang, 'Drag sections to reorder, or use the arrow buttons. Ctrl/⌘+S saves your changes.')}
         action={
           <div className={styles.headerActions}>
             <button
@@ -501,8 +502,8 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
             >
               <i className={`fas ${saving ? 'fa-spinner fa-spin' : 'fa-save'}`} aria-hidden="true" />
               {saving
-                ? (isHt ? 'Ap sove...' : 'Saving...')
-                : (isHt ? 'Sove tout' : 'Save All')}
+                ? (isHt ? 'Ap sove...' : inlineText(lang, 'Saving...'))
+                : (isHt ? 'Sove tout' : inlineText(lang, 'Save All'))}
             </button>
           </div>
         }
@@ -523,12 +524,12 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
       <section style={{ marginBottom: 32 }}>
         <h3 className={styles.sectionSubtitle}>
           <i className="fas fa-layer-group" aria-hidden="true" />
-          {isHt ? 'Modèl Layout' : 'Layout Templates'}
+          {isHt ? 'Modèl Layout' : inlineText(lang, 'Layout Templates')}
         </h3>
         <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', marginBottom: 16 }}>
           {isHt
             ? 'Kòmanse ak yon layout ki bati pou objektif ou. Yon modèl chanje sèlman lòd ak vizibilite seksyon yo — kontni ou rete menm jan an.'
-            : 'Start from a layout built for your goal. A template only changes section order and visibility — your content stays exactly the same.'}
+            : inlineText(lang, 'Start from a layout built for your goal. A template only changes section order and visibility — your content stays exactly the same.')}
         </p>
         <div className={styles.profileTemplateStrip}>
           {PROFILE_TEMPLATES.map((template) => {
@@ -556,8 +557,8 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
         </div>
         <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', marginTop: 10 }}>
           {templateId
-            ? (isHt ? 'Modèl aktyèl la aplikè.' : 'The current layout matches a template.')
-            : (isHt ? 'Layout pèsonalize — chwazi yon modèl oswa kontinye manyèlman.' : 'Custom layout — pick a template or keep customizing manually.')}
+            ? (isHt ? 'Modèl aktyèl la aplikè.' : inlineText(lang, 'The current layout matches a template.'))
+            : (isHt ? 'Layout pèsonalize — chwazi yon modèl oswa kontinye manyèlman.' : inlineText(lang, 'Custom layout — pick a template or keep customizing manually.'))}
         </p>
       </section>
 
@@ -565,12 +566,12 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
       <section style={{ marginBottom: 32 }}>
         <h3 className={styles.sectionSubtitle}>
           <i className="fas fa-arrows-alt-v" aria-hidden="true" />
-          {isHt ? 'Lòd Seksyon' : 'Section Order'}
+          {isHt ? 'Lòd Seksyon' : inlineText(lang, 'Section Order')}
         </h3>
         <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', marginBottom: 16 }}>
           {isHt
             ? 'Reòganize lòd seksyon yo sou pwofil piblik ou a — trennen ak grip la, oswa sèvi ak bouton flèch yo. Seksyon yo parèt nan lòd sa a.'
-            : 'Reorder how sections appear on your public profile — drag with the grip, or use the arrow buttons.'}
+            : inlineText(lang, 'Reorder how sections appear on your public profile — drag with the grip, or use the arrow buttons.')}
         </p>
         <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
           {reorderAnnouncement}
@@ -578,7 +579,7 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
         <div
           ref={listRef}
           role="list"
-          aria-label={isHt ? 'Lòd seksyon pwofil' : 'Profile section order'}
+          aria-label={isHt ? 'Lòd seksyon pwofil' : inlineText(lang, 'Profile section order')}
           className={classNames(styles.list, dragIndex != null && styles.listDragging)}
         >
           {sectionOrder.map((sectionId, index) => {
@@ -601,8 +602,8 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
                   onPointerDown={(e) => beginDrag(e, index)}
                   role="button"
                   tabIndex={0}
-                  aria-label={isHt ? 'Trennen pou reòganize' : 'Drag to reorder'}
-                  title={isHt ? 'Trennen pou reòganize' : 'Drag to reorder'}
+                  aria-label={isHt ? 'Trennen pou reòganize' : inlineText(lang, 'Drag to reorder')}
+                  title={isHt ? 'Trennen pou reòganize' : inlineText(lang, 'Drag to reorder')}
                   onKeyDown={(e) => {
                     // Keyboard alternative: ArrowUp / ArrowDown moves the row.
                     if (e.key === 'ArrowUp') { e.preventDefault(); moveSection(index, -1); }
@@ -620,8 +621,8 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
                   </div>
                   <div className={styles.listMeta}>
                     {isVisible
-                      ? (isHt ? 'Vizib' : 'Visible')
-                      : (isHt ? 'Kache' : 'Hidden')}
+                      ? (isHt ? 'Vizib' : inlineText(lang, 'Visible'))
+                      : (isHt ? 'Kache' : inlineText(lang, 'Hidden'))}
                     {' · '}#{index + 1}
                   </div>
                 </div>
@@ -631,7 +632,7 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
                     className="studio-btn-sm"
                     onClick={() => moveSection(index, -1)}
                     disabled={index === 0}
-                    title={isHt ? 'Moute' : 'Move up'}
+                    title={isHt ? 'Moute' : inlineText(lang, 'Move up')}
                     aria-label={isHt ? `Monte ${section.labelHt}` : `Move ${section.label} up`}
                     style={{ padding: '4px 8px', fontSize: '0.75rem' }}
                   >
@@ -642,7 +643,7 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
                     className="studio-btn-sm"
                     onClick={() => moveSection(index, 1)}
                     disabled={index === sectionOrder.length - 1}
-                    title={isHt ? 'Desann' : 'Move down'}
+                    title={isHt ? 'Desann' : inlineText(lang, 'Move down')}
                     aria-label={isHt ? `Desann ${section.labelHt}` : `Move ${section.label} down`}
                     style={{ padding: '4px 8px', fontSize: '0.75rem' }}
                   >
@@ -659,12 +660,12 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
       <section style={{ marginBottom: 32 }}>
         <h3 className={styles.sectionSubtitle}>
           <i className="fas fa-eye" aria-hidden="true" />
-          {isHt ? 'Vizibilite Seksyon' : 'Section Visibility'}
+          {isHt ? 'Vizibilite Seksyon' : inlineText(lang, 'Section Visibility')}
         </h3>
         <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', marginBottom: 16 }}>
           {isHt
             ? 'Chwazi ki seksyon ki vizib sou pwofil piblik ou a. Seksyon kache yo pa parèt ditou.'
-            : 'Toggle which sections are visible on your public profile. Hidden sections won\'t appear at all.'}
+            : inlineText(lang, 'Toggle which sections are visible on your public profile. Hidden sections won\'t appear at all.')}
         </p>
         {ALL_SECTIONS.map((section) => {
           const isVisible = sectionVisibility[section.id] !== false;
@@ -711,18 +712,18 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
       <section style={{ marginBottom: 32 }}>
         <h3 className={styles.sectionSubtitle}>
           <i className="fas fa-thumbtack" aria-hidden="true" />
-          {isHt ? 'Kontni An Vedèt' : 'Featured Content'}
+          {isHt ? 'Kontni An Vedèt' : inlineText(lang, 'Featured Content')}
         </h3>
         <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', marginBottom: 16 }}>
           {isHt
             ? 'Chwazi ki kontni ki parèt an premye sou pwofil ou a.'
-            : 'Choose which content is highlighted on your profile.'}
+            : inlineText(lang, 'Choose which content is highlighted on your profile.')}
         </p>
 
         {/* Featured Course */}
         <div className={styles.fieldGroup} style={{ marginBottom: 16 }}>
           <span className={styles.fieldLabel}>
-            <i className="fas fa-graduation-cap" /> {isHt ? 'Kou An Vedèt' : 'Featured Course'}
+            <i className="fas fa-graduation-cap" /> {isHt ? 'Kou An Vedèt' : inlineText(lang, 'Featured Course')}
           </span>
           <select
             className={styles.formSelect}
@@ -730,7 +731,7 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
             onChange={(e) => handlePin('featured_course_id', e.target.value ? parseInt(e.target.value, 10) : null)}
             disabled={pinSubmitting}
           >
-            <option value="">{isHt ? '— Okenn —' : '— None —'}</option>
+            <option value="">{isHt ? '— Okenn —' : inlineText(lang, '— None —')}</option>
             {courses.map((c) => (
               <option key={c.id} value={c.id}>{c.title}</option>
             ))}
@@ -740,7 +741,7 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
         {/* Featured Product */}
         <div className={styles.fieldGroup} style={{ marginBottom: 16 }}>
           <span className={styles.fieldLabel}>
-            <i className="fas fa-cube" /> {isHt ? 'Pwodwi An Vedèt' : 'Featured Product'}
+            <i className="fas fa-cube" /> {isHt ? 'Pwodwi An Vedèt' : inlineText(lang, 'Featured Product')}
           </span>
           <select
             className={styles.formSelect}
@@ -748,7 +749,7 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
             onChange={(e) => handlePin('featured_product_id', e.target.value ? parseInt(e.target.value, 10) : null)}
             disabled={pinSubmitting}
           >
-            <option value="">{isHt ? '— Okenn —' : '— None —'}</option>
+            <option value="">{isHt ? '— Okenn —' : inlineText(lang, '— None —')}</option>
             {products.map((p) => (
               <option key={p.id} value={p.id}>{p.title}</option>
             ))}
@@ -758,7 +759,7 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
         {/* Featured Portfolio */}
         <div className={styles.fieldGroup} style={{ marginBottom: 16 }}>
           <span className={styles.fieldLabel}>
-            <i className="fas fa-briefcase" /> {isHt ? 'Pòtfolyo An Vedèt' : 'Featured Portfolio'}
+            <i className="fas fa-briefcase" /> {isHt ? 'Pòtfolyo An Vedèt' : inlineText(lang, 'Featured Portfolio')}
           </span>
           <select
             className={styles.formSelect}
@@ -766,7 +767,7 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
             onChange={(e) => handlePin('featured_portfolio_id', e.target.value ? parseInt(e.target.value, 10) : null)}
             disabled={pinSubmitting}
           >
-            <option value="">{isHt ? '— Okenn —' : '— None —'}</option>
+            <option value="">{isHt ? '— Okenn —' : inlineText(lang, '— None —')}</option>
             {portfolios.map((p) => (
               <option key={p.id} value={p.id}>{p.title}</option>
             ))}
@@ -777,23 +778,23 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
       {/* ─── Paid Subscriptions (Phase 60) ──────────────────────── */}
       <section style={{ marginBottom: 32 }}>
         <h3 className={styles.sectionTitle}>
-          <i className="fas fa-star" /> {isHt ? 'Abònman Peyan' : 'Paid Subscriptions'}
+          <i className="fas fa-star" /> {isHt ? 'Abònman Peyan' : inlineText(lang, 'Paid Subscriptions')}
         </h3>
         <p className={styles.fieldHint} style={{ marginBottom: 14 }}>
           {isHt
             ? 'Mete yon pri chak mwa pou kontni "Abonè Sèlman" ou. Lè pri a vid oswa 0, abònman yo fèmen epi bouton Abòne a kache sou pwofil ou.'
-            : 'Set a monthly price for your "Subscribers Only" content. Empty or 0 disables subscriptions and hides the Subscribe button on your profile.'}
+            : inlineText(lang, 'Set a monthly price for your "Subscribers Only" content. Empty or 0 disables subscriptions and hides the Subscribe button on your profile.')}
         </p>
         <div className={styles.fieldGroup} style={{ marginBottom: 16, maxWidth: 280 }}>
           <span className={styles.fieldLabel}>
-            <i className="fas fa-dollar-sign" /> {isHt ? 'Pri chak mwa (USD)' : 'Monthly price (USD)'}
+            <i className="fas fa-dollar-sign" /> {isHt ? 'Pri chak mwa (USD)' : inlineText(lang, 'Monthly price (USD)')}
           </span>
           <input
             className={styles.formInput}
             type="number"
             min="0"
             step="0.50"
-            placeholder={isHt ? 'Egz. 5.00 (vid = fèmen)' : 'e.g. 5.00 (empty = off)'}
+            placeholder={isHt ? 'Egz. 5.00 (vid = fèmen)' : inlineText(lang, 'e.g. 5.00 (empty = off)')}
             value={subscriptionPrice}
             onChange={(e) => setSubscriptionPrice(e.target.value)}
           />
@@ -814,7 +815,7 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
             <i className="fas fa-circle-exclamation" aria-hidden="true" />{' '}
             {isHt
               ? 'Gen chanjman ki poko sove. Klike sou "Sove tout" pou aplike yo.'
-              : 'You have unsaved changes. Click "Save All" to apply them.'}
+              : inlineText(lang, 'You have unsaved changes. Click "Save All" to apply them.')}
           </span>
           <div className={styles.profileEditorDirtyActions}>
             <button
@@ -823,7 +824,7 @@ export default function ProfileSettingsSection({ lang, showToast, user }) {
               onClick={handleDiscardChanges}
               disabled={saving}
             >
-              {isHt ? 'Jete chanjman' : 'Discard'}
+              {isHt ? 'Jete chanjman' : inlineText(lang, 'Discard')}
             </button>
           </div>
         </div>

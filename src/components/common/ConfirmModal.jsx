@@ -41,6 +41,7 @@
  */
 import React, { useEffect, useCallback, useRef, useId } from 'react';
 import { pushFocusReturn, popFocusReturn, getFirstFocusable } from '../../accessibility/utils/focus';
+import { inlineText } from '../../utils/inlineI18n';
 
 const VARIANT_STYLES = {
   danger:  { icon: 'fa-exclamation-triangle', color: '#dc2626', bg: 'rgba(239,68,68,0.08)' },
@@ -207,7 +208,7 @@ export default function ConfirmModal({
               minHeight: '44px',
             }}
           >
-            {cancelText || (lang === 'ht' ? 'Annile' : 'Cancel')}
+            {cancelText || (lang === 'ht' ? 'Annile' : inlineText(lang, 'Cancel'))}
           </button>
           <button
             type="button"
@@ -224,7 +225,7 @@ export default function ConfirmModal({
             }}
           >
             {loading ? (
-              <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {lang === 'ht' ? 'Ap trete...' : 'Processing...'}</>
+              <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {lang === 'ht' ? 'Ap trete...' : inlineText(lang, 'Processing...')}</>
             ) : (
               confirmText || (lang === 'ht'
                 ? variant === 'danger' ? 'Wi, efase' : 'Wi, konfime'

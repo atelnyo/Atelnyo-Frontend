@@ -88,6 +88,7 @@ import {
   ContractsSection,
   LevelsBadgesSection,
 } from './sections';
+import { inlineText } from '../../utils/inlineI18n';
 // Heavy sections — lazy-loaded to split the CreatorStudio chunk
 const PublicProfileSection = React.lazy(() => import('./sections/PublicProfileSection'));
 const AffiliateSection = React.lazy(() => import('./sections/AffiliateSection'));
@@ -395,7 +396,7 @@ export default function CreatorStudio({ lang = 'en', showToast, user }) {
         <div className={styles.redirectGuardContent}>
           <i className="fas fa-spinner fa-spin" />
           <p>
-            {lang === 'ht' ? 'Redireksyon...' : 'Redirecting...'}
+            {lang === 'ht' ? 'Redireksyon...' : inlineText(lang, 'Redirecting...')}
           </p>
         </div>
       </div>
@@ -590,8 +591,8 @@ export default function CreatorStudio({ lang = 'en', showToast, user }) {
                 type="button"
                 className={styles.sidebarAvatarEdit}
                 onClick={() => setShowAvatarModal(true)}
-                aria-label={lang === 'ht' ? 'Chanje foto profile' : 'Change profile photo'}
-                title={lang === 'ht' ? 'Chanje foto' : 'Change photo'}
+                aria-label={lang === 'ht' ? 'Chanje foto profile' : inlineText(lang, 'Change profile photo')}
+                title={lang === 'ht' ? 'Chanje foto' : inlineText(lang, 'Change photo')}
               >
                 <i className="fas fa-camera" aria-hidden="true" />
               </button>
@@ -642,10 +643,10 @@ export default function CreatorStudio({ lang = 'en', showToast, user }) {
               type="button"
               className={styles.logoutBtn}
               onClick={handleLogout}
-              title={lang === 'ht' ? 'Dekonekte' : 'Sign Out'}
+              title={lang === 'ht' ? 'Dekonekte' : inlineText(lang, 'Sign Out')}
             >
               <i className="fas fa-sign-out-alt" aria-hidden="true" />
-              <span>{lang === 'ht' ? 'Dekonekte' : 'Sign Out'}</span>
+              <span>{lang === 'ht' ? 'Dekonekte' : inlineText(lang, 'Sign Out')}</span>
             </button>
             <div className={styles.versionInfo}>Atelnyo · Creator Studio</div>
           </div>

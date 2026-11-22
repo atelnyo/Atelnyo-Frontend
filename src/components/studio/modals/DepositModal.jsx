@@ -25,6 +25,7 @@ import { paymentConfigService, walletTopupService } from '../../../services/api'
 import { loadPayPalScript } from '../../CheckoutModal';
 import { StudioModal, FormField, LoadingOverlay } from './shared';
 import styles from './modals.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 // Fallback limits when the config endpoint hasn't loaded yet (they are
 // admin-configurable server-side via /api/admin/platform-config/).
@@ -44,7 +45,7 @@ export default function DepositModal({ onClose, onSuccess, lang, showToast }) {
   const buttonContainerRef = useRef(null);
   const processingRef = useRef(false);
 
-  const t = (en, ht) => (isHt ? (ht || en) : en);
+  const t = (en, ht) => (isHt ? (ht || en) : inlineText(lang, en));
 
   // ── Boot PayPal config once ──────────────────────────────────────────
   const boot = useCallback(async () => {

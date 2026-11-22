@@ -5,6 +5,7 @@
  * dènye tcheke, tan repons, klasmant sante.
  */
 import React from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 const STATUS_DETAILS = {
   healthy:  { icon: 'fa-check-circle', color: '#10b981', labelEn: 'Healthy', labelHt: 'An sante', descEn: 'Media is accessible and responding normally.', descHt: 'Medya a aksesib epi li reponn nòmalman.' },
@@ -37,7 +38,7 @@ export default function MediaStatus({ status, lastChecked, responseTimeMs, lang 
             {lastChecked && (
               <span className="media-status-meta-item">
                 <i className="fas fa-clock" />
-                {isHt ? 'Dènye tcheke' : 'Last checked'}: {new Date(lastChecked).toLocaleString()}
+                {isHt ? 'Dènye tcheke' : inlineText(lang, 'Last checked')}: {new Date(lastChecked).toLocaleString()}
               </span>
             )}
             {responseTimeMs != null && (

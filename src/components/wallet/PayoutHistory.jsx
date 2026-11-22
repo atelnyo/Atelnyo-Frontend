@@ -9,6 +9,7 @@
  *   - Empty state when no payouts
  */
 import React from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 function fmtCurrency(n) {
   if (n == null) return '—';
@@ -49,7 +50,7 @@ export default function PayoutHistory({
       <div className="wlt-payout-hist-header">
         <h3 className="wlt-payout-hist-title">
           <i className="fas fa-arrow-up" />
-          {isHt ? 'Istwa Retrè' : 'Withdrawal History'}
+          {isHt ? 'Istwa Retrè' : inlineText(lang, 'Withdrawal History')}
         </h3>
         {onRefresh && (
           <button type="button" className="wlt-refresh-btn" onClick={onRefresh} disabled={loading}>
@@ -60,15 +61,15 @@ export default function PayoutHistory({
 
       {/* Loading */}
       {loading && (
-        <div className="wlt-loading"><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap chaje...' : 'Loading...'}</div>
+        <div className="wlt-loading"><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap chaje...' : inlineText(lang, 'Loading...')}</div>
       )}
 
       {/* Empty state */}
       {!loading && (!payouts || payouts.length === 0) && (
         <div className="wlt-empty">
           <i className="fas fa-arrow-up" />
-          <h4>{isHt ? 'Pa gen retrè' : 'No withdrawals yet'}</h4>
-          <p>{isHt ? 'Lè ou fè yon retrè, li pral parèt isit la.' : 'When you make a withdrawal, it will appear here.'}</p>
+          <h4>{isHt ? 'Pa gen retrè' : inlineText(lang, 'No withdrawals yet')}</h4>
+          <p>{isHt ? 'Lè ou fè yon retrè, li pral parèt isit la.' : inlineText(lang, 'When you make a withdrawal, it will appear here.')}</p>
         </div>
       )}
 
@@ -98,12 +99,12 @@ export default function PayoutHistory({
                   <div className="wlt-payout-entry-details">
                     {payout.fee > 0 && (
                       <span className="wlt-payout-detail">
-                        {isHt ? 'Frè' : 'Fee'}: {fmtCurrency(payout.fee)}
+                        {isHt ? 'Frè' : inlineText(lang, 'Fee')}: {fmtCurrency(payout.fee)}
                       </span>
                     )}
                     {payout.net_amount > 0 && (
                       <span className="wlt-payout-detail">
-                        {isHt ? 'Nèt' : 'Net'}: {fmtCurrency(payout.net_amount)}
+                        {isHt ? 'Nèt' : inlineText(lang, 'Net')}: {fmtCurrency(payout.net_amount)}
                       </span>
                     )}
                     <span className="wlt-payout-detail">
@@ -111,12 +112,12 @@ export default function PayoutHistory({
                     </span>
                     {payout.method && (
                       <span className="wlt-payout-detail">
-                        {isHt ? 'Metòd' : 'Method'}: {payout.method}
+                        {isHt ? 'Metòd' : inlineText(lang, 'Method')}: {payout.method}
                       </span>
                     )}
                     {payout.processed_at && (
                       <span className="wlt-payout-detail">
-                        {isHt ? 'Trete' : 'Processed'}: {fmtDateTime(payout.processed_at)}
+                        {isHt ? 'Trete' : inlineText(lang, 'Processed')}: {fmtDateTime(payout.processed_at)}
                       </span>
                     )}
                   </div>

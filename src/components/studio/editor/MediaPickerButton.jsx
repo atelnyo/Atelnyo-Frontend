@@ -14,6 +14,7 @@
 import React, { useState, useCallback } from 'react';
 import MediaPicker from '../../media/MediaPicker';
 import styles from './editor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const TYPE_ICONS = {
   image: 'fa-image',
@@ -42,7 +43,7 @@ export default function MediaPickerButton({
   }, []);
 
   const icon = TYPE_ICONS[mediaType] || TYPE_ICONS.all;
-  const btnLabel = label || (isHt ? 'Bibliyotèk' : 'Library');
+  const btnLabel = label || (isHt ? 'Bibliyotèk' : inlineText(lang, 'Library'));
 
   return (
     <>
@@ -50,7 +51,7 @@ export default function MediaPickerButton({
         type="button"
         className={styles.mediaPickerBtn}
         onClick={() => setOpen(true)}
-        title={isHt ? 'Chwazi medya nan bibliyotèk la' : 'Pick from media library'}
+        title={isHt ? 'Chwazi medya nan bibliyotèk la' : inlineText(lang, 'Pick from media library')}
       >
         <i className={`fas ${icon}`} aria-hidden="true" />
         <span>{btnLabel}</span>

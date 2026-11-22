@@ -13,6 +13,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { courseService } from '../../../services/api';
 import styles from '../sections/sections.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 // Map field names to human-readable labels
 const FIELD_LABELS = {
@@ -51,7 +52,7 @@ function formatTimestamp(iso) {
 
 export default function VersionHistoryModal({ courseId, lang = 'en', onClose, onRestored }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
   const labels = FIELD_LABELS[lang] || FIELD_LABELS.en;
 
   const [versions, setVersions] = useState([]);

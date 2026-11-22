@@ -18,6 +18,7 @@
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { activityFeedService } from '../services/api';
+import { inlineText } from '../utils/inlineI18n';
 
 // ─── Event type → icon + label mapping ─────────────────────────────────
 
@@ -395,10 +396,10 @@ function getEventNotice(typeOrEvent, lang) {
     ? 'profile_request_rejected'
     : type;
   return (
-    NOTIFICATION_NOTICES[noticeType]?.[lang === 'ht' ? 'ht' : 'en']
+    NOTIFICATION_NOTICES[noticeType]?.[lang === 'ht' ? 'ht' : inlineText(lang, 'en')]
     || (lang === 'ht'
       ? 'Pa gen paj ki lyen ak notifikasyon sa a.'
-      : 'No page is linked to this notification.')
+      : inlineText(lang, 'No page is linked to this notification.'))
   );
 }
 
@@ -441,7 +442,7 @@ function formatTimeAgo(isoString, lang) {
   const now = Date.now();
   const then = new Date(isoString).getTime();
   const diffSec = Math.max(0, Math.floor((now - then) / 1000));
-  if (diffSec < 60) return lang === 'ht' ? 'kounye a' : 'just now';
+  if (diffSec < 60) return lang === 'ht' ? 'kounye a' : inlineText(lang, 'just now');
   const diffMin = Math.floor(diffSec / 60);
   if (diffMin < 60) return lang === 'ht' ? `${diffMin}m de sa` : `${diffMin}m ago`;
   const diffHr = Math.floor(diffMin / 60);
@@ -475,10 +476,10 @@ function FeedEmpty({ lang, t }) {
   return (
     <div className="act-feed-empty" role="status">
       <i className="fas fa-bell-slash" aria-hidden="true" />
-      <h3>{t?.activity_feed_empty_title || (lang === 'ht' ? 'Pa gen aktivite toujou' : 'No activity yet')}</h3>
+      <h3>{t?.activity_feed_empty_title || (lang === 'ht' ? 'Pa gen aktivite toujou' : inlineText(lang, 'No activity yet'))}</h3>
       <p>{t?.activity_feed_empty_hint || (lang === 'ht'
         ? 'Aktivite w yo ap parèt isit la lè w kòmanse itilize platfòm nan.'
-        : 'Your activity will appear here as you use the platform.')}
+        : inlineText(lang, 'Your activity will appear here as you use the platform.'))}
       </p>
     </div>
   );
@@ -608,7 +609,7 @@ function EventRow({ event, lang, t, onMarkRead, onNavigate, onShowNotice, onAcce
                 else onAcceptRequest?.(event);
               }}
             >
-              <i className="fas fa-check" aria-hidden="true" /> {lang === 'ht' ? 'Aksepte' : 'Accept'}
+              <i className="fas fa-check" aria-hidden="true" /> {lang === 'ht' ? 'Aksepte' : inlineText(lang, 'Accept')}
             </button>
             <button
               type="button"
@@ -619,7 +620,7 @@ function EventRow({ event, lang, t, onMarkRead, onNavigate, onShowNotice, onAcce
                 else onRejectRequest?.(event);
               }}
             >
-              <i className="fas fa-xmark" aria-hidden="true" /> {lang === 'ht' ? 'Rejte' : 'Reject'}
+              <i className="fas fa-xmark" aria-hidden="true" /> {lang === 'ht' ? 'Rejte' : inlineText(lang, 'Reject')}
             </button>
           </div>
         )}
@@ -627,8 +628,8 @@ function EventRow({ event, lang, t, onMarkRead, onNavigate, onShowNotice, onAcce
           <div className={`notif-proposal-status notif-proposal-status--${event.status}`}>
             <i className={`fas ${event.status === 'accepted' ? 'fa-check-circle' : 'fa-xmark-circle'}`} aria-hidden="true" />
             {event.status === 'accepted'
-              ? (lang === 'ht' ? 'Aksepte' : 'Accepted')
-              : (lang === 'ht' ? 'Rejte' : 'Rejected')}
+              ? (lang === 'ht' ? 'Aksepte' : inlineText(lang, 'Accepted'))
+              : (lang === 'ht' ? 'Rejte' : inlineText(lang, 'Rejected'))}
           </div>
         )}
       </div>
@@ -795,14 +796,14 @@ export function ActivityTimeline({ lang = 'en', userId, t, onMarkRead, onMarkAll
     return (
       <div className="act-feed-empty" role="status">
         <i className="fas fa-circle-exclamation" aria-hidden="true" />
-        <h3>{t?.activity_feed_load_error || (lang === 'ht' ? 'Pa kapab chaje aktivite' : 'Could not load activity')}</h3>
+        <h3>{t?.activity_feed_load_error || (lang === 'ht' ? 'Pa kapab chaje aktivite' : inlineText(lang, 'Could not load activity'))}</h3>
         <p>{error}</p>
         <button
           type="button"
           className="notif-page-mark-all"
           onClick={() => setRetryKey((k) => k + 1)}
         >
-          <i className="fas fa-rotate-right" aria-hidden="true" /> {lang === 'ht' ? 'Eseye ankò' : 'Retry'}
+          <i className="fas fa-rotate-right" aria-hidden="true" /> {lang === 'ht' ? 'Eseye ankò' : inlineText(lang, 'Retry')}
         </button>
       </div>
     );
@@ -825,9 +826,9 @@ export function ActivityTimeline({ lang = 'en', userId, t, onMarkRead, onMarkAll
       {showMarkAllRead && (
         <div className="act-feed-tabs" role="tablist">
           {[
-            ['all', lang === 'ht' ? 'Tout' : 'All'],
-            ['unread', lang === 'ht' ? 'Nouvo' : 'Unread'],
-            ['requests', lang === 'ht' ? 'Aksyon' : 'Actions'],
+            ['all', lang === 'ht' ? 'Tout' : inlineText(lang, 'All')],
+            ['unread', lang === 'ht' ? 'Nouvo' : inlineText(lang, 'Unread')],
+            ['requests', lang === 'ht' ? 'Aksyon' : inlineText(lang, 'Actions')],
           ].map(([key, label]) => (
             <button
               key={key}
@@ -854,7 +855,7 @@ export function ActivityTimeline({ lang = 'en', userId, t, onMarkRead, onMarkAll
         <div className="notif-page-toolbar">
           <span className="notif-page-unread-count">
             <i className="fas fa-circle" aria-hidden="true" style={{ fontSize: 8, color: 'var(--color-primary, #d81b60)', marginRight: 6 }} />
-            {unreadCount} {lang === 'ht' ? 'nouvo' : 'new'}
+            {unreadCount} {lang === 'ht' ? 'nouvo' : inlineText(lang, 'new')}
           </span>
           <div className="notif-page-toolbar-actions">
             {unreadCommunityCount > 0 && (
@@ -863,7 +864,7 @@ export function ActivityTimeline({ lang = 'en', userId, t, onMarkRead, onMarkAll
                 className="notif-page-mark-all"
                 onClick={markCommunityRead}
               >
-                <i className="fas fa-users" aria-hidden="true" /> {lang === 'ht' ? 'Make notifikasyon kominote yo' : 'Mark community read'}
+                <i className="fas fa-users" aria-hidden="true" /> {lang === 'ht' ? 'Make notifikasyon kominote yo' : inlineText(lang, 'Mark community read')}
               </button>
             )}
             <button
@@ -871,7 +872,7 @@ export function ActivityTimeline({ lang = 'en', userId, t, onMarkRead, onMarkAll
               className="notif-page-mark-all"
               onClick={markAllRead}
             >
-              <i className="fas fa-check-double" aria-hidden="true" /> {lang === 'ht' ? 'Make tout nouvo yo' : 'Mark all read'}
+              <i className="fas fa-check-double" aria-hidden="true" /> {lang === 'ht' ? 'Make tout nouvo yo' : inlineText(lang, 'Mark all read')}
             </button>
           </div>
         </div>
@@ -898,8 +899,8 @@ export function ActivityTimeline({ lang = 'en', userId, t, onMarkRead, onMarkAll
           <i className={`fas ${filter === 'unread' ? 'fa-mug-hot' : 'fa-list-check'}`} aria-hidden="true" />
           <p>
             {filter === 'unread'
-              ? (lang === 'ht' ? 'Pa gen notifikasyon nouvo — ou li tout! ☕' : 'No unread notifications — all caught up!')
-              : (lang === 'ht' ? 'Pa gen demann k ap tann repons.' : 'No pending requests.')}
+              ? (lang === 'ht' ? 'Pa gen notifikasyon nouvo — ou li tout! ☕' : inlineText(lang, 'No unread notifications — all caught up!'))
+              : (lang === 'ht' ? 'Pa gen demann k ap tann repons.' : inlineText(lang, 'No pending requests.'))}
           </p>
         </div>
       )}
@@ -910,7 +911,7 @@ export function ActivityTimeline({ lang = 'en', userId, t, onMarkRead, onMarkAll
           {loadingMore && (
             <div className="act-feed-loading-more">
               <i className="fas fa-spinner fa-spin" />
-              <span>{t?.activity_feed_loading_more || (lang === 'ht' ? 'Ap chaje...' : 'Loading...')}</span>
+              <span>{t?.activity_feed_loading_more || (lang === 'ht' ? 'Ap chaje...' : inlineText(lang, 'Loading...'))}</span>
             </div>
           )}
         </div>

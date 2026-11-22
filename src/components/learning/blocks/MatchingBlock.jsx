@@ -10,6 +10,7 @@
  * On completion, reports score as (correct / total) * 100.
  */
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import { inlineText } from '../../../utils/inlineI18n';
 
 function shuffleArray(arr) {
   const a = [...arr];
@@ -88,13 +89,13 @@ export default function MatchingBlock({
     <div className="ls-block ls-block--matching" data-block-type="matching">
       {/* Header */}
       <div className="ls-block-header">
-        <span className="ls-block-badge">🔗 {isHt ? 'Asosye' : 'Matching'}</span>
-        <h3 className="ls-block-title">{block.title || (isHt ? 'Asosye bagay yo' : 'Match the pairs')}</h3>
+        <span className="ls-block-badge">🔗 {isHt ? 'Asosye' : inlineText(lang, 'Matching')}</span>
+        <h3 className="ls-block-title">{block.title || (isHt ? 'Asosye bagay yo' : inlineText(lang, 'Match the pairs'))}</h3>
       </div>
 
       {/* Progress */}
       <div style={{ marginBottom: 16, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-        {Object.keys(matched).length} / {pairs.length} {isHt ? 'pare' : 'matched'}
+        {Object.keys(matched).length} / {pairs.length} {isHt ? 'pare' : inlineText(lang, 'matched')}
       </div>
 
       {/* Matching grid */}
@@ -105,7 +106,7 @@ export default function MatchingBlock({
         {/* Left column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 4 }}>
-            {isHt ? 'Gòch' : 'Left'}
+            {isHt ? 'Gòch' : inlineText(lang, 'Left')}
           </div>
           {pairs.map((pair, i) => {
             const matchedRight = matched[i];
@@ -157,7 +158,7 @@ export default function MatchingBlock({
         {/* Right column (shuffled) */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 4 }}>
-            {isHt ? 'Dwat' : 'Right'}
+            {isHt ? 'Dwat' : inlineText(lang, 'Right')}
           </div>
           {rightOrder.map((originalIdx) => {
             const pair = pairs[originalIdx];
@@ -198,7 +199,7 @@ export default function MatchingBlock({
           background: 'rgba(239,68,68,0.1)', color: '#ef4444',
           fontSize: '0.85rem', fontWeight: 600,
         }}>
-          {isHt ? '❌ Pa bon — eseye ankò!' : '❌ Not a match — try again!'}
+          {isHt ? '❌ Pa bon — eseye ankò!' : inlineText(lang, '❌ Not a match — try again!')}
         </div>
       )}
 
@@ -209,7 +210,7 @@ export default function MatchingBlock({
           background: 'rgba(16,185,129,0.1)', color: '#10b981',
           fontSize: '0.95rem', fontWeight: 600, textAlign: 'center',
         }}>
-          🎉 {isHt ? 'Brav! Ou fini tout asosyasyon yo!' : 'Well done! You matched all pairs!'}
+          🎉 {isHt ? 'Brav! Ou fini tout asosyasyon yo!' : inlineText(lang, 'Well done! You matched all pairs!')}
         </div>
       )}
     </div>

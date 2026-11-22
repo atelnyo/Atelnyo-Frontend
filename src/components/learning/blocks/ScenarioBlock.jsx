@@ -14,6 +14,7 @@
  *   - startScenario: ID of first scenario
  */
 import React, { useCallback, useMemo, useState } from 'react';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function ScenarioBlock({ block, lang = 'en', onComplete }) {
   const isHt = lang === 'ht';
@@ -82,7 +83,7 @@ export default function ScenarioBlock({ block, lang = 'en', onComplete }) {
       margin: '16px 0',
     }}>
       <h3 style={{ margin: '0 0 12px', color: '#e65100' }}>
-        🎭 {block?.title || (isHt ? 'Senaryo' : 'Scenario')}
+        🎭 {block?.title || (isHt ? 'Senaryo' : inlineText(lang, 'Scenario'))}
       </h3>
       {situation && (
         <div style={{
@@ -126,7 +127,7 @@ export default function ScenarioBlock({ block, lang = 'en', onComplete }) {
           border: '1px solid #ff9800',
           borderRadius: '8px', padding: '12px', marginBottom: '16px',
         }}>
-          <strong>💡 {isHt ? 'Konsekan:' : 'Consequence:'}</strong> {consequence}
+          <strong>💡 {isHt ? 'Konsekan:' : inlineText(lang, 'Consequence:')}</strong> {consequence}
         </div>
       )}
       {submitted && !isBranching && explanation && (
@@ -144,7 +145,7 @@ export default function ScenarioBlock({ block, lang = 'en', onComplete }) {
           color: '#fff', border: 'none', borderRadius: '8px', cursor: selected === null ? 'not-allowed' : 'pointer',
           fontWeight: '600',
         }}>
-          📤 {isHt ? 'Voye' : 'Submit'}
+          📤 {isHt ? 'Voye' : inlineText(lang, 'Submit')}
         </button>
       )}
     </div>

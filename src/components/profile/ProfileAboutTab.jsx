@@ -11,19 +11,20 @@
 
 import React from 'react';
 import { languageEntry, ensureHttpUrl } from './profileUtils';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function AboutTab({ profile, lang, t, isOwner }) {
   if (!profile) return null;
   const labels = {
     bio: t.profile_bio_label || 'Biography',
-    experience: t.profile_experience_label || (lang === 'ht' ? 'Eksperyans' : 'Experience'),
-    education: t.profile_education_label || (lang === 'ht' ? 'Edikasyon' : 'Education'),
+    experience: t.profile_experience_label || (lang === 'ht' ? 'Eksperyans' : inlineText(lang, 'Experience')),
+    education: t.profile_education_label || (lang === 'ht' ? 'Edikasyon' : inlineText(lang, 'Education')),
     skills: t.profile_skills_label || 'Skills',
     languages: t.profile_languages_label || 'Languages',
     website: t.profile_website_label || 'Website',
     social: t.profile_social_label || 'Social Links',
     contact: t.profile_contact_label || 'Contact',
-    phone: t.profile_phone_label || (lang === 'ht' ? 'Telefòn' : 'Phone'),
+    phone: t.profile_phone_label || (lang === 'ht' ? 'Telefòn' : inlineText(lang, 'Phone')),
     availability: t.profile_availability_label || 'Availability',
   };
   return (

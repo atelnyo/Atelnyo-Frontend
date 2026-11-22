@@ -8,6 +8,7 @@ import api, { broadcastLogout, authService } from '../../../services/api';
 import { executeRecaptcha, getRecaptchaV3Key, cacheRecaptchaKeys } from '../../../services/recaptcha';
 import { StudioModal, FormField, LoadingOverlay } from './shared';
 import styles from './modals.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function PasswordChangeModal({ onClose, lang, showToast }) {
   const isHt = lang === 'ht';
@@ -39,11 +40,11 @@ export default function PasswordChangeModal({ onClose, lang, showToast }) {
   const handleSubmit = useCallback(async (e) => {
     e?.preventDefault?.();
     if (!form.current_password || !form.new_password) {
-      setError(isHt ? 'Antre modpas aktyèl ak nouvo modpas la.' : 'Enter current and new password.');
+      setError(isHt ? 'Antre modpas aktyèl ak nouvo modpas la.' : inlineText(lang, 'Enter current and new password.'));
       return;
     }
     if (form.new_password !== form.confirm_password) {
-      setError(isHt ? 'Nouvo modpas yo pa menm.' : 'New passwords do not match.');
+      setError(isHt ? 'Nouvo modpas yo pa menm.' : inlineText(lang, 'New passwords do not match.'));
       return;
     }
     setLoading(true);
@@ -64,7 +65,7 @@ export default function PasswordChangeModal({ onClose, lang, showToast }) {
       } catch (_) {}
       broadcastLogout('password_changed');
       showToast?.(
-        isHt ? 'Modpas la chanje. Ou dekonekte.' : 'Password changed. Logged out.',
+        isHt ? 'Modpas la chanje. Ou dekonekte.' : inlineText(lang, 'Password changed. Logged out.'),
         'key',
       );
       onClose?.();
@@ -72,7 +73,7 @@ export default function PasswordChangeModal({ onClose, lang, showToast }) {
       const detail = err?.response?.data?.error
         || err?.response?.data?.detail
         || err?.message
-        || (isHt ? 'Pa t kapab chanje modpas la.' : 'Could not change password.');
+        || (isHt ? 'Pa t kapab chanje modpas la.' : inlineText(lang, 'Could not change password.'));
       setError(detail);
       showToast?.(detail, 'circle-exclamation');
     } finally {
@@ -84,13 +85,13 @@ export default function PasswordChangeModal({ onClose, lang, showToast }) {
     <StudioModal
       onClose={onClose}
       icon="fa-key"
-      title={isHt ? 'Chanje Modpas' : 'Change Password'}
-      subtitle={isHt ? 'Verifye modpas aktyèl la anvan ou mete yon nouvo.' : 'Confirm your current password before setting a new one.'}
+      title={isHt ? 'Chanje Modpas' : inlineText(lang, 'Change Password')}
+      subtitle={isHt ? 'Verifye modpas aktyèl la anvan ou mete yon nouvo.' : inlineText(lang, 'Confirm your current password before setting a new one.')}
     >
       <form onSubmit={handleSubmit} className={styles.form}>
         {error && <div className={styles.apiError} role="alert">{error}</div>}
         <LoadingOverlay loading={loading}>
-          <FormField label={isHt ? 'Modpas aktyèl' : 'Current password'} required>
+          <FormField label={isHt ? 'Modpas aktyèl' : inlineText(lang, 'Current password')} required>
             <input
               className={styles.input}
               type="password"
@@ -99,7 +100,7 @@ export default function PasswordChangeModal({ onClose, lang, showToast }) {
               autoComplete="current-password"
             />
           </FormField>
-          <FormField label={isHt ? 'Nouvo modpas' : 'New password'} required>
+          <FormField label={isHt ? 'Nouvo modpas' : inlineText(lang, 'New password')} required>
             <input
               className={styles.input}
               type="password"
@@ -108,7 +109,7 @@ export default function PasswordChangeModal({ onClose, lang, showToast }) {
               autoComplete="new-password"
             />
           </FormField>
-          <FormField label={isHt ? 'Konfime nouvo modpas' : 'Confirm new password'} required>
+          <FormField label={isHt ? 'Konfime nouvo modpas' : inlineText(lang, 'Confirm new password')} required>
             <input
               className={styles.input}
               type="password"
@@ -120,13 +121,13 @@ export default function PasswordChangeModal({ onClose, lang, showToast }) {
         </LoadingOverlay>
         <div className={styles.actions}>
           <button type="button" className="btn-secondary" onClick={onClose} disabled={loading}>
-            {isHt ? 'Anile' : 'Cancel'}
+            {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
           </button>
           <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? (
-              <><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap sove...' : 'Saving...'}</>
+              <><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap sove...' : inlineText(lang, 'Saving...')}</>
             ) : (
-              <><i className="fas fa-key" /> {isHt ? 'Chanje Modpas' : 'Change Password'}</>
+              <><i className="fas fa-key" /> {isHt ? 'Chanje Modpas' : inlineText(lang, 'Change Password')}</>
             )}
           </button>
         </div>

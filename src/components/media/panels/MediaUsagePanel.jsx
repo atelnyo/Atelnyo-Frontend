@@ -7,6 +7,7 @@
  */
 import React from 'react';
 import LinkedContent from '../LinkedContent';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function MediaUsagePanel({ media, lang = 'en' }) {
   const item = media || {};
@@ -25,7 +26,7 @@ export default function MediaUsagePanel({ media, lang = 'en' }) {
         <div className="media-panel-summary" aria-live="polite">
           <span className="media-panel-summary-item">
             <i className="fas fa-link" />
-            <strong>{usages.length}</strong> {isHt ? 'referans' : 'references'}
+            <strong>{usages.length}</strong> {isHt ? 'referans' : inlineText(lang, 'references')}
           </span>
           {Object.entries(moduleCounts).slice(0, 4).map(([mod, n]) => (
             <span key={mod} className="media-panel-summary-chip">

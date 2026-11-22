@@ -14,6 +14,7 @@
  */
 import React, { useState } from 'react';
 import { businessProfileService } from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function BusinessCreateModal({ lang = 'en', t, showToast, onClose, onCreated }) {
   const isHt = lang === 'ht';
@@ -25,7 +26,7 @@ export default function BusinessCreateModal({ lang = 'en', t, showToast, onClose
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name.trim()) {
-      showToast?.(t?.business_name_required || (isHt ? 'Non biznis la obligatwa.' : 'Business name is required.'), 'circle-exclamation');
+      showToast?.(t?.business_name_required || (isHt ? 'Non biznis la obligatwa.' : inlineText(lang, 'Business name is required.')), 'circle-exclamation');
       return;
     }
     setSaving(true);
@@ -37,13 +38,13 @@ export default function BusinessCreateModal({ lang = 'en', t, showToast, onClose
         description: form.description.trim(),
       });
       const profile = res?.data?.data ?? res?.data ?? null;
-      showToast?.(t?.business_created || (isHt ? '✅ Business Profile kreye!' : '✅ Business Profile created!'), 'check-circle');
+      showToast?.(t?.business_created || (isHt ? '✅ Business Profile kreye!' : inlineText(lang, '✅ Business Profile created!')), 'check-circle');
       onCreated?.(profile);
     } catch (err) {
       const detail = err?.response?.data?.detail
         || err?.response?.data?.name?.[0]
         || err?.response?.data?.owner?.[0]
-        || (isHt ? 'Pa t kapab kreye Business Profile la.' : 'Could not create the business profile.');
+        || (isHt ? 'Pa t kapab kreye Business Profile la.' : inlineText(lang, 'Could not create the business profile.'));
       showToast?.(detail, 'circle-exclamation');
     } finally {
       setSaving(false);
@@ -56,15 +57,15 @@ export default function BusinessCreateModal({ lang = 'en', t, showToast, onClose
         className="biz-modal"
         role="dialog"
         aria-modal="true"
-        aria-label={t?.business_create || (isHt ? 'Kreye yon Business Profile' : 'Create a Business Profile')}
+        aria-label={t?.business_create || (isHt ? 'Kreye yon Business Profile' : inlineText(lang, 'Create a Business Profile'))}
         onClick={(ev) => ev.stopPropagation()}
       >
         <div className="biz-modal-header">
           <h3 className="biz-modal-title">
             <i className="fas fa-briefcase" aria-hidden="true" />
-            {t?.business_create || (isHt ? 'Kreye yon Business Profile' : 'Create a Business Profile')}
+            {t?.business_create || (isHt ? 'Kreye yon Business Profile' : inlineText(lang, 'Create a Business Profile'))}
           </h3>
-          <button type="button" className="biz-modal-close" onClick={onClose} aria-label={isHt ? 'Fèmen' : 'Close'}>
+          <button type="button" className="biz-modal-close" onClick={onClose} aria-label={isHt ? 'Fèmen' : inlineText(lang, 'Close')}>
             <i className="fas fa-xmark" aria-hidden="true" />
           </button>
         </div>
@@ -72,13 +73,13 @@ export default function BusinessCreateModal({ lang = 'en', t, showToast, onClose
         <p className="biz-modal-hint">
           {t?.business_creator_vs || (isHt
             ? '"Sa kisa biznis mwen opere" — se pa "kiyès mwen ye kòm kreatè."'
-            : '"What business I operate" — not "who I am as a creator."')}
+            : inlineText(lang, '"What business I operate" — not "who I am as a creator."'))}
         </p>
 
         <form onSubmit={handleSubmit} className="biz-form" data-testid="business-create-form">
           <div className="biz-form-group">
             <label className="biz-form-label">
-              {t?.business_field_name || (isHt ? 'Non biznis / brand' : 'Business / brand name')} *
+              {t?.business_field_name || (isHt ? 'Non biznis / brand' : inlineText(lang, 'Business / brand name'))} *
             </label>
             <input
               type="text"
@@ -86,7 +87,7 @@ export default function BusinessCreateModal({ lang = 'en', t, showToast, onClose
               value={form.name}
               onChange={(e) => set('name', e.target.value)}
               maxLength={120}
-              placeholder={isHt ? 'Egzanp: Kreyatif Studio' : 'e.g. Creative Studio'}
+              placeholder={isHt ? 'Egzanp: Kreyatif Studio' : inlineText(lang, 'e.g. Creative Studio')}
               data-testid="business-create-name"
               required
               autoFocus
@@ -95,7 +96,7 @@ export default function BusinessCreateModal({ lang = 'en', t, showToast, onClose
 
           <div className="biz-form-group">
             <label className="biz-form-label">
-              {t?.business_field_tagline || (isHt ? 'Slogan / tagline' : 'Tagline')}
+              {t?.business_field_tagline || (isHt ? 'Slogan / tagline' : inlineText(lang, 'Tagline'))}
             </label>
             <input
               type="text"
@@ -103,13 +104,13 @@ export default function BusinessCreateModal({ lang = 'en', t, showToast, onClose
               value={form.tagline}
               onChange={(e) => set('tagline', e.target.value)}
               maxLength={200}
-              placeholder={isHt ? 'Yon fraz ki dekri biznis ou' : 'One line that describes your business'}
+              placeholder={isHt ? 'Yon fraz ki dekri biznis ou' : inlineText(lang, 'One line that describes your business')}
             />
           </div>
 
           <div className="biz-form-group">
             <label className="biz-form-label">
-              {t?.business_field_logo || (isHt ? 'Logo (URL)' : 'Logo (URL)')}
+              {t?.business_field_logo || (isHt ? 'Logo (URL)' : inlineText(lang, 'Logo (URL)'))}
             </label>
             <input
               type="url"
@@ -126,7 +127,7 @@ export default function BusinessCreateModal({ lang = 'en', t, showToast, onClose
 
           <div className="biz-form-group">
             <label className="biz-form-label">
-              {t?.business_field_description || (isHt ? 'Deskripsyon biznis' : 'Business description')}
+              {t?.business_field_description || (isHt ? 'Deskripsyon biznis' : inlineText(lang, 'Business description'))}
             </label>
             <textarea
               className="biz-form-input"
@@ -134,13 +135,13 @@ export default function BusinessCreateModal({ lang = 'en', t, showToast, onClose
               value={form.description}
               onChange={(e) => set('description', e.target.value)}
               maxLength={3000}
-              placeholder={isHt ? 'Kisa biznis ou fè, pou kisa li egziste...' : 'What your business does, why it exists...'}
+              placeholder={isHt ? 'Kisa biznis ou fè, pou kisa li egziste...' : inlineText(lang, 'What your business does, why it exists...')}
             />
           </div>
 
           <div className="biz-form-actions">
             <button type="button" className="biz-btn biz-btn-ghost" onClick={onClose} disabled={saving}>
-              {isHt ? 'Anile' : 'Cancel'}
+              {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
             </button>
             <button
               type="submit"
@@ -150,8 +151,8 @@ export default function BusinessCreateModal({ lang = 'en', t, showToast, onClose
             >
               <i className={`fas ${saving ? 'fa-spinner fa-spin' : 'fa-rocket'}`} aria-hidden="true" />
               {saving
-                ? (isHt ? 'Ap kreye...' : 'Creating...')
-                : (t?.business_create || (isHt ? 'Kreye Business Profile' : 'Create Business Profile'))}
+                ? (isHt ? 'Ap kreye...' : inlineText(lang, 'Creating...'))
+                : (t?.business_create || (isHt ? 'Kreye Business Profile' : inlineText(lang, 'Create Business Profile')))}
             </button>
           </div>
         </form>

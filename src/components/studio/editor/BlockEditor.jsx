@@ -28,6 +28,7 @@ import QuizInlineEditor from './QuizInlineEditor';
 import BlockPreview from './BlockPreview';
 import useKeyboardShortcuts from '../../../hooks/useKeyboardShortcuts';
 import styles from './editor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 // ─── Block field schemas per type ───────────────────────────────────
 const BLOCK_FIELDS = {
@@ -229,7 +230,7 @@ function newBlock(type) {
 
 export default function BlockEditor({ blocks = [], onBlocksChange, lang = 'en', courseId, moduleIndex }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
 
   const [showPicker, setShowPicker] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -500,7 +501,7 @@ export default function BlockEditor({ blocks = [], onBlocksChange, lang = 'en', 
               {previewMode ? (
                 <>
                   <div className={styles.blockPreviewBadge}>
-                    <i className="fas fa-eye" aria-hidden="true" /> {isHt ? 'Gade kòman elèv yo wè l' : 'Preview how learners see this'}
+                    <i className="fas fa-eye" aria-hidden="true" /> {isHt ? 'Gade kòman elèv yo wè l' : inlineText(lang, 'Preview how learners see this')}
                   </div>
                   <BlockPreview
                     block={draft}
@@ -510,7 +511,7 @@ export default function BlockEditor({ blocks = [], onBlocksChange, lang = 'en', 
                   />
                   <p className={styles.blockPreviewNote}>
                     <i className="fas fa-info-circle" aria-hidden="true" />
-                    {isHt ? 'Sa a se yon apèsi. Chanjman pa sove yo pa parèt isit la.' : 'This is a preview. Unsaved changes do not appear here.'}
+                    {isHt ? 'Sa a se yon apèsi. Chanjman pa sove yo pa parèt isit la.' : inlineText(lang, 'This is a preview. Unsaved changes do not appear here.')}
                   </p>
                 </>
               ) : (

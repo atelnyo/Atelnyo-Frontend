@@ -17,6 +17,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { businessInquiryService } from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 function classNames(...parts) {
   return parts.filter(Boolean).join(' ');
@@ -74,16 +75,16 @@ export default function BusinessInquiriesSection({ lang = 'en', t = {}, showToas
   }, [profile?.slug]);
 
   const statusLabel = (status) => ({
-    new: t?.business_inquiry_status_new || (isHt ? 'Nouvo' : 'New'),
-    replied: t?.business_inquiry_status_replied || (isHt ? 'Reponn' : 'Replied'),
-    closed: t?.business_inquiry_status_closed || (isHt ? 'Fèmen' : 'Closed'),
+    new: t?.business_inquiry_status_new || (isHt ? 'Nouvo' : inlineText(lang, 'New')),
+    replied: t?.business_inquiry_status_replied || (isHt ? 'Reponn' : inlineText(lang, 'Replied')),
+    closed: t?.business_inquiry_status_closed || (isHt ? 'Fèmen' : inlineText(lang, 'Closed')),
   }[status] || status);
 
   const topicLabel = (topic) => ({
-    general: t?.business_inquiry_topic_general || (isHt ? 'Jeneral' : 'General'),
-    product: t?.business_inquiry_topic_product || (isHt ? 'Pwodui' : 'Product'),
-    order: t?.business_inquiry_topic_order || (isHt ? 'Kòmand' : 'Order'),
-    support: t?.business_inquiry_topic_support || (isHt ? 'Sipò' : 'Support'),
+    general: t?.business_inquiry_topic_general || (isHt ? 'Jeneral' : inlineText(lang, 'General')),
+    product: t?.business_inquiry_topic_product || (isHt ? 'Pwodui' : inlineText(lang, 'Product')),
+    order: t?.business_inquiry_topic_order || (isHt ? 'Kòmand' : inlineText(lang, 'Order')),
+    support: t?.business_inquiry_topic_support || (isHt ? 'Sipò' : inlineText(lang, 'Support')),
   }[topic] || topic);
 
   const filtered = statusFilter === 'all'
@@ -96,7 +97,7 @@ export default function BusinessInquiriesSection({ lang = 'en', t = {}, showToas
     try {
       await businessInquiryService.reply(inq.id, replyText.trim());
       showToast?.(
-        t?.business_inquiry_reply_sent || (isHt ? '✅ Repons lan voye!' : '✅ Reply sent!'),
+        t?.business_inquiry_reply_sent || (isHt ? '✅ Repons lan voye!' : inlineText(lang, '✅ Reply sent!')),
         'check-circle',
       );
       setReplyingId(null);
@@ -104,7 +105,7 @@ export default function BusinessInquiriesSection({ lang = 'en', t = {}, showToas
       refresh();
     } catch (err) {
       showToast?.(
-        err?.response?.data?.detail || (isHt ? 'Pa t ka voye repons lan.' : 'Could not send the reply.'),
+        err?.response?.data?.detail || (isHt ? 'Pa t ka voye repons lan.' : inlineText(lang, 'Could not send the reply.')),
         'circle-exclamation',
       );
     } finally {
@@ -118,12 +119,12 @@ export default function BusinessInquiriesSection({ lang = 'en', t = {}, showToas
     try {
       await businessInquiryService.close(inq.id);
       showToast?.(
-        t?.business_inquiry_closed || (isHt ? 'Fèmen ✓' : 'Closed ✓'),
+        t?.business_inquiry_closed || (isHt ? 'Fèmen ✓' : inlineText(lang, 'Closed ✓')),
         'check-circle',
       );
       refresh();
     } catch {
-      showToast?.(isHt ? 'Pa t ka fèmen.' : 'Could not close.', 'circle-exclamation');
+      showToast?.(isHt ? 'Pa t ka fèmen.' : inlineText(lang, 'Could not close.'), 'circle-exclamation');
     } finally {
       setBusy(false);
     }
@@ -134,17 +135,17 @@ export default function BusinessInquiriesSection({ lang = 'en', t = {}, showToas
       <div className="biz-ws-section-head">
         <h3 className="biz-ws-section-title">
           <i className="fas fa-envelope" aria-hidden="true" />
-          {t?.business_section_inquiries || (isHt ? 'Mesaj kliyan' : 'Customer messages')}
+          {t?.business_section_inquiries || (isHt ? 'Mesaj kliyan' : inlineText(lang, 'Customer messages'))}
         </h3>
         <p className="biz-ws-section-hint">
           {t?.business_inquiries_hint || (isHt
             ? 'Kesyon kliyan yo sou biznis ou a — reponn pou fèmen bouk la.'
-            : 'Questions customers ask your business — reply to close the loop.')}
+            : inlineText(lang, 'Questions customers ask your business — reply to close the loop.'))}
         </p>
       </div>
 
       {/* ─── Status filter chips ─────────────────────────────── */}
-      <div className="biz-inquiry-filters" role="group" aria-label={isHt ? 'Filtre pa estati' : 'Filter by status'}>
+      <div className="biz-inquiry-filters" role="group" aria-label={isHt ? 'Filtre pa estati' : inlineText(lang, 'Filter by status')}>
         {(['all', 'new', 'replied', 'closed']).map((f) => (
           <button
             type="button"
@@ -154,7 +155,7 @@ export default function BusinessInquiriesSection({ lang = 'en', t = {}, showToas
             data-testid={`business-inquiry-filter-${f}`}
           >
             {f === 'all'
-              ? (isHt ? 'Tout' : 'All')
+              ? (isHt ? 'Tout' : inlineText(lang, 'All'))
               : statusLabel(f)}
           </button>
         ))}
@@ -167,10 +168,10 @@ export default function BusinessInquiriesSection({ lang = 'en', t = {}, showToas
       ) : filtered.length === 0 ? (
         <div className="biz-hub-empty" data-testid="business-inquiries-empty">
           <i className="fas fa-envelope-open-text" aria-hidden="true" />
-          <h3>{t?.business_inquiry_empty || (isHt ? 'Pa gen demann ankò' : 'No inquiries yet')}</h3>
+          <h3>{t?.business_inquiry_empty || (isHt ? 'Pa gen demann ankò' : inlineText(lang, 'No inquiries yet'))}</h3>
           <p>{t?.business_inquiry_empty_hint || (isHt
             ? 'Lè yon kliyan poze yon kesyon sou paj piblik biznis ou a, li ap parèt isit la.'
-            : 'When a customer asks a question on your public business page, it will appear here.')}</p>
+            : inlineText(lang, 'When a customer asks a question on your public business page, it will appear here.'))}</p>
         </div>
       ) : (
         <div className="biz-inquiry-list">
@@ -196,7 +197,7 @@ export default function BusinessInquiriesSection({ lang = 'en', t = {}, showToas
               <p className="biz-inquiry-meta">
                 <i className="fas fa-user" aria-hidden="true" /> @{inq.customer_username}
                 {' · '}
-                {new Date(inq.created_at).toLocaleDateString(isHt ? 'fr-HT' : 'en-US', {
+                {new Date(inq.created_at).toLocaleDateString(isHt ? 'fr-HT' : inlineText(lang, 'en-US'), {
                   year: 'numeric', month: 'short', day: 'numeric',
                 })}
               </p>
@@ -210,7 +211,7 @@ export default function BusinessInquiriesSection({ lang = 'en', t = {}, showToas
               {inq.reply && (
                 <div className="biz-inquiry-reply-box">
                   <p className="biz-inquiry-reply-label">
-                    <i className="fas fa-reply" aria-hidden="true" /> {isHt ? 'Repons ou:' : 'Your reply:'}
+                    <i className="fas fa-reply" aria-hidden="true" /> {isHt ? 'Repons ou:' : inlineText(lang, 'Your reply:')}
                   </p>
                   <p className="biz-inquiry-reply-text">{inq.reply}</p>
                 </div>
@@ -229,7 +230,7 @@ export default function BusinessInquiriesSection({ lang = 'en', t = {}, showToas
                           onChange={(e) => setReplyText(e.target.value)}
                           placeholder={t?.business_inquiry_reply_placeholder || (isHt
                             ? 'Ekri repons ou...'
-                            : 'Write your reply...')}
+                            : inlineText(lang, 'Write your reply...'))}
                           data-testid="business-inquiry-reply-input"
                         />
                         <div className="biz-inquiry-actions-row">
@@ -239,7 +240,7 @@ export default function BusinessInquiriesSection({ lang = 'en', t = {}, showToas
                             onClick={() => { setReplyingId(null); setReplyText(''); }}
                             disabled={busy}
                           >
-                            {isHt ? 'Anile' : 'Cancel'}
+                            {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
                           </button>
                           <button
                             type="button"
@@ -249,7 +250,7 @@ export default function BusinessInquiriesSection({ lang = 'en', t = {}, showToas
                             data-testid="business-inquiry-reply-send"
                           >
                             <i className={`fas ${busy ? 'fa-spinner fa-spin' : 'fa-paper-plane'}`} aria-hidden="true" />
-                            {t?.business_inquiry_send || (isHt ? 'Voye' : 'Send')}
+                            {t?.business_inquiry_send || (isHt ? 'Voye' : inlineText(lang, 'Send'))}
                           </button>
                         </div>
                       </>
@@ -262,7 +263,7 @@ export default function BusinessInquiriesSection({ lang = 'en', t = {}, showToas
                           data-testid="business-inquiry-reply-btn"
                         >
                           <i className="fas fa-reply" aria-hidden="true" />
-                          {t?.business_inquiry_reply || (isHt ? 'Reponn' : 'Reply')}
+                          {t?.business_inquiry_reply || (isHt ? 'Reponn' : inlineText(lang, 'Reply'))}
                         </button>
                         <button
                           type="button"
@@ -272,7 +273,7 @@ export default function BusinessInquiriesSection({ lang = 'en', t = {}, showToas
                           data-testid="business-inquiry-close-btn"
                         >
                           <i className="fas fa-xmark" aria-hidden="true" />
-                          {t?.business_inquiry_close || (isHt ? 'Fèmen' : 'Close')}
+                          {t?.business_inquiry_close || (isHt ? 'Fèmen' : inlineText(lang, 'Close'))}
                         </button>
                       </div>
                     )}

@@ -13,6 +13,7 @@
  * an interruption or when there's pending sync work.
  */
 import React, { useState } from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 /**
  * RecoveryBanner
@@ -35,7 +36,7 @@ export default function RecoveryBanner({ type, lang = 'en', onDismiss, onRetry }
       bg: 'var(--pr-color-green-500-bg, rgba(34,197,94,0.08))',
       text: lang === 'ht'
         ? 'Byenveni! Travay ou anvan an te restore.'
-        : 'Welcome back! Your previous work was restored.',
+        : inlineText(lang, 'Welcome back! Your previous work was restored.'),
     },
     sync_pending: {
       icon: 'fa-clock',
@@ -43,7 +44,7 @@ export default function RecoveryBanner({ type, lang = 'en', onDismiss, onRetry }
       bg: 'var(--pr-color-amber-500-bg, rgba(245,158,11,0.08))',
       text: lang === 'ht'
         ? 'Gen travay ki pa encore senkronize. Li pral sove otomatikman.'
-        : 'You have unsynchronized work. It will sync automatically.',
+        : inlineText(lang, 'You have unsynchronized work. It will sync automatically.'),
     },
     sync_failed: {
       icon: 'fa-exclamation-triangle',
@@ -51,7 +52,7 @@ export default function RecoveryBanner({ type, lang = 'en', onDismiss, onRetry }
       bg: 'var(--pr-color-red-500-bg, rgba(239,68,68,0.08))',
       text: lang === 'ht'
         ? 'Senkronizasyon an echwe. Travay ou a sove sou aparèy sa a.'
-        : 'Sync failed. Your work is saved on this device.',
+        : inlineText(lang, 'Sync failed. Your work is saved on this device.'),
     },
     offline: {
       icon: 'fa-wifi',
@@ -59,7 +60,7 @@ export default function RecoveryBanner({ type, lang = 'en', onDismiss, onRetry }
       bg: 'var(--pr-color-blue-500-bg, rgba(59,130,246,0.08))',
       text: lang === 'ht'
         ? 'Ou pa konekte. Travay ou a pral sove sou aparèy sa a.'
-        : 'You\'re offline. Supported work will be saved on this device.',
+        : inlineText(lang, 'You\'re offline. Supported work will be saved on this device.'),
     },
     storage_full: {
       icon: 'fa-hdd',
@@ -67,7 +68,7 @@ export default function RecoveryBanner({ type, lang = 'en', onDismiss, onRetry }
       bg: 'var(--pr-color-red-500-bg, rgba(239,68,68,0.08))',
       text: lang === 'ht'
         ? 'Espas depo a plen. Eseye efase dosye oswa aplikasyon pou fè plas.'
-        : 'Storage is full. Try removing files or apps to free space.',
+        : inlineText(lang, 'Storage is full. Try removing files or apps to free space.'),
     },
   };
 
@@ -112,12 +113,12 @@ export default function RecoveryBanner({ type, lang = 'en', onDismiss, onRetry }
             cursor: 'pointer',
           }}
         >
-          {lang === 'ht' ? 'Eseye ankò' : 'Retry'}
+          {lang === 'ht' ? 'Eseye ankò' : inlineText(lang, 'Retry')}
         </button>
       )}
       <button
         onClick={handleDismiss}
-        aria-label={lang === 'ht' ? 'Fèmen' : 'Dismiss'}
+        aria-label={lang === 'ht' ? 'Fèmen' : inlineText(lang, 'Dismiss')}
         style={{
           background: 'none',
           border: 'none',

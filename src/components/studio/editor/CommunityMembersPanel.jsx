@@ -21,6 +21,7 @@ import PanelSkeleton, {
   PanelEmpty, PanelError, PanelHeader,
 } from './communityPanelUI';
 import styles from './communityEditor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const asArray = (data) => (Array.isArray(data) ? data : (data?.results || []));
 const PAGE_SIZE = 30;
@@ -132,7 +133,7 @@ export default function CommunityMembersPanel({
       refetchBanned();
     } catch (err) {
       showToast?.(
-        err?.response?.data?.detail || (isHt ? 'Aksyon an refize.' : 'Action refused.'),
+        err?.response?.data?.detail || (isHt ? 'Aksyon an refize.' : inlineText(lang, 'Action refused.')),
         'circle-exclamation',
       );
     } finally {
@@ -149,7 +150,7 @@ export default function CommunityMembersPanel({
   const reject = (m) => act(
     m.user_id ?? m.user ?? m.id,
     () => communitiesService.rejectJoinRequest(slug, m.user_id ?? m.user ?? m.id),
-    isHt ? 'Demann nan rejte.' : 'Request rejected.',
+    isHt ? 'Demann nan rejte.' : inlineText(lang, 'Request rejected.'),
   );
 
   const promote = (m) => {
@@ -189,7 +190,7 @@ export default function CommunityMembersPanel({
   );
 
   const initialLoading = loading && !loadedOnce;
-  if (initialLoading) return <PanelSkeleton rows={4} label={isHt ? 'Ap chaje manm yo' : 'Loading members'} />;
+  if (initialLoading) return <PanelSkeleton rows={4} label={isHt ? 'Ap chaje manm yo' : inlineText(lang, 'Loading members')} />;
 
   const needle = query.trim().toLowerCase();
   const matches = (m) => !needle || (m.username || '').toLowerCase().includes(needle);
@@ -217,7 +218,7 @@ export default function CommunityMembersPanel({
               className={styles.iconBtn}
               onClick={() => promote(m)}
               disabled={Boolean(busyId) || m.role === 'admin'}
-              title={isHt ? 'Pwomote yon nivo' : 'Promote one rank'}
+              title={isHt ? 'Pwomote yon nivo' : inlineText(lang, 'Promote one rank')}
               aria-label={isHt ? `Pwomote ${m.username}` : `Promote ${m.username}`}
             >
               <i className="fas fa-arrow-up" aria-hidden="true" />
@@ -227,7 +228,7 @@ export default function CommunityMembersPanel({
               className={styles.iconBtn}
               onClick={() => demote(m)}
               disabled={Boolean(busyId) || m.role === 'member'}
-              title={isHt ? 'Desann yon nivo' : 'Demote one rank'}
+              title={isHt ? 'Desann yon nivo' : inlineText(lang, 'Demote one rank')}
               aria-label={isHt ? `Desann ${m.username}` : `Demote ${m.username}`}
             >
               <i className="fas fa-arrow-down" aria-hidden="true" />
@@ -241,7 +242,7 @@ export default function CommunityMembersPanel({
               className={styles.iconBtn}
               onClick={() => toggleMute(m)}
               disabled={Boolean(busyId)}
-              title={m.is_muted ? (isHt ? 'Retire silans la' : 'Unmute') : (isHt ? 'Silans 24 èdtan' : 'Mute 24h')}
+              title={m.is_muted ? (isHt ? 'Retire silans la' : inlineText(lang, 'Unmute')) : (isHt ? 'Silans 24 èdtan' : inlineText(lang, 'Mute 24h'))}
               aria-label={m.is_muted ? (isHt ? `Retire silans ${m.username}` : `Unmute ${m.username}`) : (isHt ? `Silans ${m.username}` : `Mute ${m.username}`)}
             >
               <i className={`fas ${m.is_muted ? 'fa-microphone' : 'fa-microphone-slash'}`} aria-hidden="true" />
@@ -252,7 +253,7 @@ export default function CommunityMembersPanel({
                 className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
                 onClick={() => setBanTarget(m)}
                 disabled={Boolean(busyId)}
-                title={isHt ? 'Bloke manm nan' : 'Ban member'}
+                title={isHt ? 'Bloke manm nan' : inlineText(lang, 'Ban member')}
                 aria-label={isHt ? `Bloke ${m.username}` : `Ban ${m.username}`}
               >
                 <i className="fas fa-ban" aria-hidden="true" />
@@ -277,7 +278,7 @@ export default function CommunityMembersPanel({
             <span className={`${styles.pill} ${m.role === 'owner' ? styles.pillOwner : styles.pillStaff}`}>
               {isHt ? role.ht : role.en}
             </span>
-            {m.is_muted && <span className={`${styles.pill} ${styles.pillMuted}`}>{isHt ? 'Silans' : 'Muted'}</span>}
+            {m.is_muted && <span className={`${styles.pill} ${styles.pillMuted}`}>{isHt ? 'Silans' : inlineText(lang, 'Muted')}</span>}
           </div>
           <div className={styles.rowMeta}>
             {m.joined_at ? (isHt ? `Manm depi ${fmtDate(m.joined_at)}` : `Member since ${fmtDate(m.joined_at)}`) : ''}
@@ -292,21 +293,21 @@ export default function CommunityMembersPanel({
     <div>
       <PanelHeader
         icon="fa-users-gear"
-        title={isHt ? 'Jesyon manm' : 'Member management'}
+        title={isHt ? 'Jesyon manm' : inlineText(lang, 'Member management')}
         count={typeof totalCount === 'number' ? totalCount : members.length}
         subtitle={isHt
           ? 'Pwomote yon nivo alafwa. Silans bloke pòs 24 èdtan; blokaj retire aksè nèt.'
-          : 'Promote one rank at a time. Mute blocks posting for 24h; a ban removes access entirely.'}
+          : inlineText(lang, 'Promote one rank at a time. Mute blocks posting for 24h; a ban removes access entirely.')}
         refreshing={loading && loadedOnce}
         onRefresh={refreshAll}
-        refreshLabel={isHt ? 'Rafrechi manm yo' : 'Refresh members'}
+        refreshLabel={isHt ? 'Rafrechi manm yo' : inlineText(lang, 'Refresh members')}
       />
 
       {error && (
         <PanelError
-          message={isHt ? 'Pat kapab chaje manm yo.' : 'Could not load the member roster.'}
+          message={isHt ? 'Pat kapab chaje manm yo.' : inlineText(lang, 'Could not load the member roster.')}
           onRetry={refreshAll}
-          retryLabel={isHt ? 'Reyese' : 'Retry'}
+          retryLabel={isHt ? 'Reyese' : inlineText(lang, 'Retry')}
         />
       )}
 
@@ -317,8 +318,8 @@ export default function CommunityMembersPanel({
           className={styles.searchInput}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder={isHt ? 'Chèche yon manm…' : 'Search members…'}
-          aria-label={isHt ? 'Chèche yon manm' : 'Search members'}
+          placeholder={isHt ? 'Chèche yon manm…' : inlineText(lang, 'Search members…')}
+          aria-label={isHt ? 'Chèche yon manm' : inlineText(lang, 'Search members')}
         />
       </div>
 
@@ -326,7 +327,7 @@ export default function CommunityMembersPanel({
         <>
           <h4 className={styles.sectionTitle}>
             <i className="fas fa-user-clock" aria-hidden="true" />
-            {isHt ? 'Demann antre' : 'Join requests'} ({visibleRequests.length})
+            {isHt ? 'Demann antre' : inlineText(lang, 'Join requests')} ({visibleRequests.length})
           </h4>
           <div className={styles.list}>
             {visibleRequests.map((m) => (
@@ -335,7 +336,7 @@ export default function CommunityMembersPanel({
                 <div className={styles.rowBody}>
                   <div className={styles.rowName}>@{m.username}</div>
                   <div className={styles.rowMeta}>
-                    {isHt ? 'Mande antre' : 'Requested to join'}
+                    {isHt ? 'Mande antre' : inlineText(lang, 'Requested to join')}
                     {m.joined_at ? ` · ${fmtDate(m.joined_at)}` : ''}
                   </div>
                 </div>
@@ -345,7 +346,7 @@ export default function CommunityMembersPanel({
                     className={`${styles.iconBtn} ${styles.iconBtnApprove}`}
                     onClick={() => approve(m)}
                     disabled={Boolean(busyId)}
-                    title={isHt ? 'Apwouve' : 'Approve'}
+                    title={isHt ? 'Apwouve' : inlineText(lang, 'Approve')}
                     aria-label={isHt ? `Apwouve ${m.username}` : `Approve ${m.username}`}
                   >
                     <i className="fas fa-check" aria-hidden="true" />
@@ -355,7 +356,7 @@ export default function CommunityMembersPanel({
                     className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
                     onClick={() => reject(m)}
                     disabled={Boolean(busyId)}
-                    title={isHt ? 'Rejte' : 'Reject'}
+                    title={isHt ? 'Rejte' : inlineText(lang, 'Reject')}
                     aria-label={isHt ? `Rejte ${m.username}` : `Reject ${m.username}`}
                   >
                     <i className="fas fa-xmark" aria-hidden="true" />
@@ -371,7 +372,7 @@ export default function CommunityMembersPanel({
         <>
           <h4 className={styles.sectionTitle}>
             <i className="fas fa-shield-halved" aria-hidden="true" />
-            {isHt ? 'Ekip la' : 'Staff'}
+            {isHt ? 'Ekip la' : inlineText(lang, 'Staff')}
           </h4>
           <div className={styles.list}>{staff.map(renderMemberRow)}</div>
         </>
@@ -379,18 +380,18 @@ export default function CommunityMembersPanel({
 
       <h4 className={styles.sectionTitle}>
         <i className="fas fa-user" aria-hidden="true" />
-        {isHt ? 'Manm' : 'Members'} ({plainMembers.length})
+        {isHt ? 'Manm' : inlineText(lang, 'Members')} ({plainMembers.length})
       </h4>
       {plainMembers.length === 0 ? (
         <>
           <PanelEmpty
             icon={needle ? 'fa-magnifying-glass' : 'fa-user-group'}
             title={needle
-              ? (isHt ? 'Pa gen manm ki koresponn.' : 'No members match your search.')
-              : (isHt ? 'Poko gen manm òdinè.' : 'No regular members yet.')}
+              ? (isHt ? 'Pa gen manm ki koresponn.' : inlineText(lang, 'No members match your search.'))
+              : (isHt ? 'Poko gen manm òdinè.' : inlineText(lang, 'No regular members yet.'))}
             description={needle
               ? undefined
-              : (isHt ? 'Pataje lyen envitasyon an pou fè moun rantre.' : 'Share the invite link to bring people in.')}
+              : (isHt ? 'Pataje lyen envitasyon an pou fè moun rantre.' : inlineText(lang, 'Share the invite link to bring people in.'))}
           />
           {!needle && hasMore && (
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: 14 }}>
@@ -401,8 +402,8 @@ export default function CommunityMembersPanel({
                 disabled={loadingMore}
               >
                 {loadingMore
-                  ? (isHt ? 'Ap chaje…' : 'Loading…')
-                  : (isHt ? 'Chaje plis manm' : 'Load more members')}
+                  ? (isHt ? 'Ap chaje…' : inlineText(lang, 'Loading…'))
+                  : (isHt ? 'Chaje plis manm' : inlineText(lang, 'Load more members'))}
               </button>
             </div>
           )}
@@ -419,8 +420,8 @@ export default function CommunityMembersPanel({
                 disabled={loadingMore}
               >
                 {loadingMore
-                  ? (isHt ? 'Ap chaje…' : 'Loading…')
-                  : (isHt ? 'Chaje plis manm' : 'Load more members')}
+                  ? (isHt ? 'Ap chaje…' : inlineText(lang, 'Loading…'))
+                  : (isHt ? 'Chaje plis manm' : inlineText(lang, 'Load more members'))}
               </button>
             </div>
           )}
@@ -431,7 +432,7 @@ export default function CommunityMembersPanel({
         <>
           <h4 className={styles.sectionTitle}>
             <i className="fas fa-ban" aria-hidden="true" />
-            {isHt ? 'Manm bloke' : 'Banned'} ({visibleBanned.length})
+            {isHt ? 'Manm bloke' : inlineText(lang, 'Banned')} ({visibleBanned.length})
           </h4>
           <div className={styles.list}>
             {visibleBanned.map((m) => (
@@ -440,12 +441,12 @@ export default function CommunityMembersPanel({
                 <div className={styles.rowBody}>
                   <div className={styles.rowName}>
                     @{m.username}
-                    <span className={`${styles.pill} ${styles.pillMuted}`}>{isHt ? 'Bloke' : 'Banned'}</span>
+                    <span className={`${styles.pill} ${styles.pillMuted}`}>{isHt ? 'Bloke' : inlineText(lang, 'Banned')}</span>
                   </div>
                   <div className={styles.rowMeta}>
                     {m.banned_by_username
                       ? (isHt ? `Pa @${m.banned_by_username}` : `By @${m.banned_by_username}`)
-                      : (isHt ? 'Blokaj' : 'Banned')}
+                      : (isHt ? 'Blokaj' : inlineText(lang, 'Banned'))}
                     {m.ban_reason ? ` · ${m.ban_reason}` : ''}
                   </div>
                 </div>
@@ -455,7 +456,7 @@ export default function CommunityMembersPanel({
                     className={styles.iconBtn}
                     onClick={() => unban(m)}
                     disabled={Boolean(busyId)}
-                    title={isHt ? 'Debloke' : 'Unban'}
+                    title={isHt ? 'Debloke' : inlineText(lang, 'Unban')}
                     aria-label={isHt ? `Debloke ${m.username}` : `Unban ${m.username}`}
                   >
                     <i className="fas fa-rotate-left" aria-hidden="true" />
@@ -473,9 +474,9 @@ export default function CommunityMembersPanel({
           title={isHt ? `Bloke @${banTarget.username}?` : `Ban @${banTarget.username}?`}
           message={isHt
             ? 'Manm nan pèdi aksè imedyatman. Ou ka debloke l pita nan lis manm bloke yo.'
-            : 'The member loses access immediately. You can unban them later from the banned list.'}
-          confirmText={isHt ? 'Bloke' : 'Ban'}
-          cancelText={isHt ? 'Anile' : 'Cancel'}
+            : inlineText(lang, 'The member loses access immediately. You can unban them later from the banned list.')}
+          confirmText={isHt ? 'Bloke' : inlineText(lang, 'Ban')}
+          cancelText={isHt ? 'Anile' : inlineText(lang, 'Cancel')}
           onConfirm={confirmBan}
           onCancel={() => setBanTarget(null)}
         />

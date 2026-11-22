@@ -12,6 +12,7 @@
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── Helpers ──────────────────────────────────────────────────────
 
@@ -64,7 +65,7 @@ function HealthScoreCard({ score, lang }) {
         </svg>
       </div>
       <div className="ma-health-label">
-        {lang === 'ht' ? 'Sante Communautaire' : 'Community Health'}
+        {lang === 'ht' ? 'Sante Communautaire' : inlineText(lang, 'Community Health')}
       </div>
     </div>
   );
@@ -136,7 +137,7 @@ function ModeratorPerformance({ moderators, lang }) {
     <div className="ma-moderators">
       <h4>
         <i className="fas fa-user-shield" />
-        {lang === 'ht' ? 'Pèfòmans Modiratè' : 'Moderator Performance'}
+        {lang === 'ht' ? 'Pèfòmans Modiratè' : inlineText(lang, 'Moderator Performance')}
       </h4>
 
       <div className="ma-moderator-list">
@@ -195,7 +196,7 @@ export default function ModerationAnalytics({ community, lang = 'en' }) {
     return (
       <div className="ma-loading">
         <i className="fas fa-spinner fa-spin" />
-        <span>{lang === 'ht' ? 'Ap chaje...' : 'Loading...'}</span>
+        <span>{lang === 'ht' ? 'Ap chaje...' : inlineText(lang, 'Loading...')}</span>
       </div>
     );
   }
@@ -209,7 +210,7 @@ export default function ModerationAnalytics({ community, lang = 'en' }) {
       <div className="ma-header">
         <h3>
           <i className="fas fa-chart-line" />
-          {lang === 'ht' ? 'Analiz Moderasyon' : 'Moderation Analytics'}
+          {lang === 'ht' ? 'Analiz Moderasyon' : inlineText(lang, 'Moderation Analytics')}
         </h3>
         <div className="ma-time-range">
           <button className={timeRange === '24h' ? 'ma-range-active' : ''} onClick={() => setTimeRange('24h')}>24H</button>
@@ -226,42 +227,42 @@ export default function ModerationAnalytics({ community, lang = 'en' }) {
       <div className="ma-metrics-grid">
         <MetricCard
           icon="fa-flag"
-          label={lang === 'ht' ? 'Rapò' : 'Reports'}
+          label={lang === 'ht' ? 'Rapò' : inlineText(lang, 'Reports')}
           value={metrics?.total_reports || 0}
           change={metrics?.reports_change}
           color="#8b5cf6"
         />
         <MetricCard
           icon="fa-check-circle"
-          label={lang === 'ht' ? 'Rezoud' : 'Resolved'}
+          label={lang === 'ht' ? 'Rezoud' : inlineText(lang, 'Resolved')}
           value={metrics?.resolved || 0}
           change={metrics?.resolved_change}
           color="#10b981"
         />
         <MetricCard
           icon="fa-clock"
-          label={lang === 'ht' ? 'Tan Repons' : 'Response Time'}
+          label={lang === 'ht' ? 'Tan Repons' : inlineText(lang, 'Response Time')}
           value={metrics?.avg_response_time || '0m'}
           color="#3b82f6"
           format="text"
         />
         <MetricCard
           icon="fa-ban"
-          label={lang === 'ht' ? 'Bloke' : 'Bans'}
+          label={lang === 'ht' ? 'Bloke' : inlineText(lang, 'Bans')}
           value={metrics?.total_bans || 0}
           change={metrics?.bans_change}
           color="#dc2626"
         />
         <MetricCard
           icon="fa-exclamation-triangle"
-          label={lang === 'ht' ? 'Avètisman' : 'Warnings'}
+          label={lang === 'ht' ? 'Avètisman' : inlineText(lang, 'Warnings')}
           value={metrics?.total_warnings || 0}
           change={metrics?.warnings_change}
           color="#f59e0b"
         />
         <MetricCard
           icon="fa-volume-mute"
-          label={lang === 'ht' ? 'Mute' : 'Mutes'}
+          label={lang === 'ht' ? 'Mute' : inlineText(lang, 'Mutes')}
           value={metrics?.total_mutes || 0}
           color="#6b7280"
         />
@@ -269,21 +270,21 @@ export default function ModerationAnalytics({ community, lang = 'en' }) {
 
       {/* Trend Charts */}
       <div className="ma-trends">
-        <h4>{lang === 'ht' ? 'Tandan' : 'Trends'}</h4>
+        <h4>{lang === 'ht' ? 'Tandan' : inlineText(lang, 'Trends')}</h4>
         <div className="ma-trends-grid">
           <TrendChart
             data={trends?.reports || []}
-            label={lang === 'ht' ? 'Rapò' : 'Reports'}
+            label={lang === 'ht' ? 'Rapò' : inlineText(lang, 'Reports')}
             color="#8b5cf6"
           />
           <TrendChart
             data={trends?.resolutions || []}
-            label={lang === 'ht' ? 'Rezolisyon' : 'Resolutions'}
+            label={lang === 'ht' ? 'Rezolisyon' : inlineText(lang, 'Resolutions')}
             color="#10b981"
           />
           <TrendChart
             data={trends?.response_time || []}
-            label={lang === 'ht' ? 'Tan Repons' : 'Response Time'}
+            label={lang === 'ht' ? 'Tan Repons' : inlineText(lang, 'Response Time')}
             color="#3b82f6"
           />
         </div>
@@ -297,7 +298,7 @@ export default function ModerationAnalytics({ community, lang = 'en' }) {
         <div className="ma-recent">
           <h4>
             <i className="fas fa-history" />
-            {lang === 'ht' ? 'Dènye Aktivite' : 'Recent Activity'}
+            {lang === 'ht' ? 'Dènye Aktivite' : inlineText(lang, 'Recent Activity')}
           </h4>
           <div className="ma-recent-list">
             {recent_actions.slice(0, 10).map((action, idx) => (

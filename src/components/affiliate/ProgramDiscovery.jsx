@@ -16,6 +16,7 @@ import useFetch from '../../hooks/useFetch';
 import useSafeNavigate from '../../hooks/useSafeNavigate';
 import { translations } from '../../data/translations';
 import './AffiliateDashboard.css';
+import { inlineText } from '../../utils/inlineI18n';
 
 const LANG_FALLBACK = {
   discover_title: 'Discover Programs',
@@ -121,7 +122,7 @@ function ApplyModal({ program, lang, t, showToast, onClose, onApplied }) {
               className="aff-input aff-textarea"
               value={motivation}
               onChange={(e) => setMotivation(e.target.value)}
-              placeholder={lang === 'ht' ? 'Eksplike poukisa ou vle antre...' : 'Explain why you want to join...'}
+              placeholder={lang === 'ht' ? 'Eksplike poukisa ou vle antre...' : inlineText(lang, 'Explain why you want to join...')}
               rows={3}
               required
             />

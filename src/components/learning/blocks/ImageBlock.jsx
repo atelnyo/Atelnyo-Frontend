@@ -22,6 +22,7 @@
  *   - aspectRatio: string (e.g., '16/9', '4/3', '1/1') — optional
  */
 import React, { useCallback, useRef, useState } from 'react';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function ImageBlock({ block, lang = 'en', index, courseId, moduleIndex, onComplete, onViewed }) {
   const isHt = lang === 'ht';
@@ -54,7 +55,7 @@ export default function ImageBlock({ block, lang = 'en', index, courseId, module
     ? ''
     : (block.altText || block.alt || block.config?.altText || block.config?.alt || caption || '');
   // Fallback alt for non-decorative images without any text
-  const alt = isDecorative ? undefined : (altText || (isHt ? 'Imaj kou' : 'Course image'));
+  const alt = isDecorative ? undefined : (altText || (isHt ? 'Imaj kou' : inlineText(lang, 'Course image')));
 
   const aspectRatio = block.aspectRatio || block.config?.aspectRatio || undefined;
 
@@ -63,7 +64,7 @@ export default function ImageBlock({ block, lang = 'en', index, courseId, module
       <div className="ls-block-media-empty" role="status">
         <i className="fas fa-image" aria-hidden="true" style={{ fontSize: '1.5rem', opacity: 0.3 }} />
         <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
-          {isHt ? 'Pa gen imaj pou bloc sa a.' : 'No image for this block.'}
+          {isHt ? 'Pa gen imaj pou bloc sa a.' : inlineText(lang, 'No image for this block.')}
         </span>
       </div>
     );
@@ -104,7 +105,7 @@ export default function ImageBlock({ block, lang = 'en', index, courseId, module
           }}>
             <i className="fas fa-image" style={{ fontSize: '1.5rem', opacity: 0.3 }} aria-hidden="true" />
             <span style={{ fontSize: '0.85rem' }}>
-              {isHt ? 'Imaj sa a pa disponib.' : 'This image is unavailable.'}
+              {isHt ? 'Imaj sa a pa disponib.' : inlineText(lang, 'This image is unavailable.')}
             </span>
           </div>
         ) : (

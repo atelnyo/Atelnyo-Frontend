@@ -12,6 +12,7 @@
  */
 import React from 'react';
 import styles from './shared.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function QuickActions({
   lang,
@@ -27,31 +28,31 @@ export default function QuickActions({
     {
       id: 'create_course',
       icon: 'fa-graduation-cap',
-      label: isHt ? 'Kreye Kou' : 'Create Course',
+      label: isHt ? 'Kreye Kou' : inlineText(lang, 'Create Course'),
       handler: () => setShowCourseModal(true),
     },
     {
       id: 'create_product',
       icon: 'fa-cube',
-      label: isHt ? 'Kreye Pwodwi' : 'Create Product',
+      label: isHt ? 'Kreye Pwodwi' : inlineText(lang, 'Create Product'),
       handler: () => setShowProductModal(true),
     },
     {
       id: 'create_portfolio',
       icon: 'fa-briefcase',
-      label: isHt ? 'Kreye Pòtfolyo' : 'Create Portfolio',
+      label: isHt ? 'Kreye Pòtfolyo' : inlineText(lang, 'Create Portfolio'),
       handler: () => setShowProjectModal(true),
     },
     {
       id: 'upload_media',
       icon: 'fa-cloud-upload-alt',
-      label: isHt ? 'Mete URL Medya' : 'Upload Media URL',
+      label: isHt ? 'Mete URL Medya' : inlineText(lang, 'Upload Media URL'),
       handler: () => setActiveSection('media'),
     },
     {
       id: 'view_profile',
       icon: 'fa-user-circle',
-      label: isHt ? 'Pwofil Piblik' : 'View Public Profile',
+      label: isHt ? 'Pwofil Piblik' : inlineText(lang, 'View Public Profile'),
       handler: () => setActiveSection('public_profile'),
     },
   ];

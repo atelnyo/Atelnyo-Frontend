@@ -20,6 +20,7 @@ import api from '../../../services/api';
 import { walletService } from '../../../services/api';
 import { StudioModal, FormField, LoadingOverlay } from './shared';
 import styles from './modals.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const METHOD_LABELS = {
   paypal: { en: 'PayPal', ht: 'PayPal' },
@@ -97,14 +98,14 @@ export default function WithdrawModal({ onClose, onSuccess, lang, showToast, onO
   const validate = () => {
     const errs = {};
     if (!form.amount || isNaN(Number(form.amount)) || Number(form.amount) < 5) {
-      errs.amount = lang === 'ht' ? 'Montan minimòm se $5' : 'Minimum amount is $5';
+      errs.amount = lang === 'ht' ? 'Montan minimòm se $5' : inlineText(lang, 'Minimum amount is $5');
     }
     if (Number(form.amount) > Number((accounts.find((a) => String(a.id) === String(form.payout_account)))?.limit ?? Infinity)) {
       // No hard limit on payout accounts today — kept as a safety valve.
     }
     // A connected account OR manual details are required.
     if (!form.payout_account && !form.account_details.trim()) {
-      errs.account_details = lang === 'ht' ? 'Chwazi yon kont oswa antre detay kont' : 'Choose an account or enter account details';
+      errs.account_details = lang === 'ht' ? 'Chwazi yon kont oswa antre detay kont' : inlineText(lang, 'Choose an account or enter account details');
     }
     return errs;
   };
@@ -128,14 +129,14 @@ export default function WithdrawModal({ onClose, onSuccess, lang, showToast, onO
       }
       await api.post('wallet/payouts/', payload);
       showToast?.(
-        lang === 'ht' ? '✅ Demann retrè soumèt avèk siksè!' : '✅ Withdrawal request submitted!',
+        lang === 'ht' ? '✅ Demann retrè soumèt avèk siksè!' : inlineText(lang, '✅ Withdrawal request submitted!'),
         'check-circle',
       );
       onSuccess?.(); onClose?.();
     } catch (err) {
       const detail = err?.response?.data?.detail || err?.response?.data?.amount?.[0]
         || err?.message
-        || (lang === 'ht' ? 'Pa t kapab soumèt retrè a.' : 'Could not submit withdrawal.');
+        || (lang === 'ht' ? 'Pa t kapab soumèt retrè a.' : inlineText(lang, 'Could not submit withdrawal.'));
       setErrors((e) => ({ ...e, _api: detail }));
       showToast?.(detail, 'circle-exclamation');
     } finally { setLoading(false); }
@@ -145,8 +146,8 @@ export default function WithdrawModal({ onClose, onSuccess, lang, showToast, onO
 
   return (
     <StudioModal onClose={onClose} icon="fa-arrow-up"
-      title={lang === 'ht' ? 'Retrè lajan' : 'Withdraw Funds'}
-      subtitle={lang === 'ht' ? 'Retire lajan nan bous ou' : 'Withdraw money from your wallet'}>
+      title={lang === 'ht' ? 'Retrè lajan' : inlineText(lang, 'Withdraw Funds')}
+      subtitle={lang === 'ht' ? 'Retire lajan nan bous ou' : inlineText(lang, 'Withdraw money from your wallet')}>
 
       {/* ── KYC gate — unverified / pending / rejected ──────────────── */}
       {kycBlocked && (
@@ -159,36 +160,36 @@ export default function WithdrawModal({ onClose, onSuccess, lang, showToast, onO
           {kycStatus === 'pending' && (
             <>
               <h4 className={styles.kycGateTitle}>
-                {lang === 'ht' ? 'Verifikasyon ap trete' : 'Verification in progress'}
+                {lang === 'ht' ? 'Verifikasyon ap trete' : inlineText(lang, 'Verification in progress')}
               </h4>
               <p className={styles.kycGateText}>
                 {lang === 'ht'
                   ? 'Idantite ou ap revize. Yon fwa apwouve, ou ka retire lajan.'
-                  : 'Your identity is under review. Once approved, you can withdraw funds.'}
+                  : inlineText(lang, 'Your identity is under review. Once approved, you can withdraw funds.')}
               </p>
             </>
           )}
           {kycStatus === 'rejected' && (
             <>
               <h4 className={styles.kycGateTitle}>
-                {lang === 'ht' ? 'Verifikasyon refize' : 'Verification rejected'}
+                {lang === 'ht' ? 'Verifikasyon refize' : inlineText(lang, 'Verification rejected')}
               </h4>
               <p className={styles.kycGateText}>
                 {lang === 'ht'
                   ? 'Verifikasyon ou te refize. Re-soumèt enfòmasyon ou yo pou ou ka retire lajan.'
-                  : 'Your verification was rejected. Re-submit your details to unlock withdrawals.'}
+                  : inlineText(lang, 'Your verification was rejected. Re-submit your details to unlock withdrawals.')}
               </p>
             </>
           )}
           {(kycStatus === 'unverified' || kycStatus === 'expired') && (
             <>
               <h4 className={styles.kycGateTitle}>
-                {lang === 'ht' ? 'KYC obligatwa pou retrè' : 'KYC required to withdraw'}
+                {lang === 'ht' ? 'KYC obligatwa pou retrè' : inlineText(lang, 'KYC required to withdraw')}
               </h4>
               <p className={styles.kycGateText}>
                 {lang === 'ht'
                   ? 'Pou retire lajan ou bezwen verifye idantite ou an premye (KYC).'
-                  : 'You need to verify your identity (KYC) before withdrawing funds.'}
+                  : inlineText(lang, 'You need to verify your identity (KYC) before withdrawing funds.')}
               </p>
             </>
           )}
@@ -201,10 +202,10 @@ export default function WithdrawModal({ onClose, onSuccess, lang, showToast, onO
             }}
           >
             <i className="fas fa-user-shield" aria-hidden="true" />
-            {lang === 'ht' ? 'Verifye Idantite' : 'Verify Identity'}
+            {lang === 'ht' ? 'Verifye Idantite' : inlineText(lang, 'Verify Identity')}
           </button>
           <button type="button" className="btn-secondary" onClick={onClose}>
-            {lang === 'ht' ? 'Fèmen' : 'Close'}
+            {lang === 'ht' ? 'Fèmen' : inlineText(lang, 'Close')}
           </button>
         </div>
       )}
@@ -214,7 +215,7 @@ export default function WithdrawModal({ onClose, onSuccess, lang, showToast, onO
       <form onSubmit={handleSubmit} className={styles.form}>
         {errors._api && <div className={styles.apiError} role="alert">{errors._api}</div>}
         <LoadingOverlay loading={loading}>
-          <FormField label={lang === 'ht' ? 'Montan ($)' : 'Amount ($)'} required error={errors.amount}>
+          <FormField label={lang === 'ht' ? 'Montan ($)' : inlineText(lang, 'Amount ($)')} required error={errors.amount}>
             <input className={styles.input} type="number" min="5" step="1"
               value={form.amount} onChange={(e) => handleChange('amount', e.target.value)}
               placeholder="50.00" autoFocus />
@@ -222,15 +223,15 @@ export default function WithdrawModal({ onClose, onSuccess, lang, showToast, onO
 
           {/* Connected payout account picker — primary path */}
           <FormField
-            label={lang === 'ht' ? 'Kont Peman' : 'Payout Account'}
-            hint={lang === 'ht' ? 'Chwazi yon kont ou konekte (bank, PayPal...) oswa antre detay' : 'Pick an account you connected, or enter details below'}
+            label={lang === 'ht' ? 'Kont Peman' : inlineText(lang, 'Payout Account')}
+            hint={lang === 'ht' ? 'Chwazi yon kont ou konekte (bank, PayPal...) oswa antre detay' : inlineText(lang, 'Pick an account you connected, or enter details below')}
           >
             {accountsLoading ? (
-              <div className={styles.hint}><i className="fas fa-spinner fa-spin" /> {lang === 'ht' ? 'Ap chaje kont yo...' : 'Loading accounts...'}</div>
+              <div className={styles.hint}><i className="fas fa-spinner fa-spin" /> {lang === 'ht' ? 'Ap chaje kont yo...' : inlineText(lang, 'Loading accounts...')}</div>
             ) : accounts.length > 0 ? (
               <select className={styles.input} value={form.payout_account}
                 onChange={(e) => handleChange('payout_account', e.target.value)}>
-                <option value="">{lang === 'ht' ? '— Chwazi yon kont —' : '— Select an account —'}</option>
+                <option value="">{lang === 'ht' ? '— Chwazi yon kont —' : inlineText(lang, '— Select an account —')}</option>
                 {accounts.map((acc) => {
                   const label = METHOD_LABELS[acc.method]?.en || acc.method;
                   return (
@@ -244,7 +245,7 @@ export default function WithdrawModal({ onClose, onSuccess, lang, showToast, onO
               <div className={styles.hint}>
                 {lang === 'ht'
                   ? 'Pa gen kont konekte. Antre detay anba a oswa ale nan "Kont Peman" pou konekte yon kont PayPal/bank.'
-                  : 'No connected accounts. Enter details below, or use "Payout Accounts" to connect PayPal/bank.'}
+                  : inlineText(lang, 'No connected accounts. Enter details below, or use "Payout Accounts" to connect PayPal/bank.')}
               </div>
             )}
           </FormField>
@@ -252,15 +253,15 @@ export default function WithdrawModal({ onClose, onSuccess, lang, showToast, onO
           {selectedAccount && (
             <div className={styles.refundSummary}>
               <div className={styles.refundSummaryRow}>
-                <span>{lang === 'ht' ? 'Kont' : 'Account'}:</span>
+                <span>{lang === 'ht' ? 'Kont' : inlineText(lang, 'Account')}:</span>
                 <strong>{selectedAccount.label || METHOD_LABELS[selectedAccount.method]?.en || selectedAccount.method}</strong>
               </div>
               <div className={styles.refundSummaryRow}>
-                <span>{lang === 'ht' ? 'Metòd' : 'Method'}:</span>
+                <span>{lang === 'ht' ? 'Metòd' : inlineText(lang, 'Method')}:</span>
                 <strong>{METHOD_LABELS[selectedAccount.method]?.en || selectedAccount.method}</strong>
               </div>
               <div className={styles.refundSummaryRow}>
-                <span>{lang === 'ht' ? 'Konekte' : 'Added'}:</span>
+                <span>{lang === 'ht' ? 'Konekte' : inlineText(lang, 'Added')}:</span>
                 <strong>{fmtDate(selectedAccount.created_at)}</strong>
               </div>
             </div>
@@ -269,41 +270,41 @@ export default function WithdrawModal({ onClose, onSuccess, lang, showToast, onO
           {/* Manual fallback — only when no account is selected */}
           {!form.payout_account && (
             <>
-              <FormField label={lang === 'ht' ? 'Metòd Peman' : 'Payment Method'}>
+              <FormField label={lang === 'ht' ? 'Metòd Peman' : inlineText(lang, 'Payment Method')}>
                 <select className={styles.input} value={form.method}
                   onChange={(e) => handleChange('method', e.target.value)}>
-                  <option value="bank">{lang === 'ht' ? 'Bank' : 'Bank Transfer'}</option>
+                  <option value="bank">{lang === 'ht' ? 'Bank' : inlineText(lang, 'Bank Transfer')}</option>
                   <option value="paypal">PayPal</option>
-                  <option value="mobile_money">{lang === 'ht' ? 'Lajan Mobil' : 'Mobile Money'}</option>
+                  <option value="mobile_money">{lang === 'ht' ? 'Lajan Mobil' : inlineText(lang, 'Mobile Money')}</option>
                   <option value="crypto">Cryptocurrency</option>
                 </select>
               </FormField>
-              <FormField label={lang === 'ht' ? 'Detay Kont' : 'Account Details'} error={errors.account_details}
-                hint={lang === 'ht' ? 'Non bank, nimewo kont, oswa imèl PayPal' : 'Bank name, account number, or PayPal email'}>
+              <FormField label={lang === 'ht' ? 'Detay Kont' : inlineText(lang, 'Account Details')} error={errors.account_details}
+                hint={lang === 'ht' ? 'Non bank, nimewo kont, oswa imèl PayPal' : inlineText(lang, 'Bank name, account number, or PayPal email')}>
                 <textarea className={styles.textarea} value={form.account_details}
                   onChange={(e) => handleChange('account_details', e.target.value)}
-                  placeholder={lang === 'ht' ? 'Bank: ... Nimewo: ...' : 'Bank: ... Account: ...'}
+                  placeholder={lang === 'ht' ? 'Bank: ... Nimewo: ...' : inlineText(lang, 'Bank: ... Account: ...')}
                   rows={2} />
               </FormField>
             </>
           )}
 
-          <FormField label={lang === 'ht' ? 'Nòt (opsyonèl)' : 'Notes (optional)'}>
+          <FormField label={lang === 'ht' ? 'Nòt (opsyonèl)' : inlineText(lang, 'Notes (optional)')}>
             <input className={styles.input} value={form.notes}
               onChange={(e) => handleChange('notes', e.target.value)}
-              placeholder={lang === 'ht' ? 'Nòt pou admin...' : 'Note for admin...'}
+              placeholder={lang === 'ht' ? 'Nòt pou admin...' : inlineText(lang, 'Note for admin...')}
               maxLength={500} />
           </FormField>
         </LoadingOverlay>
         <div className={styles.actions}>
           <button type="button" className="btn-secondary" onClick={onClose} disabled={loading}>
-            {lang === 'ht' ? 'Anile' : 'Cancel'}
+            {lang === 'ht' ? 'Anile' : inlineText(lang, 'Cancel')}
           </button>
           <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? (
-              <><i className="fas fa-spinner fa-spin" /> {lang === 'ht' ? 'Ap trete...' : 'Processing...'}</>
+              <><i className="fas fa-spinner fa-spin" /> {lang === 'ht' ? 'Ap trete...' : inlineText(lang, 'Processing...')}</>
             ) : (
-              <><i className="fas fa-paper-plane" /> {lang === 'ht' ? 'Soumèt Retrè' : 'Submit Withdrawal'}</>
+              <><i className="fas fa-paper-plane" /> {lang === 'ht' ? 'Soumèt Retrè' : inlineText(lang, 'Submit Withdrawal')}</>
             )}
           </button>
         </div>

@@ -33,6 +33,7 @@ import {
   readReferralParams, extractError, clearFailedAttempts,
   validateSignupFields, validateLoginFields,
 } from './authUtils';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── SEO meta tags (only on dedicated /login or /signup routes) ──────
 function AuthSeoMeta({ lang, mode }) {
@@ -90,8 +91,8 @@ function buildTranslations(t, lang) {
     placeholder_email: t.wizard_email || 'Email',
     placeholder_password: t.password_placeholder || 'Password',
     forgot_link: t.forgot_password_link || 'Forgot password?',
-    no_account: lang === 'ht' ? 'Ou pa gen kont?' : 'No account?',
-    have_account: lang === 'ht' ? 'Ou gen kont deja?' : 'Already have an account?',
+    no_account: lang === 'ht' ? 'Ou pa gen kont?' : inlineText(lang, 'No account?'),
+    have_account: lang === 'ht' ? 'Ou gen kont deja?' : inlineText(lang, 'Already have an account?'),
     cancel: t.common_cancel || 'Cancel',
     switch_to_login: t.login || 'Login',
     switch_to_signup: t.signup || 'Sign up',
@@ -206,9 +207,9 @@ const Auth = ({
     if (mode === 'login') return T.login;
     if (mode === 'signup') return T.signup;
     if (mode === 'forgot') return T.forgot_title;
-    if (mode === 'forgot_success') return lang === 'ht' ? 'Email Voye!' : 'Email Sent!';
+    if (mode === 'forgot_success') return lang === 'ht' ? 'Email Voye!' : inlineText(lang, 'Email Sent!');
     if (mode === 'reset') return T.reset_title;
-    if (mode === '2fa') return lang === 'ht' ? 'Verifikasyon De Fakèy' : 'Two-Factor Verification';
+    if (mode === '2fa') return lang === 'ht' ? 'Verifikasyon De Fakèy' : inlineText(lang, 'Two-Factor Verification');
     return '';
   };
 
@@ -218,11 +219,11 @@ const Auth = ({
     if (mode === 'forgot') return T.forgot_subtitle;
     if (mode === 'forgot_success') return lang === 'ht'
       ? 'Si imèl la enskri, nou voye yon lyen reset password ba ou. Verifie bwat resepsyon ou.'
-      : 'If the email is registered, we sent a password reset link. Check your inbox.';
+      : inlineText(lang, 'If the email is registered, we sent a password reset link. Check your inbox.');
     if (mode === 'reset') return T.reset_subtitle;
     if (mode === '2fa') return lang === 'ht'
       ? 'Antre kòd 6 chif ki nan aplikasyon aktestriktè ou an.'
-      : 'Enter the 6-digit code from your authenticator app.';
+      : inlineText(lang, 'Enter the 6-digit code from your authenticator app.');
     return '';
   };
 
@@ -248,7 +249,7 @@ const Auth = ({
       // Get reCAPTCHA token
       const recaptchaToken = await getToken();
       if (showV2Checkbox && recaptchaToken === null) {
-        setError(lang === 'ht' ? 'Konfime ou pa yon robo anvan ou kontinye.' : 'Please confirm you are not a robot before continuing.');
+        setError(lang === 'ht' ? 'Konfime ou pa yon robo anvan ou kontinye.' : inlineText(lang, 'Please confirm you are not a robot before continuing.'));
         setIsLoading(false);
         return;
       }
@@ -271,14 +272,14 @@ const Auth = ({
         resetFailedAttempts();
         clearFailedAttempts();
         dismissPendingGoogle();
-        if (showToast) showToast(lang === 'ht' ? 'Koneksyon siksè!' : 'Login successful!', 'check-circle');
+        if (showToast) showToast(lang === 'ht' ? 'Koneksyon siksè!' : inlineText(lang, 'Login successful!'), 'check-circle');
         onLoginSuccess(data.user);
 
       } else if (mode === '2fa') {
         const { data } = await authService.twoFactorVerifyLogin(twoFactorChallenge, formData.twoFactorCode);
         persistSession(data);
         setTwoFactorChallenge(null);
-        if (showToast) showToast(lang === 'ht' ? 'Koneksyon siksè!' : 'Login successful!', 'check-circle');
+        if (showToast) showToast(lang === 'ht' ? 'Koneksyon siksè!' : inlineText(lang, 'Login successful!'), 'check-circle');
         onLoginSuccess(data.user);
 
       } else if (mode === 'signup') {
@@ -293,7 +294,7 @@ const Auth = ({
         resetFailedAttempts();
         clearFailedAttempts();
         dismissPendingGoogle();
-        if (showToast) showToast(lang === 'ht' ? 'Kont ou kreye ak siksè!' : 'Account created successfully!', 'user-check');
+        if (showToast) showToast(lang === 'ht' ? 'Kont ou kreye ak siksè!' : inlineText(lang, 'Account created successfully!'), 'user-check');
 
         // ── Email verification nudge (optional, never blocking) ──
         // Instead of closing immediately, offer a one-tap verify flow.
@@ -306,7 +307,7 @@ const Auth = ({
 
       } else if (mode === 'forgot') {
         const email = formData.email.trim();
-        if (!email) { setError(lang === 'ht' ? 'Antre imel ou.' : 'Please enter your email.'); setIsLoading(false); return; }
+        if (!email) { setError(lang === 'ht' ? 'Antre imel ou.' : inlineText(lang, 'Please enter your email.')); setIsLoading(false); return; }
         const { data } = await authService.forgotPassword(email, recaptchaToken);
         if (showToast) showToast(T.forgot_success, 'envelope');
         resetFailedAttempts();
@@ -324,11 +325,11 @@ const Auth = ({
       } else if (mode === 'reset') {
         const { resetToken, newPassword, confirmNewPassword } = formData;
         if (newPassword !== confirmNewPassword) {
-          setError(lang === 'ht' ? 'Modpas yo pa menm.' : 'Passwords do not match.');
+          setError(lang === 'ht' ? 'Modpas yo pa menm.' : inlineText(lang, 'Passwords do not match.'));
           setIsLoading(false); return;
         }
         if (newPassword.length < 6) {
-          setError(lang === 'ht' ? 'Modpas dwe omwen 6 karaktè.' : 'Password must be at least 6 characters.');
+          setError(lang === 'ht' ? 'Modpas dwe omwen 6 karaktè.' : inlineText(lang, 'Password must be at least 6 characters.'));
           setIsLoading(false); return;
         }
         await authService.resetPasswordConfirm(resetToken || resetInfo.token, newPassword, recaptchaToken);
@@ -400,7 +401,7 @@ const Auth = ({
     const email = (formData.email || '').trim();
     const pw = (formData.password || '').trim();
     if (!email || !pw) {
-      setError(lang === 'ht' ? 'Antre imèl ak modpas ou.' : 'Please enter your email and password.');
+      setError(lang === 'ht' ? 'Antre imèl ak modpas ou.' : inlineText(lang, 'Please enter your email and password.'));
       return;
     }
     setCancelLoading(true);
@@ -410,13 +411,13 @@ const Auth = ({
       persistSession(data);
       clearFailedAttempts();
       if (showToast) showToast(
-        lang === 'ht' ? 'Efase kont anile! Kont ou aktif ankò.' : 'Account deletion cancelled! Your account is active again.',
+        lang === 'ht' ? 'Efase kont anile! Kont ou aktif ankò.' : inlineText(lang, 'Account deletion cancelled! Your account is active again.'),
         'check-circle',
       );
       onLoginSuccess(data.user);
     } catch (err) {
       const msg = err.response?.data?.error || err.response?.data?.detail
-        || (lang === 'ht' ? 'Pa t kapab anile efase kont.' : 'Could not cancel account deletion.');
+        || (lang === 'ht' ? 'Pa t kapab anile efase kont.' : inlineText(lang, 'Could not cancel account deletion.'));
       setError(typeof msg === 'string' ? msg : JSON.stringify(msg));
     } finally { setCancelLoading(false); }
   };
@@ -437,33 +438,33 @@ const Auth = ({
         <h3 className="auth-aside-title">
           {lang === 'ht'
             ? 'Aprann. Kreye. Pataje.'
-            : 'Learn. Create. Share.'}
+            : inlineText(lang, 'Learn. Create. Share.')}
         </h3>
         <ul className="auth-aside-points">
           <li>
             <i className="fas fa-circle-check" aria-hidden="true" />
-            <span>{lang === 'ht' ? 'Kou ak sètifika gratis' : 'Free courses and certificates'}</span>
+            <span>{lang === 'ht' ? 'Kou ak sètifika gratis' : inlineText(lang, 'Free courses and certificates')}</span>
           </li>
           <li>
             <i className="fas fa-circle-check" aria-hidden="true" />
-            <span>{lang === 'ht' ? 'Kominote kreyatè global' : 'A global creator community'}</span>
+            <span>{lang === 'ht' ? 'Kominote kreyatè global' : inlineText(lang, 'A global creator community')}</span>
           </li>
           <li>
             <i className="fas fa-circle-check" aria-hidden="true" />
-            <span>{lang === 'ht' ? 'Vann travay ou nan maché a' : 'Sell your work on the marketplace'}</span>
+            <span>{lang === 'ht' ? 'Vann travay ou nan maché a' : inlineText(lang, 'Sell your work on the marketplace')}</span>
           </li>
         </ul>
         <p className="auth-aside-quote">
           {lang === 'ht'
             ? '« Atelnyo se lekòl ou nan pòch ou. »'
-            : '"Atelnyo is your school in your pocket."'}
+            : inlineText(lang, '"Atelnyo is your school in your pocket."')}
         </p>
       </aside>
 
       <div ref={authCardRef} className="auth-card">
         {/* Mode nav tabs (hidden during the post-signup verify prompt) */}
         {!showVerifyPrompt && (
-        <nav className="auth-mode-nav" aria-label={lang === 'ht' ? 'Opsyon koneksyon' : 'Authentication navigation'}>
+        <nav className="auth-mode-nav" aria-label={lang === 'ht' ? 'Opsyon koneksyon' : inlineText(lang, 'Authentication navigation')}>
           {['login', 'signup', 'forgot'].map((tab) => (
             <a
               key={tab}
@@ -518,7 +519,7 @@ const Auth = ({
             {showV2Checkbox && (
               <div className="auth-recaptcha">
                 <p className="auth-recaptcha-note">
-                  {lang === 'ht' ? 'Plizyè tantativ echwe. Konfime ou se yon moun.' : 'Several attempts failed. Confirm you are human.'}
+                  {lang === 'ht' ? 'Plizyè tantativ echwe. Konfime ou se yon moun.' : inlineText(lang, 'Several attempts failed. Confirm you are human.')}
                 </p>
                 <div ref={v2ContainerRef} className="auth-recaptcha-box" />
               </div>
@@ -530,7 +531,7 @@ const Auth = ({
               {mode === 'signup' && T.signup}
               {mode === 'forgot' && T.forgot_send}
               {mode === 'reset' && T.reset_submit}
-              {mode === '2fa' && (lang === 'ht' ? 'Konfime de fakèy' : 'Verify')}
+              {mode === '2fa' && (lang === 'ht' ? 'Konfime de fakèy' : inlineText(lang, 'Verify'))}
             </button>
           </form>
         )}
@@ -563,7 +564,7 @@ const Auth = ({
         {googleClientId && (mode === 'login' || mode === 'signup') && !showVerifyPrompt && (
           <div className="auth-provider-rows">
             <div className="auth-provider-divider" aria-hidden="true">
-              <span>{lang === 'ht' ? 'oswa' : 'or'}</span>
+              <span>{lang === 'ht' ? 'oswa' : inlineText(lang, 'or')}</span>
             </div>
             {pendingGoogle && pendingGoogle.email && (
               <div className="auth-google-resume">
@@ -576,7 +577,7 @@ const Auth = ({
                 >
                   {pendingGoogle.picture && <img className="auth-resume-avatar" src={pendingGoogle.picture} alt="" />}
                   <span>
-                    {lang === 'ht' ? 'Kontinye kòm' : 'Continue as'}{' '}
+                    {lang === 'ht' ? 'Kontinye kòm' : inlineText(lang, 'Continue as')}{' '}
                     <strong>{pendingGoogle.name || pendingGoogle.email}</strong>
                   </span>
                   <i className="fas fa-arrow-right" aria-hidden="true" />
@@ -584,7 +585,7 @@ const Auth = ({
                 <button
                   type="button"
                   className="auth-resume-dismiss"
-                  aria-label={lang === 'ht' ? 'Efase rapèl sa a' : 'Dismiss this reminder'}
+                  aria-label={lang === 'ht' ? 'Efase rapèl sa a' : inlineText(lang, 'Dismiss this reminder')}
                   onClick={dismissPendingGoogle}
                   disabled={isLoading}
                 >
@@ -604,7 +605,7 @@ const Auth = ({
           <p className="auth-google-webview-note">
             {lang === 'ht'
               ? 'Koneksyon Google pa disponib andedan app Android la. Konekte ak imèl ou, oswa ouvri atelnyo.site nan Chrome pou itilize Google.'
-              : 'Google sign-in is unavailable inside the Android app. Use email, or open atelnyo.site in Chrome to sign in with Google.'}
+              : inlineText(lang, 'Google sign-in is unavailable inside the Android app. Use email, or open atelnyo.site in Chrome to sign in with Google.')}
           </p>
         )}
 

@@ -7,6 +7,7 @@
  *   - Quick action buttons (Deposit, Withdraw, Manage Payout Accounts)
  */
 import React from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 function fmtCurrency(n) {
   if (n == null || !Number.isFinite(Number(n))) return '$0.00';
@@ -51,8 +52,8 @@ export default function WalletOverview({
     return (
       <div className="wlt-overview-empty">
         <i className="fas fa-wallet" />
-        <h3>{isHt ? 'Bous ap ouvri...' : 'Opening wallet...'}</h3>
-        <p>{isHt ? 'Bous ou ap kreye otomatikman. Rete sou paj sa a yon ti moman.' : 'Your wallet is created automatically. Stay on this page a moment.'}</p>
+        <h3>{isHt ? 'Bous ap ouvri...' : inlineText(lang, 'Opening wallet...')}</h3>
+        <p>{isHt ? 'Bous ou ap kreye otomatikman. Rete sou paj sa a yon ti moman.' : inlineText(lang, 'Your wallet is created automatically. Stay on this page a moment.')}</p>
       </div>
     );
   }
@@ -69,11 +70,11 @@ export default function WalletOverview({
         <div className="wlt-balance-header">
           <span className="wlt-balance-label">
             <i className="fas fa-wallet" />
-            {isHt ? 'Balans Disponib' : 'Available Balance'}
+            {isHt ? 'Balans Disponib' : inlineText(lang, 'Available Balance')}
           </span>
           <div className="wlt-balance-actions">
             {onViewTransactions && (
-              <button type="button" className="wlt-balance-btn" onClick={onViewTransactions} title={isHt ? 'Istwa' : 'History'}>
+              <button type="button" className="wlt-balance-btn" onClick={onViewTransactions} title={isHt ? 'Istwa' : inlineText(lang, 'History')}>
                 <i className="fas fa-clock-rotate-left" />
               </button>
             )}
@@ -82,15 +83,15 @@ export default function WalletOverview({
         <div className="wlt-balance-value">{fmtCurrency(balance)}</div>
         <div className="wlt-balance-details">
           <div className="wlt-balance-detail">
-            <span className="wlt-detail-label">{isHt ? 'Annatant' : 'Pending'}</span>
+            <span className="wlt-detail-label">{isHt ? 'Annatant' : inlineText(lang, 'Pending')}</span>
             <span className="wlt-detail-value">{fmtCurrency(pending)}</span>
           </div>
           <div className="wlt-balance-detail">
-            <span className="wlt-detail-label">{isHt ? 'Total Touche' : 'Total Earned'}</span>
+            <span className="wlt-detail-label">{isHt ? 'Total Touche' : inlineText(lang, 'Total Earned')}</span>
             <span className="wlt-detail-value">{fmtCurrency(totalEarned)}</span>
           </div>
           <div className="wlt-balance-detail">
-            <span className="wlt-detail-label">{isHt ? 'Resevwa' : 'Lifetime'}</span>
+            <span className="wlt-detail-label">{isHt ? 'Resevwa' : inlineText(lang, 'Lifetime')}</span>
             <span className="wlt-detail-value">{fmtCurrency(lifetimeReceived)}</span>
           </div>
         </div>
@@ -98,13 +99,13 @@ export default function WalletOverview({
           {onWithdraw && (
             <button type="button" className="wlt-balance-cta" onClick={onWithdraw} disabled={balance <= 0}>
               <i className="fas fa-arrow-up" />
-              {isHt ? 'Retire Lajan' : 'Withdraw'}
+              {isHt ? 'Retire Lajan' : inlineText(lang, 'Withdraw')}
             </button>
           )}
           {onManagePayouts && (
             <button type="button" className="wlt-balance-cta wlt-balance-cta-secondary" onClick={onManagePayouts}>
               <i className="fas fa-university" />
-              {isHt ? 'Kont Peman' : 'Payout Accounts'}
+              {isHt ? 'Kont Peman' : inlineText(lang, 'Payout Accounts')}
             </button>
           )}
         </div>
@@ -114,39 +115,39 @@ export default function WalletOverview({
       <div className="wlt-stats-grid">
         <StatCard
           icon="fa-receipt"
-          label={isHt ? 'Tranzaksyon' : 'Transactions'}
+          label={isHt ? 'Tranzaksyon' : inlineText(lang, 'Transactions')}
           value={fmtCount(stats?.total_transactions ?? wallet.transaction_count)}
           color="var(--state-info, #38bdf8)"
         />
         <StatCard
           icon="fa-university"
-          label={isHt ? 'Kont Peman' : 'Payout Accounts'}
+          label={isHt ? 'Kont Peman' : inlineText(lang, 'Payout Accounts')}
           value={fmtCount(stats?.payout_accounts ?? wallet.payout_accounts_count)}
           color="var(--pr-color-violet-500, #8b5cf6)"
         />
         <StatCard
           icon="fa-arrow-up"
-          label={isHt ? 'Retrè' : 'Withdrawals'}
+          label={isHt ? 'Retrè' : inlineText(lang, 'Withdrawals')}
           value={fmtCount(stats?.total_withdrawals ?? wallet.withdrawals_count)}
           color="var(--state-warning, #f59e0b)"
         />
         <StatCard
           icon="fa-hand-holding-heart"
-          label={isHt ? 'Tips Resevwa' : 'Tips Received'}
+          label={isHt ? 'Tips Resevwa' : inlineText(lang, 'Tips Received')}
           value={fmtCount(stats?.tips_received ?? wallet.tips_received_count)}
           subtitle={fmtCurrency(stats?.tips_received_amount ?? wallet.tips_received_amount)}
           color="var(--state-success, #10b981)"
         />
         <StatCard
           icon="fa-paper-plane"
-          label={isHt ? 'Tips Voye' : 'Tips Sent'}
+          label={isHt ? 'Tips Voye' : inlineText(lang, 'Tips Sent')}
           value={fmtCount(stats?.tips_sent ?? wallet.tips_sent_count)}
           subtitle={fmtCurrency(stats?.tips_sent_amount ?? wallet.tips_sent_amount)}
           color="var(--pr-color-orange-500, #f97316)"
         />
         <StatCard
           icon="fa-star"
-          label={isHt ? 'Kontribisyon' : 'Contributions'}
+          label={isHt ? 'Kontribisyon' : inlineText(lang, 'Contributions')}
           value={fmtCount(stats?.referral_commissions)}
           subtitle={fmtCurrency(stats?.referral_earnings)}
           color="var(--color-primary, #d81b60)"
@@ -157,15 +158,15 @@ export default function WalletOverview({
       <div className="wlt-quick-actions">
         <button type="button" className="wlt-quick-action" onClick={onWithdraw} disabled={balance <= 0}>
           <i className="fas fa-arrow-up" />
-          <span>{isHt ? 'Retrè' : 'Withdraw'}</span>
+          <span>{isHt ? 'Retrè' : inlineText(lang, 'Withdraw')}</span>
         </button>
         <button type="button" className="wlt-quick-action" onClick={onManagePayouts}>
           <i className="fas fa-university" />
-          <span>{isHt ? 'Kont Peman' : 'Payout Accts'}</span>
+          <span>{isHt ? 'Kont Peman' : inlineText(lang, 'Payout Accts')}</span>
         </button>
         <button type="button" className="wlt-quick-action" onClick={onViewTransactions}>
           <i className="fas fa-clock-rotate-left" />
-          <span>{isHt ? 'Istwa' : 'History'}</span>
+          <span>{isHt ? 'Istwa' : inlineText(lang, 'History')}</span>
         </button>
       </div>
     </div>

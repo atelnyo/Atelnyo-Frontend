@@ -13,6 +13,7 @@
  */
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import api from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── Constants ────────────────────────────────────────────────────
 
@@ -195,20 +196,20 @@ function BulkActionsBar({ selectedCount, onBulkAction, onClearSelection, lang })
     <div className="mq-bulk-bar">
       <div className="mq-bulk-info">
         <span className="mq-bulk-count">{selectedCount}</span>
-        {lang === 'ht' ? ' seleksyone' : ' selected'}
+        {lang === 'ht' ? ' seleksyone' : inlineText(lang, ' selected')}
       </div>
       <div className="mq-bulk-actions">
         <button className="mq-btn mq-btn-approve" onClick={() => onBulkAction('approve')}>
-          <i className="fas fa-check" /> {lang === 'ht' ? 'Apwouve Tout' : 'Approve All'}
+          <i className="fas fa-check" /> {lang === 'ht' ? 'Apwouve Tout' : inlineText(lang, 'Approve All')}
         </button>
         <button className="mq-btn mq-btn-reject" onClick={() => onBulkAction('reject')}>
-          <i className="fas fa-times" /> {lang === 'ht' ? 'Rejte Tout' : 'Reject All'}
+          <i className="fas fa-times" /> {lang === 'ht' ? 'Rejte Tout' : inlineText(lang, 'Reject All')}
         </button>
         <button className="mq-btn mq-btn-flag" onClick={() => onBulkAction('escalate')}>
-          <i className="fas fa-arrow-up" /> {lang === 'ht' ? 'Eskale Tout' : 'Escalate All'}
+          <i className="fas fa-arrow-up" /> {lang === 'ht' ? 'Eskale Tout' : inlineText(lang, 'Escalate All')}
         </button>
         <button className="mq-btn mq-btn-clear" onClick={onClearSelection}>
-          <i className="fas fa-times" /> {lang === 'ht' ? 'Anile' : 'Clear'}
+          <i className="fas fa-times" /> {lang === 'ht' ? 'Anile' : inlineText(lang, 'Clear')}
         </button>
       </div>
     </div>
@@ -221,12 +222,12 @@ function FilterBar({ filters, onFilterChange, stats, lang }) {
   return (
     <div className="mq-filters">
       <div className="mq-filter-group">
-        <label>{lang === 'ht' ? 'Priyorite' : 'Priority'}</label>
+        <label>{lang === 'ht' ? 'Priyorite' : inlineText(lang, 'Priority')}</label>
         <select
           value={filters.priority || ''}
           onChange={(e) => onFilterChange('priority', e.target.value)}
         >
-          <option value="">{lang === 'ht' ? 'Tout' : 'All'}</option>
+          <option value="">{lang === 'ht' ? 'Tout' : inlineText(lang, 'All')}</option>
           <option value="critical">🔴 Critical</option>
           <option value="high">🟠 High</option>
           <option value="medium">🟡 Medium</option>
@@ -235,12 +236,12 @@ function FilterBar({ filters, onFilterChange, stats, lang }) {
       </div>
 
       <div className="mq-filter-group">
-        <label>{lang === 'ht' ? 'Kalite' : 'Type'}</label>
+        <label>{lang === 'ht' ? 'Kalite' : inlineText(lang, 'Type')}</label>
         <select
           value={filters.content_type || ''}
           onChange={(e) => onFilterChange('content_type', e.target.value)}
         >
-          <option value="">{lang === 'ht' ? 'Tout' : 'All'}</option>
+          <option value="">{lang === 'ht' ? 'Tout' : inlineText(lang, 'All')}</option>
           <option value="post">Post</option>
           <option value="discussion">Discussion</option>
           <option value="message">Message</option>
@@ -250,12 +251,12 @@ function FilterBar({ filters, onFilterChange, stats, lang }) {
       </div>
 
       <div className="mq-filter-group">
-        <label>{lang === 'ht' ? 'Rezon' : 'Reason'}</label>
+        <label>{lang === 'ht' ? 'Rezon' : inlineText(lang, 'Reason')}</label>
         <select
           value={filters.reason || ''}
           onChange={(e) => onFilterChange('reason', e.target.value)}
         >
-          <option value="">{lang === 'ht' ? 'Tout' : 'All'}</option>
+          <option value="">{lang === 'ht' ? 'Tout' : inlineText(lang, 'All')}</option>
           <option value="spam">Spam</option>
           <option value="harassment">Harassment</option>
           <option value="violence">Violence</option>
@@ -269,7 +270,7 @@ function FilterBar({ filters, onFilterChange, stats, lang }) {
         <i className="fas fa-search" />
         <input
           type="text"
-          placeholder={lang === 'ht' ? 'Chèche...' : 'Search...'}
+          placeholder={lang === 'ht' ? 'Chèche...' : inlineText(lang, 'Search...')}
           value={filters.search || ''}
           onChange={(e) => onFilterChange('search', e.target.value)}
         />
@@ -381,12 +382,12 @@ export default function ModerationQueue({ community, lang = 'en', showToast }) {
         return next;
       });
       showToast?.(
-        lang === 'ht' ? 'Aksyon reyisi!' : 'Action completed!',
+        lang === 'ht' ? 'Aksyon reyisi!' : inlineText(lang, 'Action completed!'),
         'success'
       );
     } catch (err) {
       showToast?.(
-        lang === 'ht' ? 'Erè' : 'Error',
+        lang === 'ht' ? 'Erè' : inlineText(lang, 'Error'),
         'error'
       );
     }
@@ -406,7 +407,7 @@ export default function ModerationQueue({ community, lang = 'en', showToast }) {
       );
     } catch (err) {
       showToast?.(
-        lang === 'ht' ? 'Erè' : 'Error',
+        lang === 'ht' ? 'Erè' : inlineText(lang, 'Error'),
         'error'
       );
     }
@@ -447,14 +448,14 @@ export default function ModerationQueue({ community, lang = 'en', showToast }) {
       <div className="mq-header">
         <h3>
           <i className="fas fa-list-check" />
-          {lang === 'ht' ? 'Ke Moderasyon' : 'Moderation Queue'}
+          {lang === 'ht' ? 'Ke Moderasyon' : inlineText(lang, 'Moderation Queue')}
         </h3>
         <div className="mq-header-actions">
           <button className="mq-btn mq-btn-sort" onClick={() => setSortBy(s => s === 'priority' ? 'time' : s === 'time' ? 'reports' : 'priority')}>
             <i className="fas fa-sort" /> {sortBy === 'priority' ? 'Priority' : sortBy === 'time' ? 'Newest' : 'Most Reports'}
           </button>
           <button className="mq-btn mq-btn-select-all" onClick={handleSelectAll}>
-            <i className="fas fa-check-double" /> {lang === 'ht' ? 'Tout' : 'Select All'}
+            <i className="fas fa-check-double" /> {lang === 'ht' ? 'Tout' : inlineText(lang, 'Select All')}
           </button>
         </div>
       </div>
@@ -472,7 +473,7 @@ export default function ModerationQueue({ community, lang = 'en', showToast }) {
         {sortedItems.length === 0 && !loading ? (
           <div className="mq-empty">
             <i className="fas fa-check-circle" />
-            <p>{lang === 'ht' ? 'Pa gen kontni nan ke a' : 'Queue is clear!'}</p>
+            <p>{lang === 'ht' ? 'Pa gen kontni nan ke a' : inlineText(lang, 'Queue is clear!')}</p>
           </div>
         ) : (
           sortedItems.map((item, idx) => (
@@ -494,7 +495,7 @@ export default function ModerationQueue({ community, lang = 'en', showToast }) {
         {loading && (
           <div className="mq-loading">
             <i className="fas fa-spinner fa-spin" />
-            <span>{lang === 'ht' ? 'Ap chaje...' : 'Loading...'}</span>
+            <span>{lang === 'ht' ? 'Ap chaje...' : inlineText(lang, 'Loading...')}</span>
           </div>
         )}
       </div>

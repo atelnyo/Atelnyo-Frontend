@@ -12,6 +12,7 @@
  */
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import styles from './learning.module.css';
+import { inlineText } from '../../utils/inlineI18n';
 
 function formatTime(sec) {
   if (!Number.isFinite(sec) || sec < 0) return '0:00';
@@ -24,7 +25,7 @@ const RATES = [1, 1.25, 1.5, 0.75];
 
 export default function AudioPlayer({ src, label, lang = 'en', compact }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
   const audioRef = useRef(null);
   const [playing, setPlaying] = useState(false);
   const [loading, setLoading] = useState(true);

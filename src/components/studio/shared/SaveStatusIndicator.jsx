@@ -13,6 +13,7 @@
  *   - Click to retry on error
  */
 import React from 'react';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const STATUS_CONFIG = {
   idle: {
@@ -65,15 +66,15 @@ export default function SaveStatusIndicator({
     const d = new Date(ts);
     const now = new Date();
     const diff = now - d;
-    if (diff < 60000) return isHt ? 'kounye a' : 'just now';
-    if (diff < 3600000) return `${Math.floor(diff / 60000)}${isHt ? ' min' : 'm'}`;
+    if (diff < 60000) return isHt ? 'kounye a' : inlineText(lang, 'just now');
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}${isHt ? ' min' : inlineText(lang, 'm')}`;
     return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
   const tooltip = status === 'error'
-    ? (error || (isHt ? 'Erè sove' : 'Save error'))
+    ? (error || (isHt ? 'Erè sove' : inlineText(lang, 'Save error')))
     : status === 'saved' && lastSaved
-      ? `${isHt ? 'Dènye sove' : 'Last saved'}: ${formatTime(lastSaved)}`
+      ? `${isHt ? 'Dènye sove' : inlineText(lang, 'Last saved')}: ${formatTime(lastSaved)}`
       : config.label;
 
   return (

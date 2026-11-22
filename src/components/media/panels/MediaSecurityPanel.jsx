@@ -22,6 +22,7 @@
  * rows. Replaced by placeholder text + dashed border + inline icon.
  */
 import React from 'react';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const FIELDS = [
   { key: 'visibility',       labelEn: 'Visibility',     labelHt: 'Vizibilite',          icon: 'fa-eye',                  backendPending: false, derive: (m) => m?.visibility || 'public' },
@@ -49,17 +50,17 @@ export default function MediaSecurityPanel({ media, security = null, lang = 'en'
     <div className={`media-panel media-panel-security ${className}`}>
       <div className="media-panel-security-header">
         <i className="fas fa-shield-alt" aria-hidden="true" />
-        <strong>{isHt ? 'Sekirite' : 'Security'}</strong>
+        <strong>{isHt ? 'Sekirite' : inlineText(lang, 'Security')}</strong>
         {!isAdmin && (
           <span className="media-panel-security-adminonly">
-            {isHt ? 'Avanse: admin sèlman' : 'Advanced: admin only'}
+            {isHt ? 'Avanse: admin sèlman' : inlineText(lang, 'Advanced: admin only')}
           </span>
         )}
       </div>
       <p className="media-panel-intro">
         {isHt
           ? 'Tout siy sekirite pou medya sa a. Jaden ki pa disponib tann yon endpoint backend.'
-          : 'All security signals for this media. Fields without a backend endpoint render as pending.'}
+          : inlineText(lang, 'All security signals for this media. Fields without a backend endpoint render as pending.')}
       </p>
       <dl className="media-panel-security-grid">
         {FIELDS.map((f) => {
@@ -76,9 +77,9 @@ export default function MediaSecurityPanel({ media, security = null, lang = 'en'
             isRestricted = true;
           } else if (f.backendPending) {
             display = (
-              <span className="media-panel-pending" title={isHt ? 'Tann yon endpoint backend' : 'Awaiting backend endpoint'}>
+              <span className="media-panel-pending" title={isHt ? 'Tann yon endpoint backend' : inlineText(lang, 'Awaiting backend endpoint')}>
                 <i className="fas fa-hourglass-half" />
-                {isHt ? 'Ap tann backend' : 'Backend pending'}
+                {isHt ? 'Ap tann backend' : inlineText(lang, 'Backend pending')}
               </span>
             );
           } else if (f.list) {

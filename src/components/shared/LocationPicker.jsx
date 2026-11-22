@@ -24,6 +24,7 @@
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import useGeolocation from '../../hooks/useGeolocation';
 import { searchCities, COMMON_COUNTRIES } from '../../services/locationService';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── Debounce helper ───────────────────────────────────────────────
 function debounce(fn, ms) {
@@ -381,7 +382,7 @@ export default function LocationPicker({
                 className="location-input"
                 value={value.address_line2 || ''}
                 onChange={(e) => update('address_line2', e.target.value)}
-                placeholder={lang === 'ht' ? 'Biylding, kay nimewo' : 'Building, apt number'}
+                placeholder={lang === 'ht' ? 'Biylding, kay nimewo' : inlineText(lang, 'Building, apt number')}
                 disabled={disabled}
                 autoComplete="address-line2"
               />

@@ -8,10 +8,11 @@
 import React, { useState } from 'react';
 import { normalizeSpeechText } from '../../modules/learning/speech';
 import styles from './learning.module.css';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function ListeningBlock({ block, lang = 'en', reportComplete }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
   const [typed, setTyped] = useState('');
   const [typedResult, setTypedResult] = useState(null);
   const [listenDone, setListenDone] = useState(false);

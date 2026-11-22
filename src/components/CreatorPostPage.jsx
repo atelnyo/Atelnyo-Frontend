@@ -11,6 +11,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { creatorProfileService } from '../services/api';
+import { inlineText } from '../utils/inlineI18n';
 
 function formatDate(value, lang) {
   if (!value) return '';
@@ -73,13 +74,13 @@ export default function CreatorPostPage({ lang = 'en' }) {
         {backToProfile}
         <h1 className="creator-post-title">
           {state === 'missing'
-            ? (isHt ? 'Pòs sa a pa egziste' : 'This post does not exist')
-            : (isHt ? 'Nou pa t ka chaje pòs la' : 'Could not load the post')}
+            ? (isHt ? 'Pòs sa a pa egziste' : inlineText(lang, 'This post does not exist'))
+            : (isHt ? 'Nou pa t ka chaje pòs la' : inlineText(lang, 'Could not load the post'))}
         </h1>
         <p className="creator-post-meta">
           {state === 'missing'
-            ? (isHt ? 'Li ka siprime, oswa lyen an pa bon.' : 'It may have been deleted, or the link is wrong.')
-            : (isHt ? 'Eseye ankò nan yon ti moman.' : 'Please try again in a moment.')}
+            ? (isHt ? 'Li ka siprime, oswa lyen an pa bon.' : inlineText(lang, 'It may have been deleted, or the link is wrong.'))
+            : (isHt ? 'Eseye ankò nan yon ti moman.' : inlineText(lang, 'Please try again in a moment.'))}
         </p>
       </div>
     );
@@ -90,7 +91,7 @@ export default function CreatorPostPage({ lang = 'en' }) {
       {backToProfile}
       <header className="creator-post-header">
         <h1 className="creator-post-title">
-          {isHt ? 'Pòs' : 'Post'}
+          {isHt ? 'Pòs' : inlineText(lang, 'Post')}
         </h1>
         <p className="creator-post-meta">
           <Link to={`/c/${encodeURIComponent(username)}`} className="creator-post-author">

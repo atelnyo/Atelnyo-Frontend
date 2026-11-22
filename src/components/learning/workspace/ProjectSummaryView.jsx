@@ -11,6 +11,7 @@
  */
 import React, { useCallback } from 'react';
 import api from '../../../services/api';
+import { inlineText } from '../../../utils/inlineI18n';
 
 /**
  * §26 — Build a client-side export object from project data.
@@ -84,7 +85,7 @@ function downloadBlob(blob, filename) {
 /**
  * §26 — Client-side print-to-PDF fallback via browser's native print dialog.
  */
-function printToPDF(project, sections, user, isHt) {
+function printToPDF(project, sections, user, isHt, lang = 'en') {
   const requiredCount = sections.filter((s) => s.is_required).length;
   const completedCount = (project.completed_sections || []).length;
   const pct = project.completion_percentage || 0;
@@ -97,7 +98,7 @@ function printToPDF(project, sections, user, isHt) {
 <html lang="${isHt ? 'ht' : 'en'}">
 <head>
 <meta charset="utf-8">
-<title>${project.title || (isHt ? 'Rezime Pwojè' : 'Project Summary')}</title>
+<title>${project.title || (isHt ? 'Rezime Pwojè' : inlineText(lang, 'Project Summary'))}</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #111827; padding: 32px; max-width: 800px; margin: 0 auto; }
@@ -122,13 +123,13 @@ function printToPDF(project, sections, user, isHt) {
 </style>
 </head>
 <body>
-<h1>${project.title || (isHt ? 'Pwojè Mwen' : 'My Project')}</h1>
+<h1>${project.title || (isHt ? 'Pwojè Mwen' : inlineText(lang, 'My Project'))}</h1>
 <div class="meta">
-  ${isHt ? 'Estati' : 'Status'}: ${project.status} &mdash;
-  ${pct}% ${isHt ? 'konplete' : 'complete'} &mdash;
-  ${completedCount}/${requiredCount} ${isHt ? 'sekasyon fini' : 'sections done'}
+  ${isHt ? 'Estati' : inlineText(lang, 'Status')}: ${project.status} &mdash;
+  ${pct}% ${isHt ? 'konplete' : inlineText(lang, 'complete')} &mdash;
+  ${completedCount}/${requiredCount} ${isHt ? 'sekasyon fini' : inlineText(lang, 'sections done')}
 </div>
-${userName ? `<div class="user-info">${isHt ? 'Ekspòte pa' : 'Exported by'}: ${userName}</div>` : ''}
+${userName ? `<div class="user-info">${isHt ? 'Ekspòte pa' : inlineText(lang, 'Exported by')}: ${userName}</div>` : ''}
 <div class="progress"><div class="progress-fill"></div></div>
 `;
 
@@ -137,7 +138,7 @@ ${userName ? `<div class="user-info">${isHt ? 'Ekspòte pa' : 'Exported by'}: ${
     html += `<div class="section${isDone ? ' done' : ''}">`;
     html += `<div class="section-header">`;
     html += `<h2>${section.title}</h2>`;
-    html += `<span class="badge ${isDone ? 'badge-done' : 'badge-pending'}">${isDone ? (isHt ? '✅ Fini' : '✅ Done') : (isHt ? '⬜ Pa fini' : '⬜ Pending')}</span>`;
+    html += `<span class="badge ${isDone ? 'badge-done' : 'badge-pending'}">${isDone ? (isHt ? '✅ Fini' : inlineText(lang, '✅ Done')) : (isHt ? '⬜ Pa fini' : inlineText(lang, '⬜ Pending'))}</span>`;
     html += `</div>`;
     if (section.description) {
       html += `<p style="font-size:0.85rem;color:#6b7280;margin-bottom:10px">${section.description}</p>`;
@@ -148,14 +149,14 @@ ${userName ? `<div class="user-info">${isHt ? 'Ekspòte pa' : 'Exported by'}: ${
       html += `<div class="field-label">${field.label}${field.required_status === 'required' ? ' *' : ''}</div>`;
       html += val
         ? `<div class="field-value">${String(val).replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`
-        : `<div class="field-empty">${isHt ? '(pa gen done)' : '(no data)'}</div>`;
+        : `<div class="field-empty">${isHt ? '(pa gen done)' : inlineText(lang, '(no data)')}</div>`;
       html += `</div>`;
     }
     html += `</div>`;
   }
 
   const dateStr = now.toLocaleDateString(isHt ? 'ht' : 'en', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-  html += `<div class="footer">${isHt ? 'Ekspòte depi Atelnyo' : 'Exported from Atelnyo'} &mdash; ${dateStr}</div>`;
+  html += `<div class="footer">${isHt ? 'Ekspòte depi Atelnyo' : inlineText(lang, 'Exported from Atelnyo')} &mdash; ${dateStr}</div>`;
   html += `</body></html>`;
 
   const printWindow = window.open('', '_blank', 'width=820,height=900');
@@ -169,7 +170,7 @@ ${userName ? `<div class="user-info">${isHt ? 'Ekspòte pa' : 'Exported by'}: ${
   }
 }
 
-export default function ProjectSummaryView({ project, isHt, onBack, user }) {
+export default function ProjectSummaryView({ project, isHt, lang = 'en', onBack, user }) {
   const sections = project.sections || [];
   const courseId = project.course;
 
@@ -200,18 +201,18 @@ export default function ProjectSummaryView({ project, isHt, onBack, user }) {
       downloadBlob(blob, `project-export-${new Date().toISOString().slice(0, 10)}.pdf`);
     } catch {
       // Client-side fallback: print dialog
-      printToPDF(project, sections, user, isHt);
+      printToPDF(project, sections, user, isHt, lang);
     }
-  }, [project, sections, user, isHt, courseId]);
+  }, [project, sections, user, isHt, lang, courseId]);
 
   return (
     <div className="pw-summary">
       <div className="pw-summary-header">
         <button className="pw-btn pw-btn--ghost" onClick={onBack}>
           <i className="fas fa-arrow-left" aria-hidden="true" />
-          {isHt ? 'Retounen' : 'Back'}
+          {isHt ? 'Retounen' : inlineText(lang, 'Back')}
         </button>
-        <h3>{isHt ? 'Rezime Pwojè' : 'Project Summary'}</h3>
+        <h3>{isHt ? 'Rezime Pwojè' : inlineText(lang, 'Project Summary')}</h3>
         <span className="pw-summary-pct">{project.completion_percentage}%</span>
       </div>
 
@@ -219,11 +220,11 @@ export default function ProjectSummaryView({ project, isHt, onBack, user }) {
       <div className="pw-summary-export">
         <button className="pw-btn pw-btn--secondary" onClick={handleExportJson}>
           <i className="fas fa-download" aria-hidden="true" />
-          {isHt ? 'Ekspòte JSON' : 'Export JSON'}
+          {isHt ? 'Ekspòte JSON' : inlineText(lang, 'Export JSON')}
         </button>
         <button className="pw-btn pw-btn--secondary" onClick={handleExportPdf}>
           <i className="fas fa-file-pdf" aria-hidden="true" />
-          {isHt ? 'Ekspòte PDF' : 'Export PDF'}
+          {isHt ? 'Ekspòte PDF' : inlineText(lang, 'Export PDF')}
         </button>
       </div>
 
@@ -233,7 +234,7 @@ export default function ProjectSummaryView({ project, isHt, onBack, user }) {
         </div>
         <p className="pw-summary-meta">
           {project.completed_sections?.length || 0} / {sections.filter((s) => s.is_required).length}{' '}
-          {isHt ? 'sekasyon obligatwa fini' : 'required sections complete'}
+          {isHt ? 'sekasyon obligatwa fini' : inlineText(lang, 'required sections complete')}
         </p>
       </div>
 
@@ -268,7 +269,7 @@ export default function ProjectSummaryView({ project, isHt, onBack, user }) {
                         </p>
                       ) : (
                         <p className="pw-summary-field-empty">
-                          {isHt ? '(pa gen done)' : '(no data)'}
+                          {isHt ? '(pa gen done)' : inlineText(lang, '(no data)')}
                         </p>
                       )}
                     </div>

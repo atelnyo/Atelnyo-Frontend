@@ -21,6 +21,7 @@
 import React, { useEffect, useState } from 'react';
 import api, { courseService, marketplaceService } from '../../../services/api';
 import styles from './shared.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const LOW_STOCK_THRESHOLD = 5;
 
@@ -100,25 +101,25 @@ export default function StatusSummary({ lang = 'en', onNavigate }) {
   if (!hasAny) return null;
 
   return (
-    <div className={styles.statusSummary} role="region" aria-label={isHt ? 'Rezime estati' : 'Status summary'}>
+    <div className={styles.statusSummary} role="region" aria-label={isHt ? 'Rezime estati' : inlineText(lang, 'Status summary')}>
       <h3 className={styles.statusTitle}>
         <i className="fas fa-gauge-high" aria-hidden="true" />
-        {isHt ? 'Rezime Estati' : 'Status Summary'}
+        {isHt ? 'Rezime Estati' : inlineText(lang, 'Status Summary')}
       </h3>
 
       {data.products && (
         <StatusRow
           icon="fa-cube"
-          label={isHt ? 'Pwodwi' : 'Products'}
+          label={isHt ? 'Pwodwi' : inlineText(lang, 'Products')}
           onClick={onNavigate ? () => onNavigate('products') : null}
         >
-          <StatusChip label={isHt ? 'aktif' : 'active'} count={data.products.active} tone="Emerald" />
-          <StatusChip label={isHt ? 'bouyon' : 'drafts'} count={data.products.drafts} tone="Amber" />
+          <StatusChip label={isHt ? 'aktif' : inlineText(lang, 'active')} count={data.products.active} tone="Emerald" />
+          <StatusChip label={isHt ? 'bouyon' : inlineText(lang, 'drafts')} count={data.products.drafts} tone="Amber" />
           {data.products.lowStock > 0 && (
-            <StatusChip label={isHt ? 'stock ba' : 'low stock'} count={data.products.lowStock} tone="Amber" />
+            <StatusChip label={isHt ? 'stock ba' : inlineText(lang, 'low stock')} count={data.products.lowStock} tone="Amber" />
           )}
           {data.products.outOfStock > 0 && (
-            <StatusChip label={isHt ? 'pa gen stock' : 'out of stock'} count={data.products.outOfStock} tone="Red" />
+            <StatusChip label={isHt ? 'pa gen stock' : inlineText(lang, 'out of stock')} count={data.products.outOfStock} tone="Red" />
           )}
         </StatusRow>
       )}
@@ -126,23 +127,23 @@ export default function StatusSummary({ lang = 'en', onNavigate }) {
       {data.orders && (
         <StatusRow
           icon="fa-cart-shopping"
-          label={isHt ? 'Lòd (vant)' : 'Orders (sales)'}
+          label={isHt ? 'Lòd (vant)' : inlineText(lang, 'Orders (sales)')}
           onClick={onNavigate ? () => onNavigate('orders') : null}
         >
-          <StatusChip label={isHt ? 'annatant' : 'pending'} count={data.orders.pending} tone="Amber" />
-          <StatusChip label={isHt ? 'fini' : 'completed'} count={data.orders.completed} tone="Emerald" />
+          <StatusChip label={isHt ? 'annatant' : inlineText(lang, 'pending')} count={data.orders.pending} tone="Amber" />
+          <StatusChip label={isHt ? 'fini' : inlineText(lang, 'completed')} count={data.orders.completed} tone="Emerald" />
         </StatusRow>
       )}
 
       {data.courses != null && (
         <StatusRow
           icon="fa-graduation-cap"
-          label={isHt ? 'Kou' : 'Courses'}
+          label={isHt ? 'Kou' : inlineText(lang, 'Courses')}
           onClick={onNavigate ? () => onNavigate('courses') : null}
         >
-          <StatusChip label={isHt ? 'pibliye' : 'published'} count={data.courses.published} tone="Emerald" />
+          <StatusChip label={isHt ? 'pibliye' : inlineText(lang, 'published')} count={data.courses.published} tone="Emerald" />
           {data.courses.drafts > 0 && (
-            <StatusChip label={isHt ? 'bouyon' : 'drafts'} count={data.courses.drafts} tone="Amber" />
+            <StatusChip label={isHt ? 'bouyon' : inlineText(lang, 'drafts')} count={data.courses.drafts} tone="Amber" />
           )}
         </StatusRow>
       )}
@@ -150,10 +151,10 @@ export default function StatusSummary({ lang = 'en', onNavigate }) {
       {data.unread != null && (
         <StatusRow
           icon="fa-envelope"
-          label={isHt ? 'Mesaj' : 'Messages'}
+          label={isHt ? 'Mesaj' : inlineText(lang, 'Messages')}
           onClick={onNavigate ? () => onNavigate('messages') : null}
         >
-          <StatusChip label={isHt ? 'pa li' : 'unread'} count={data.unread} tone="Blue" />
+          <StatusChip label={isHt ? 'pa li' : inlineText(lang, 'unread')} count={data.unread} tone="Blue" />
         </StatusRow>
       )}
     </div>

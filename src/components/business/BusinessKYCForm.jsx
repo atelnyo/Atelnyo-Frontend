@@ -6,6 +6,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 const BUSINESS_TYPES = [
   { value: 'sole_proprietorship', labelHt: 'Propriyete Pèsonèl', labelEn: 'Sole Proprietorship' },
@@ -17,7 +18,7 @@ const BUSINESS_TYPES = [
 ];
 
 export default function BusinessKYCForm({ businessId, lang = 'en', onStatusChange }) {
-  const t = (ht, en) => lang === 'ht' ? ht : en;
+  const t = (ht, en) => lang === 'ht' ? ht : inlineText(lang, en);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState(null);

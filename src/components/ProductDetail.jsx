@@ -27,6 +27,7 @@ import { historyBack } from '../utils/history';
 import { ogImageForLang } from './profile/profileConstants';
 import { t2 } from '../utils/i18n';
 import { sanitizeProductDescription } from '../utils/sanitize';
+import { inlineText } from '../utils/inlineI18n';
 
 /* ─── Constants ────────────────────────────────────────────────── */
 const OG_IMAGE_FALLBACK = 'https://atelnyo.site/og-banner-en.svg';
@@ -558,7 +559,7 @@ export default function ProductDetail({ lang = 'en', product: propProduct, onBac
                   <i className="fas fa-shield-alt" style={{ marginRight: 4, opacity: 0.5 }} />
                   {lang === 'ht'
                     ? 'Seksyon an sekirite. Paiement an komen se pa sa a platfòm nan jere a.'
-                    : 'Secure checkout. Payment handled by the platform.'}
+                    : inlineText(lang, 'Secure checkout. Payment handled by the platform.')}
                 </p>
               </div>
 

@@ -15,6 +15,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import MediaGrid from './MediaGrid';
 import ImageViewer from './ImageViewer';
 import { mediaProviderService } from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function MediaPicker({
   onSelect,
@@ -41,7 +42,7 @@ export default function MediaPicker({
         const res = await mediaProviderService.userMedia(params);
         setItems(res.data?.results || res.data || []);
       } catch (err) {
-        setError(err.response?.data?.error || (isHt ? 'Pa kapab chaje medya yo' : 'Failed to load media'));
+        setError(err.response?.data?.error || (isHt ? 'Pa kapab chaje medya yo' : inlineText(lang, 'Failed to load media')));
       } finally {
         setLoading(false);
       }
@@ -70,18 +71,18 @@ export default function MediaPicker({
   }, [onSelect, multiSelect, selected]);
 
   return (
-    <div className={`media-picker ${className}`} role="dialog" aria-label={isHt ? 'Chwazi medya' : 'Media picker'} aria-modal="true">
+    <div className={`media-picker ${className}`} role="dialog" aria-label={isHt ? 'Chwazi medya' : inlineText(lang, 'Media picker')} aria-modal="true">
       {/* Header */}
       <div className="media-picker-header">
         <h3 className="media-picker-title">
           <i className="fas fa-photo-video" aria-hidden="true" />
-          {isHt ? 'Chwazi Medya' : 'Media Picker'}
+          {isHt ? 'Chwazi Medya' : inlineText(lang, 'Media Picker')}
         </h3>
         <button
           type="button"
           className="media-picker-close"
           onClick={onCancel}
-          aria-label={isHt ? 'Fèmen' : 'Close'}
+          aria-label={isHt ? 'Fèmen' : inlineText(lang, 'Close')}
         >
           <i className="fas fa-times" />
         </button>
@@ -122,7 +123,7 @@ export default function MediaPicker({
         <div className="media-picker-selected">
           <span>
             <i className="fas fa-check-circle" aria-hidden="true" />
-            {selected.length} {isHt ? 'chwazi' : 'selected'}
+            {selected.length} {isHt ? 'chwazi' : inlineText(lang, 'selected')}
           </span>
         </div>
       )}
@@ -130,7 +131,7 @@ export default function MediaPicker({
       {/* Actions */}
       <div className="media-picker-actions">
         <button type="button" className="btn-secondary" onClick={onCancel}>
-          {isHt ? 'Anile' : 'Cancel'}
+          {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
         </button>
         <button
           type="button"
@@ -139,7 +140,7 @@ export default function MediaPicker({
           disabled={selected.length === 0}
         >
           <i className="fas fa-check" aria-hidden="true" />
-          {isHt ? 'Chwazi' : 'Choose'}
+          {isHt ? 'Chwazi' : inlineText(lang, 'Choose')}
         </button>
       </div>
     </div>

@@ -27,6 +27,7 @@
  *   lang        — language code (default: 'ht')
  */
 import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── Video Source Detection ─────────────────────────────────────────
 
@@ -241,7 +242,7 @@ export default function StableVideoPlayer({
       <div className={`svp-empty ${className}`} style={{ width }}>
         <div className="svp-placeholder">
           <i className="fas fa-video" />
-          <span>{lang === 'ht' ? 'Pa gen videyo' : 'No video'}</span>
+          <span>{lang === 'ht' ? 'Pa gen videyo' : inlineText(lang, 'No video')}</span>
         </div>
       </div>
     );

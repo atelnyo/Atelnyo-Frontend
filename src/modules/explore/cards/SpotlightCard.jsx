@@ -16,6 +16,7 @@ import CardOpenButton from './CardOpenButton';
 import SaveCountChip from './SaveCountChip';
 import SaveHeartButton from '../../../components/SaveHeartButton';
 import useSavedItem from '../../../hooks/useSavedItem';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const CATEGORY_CFG = {
   talent:   { bg: 'linear-gradient(135deg, #7c3aed22, #f59e0b18)', border: '#7c3aed44', pill: '#7c3aed', icon: 'fa-star' },
@@ -159,7 +160,7 @@ export default function SpotlightCard({
       <div className="spotlight-card-body">
         {/* Title */}
         <div className="spotlight-card-title" title={title}>
-          {title || (lang === 'ht' ? 'Envansyon' : 'Invention')}
+          {title || (lang === 'ht' ? 'Envansyon' : inlineText(lang, 'Invention'))}
         </div>
 
         {/* Description */}
@@ -176,7 +177,7 @@ export default function SpotlightCard({
             {views > 0 && (
               <span
                 className="spotlight-card-stat"
-                title={`${views} ${t.spotlight_views || (lang === 'ht' ? 'vi' : 'views')}`}
+                title={`${views} ${t.spotlight_views || (lang === 'ht' ? 'vi' : inlineText(lang, 'views'))}`}
               >
                 <i className="fas fa-eye" aria-hidden="true" /> {views}
               </span>
@@ -184,7 +185,7 @@ export default function SpotlightCard({
             {shares > 0 && (
               <span
                 className="spotlight-card-stat"
-                title={`${shares} ${t.spotlight_shares || (lang === 'ht' ? 'pataje' : 'shares')}`}
+                title={`${shares} ${t.spotlight_shares || (lang === 'ht' ? 'pataje' : inlineText(lang, 'shares'))}`}
               >
                 <i className="fas fa-share-nodes" aria-hidden="true" /> {shares}
               </span>

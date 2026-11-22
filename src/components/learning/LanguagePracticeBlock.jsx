@@ -35,6 +35,7 @@ import ListeningBlock from './ListeningBlock';
 import TextBlock from './TextBlock';
 import VideoBlock from './VideoBlock';
 import styles from './learning.module.css';
+import { inlineText } from '../../utils/inlineI18n';
 
 const TYPE_META = {
   repeat:        { icon: 'fa-repeat',        label: { en: 'Repeat After Me', ht: 'Repete apre m' } },
@@ -50,7 +51,7 @@ const TYPE_META = {
 
 export default function LanguagePracticeBlock({ block, lang = 'en', index, courseId, moduleIndex, onComplete, onViewed }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
   const meta = TYPE_META[block.type] || TYPE_META.repeat;
   const completedRef = useRef(false); // avoid double-reporting completion
 

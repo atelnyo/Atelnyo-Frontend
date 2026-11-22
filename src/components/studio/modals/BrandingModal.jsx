@@ -9,6 +9,7 @@ import React, { useState, useCallback } from 'react';
 import api, { applyTokenPair } from '../../../services/api';
 import { StudioModal, FormField, LoadingOverlay } from './shared';
 import styles from './modals.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function BrandingModal({ onClose, onSuccess, lang, showToast }) {
   const [brandName, setBrandName] = useState('');
@@ -19,7 +20,7 @@ export default function BrandingModal({ onClose, onSuccess, lang, showToast }) {
     e?.preventDefault?.();
     const trimmed = brandName.trim();
     if (!trimmed) {
-      setError(lang === 'ht' ? 'Non mak oblije' : 'Brand name required');
+      setError(lang === 'ht' ? 'Non mak oblije' : inlineText(lang, 'Brand name required'));
       return;
     }
     setError(null); setLoading(true);
@@ -36,14 +37,14 @@ export default function BrandingModal({ onClose, onSuccess, lang, showToast }) {
         } catch (_) { /* ignore */ }
       }
       showToast?.(
-        lang === 'ht' ? '✅ Non mak mete ajou!' : '✅ Brand name updated!',
+        lang === 'ht' ? '✅ Non mak mete ajou!' : inlineText(lang, '✅ Brand name updated!'),
         'check-circle',
       );
       onSuccess?.(); onClose?.();
     } catch (err) {
       const detail = err?.response?.data?.error || err?.response?.data?.detail
         || err?.message
-        || (lang === 'ht' ? 'Pa t kapab mete brand la ajou.' : 'Could not update brand.');
+        || (lang === 'ht' ? 'Pa t kapab mete brand la ajou.' : inlineText(lang, 'Could not update brand.'));
       setError(detail);
       showToast?.(detail, 'circle-exclamation');
     } finally { setLoading(false); }
@@ -51,13 +52,13 @@ export default function BrandingModal({ onClose, onSuccess, lang, showToast }) {
 
   return (
     <StudioModal onClose={onClose} icon="fa-palette"
-      title={lang === 'ht' ? 'Non Mak' : 'Brand Name'}
-      subtitle={lang === 'ht' ? 'Chwazi non mak ou sou Atelnyo' : 'Choose your brand name on Atelnyo'}>
+      title={lang === 'ht' ? 'Non Mak' : inlineText(lang, 'Brand Name')}
+      subtitle={lang === 'ht' ? 'Chwazi non mak ou sou Atelnyo' : inlineText(lang, 'Choose your brand name on Atelnyo')}>
 
       <form onSubmit={handleSubmit} className={styles.form}>
         {error && <div className={styles.apiError} role="alert">{error}</div>}
         <LoadingOverlay loading={loading}>
-          <FormField label={lang === 'ht' ? 'Non Mak / Atis' : 'Brand / Artist Name'} required>
+          <FormField label={lang === 'ht' ? 'Non Mak / Atis' : inlineText(lang, 'Brand / Artist Name')} required>
             <input className={styles.input} value={brandName}
               onChange={(e) => { setBrandName(e.target.value); setError(null); }}
               placeholder="DJ Rose, Professor Dev, ..."
@@ -66,18 +67,18 @@ export default function BrandingModal({ onClose, onSuccess, lang, showToast }) {
           <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
             {lang === 'ht'
               ? '💡 Non mak ou pral parèt sou pwofil Creator ou. Ou ka itilize yon non atis, non biznis, oswa non lekòl.'
-              : '💡 Your brand name will appear on your Creator profile. You can use an artist name, business name, or school name.'}
+              : inlineText(lang, '💡 Your brand name will appear on your Creator profile. You can use an artist name, business name, or school name.')}
           </p>
         </LoadingOverlay>
         <div className={styles.actions}>
           <button type="button" className="btn-secondary" onClick={onClose} disabled={loading}>
-            {lang === 'ht' ? 'Anile' : 'Cancel'}
+            {lang === 'ht' ? 'Anile' : inlineText(lang, 'Cancel')}
           </button>
           <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? (
-              <><i className="fas fa-spinner fa-spin" /> {lang === 'ht' ? 'Ap sove...' : 'Saving...'}</>
+              <><i className="fas fa-spinner fa-spin" /> {lang === 'ht' ? 'Ap sove...' : inlineText(lang, 'Saving...')}</>
             ) : (
-              <><i className="fas fa-save" /> {lang === 'ht' ? 'Sove Mak' : 'Save Brand'}</>
+              <><i className="fas fa-save" /> {lang === 'ht' ? 'Sove Mak' : inlineText(lang, 'Save Brand')}</>
             )}
           </button>
         </div>

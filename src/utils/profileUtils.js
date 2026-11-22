@@ -1,3 +1,4 @@
+import { inlineText } from './inlineI18n';
 /**
  * src/utils/profileUtils.js
  *
@@ -115,7 +116,7 @@ export function bucketRelativeTime(iso, lang = 'en') {
   const diffMin = Math.round(diffMs / 60000);
 
   // Ultra-recent: minutes
-  if (diffMin < 1) return lang === 'ht' ? 'kounye a' : 'now';
+  if (diffMin < 1) return lang === 'ht' ? 'kounye a' : inlineText(lang, 'now');
   if (diffMin < 60) return lang === 'ht' ? `${diffMin}m de sa` : `${diffMin}m ago`;
 
   const diffH = Math.round(diffMin / 60);
@@ -123,7 +124,7 @@ export function bucketRelativeTime(iso, lang = 'en') {
 
   // Yesterday bucket
   const oneDayMs = 86_400_000;
-  if (diffH < 48) return lang === 'ht' ? 'Yè' : 'Yesterday';
+  if (diffH < 48) return lang === 'ht' ? 'Yè' : inlineText(lang, 'Yesterday');
 
   const diffD = Math.round(diffH / 24);
   if (diffD < 7) return lang === 'ht' ? `${diffD}j de sa` : `${diffD}d ago`;

@@ -5,6 +5,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../../services/api';
 import './TemplatePicker.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function TemplatePicker({ lang = 'en', onSelect }) {
   const isHt = lang === 'ht';
@@ -34,11 +35,11 @@ export default function TemplatePicker({ lang = 'en', onSelect }) {
 
   return (
     <div className="template-picker">
-      <h3>📝 {isHt ? 'Chwazi yon Modèl' : 'Choose a Template'}</h3>
+      <h3>📝 {isHt ? 'Chwazi yon Modèl' : inlineText(lang, 'Choose a Template')}</h3>
       <p className="tp-subtitle">
         {isHt
           ? 'Chwazi yon modèl pou kòmanse, oswa kòmanse ak yon kou vid.'
-          : 'Pick a template to start, or begin with a blank course.'}
+          : inlineText(lang, 'Pick a template to start, or begin with a blank course.')}
       </p>
       <div className="tp-grid">
         {templates.map((t) => (
@@ -47,7 +48,7 @@ export default function TemplatePicker({ lang = 'en', onSelect }) {
             <h4 className="tp-name">{isHt ? t.name : t.name_en}</h4>
             <p className="tp-desc">{isHt ? t.description : t.description_en}</p>
             <div className="tp-meta">
-              <span>{t.module_count} {isHt ? 'modil' : 'modules'}</span>
+              <span>{t.module_count} {isHt ? 'modil' : inlineText(lang, 'modules')}</span>
               <span className={`tp-diff tp-diff-${t.difficulty}`}>{t.difficulty}</span>
             </div>
           </button>

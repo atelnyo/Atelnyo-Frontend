@@ -13,6 +13,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useHasAdminAccess } from '../../hooks/useHasAdminAccess';
 import { adminMediaService } from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 function fmtNumber(n) {
   if (n == null || !Number.isFinite(Number(n))) return '0';
@@ -65,7 +66,7 @@ export default function AdminBrokenMediaCenter({ lang = 'en', showToast, user, o
   useEffect(() => {
     if (user && !permsLoading && !hasStaffAccess) {
       showToast?.(
-        isHt ? 'Aksè rezeve pou administratè.' : 'Staff access required.',
+        isHt ? 'Aksè rezeve pou administratè.' : inlineText(lang, 'Staff access required.'),
         'user-lock',
       );
       if (onNavigate) onNavigate('/', { replace: true });
@@ -79,7 +80,7 @@ export default function AdminBrokenMediaCenter({ lang = 'en', showToast, user, o
       setStats(res.data);
     } catch {
       showToast?.(
-        isHt ? 'Pa kapab chaje estatistik.' : 'Failed to load stats.',
+        isHt ? 'Pa kapab chaje estatistik.' : inlineText(lang, 'Failed to load stats.'),
         'exclamation-triangle',
       );
     } finally {
@@ -94,8 +95,8 @@ export default function AdminBrokenMediaCenter({ lang = 'en', showToast, user, o
       <div className="abmc-shell">
         <div className="avq-empty">
           <i className="fas fa-user-lock" />
-          <h3>{isHt ? 'Aksè Rezeve' : 'Staff Access Required'}</h3>
-          <p>{isHt ? 'Ou bezwen pèmisyon administratè.' : 'You need staff permissions.'}</p>
+          <h3>{isHt ? 'Aksè Rezeve' : inlineText(lang, 'Staff Access Required')}</h3>
+          <p>{isHt ? 'Ou bezwen pèmisyon administratè.' : inlineText(lang, 'You need staff permissions.')}</p>
         </div>
       </div>
     );
@@ -110,39 +111,39 @@ export default function AdminBrokenMediaCenter({ lang = 'en', showToast, user, o
         </button>
         <div className="abmc-header-center">
           <h1 className="abmc-title">
-            <i className="fas fa-link-slash" /> {isHt ? 'Sant Medya Kase' : 'Broken Media Center'}
+            <i className="fas fa-link-slash" /> {isHt ? 'Sant Medya Kase' : inlineText(lang, 'Broken Media Center')}
           </h1>
           <p className="abmc-subtitle">
             {isHt
               ? 'Siveye tout medya ki kase sou platfòm la.'
-              : 'Monitor all broken media across the platform.'}
+              : inlineText(lang, 'Monitor all broken media across the platform.')}
           </p>
         </div>
         <div className="abmc-header-actions">
           <button type="button" className="abmc-btn" onClick={fetchStats}>
-            <i className="fas fa-sync" /> {isHt ? 'Rafrechi' : 'Refresh'}
+            <i className="fas fa-sync" /> {isHt ? 'Rafrechi' : inlineText(lang, 'Refresh')}
           </button>
         </div>
       </div>
 
       {loading ? (
         <div className="abmc-loading">
-          <i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap chaje...' : 'Loading...'}
+          <i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap chaje...' : inlineText(lang, 'Loading...')}
         </div>
       ) : (
         <div className="abmc-body">
           <div className="abmc-stats-grid">
-            <StatCard icon="fa-link-slash" label={isHt ? 'Total Kase' : 'Total Broken'} value={stats?.total_broken} color="var(--state-error, #ef4444)" />
-            <StatCard icon="fa-calendar-day" label={isHt ? 'Jodi a' : 'Today'} value={stats?.broken_today} color="var(--state-warning, #f59e0b)" />
-            <StatCard icon="fa-calendar-week" label={isHt ? 'Semèn sa' : 'This Week'} value={stats?.broken_this_week} color="var(--pr-color-orange-500, #f97316)" />
-            <StatCard icon="fa-calendar-alt" label={isHt ? 'Mwa sa' : 'This Month'} value={stats?.broken_this_month} color="var(--pr-color-orange-400, #fb923c)" />
-            <StatCard icon="fa-heart-pulse" label={isHt ? 'Fikse Resamman' : 'Recently Fixed'} value={stats?.recently_fixed} color="var(--state-success, #10b981)" />
-            <StatCard icon="fa-clock" label={isHt ? 'Ap Tann Ranplasman' : 'Waiting Replacement'} value={stats?.waiting_replacement} color="var(--pr-color-violet-500, #8b5cf6)" />
+            <StatCard icon="fa-link-slash" label={isHt ? 'Total Kase' : inlineText(lang, 'Total Broken')} value={stats?.total_broken} color="var(--state-error, #ef4444)" />
+            <StatCard icon="fa-calendar-day" label={isHt ? 'Jodi a' : inlineText(lang, 'Today')} value={stats?.broken_today} color="var(--state-warning, #f59e0b)" />
+            <StatCard icon="fa-calendar-week" label={isHt ? 'Semèn sa' : inlineText(lang, 'This Week')} value={stats?.broken_this_week} color="var(--pr-color-orange-500, #f97316)" />
+            <StatCard icon="fa-calendar-alt" label={isHt ? 'Mwa sa' : inlineText(lang, 'This Month')} value={stats?.broken_this_month} color="var(--pr-color-orange-400, #fb923c)" />
+            <StatCard icon="fa-heart-pulse" label={isHt ? 'Fikse Resamman' : inlineText(lang, 'Recently Fixed')} value={stats?.recently_fixed} color="var(--state-success, #10b981)" />
+            <StatCard icon="fa-clock" label={isHt ? 'Ap Tann Ranplasman' : inlineText(lang, 'Waiting Replacement')} value={stats?.waiting_replacement} color="var(--pr-color-violet-500, #8b5cf6)" />
           </div>
           <div className="abmc-tops-grid">
-            <TopList title={isHt ? 'Providers ki pi kase' : 'Most Broken Providers'} items={stats?.most_broken_providers} keyField="name" valueField="count" icon="fa-cloud" />
-            <TopList title={isHt ? 'Kreyatè ki pi kase' : 'Most Broken Creators'} items={stats?.most_broken_creators} keyField="username" valueField="count" icon="fa-users" />
-            <TopList title={isHt ? 'Modil ki pi kase' : 'Most Broken Modules'} items={stats?.most_broken_modules} keyField="module" valueField="count" icon="fa-cubes" />
+            <TopList title={isHt ? 'Providers ki pi kase' : inlineText(lang, 'Most Broken Providers')} items={stats?.most_broken_providers} keyField="name" valueField="count" icon="fa-cloud" />
+            <TopList title={isHt ? 'Kreyatè ki pi kase' : inlineText(lang, 'Most Broken Creators')} items={stats?.most_broken_creators} keyField="username" valueField="count" icon="fa-users" />
+            <TopList title={isHt ? 'Modil ki pi kase' : inlineText(lang, 'Most Broken Modules')} items={stats?.most_broken_modules} keyField="module" valueField="count" icon="fa-cubes" />
           </div>
         </div>
       )}

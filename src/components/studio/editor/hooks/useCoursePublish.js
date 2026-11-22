@@ -9,8 +9,9 @@
  */
 import { useCallback, useState } from 'react';
 import { courseService } from '../../../../services/api';
+import { inlineText } from '../../../../utils/inlineI18n';
 
-export function useCoursePublish({ savedIdRef, doSave, isHt, showToast, setSaveState, setSaveError, clearDirty, setDirty, onSaved }) {
+export function useCoursePublish({ savedIdRef, doSave, isHt, lang = 'en', showToast, setSaveState, setSaveError, clearDirty, setDirty, onSaved }) {
   const [publishing, setPublishing] = useState(false);
 
   const handlePublish = useCallback(async () => {
@@ -23,7 +24,7 @@ export function useCoursePublish({ savedIdRef, doSave, isHt, showToast, setSaveS
         if (!ok || !savedIdRef.current) {
           setSaveError(isHt
             ? 'Sove kou a anvan w pibliye l — gen jaden ki pa konplè.'
-            : 'Save the course before publishing — some fields are incomplete.');
+            : inlineText(lang, 'Save the course before publishing — some fields are incomplete.'));
           setSaveState('error');
           return;
         }
@@ -35,7 +36,7 @@ export function useCoursePublish({ savedIdRef, doSave, isHt, showToast, setSaveS
         setSaveState('saved');
         setSaveError('');
         onSaved?.();
-        showToast?.(isHt ? '🚀 Kou pibliye! Vizitè yo ka wè l kounye a.' : '🚀 Course published! Visitors can see it now.', 'check-circle');
+        showToast?.(isHt ? '🚀 Kou pibliye! Vizitè yo ka wè l kounye a.' : inlineText(lang, '🚀 Course published! Visitors can see it now.'), 'check-circle');
         return;
       }
     } catch (err) {
@@ -43,10 +44,10 @@ export function useCoursePublish({ savedIdRef, doSave, isHt, showToast, setSaveS
       if (gate) {
         // Server-side publish gate (§51) — surface each missing item.
         const map = {
-          title: isHt ? 'Ajoute yon tit' : 'Add a title',
-          description: isHt ? 'Deskripsyon an dwe gen 20+ karaktè' : 'Description must be 20+ characters',
-          image_url: isHt ? 'Ajoute yon imaj kouvèti' : 'Add a cover image',
-          external_url: isHt ? 'Ajoute URL kou ekstèn lan' : 'Add the external course URL',
+          title: isHt ? 'Ajoute yon tit' : inlineText(lang, 'Add a title'),
+          description: isHt ? 'Deskripsyon an dwe gen 20+ karaktè' : inlineText(lang, 'Description must be 20+ characters'),
+          image_url: isHt ? 'Ajoute yon imaj kouvèti' : inlineText(lang, 'Add a cover image'),
+          external_url: isHt ? 'Ajoute URL kou ekstèn lan' : inlineText(lang, 'Add the external course URL'),
         };
         const missing = Object.keys(gate).map((k) => map[k] || gate[k]).join(' · ');
         setSaveError(isHt
@@ -56,7 +57,7 @@ export function useCoursePublish({ savedIdRef, doSave, isHt, showToast, setSaveS
         showToast?.(isHt ? `Kou a pa pibliye — ${missing}.` : `Course not published — ${missing}.`, 'circle-exclamation');
       } else {
         const detail = err?.response?.data?.detail || err?.message
-          || (isHt ? 'Pa t kapab pibliye kou a.' : 'Could not publish the course.');
+          || (isHt ? 'Pa t kapab pibliye kou a.' : inlineText(lang, 'Could not publish the course.'));
         setSaveError(detail);
         setSaveState('error');
         showToast?.(detail, 'circle-exclamation');

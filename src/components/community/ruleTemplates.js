@@ -9,7 +9,7 @@
  * file, so the wording and the ordering cannot drift between surfaces.
  *
  * Every rule has a stable ``key`` (``categoryId:ruleId``) and copy in
- * the three interface languages the project supports (ht / en / fr).
+ * the four interface languages the project supports (ht / en / fr / es).
  * User-selected copies become ordinary user content in ``CommunityRule``
  * rows — changing the interface language never rewrites them.
  */
@@ -18,51 +18,56 @@ export const RULE_TEMPLATE_CATEGORIES = [
   {
     id: 'respect',
     icon: 'fa-handshake-angle',
-    label: { en: 'Respect & behavior', ht: 'Respè ak konpòtman', fr: 'Respect et comportement' },
+    label: { en: 'Respect & behavior', ht: 'Respè ak konpòtman', fr: 'Respect et comportement', es: 'Respeto y conducta' },
     rules: [
       {
         id: 'be-respectful',
-        title: { en: 'Be respectful', ht: 'Respekte tout moun', fr: 'Soyez respectueux' },
+        title: { en: 'Be respectful', ht: 'Respekte tout moun', fr: 'Soyez respectueux', es: 'Sé respetuoso' },
         description: {
           en: 'Treat every member with kindness, even when you disagree with their ideas.',
           ht: 'Trete chak manm ak jantiyès, menm lè w pa dakò ak lide yo.',
           fr: 'Traitez chaque membre avec bienveillance, même lorsque vous n’êtes pas d’accord.',
+          es: 'Trata a cada miembro con amabilidad, incluso cuando no estés de acuerdo con sus ideas.',
         },
       },
       {
         id: 'no-harassment',
-        title: { en: 'No harassment', ht: 'Pa gen arasman', fr: 'Pas de harcèlement' },
+        title: { en: 'No harassment', ht: 'Pa gen arasman', fr: 'Pas de harcèlement', es: 'Sin acoso' },
         description: {
           en: 'Do not target, intimidate, or repeatedly contact someone against their wishes.',
           ht: 'Pa vize, entimide, oswa kontakte yon moun repete kont volonte li.',
           fr: 'Ne ciblez pas, n’intimidez pas et ne contactez pas une personne contre son gré.',
+          es: 'No señales, intimides ni contactes repetidamente a alguien en contra de su voluntad.',
         },
       },
       {
         id: 'no-bullying',
-        title: { en: 'No bullying', ht: 'Pa gen entimidasyon', fr: 'Pas d’intimidation' },
+        title: { en: 'No bullying', ht: 'Pa gen entimidasyon', fr: 'Pas d’intimidation', es: 'Sin intimidación' },
         description: {
           en: 'Mocking, humiliating, or ganging up on a member is not allowed.',
           ht: 'Pase moun nan betiz, imilye yo, oswa mete plizyè moun sou yon manm pa pèmèt.',
           fr: 'Se moquer, humilier ou s’acharner sur un membre n’est pas autorisé.',
+          es: 'No se permite burlarse, humillar ni acosar en grupo a un miembro.',
         },
       },
       {
         id: 'no-discrimination',
-        title: { en: 'No discrimination', ht: 'Pa gen diskriminasyon', fr: 'Pas de discrimination' },
+        title: { en: 'No discrimination', ht: 'Pa gen diskriminasyon', fr: 'Pas de discrimination', es: 'Sin discriminación' },
         description: {
           en: 'No attacks based on race, ethnicity, gender, religion, disability, or origin.',
           ht: 'Pa gen atak sou baz ras, etnisite, sèks, relijyon, andikap, oswa orijin.',
           fr: 'Aucune attaque fondée sur la race, l’origine, le genre, la religion ou le handicap.',
+          es: 'No se permiten ataques por raza, etnia, género, religión, discapacidad u origen.',
         },
       },
       {
         id: 'no-threats',
-        title: { en: 'No threats or personal attacks', ht: 'Pa gen menas oswa atak pèsonèl', fr: 'Pas de menaces ni d’attaques personnelles' },
+        title: { en: 'No threats or personal attacks', ht: 'Pa gen menas oswa atak pèsonèl', fr: 'Pas de menaces ni d’attaques personnelles', es: 'Sin amenazas ni ataques personales' },
         description: {
           en: 'Debate the idea, never the person. Threats are reported immediately.',
           ht: 'Debat lide a, pa janm moun nan. Menas yo rapòte touswit.',
           fr: 'Débattez des idées, jamais des personnes. Les menaces sont signalées immédiatement.',
+          es: 'Debate la idea, nunca a la persona. Las amenazas se denuncian de inmediato.',
         },
       },
     ],
@@ -70,51 +75,56 @@ export const RULE_TEMPLATE_CATEGORIES = [
   {
     id: 'content',
     icon: 'fa-file-lines',
-    label: { en: 'Content guidelines', ht: 'Gid pou kontni', fr: 'Règles de contenu' },
+    label: { en: 'Content guidelines', ht: 'Gid pou kontni', fr: 'Règles de contenu', es: 'Normas de contenido' },
     rules: [
       {
         id: 'stay-on-topic',
-        title: { en: 'Stay on topic', ht: 'Rete nan sijè a', fr: 'Restez dans le sujet' },
+        title: { en: 'Stay on topic', ht: 'Rete nan sijè a', fr: 'Restez dans le sujet', es: 'Mantente en el tema' },
         description: {
           en: 'Share content relevant to this community so the feed stays useful.',
           ht: 'Pataje kontni ki gen rapò ak kominote sa a pou fil la rete itil.',
           fr: 'Partagez du contenu pertinent pour cette communauté afin que le fil reste utile.',
+          es: 'Comparte contenido relevante para esta comunidad para que el feed siga siendo útil.',
         },
       },
       {
         id: 'relevant-content',
-        title: { en: 'Share relevant content', ht: 'Pataje kontni ki gen rapò', fr: 'Partagez du contenu pertinent' },
+        title: { en: 'Share relevant content', ht: 'Pataje kontni ki gen rapò', fr: 'Partagez du contenu pertinent', es: 'Comparte contenido relevante' },
         description: {
           en: 'Post things members can use here — not unrelated links or off-topic chatter.',
           ht: 'Pibliye bagay manm yo ka sèvi isit — pa lyen san rapò ni pale de lòt bagay.',
           fr: 'Publiez des contenus utiles ici — pas de liens hors sujet ni de conversations sans rapport.',
+          es: 'Publica cosas que los miembros puedan usar aquí — no enlaces sin relación ni charlas fuera de tema.',
         },
       },
       {
         id: 'appropriate-content',
-        title: { en: 'No inappropriate content', ht: 'Pa gen kontni ki pa apwopriye', fr: 'Pas de contenu inapproprié' },
+        title: { en: 'No inappropriate content', ht: 'Pa gen kontni ki pa apwopriye', fr: 'Pas de contenu inapproprié', es: 'Sin contenido inapropiado' },
         description: {
           en: 'No sexual, violent, or otherwise unsafe content where it is not welcome.',
           ht: 'Pa gen kontni seksyèl, vyolan, oswa ki pa an sekirite kote li pa aksepte.',
           fr: 'Aucun contenu sexuel, violent ou dangereux là où il n’est pas accepté.',
+          es: 'Nada de contenido sexual, violento o inseguro donde no sea bienvenido.',
         },
       },
       {
         id: 'intellectual-property',
-        title: { en: 'Respect intellectual property', ht: 'Respekte pwopriyete entelektyèl', fr: 'Respectez la propriété intellectuelle' },
+        title: { en: 'Respect intellectual property', ht: 'Respekte pwopriyete entelektyèl', fr: 'Respectez la propriété intellectuelle', es: 'Respeta la propiedad intelectual' },
         description: {
           en: 'Credit creators and do not repost paid or copyrighted work without permission.',
           ht: 'Bay kreyatè kredi epi pa repibliye travay peye oswa ki gen dwadotè san pèmisyon.',
           fr: 'Créditez les créateurs et ne republiez pas de contenu payant ou protégé sans autorisation.',
+          es: 'Da crédito a los creadores y no republiques trabajos de pago o con derechos de autor sin permiso.',
         },
       },
       {
         id: 'accurate-information',
-        title: { en: 'Avoid misleading information', ht: 'Evite enfòmasyon ki twonpe', fr: 'Évitez les informations trompeuses' },
+        title: { en: 'Avoid misleading information', ht: 'Evite enfòmasyon ki twonpe', fr: 'Évitez les informations trompeuses', es: 'Evita la información engañosa' },
         description: {
           en: 'Check before sharing. Label opinions and correct mistakes when you learn better.',
           ht: 'Verifye anvan w pataje. Make opinyon epi korije erè lè w aprann pi byen.',
           fr: 'Vérifiez avant de partager. Identifiez les opinions et corrigez vos erreurs.',
+          es: 'Verifica antes de compartir. Señala las opiniones y corrige los errores cuando aprendas algo mejor.',
         },
       },
     ],
@@ -122,51 +132,56 @@ export const RULE_TEMPLATE_CATEGORIES = [
   {
     id: 'spam',
     icon: 'fa-bullhorn',
-    label: { en: 'Spam & promotion', ht: 'Spam ak pwomosyon', fr: 'Spam et promotion' },
+    label: { en: 'Spam & promotion', ht: 'Spam ak pwomosyon', fr: 'Spam et promotion', es: 'Spam y promoción' },
     rules: [
       {
         id: 'no-spam',
-        title: { en: 'No spam', ht: 'Pa gen spam', fr: 'Pas de spam' },
+        title: { en: 'No spam', ht: 'Pa gen spam', fr: 'Pas de spam', es: 'Sin spam' },
         description: {
           en: 'No repeated promotions, mass mentions, or unsolicited direct messages.',
           ht: 'Pa gen pwomosyon repetitif, mansyon an mas, ni mesaj prive san demand.',
           fr: 'Pas de promotions répétées, de mentions massives ni de messages privés non sollicités.',
+          es: 'Nada de promociones repetidas, menciones masivas ni mensajes directos no solicitados.',
         },
       },
       {
         id: 'no-fraudulent-offers',
-        title: { en: 'No fraudulent offers', ht: 'Pa gen òf magouy', fr: 'Pas d’offres frauduleuses' },
+        title: { en: 'No fraudulent offers', ht: 'Pa gen òf magouy', fr: 'Pas d’offres frauduleuses', es: 'Sin ofertas fraudulentas' },
         description: {
           en: 'Do not promise money, prizes, or investments you cannot prove are real.',
           ht: 'Pa pwomèt lajan, prim, oswa envestisman ou pa ka prouve ki reyèl.',
           fr: 'Ne promettez pas d’argent, de prix ou d’investissements dont vous ne pouvez prouver la réalité.',
+          es: 'No prometas dinero, premios o inversiones que no puedas demostrar que son reales.',
         },
       },
       {
         id: 'no-repetitive-advertising',
-        title: { en: 'No repetitive advertising', ht: 'Pa gen piblisite repetitif', fr: 'Pas de publicité répétitive' },
+        title: { en: 'No repetitive advertising', ht: 'Pa gen piblisite repetitif', fr: 'Pas de publicité répétitive', es: 'Sin publicidad repetitiva' },
         description: {
           en: 'One clear promotion is enough. Do not repost the same offer across threads.',
           ht: 'Yon sèl pwomosyon klè sifi. Pa repibliye menm òf la nan plizyè fil.',
           fr: 'Une promotion claire suffit. Ne repostez pas la même offre dans plusieurs fils.',
+          es: 'Una promoción clara es suficiente. No republiques la misma oferta en varios hilos.',
         },
       },
       {
         id: 'promotion-guidelines',
-        title: { en: 'Follow promotional guidelines', ht: 'Swiv gid pwomosyon yo', fr: 'Suivez les règles de promotion' },
+        title: { en: 'Follow promotional guidelines', ht: 'Swiv gid pwomosyon yo', fr: 'Suivez les règles de promotion', es: 'Sigue las normas de promoción' },
         description: {
           en: 'Use the promotion space or day the community provides, and disclose affiliations.',
           ht: 'Sèvi ak espas oswa jou pwomosyon kominote a bay, epi deklare afilyasyon w.',
           fr: 'Utilisez l’espace ou le jour de promotion prévu, et déclarez vos affiliations.',
+          es: 'Usa el espacio o el día de promoción que ofrece la comunidad, y declara tus afiliaciones.',
         },
       },
       {
         id: 'no-misleading-links',
-        title: { en: 'No misleading links', ht: 'Pa gen lyen ki twonpe', fr: 'Pas de liens trompeurs' },
+        title: { en: 'No misleading links', ht: 'Pa gen lyen ki twonpe', fr: 'Pas de liens trompeurs', es: 'Sin enlaces engañosos' },
         description: {
           en: 'The link must lead where the post says it leads. No cloaking or fake downloads.',
           ht: 'Lyen an dwe mennen kote pòs la di li mennen. Pa gen kache ni telechajman fo.',
           fr: 'Le lien doit mener là où l’annonce l’indique. Pas de masquage ni de faux téléchargements.',
+          es: 'El enlace debe llevar a donde dice la publicación. Nada de ocultamiento ni descargas falsas.',
         },
       },
     ],
@@ -174,42 +189,46 @@ export const RULE_TEMPLATE_CATEGORIES = [
   {
     id: 'privacy',
     icon: 'fa-shield-halved',
-    label: { en: 'Privacy & safety', ht: 'Vi prive ak sekirite', fr: 'Confidentialité et sécurité' },
+    label: { en: 'Privacy & safety', ht: 'Vi prive ak sekirite', fr: 'Confidentialité et sécurité', es: 'Privacidad y seguridad' },
     rules: [
       {
         id: 'protect-personal-information',
-        title: { en: 'Protect personal information', ht: 'Pwoteje enfòmasyon pèsonèl', fr: 'Protégez les informations personnelles' },
+        title: { en: 'Protect personal information', ht: 'Pwoteje enfòmasyon pèsonèl', fr: 'Protégez les informations personnelles', es: 'Protege la información personal' },
         description: {
           en: 'Do not post phone numbers, addresses, IDs, or other private details about anyone.',
           ht: 'Pa pibliye nimewo telefòn, adrès, pyès idantite, oswa lòt detay prive sou pèsonn.',
           fr: 'Ne publiez pas de numéros, d’adresses, de pièces d’identité ou d’autres données privées.',
+          es: 'No publiques números de teléfono, direcciones, documentos de identidad ni otros datos privados de nadie.',
         },
       },
       {
         id: 'no-private-content-sharing',
-        title: { en: 'No unauthorized sharing of private content', ht: 'Pa pataje kontni prive san otorizasyon', fr: 'Pas de partage de contenu privé sans autorisation' },
+        title: { en: 'No unauthorized sharing of private content', ht: 'Pa pataje kontni prive san otorizasyon', fr: 'Pas de partage de contenu privé sans autorisation', es: 'No compartas contenido privado sin autorización' },
         description: {
           en: 'Screenshots, DMs, and private files stay private unless everyone involved agrees.',
           ht: 'Captire ekran, mesaj prive, ak fichye prive rete prive sof si tout moun konsène dakò.',
           fr: 'Captures, messages privés et fichiers privés restent privés sans l’accord des personnes concernées.',
+          es: 'Las capturas, los mensajes y los archivos privados siguen siendo privados salvo que todos los implicados estén de acuerdo.',
         },
       },
       {
         id: 'no-impersonation',
-        title: { en: 'No impersonation', ht: 'Pa gen imitasyon idantite', fr: 'Pas d’usurpation d’identité' },
+        title: { en: 'No impersonation', ht: 'Pa gen imitasyon idantite', fr: 'Pas d’usurpation d’identité', es: 'Sin suplantación de identidad' },
         description: {
           en: 'Do not pretend to be another member, creator, moderator, or brand.',
           ht: 'Pa pretann ou se yon lòt manm, kreyatè, moderatè, oswa mak.',
           fr: 'Ne vous faites pas passer pour un autre membre, créateur, modérateur ou une marque.',
+          es: 'No te hagas pasar por otro miembro, creador, moderador o marca.',
         },
       },
       {
         id: 'report-suspicious-activity',
-        title: { en: 'Report suspicious activity', ht: 'Siyale aktivite sispèk', fr: 'Signalez les activités suspectes' },
+        title: { en: 'Report suspicious activity', ht: 'Siyale aktivite sispèk', fr: 'Signalez les activités suspectes', es: 'Denuncia actividades sospechosas' },
         description: {
           en: 'Use the report control instead of arguing publicly. Moderators will review it.',
           ht: 'Sèvi ak bouton siyale a olye w diskite an piblik. Moderatè yo ap revize l.',
           fr: 'Utilisez le bouton de signalement plutôt que d’argumenter publiquement. Les modérateurs examineront.',
+          es: 'Usa el botón de denuncia en lugar de discutir en público. Los moderadores lo revisarán.',
         },
       },
     ],
@@ -217,51 +236,56 @@ export const RULE_TEMPLATE_CATEGORIES = [
   {
     id: 'participation',
     icon: 'fa-people-group',
-    label: { en: 'Community participation', ht: 'Patisipasyon nan kominote a', fr: 'Participation communautaire' },
+    label: { en: 'Community participation', ht: 'Patisipasyon nan kominote a', fr: 'Participation communautaire', es: 'Participación comunitaria' },
     rules: [
       {
         id: 'respect-members',
-        title: { en: 'Respect community members', ht: 'Respekte manm kominote a', fr: 'Respectez les membres' },
+        title: { en: 'Respect community members', ht: 'Respekte manm kominote a', fr: 'Respectez les membres', es: 'Respeta a los miembros de la comunidad' },
         description: {
           en: 'Assume good faith, ask before correcting, and thank people who help.',
           ht: 'Sipoze bon entansyon, mande anvan w korije, epi remèsye moun ki ede.',
           fr: 'Présumez la bonne foi, demandez avant de corriger et remerciez ceux qui aident.',
+          es: 'Presume buena fe, pregunta antes de corregir y agradece a quienes ayudan.',
         },
       },
       {
         id: 'constructive-discussions',
-        title: { en: 'Keep discussions constructive', ht: 'Kenbe diskisyon yo konstriktif', fr: 'Gardez des discussions constructives' },
+        title: { en: 'Keep discussions constructive', ht: 'Kenbe diskisyon yo konstriktif', fr: 'Gardez des discussions constructives', es: 'Mantén debates constructivos' },
         description: {
           en: 'Add context or a next step. “That is wrong” without a reason helps no one.',
           ht: 'Ajoute kontèks oswa yon pwochen etap. “Sa a mal” san rezon pa ede pèsonn.',
           fr: 'Ajoutez du contexte ou une prochaine étape. « C’est faux » sans raison n’aide personne.',
+          es: 'Aporta contexto o un siguiente paso. «Eso está mal» sin una razón no ayuda a nadie.',
         },
       },
       {
         id: 'avoid-unnecessary-conflicts',
-        title: { en: 'Avoid unnecessary conflicts', ht: 'Evite konfli ki pa nesesè', fr: 'Évitez les conflits inutiles' },
+        title: { en: 'Avoid unnecessary conflicts', ht: 'Evite konfli ki pa nesesè', fr: 'Évitez les conflits inutiles', es: 'Evita conflictos innecesarios' },
         description: {
           en: 'Take heated disagreements to a private message or ask a moderator to step in.',
           ht: 'Mete dezakò cho nan yon mesaj prive oswa mande yon moderatè antre.',
           fr: 'Déplacez les désaccords houleux en message privé ou demandez l’intervention d’un modérateur.',
+          es: 'Lleva los desacuerdos acalorados a un mensaje privado o pide la intervención de un moderador.',
         },
       },
       {
         id: 'follow-moderator-instructions',
-        title: { en: 'Follow moderator instructions', ht: 'Swiv enstriksyon moderatè yo', fr: 'Suivez les instructions des modérateurs' },
+        title: { en: 'Follow moderator instructions', ht: 'Swiv enstriksyon moderatè yo', fr: 'Suivez les instructions des modérateurs', es: 'Sigue las instrucciones de los moderadores' },
         description: {
           en: 'If a moderator asks you to stop or move a thread, do it. Appeal privately, not in the feed.',
           ht: 'Si yon moderatè mande w sispann oswa deplase yon fil, fè l. Fè apèl an prive, pa nan fil la.',
           fr: 'Si un modérateur vous demande d’arrêter ou de déplacer un fil, faites-le. Contestez en privé.',
+          es: 'Si un moderador te pide que pares o muevas un hilo, hazlo. Apela en privado, no en el feed.',
         },
       },
       {
         id: 'contribute-positively',
-        title: { en: 'Contribute positively', ht: 'Kontribye pozitivman', fr: 'Contribuez positivement' },
+        title: { en: 'Contribute positively', ht: 'Kontribye pozitivman', fr: 'Contribuez positivement', es: 'Contribuye de forma positiva' },
         description: {
           en: 'Answer one question, welcome one new member, or share one useful resource.',
           ht: 'Reponn yon kesyon, akeyi yon nouvo manm, oswa pataje yon resous itil.',
           fr: 'Répondez à une question, accueillez un nouveau membre ou partagez une ressource utile.',
+          es: 'Responde una pregunta, da la bienvenida a un nuevo miembro o comparte un recurso útil.',
         },
       },
     ],
@@ -269,51 +293,55 @@ export const RULE_TEMPLATE_CATEGORIES = [
   {
     id: 'commerce',
     icon: 'fa-bag-shopping',
-    label: { en: 'Buying & selling', ht: 'Achte ak vann', fr: 'Achat et vente' },
+    label: { en: 'Buying & selling', ht: 'Achte ak vann', fr: 'Achat et vente', es: 'Compra y venta' },
     rules: [
       {
         id: 'no-fraudulent-transactions',
-        title: { en: 'No fraudulent transactions', ht: 'Pa gen tranzaksyon magouy', fr: 'Pas de transactions frauduleuses' },
+        title: { en: 'No fraudulent transactions', ht: 'Pa gen tranzaksyon magouy', fr: 'Pas de transactions frauduleuses', es: 'Sin transacciones fraudulentas' },
         description: {
           en: 'Only offer goods or services you can actually deliver, at the stated terms.',
           ht: 'Sèlman ofri byen oswa sèvis ou ka vrèman delivre, ak kondisyon w di yo.',
           fr: 'Ne proposez que des biens ou services que vous pouvez réellement fournir, aux conditions annoncées.',
+          es: 'Ofrece solo bienes o servicios que puedas entregar realmente, en los términos indicados.',
         },
       },
       {
         id: 'accurate-product-information',
-        title: { en: 'Provide accurate product information', ht: 'Bay enfòmasyon egzak sou pwodwi a', fr: 'Fournissez des informations exactes' },
+        title: { en: 'Provide accurate product information', ht: 'Bay enfòmasyon egzak sou pwodwi a', fr: 'Fournissez des informations exactes', es: 'Proporciona información exacta del producto' },
         description: {
           en: 'Describe condition, price, delivery, and refund terms honestly.',
           ht: 'Dekri kondisyon, pri, livrezon, ak kondisyon ranbousman an onètman.',
           fr: 'Décrivez honnêtement l’état, le prix, la livraison et les conditions de remboursement.',
+          es: 'Describe con honestidad el estado, el precio, la entrega y las condiciones de reembolso.',
         },
       },
       {
         id: 'honor-agreed-terms',
-        title: { en: 'Respect agreed transaction terms', ht: 'Respekte kondisyon tranzaksyon yo', fr: 'Respectez les conditions convenues' },
+        title: { en: 'Respect agreed transaction terms', ht: 'Respekte kondisyon tranzaksyon yo', fr: 'Respectez les conditions convenues', es: 'Respeta los términos acordados' },
         description: {
           en: 'Once both sides agree, do not change the price or terms unilaterally.',
           ht: 'Yon fwa tou de bò dakò, pa chanje pri a oswa kondisyon yo poukont ou.',
           fr: 'Une fois l’accord conclu, ne modifiez pas unilatéralement le prix ou les conditions.',
+          es: 'Una vez que ambas partes aceptan, no cambies el precio ni los términos unilateralmente.',
         },
       },
       {
         id: 'no-trade-impersonation',
-        title: { en: 'Do not impersonate sellers or buyers', ht: 'Pa imite vandè oswa achtè', fr: 'N’usurpez pas l’identité d’un vendeur ou acheteur' },
+        title: { en: 'Do not impersonate sellers or buyers', ht: 'Pa imite vandè oswa achtè', fr: 'N’usurpez pas l’identité d’un vendeur ou acheteur', es: 'No suplantes a vendedores ni compradores' },
         description: {
           en: 'Do not pose as a trusted seller or use another person’s business identity.',
           ht: 'Pa pran pòz yon vandè yo fè konfyans oswa idantite biznis yon lòt moun.',
           fr: 'Ne vous faites pas passer pour un vendeur de confiance ni pour l’entreprise d’autrui.',
+          es: 'No te hagas pasar por un vendedor de confianza ni uses la identidad comercial de otra persona.',
         },
       },
     ],
   },
 ];
 
-const SUPPORTED = new Set(['ht', 'en', 'fr']);
+const SUPPORTED = new Set(['ht', 'en', 'fr', 'es']);
 
-/** Normalizes a language code to the three supported interface languages. */
+/** Normalizes a language code to the four supported interface languages. */
 export function ruleTemplateLang(lang) {
   const code = String(lang || '').trim().toLowerCase().split('-')[0];
   return SUPPORTED.has(code) ? code : 'en';

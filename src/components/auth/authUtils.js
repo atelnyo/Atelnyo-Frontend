@@ -1,3 +1,4 @@
+import { inlineText } from '../../utils/inlineI18n';
 /**
  * authUtils.js — Pure utility functions for the Auth component.
  *
@@ -148,7 +149,7 @@ export function extractOtpCode(text) {
 // ─── Error message extraction ────────────────────────────────────────
 export function extractError(err, lang = 'en') {
   const msg = err?.response?.data?.error || err?.response?.data?.detail
-    || (lang === 'ht' ? 'Gen yon erè ki fèt.' : 'An error occurred.');
+    || (lang === 'ht' ? 'Gen yon erè ki fèt.' : inlineText(lang, 'An error occurred.'));
   return typeof msg === 'string' ? msg : JSON.stringify(msg);
 }
 

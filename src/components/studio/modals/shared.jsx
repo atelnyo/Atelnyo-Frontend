@@ -16,6 +16,7 @@
 import React, { lazy, Suspense, useCallback, useEffect, useId, useRef, useState } from 'react';
 import { mediaProviderService } from '../../../services/api';
 import styles from './modals.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 // react-player is lazy-loaded so the base modal bundle never pays its
 // weight — the player chunk only downloads the first time a creator
@@ -209,8 +210,8 @@ export function HelpTip({ help, lang = 'en' }) {
         className={`${styles.helpTipBtn}${open ? ' ' + styles.helpTipBtnOpen : ''}`}
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        aria-label={lang === 'ht' ? 'Eksplikasyon' : 'Help'}
-        title={lang === 'ht' ? 'Eksplikasyon' : 'Help'}
+        aria-label={lang === 'ht' ? 'Eksplikasyon' : inlineText(lang, 'Help')}
+        title={lang === 'ht' ? 'Eksplikasyon' : inlineText(lang, 'Help')}
       >
         <i className="fas fa-circle-question" aria-hidden="true" />
       </button>
@@ -333,7 +334,7 @@ export function MediaUrlField({
             fallback={
               <div className={styles.videoPreviewLoading}>
                 <i className="fas fa-spinner fa-spin" aria-hidden="true" />
-                <span>{lang === 'ht' ? 'Ap chaje videyo a...' : 'Loading video...'}</span>
+                <span>{lang === 'ht' ? 'Ap chaje videyo a...' : inlineText(lang, 'Loading video...')}</span>
               </div>
             }
           >
@@ -351,13 +352,13 @@ export function MediaUrlField({
             {videoStatus === 'loading' && (
               <div className={styles.videoPreviewLoading} role="status" aria-live="polite">
                 <i className="fas fa-spinner fa-spin" aria-hidden="true" />
-                <span>{lang === 'ht' ? 'Ap chaje videyo a...' : 'Loading video...'}</span>
+                <span>{lang === 'ht' ? 'Ap chaje videyo a...' : inlineText(lang, 'Loading video...')}</span>
               </div>
             )}
             {videoStatus === 'error' && (
               <div className={styles.videoPreviewLoading} role="alert">
                 <i className="fas fa-triangle-exclamation" aria-hidden="true" />
-                <span>{lang === 'ht' ? 'Videyo sa a pa t kapab chaje.' : 'This video could not be loaded.'}</span>
+                <span>{lang === 'ht' ? 'Videyo sa a pa t kapab chaje.' : inlineText(lang, 'This video could not be loaded.')}</span>
               </div>
             )}
           </Suspense>
@@ -467,13 +468,13 @@ export function ImageUrlField({
           {validation.checking ? (
             <span className={styles.imageStatusChecking}>
               <i className="fas fa-spinner fa-spin" aria-hidden="true" />
-              <span>{lang === 'ht' ? 'Ap verifye...' : 'Checking...'}</span>
+              <span>{lang === 'ht' ? 'Ap verifye...' : inlineText(lang, 'Checking...')}</span>
             </span>
           ) : validation.is_valid ? (
             <>
               <span className={styles.imageStatusValid}>
                 <i className="fas fa-check-circle" aria-hidden="true" />
-                <span>{lang === 'ht' ? 'Imaj valab' : 'Valid image'}</span>
+                <span>{lang === 'ht' ? 'Imaj valab' : inlineText(lang, 'Valid image')}</span>
               </span>
               {validation.mime_type && (
                 <span className={styles.imageMeta}>{validation.mime_type}</span>
@@ -492,7 +493,7 @@ export function ImageUrlField({
               <i className="fas fa-exclamation-triangle" aria-hidden="true" />
               <span>
                 {validation.error_message
-                  || (lang === 'ht' ? 'URL pa valab — pa yon imaj' : 'Not a valid image URL')}
+                  || (lang === 'ht' ? 'URL pa valab — pa yon imaj' : inlineText(lang, 'Not a valid image URL'))}
               </span>
             </span>
           )}

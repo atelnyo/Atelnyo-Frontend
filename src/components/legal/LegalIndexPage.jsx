@@ -18,6 +18,7 @@ import React, { useEffect, useState } from 'react';
 import SEOHead from '../shared/SEOHead';
 import useSafeNavigate from '../../hooks/useSafeNavigate';
 import legalService from '../../services/legalService';
+import { inlineText } from '../../utils/inlineI18n';
 
 const s = {
   shell: {
@@ -171,7 +172,7 @@ export default function LegalIndexPage({ lang = 'en' }) {
   useEffect(() => {
     let cancelled = false;
 
-    document.title = (isFr ? 'Légal — Atelnyo' : 'Legal — Atelnyo');
+    document.title = (isFr ? 'Légal — Atelnyo' : inlineText(lang, 'Legal — Atelnyo'));
 
     // SEO meta
     const metaDesc = isFr
@@ -180,7 +181,7 @@ export default function LegalIndexPage({ lang = 'en' }) {
         ? 'Todos los documentos legales y de cumplimiento de Atelnyo en un solo lugar.'
         : isHt
           ? 'Tout dokiman legal ak konfòmite Atelnyo nan yon sèl kote.'
-          : 'All Atelnyo legal and compliance documents in one place.';
+          : inlineText(lang, 'All Atelnyo legal and compliance documents in one place.');
     const existingMeta = document.querySelector('meta[name="description"]');
     if (existingMeta) { existingMeta.setAttribute('content', metaDesc); }
 

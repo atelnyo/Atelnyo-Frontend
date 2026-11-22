@@ -11,6 +11,7 @@
  * Reports completion when all required items are checked.
  */
 import React, { useState, useCallback, useEffect } from 'react';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function ChecklistBlock({
   block,
@@ -49,8 +50,8 @@ export default function ChecklistBlock({
     <div className="ls-block ls-block--checklist" data-block-type="checklist">
       {/* Header */}
       <div className="ls-block-header">
-        <span className="ls-block-badge">✅ {isHt ? 'Tcheklis' : 'Checklist'}</span>
-        <h3 className="ls-block-title">{block.title || (isHt ? 'Tcheklis' : 'Checklist')}</h3>
+        <span className="ls-block-badge">✅ {isHt ? 'Tcheklis' : inlineText(lang, 'Checklist')}</span>
+        <h3 className="ls-block-title">{block.title || (isHt ? 'Tcheklis' : inlineText(lang, 'Checklist'))}</h3>
       </div>
 
       {/* Description */}
@@ -63,8 +64,8 @@ export default function ChecklistBlock({
       {/* Progress bar — Phase 10: accessible with text equivalent */}
       <div style={{ marginBottom: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: 4 }}>
-          <span>{checkedCount} / {items.length} {isHt ? 'fè' : 'done'}</span>
-          <span>{requiredCount} {isHt ? 'oblije' : 'required'}</span>
+          <span>{checkedCount} / {items.length} {isHt ? 'fè' : inlineText(lang, 'done')}</span>
+          <span>{requiredCount} {isHt ? 'oblije' : inlineText(lang, 'required')}</span>
         </div>
         <div
           role="progressbar"
@@ -98,7 +99,7 @@ export default function ChecklistBlock({
               type="button"
               role="checkbox"
               aria-checked={isChecked}
-              aria-label={`${item.text || ''}${isRequired ? (isHt ? ' — oblije' : ' — required') : ''}`}
+              aria-label={`${item.text || ''}${isRequired ? (isHt ? ' — oblije' : inlineText(lang, ' — required')) : ''}`}
               onClick={() => toggle(i)}
               style={{
                 display: 'flex', alignItems: 'center', gap: 12,
@@ -135,7 +136,7 @@ export default function ChecklistBlock({
                   fontSize: '0.7rem', color: '#ef4444', fontWeight: 600,
                   textTransform: 'uppercase', letterSpacing: '0.03em',
                 }}>
-                  {isHt ? 'oblije' : 'req'}
+                  {isHt ? 'oblije' : inlineText(lang, 'req')}
                 </span>
               )}
             </button>
@@ -145,7 +146,7 @@ export default function ChecklistBlock({
 
       {items.length === 0 && (
         <p style={{ padding: '20px 0', color: 'var(--text-secondary)', fontSize: '0.9rem', textAlign: 'center' }}>
-          {isHt ? 'Pa gen bagay nan tcheklis la.' : 'No items in the checklist.'}
+          {isHt ? 'Pa gen bagay nan tcheklis la.' : inlineText(lang, 'No items in the checklist.')}
         </p>
       )}
 
@@ -156,7 +157,7 @@ export default function ChecklistBlock({
           background: 'rgba(16,185,129,0.1)', color: '#10b981',
           fontSize: '0.9rem', fontWeight: 600, textAlign: 'center',
         }}>
-          🎉 {isHt ? 'Ou fini tout bagay yo!' : 'You completed everything!'}
+          🎉 {isHt ? 'Ou fini tout bagay yo!' : inlineText(lang, 'You completed everything!')}
         </div>
       )}
     </div>

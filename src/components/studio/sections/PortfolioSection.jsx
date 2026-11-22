@@ -13,6 +13,7 @@ import useFetch from '../../../hooks/useFetch';
 import { StudioSkeleton, EmptyState, SectionHeader, fmtCount } from '../shared';
 import ConfirmModal from '../../common/ConfirmModal';
 import styles from './sections.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function PortfolioSection({ lang, t, showToast, setShowProjectModal, onEdit }) {
   const [confirm, setConfirm] = useState(null);
@@ -25,7 +26,7 @@ export default function PortfolioSection({ lang, t, showToast, setShowProjectMod
   const handleDeleteClick = (item) => {
     setConfirm({
       item,
-      title: lang === 'ht' ? 'Efase pwojè' : 'Delete project',
+      title: lang === 'ht' ? 'Efase pwojè' : inlineText(lang, 'Delete project'),
       message: lang === 'ht' ? `Eske w sèten ou vle efase "${item.title}"?` : `Are you sure you want to delete "${item.title}"?`,
       onConfirm: () => {
         // Optimistic + non-blocking: the row vanishes instantly AND the
@@ -39,9 +40,9 @@ export default function PortfolioSection({ lang, t, showToast, setShowProjectMod
         (async () => {
           try {
             await portfolioService.delete(item.id);
-            showToast?.(lang === 'ht' ? '✅ Pwojè efase!' : '✅ Project deleted!', 'check-circle');
+            showToast?.(lang === 'ht' ? '✅ Pwojè efase!' : inlineText(lang, '✅ Project deleted!'), 'check-circle');
           } catch (err) {
-            showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase.' : 'Could not delete.'), 'circle-exclamation');
+            showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase.' : inlineText(lang, 'Could not delete.')), 'circle-exclamation');
           }
           refetch();
         })();
@@ -103,12 +104,12 @@ export default function PortfolioSection({ lang, t, showToast, setShowProjectMod
                   {p.title}
                   {p.is_featured && (
                     <span className={styles.badge} style={{ marginLeft: 8, background: 'rgba(245,158,11,0.12)', color: '#b45309' }}>
-                      ⭐ {lang === 'ht' ? 'Vedèt' : 'Featured'}
+                      ⭐ {lang === 'ht' ? 'Vedèt' : inlineText(lang, 'Featured')}
                     </span>
                   )}
                   {p.is_published === false && (
                     <span className={styles.badge} style={{ marginLeft: 8, background: 'rgba(100,116,139,0.12)', color: 'var(--color-gray-500)' }}>
-                      {lang === 'ht' ? 'Bouyon' : 'Draft'}
+                      {lang === 'ht' ? 'Bouyon' : inlineText(lang, 'Draft')}
                     </span>
                   )}
                 </div>
@@ -137,11 +138,11 @@ export default function PortfolioSection({ lang, t, showToast, setShowProjectMod
               </div>
               <div className={styles.itemActions}>
                 <button type="button" className={styles.editBtn} onClick={() => onEdit?.(p)}
-                  title={lang === 'ht' ? 'Modifye' : 'Edit'}>
+                  title={lang === 'ht' ? 'Modifye' : inlineText(lang, 'Edit')}>
                   <i className="fas fa-pen" aria-hidden="true" />
                 </button>
                 <button type="button" className={styles.deleteBtn} onClick={() => handleDeleteClick(p)}
-                  title={lang === 'ht' ? 'Efase' : 'Delete'}>
+                  title={lang === 'ht' ? 'Efase' : inlineText(lang, 'Delete')}>
                   <i className="fas fa-trash-can" aria-hidden="true" />
                 </button>
               </div>

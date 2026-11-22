@@ -9,6 +9,7 @@
  *   - Waiting Connection message
  */
 import React, { useState, useEffect } from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function OfflineMedia({
   cachedUrl,
@@ -46,7 +47,7 @@ export default function OfflineMedia({
       {/* Offline Badge */}
       <div className="offline-media-badge">
         <i className="fas fa-wifi-slash" />
-        {isHt ? 'Offline' : 'Offline'}
+        {isHt ? 'Offline' : inlineText(lang, 'Offline')}
       </div>
 
       <div className="offline-media-body">
@@ -58,7 +59,7 @@ export default function OfflineMedia({
             ) : (
               <div className="offline-media-placeholder">
                 <i className={`fas ${mediaType === 'video' ? 'fa-video' : mediaType === 'audio' ? 'fa-music' : 'fa-file'}`} />
-                <span>{title || (isHt ? 'Preview nan cach' : 'Cached preview')}</span>
+                <span>{title || (isHt ? 'Preview nan cach' : inlineText(lang, 'Cached preview'))}</span>
               </div>
             )}
           </div>
@@ -67,8 +68,8 @@ export default function OfflineMedia({
         {/* Message */}
         <p className="offline-media-message">
           {retrying
-            ? (isHt ? 'Ap eseye rekonekte...' : 'Trying to reconnect...')
-            : (isHt ? 'Pa gen koneksyon entènèt. Medya a pa ka chaje.' : 'No internet connection. Media cannot be loaded.')}
+            ? (isHt ? 'Ap eseye rekonekte...' : inlineText(lang, 'Trying to reconnect...'))
+            : (isHt ? 'Pa gen koneksyon entènèt. Medya a pa ka chaje.' : inlineText(lang, 'No internet connection. Media cannot be loaded.'))}
         </p>
 
         {/* Actions */}
@@ -81,8 +82,8 @@ export default function OfflineMedia({
           >
             <i className={`fas ${retrying ? 'fa-spinner fa-spin' : 'fa-redo'}`} />
             {retrying
-              ? (isHt ? 'Ap rekonekte...' : 'Reconnecting...')
-              : (isHt ? 'Eseye ankò' : 'Retry')}
+              ? (isHt ? 'Ap rekonekte...' : inlineText(lang, 'Reconnecting...'))
+              : (isHt ? 'Eseye ankò' : inlineText(lang, 'Retry'))}
           </button>
         </div>
       </div>

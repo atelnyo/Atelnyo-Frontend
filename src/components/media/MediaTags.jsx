@@ -17,6 +17,7 @@
  * Sa ede Search pi rapid.
  */
 import React, { useState } from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 const PRESET_TAGS = [
   { id: 'favorite', icon: 'fa-star', labelEn: 'Favorite', labelHt: 'Favori', color: 'var(--state-warning, #f59e0b)', bg: 'var(--severity-medium-bg, rgba(245,158,11,0.08))' },
@@ -93,7 +94,7 @@ export default function MediaTags({
       <div className="media-tags-priority">
         <span className="media-tags-priority-label">
           <i className="fas fa-flag" />
-          {isHt ? 'Priyorite' : 'Priority'}
+          {isHt ? 'Priyorite' : inlineText(lang, 'Priority')}
         </span>
         <div className="media-tags-priority-options">
           {PRIORITY_OPTIONS.map((opt) => (
@@ -115,7 +116,7 @@ export default function MediaTags({
         <div className="media-tags-custom">
           <span className="media-tags-custom-label">
             <i className="fas fa-tag" />
-            {isHt ? 'Etikèt' : 'Labels'}
+            {isHt ? 'Etikèt' : inlineText(lang, 'Labels')}
           </span>
           <div className="media-tags-custom-list">
             {customLabels.map((label, i) => (
@@ -125,7 +126,7 @@ export default function MediaTags({
                   type="button"
                   className="media-tags-custom-remove"
                   onClick={() => handleRemoveLabel(i)}
-                  aria-label={isHt ? 'Retire' : 'Remove'}
+                  aria-label={isHt ? 'Retire' : inlineText(lang, 'Remove')}
                 >
                   <i className="fas fa-times" />
                 </button>
@@ -140,7 +141,7 @@ export default function MediaTags({
         <input
           type="text"
           className="field-input"
-          placeholder={isHt ? 'Ajoute yon etikèt...' : 'Add a label...'}
+          placeholder={isHt ? 'Ajoute yon etikèt...' : inlineText(lang, 'Add a label...')}
           value={newLabel}
           onChange={(e) => setNewLabel(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') handleAddLabel(); }}

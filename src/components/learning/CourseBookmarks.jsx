@@ -3,6 +3,7 @@
  * Stored in localStorage with cloud sync when available.
  */
 import React, { useState, useEffect, useCallback } from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 const STORAGE_KEY = 'atelnyo_bookmarks';
 
@@ -61,7 +62,7 @@ export default function CourseBookmarks({ courseId, lang = 'en', onNavigate }) {
       {bookmarks.length > 0 && (
         <div>
           <h4 style={{ margin: '0 0 8px', fontSize: '14px' }}>
-            🔖 {isHt ? 'Sove' : 'Saved'} ({bookmarks.length})
+            🔖 {isHt ? 'Sove' : inlineText(lang, 'Saved')} ({bookmarks.length})
           </h4>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
             {bookmarks.map((b, i) => (
@@ -77,7 +78,7 @@ export default function CourseBookmarks({ courseId, lang = 'en', onNavigate }) {
                 <button
                   onClick={(e) => { e.stopPropagation(); removeBookmark(b.moduleIndex, b.blockId); }}
                   style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#999' }}
-                  aria-label={isHt ? 'Retire sove' : 'Remove bookmark'}
+                  aria-label={isHt ? 'Retire sove' : inlineText(lang, 'Remove bookmark')}
                 >✕</button>
               </li>
             ))}

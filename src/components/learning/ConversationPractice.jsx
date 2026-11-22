@@ -19,10 +19,11 @@ import { speechSubmissionService } from '../../services/api';
 import AudioPlayer from './AudioPlayer';
 import SpeechRecorder from './SpeechRecorder';
 import styles from './learning.module.css';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function ConversationPractice({ block, lang = 'en', courseId, moduleIndex, reportComplete }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
   const steps = Array.isArray(block.steps) ? block.steps : [];
   const [current, setCurrent] = useState(0);
   const [recordingUrl, setRecordingUrl] = useState(null);

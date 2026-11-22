@@ -22,6 +22,7 @@
  */
 import React, { useMemo } from 'react';
 import { t2 } from '../../../utils/i18n';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function ContentStructureView({
   chapters = [],
@@ -43,14 +44,14 @@ export default function ContentStructureView({
     chapters.forEach((chapter, ci) => {
       items.push({
         level: 2,
-        label: chapter.title || `${isHt ? 'Modil' : 'Chapter'} ${ci + 1}`,
+        label: chapter.title || `${isHt ? 'Modil' : inlineText(lang, 'Chapter')} ${ci + 1}`,
         type: 'chapter',
       });
 
       (chapter.lessons || []).forEach((lesson, li) => {
         items.push({
           level: 3,
-          label: lesson.title || `${isHt ? 'Leson' : 'Lesson'} ${li + 1}`,
+          label: lesson.title || `${isHt ? 'Leson' : inlineText(lang, 'Lesson')} ${li + 1}`,
           type: 'lesson',
         });
 
@@ -60,7 +61,7 @@ export default function ContentStructureView({
             const level = Math.min(Number(block.headingLevel) + 2, 6); // Offset from course structure
             items.push({
               level,
-              label: (block.content || '').replace(/<[^>]*>/g, '').slice(0, 60) || `${isHt ? 'Tit' : 'Heading'}`,
+              label: (block.content || '').replace(/<[^>]*>/g, '').slice(0, 60) || `${isHt ? 'Tit' : inlineText(lang, 'Heading')}`,
               type: 'block',
             });
           }
@@ -92,7 +93,7 @@ export default function ContentStructureView({
   }, [structure, isHt]);
 
   return (
-    <div className={`a11y-structure-view ${className}`} role="region" aria-label={isHt ? 'Istati Kontni' : 'Content Structure'}>
+    <div className={`a11y-structure-view ${className}`} role="region" aria-label={isHt ? 'Istati Kontni' : inlineText(lang, 'Content Structure')}>
       <div style={{
         padding: '12px 16px',
         borderBottom: '1px solid var(--border-color-subtle, rgba(0,0,0,0.06))',
@@ -102,7 +103,7 @@ export default function ContentStructureView({
       }}>
         <i className="fas fa-heading" aria-hidden="true" style={{ color: 'var(--color-primary, #d81b60)' }} />
         <span style={{ fontWeight: 700, fontSize: '0.85rem' }}>
-          {isHt ? 'Istati Tèt' : 'Heading Structure'}
+          {isHt ? 'Istati Tèt' : inlineText(lang, 'Heading Structure')}
         </span>
         {issues.length > 0 && (
           <span style={{
@@ -113,7 +114,7 @@ export default function ContentStructureView({
             background: 'rgba(245,158,11,0.1)',
             color: 'var(--state-warning, #d97706)',
           }}>
-            {issues.length} {isHt ? 'pwoblèm' : 'issues'}
+            {issues.length} {isHt ? 'pwoblèm' : inlineText(lang, 'issues')}
           </span>
         )}
       </div>
@@ -121,7 +122,7 @@ export default function ContentStructureView({
       <div style={{ padding: '8px 0', maxHeight: '400px', overflow: 'auto' }}>
         {structure.length === 0 ? (
           <p style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-            {isHt ? 'Pa gen kontni ankò.' : 'No content yet.'}
+            {isHt ? 'Pa gen kontni ankò.' : inlineText(lang, 'No content yet.')}
           </p>
         ) : (
           structure.map((item, i) => {

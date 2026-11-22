@@ -11,6 +11,7 @@ import StudioPropertiesPanel, {
 } from './StudioPropertiesPanel';
 import { ImageUrlField, MediaUrlField, HelpTip } from '../modals/shared';
 import styles from './editor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function TalentEditor({ onClose, onSuccess, onSaved, lang = 'en', showToast, user, item }) {
   const isHt = lang === 'ht';
@@ -51,8 +52,8 @@ export default function TalentEditor({ onClose, onSuccess, onSaved, lang = 'en',
 
   const validate = useCallback(() => {
     const errs = {};
-    if (!form.name.trim()) errs.name = isHt ? 'Non oblije' : 'Name required';
-    if (!form.role.trim()) errs.role = isHt ? 'Wòl oblije' : 'Role required';
+    if (!form.name.trim()) errs.name = isHt ? 'Non oblije' : inlineText(lang, 'Name required');
+    if (!form.role.trim()) errs.role = isHt ? 'Wòl oblije' : inlineText(lang, 'Role required');
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }, [form, isHt]);
@@ -87,7 +88,7 @@ export default function TalentEditor({ onClose, onSuccess, onSaved, lang = 'en',
       setDirty(false);
       setSaveState('saved');
       onSaved?.();
-      showToast?.(isHt ? '✅ Talan sove' : '✅ Talent saved', 'check-circle');
+      showToast?.(isHt ? '✅ Talan sove' : inlineText(lang, '✅ Talent saved'), 'check-circle');
       setTimeout(() => setSaveState('idle'), 1500);
       return true;
     } catch (err) {
@@ -95,7 +96,7 @@ export default function TalentEditor({ onClose, onSuccess, onSaved, lang = 'en',
         || err?.response?.data?.name?.[0]
         || err?.response?.data?.role?.[0]
         || err?.message
-        || (isHt ? 'Pa t kapab sove talan an.' : 'Could not save talent.');
+        || (isHt ? 'Pa t kapab sove talan an.' : inlineText(lang, 'Could not save talent.'));
       setErrors((e) => ({ ...e, _api: detail }));
       showToast?.(detail, 'circle-exclamation');
       setSaveState('error');
@@ -113,47 +114,47 @@ export default function TalentEditor({ onClose, onSuccess, onSaved, lang = 'en',
   }, [doSave, onClose, onSuccess]);
 
   const validationList = [];
-  if (!form.name.trim()) validationList.push({ id: 'name', label: isHt ? 'Non obligatwa' : 'Name required', zone: 'editor' });
-  if (!form.role.trim()) validationList.push({ id: 'role', label: isHt ? 'Wòl obligatwa' : 'Role required', zone: 'editor' });
+  if (!form.name.trim()) validationList.push({ id: 'name', label: isHt ? 'Non obligatwa' : inlineText(lang, 'Name required'), zone: 'editor' });
+  if (!form.role.trim()) validationList.push({ id: 'role', label: isHt ? 'Wòl obligatwa' : inlineText(lang, 'Role required'), zone: 'editor' });
 
   const editorContent = (
     <div className={styles.editorMain} style={{ padding: 24, maxWidth: 800, margin: '0 auto', width: '100%' }}>
       {errors._api && <div className={styles.apiError} role="alert" style={{ marginBottom: 16 }}>{errors._api}</div>}
       <div className={styles.formSection}>
-        <h3 className={styles.sectionTitle}><i className="fas fa-user" /> {isHt ? 'Enfòmasyon Debaz' : 'Basic Info'}</h3>
+        <h3 className={styles.sectionTitle}><i className="fas fa-user" /> {isHt ? 'Enfòmasyon Debaz' : inlineText(lang, 'Basic Info')}</h3>
         <div style={{ display: 'grid', gap: 16 }}>
-          <PropField label={isHt ? 'Non' : 'Name'} required error={errors.name}>
-            <PropInput value={form.name} onChange={(e) => handleChange('name', e.target.value)} placeholder={isHt ? 'Non talan an' : 'Talent name'} />
+          <PropField label={isHt ? 'Non' : inlineText(lang, 'Name')} required error={errors.name}>
+            <PropInput value={form.name} onChange={(e) => handleChange('name', e.target.value)} placeholder={isHt ? 'Non talan an' : inlineText(lang, 'Talent name')} />
           </PropField>
-          <PropField label={isHt ? 'Wòl' : 'Role'} required error={errors.role}>
-            <PropInput value={form.role} onChange={(e) => handleChange('role', e.target.value)} placeholder={isHt ? 'Chantè, Dansè, Aktris...' : 'Singer, Dancer, Actor...'} />
+          <PropField label={isHt ? 'Wòl' : inlineText(lang, 'Role')} required error={errors.role}>
+            <PropInput value={form.role} onChange={(e) => handleChange('role', e.target.value)} placeholder={isHt ? 'Chantè, Dansè, Aktris...' : inlineText(lang, 'Singer, Dancer, Actor...')} />
           </PropField>
-          <PropField label={isHt ? 'Kote' : 'Location'}>
-            <PropInput value={form.location} onChange={(e) => handleChange('location', e.target.value)} placeholder={isHt ? 'Potoprens, Ayiti' : 'Port-au-Prince, Haiti'} />
+          <PropField label={isHt ? 'Kote' : inlineText(lang, 'Location')}>
+            <PropInput value={form.location} onChange={(e) => handleChange('location', e.target.value)} placeholder={isHt ? 'Potoprens, Ayiti' : inlineText(lang, 'Port-au-Prince, Haiti')} />
           </PropField>
-          <PropField label={isHt ? 'Biyo' : 'Bio'}>
-            <textarea value={form.bio} onChange={(e) => handleChange('bio', e.target.value)} className={styles.textarea} rows={4} placeholder={isHt ? 'Dekri talan an...' : 'Describe the talent...'} maxLength={1000} />
+          <PropField label={isHt ? 'Biyo' : inlineText(lang, 'Bio')}>
+            <textarea value={form.bio} onChange={(e) => handleChange('bio', e.target.value)} className={styles.textarea} rows={4} placeholder={isHt ? 'Dekri talan an...' : inlineText(lang, 'Describe the talent...')} maxLength={1000} />
           </PropField>
-          <PropField label={isHt ? 'Konpetans (separe ak virgül)' : 'Skills (comma separated)'} hint={isHt ? 'Chante, Danse, Mizik' : 'Singing, Dancing, Music'}>
-            <PropInput value={form.skills} onChange={(e) => handleChange('skills', e.target.value)} placeholder={isHt ? 'Chante, Danse, Mizik' : 'Singing, Dancing, Music'} />
+          <PropField label={isHt ? 'Konpetans (separe ak virgül)' : inlineText(lang, 'Skills (comma separated)')} hint={isHt ? 'Chante, Danse, Mizik' : inlineText(lang, 'Singing, Dancing, Music')}>
+            <PropInput value={form.skills} onChange={(e) => handleChange('skills', e.target.value)} placeholder={isHt ? 'Chante, Danse, Mizik' : inlineText(lang, 'Singing, Dancing, Music')} />
           </PropField>
         </div>
       </div>
 
       <div className={styles.formSection} style={{ marginTop: 24 }}>
-        <h3 className={styles.sectionTitle}><i className="fas fa-image" /> {isHt ? 'Foto & Kontak' : 'Photo & Contact'}</h3>
+        <h3 className={styles.sectionTitle}><i className="fas fa-image" /> {isHt ? 'Foto & Kontak' : inlineText(lang, 'Photo & Contact')}</h3>
         <div style={{ display: 'grid', gap: 16 }}>
           <ImageUrlField
-            label={isHt ? 'URL Avatè' : 'Avatar URL'}
+            label={isHt ? 'URL Avatè' : inlineText(lang, 'Avatar URL')}
             value={form.avatar_url}
             onChange={(v) => handleChange('avatar_url', v)}
             lang={lang}
-            hint={isHt ? 'Foto pwofil talan an (kare pi byen)' : 'Talent profile photo (square works best)'}
+            hint={isHt ? 'Foto pwofil talan an (kare pi byen)' : inlineText(lang, 'Talent profile photo (square works best)')}
           />
-          <PropField label={isHt ? 'Imèl Kontak' : 'Contact Email'}>
+          <PropField label={isHt ? 'Imèl Kontak' : inlineText(lang, 'Contact Email')}>
             <PropInput type="email" value={form.contact_email} onChange={(e) => handleChange('contact_email', e.target.value)} placeholder="email@example.com" />
           </PropField>
-          <PropField label={isHt ? 'Sit Web / URL' : 'Website / URL'}>
+          <PropField label={isHt ? 'Sit Web / URL' : inlineText(lang, 'Website / URL')}>
             <PropInput type="url" value={form.contact_url} onChange={(e) => handleChange('contact_url', e.target.value)} placeholder="https://..." />
           </PropField>
         </div>
@@ -164,12 +165,12 @@ export default function TalentEditor({ onClose, onSuccess, onSaved, lang = 'en',
 
   const propertiesContent = (
     <StudioPropertiesPanel>
-      <PropertyGroup title={isHt ? 'Paramèt' : 'Settings'} defaultOpen>
+      <PropertyGroup title={isHt ? 'Paramèt' : inlineText(lang, 'Settings')} defaultOpen>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0' }}>
           <div>
-            <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>{isHt ? 'Vizibilite' : 'Visibility'}</div>
+            <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>{isHt ? 'Vizibilite' : inlineText(lang, 'Visibility')}</div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-              {form.is_active ? (isHt ? 'Vizib nan Explore' : 'Visible in Explore') : (isHt ? 'Kache' : 'Hidden')}
+              {form.is_active ? (isHt ? 'Vizib nan Explore' : inlineText(lang, 'Visible in Explore')) : (isHt ? 'Kache' : inlineText(lang, 'Hidden'))}
             </div>
           </div>
           <button
@@ -194,18 +195,18 @@ export default function TalentEditor({ onClose, onSuccess, onSaved, lang = 'en',
 
   return (
     <StudioEditorShell
-      title={isHt ? 'Editè Talan' : 'Talent Editor'}
+      title={isHt ? 'Editè Talan' : inlineText(lang, 'Talent Editor')}
       icon="fa-star"
       lang={lang}
-      docTitle={form.name || (isHt ? 'Talan san tit' : 'Untitled talent')}
+      docTitle={form.name || (isHt ? 'Talan san tit' : inlineText(lang, 'Untitled talent'))}
       isNew={!isEdit}
       dirty={dirty}
       saveState={saveState}
       onBack={onClose}
       onSave={handleSave}
       onPublish={handlePublish}
-      saveLabel={isHt ? 'Sove' : 'Save'}
-      publishLabel={isHt ? 'Publie' : 'Publish'}
+      saveLabel={isHt ? 'Sove' : inlineText(lang, 'Save')}
+      publishLabel={isHt ? 'Publie' : inlineText(lang, 'Publish')}
       canSave={true}
       validation={validationList}
       editor={editorContent}

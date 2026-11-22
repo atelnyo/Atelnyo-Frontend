@@ -14,10 +14,11 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { mediaLibraryService } from '../../../services/api';
 import AudioPlayer from '../../learning/AudioPlayer';
 import styles from './editor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function AudioLibraryModal({ lang = 'en', onSelect, onClose }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
   const [items, setItems] = useState(null); // null = loading
   const [search, setSearch] = useState('');
   const [error, setError] = useState('');

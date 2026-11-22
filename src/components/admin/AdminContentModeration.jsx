@@ -14,6 +14,7 @@ import { useHasAdminAccess } from '../../hooks/useHasAdminAccess';
 import { adminMediaService, creatorProfileService, contentStateService } from '../../services/api';
 import ContentLifecycleControls from '../shared/ContentLifecycleControls';
 import { useRoleGate } from '../../hooks/useRoleGate';
+import { inlineText } from '../../utils/inlineI18n';
 
 const MOD_STATUSES = [
   { key: '', label: 'All', icon: 'fa-list', color: 'var(--text-secondary, #64748b)' },
@@ -83,7 +84,7 @@ export default function AdminContentModeration({ lang = 'en', showToast, user, o
 
   useEffect(() => {
     if (user && !permsLoading && !hasStaffAccess) {
-      showToast?.(isHt ? 'Aksè rezeve.' : 'Staff access required.', 'user-lock');
+      showToast?.(isHt ? 'Aksè rezeve.' : inlineText(lang, 'Staff access required.'), 'user-lock');
       if (onNavigate) onNavigate('/', { replace: true });
     }
   }, [user, hasStaffAccess, permsLoading]);
@@ -94,7 +95,7 @@ export default function AdminContentModeration({ lang = 'en', showToast, user, o
       const res = await adminMediaService.moderatedList(statusFilter);
       setItems(res.data?.items || []);
     } catch {
-      showToast?.(isHt ? 'Pa kapab chaje.' : 'Failed to load.', 'exclamation-triangle');
+      showToast?.(isHt ? 'Pa kapab chaje.' : inlineText(lang, 'Failed to load.'), 'exclamation-triangle');
     } finally { setLoading(false); }
   }, [statusFilter]);
 
@@ -105,7 +106,7 @@ export default function AdminContentModeration({ lang = 'en', showToast, user, o
       const payload = res.data?.results || res.data || [];
       setLifecycle(Array.isArray(payload) ? payload : []);
     } catch {
-      showToast?.(isHt ? 'Pa kapab chaje estati yo.' : 'Failed to load lifecycle rows.', 'exclamation-triangle');
+      showToast?.(isHt ? 'Pa kapab chaje estati yo.' : inlineText(lang, 'Failed to load lifecycle rows.'), 'exclamation-triangle');
     } finally {
       setLifecycleLoading(false);
     }
@@ -126,7 +127,7 @@ export default function AdminContentModeration({ lang = 'en', showToast, user, o
       setPosts(res.data?.results || []);
       setPostTotal(res.data?.count || 0);
     } catch {
-      showToast?.(isHt ? 'Pa kapab chaje post yo.' : 'Failed to load posts.', 'exclamation-triangle');
+      showToast?.(isHt ? 'Pa kapab chaje post yo.' : inlineText(lang, 'Failed to load posts.'), 'exclamation-triangle');
     } finally { setPostsLoading(false); }
   }, [canModeratePosts, postSearch, isHt, showToast]);
 
@@ -144,11 +145,11 @@ export default function AdminContentModeration({ lang = 'en', showToast, user, o
     setDeletingSlug(post.slug);
     try {
       await creatorProfileService.adminDelete(post.slug, postReason.trim());
-      showToast?.(isHt ? '🗑️ Post siprime + otè a notifye.' : '🗑️ Post deleted + author notified.', 'trash');
+      showToast?.(isHt ? '🗑️ Post siprime + otè a notifye.' : inlineText(lang, '🗑️ Post deleted + author notified.'), 'trash');
       setPostReason('');
       fetchPosts();
     } catch (err) {
-      showToast?.(err?.response?.data?.error || (isHt ? 'Erè siprime post.' : 'Delete post failed.'), 'exclamation-triangle');
+      showToast?.(err?.response?.data?.error || (isHt ? 'Erè siprime post.' : inlineText(lang, 'Delete post failed.')), 'exclamation-triangle');
     } finally { setDeletingSlug(''); }
   };
 
@@ -158,7 +159,7 @@ export default function AdminContentModeration({ lang = 'en', showToast, user, o
       showToast?.('✓ ' + status, 'check-circle');
       fetchItems();
     } catch {
-      showToast?.(isHt ? 'Erè modere.' : 'Moderation failed.', 'exclamation-triangle');
+      showToast?.(isHt ? 'Erè modere.' : inlineText(lang, 'Moderation failed.'), 'exclamation-triangle');
     }
     setActionModal(null);
     setReason('');
@@ -173,10 +174,10 @@ export default function AdminContentModeration({ lang = 'en', showToast, user, o
       <div className="acm-header">
         <button type="button" className="acm-back" onClick={() => onNavigate?.(-1)}><i className="fas fa-arrow-left" /></button>
         <div className="acm-header-center">
-          <h1 className="acm-title"><i className="fas fa-shield-halved" /> {isHt ? 'Moderasyon Kontni' : 'Content Moderation'}</h1>
-          <p className="acm-subtitle">{isHt ? 'Make medya dapre politik kontni.' : 'Flag media according to content policy.'}</p>
+          <h1 className="acm-title"><i className="fas fa-shield-halved" /> {isHt ? 'Moderasyon Kontni' : inlineText(lang, 'Content Moderation')}</h1>
+          <p className="acm-subtitle">{isHt ? 'Make medya dapre politik kontni.' : inlineText(lang, 'Flag media according to content policy.')}</p>
         </div>
-        <button type="button" className="acm-btn" onClick={fetchItems}><i className="fas fa-sync" /> {isHt ? 'Rafrechi' : 'Refresh'}</button>
+        <button type="button" className="acm-btn" onClick={fetchItems}><i className="fas fa-sync" /> {isHt ? 'Rafrechi' : inlineText(lang, 'Refresh')}</button>
       </div>
 
       {/* Phase 11/12 — publication lifecycle. Generic controls: the
@@ -184,7 +185,7 @@ export default function AdminContentModeration({ lang = 'en', showToast, user, o
       <div className="acm-filters" style={{ marginBottom: 12, flexDirection: 'column', alignItems: 'stretch', gap: 8 }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
           <strong style={{ fontSize: '.85rem' }}>
-            {isHt ? 'Estati piblikasyon' : 'Publication status'}
+            {isHt ? 'Estati piblikasyon' : inlineText(lang, 'Publication status')}
           </strong>
           <select
             value={lifecycleType}
@@ -197,14 +198,14 @@ export default function AdminContentModeration({ lang = 'en', showToast, user, o
             ))}
           </select>
           <button type="button" className="acm-btn" onClick={fetchLifecycle} disabled={lifecycleLoading}>
-            <i className="fas fa-sync" /> {isHt ? 'Chaje' : 'Load'}
+            <i className="fas fa-sync" /> {isHt ? 'Chaje' : inlineText(lang, 'Load')}
           </button>
         </div>
         {lifecycleLoading ? (
-          <div className="acm-loading"><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap chaje...' : 'Loading...'}</div>
+          <div className="acm-loading"><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap chaje...' : inlineText(lang, 'Loading...')}</div>
         ) : lifecycle.length === 0 ? (
           <p style={{ fontSize: '.82rem', opacity: .7 }}>
-            {isHt ? 'Poko gen estati pou tip sa a.' : 'No lifecycle rows for this type yet.'}
+            {isHt ? 'Poko gen estati pou tip sa a.' : inlineText(lang, 'No lifecycle rows for this type yet.')}
           </p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 360, overflowY: 'auto' }}>
@@ -215,7 +216,7 @@ export default function AdminContentModeration({ lang = 'en', showToast, user, o
                     {row.content_type} #{row.object_id} · {row.publication_state}
                   </div>
                   <div style={{ fontSize: '.75rem', opacity: .7 }}>
-                    {isHt ? 'Distribisyon' : 'Distribution'}: {row.effective_distribution}
+                    {isHt ? 'Distribisyon' : inlineText(lang, 'Distribution')}: {row.effective_distribution}
                   </div>
                 </div>
                 <ContentLifecycleControls
@@ -237,16 +238,16 @@ export default function AdminContentModeration({ lang = 'en', showToast, user, o
             <strong style={{ fontSize: '.85rem' }}>
               {isHt ? `Post kreyatè yo (${postTotal}) — admin ka siprime nenpòt:` : `Creator posts (${postTotal}) — admin can delete any:`}
             </strong>
-            <input type="text" value={postSearch} onChange={(e) => setPostSearch(e.target.value)} placeholder={isHt ? 'Chèche tèks oswa @user...' : 'Search text or @user...'} aria-label="search posts" style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border-color)', fontSize: '.82rem', minWidth: 200 }} />
-            <input type="text" value={postReason} onChange={(e) => setPostReason(e.target.value)} placeholder={isHt ? 'Rezon (voye bay otè)' : 'Reason (sent to author)'} aria-label="reason" style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border-color)', fontSize: '.82rem', minWidth: 220 }} />
+            <input type="text" value={postSearch} onChange={(e) => setPostSearch(e.target.value)} placeholder={isHt ? 'Chèche tèks oswa @user...' : inlineText(lang, 'Search text or @user...')} aria-label="search posts" style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border-color)', fontSize: '.82rem', minWidth: 200 }} />
+            <input type="text" value={postReason} onChange={(e) => setPostReason(e.target.value)} placeholder={isHt ? 'Rezon (voye bay otè)' : inlineText(lang, 'Reason (sent to author)')} aria-label="reason" style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border-color)', fontSize: '.82rem', minWidth: 220 }} />
             <button type="button" className="acm-btn" onClick={fetchPosts} disabled={postsLoading}>
-              <i className="fas fa-sync" /> {isHt ? 'Chaje' : 'Load'}
+              <i className="fas fa-sync" /> {isHt ? 'Chaje' : inlineText(lang, 'Load')}
             </button>
           </div>
           {postsLoading ? (
-            <div className="acm-loading"><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap chaje post...' : 'Loading posts...'}</div>
+            <div className="acm-loading"><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap chaje post...' : inlineText(lang, 'Loading posts...')}</div>
           ) : posts.length === 0 ? (
-            <p style={{ fontSize: '.82rem', opacity: .7 }}>{isHt ? 'Pa gen post.' : 'No posts.'}</p>
+            <p style={{ fontSize: '.82rem', opacity: .7 }}>{isHt ? 'Pa gen post.' : inlineText(lang, 'No posts.')}</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 320, overflowY: 'auto' }}>
               {posts.map((p) => (
@@ -255,8 +256,8 @@ export default function AdminContentModeration({ lang = 'en', showToast, user, o
                     <div style={{ fontSize: '.82rem', fontWeight: 600 }}>@{p.author_username} · <span style={{ opacity: .6 }}>{p.slug}</span></div>
                     <div style={{ fontSize: '.82rem', opacity: .85, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.body}</div>
                   </div>
-                  <button type="button" className="acm-action-btn" disabled={deletingSlug === p.slug} onClick={() => handleDeletePostRow(p)} title={isHt ? 'Siprime + notifye otè' : 'Delete + notify author'}>
-                    <i className="fas fa-trash" /> {deletingSlug === p.slug ? '...' : (isHt ? 'Siprime' : 'Delete')}
+                  <button type="button" className="acm-action-btn" disabled={deletingSlug === p.slug} onClick={() => handleDeletePostRow(p)} title={isHt ? 'Siprime + notifye otè' : inlineText(lang, 'Delete + notify author')}>
+                    <i className="fas fa-trash" /> {deletingSlug === p.slug ? '...' : (isHt ? 'Siprime' : inlineText(lang, 'Delete'))}
                   </button>
                 </div>
               ))}
@@ -275,16 +276,16 @@ export default function AdminContentModeration({ lang = 'en', showToast, user, o
       </div>
 
       <div className="acm-body">
-        {loading ? <div className="acm-loading"><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap chaje...' : 'Loading...'}</div>
-        : items.length === 0 ? <div className="acm-empty"><i className="fas fa-check-circle" style={{opacity:.3}} /><p>{isHt ? 'Pa gen medya make.' : 'No flagged media.'}</p></div>
+        {loading ? <div className="acm-loading"><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap chaje...' : inlineText(lang, 'Loading...')}</div>
+        : items.length === 0 ? <div className="acm-empty"><i className="fas fa-check-circle" style={{opacity:.3}} /><p>{isHt ? 'Pa gen medya make.' : inlineText(lang, 'No flagged media.')}</p></div>
         : (
           <div className="acm-table-wrap">
             <table className="acm-table">
               <thead><tr>
-                <th>{isHt ? 'Medya' : 'Media'}</th><th>{isHt ? 'Mèt' : 'Owner'}</th>
-                <th>{isHt ? 'Mak' : 'Flag'}</th><th>{isHt ? 'Moderatè' : 'Moderator'}</th>
-                <th>{isHt ? 'Reyon' : 'Reason'}</th><th>{isHt ? 'Dat' : 'Date'}</th>
-                <th>{isHt ? 'Aksyon' : 'Actions'}</th>
+                <th>{isHt ? 'Medya' : inlineText(lang, 'Media')}</th><th>{isHt ? 'Mèt' : inlineText(lang, 'Owner')}</th>
+                <th>{isHt ? 'Mak' : inlineText(lang, 'Flag')}</th><th>{isHt ? 'Moderatè' : inlineText(lang, 'Moderator')}</th>
+                <th>{isHt ? 'Reyon' : inlineText(lang, 'Reason')}</th><th>{isHt ? 'Dat' : inlineText(lang, 'Date')}</th>
+                <th>{isHt ? 'Aksyon' : inlineText(lang, 'Actions')}</th>
               </tr></thead>
               <tbody>
                 {items.map((item) => (
@@ -297,7 +298,7 @@ export default function AdminContentModeration({ lang = 'en', showToast, user, o
                     <td className="acm-cell-time">{item.moderated_at?new Date(item.moderated_at).toLocaleDateString():'—'}</td>
                     <td className="acm-cell-actions">
                       <button type="button" className="acm-action-btn" onClick={() => setActionModal({id:item.id, url:item.url, current:item.moderation_status})}>
-                        <i className="fas fa-flag" /> {isHt?'Make':'Flag'}
+                        <i className="fas fa-flag" /> {isHt?'Make':inlineText(lang, 'Flag')}
                       </button>
                     </td>
                   </tr>
@@ -312,16 +313,16 @@ export default function AdminContentModeration({ lang = 'en', showToast, user, o
         <div className="acm-modal-backdrop" onClick={(e) => { if (e.target===e.currentTarget) { setActionModal(null); setReason(''); } }}>
           <div className="acm-modal-card">
             <div className="acm-modal-header">
-              <h3><i className="fas fa-flag" /> {isHt?'Make Medya':'Flag Media'}</h3>
+              <h3><i className="fas fa-flag" /> {isHt?'Make Medya':inlineText(lang, 'Flag Media')}</h3>
               <button type="button" className="acm-modal-close" onClick={()=>{setActionModal(null); setReason('');}}><i className="fas fa-times"/></button>
             </div>
             <div className="acm-modal-body">
               <p className="acm-modal-url">{actionModal.url?.slice(0,80)}</p>
-              <p className="acm-modal-current">{isHt?'Mak aktyèl':'Current'}: <strong>{actionModal.current||'none'}</strong></p>
+              <p className="acm-modal-current">{isHt?'Mak aktyèl':inlineText(lang, 'Current')}: <strong>{actionModal.current||'none'}</strong></p>
               <input
                 type="text"
                 className="acm-modal-input"
-                placeholder={isHt?'Reyon (opsyonèl)':'Reason (optional)'}
+                placeholder={isHt?'Reyon (opsyonèl)':inlineText(lang, 'Reason (optional)')}
                 value={reason}
                 onChange={(e)=>setReason(e.target.value)}
                 style={{width:'100%',padding:'8px 10px',borderRadius:8,border:'1px solid var(--border-color)',marginBottom:12,fontSize:'.82rem',fontFamily:'inherit'}}

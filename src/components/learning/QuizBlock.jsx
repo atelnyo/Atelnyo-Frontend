@@ -18,6 +18,7 @@ import { quizService, quizAttemptService } from '../../services/api';
 import { playChime } from '../../utils/celebrate';
 import { saveDraft, restoreDraft, removeDraft } from '../../services/learningDraftManager';
 import styles from './learning.module.css';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── Quiz answer persistence via draftStore (§9, §28) ───────────
 // Migrated from raw localStorage to draftStore primitive for proper
@@ -68,7 +69,7 @@ export default function QuizBlock({
   gamification = null, onGamification = null,
 }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
   const [quizzes, setQuizzes] = useState(null); // null = loading
   const [loadErr, setLoadErr] = useState('');
   // §28 — Initialize answers from draftStore (async, survives page reload)

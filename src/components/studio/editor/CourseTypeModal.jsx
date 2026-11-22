@@ -13,6 +13,7 @@
  */
 import React from 'react';
 import styles from './editor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function CourseTypeModal({ lang = 'en', onClose, onSelect }) {
   const isHt = lang === 'ht';
@@ -22,7 +23,7 @@ export default function CourseTypeModal({ lang = 'en', onClose, onSelect }) {
       onClick={(e) => { if (e.target === e.currentTarget) onClose?.(); }}
       role="dialog"
       aria-modal="true"
-      aria-label={isHt ? 'Kreye yon Kou' : 'Create a Course'}
+      aria-label={isHt ? 'Kreye yon Kou' : inlineText(lang, 'Create a Course')}
     >
       <div className={styles.typeModal}>
         <header className={styles.typeModalHeader}>
@@ -30,11 +31,11 @@ export default function CourseTypeModal({ lang = 'en', onClose, onSelect }) {
             <i className="fas fa-graduation-cap" aria-hidden="true" />
           </span>
           <div>
-            <h2>{isHt ? 'Kreye yon Kou' : 'Create a Course'}</h2>
+            <h2>{isHt ? 'Kreye yon Kou' : inlineText(lang, 'Create a Course')}</h2>
             <p>
               {isHt
                 ? 'Ki kalite kou w ap kreye a?'
-                : 'What type of course are you creating?'}
+                : inlineText(lang, 'What type of course are you creating?')}
             </p>
           </div>
         </header>
@@ -50,12 +51,12 @@ export default function CourseTypeModal({ lang = 'en', onClose, onSelect }) {
             </span>
             <span className={styles.typeOptionText}>
               <span className={styles.typeOptionTitle}>
-                {isHt ? 'Anseye sou Atelnyo' : 'Teach on Atelnyo'}
+                {isHt ? 'Anseye sou Atelnyo' : inlineText(lang, 'Teach on Atelnyo')}
               </span>
               <span className={styles.typeOptionDesc}>
                 {isHt
                   ? 'Kou sou entènèt — elèv yo aprann dirèkteman nan atelnyo.'
-                  : 'Online course — students learn directly through atelnyo.'}
+                  : inlineText(lang, 'Online course — students learn directly through atelnyo.')}
               </span>
             </span>
           </button>
@@ -70,12 +71,12 @@ export default function CourseTypeModal({ lang = 'en', onClose, onSelect }) {
             </span>
             <span className={styles.typeOptionText}>
               <span className={styles.typeOptionTitle}>
-                {isHt ? 'Anseye yon lòt kote' : 'Teach elsewhere'}
+                {isHt ? 'Anseye yon lòt kote' : inlineText(lang, 'Teach elsewhere')}
               </span>
               <span className={styles.typeOptionDesc}>
                 {isHt
                   ? 'Kou ekstèn — sèvi Atelnyo pou òganize ak prezante kou a pandan aprantisaj la fèt sou yon lòt platfòm, kote, oswa enstitisyon.'
-                  : 'External / non-online course — use Atelnyo to organize and present the course while learning happens through another platform, location, institution, or system.'}
+                  : inlineText(lang, 'External / non-online course — use Atelnyo to organize and present the course while learning happens through another platform, location, institution, or system.')}
               </span>
             </span>
           </button>
@@ -83,7 +84,7 @@ export default function CourseTypeModal({ lang = 'en', onClose, onSelect }) {
 
         <button type="button" className={styles.typeModalBack} onClick={onClose}>
           <i className="fas fa-arrow-left" aria-hidden="true" />{' '}
-          {isHt ? 'Retounen' : 'Back'}
+          {isHt ? 'Retounen' : inlineText(lang, 'Back')}
         </button>
       </div>
     </div>

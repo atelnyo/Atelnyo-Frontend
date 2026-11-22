@@ -14,6 +14,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { creatorProgressionService } from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 function classNames(...parts) { return parts.filter(Boolean).join(' '); }
 
@@ -50,7 +51,7 @@ export default function CreatorProgression({ lang = 'en', showToast, compact = f
     return (
       <div className="cprog-error" role="alert">
         <i className="fas fa-triangle-exclamation" />
-        <span>{isHt ? 'Pa ka chaje pwogresyon' : 'Cannot load progression'}</span>
+        <span>{isHt ? 'Pa ka chaje pwogresyon' : inlineText(lang, 'Cannot load progression')}</span>
       </div>
     );
   }
@@ -66,7 +67,7 @@ export default function CreatorProgression({ lang = 'en', showToast, compact = f
         </div>
         <div className="cprog-current-info">
           <div className="cprog-current-level">
-            {isHt ? 'Nivo' : 'Level'} {current_tier?.level}
+            {isHt ? 'Nivo' : inlineText(lang, 'Level')} {current_tier?.level}
           </div>
           <div className="cprog-current-name">
             {isHt ? current_tier?.name_ht : current_tier?.name}
@@ -82,7 +83,7 @@ export default function CreatorProgression({ lang = 'en', showToast, compact = f
         <div className="cprog-next">
           <div className="cprog-next-header">
             <span className="cprog-next-label">
-              {isHt ? 'Pwochen:' : 'Next:'} {' '}
+              {isHt ? 'Pwochen:' : inlineText(lang, 'Next:')} {' '}
               <strong style={{ color: next_tier?.color }}>
                 {isHt ? next_tier?.name_ht : next_tier?.name}
               </strong>
@@ -105,7 +106,7 @@ export default function CreatorProgression({ lang = 'en', showToast, compact = f
               <div className="cprog-reqs-missing">
                 <span className="cprog-reqs-label">
                   <i className="fas fa-circle-exclamation" style={{ color: '#f59e0b' }} /> {' '}
-                  {isHt ? 'Sa ou bezwen fè:' : 'What you need:'}
+                  {isHt ? 'Sa ou bezwen fè:' : inlineText(lang, 'What you need:')}
                 </span>
                 {requirements_missing.map((req, i) => (
                   <div key={i} className="cprog-req-item cprog-req-missing">
@@ -118,7 +119,7 @@ export default function CreatorProgression({ lang = 'en', showToast, compact = f
               <div className="cprog-reqs-met">
                 <span className="cprog-reqs-label">
                   <i className="fas fa-circle-check" style={{ color: '#10b981' }} /> {' '}
-                  {isHt ? 'Fini:' : 'Done:'}
+                  {isHt ? 'Fini:' : inlineText(lang, 'Done:')}
                 </span>
                 {requirements_met.map((req, i) => (
                   <div key={i} className="cprog-req-item cprog-req-done">
@@ -134,7 +135,7 @@ export default function CreatorProgression({ lang = 'en', showToast, compact = f
             <div className="cprog-unlocks">
               <span className="cprog-reqs-label">
                 <i className="fas fa-unlock" style={{ color: '#8b5cf6' }} /> {' '}
-                {isHt ? 'Sa w ap jwenn:' : 'What you\'ll unlock:'}
+                {isHt ? 'Sa w ap jwenn:' : inlineText(lang, 'What you\'ll unlock:')}
               </span>
               <div className="cprog-unlocks-list">
                 {next_tier.unlocks.map((unlock, i) => (
@@ -153,7 +154,7 @@ export default function CreatorProgression({ lang = 'en', showToast, compact = f
         <div className="cprog-ladder">
           <h4 className="cprog-ladder-title">
             <i className="fas fa-mountain" aria-hidden="true" /> {' '}
-            {isHt ? 'Vwayaj Kreyatè' : 'Creator Journey'}
+            {isHt ? 'Vwayaj Kreyatè' : inlineText(lang, 'Creator Journey')}
           </h4>
           <div className="cprog-ladder-list">
             {all_tiers.map((tier) => {

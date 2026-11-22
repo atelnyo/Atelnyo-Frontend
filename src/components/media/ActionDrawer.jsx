@@ -17,6 +17,7 @@
  *   - Keyboard: Escape closes (already wired)
  */
 import React, { useEffect, useRef, useCallback } from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function ActionDrawer({
   open = false,
@@ -93,7 +94,7 @@ export default function ActionDrawer({
         onTouchEnd={position === 'bottom' ? handleTouchEnd : undefined}
         role="dialog"
         aria-modal="true"
-        aria-label={title || (isHt ? 'Aksyon' : 'Actions')}
+        aria-label={title || (isHt ? 'Aksyon' : inlineText(lang, 'Actions'))}
       >
         {/* Handle (bottom variant only) */}
         {position === 'bottom' && (
@@ -110,7 +111,7 @@ export default function ActionDrawer({
               type="button"
               className="action-drawer-close"
               onClick={onClose}
-              aria-label={isHt ? 'Fèmen' : 'Close'}
+              aria-label={isHt ? 'Fèmen' : inlineText(lang, 'Close')}
             >
               <i className="fas fa-times" />
             </button>
@@ -160,7 +161,7 @@ export default function ActionDrawer({
         {position === 'bottom' && (
           <div className="action-drawer-footer">
             <button type="button" className="action-drawer-cancel" onClick={onClose}>
-              {isHt ? 'Anile' : 'Cancel'}
+              {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
             </button>
           </div>
         )}

@@ -23,6 +23,7 @@
  *   />
  */
 import React from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function AccessibleErrorRecovery({
   title,
@@ -100,7 +101,7 @@ export default function AccessibleErrorRecovery({
           gap: '6px',
         }}>
           <i className="fas fa-check-circle" aria-hidden="true" />
-          {isHt ? 'Pwogrè ou anrejistre.' : 'Your progress was saved.'}
+          {isHt ? 'Pwogrè ou anrejistre.' : inlineText(lang, 'Your progress was saved.')}
         </p>
       )}
 

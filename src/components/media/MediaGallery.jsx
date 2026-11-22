@@ -17,6 +17,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import MediaGrid from './MediaGrid';
 import VideoEmbedFrame from './VideoEmbedFrame';
 import '../../styles/media-gallery.css';
+import { inlineText } from '../../utils/inlineI18n';
 
 /** Extract a usable image URL from any item shape (media_url, public_url, url, thumbnail_url). */
 function resolveUrl(item) {
@@ -261,12 +262,12 @@ export default function MediaGallery({
             if (e.target === e.currentTarget) closeLightbox();
           }}
           role="dialog"
-          aria-label={isHt ? 'Aperçu gwo' : 'Large preview'}
+          aria-label={isHt ? 'Aperçu gwo' : inlineText(lang, 'Large preview')}
           aria-modal="true"
         >
           {/* Close */}
           <button type="button" className="media-gallery-close" onClick={closeLightbox}
-            aria-label={isHt ? 'Fèmen' : 'Close'}>
+            aria-label={isHt ? 'Fèmen' : inlineText(lang, 'Close')}>
             <i className="fas fa-times" aria-hidden="true" />
           </button>
 
@@ -274,28 +275,28 @@ export default function MediaGallery({
           <div className="media-gallery-toolbar">
             <button type="button" className="media-gallery-toolbar-btn"
               onClick={() => setShowDetail((d) => !d)}
-              title={isHt ? 'Detay' : 'Details'}>
+              title={isHt ? 'Detay' : inlineText(lang, 'Details')}>
               <i className="fas fa-info-circle" />
             </button>
             <button type="button" className="media-gallery-toolbar-btn"
               onClick={toggleZoom}
-              title={zoomed ? (isHt ? 'Retresi' : 'Zoom out') : (isHt ? 'Agrandi' : 'Zoom in')}>
+              title={zoomed ? (isHt ? 'Retresi' : inlineText(lang, 'Zoom out')) : (isHt ? 'Agrandi' : inlineText(lang, 'Zoom in'))}>
               <i className={`fas fa-${zoomed ? 'search-minus' : 'search-plus'}`} />
             </button>
             <button type="button" className="media-gallery-toolbar-btn"
               onClick={() => setFullscreen((f) => !f)}
-              title={isHt ? 'Plen ekran' : 'Fullscreen'}>
+              title={isHt ? 'Plen ekran' : inlineText(lang, 'Fullscreen')}>
               <i className={`fas fa-${fullscreen ? 'compress' : 'expand'}`} />
             </button>
             <button type="button" className="media-gallery-toolbar-btn"
               onClick={handleCopyUrl}
-              title={isHt ? 'Kopi URL' : 'Copy URL'}>
+              title={isHt ? 'Kopi URL' : inlineText(lang, 'Copy URL')}>
               <i className={`fas fa-${copied ? 'check' : 'link'}`} />
             </button>
             {selUrl && (
               <a href={selUrl} target="_blank" rel="noopener noreferrer"
                 className="media-gallery-toolbar-btn" style={{ textDecoration: 'none' }}
-                title={isHt ? 'Telechaje' : 'Download'}>
+                title={isHt ? 'Telechaje' : inlineText(lang, 'Download')}>
                 <i className="fas fa-download" />
               </a>
             )}
@@ -305,11 +306,11 @@ export default function MediaGallery({
           {items.length > 1 && (
             <>
               <button type="button" className="media-gallery-nav media-gallery-nav-prev"
-                onClick={goPrev} aria-label={isHt ? 'Anvan' : 'Previous'}>
+                onClick={goPrev} aria-label={isHt ? 'Anvan' : inlineText(lang, 'Previous')}>
                 <i className="fas fa-chevron-left" aria-hidden="true" />
               </button>
               <button type="button" className="media-gallery-nav media-gallery-nav-next"
-                onClick={goNext} aria-label={isHt ? 'Apre' : 'Next'}>
+                onClick={goNext} aria-label={isHt ? 'Apre' : inlineText(lang, 'Next')}>
                 <i className="fas fa-chevron-right" aria-hidden="true" />
               </button>
             </>
@@ -351,7 +352,7 @@ export default function MediaGallery({
                   <a href={selUrl} target="_blank" rel="noopener noreferrer"
                     className="media-gallery-download">
                     <i className="fas fa-download" aria-hidden="true" />
-                    {isHt ? 'Telechaje / Louvri' : 'Download / Open'}
+                    {isHt ? 'Telechaje / Louvri' : inlineText(lang, 'Download / Open')}
                   </a>
                 )}
               </div>
@@ -361,7 +362,7 @@ export default function MediaGallery({
             {selType === 'image' && (
               <div className="media-gallery-zoom-indicator">
                 <i className={`fas fa-${zoomed ? 'search-minus' : 'search-plus'}`} />
-                {zoomed ? `${Math.round(zoomLevel * 100)}%` : (isHt ? 'Klike pou zoum' : 'Click to zoom')}
+                {zoomed ? `${Math.round(zoomLevel * 100)}%` : (isHt ? 'Klike pou zoum' : inlineText(lang, 'Click to zoom'))}
               </div>
             )}
           </div>
@@ -399,11 +400,11 @@ export default function MediaGallery({
                 onClick={() => setShowDetail(false)}>
                 <i className="fas fa-times" />
               </button>
-              <h4>{isHt ? 'Detay Medya' : 'Media Details'}</h4>
+              <h4>{isHt ? 'Detay Medya' : inlineText(lang, 'Media Details')}</h4>
 
               {selTitle && (
                 <div className="media-gallery-detail-item">
-                  <span className="label">{isHt ? 'Tit' : 'Title'}</span>
+                  <span className="label">{isHt ? 'Tit' : inlineText(lang, 'Title')}</span>
                   <span className="value">{selTitle}</span>
                 </div>
               )}
@@ -415,13 +416,13 @@ export default function MediaGallery({
               )}
               {selWidth && selHeight && (
                 <div className="media-gallery-detail-item">
-                  <span className="label">{isHt ? 'Dimansyon' : 'Dimensions'}</span>
+                  <span className="label">{isHt ? 'Dimansyon' : inlineText(lang, 'Dimensions')}</span>
                   <span className="value">{selWidth} × {selHeight} px</span>
                 </div>
               )}
               {selSize != null && (
                 <div className="media-gallery-detail-item">
-                  <span className="label">{isHt ? 'Gwose' : 'Size'}</span>
+                  <span className="label">{isHt ? 'Gwose' : inlineText(lang, 'Size')}</span>
                   <span className="value">
                     {Number(selSize) >= 1_000_000 ? `${(Number(selSize) / 1_000_000).toFixed(1)} MB`
                       : Number(selSize) >= 1_000 ? `${(Number(selSize) / 1_000).toFixed(1)} KB`
@@ -431,12 +432,12 @@ export default function MediaGallery({
               )}
               {selProvider && (
                 <div className="media-gallery-detail-item">
-                  <span className="label">{isHt ? 'Provider' : 'Provider'}</span>
+                  <span className="label">{isHt ? 'Provider' : inlineText(lang, 'Provider')}</span>
                   <span className="value">{selProvider}</span>
                 </div>
               )}
               <div className="media-gallery-detail-item">
-                <span className="label">{isHt ? 'Estati' : 'Status'}</span>
+                <span className="label">{isHt ? 'Estati' : inlineText(lang, 'Status')}</span>
                 <span className="value" style={{
                   color: selStatus === 'healthy' ? '#10b981' :
                          selStatus === 'broken' ? '#ef4444' :

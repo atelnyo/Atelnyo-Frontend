@@ -30,6 +30,7 @@ import TipsInbox from '../../wallet/TipsInbox';
 import DepositModal from '../modals/DepositModal';
 import RefundModal from '../modals/RefundModal';
 import SendTipModal from '../modals/SendTipModal';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const TABS = [
   { id: 'overview',     icon: 'fa-wallet',             ht: 'Balans',        en: 'Overview' },
@@ -108,29 +109,29 @@ export default function WalletSection({ lang, t, showToast, setShowWithdrawModal
     // callback endpoint — just refresh the list and show a success toast.
     if (data?._refresh) {
       refetchAccounts();
-      showToast?.(isHt ? '✅ PayPal konekte!' : '✅ PayPal connected!', 'check-circle');
+      showToast?.(isHt ? '✅ PayPal konekte!' : inlineText(lang, '✅ PayPal connected!'), 'check-circle');
       return;
     }
     await api.post('wallet/payout-accounts/', data);
-    showToast?.(isHt ? '✅ Kont peman ajoute!' : '✅ Payout account added!', 'check-circle');
+    showToast?.(isHt ? '✅ Kont peman ajoute!' : inlineText(lang, '✅ Payout account added!'), 'check-circle');
     refetchAccounts();
   }, [refetchAccounts, showToast, isHt]);
 
   const handlePayoutAccountUpdate = useCallback(async (id, data) => {
     await api.patch(`wallet/payout-accounts/${id}/`, data);
-    showToast?.(isHt ? '✅ Kont peman modifye!' : '✅ Payout account updated!', 'check-circle');
+    showToast?.(isHt ? '✅ Kont peman modifye!' : inlineText(lang, '✅ Payout account updated!'), 'check-circle');
     refetchAccounts();
   }, [refetchAccounts, showToast, isHt]);
 
   const handlePayoutAccountDelete = useCallback(async (id) => {
     await api.delete(`wallet/payout-accounts/${id}/`);
-    showToast?.(isHt ? '🗑️ Kont peman efase' : '🗑️ Payout account deleted', 'trash');
+    showToast?.(isHt ? '🗑️ Kont peman efase' : inlineText(lang, '🗑️ Payout account deleted'), 'trash');
     refetchAccounts();
   }, [refetchAccounts, showToast, isHt]);
 
   const handleSetDefault = useCallback(async (id) => {
     await api.patch(`wallet/payout-accounts/${id}/`, { is_default: true });
-    showToast?.(isHt ? '⭐ Kont defo mete' : '⭐ Default account set', 'star');
+    showToast?.(isHt ? '⭐ Kont defo mete' : inlineText(lang, '⭐ Default account set'), 'star');
     refetchAccounts();
   }, [refetchAccounts, showToast, isHt]);
 
@@ -167,27 +168,27 @@ export default function WalletSection({ lang, t, showToast, setShowWithdrawModal
         }}
         tip={lang === 'ht'
           ? 'Ou dwe konekte yon kont peman anvan w ka retire lajan.'
-          : 'You must connect a payout account before you can withdraw funds.'}
+          : inlineText(lang, 'You must connect a payout account before you can withdraw funds.')}
         action={
           <div className={styles.walletActions}>
             <button
               type="button"
               className="btn-primary"
               onClick={() => setShowDeposit(true)}
-              title={isHt ? 'Depoze lajan ak PayPal' : 'Fund with PayPal'}
+              title={isHt ? 'Depoze lajan ak PayPal' : inlineText(lang, 'Fund with PayPal')}
             >
               <i className="fas fa-circle-dollar-to-slot" aria-hidden="true" />
-              {isHt ? 'Depoze' : 'Fund'}
+              {isHt ? 'Depoze' : inlineText(lang, 'Fund')}
             </button>
             <button
               type="button"
               className="btn-primary"
               onClick={() => setShowWithdrawModal(true)}
               disabled={Number(wallet?.balance || 0) <= 0}
-              title={isHt ? 'Retire lajan' : 'Withdraw'}
+              title={isHt ? 'Retire lajan' : inlineText(lang, 'Withdraw')}
             >
               <i className="fas fa-arrow-up" aria-hidden="true" />
-              {isHt ? 'Retire' : 'Withdraw'}
+              {isHt ? 'Retire' : inlineText(lang, 'Withdraw')}
             </button>
           </div>
         }
@@ -268,14 +269,14 @@ export default function WalletSection({ lang, t, showToast, setShowWithdrawModal
           <div className={styles.refundPane}>
             <h3 className={styles.sectionSubtitle}>
               <i className="fas fa-rotate-left" aria-hidden="true" />
-              {isHt ? 'Peman PayPal Ou Ka Ranbouse' : 'PayPal Payments You Can Refund'}
+              {isHt ? 'Peman PayPal Ou Ka Ranbouse' : inlineText(lang, 'PayPal Payments You Can Refund')}
             </h3>
             {txnsLoading ? (
-              <div className={styles.hintRow}><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap chaje...' : 'Loading...'}</div>
+              <div className={styles.hintRow}><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap chaje...' : inlineText(lang, 'Loading...')}</div>
             ) : refundableTxns.length === 0 ? (
               <EmptyState
                 icon="fa-rotate-left"
-                title={isHt ? 'Pa gen peman refoundable' : 'No refundable payments'}
+                title={isHt ? 'Pa gen peman refoundable' : inlineText(lang, 'No refundable payments')}
               />
             ) : (
               <div className={styles.list}>
@@ -293,7 +294,7 @@ export default function WalletSection({ lang, t, showToast, setShowWithdrawModal
                           {txn.status}
                         </span>
                         {Number(txn.refunded_amount || 0) > 0 && (
-                          <span>· {isHt ? 'Deja ranbouse' : 'Refunded'}: ${Number(txn.refunded_amount).toFixed(2)}</span>
+                          <span>· {isHt ? 'Deja ranbouse' : inlineText(lang, 'Refunded')}: ${Number(txn.refunded_amount).toFixed(2)}</span>
                         )}
                       </div>
                     </div>
@@ -303,7 +304,7 @@ export default function WalletSection({ lang, t, showToast, setShowWithdrawModal
                       onClick={() => setRefundTxn(txn)}
                     >
                       <i className="fas fa-rotate-left" aria-hidden="true" />
-                      {isHt ? 'Refund' : 'Refund'}
+                      {isHt ? 'Refund' : inlineText(lang, 'Refund')}
                     </button>
                   </div>
                 ))}

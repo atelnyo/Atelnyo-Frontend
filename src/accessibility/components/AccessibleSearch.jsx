@@ -23,6 +23,7 @@
  *   />
  */
 import React, { useRef, useId } from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function AccessibleSearch({
   value,
@@ -47,7 +48,7 @@ export default function AccessibleSearch({
     <div className={`a11y-search ${className}`} style={{ position: 'relative' }}>
       {/* Label (visually hidden but accessible) */}
       <label htmlFor={inputId} className="sr-only">
-        {placeholder || (isHt ? 'Chèche' : 'Search')}
+        {placeholder || (isHt ? 'Chèche' : inlineText(lang, 'Search'))}
       </label>
 
       <div style={{ position: 'relative' }}>
@@ -99,7 +100,7 @@ export default function AccessibleSearch({
           <button
             type="button"
             onClick={() => { onClear(); inputRef.current?.focus(); }}
-            aria-label={isHt ? 'Efase chèch' : 'Clear search'}
+            aria-label={isHt ? 'Efase chèch' : inlineText(lang, 'Clear search')}
             style={{
               position: 'absolute',
               right: '12px',
@@ -133,7 +134,7 @@ export default function AccessibleSearch({
         className="sr-only"
       >
         {isLoading
-          ? (isHt ? 'Ap chèche...' : 'Searching...')
+          ? (isHt ? 'Ap chèche...' : inlineText(lang, 'Searching...'))
           : error
             ? (isHt ? `Erè: ${error}` : `Error: ${error}`)
             : resultCount != null

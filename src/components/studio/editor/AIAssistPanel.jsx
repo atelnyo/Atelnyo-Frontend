@@ -19,6 +19,7 @@
 import React, { useState, useCallback } from 'react';
 import { aiService } from '../../../services/api';
 import styles from './editor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const AI_TOOLS = [
   {
@@ -76,7 +77,7 @@ const LANGUAGES = [
 
 export default function AIAssistPanel({ lang = 'en', onInsertContent, currentContent = '' }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
 
   const [activeTool, setActiveTool] = useState(null);
   const [input, setInput] = useState('');

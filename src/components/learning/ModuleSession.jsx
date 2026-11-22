@@ -33,6 +33,7 @@ import LessonIntroduction from './LessonIntroduction';
 import ProgressExplanation from './ProgressExplanation';
 import useLearningNavigation, { NAV_STATE, SAVE_STATE } from '../../hooks/useLearningNavigation';
 import useLessonCompletion from '../../hooks/useLessonCompletion';
+import { inlineText } from '../../utils/inlineI18n';
 
 // Fisher–Yates shuffle — module scope so the component body stays pure
 // (the review session mixes the module's blocks into a fresh order).
@@ -266,8 +267,8 @@ export default function ModuleSession({
   }, [isStepDone, current, isAssessment, sessionBlocks, moduleIndex, completedModules, isLastStep, stepCount, onSafeNavigate, onNextModule]);
 
   const moduleTitle = useMemo(() => {
-    const base = (typeof item === 'object' && item.title) ? item.title : `${isHt ? 'Modil' : 'Module'} ${moduleIndex + 1}`;
-    return review ? `${isHt ? 'Revizyon' : 'Review'} · ${base}` : base;
+    const base = (typeof item === 'object' && item.title) ? item.title : `${isHt ? 'Modil' : inlineText(lang, 'Module')} ${moduleIndex + 1}`;
+    return review ? `${isHt ? 'Revizyon' : inlineText(lang, 'Review')} · ${base}` : base;
   }, [item, moduleIndex, isHt, review]);
   const doneCount = useMemo(
     () => [...Array(stepCount).keys()].filter((i) => isStepDone(i)).length,
@@ -359,8 +360,8 @@ export default function ModuleSession({
           type="button"
           className="ls-header-btn"
           onClick={onExit}
-          aria-label={isHt ? 'Soti nan sesyon an' : 'Exit session'}
-          title={isHt ? 'Soti' : 'Exit'}
+          aria-label={isHt ? 'Soti nan sesyon an' : inlineText(lang, 'Exit session')}
+          title={isHt ? 'Soti' : inlineText(lang, 'Exit')}
         >
           <i className="fas fa-arrow-left" aria-hidden="true" />
         </button>
@@ -368,7 +369,7 @@ export default function ModuleSession({
           <strong>{moduleTitle}</strong>
           <span aria-live="polite">
             {showComplete
-              ? (isHt ? 'Sesyon fini' : 'Session complete')
+              ? (isHt ? 'Sesyon fini' : inlineText(lang, 'Session complete'))
               : (isHt ? `Etap ${current + 1} sou ${stepCount}` : `Step ${current + 1} of ${stepCount}`)}
           </span>
         </div>
@@ -384,12 +385,12 @@ export default function ModuleSession({
           <span
             className={`ls-session-hearts${!gamification.hearts_unlimited && Number(gamification.hearts) === 0 ? ' is-empty' : ''}${gamification.hearts_unlimited ? ' is-unlimited' : ''}`}
             title={gamification.hearts_unlimited
-              ? (isHt ? 'Kè san limit (plan peye)' : 'Unlimited hearts (paid plan)')
-              : (isHt ? 'Kè — erè ki rete' : 'Hearts — mistakes left')}
+              ? (isHt ? 'Kè san limit (plan peye)' : inlineText(lang, 'Unlimited hearts (paid plan)'))
+              : (isHt ? 'Kè — erè ki rete' : inlineText(lang, 'Hearts — mistakes left'))}
             role="status"
           >
             {gamification.hearts_unlimited ? (
-              <span aria-label={isHt ? 'Kè san limit' : 'Unlimited hearts'}>
+              <span aria-label={isHt ? 'Kè san limit' : inlineText(lang, 'Unlimited hearts')}>
                 <i className="fas fa-heart is-full" aria-hidden="true" /> <strong aria-hidden="true">∞</strong>
               </span>
             ) : (
@@ -407,7 +408,7 @@ export default function ModuleSession({
 
       {/* ─── Step-dot path (real progress only) ─────────────────── */}
       {!showComplete && stepCount > 0 && (
-        <div className="ls-session-path" role="img" aria-label={isHt ? 'Pwogrè nan modil la' : 'Module progress'}>
+        <div className="ls-session-path" role="img" aria-label={isHt ? 'Pwogrè nan modil la' : inlineText(lang, 'Module progress')}>
           {[...Array(stepCount).keys()].map((i) => {
             const done = isStepDone(i);
             const cls = [
@@ -441,7 +442,7 @@ export default function ModuleSession({
               <i className="fas fa-trophy" aria-hidden="true" />
             </div>
           </div>
-          <h3>{review ? (isHt ? 'Revizyon fini!' : 'Review complete!') : (isHt ? 'Modil fini!' : 'Module complete!')}</h3>
+          <h3>{review ? (isHt ? 'Revizyon fini!' : inlineText(lang, 'Review complete!')) : (isHt ? 'Modil fini!' : inlineText(lang, 'Module complete!'))}</h3>
           <p>
             {review
               ? (isHt
@@ -469,11 +470,11 @@ export default function ModuleSession({
           )}
           <div className="ls-session-done-actions">
             <button type="button" className="ls-btn" onClick={onExit}>
-              <i className="fas fa-list-check" aria-hidden="true" /> {isHt ? 'Tounen nan kourikoulòm' : 'Back to curriculum'}
+              <i className="fas fa-list-check" aria-hidden="true" /> {isHt ? 'Tounen nan kourikoulòm' : inlineText(lang, 'Back to curriculum')}
             </button>
             {onNextModule && (
               <button type="button" className="ls-btn ls-btn--primary" onClick={onNextModule}>
-                <i className="fas fa-arrow-right" aria-hidden="true" /> {isHt ? 'Pwochen modil' : 'Next module'}
+                <i className="fas fa-arrow-right" aria-hidden="true" /> {isHt ? 'Pwochen modil' : inlineText(lang, 'Next module')}
               </button>
             )}
           </div>
@@ -516,8 +517,8 @@ export default function ModuleSession({
             <div className="ls-session-assessment-head">
               <span className="ls-session-assessment-icon"><i className="fas fa-clipboard-question" aria-hidden="true" /></span>
               <div>
-                <strong>{isHt ? 'Evalyasyon modil la' : 'Module assessment'}</strong>
-                <span>{isHt ? 'Reponn tout kesyon yo — sa konte nan pwogrè ou.' : 'Answer every question — it counts toward your progress.'}</span>
+                <strong>{isHt ? 'Evalyasyon modil la' : inlineText(lang, 'Module assessment')}</strong>
+                <span>{isHt ? 'Reponn tout kesyon yo — sa konte nan pwogrè ou.' : inlineText(lang, 'Answer every question — it counts toward your progress.')}</span>
               </div>
             </div>
           )}
@@ -559,19 +560,19 @@ export default function ModuleSession({
             <p className="ls-session-hint">
               {canContinue
                 ? (isLastStep
-                    ? (isHt ? 'Fini modil la' : 'Finish the module')
-                    : (isHt ? 'Kontinye nan pwochen etap' : 'Continue to the next step'))
+                    ? (isHt ? 'Fini modil la' : inlineText(lang, 'Finish the module'))
+                    : (isHt ? 'Kontinye nan pwochen etap' : inlineText(lang, 'Continue to the next step')))
                 : (isHt
                     ? 'Konplete aktivite a pou kontinye'
-                    : 'Complete the activity to continue')}
+                    : inlineText(lang, 'Complete the activity to continue'))}
             </p>
             {canContinue && (
               <span className="ls-session-kbd" aria-hidden="true">
-                <kbd>Enter</kbd> <kbd>→</kbd> {isHt ? 'kontinye' : 'continue'}
+                <kbd>Enter</kbd> <kbd>→</kbd> {isHt ? 'kontinye' : inlineText(lang, 'continue')}
                 {current > 0 && (
                   <>
                     <span className="ls-session-kbd-sep">·</span>
-                    <kbd>←</kbd> {isHt ? 'retounen' : 'back'}
+                    <kbd>←</kbd> {isHt ? 'retounen' : inlineText(lang, 'back')}
                   </>
                 )}
               </span>
@@ -582,10 +583,10 @@ export default function ModuleSession({
                 type="button"
                 className="ls-btn ls-session-back"
                 onClick={() => setCurrent((c) => Math.max(0, c - 1))}
-                aria-label={isHt ? 'Retounen nan etap anvan' : 'Previous step'}
-                title={isHt ? 'Retounen' : 'Back'}
+                aria-label={isHt ? 'Retounen nan etap anvan' : inlineText(lang, 'Previous step')}
+                title={isHt ? 'Retounen' : inlineText(lang, 'Back')}
               >
-                <i className="fas fa-arrow-left" aria-hidden="true" /> {isHt ? 'Retounen' : 'Back'}
+                <i className="fas fa-arrow-left" aria-hidden="true" /> {isHt ? 'Retounen' : inlineText(lang, 'Back')}
               </button>
             )}
             <button
@@ -597,11 +598,11 @@ export default function ModuleSession({
               aria-live="polite"
             >
               {navBusy ? (
-                <><i className="fas fa-spinner fa-pulse" aria-hidden="true" /> {isHt ? 'Ap trete...' : 'Processing...'}</>
+                <><i className="fas fa-spinner fa-pulse" aria-hidden="true" /> {isHt ? 'Ap trete...' : inlineText(lang, 'Processing...')}</>
               ) : isLastStep ? (
-                <><i className="fas fa-flag-checkered" aria-hidden="true" /> {isHt ? 'Fini' : 'Finish'}</>
+                <><i className="fas fa-flag-checkered" aria-hidden="true" /> {isHt ? 'Fini' : inlineText(lang, 'Finish')}</>
               ) : (
-                <>{isHt ? 'Kontinye' : 'Continue'} <i className="fas fa-arrow-right" aria-hidden="true" /></>
+                <>{isHt ? 'Kontinye' : inlineText(lang, 'Continue')} <i className="fas fa-arrow-right" aria-hidden="true" /></>
               )}
             </button>
             </div>

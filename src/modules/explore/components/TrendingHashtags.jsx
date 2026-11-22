@@ -14,6 +14,7 @@
 import React, { useEffect, useState } from 'react';
 import { searchService } from '../../../services/api';
 import './TrendingHashtags.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 // ─── Trending-rail localStorage cache (second-visit zero-request) ─────
 // The rail is public + short-lived, so a 5-min snapshot (mirroring the
@@ -106,7 +107,7 @@ export default function TrendingHashtags({ lang = 'en', limit = 8, onSearch }) {
 
   const title = lang === 'ht'
     ? 'Hashtags ki ap monte'
-    : 'Rising Hashtags';
+    : inlineText(lang, 'Rising Hashtags');
 
   return (
     <div className="tr-trending" aria-label={title}>
@@ -116,7 +117,7 @@ export default function TrendingHashtags({ lang = 'en', limit = 8, onSearch }) {
           {title}
         </span>
         <span className="tr-hint">
-          {lang === 'ht' ? 'Klike pou chèche' : 'Tap to search'}
+          {lang === 'ht' ? 'Klike pou chèche' : inlineText(lang, 'Tap to search')}
         </span>
       </div>
       <div className="tr-rail">

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import QRCodeLib from 'qrcode';
+import { inlineText } from '../../utils/inlineI18n';
 
 /**
  * ShareModal — modal dialog for sharing the creator profile URL.
@@ -37,7 +38,7 @@ export default function ShareModal({ url, onClose, lang }) {
   return (
     <div className="csp-modal-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label="Share profile">
       <div className="csp-modal-card" onClick={(e) => e.stopPropagation()}>
-        <h3>{lang === 'ht' ? 'Pataje pwofil' : 'Share Profile'}</h3>
+        <h3>{lang === 'ht' ? 'Pataje pwofil' : inlineText(lang, 'Share Profile')}</h3>
 
         {/* ─── QR Code ──────────────────────────────────────── */}
         <div className="csp-share-qr">
@@ -45,7 +46,7 @@ export default function ShareModal({ url, onClose, lang }) {
           <p className="csp-share-qr-label">
             {lang === 'ht'
               ? 'Scanne pou ouvri pwofil la'
-              : 'Scan to open profile'}
+              : inlineText(lang, 'Scan to open profile')}
           </p>
         </div>
 
@@ -53,7 +54,7 @@ export default function ShareModal({ url, onClose, lang }) {
         <div className="csp-modal-input-row">
           <input type="text" readOnly value={url} aria-label="Profile URL" onClick={(e) => e.target.select()} />
           <button type="button" onClick={handleCopy}>
-            {copiedModal ? <i className="fas fa-check" /> : (lang === 'ht' ? 'Kopye' : 'Copy')}
+            {copiedModal ? <i className="fas fa-check" /> : (lang === 'ht' ? 'Kopye' : inlineText(lang, 'Copy'))}
           </button>
         </div>
 
@@ -62,7 +63,7 @@ export default function ShareModal({ url, onClose, lang }) {
           background: 'transparent', borderRadius: 8, fontSize: '0.72rem', cursor: 'pointer',
           color: 'var(--csp-text-secondary)', fontWeight: 500,
         }}>
-          {lang === 'ht' ? 'Fèmen' : 'Close'}
+          {lang === 'ht' ? 'Fèmen' : inlineText(lang, 'Close')}
         </button>
       </div>
     </div>

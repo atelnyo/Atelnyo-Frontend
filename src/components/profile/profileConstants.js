@@ -50,13 +50,13 @@ export function ogImageForLang(lang) {
 
 // Left navigation rail items (desktop only)
 export const RAIL_ITEMS = [
-  { id: 'dashboard',  icon: 'fa-th-large',  label: 'Overview', labelHt: 'Apèsi', labelFr: 'Vue d’ensemble' },
-  { id: 'picks',      icon: 'fa-bookmark',  label: 'Picks', labelHt: 'Seleksyon', labelFr: 'Sélections' },
-  { id: 'courses',    icon: 'fa-graduation-cap', label: 'Courses', labelHt: 'Kou', labelFr: 'Cours' },
-  { id: 'products',   icon: 'fa-cube',      label: 'Products', labelHt: 'Pwodwi', labelFr: 'Produits' },
-  { id: 'portfolio',  icon: 'fa-briefcase', label: 'Portfolio', labelHt: 'Pòtfolyo', labelFr: 'Portfolio' },
-  { id: 'reviews',    icon: 'fa-star',      label: 'Reviews', labelHt: 'Revi', labelFr: 'Avis' },
-  { id: 'about',      icon: 'fa-user',      label: 'About', labelHt: 'Sou nou', labelFr: 'À propos' },
+  { id: 'dashboard',  icon: 'fa-th-large',  label: 'Overview', labelHt: 'Apèsi', labelFr: 'Vue d’ensemble', labelEs: 'Resumen' },
+  { id: 'picks',      icon: 'fa-bookmark',  label: 'Picks', labelHt: 'Seleksyon', labelFr: 'Sélections', labelEs: 'Selecciones' },
+  { id: 'courses',    icon: 'fa-graduation-cap', label: 'Courses', labelHt: 'Kou', labelFr: 'Cours', labelEs: 'Cursos' },
+  { id: 'products',   icon: 'fa-cube',      label: 'Products', labelHt: 'Pwodwi', labelFr: 'Produits', labelEs: 'Productos' },
+  { id: 'portfolio',  icon: 'fa-briefcase', label: 'Portfolio', labelHt: 'Pòtfolyo', labelFr: 'Portfolio', labelEs: 'Portafolio' },
+  { id: 'reviews',    icon: 'fa-star',      label: 'Reviews', labelHt: 'Revi', labelFr: 'Avis', labelEs: 'Reseñas' },
+  { id: 'about',      icon: 'fa-user',      label: 'About', labelHt: 'Sou nou', labelFr: 'À propos', labelEs: 'Acerca de' },
 ];
 
 // Profile tabs (also fed to the rail) — will be filtered by section_config

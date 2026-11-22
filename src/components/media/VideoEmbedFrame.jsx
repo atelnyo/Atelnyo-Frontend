@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function VideoEmbedFrame({
   src,
@@ -50,12 +51,12 @@ export default function VideoEmbedFrame({
           }}
         >
           <i className="fas fa-spinner fa-spin" aria-hidden="true" />
-          <span>{loadingText || (isHt ? 'Ap chaje videyo a...' : 'Loading video...')}</span>
+          <span>{loadingText || (isHt ? 'Ap chaje videyo a...' : inlineText(lang, 'Loading video...'))}</span>
         </div>
       )}
       <iframe
         src={src}
-        title={title || (isHt ? 'Videyo' : 'Video')}
+        title={title || (isHt ? 'Videyo' : inlineText(lang, 'Video'))}
         className={frameClassName}
         allow={allow}
         allowFullScreen={allowFullScreen}

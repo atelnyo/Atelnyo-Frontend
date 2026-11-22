@@ -20,6 +20,7 @@ import PanelSkeleton, {
   ExpandableText, PanelEmpty, PanelError, PanelHeader,
 } from './communityPanelUI';
 import styles from './communityEditor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const asArray = (data) => (Array.isArray(data) ? data : (data?.results || []));
 const PAGE_SIZE = 20;
@@ -95,7 +96,7 @@ function fmtWhen(iso, lang) {
   if (!iso) return '';
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '';
-  return d.toLocaleString(lang === 'ht' ? 'fr-HT' : 'en-US', {
+  return d.toLocaleString(lang === 'ht' ? 'fr-HT' : inlineText(lang, 'en-US'), {
     month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit',
   });
 }
@@ -199,7 +200,7 @@ export default function CommunityEventsPanel({
   };
 
   const applyEventTemplate = (tpl) => {
-    const key = isHt ? 'ht' : 'en';
+    const key = isHt ? 'ht' : inlineText(lang, 'en');
     setEditingId(null);
     setForm((f) => ({
       ...EMPTY_FORM,
@@ -237,19 +238,19 @@ export default function CommunityEventsPanel({
 
   const submit = useCallback(async () => {
     if (!form.title.trim()) {
-      showToast?.(isHt ? 'Tit evènman an obligatwa.' : 'Event title is required.', 'circle-exclamation');
+      showToast?.(isHt ? 'Tit evènman an obligatwa.' : inlineText(lang, 'Event title is required.'), 'circle-exclamation');
       return;
     }
     if (!form.start_time || !form.end_time) {
-      showToast?.(isHt ? 'Dat kòmansman ak fen obligatwa.' : 'Start and end times are required.', 'circle-exclamation');
+      showToast?.(isHt ? 'Dat kòmansman ak fen obligatwa.' : inlineText(lang, 'Start and end times are required.'), 'circle-exclamation');
       return;
     }
     if (new Date(form.end_time) <= new Date(form.start_time)) {
-      showToast?.(isHt ? 'Fen an dwe apre kòmansman.' : 'End must be after start.', 'circle-exclamation');
+      showToast?.(isHt ? 'Fen an dwe apre kòmansman.' : inlineText(lang, 'End must be after start.'), 'circle-exclamation');
       return;
     }
     if (!form.is_free && !(Number(form.price) > 0)) {
-      showToast?.(isHt ? 'Mete yon pri pou evènman peye.' : 'Set a price for a paid event.', 'circle-exclamation');
+      showToast?.(isHt ? 'Mete yon pri pou evènman peye.' : inlineText(lang, 'Set a price for a paid event.'), 'circle-exclamation');
       return;
     }
     const payload = {
@@ -277,8 +278,8 @@ export default function CommunityEventsPanel({
       }
       showToast?.(
         editingId
-          ? (isHt ? '✅ Evènman mete ajou.' : '✅ Event updated.')
-          : (isHt ? '✅ Evènman kreye (bouyon).' : '✅ Event created (draft).'),
+          ? (isHt ? '✅ Evènman mete ajou.' : inlineText(lang, '✅ Event updated.'))
+          : (isHt ? '✅ Evènman kreye (bouyon).' : inlineText(lang, '✅ Event created (draft).')),
         'check-circle',
       );
       cancelComposer();
@@ -288,7 +289,7 @@ export default function CommunityEventsPanel({
         err?.response?.data?.detail
           || err?.response?.data?.start_time?.[0]
           || err?.response?.data?.community?.[0]
-          || (isHt ? 'Pa t kapab sove evènman an.' : 'Could not save the event.'),
+          || (isHt ? 'Pa t kapab sove evènman an.' : inlineText(lang, 'Could not save the event.')),
         'circle-exclamation',
       );
     } finally {
@@ -300,11 +301,11 @@ export default function CommunityEventsPanel({
     setBusy(true);
     try {
       await communityEventsService.update(ev.id, { status: 'published' });
-      showToast?.(isHt ? 'Evènman pibliye!' : 'Event published!', 'check-circle');
+      showToast?.(isHt ? 'Evènman pibliye!' : inlineText(lang, 'Event published!'), 'check-circle');
       refetch();
     } catch (err) {
       showToast?.(
-        err?.response?.data?.detail || (isHt ? 'Pa t kapab pibliye.' : 'Could not publish.'),
+        err?.response?.data?.detail || (isHt ? 'Pa t kapab pibliye.' : inlineText(lang, 'Could not publish.')),
         'circle-exclamation',
       );
     } finally {
@@ -327,7 +328,7 @@ export default function CommunityEventsPanel({
       if (attendeesForRef.current === ev.id) {
         setAttendeesError(
           err?.response?.data?.detail
-            || (isHt ? 'Pa t kapab chaje lis envite yo.' : 'Could not load the guest list.'),
+            || (isHt ? 'Pa t kapab chaje lis envite yo.' : inlineText(lang, 'Could not load the guest list.')),
         );
       }
     } finally {
@@ -354,13 +355,13 @@ export default function CommunityEventsPanel({
     try {
       await communityEventsService.cancel(target.id);
       showToast?.(
-        isHt ? 'Evènman anile. Manm yo pa ka enskri ankò.' : 'Event cancelled. Members can no longer register.',
+        isHt ? 'Evènman anile. Manm yo pa ka enskri ankò.' : inlineText(lang, 'Event cancelled. Members can no longer register.'),
         'circle-check',
       );
       refetch();
     } catch (err) {
       showToast?.(
-        err?.response?.data?.detail || (isHt ? 'Pa t kapab anile evènman an.' : 'Could not cancel the event.'),
+        err?.response?.data?.detail || (isHt ? 'Pa t kapab anile evènman an.' : inlineText(lang, 'Could not cancel the event.')),
         'circle-exclamation',
       );
     } finally {
@@ -376,10 +377,10 @@ export default function CommunityEventsPanel({
     try {
       await communityEventsService.delete(target.id);
       refetch();
-      showToast?.(isHt ? 'Evènman efase.' : 'Event deleted.', 'trash-can');
+      showToast?.(isHt ? 'Evènman efase.' : inlineText(lang, 'Event deleted.'), 'trash-can');
     } catch (err) {
       showToast?.(
-        err?.response?.data?.detail || (isHt ? 'Pa t kapab efase.' : 'Could not delete.'),
+        err?.response?.data?.detail || (isHt ? 'Pa t kapab efase.' : inlineText(lang, 'Could not delete.')),
         'circle-exclamation',
       );
     } finally {
@@ -388,46 +389,46 @@ export default function CommunityEventsPanel({
   }, [deleteTarget, isHt, refetch, showToast]);
 
   if (initialLoading) {
-    return <PanelSkeleton rows={3} label={isHt ? 'Ap chaje evènman yo' : 'Loading events'} />;
+    return <PanelSkeleton rows={3} label={isHt ? 'Ap chaje evènman yo' : inlineText(lang, 'Loading events')} />;
   }
 
   const visibleEvents = statusFilter === 'all'
     ? events
     : events.filter((ev) => (ev.status || 'draft') === statusFilter);
   const filterOptions = [
-    { id: 'all', label: isHt ? 'Tout' : 'All' },
-    { id: 'draft', label: isHt ? 'Bouyon' : 'Draft' },
-    { id: 'published', label: isHt ? 'Pibliye' : 'Published' },
-    { id: 'cancelled', label: isHt ? 'Anile' : 'Cancelled' },
-    { id: 'completed', label: isHt ? 'Fini' : 'Completed' },
+    { id: 'all', label: isHt ? 'Tout' : inlineText(lang, 'All') },
+    { id: 'draft', label: isHt ? 'Bouyon' : inlineText(lang, 'Draft') },
+    { id: 'published', label: isHt ? 'Pibliye' : inlineText(lang, 'Published') },
+    { id: 'cancelled', label: isHt ? 'Anile' : inlineText(lang, 'Cancelled') },
+    { id: 'completed', label: isHt ? 'Fini' : inlineText(lang, 'Completed') },
   ];
 
   return (
     <div>
       <PanelHeader
         icon="fa-calendar-days"
-        title={isHt ? 'Evènman kominote a' : 'Community events'}
+        title={isHt ? 'Evènman kominote a' : inlineText(lang, 'Community events')}
         count={typeof totalCount === 'number' ? totalCount : events.length}
         subtitle={isHt
           ? 'Evènman pibliye yo parèt sou paj kominote a. Bouyon rete prive jiskaske ou pibliye yo.'
-          : 'Published events appear on the community page. Drafts stay private until you publish them.'}
+          : inlineText(lang, 'Published events appear on the community page. Drafts stay private until you publish them.')}
         refreshing={loading && loadedOnce}
         onRefresh={refetch}
-        refreshLabel={isHt ? 'Rafrechi evènman yo' : 'Refresh events'}
+        refreshLabel={isHt ? 'Rafrechi evènman yo' : inlineText(lang, 'Refresh events')}
       >
         {canModerate && !composerOpen && (
           <button type="button" className={styles.primaryBtn} onClick={openCreate}>
             <i className="fas fa-plus" aria-hidden="true" />
-            {isHt ? 'Kreye evènman' : 'Create event'}
+            {isHt ? 'Kreye evènman' : inlineText(lang, 'Create event')}
           </button>
         )}
       </PanelHeader>
 
       {error && (
         <PanelError
-          message={isHt ? 'Pat kapab chaje evènman yo.' : 'Could not load the events.'}
+          message={isHt ? 'Pat kapab chaje evènman yo.' : inlineText(lang, 'Could not load the events.')}
           onRetry={refetch}
-          retryLabel={isHt ? 'Reyese' : 'Retry'}
+          retryLabel={isHt ? 'Reyese' : inlineText(lang, 'Retry')}
         />
       )}
 
@@ -453,7 +454,7 @@ export default function CommunityEventsPanel({
           {!editingId && (
             <div style={{ marginBottom: 10 }}>
               <div className={styles.fieldLabel} style={{ marginBottom: 6 }}>
-                {isHt ? 'Modèl rapid' : 'Quick templates'}
+                {isHt ? 'Modèl rapid' : inlineText(lang, 'Quick templates')}
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {EVENT_TEMPLATES.map((tpl) => (
@@ -462,7 +463,7 @@ export default function CommunityEventsPanel({
                     type="button"
                     className={styles.secondaryBtn}
                     onClick={() => applyEventTemplate(tpl)}
-                    title={isHt ? 'Ranpli fòm lan ak modèl sa a' : 'Fill the form with this template'}
+                    title={isHt ? 'Ranpli fòm lan ak modèl sa a' : inlineText(lang, 'Fill the form with this template')}
                   >
                     <i className={`fas ${tpl.icon}`} aria-hidden="true" />
                     {isHt ? tpl.label.ht : tpl.label.en}
@@ -473,29 +474,29 @@ export default function CommunityEventsPanel({
           )}
           <div className={styles.formGrid}>
             <label className={styles.field} style={{ gridColumn: '1 / -1' }}>
-              <span className={styles.fieldLabel}>{isHt ? 'Tit' : 'Title'}</span>
+              <span className={styles.fieldLabel}>{isHt ? 'Tit' : inlineText(lang, 'Title')}</span>
               <input
                 type="text"
                 className={styles.input}
                 value={form.title}
                 maxLength={200}
                 onChange={(e) => change('title', e.target.value)}
-                placeholder={isHt ? 'Non evènman an' : 'Event name'}
+                placeholder={isHt ? 'Non evènman an' : inlineText(lang, 'Event name')}
               />
             </label>
             <label className={styles.field} style={{ gridColumn: '1 / -1' }}>
-              <span className={styles.fieldLabel}>{isHt ? 'Deskripsyon' : 'Description'}</span>
+              <span className={styles.fieldLabel}>{isHt ? 'Deskripsyon' : inlineText(lang, 'Description')}</span>
               <textarea
                 className={styles.textarea}
                 rows={2}
                 value={form.description}
                 maxLength={3000}
                 onChange={(e) => change('description', e.target.value)}
-                placeholder={isHt ? 'Sa k ap pase nan evènman an?' : 'What happens at this event?'}
+                placeholder={isHt ? 'Sa k ap pase nan evènman an?' : inlineText(lang, 'What happens at this event?')}
               />
             </label>
             <label className={styles.field}>
-              <span className={styles.fieldLabel}>{isHt ? 'Kòmansman' : 'Starts'}</span>
+              <span className={styles.fieldLabel}>{isHt ? 'Kòmansman' : inlineText(lang, 'Starts')}</span>
               <input
                 type="datetime-local"
                 className={styles.input}
@@ -504,7 +505,7 @@ export default function CommunityEventsPanel({
               />
             </label>
             <label className={styles.field}>
-              <span className={styles.fieldLabel}>{isHt ? 'Fen' : 'Ends'}</span>
+              <span className={styles.fieldLabel}>{isHt ? 'Fen' : inlineText(lang, 'Ends')}</span>
               <input
                 type="datetime-local"
                 className={styles.input}
@@ -513,24 +514,24 @@ export default function CommunityEventsPanel({
               />
             </label>
             <label className={styles.field}>
-              <span className={styles.fieldLabel}>{isHt ? 'Kote' : 'Location'}</span>
+              <span className={styles.fieldLabel}>{isHt ? 'Kote' : inlineText(lang, 'Location')}</span>
               <input
                 type="text"
                 className={styles.input}
                 value={form.location}
                 onChange={(e) => change('location', e.target.value)}
-                placeholder={isHt ? 'Potoprens, Ayiti' : 'Port-au-Prince, Haiti'}
+                placeholder={isHt ? 'Potoprens, Ayiti' : inlineText(lang, 'Port-au-Prince, Haiti')}
               />
             </label>
             <label className={styles.field}>
-              <span className={styles.fieldLabel}>{isHt ? 'Maks patisipan' : 'Max attendees'}</span>
+              <span className={styles.fieldLabel}>{isHt ? 'Maks patisipan' : inlineText(lang, 'Max attendees')}</span>
               <input
                 type="number"
                 min="0"
                 className={styles.input}
                 value={form.max_attendees}
                 onChange={(e) => change('max_attendees', e.target.value)}
-                placeholder={isHt ? 'San limit' : 'Unlimited'}
+                placeholder={isHt ? 'San limit' : inlineText(lang, 'Unlimited')}
               />
             </label>
           </div>
@@ -541,7 +542,7 @@ export default function CommunityEventsPanel({
               checked={form.is_online}
               onChange={(e) => change('is_online', e.target.checked)}
             />
-            {isHt ? 'Evènman an liy' : 'Online event'}
+            {isHt ? 'Evènman an liy' : inlineText(lang, 'Online event')}
           </label>
           {form.is_online && (
             <input
@@ -550,7 +551,7 @@ export default function CommunityEventsPanel({
               value={form.online_url}
               onChange={(e) => change('online_url', e.target.value)}
               placeholder="https://meet.google.com/..."
-              aria-label={isHt ? 'Lyen evènman an liy' : 'Online event URL'}
+              aria-label={isHt ? 'Lyen evènman an liy' : inlineText(lang, 'Online event URL')}
             />
           )}
 
@@ -560,11 +561,11 @@ export default function CommunityEventsPanel({
               checked={form.is_free}
               onChange={(e) => change('is_free', e.target.checked)}
             />
-            {isHt ? 'Evènman gratis' : 'Free event'}
+            {isHt ? 'Evènman gratis' : inlineText(lang, 'Free event')}
           </label>
           {!form.is_free && (
             <label className={styles.field} style={{ maxWidth: 200 }}>
-              <span className={styles.fieldLabel}>{isHt ? 'Pri (USD)' : 'Price (USD)'}</span>
+              <span className={styles.fieldLabel}>{isHt ? 'Pri (USD)' : inlineText(lang, 'Price (USD)')}</span>
               <input
                 type="number"
                 min="0.01"
@@ -579,11 +580,11 @@ export default function CommunityEventsPanel({
 
           <div className={styles.composerActions} style={{ gap: 8 }}>
             <button type="button" className={styles.secondaryBtn} onClick={cancelComposer} disabled={busy}>
-              {isHt ? 'Anile' : 'Cancel'}
+              {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
             </button>
             <button type="button" className={styles.primaryBtn} onClick={submit} disabled={busy}>
               <i className={`fas ${busy ? 'fa-spinner fa-spin' : 'fa-save'}`} aria-hidden="true" />
-              {editingId ? (isHt ? 'Mete ajou' : 'Update event') : (isHt ? 'Kreye evènman' : 'Create event')}
+              {editingId ? (isHt ? 'Mete ajou' : inlineText(lang, 'Update event')) : (isHt ? 'Kreye evènman' : inlineText(lang, 'Create event'))}
             </button>
           </div>
         </div>
@@ -593,17 +594,17 @@ export default function CommunityEventsPanel({
         <PanelEmpty
           icon={events.length === 0 ? 'fa-calendar-plus' : 'fa-filter'}
           title={events.length === 0
-            ? (isHt ? 'Poko gen evènman.' : 'No events yet.')
-            : (isHt ? 'Pa gen evènman pou filtè sa a.' : 'No events match this filter.')}
+            ? (isHt ? 'Poko gen evènman.' : inlineText(lang, 'No events yet.'))
+            : (isHt ? 'Pa gen evènman pou filtè sa a.' : inlineText(lang, 'No events match this filter.'))}
           description={events.length === 0
             ? (isHt
               ? 'Planifye yon rankont, yon atelye oswa yon fèt pou rasanble manm yo.'
-              : 'Plan a meetup, workshop or celebration to gather your members.')
-            : (isHt ? 'Chanje filtè a pou wè lòt evènman.' : 'Change the filter to see other events.')}
+              : inlineText(lang, 'Plan a meetup, workshop or celebration to gather your members.'))
+            : (isHt ? 'Chanje filtè a pou wè lòt evènman.' : inlineText(lang, 'Change the filter to see other events.'))}
           action={events.length === 0 && canModerate ? (
             <button type="button" className={styles.secondaryBtn} onClick={openCreate}>
               <i className="fas fa-plus" aria-hidden="true" />
-              {isHt ? 'Kreye premye evènman an' : 'Create your first event'}
+              {isHt ? 'Kreye premye evènman an' : inlineText(lang, 'Create your first event')}
             </button>
           ) : undefined}
         />
@@ -628,7 +629,7 @@ export default function CommunityEventsPanel({
                   <div className={styles.rowMeta}>
                     {fmtWhen(ev.start_time, lang)}
                     {ev.location ? ` · ${ev.location}` : ''}
-                    {ev.is_online ? ` · 🌐 ${isHt ? 'An liy' : 'Online'}` : ''}
+                    {ev.is_online ? ` · 🌐 ${isHt ? 'An liy' : inlineText(lang, 'Online')}` : ''}
                     {ev.is_free === false && ev.price != null ? ` · $${ev.price} ${ev.currency || 'USD'}` : ''}
                     {` · 👥 ${ev.attendee_count ?? 0}${ev.max_attendees ? ` / ${ev.max_attendees}` : ''}`}
                   </div>
@@ -649,7 +650,7 @@ export default function CommunityEventsPanel({
                       onClick={() => toggleAttendees(ev)}
                       disabled={busy}
                       aria-expanded={attendeesFor === ev.id}
-                      title={isHt ? 'Lis envite yo' : 'Guest list'}
+                      title={isHt ? 'Lis envite yo' : inlineText(lang, 'Guest list')}
                       aria-label={isHt ? `Wè envite ${ev.title}` : `View attendees for ${ev.title}`}
                     >
                       <i className="fas fa-user-group" aria-hidden="true" />
@@ -660,7 +661,7 @@ export default function CommunityEventsPanel({
                         className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
                         onClick={() => setCancelTarget(ev)}
                         disabled={busy}
-                        title={isHt ? 'Anile evènman an' : 'Cancel event'}
+                        title={isHt ? 'Anile evènman an' : inlineText(lang, 'Cancel event')}
                         aria-label={isHt ? `Anile ${ev.title}` : `Cancel ${ev.title}`}
                       >
                         <i className="fas fa-ban" aria-hidden="true" />
@@ -672,7 +673,7 @@ export default function CommunityEventsPanel({
                         className={styles.iconBtn}
                         onClick={() => publish(ev)}
                         disabled={busy}
-                        title={isHt ? 'Pibliye' : 'Publish'}
+                        title={isHt ? 'Pibliye' : inlineText(lang, 'Publish')}
                         aria-label={isHt ? `Pibliye ${ev.title}` : `Publish ${ev.title}`}
                       >
                         <i className="fas fa-rocket" aria-hidden="true" />
@@ -684,7 +685,7 @@ export default function CommunityEventsPanel({
                         className={styles.iconBtn}
                         onClick={() => openEdit(ev)}
                         disabled={busy}
-                        title={isHt ? 'Modifye' : 'Edit'}
+                        title={isHt ? 'Modifye' : inlineText(lang, 'Edit')}
                         aria-label={isHt ? `Modifye ${ev.title}` : `Edit ${ev.title}`}
                       >
                         <i className="fas fa-pen" aria-hidden="true" />
@@ -695,7 +696,7 @@ export default function CommunityEventsPanel({
                       className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
                       onClick={() => setDeleteTarget(ev)}
                       disabled={busy}
-                      title={isHt ? 'Efase' : 'Delete'}
+                      title={isHt ? 'Efase' : inlineText(lang, 'Delete')}
                       aria-label={isHt ? `Efase ${ev.title}` : `Delete ${ev.title}`}
                     >
                       <i className="fas fa-trash-can" aria-hidden="true" />
@@ -707,33 +708,33 @@ export default function CommunityEventsPanel({
                     <div className={styles.subPanelHead}>
                       <span>
                         <i className="fas fa-user-group" aria-hidden="true" />{' '}
-                        {isHt ? 'Envite' : 'Attendees'}
+                        {isHt ? 'Envite' : inlineText(lang, 'Attendees')}
                         {` (${attendees.length})`}
                       </span>
                       {attendees.length > 0 && (
                         <span>
                           {attendees.reduce((sum, t) => sum + (Number(t.quantity) || 1), 0)}
-                          {isHt ? ' plas' : ' seats'}
+                          {isHt ? ' plas' : inlineText(lang, ' seats')}
                         </span>
                       )}
                     </div>
                     {attendeesLoading ? (
                       <div className={styles.subEmpty}>
                         <i className="fas fa-spinner fa-spin" aria-hidden="true" />{' '}
-                        {isHt ? 'Ap chaje envite yo…' : 'Loading attendees…'}
+                        {isHt ? 'Ap chaje envite yo…' : inlineText(lang, 'Loading attendees…')}
                       </div>
                     ) : attendeesError ? (
                       <div className={styles.subError}>
                         <span>{attendeesError}</span>
                         <button type="button" className={styles.linkBtn} onClick={() => loadAttendees(ev)}>
-                          {isHt ? 'Reyese' : 'Retry'}
+                          {isHt ? 'Reyese' : inlineText(lang, 'Retry')}
                         </button>
                       </div>
                     ) : attendees.length === 0 ? (
                       <div className={styles.subEmpty}>
                         {isHt
                           ? 'Poko gen moun ki enskri nan evènman sa a.'
-                          : 'No one has registered for this event yet.'}
+                          : inlineText(lang, 'No one has registered for this event yet.')}
                       </div>
                     ) : (
                       <div className={styles.subList}>
@@ -751,12 +752,12 @@ export default function CommunityEventsPanel({
                                 @{ticket.username || 'membre'}
                                 <span className={`${styles.pill} ${ticket.status === 'confirmed' ? styles.pillStaff : styles.pillOwner}`}>
                                   {ticket.status === 'confirmed'
-                                    ? (isHt ? 'Konfime' : 'Confirmed')
-                                    : (isHt ? 'Rezève' : 'Reserved')}
+                                    ? (isHt ? 'Konfime' : inlineText(lang, 'Confirmed'))
+                                    : (isHt ? 'Rezève' : inlineText(lang, 'Reserved'))}
                                 </span>
                               </div>
                               <div className={styles.subMeta}>
-                                {`${ticket.quantity || 1} ${isHt ? 'plas' : 'seat(s)'}`}
+                                {`${ticket.quantity || 1} ${isHt ? 'plas' : inlineText(lang, 'seat(s)')}`}
                                 {Number(ticket.price_paid) > 0 && ` · $${ticket.price_paid} ${ticket.currency || 'USD'}`}
                               </div>
                             </div>
@@ -779,8 +780,8 @@ export default function CommunityEventsPanel({
               disabled={loadingMore}
             >
               {loadingMore
-                ? (isHt ? 'Ap chaje…' : 'Loading…')
-                : (isHt ? 'Chaje plis evènman' : 'Load more events')}
+                ? (isHt ? 'Ap chaje…' : inlineText(lang, 'Loading…'))
+                : (isHt ? 'Chaje plis evènman' : inlineText(lang, 'Load more events'))}
             </button>
           </div>
         )}
@@ -790,12 +791,12 @@ export default function CommunityEventsPanel({
       {cancelTarget && (
         <ConfirmModal
           lang={lang}
-          title={isHt ? 'Anile evènman an?' : 'Cancel event?'}
+          title={isHt ? 'Anile evènman an?' : inlineText(lang, 'Cancel event?')}
           message={isHt
             ? `« ${cancelTarget.title} » ap rete vizib, men manm yo p ap ka enskri ankò e tikè ki deja konfime yo ap rete sou dosye.`
             : `"${cancelTarget.title}" stays visible, but members can no longer register and already confirmed tickets remain on record.`}
-          confirmText={isHt ? 'Anile evènman an' : 'Cancel event'}
-          cancelText={isHt ? 'Kenbe l' : 'Keep it'}
+          confirmText={isHt ? 'Anile evènman an' : inlineText(lang, 'Cancel event')}
+          cancelText={isHt ? 'Kenbe l' : inlineText(lang, 'Keep it')}
           onConfirm={cancelEvent}
           onCancel={() => setCancelTarget(null)}
         />
@@ -804,12 +805,12 @@ export default function CommunityEventsPanel({
       {deleteTarget && (
         <ConfirmModal
           lang={lang}
-          title={isHt ? 'Efase evènman an?' : 'Delete event?'}
+          title={isHt ? 'Efase evènman an?' : inlineText(lang, 'Delete event?')}
           message={isHt
             ? `« ${deleteTarget.title} » ap disparèt pou manm yo. Tikè ak envitasyon ki gen rapò ak li p ap valab ankò.`
             : `"${deleteTarget.title}" will be removed for members. Related tickets and RSVPs will no longer be valid.`}
-          confirmText={isHt ? 'Efase' : 'Delete'}
-          cancelText={isHt ? 'Anile' : 'Cancel'}
+          confirmText={isHt ? 'Efase' : inlineText(lang, 'Delete')}
+          cancelText={isHt ? 'Anile' : inlineText(lang, 'Cancel')}
           onConfirm={confirmDelete}
           onCancel={() => setDeleteTarget(null)}
         />

@@ -9,6 +9,7 @@
  * sheet route (/sheet/admin/faq).
  */
 import React, { useState, useCallback } from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 const ADMIN_FAQS = {
   ht: [
@@ -281,12 +282,12 @@ export default function AdminFAQ({ lang = 'en', onNavigate }) {
           <div>
             <h1 className="ad-dash-title">
               <i className="fas fa-question-circle" aria-hidden="true" />
-              {' '}{isHt ? 'FAQ Admin' : 'Admin FAQ'}
+              {' '}{isHt ? 'FAQ Admin' : inlineText(lang, 'Admin FAQ')}
             </h1>
             <p className="ad-dash-subtitle">
               {isHt
                 ? 'Kesyon ak repons pou itilizatè administratè yo.'
-                : 'Questions & answers for admin users.'}
+                : inlineText(lang, 'Questions & answers for admin users.')}
             </p>
           </div>
         </div>
@@ -295,7 +296,7 @@ export default function AdminFAQ({ lang = 'en', onNavigate }) {
             type="button"
             className="ad-dash-refresh"
             onClick={() => onNavigate?.('/sheet/admin/dashboard')}
-            title={isHt ? 'Retounen nan Dashboard' : 'Back to Dashboard'}
+            title={isHt ? 'Retounen nan Dashboard' : inlineText(lang, 'Back to Dashboard')}
           >
             <i className="fas fa-gauge-high" />
           </button>
@@ -316,19 +317,19 @@ export default function AdminFAQ({ lang = 'en', onNavigate }) {
               type="text"
               value={search}
               onChange={(e) => { setSearch(e.target.value); setOpenKey(null); }}
-              placeholder={isHt ? 'Chèche nan FAQ admin...' : 'Search admin FAQ...'}
+              placeholder={isHt ? 'Chèche nan FAQ admin...' : inlineText(lang, 'Search admin FAQ...')}
               style={{
                 border: 'none', outline: 'none', background: 'transparent',
                 color: 'var(--text-primary)', fontSize: '0.9rem', width: '100%',
               }}
-              aria-label={isHt ? 'Chèche nan FAQ admin' : 'Search admin FAQ'}
+              aria-label={isHt ? 'Chèche nan FAQ admin' : inlineText(lang, 'Search admin FAQ')}
             />
             {search && (
               <button
                 type="button"
                 onClick={() => { setSearch(''); setOpenKey(null); }}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}
-                aria-label={isHt ? 'Efase chèch' : 'Clear search'}
+                aria-label={isHt ? 'Efase chèch' : inlineText(lang, 'Clear search')}
               >
                 <i className="fas fa-times" aria-hidden="true" />
               </button>
@@ -340,7 +341,7 @@ export default function AdminFAQ({ lang = 'en', onNavigate }) {
         {search && filtered.length === 0 && (
           <div className="ad-dash-panel-empty">
             <i className="fas fa-search" />
-            <p>{isHt ? 'Pa gen kesyon ki mache ak chèch ou.' : 'No questions match your search.'}</p>
+            <p>{isHt ? 'Pa gen kesyon ki mache ak chèch ou.' : inlineText(lang, 'No questions match your search.')}</p>
           </div>
         )}
 
@@ -382,16 +383,16 @@ export default function AdminFAQ({ lang = 'en', onNavigate }) {
           <div className="ad-dash-panel-header">
             <h2 className="ad-dash-panel-title">
               <i className="fas fa-bolt" aria-hidden="true" />
-              {' '}{isHt ? 'Lyen Rapid' : 'Quick Links'}
+              {' '}{isHt ? 'Lyen Rapid' : inlineText(lang, 'Quick Links')}
             </h2>
           </div>
           <div className="ad-dash-panel-body">
             <div className="ad-dash-links">
               {[
-                { href: '/sheet/admin/dashboard', icon: 'fa-gauge-high', label: 'Admin Dashboard', desc: isHt ? 'Jwenn tout enfòmasyon nan yon kote' : 'Overview of everything' },
-                { href: '/sheet/admin/creators', icon: 'fa-users-gear', label: 'Creator Review', desc: isHt ? 'Revize aplikasyon kreyatè yo' : 'Review creator applications' },
-                { href: '/sheet/admin/academy', icon: 'fa-graduation-cap', label: 'Language Academy', desc: isHt ? 'Jere pwogram lang ofisyèl yo' : 'Manage official language programs' },
-                { href: '/sheet/admin/rules', icon: 'fa-gears', label: 'Rule Engine', desc: isHt ? 'Kreye reglman otomatik' : 'Create automated rules' },
+                { href: '/sheet/admin/dashboard', icon: 'fa-gauge-high', label: 'Admin Dashboard', desc: isHt ? 'Jwenn tout enfòmasyon nan yon kote' : inlineText(lang, 'Overview of everything') },
+                { href: '/sheet/admin/creators', icon: 'fa-users-gear', label: 'Creator Review', desc: isHt ? 'Revize aplikasyon kreyatè yo' : inlineText(lang, 'Review creator applications') },
+                { href: '/sheet/admin/academy', icon: 'fa-graduation-cap', label: 'Language Academy', desc: isHt ? 'Jere pwogram lang ofisyèl yo' : inlineText(lang, 'Manage official language programs') },
+                { href: '/sheet/admin/rules', icon: 'fa-gears', label: 'Rule Engine', desc: isHt ? 'Kreye reglman otomatik' : inlineText(lang, 'Create automated rules') },
               ].map((link) => (
                 <button
                   key={link.href}

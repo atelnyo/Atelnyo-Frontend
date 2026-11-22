@@ -17,6 +17,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { chatService, formatMessageTime, groupMessagesByDate } from '../../services/chat';
 import api from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 // How long after the last keystroke the "typing" indicator clears.
 const TYPING_TIMEOUT = 1500;
@@ -374,7 +375,7 @@ export default function ChatBox({
         ) : messages.length === 0 ? (
           <div className="chat-empty">
             <i className="fas fa-comments" />
-            <p>{lang === 'ht' ? 'Kòmanse yon konvèsasyon' : 'Start a conversation'}</p>
+            <p>{lang === 'ht' ? 'Kòmanse yon konvèsasyon' : inlineText(lang, 'Start a conversation')}</p>
           </div>
         ) : (
           <>
@@ -434,7 +435,7 @@ export default function ChatBox({
               value={inputValue}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              placeholder={lang === 'ht' ? 'Ekri yon mesaj...' : 'Type a message...'}
+              placeholder={lang === 'ht' ? 'Ekri yon mesaj...' : inlineText(lang, 'Type a message...')}
               disabled={!isConnected}
             />
           </>

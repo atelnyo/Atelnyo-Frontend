@@ -6,6 +6,7 @@
  */
 import React, { useState, useCallback } from 'react';
 import api, { walletService } from '../../../services/api';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const MIN_TIP = 0.50;
 
@@ -31,10 +32,10 @@ export default function SendTipModal({ lang = 'en', showToast, onClose, creatorI
         amount: parsed,
         message: message.trim(),
       });
-      showToast?.(isHt ? '✅ Tip voye!' : '✅ Tip sent!');
+      showToast?.(isHt ? '✅ Tip voye!' : inlineText(lang, '✅ Tip sent!'));
       onClose?.(res.data);
     } catch (err) {
-      const detail = err?.response?.data?.detail || err?.message || (isHt ? 'Erè.' : 'Error.');
+      const detail = err?.response?.data?.detail || err?.message || (isHt ? 'Erè.' : inlineText(lang, 'Error.'));
       setError(typeof detail === 'string' ? detail : JSON.stringify(detail));
     } finally {
       setSubmitting(false);
@@ -43,21 +44,21 @@ export default function SendTipModal({ lang = 'en', showToast, onClose, creatorI
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" onClick={(e) => e.stopPropagation()} role="dialog" aria-label={isHt ? 'Voye Tip' : 'Send Tip'}>
+      <div className="modal-card" onClick={(e) => e.stopPropagation()} role="dialog" aria-label={isHt ? 'Voye Tip' : inlineText(lang, 'Send Tip')}>
         <div className="modal-header">
           <h3>
             <i className="fas fa-hand-holding-heart" aria-hidden="true" />
-            {isHt ? 'Voye Tip' : 'Send Tip'}
+            {isHt ? 'Voye Tip' : inlineText(lang, 'Send Tip')}
             {creatorName ? ` · @${creatorName}` : ''}
           </h3>
-          <button type="button" className="modal-close" onClick={onClose} aria-label={isHt ? 'Fèmen' : 'Close'}>
+          <button type="button" className="modal-close" onClick={onClose} aria-label={isHt ? 'Fèmen' : inlineText(lang, 'Close')}>
             <i className="fas fa-times" />
           </button>
         </div>
         <form onSubmit={handleSubmit} className="modal-body">
           {error && <div className="modal-error">{error}</div>}
           <div className="form-group">
-            <label htmlFor="tip-amount">{isHt ? 'Kantite (USD)' : 'Amount (USD)'}</label>
+            <label htmlFor="tip-amount">{isHt ? 'Kantite (USD)' : inlineText(lang, 'Amount (USD)')}</label>
             <div className="input-with-prefix">
               <span className="input-prefix">$</span>
               <input
@@ -75,26 +76,26 @@ export default function SendTipModal({ lang = 'en', showToast, onClose, creatorI
             <span className="form-hint">{isHt ? `Tip minimòm $${MIN_TIP.toFixed(2)}` : `Minimum tip $${MIN_TIP.toFixed(2)}`}</span>
           </div>
           <div className="form-group">
-            <label htmlFor="tip-message">{isHt ? 'Mesaj (opsyonèl)' : 'Message (optional)'}</label>
+            <label htmlFor="tip-message">{isHt ? 'Mesaj (opsyonèl)' : inlineText(lang, 'Message (optional)')}</label>
             <textarea
               id="tip-message"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder={isHt ? 'Mesaj ou...' : 'Your message...'}
+              placeholder={isHt ? 'Mesaj ou...' : inlineText(lang, 'Your message...')}
               rows={3}
               maxLength={280}
               disabled={submitting}
             />
-            <span className="form-hint">{isHt ? 'Opsyonèl, maks 280 karaktè' : 'Optional, max 280 chars'}</span>
+            <span className="form-hint">{isHt ? 'Opsyonèl, maks 280 karaktè' : inlineText(lang, 'Optional, max 280 chars')}</span>
           </div>
           <div className="modal-actions">
             <button type="button" className="btn-secondary" onClick={onClose} disabled={submitting}>
-              {isHt ? 'Anile' : 'Cancel'}
+              {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
             </button>
             <button type="submit" className="btn-primary" disabled={submitting}>
               {submitting
-                ? (isHt ? 'Ap voye...' : 'Sending...')
-                : (isHt ? 'Voye Tip' : 'Send Tip')}
+                ? (isHt ? 'Ap voye...' : inlineText(lang, 'Sending...'))
+                : (isHt ? 'Voye Tip' : inlineText(lang, 'Send Tip'))}
             </button>
           </div>
         </form>

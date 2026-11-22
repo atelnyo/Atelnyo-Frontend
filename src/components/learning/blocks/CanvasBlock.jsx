@@ -16,6 +16,7 @@
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import './CanvasBlock.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 /** Standard Business Model Canvas sections (bilingual titles). */
 export const DEFAULT_SECTIONS = [
@@ -31,11 +32,12 @@ export const DEFAULT_SECTIONS = [
 ];
 
 /** Normalize any stored `sections` shape into `{ key, title, content }`. */
-export function normalizeSections(raw, isHt = true) {
+export function normalizeSections(raw, langOrIsHt = true) {
+  const lang = typeof langOrIsHt === 'boolean' ? (langOrIsHt ? 'ht' : 'en') : (langOrIsHt || 'en');
   const fallback = DEFAULT_SECTIONS.map((s) => ({
     key: s.key,
-    title: s.title[isHt ? 'ht' : 'en'],
-    hint: s.hint[isHt ? 'ht' : 'en'],
+    title: s.title[lang] || s.title.en,
+    hint: s.hint[lang] || s.hint.en,
     content: '',
   }));
 
@@ -55,11 +57,11 @@ export function normalizeSections(raw, isHt = true) {
         // Fall back to the other language rather than showing an empty
         // heading when only one translation was filled in.
         title: typeof title === 'object'
-          ? (title[isHt ? 'ht' : 'en'] || title[isHt ? 'en' : 'ht'] || '')
+          ? (title[lang] || title.en || title.ht || '')
           : String(title),
         hint: section.hint
           ? (typeof section.hint === 'object'
-            ? (section.hint[isHt ? 'ht' : 'en'] || section.hint[isHt ? 'en' : 'ht'] || '')
+            ? (section.hint[lang] || section.hint.en || section.hint.ht || '')
             : String(section.hint))
           : '',
         content: content || '',
@@ -85,7 +87,7 @@ export default function CanvasBlock({
 }) {
   const isHt = lang === 'ht';
   const sectionsFromBlock = useMemo(
-    () => normalizeSections(block?.sections, isHt),
+    () => normalizeSections(block?.sections, lang),
     [block?.sections, isHt],
   );
 
@@ -148,11 +150,11 @@ export default function CanvasBlock({
   const canComplete = filled > 0;
 
   const asText = useCallback(() => {
-    const title = block?.title || (isHt ? 'Kannavas Modèl Biznis' : 'Business Model Canvas');
+    const title = block?.title || (isHt ? 'Kannavas Modèl Biznis' : inlineText(lang, 'Business Model Canvas'));
     const lines = [title, ''];
     sectionsFromBlock.forEach((s) => {
       lines.push(`## ${s.title}`);
-      lines.push((values[s.key] || '').trim() || (isHt ? '(vid)' : '(empty)'));
+      lines.push((values[s.key] || '').trim() || (isHt ? '(vid)' : inlineText(lang, '(empty)')));
       lines.push('');
     });
     return lines.join('\n');
@@ -182,14 +184,14 @@ export default function CanvasBlock({
   return (
     <div className="ls-canvas-block">
       <div className="ls-canvas-head">
-        <h3 className="ls-block-title">{block?.title || (isHt ? 'Kannavas Modèl Biznis' : 'Business Model Canvas')}</h3>
+        <h3 className="ls-block-title">{block?.title || (isHt ? 'Kannavas Modèl Biznis' : inlineText(lang, 'Business Model Canvas'))}</h3>
         <div className="ls-canvas-tools">
           <span className="ls-canvas-progress" aria-live="polite">
-            {filled}/{sectionsFromBlock.length} {isHt ? 'seksyon' : 'sections'}
-            {savedAt ? ` · ${isHt ? 'sove' : 'saved'}` : ''}
+            {filled}/{sectionsFromBlock.length} {isHt ? 'seksyon' : inlineText(lang, 'sections')}
+            {savedAt ? ` · ${isHt ? 'sove' : inlineText(lang, 'saved')}` : ''}
           </span>
           <button type="button" className="ls-canvas-btn" onClick={handleCopy}>
-            <i className="fas fa-copy" aria-hidden="true" /> {copied ? (isHt ? 'Kopye ✔' : 'Copied ✔') : (isHt ? 'Kopye' : 'Copy')}
+            <i className="fas fa-copy" aria-hidden="true" /> {copied ? (isHt ? 'Kopye ✔' : inlineText(lang, 'Copied ✔')) : (isHt ? 'Kopye' : inlineText(lang, 'Copy'))}
           </button>
           <button type="button" className="ls-canvas-btn" onClick={handleDownload}>
             <i className="fas fa-download" aria-hidden="true" /> .txt
@@ -209,7 +211,7 @@ export default function CanvasBlock({
                 id={id}
                 className="ls-canvas-textarea"
                 value={value}
-                placeholder={isHt ? 'Ekri ide w yo isit…' : 'Write your ideas here…'}
+                placeholder={isHt ? 'Ekri ide w yo isit…' : inlineText(lang, 'Write your ideas here…')}
                 onChange={(e) => handleChange(section.key, e.target.value)}
                 rows={4}
               />
@@ -225,11 +227,11 @@ export default function CanvasBlock({
           disabled={!canComplete}
           onClick={() => onComplete?.(moduleIndex, block.id, 'canvas')}
         >
-          <i className="fas fa-check" aria-hidden="true" /> {isHt ? 'Mwen fini ak kannavas la' : "I'm done with the canvas"}
+          <i className="fas fa-check" aria-hidden="true" /> {isHt ? 'Mwen fini ak kannavas la' : inlineText(lang, "I'm done with the canvas")}
         </button>
         {!canComplete && (
           <span className="ls-canvas-note">
-            {isHt ? 'Ranpli omwen yon seksyon pou w ka kontinye.' : 'Fill at least one section to continue.'}
+            {isHt ? 'Ranpli omwen yon seksyon pou w ka kontinye.' : inlineText(lang, 'Fill at least one section to continue.')}
           </span>
         )}
       </div>

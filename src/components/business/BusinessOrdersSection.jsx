@@ -16,6 +16,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { businessOrderService } from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 const STATUS_FLOW = ['new', 'contacted', 'fulfilled', 'cancelled'];
 
@@ -29,16 +30,16 @@ export default function BusinessOrdersSection({
   const [busyId, setBusyId] = useState(null);
 
   const statusLabel = (s) => ({
-    new: isHt ? 'Nouvo' : 'New',
-    contacted: isHt ? 'Kontakte' : 'Contacted',
-    fulfilled: isHt ? 'Ranpli' : 'Fulfilled',
-    cancelled: isHt ? 'Anile' : 'Cancelled',
+    new: isHt ? 'Nouvo' : inlineText(lang, 'New'),
+    contacted: isHt ? 'Kontakte' : inlineText(lang, 'Contacted'),
+    fulfilled: isHt ? 'Ranpli' : inlineText(lang, 'Fulfilled'),
+    cancelled: isHt ? 'Anile' : inlineText(lang, 'Cancelled'),
   }[s] || s);
 
   const payLabel = (p) => ({
-    unpaid: isHt ? 'Pa peye' : 'Unpaid',
-    paid: isHt ? 'Peye' : 'Paid',
-    refunded: isHt ? 'Rembouse' : 'Refunded',
+    unpaid: isHt ? 'Pa peye' : inlineText(lang, 'Unpaid'),
+    paid: isHt ? 'Peye' : inlineText(lang, 'Paid'),
+    refunded: isHt ? 'Rembouse' : inlineText(lang, 'Refunded'),
   }[p] || p);
 
   const load = async () => {
@@ -72,12 +73,12 @@ export default function BusinessOrdersSection({
         setOrders((prev) => prev.map((o) => (o.id === data.id ? data : o)));
       }
       showToast?.(
-        isHt ? 'Estati kòmand la mete ajou.' : 'Order status updated.',
+        isHt ? 'Estati kòmand la mete ajou.' : inlineText(lang, 'Order status updated.'),
         'check-circle',
       );
     } catch (err) {
       showToast?.(
-        err?.response?.data?.detail || (isHt ? 'Pa t ka mete ajou estati a.' : 'Could not update status.'),
+        err?.response?.data?.detail || (isHt ? 'Pa t ka mete ajou estati a.' : inlineText(lang, 'Could not update status.')),
         'circle-exclamation',
       );
     } finally {
@@ -99,13 +100,13 @@ export default function BusinessOrdersSection({
         setOrders((prev) => prev.map((o) => (o.id === data.id ? data : o)));
       }
       showToast?.(
-        isHt ? 'Kòmand la rembouse.' : 'Order refunded.',
+        isHt ? 'Kòmand la rembouse.' : inlineText(lang, 'Order refunded.'),
         'check-circle',
       );
       await load(); // refresh the revenue summary too
     } catch (err) {
       showToast?.(
-        err?.response?.data?.detail || (isHt ? 'Rembousman an pa t mache.' : 'Refund failed.'),
+        err?.response?.data?.detail || (isHt ? 'Rembousman an pa t mache.' : inlineText(lang, 'Refund failed.')),
         'circle-exclamation',
       );
     } finally {
@@ -113,7 +114,7 @@ export default function BusinessOrdersSection({
     }
   };
 
-  const money = (n) => Number(n ?? 0).toLocaleString(isHt ? 'fr-HT' : 'en-US', {
+  const money = (n) => Number(n ?? 0).toLocaleString(isHt ? 'fr-HT' : inlineText(lang, 'en-US'), {
     minimumFractionDigits: 2,
   });
 
@@ -133,12 +134,12 @@ export default function BusinessOrdersSection({
         <div>
           <h3 className="biz-catalog-title">
             <i className="fas fa-cart-shopping" aria-hidden="true" />
-            {t?.business_orders_title || (isHt ? 'Kòmand & Revni' : 'Orders & Revenue')}
+            {t?.business_orders_title || (isHt ? 'Kòmand & Revni' : inlineText(lang, 'Orders & Revenue'))}
           </h3>
           <p className="biz-catalog-hint">
             {t?.business_orders_hint || (isHt
               ? 'Kòmand sa yo se lead biznis ou yo. Kliyan peye ak balans Wallet yo lè Seller aktive.'
-              : 'These orders are your business leads. Customers pay with their Wallet balance when Seller is active.')}
+              : inlineText(lang, 'These orders are your business leads. Customers pay with their Wallet balance when Seller is active.'))}
           </p>
         </div>
       </div>
@@ -148,22 +149,22 @@ export default function BusinessOrdersSection({
         <div className="biz-revenue-grid" data-testid="business-revenue">
           <div className="biz-revenue-card biz-revenue-primary">
             <span className="biz-revenue-label">
-              {t?.business_revenue_total || (isHt ? 'Revni total (peye)' : 'Total revenue (paid)')}
+              {t?.business_revenue_total || (isHt ? 'Revni total (peye)' : inlineText(lang, 'Total revenue (paid)'))}
             </span>
             <span className="biz-revenue-value" data-testid="business-revenue-total">
               {money(revenue.total_revenue)} {revenue.currency || 'USD'}
             </span>
           </div>
           <div className="biz-revenue-card">
-            <span className="biz-revenue-label">{isHt ? 'Peye' : 'Paid'}</span>
+            <span className="biz-revenue-label">{isHt ? 'Peye' : inlineText(lang, 'Paid')}</span>
             <span className="biz-revenue-value">{revenue.orders?.paid ?? 0}</span>
           </div>
           <div className="biz-revenue-card">
-            <span className="biz-revenue-label">{isHt ? 'Pa peye' : 'Unpaid'}</span>
+            <span className="biz-revenue-label">{isHt ? 'Pa peye' : inlineText(lang, 'Unpaid')}</span>
             <span className="biz-revenue-value">{revenue.orders?.unpaid ?? 0}</span>
           </div>
           <div className="biz-revenue-card">
-            <span className="biz-revenue-label">{isHt ? 'Rembouse' : 'Refunded'}</span>
+            <span className="biz-revenue-label">{isHt ? 'Rembouse' : inlineText(lang, 'Refunded')}</span>
             <span className="biz-revenue-value">{revenue.orders?.refunded ?? 0}</span>
           </div>
         </div>
@@ -173,10 +174,10 @@ export default function BusinessOrdersSection({
       {orders.length === 0 ? (
         <div className="biz-catalog-empty" data-testid="business-orders-empty">
           <i className="fas fa-inbox" aria-hidden="true" />
-          <h4>{isHt ? 'Pa gen kòmand ankò' : 'No orders yet'}</h4>
+          <h4>{isHt ? 'Pa gen kòmand ankò' : inlineText(lang, 'No orders yet')}</h4>
           <p>{isHt
             ? 'Lè yon kliyan kòmande yon atik nan paj piblik ou, li ap parèt isit la.'
-            : 'When a customer orders an item on your public page, it will appear here.'}</p>
+            : inlineText(lang, 'When a customer orders an item on your public page, it will appear here.')}</p>
         </div>
       ) : (
         <div className="biz-orders-list">
@@ -219,7 +220,7 @@ export default function BusinessOrdersSection({
                     data-testid="business-order-refund"
                   >
                     <i className={`fas ${busyId === `refund_${order.id}` ? 'fa-spinner fa-spin' : 'fa-rotate-left'}`} aria-hidden="true" />
-                    {isHt ? 'Rembouse' : 'Refund'}
+                    {isHt ? 'Rembouse' : inlineText(lang, 'Refund')}
                   </button>
                 )}
                 {STATUS_FLOW.map((next) => (

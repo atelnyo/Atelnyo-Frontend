@@ -23,10 +23,11 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { resolveVideoSource } from '../../modules/explore/utils/videoSource';
 import styles from './learning.module.css';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function VideoBlock({ block, lang = 'en', reportComplete }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
   const [watchDone, setWatchDone] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
   const playbackRateRef = useRef(1);
@@ -175,7 +176,7 @@ export default function VideoBlock({ block, lang = 'en', reportComplete }) {
               videoRef.current?.setPlaybackRate(newRate);
             }
           }}
-          aria-label={isHt ? 'Vitese -= 0.5x' : 'Speed -0.5x'}
+          aria-label={isHt ? 'Vitese -= 0.5x' : inlineText(lang, 'Speed -0.5x')}
           disabled={playbackRate <= 0.5}
         >
           <i className="fas fa-slower" aria-hidden="true" /> 0.5x
@@ -191,7 +192,7 @@ export default function VideoBlock({ block, lang = 'en', reportComplete }) {
               videoRef.current?.setPlaybackRate(newRate);
             }
           }}
-          aria-label={isHt ? 'Vitese += 0.5x' : 'Speed +0.5x'}
+          aria-label={isHt ? 'Vitese += 0.5x' : inlineText(lang, 'Speed +0.5x')}
           disabled={playbackRate >= 2}
         >
           <i className="fas fa-faster" aria-hidden="true" /> 2x

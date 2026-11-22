@@ -25,6 +25,7 @@ import { buildContentUrl } from '../../../utils/contentUrl';
 import { StudioSkeleton, EmptyState, SectionHeader } from '../shared';
 import ConfirmModal from '../../common/ConfirmModal';
 import styles from './sections.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 function formatWhen(value) {
   if (!value) { return ''; }
@@ -101,7 +102,7 @@ export default function CommunitiesSection({ lang, t, showToast, user, setShowCo
       refetchRequests(); // queue shrinks; founded refetch updates member_count
       refetchFounded();
     } catch (err) {
-      showToast?.(err?.response?.data?.detail || (isHt ? 'Pa t kapab apwouve demann nan.' : 'Could not approve the request.'), 'circle-exclamation');
+      showToast?.(err?.response?.data?.detail || (isHt ? 'Pa t kapab apwouve demann nan.' : inlineText(lang, 'Could not approve the request.')), 'circle-exclamation');
     }
   }, [isHt, showToast, refetchRequests, refetchFounded]);
 
@@ -111,10 +112,10 @@ export default function CommunitiesSection({ lang, t, showToast, user, setShowCo
         community.slug || community.id,
         membership.user_id ?? membership.user ?? membership.id,
       );
-      showToast?.(isHt ? 'Demann nan rejte.' : 'Request rejected.', 'check-circle');
+      showToast?.(isHt ? 'Demann nan rejte.' : inlineText(lang, 'Request rejected.'), 'check-circle');
       refetchRequests();
     } catch (err) {
-      showToast?.(err?.response?.data?.detail || (isHt ? 'Pa t kapab rejte demann nan.' : 'Could not reject the request.'), 'circle-exclamation');
+      showToast?.(err?.response?.data?.detail || (isHt ? 'Pa t kapab rejte demann nan.' : inlineText(lang, 'Could not reject the request.')), 'circle-exclamation');
     }
     setRejectTarget(null);
   }, [isHt, showToast, refetchRequests]);
@@ -125,7 +126,7 @@ export default function CommunitiesSection({ lang, t, showToast, user, setShowCo
   // so no local refetch is needed here.
   const handleFoundClick = useCallback(async () => {
     if (!user) {
-      showToast?.(isHt ? 'Konekte pou w ka fonde yon kominote.' : 'Log in to found a community.', 'circle-exclamation');
+      showToast?.(isHt ? 'Konekte pou w ka fonde yon kominote.' : inlineText(lang, 'Log in to found a community.'), 'circle-exclamation');
       return;
     }
     try {
@@ -137,7 +138,7 @@ export default function CommunitiesSection({ lang, t, showToast, user, setShowCo
         // eslint-disable-next-line react/prop-types -- t is a plain translations object, untyped by convention
         showToast?.(t?.community_create_gated || (isHt
           ? 'Sèlman kreyatè ki gen kontni pibliye ka fonde kominote. Pibliye yon kou, yon pwodwi, oswa yon mizik anvan.'
-          : 'Only creators with published content can found a community. Publish a course, product, or music first.'), 'circle-exclamation');
+          : inlineText(lang, 'Only creators with published content can found a community. Publish a course, product, or music first.')), 'circle-exclamation');
       }
     } catch {
       setShowCommunityEditor?.(true); // server re-checks on submit
@@ -161,7 +162,7 @@ export default function CommunitiesSection({ lang, t, showToast, user, setShowCo
       <div className="cm-card-body">
         <div className="cm-card-name">
           <span>{c.name}</span>
-          {isFounder && <span className="cm-badge">{isHt ? 'Fondatè' : 'Founder'}</span>}
+          {isFounder && <span className="cm-badge">{isHt ? 'Fondatè' : inlineText(lang, 'Founder')}</span>}
         </div>
         <div className="cm-card-meta">
           {c.member_count != null && <span>👥 {c.member_count}</span>}
@@ -177,8 +178,8 @@ export default function CommunitiesSection({ lang, t, showToast, user, setShowCo
             type="button"
             className="cm-icon-btn"
             onClick={() => onEdit(c)}
-            title={isHt ? 'Modifye kominote a' : 'Edit community'}
-            aria-label={isHt ? 'Modifye kominote a' : 'Edit community'}
+            title={isHt ? 'Modifye kominote a' : inlineText(lang, 'Edit community')}
+            aria-label={isHt ? 'Modifye kominote a' : inlineText(lang, 'Edit community')}
           >
             <i className="fas fa-pen" aria-hidden="true" />
           </button>
@@ -187,8 +188,8 @@ export default function CommunitiesSection({ lang, t, showToast, user, setShowCo
           type="button"
           className="cm-icon-btn"
           onClick={() => openCommunity(c)}
-          title={isHt ? 'Ouvri kominote a' : 'Open community'}
-          aria-label={isHt ? 'Ouvri kominote a' : 'Open community'}
+          title={isHt ? 'Ouvri kominote a' : inlineText(lang, 'Open community')}
+          aria-label={isHt ? 'Ouvri kominote a' : inlineText(lang, 'Open community')}
         >
           <i className="fas fa-arrow-up-right-from-square" aria-hidden="true" />
         </button>
@@ -200,7 +201,7 @@ export default function CommunitiesSection({ lang, t, showToast, user, setShowCo
     <div className={styles.section}>
       <SectionHeader
         icon="fa-users"
-        title={isHt ? 'Kominote mwen yo' : 'My Communities'}
+        title={isHt ? 'Kominote mwen yo' : inlineText(lang, 'My Communities')}
         lang={lang}
         help={{
           ht: 'Kominote ou fonde yo ak sa ou vin manmb. Fondatè ajoute règleman, fikse anons, epi modere manm yo depi paj kominote a.',
@@ -208,12 +209,12 @@ export default function CommunitiesSection({ lang, t, showToast, user, setShowCo
         }}
         tip={isHt
           ? 'Fondasyon an rezève pou kreyatè ki gen kontni pibliye — yon kou, yon pwodwi, oswa yon mizik.'
-          : 'Founding is reserved for creators with published content — a course, product, or music upload.'}
+          : inlineText(lang, 'Founding is reserved for creators with published content — a course, product, or music upload.')}
         action={
           <button type="button" className="btn-primary cm-found-btn" onClick={handleFoundClick}>
             <i className="fas fa-plus" aria-hidden="true" />
             {/* eslint-disable-next-line react/prop-types -- t is a plain translations object, untyped by convention */}
-            {t?.community_create_cta || (isHt ? 'Fonde yon Kominote' : 'Found a Community')}
+            {t?.community_create_cta || (isHt ? 'Fonde yon Kominote' : inlineText(lang, 'Found a Community'))}
           </button>
         }
       />
@@ -227,7 +228,7 @@ export default function CommunitiesSection({ lang, t, showToast, user, setShowCo
             <div key={`req-${community.id}`}>
               <h3 className="cm-group-title">
                 <i className="fas fa-user-clock" aria-hidden="true" />
-                {isHt ? 'Demann antre' : 'Join requests'}
+                {isHt ? 'Demann antre' : inlineText(lang, 'Join requests')}
                 <span className="cm-count">{requests.length}</span>
                 <span className="cm-card-meta">· {community.name}</span>
               </h3>
@@ -240,7 +241,7 @@ export default function CommunitiesSection({ lang, t, showToast, user, setShowCo
                     <div className="cm-card-body">
                       <div className="cm-card-name">{m.username}</div>
                       <div className="cm-card-meta">
-                        {isHt ? 'Mandee antre nan' : 'Requested to join'} · {community.name}
+                        {isHt ? 'Mandee antre nan' : inlineText(lang, 'Requested to join')} · {community.name}
                       </div>
                     </div>
                     <div className="cm-card-actions">
@@ -248,8 +249,8 @@ export default function CommunitiesSection({ lang, t, showToast, user, setShowCo
                         type="button"
                         className="cm-icon-btn cm-icon-btn-approve"
                         onClick={() => handleApprove(community, m)}
-                        title={isHt ? 'Apwouve' : 'Approve'}
-                        aria-label={isHt ? 'Apwouve demann nan' : 'Approve request'}
+                        title={isHt ? 'Apwouve' : inlineText(lang, 'Approve')}
+                        aria-label={isHt ? 'Apwouve demann nan' : inlineText(lang, 'Approve request')}
                       >
                         <i className="fas fa-check" aria-hidden="true" />
                       </button>
@@ -257,8 +258,8 @@ export default function CommunitiesSection({ lang, t, showToast, user, setShowCo
                         type="button"
                         className="cm-icon-btn cm-icon-btn-reject"
                         onClick={() => setRejectTarget({ community, membership: m })}
-                        title={isHt ? 'Rejte' : 'Reject'}
-                        aria-label={isHt ? 'Rejte demann nan' : 'Reject request'}
+                        title={isHt ? 'Rejte' : inlineText(lang, 'Reject')}
+                        aria-label={isHt ? 'Rejte demann nan' : inlineText(lang, 'Reject request')}
                       >
                         <i className="fas fa-xmark" aria-hidden="true" />
                       </button>
@@ -273,12 +274,12 @@ export default function CommunitiesSection({ lang, t, showToast, user, setShowCo
         {noFounded && noJoined ? (
           <EmptyState
             icon="fa-users"
-            title={isHt ? 'Poko gen kominote' : 'No communities yet'}
+            title={isHt ? 'Poko gen kominote' : inlineText(lang, 'No communities yet')}
             hint={isHt
               ? 'Fonde premye kominote ou, oswa vin manmb nan yon sèl depi Explore.'
-              : 'Found your first community, or join one from Explore.'}
+              : inlineText(lang, 'Found your first community, or join one from Explore.')}
             // eslint-disable-next-line react/prop-types -- t is a plain translations object, untyped by convention
-            ctaLabel={t?.community_create_cta || (isHt ? 'Fonde yon Kominote' : 'Found a Community')}
+            ctaLabel={t?.community_create_cta || (isHt ? 'Fonde yon Kominote' : inlineText(lang, 'Found a Community'))}
             onCta={handleFoundClick}
           />
         ) : (
@@ -287,7 +288,7 @@ export default function CommunitiesSection({ lang, t, showToast, user, setShowCo
               <>
                 <h3 className="cm-group-title">
                   <i className="fas fa-crown" aria-hidden="true" />
-                  {isHt ? 'Mwen fonde' : 'Founded by me'}
+                  {isHt ? 'Mwen fonde' : inlineText(lang, 'Founded by me')}
                   <span className="cm-count">{founded.length}</span>
                 </h3>
                 <div className="cm-list">
@@ -299,7 +300,7 @@ export default function CommunitiesSection({ lang, t, showToast, user, setShowCo
               <>
                 <h3 className="cm-group-title">
                   <i className="fas fa-user-check" aria-hidden="true" />
-                  {isHt ? 'Mwen vin manmb' : 'Joined'}
+                  {isHt ? 'Mwen vin manmb' : inlineText(lang, 'Joined')}
                   <span className="cm-count">{joined.length}</span>
                 </h3>
                 <div className="cm-list">
@@ -314,12 +315,12 @@ export default function CommunitiesSection({ lang, t, showToast, user, setShowCo
       {rejectTarget && (
         <ConfirmModal
           lang={lang}
-          title={isHt ? 'Rejte demann antre' : 'Reject join request'}
+          title={isHt ? 'Rejte demann antre' : inlineText(lang, 'Reject join request')}
           message={isHt
             ? `Rejte demann ${rejectTarget.membership.username} pou « ${rejectTarget.community.name} »? Li ka mande ankò pita.`
             : `Reject ${rejectTarget.membership.username}'s request to join "${rejectTarget.community.name}"? They can request again later.`}
-          confirmText={isHt ? 'Rejte' : 'Reject'}
-          cancelText={isHt ? 'Anile' : 'Cancel'}
+          confirmText={isHt ? 'Rejte' : inlineText(lang, 'Reject')}
+          cancelText={isHt ? 'Anile' : inlineText(lang, 'Cancel')}
           onConfirm={() => handleReject(rejectTarget.community, rejectTarget.membership)}
           onCancel={() => setRejectTarget(null)}
         />

@@ -8,9 +8,10 @@ import { classNames } from '../utils/cardHelpers';
 import CardOpenButton from './CardOpenButton';
 import SaveCountChip from './SaveCountChip';
 import TrendingVelocity from './TrendingVelocity';
+import { inlineText } from '../../../utils/inlineI18n';
 
 /** SVG fallback — talent-themed gradient with star/person icon */
-function TalentFallback({ name, isHt }) {
+function TalentFallback({ name, isHt, lang = 'en' }) {
   return (
     <div className="explore-card-fallback">
       <svg viewBox="0 0 600 340" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -30,7 +31,7 @@ function TalentFallback({ name, isHt }) {
         </g>
         <text x="300" y="270" textAnchor="middle" fill="#10b981" opacity="0.5"
               fontFamily="system-ui, -apple-system, sans-serif" fontSize="13" fontWeight="600">
-          {name || (isHt ? 'Talan' : 'Talent')}
+          {name || (isHt ? 'Talan' : inlineText(lang, 'Talent'))}
         </text>
       </svg>
     </div>
@@ -69,7 +70,7 @@ export default function TalentCard({ talent, onOpenSheet, showToast, t, isSaved,
             onError={() => setImgFailed(true)}
           />
         ) : (
-          <TalentFallback name={talent.name} isHt={lang === 'ht'} />
+          <TalentFallback name={talent.name} isHt={lang === 'ht'} lang={lang} />
         )}
         {talent.is_new && <span className="explore-new-pill" style={{ position: 'absolute', top: 8, right: 8 }}>{t.explore_chip_new || 'New'}</span>}
         {/* Trending Velocity — shows how fast this creator is rising */}
@@ -122,7 +123,7 @@ export default function TalentCard({ talent, onOpenSheet, showToast, t, isSaved,
             <span>@{talent.linked_username || talent.user_key || talent.created_by_username}</span>
           </div>
         ) : (
-          <div className="explore-talent-linked explore-talent-unlinked" title={lang === 'ht' ? 'Okenn itilizatè' : 'No user'}>
+          <div className="explore-talent-linked explore-talent-unlinked" title={lang === 'ht' ? 'Okenn itilizatè' : inlineText(lang, 'No user')}>
             <i className="fas fa-user-slash" aria-hidden="true" />
             <span>{lang === 'ht' ? 'Okenn itilizatè' : lang === 'fr' ? 'Aucun utilisateur' : lang === 'es' ? 'Sin usuario' : 'No user'}</span>
           </div>
@@ -151,7 +152,7 @@ export default function TalentCard({ talent, onOpenSheet, showToast, t, isSaved,
           aria-label={t.explore_sheet_talent_title || 'View talent'}
         >
           <i className="fas fa-arrow-right" aria-hidden="true" />
-          <span>{t.explore_sheet_talent_title || (lang === 'ht' ? 'Wè' : 'View')}</span>
+          <span>{t.explore_sheet_talent_title || (lang === 'ht' ? 'Wè' : inlineText(lang, 'View'))}</span>
         </button>
       </div>
     </div>

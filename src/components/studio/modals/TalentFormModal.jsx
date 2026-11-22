@@ -8,6 +8,7 @@ import React, { useState, useCallback } from 'react';
 import { talentService } from '../../../services/api';
 import { StudioModal, FormField, LoadingOverlay, HelpTip, MediaUrlField } from './shared';
 import styles from './modals.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function TalentFormModal({ onClose, onSuccess, lang, showToast, talent }) {
   const isEdit = Boolean(talent);
@@ -34,8 +35,8 @@ export default function TalentFormModal({ onClose, onSuccess, lang, showToast, t
 
   const validate = () => {
     const errs = {};
-    if (!form.name.trim()) errs.name = lang === 'ht' ? 'Non oblije' : 'Name required';
-    if (!form.role.trim()) errs.role = lang === 'ht' ? 'Wòl oblije' : 'Role required';
+    if (!form.name.trim()) errs.name = lang === 'ht' ? 'Non oblije' : inlineText(lang, 'Name required');
+    if (!form.role.trim()) errs.role = lang === 'ht' ? 'Wòl oblije' : inlineText(lang, 'Role required');
     return errs;
   };
 
@@ -65,8 +66,8 @@ export default function TalentFormModal({ onClose, onSuccess, lang, showToast, t
       }
       showToast?.(
         isEdit
-          ? (lang === 'ht' ? '✅ Talan mete ajou!' : '✅ Talent updated!')
-          : (lang === 'ht' ? '✅ Talan kreye!' : '✅ Talent created!'),
+          ? (lang === 'ht' ? '✅ Talan mete ajou!' : inlineText(lang, '✅ Talent updated!'))
+          : (lang === 'ht' ? '✅ Talan kreye!' : inlineText(lang, '✅ Talent created!')),
         'check-circle',
       );
       onSuccess?.(); onClose?.();
@@ -75,7 +76,7 @@ export default function TalentFormModal({ onClose, onSuccess, lang, showToast, t
         || err?.response?.data?.name?.[0]
         || err?.response?.data?.role?.[0]
         || err?.message
-        || (lang === 'ht' ? 'Pa t kapab sove talan an.' : 'Could not save talent.');
+        || (lang === 'ht' ? 'Pa t kapab sove talan an.' : inlineText(lang, 'Could not save talent.'));
       setErrors((e) => ({ ...e, _api: detail }));
       showToast?.(detail, 'circle-exclamation');
     } finally { setLoading(false); }
@@ -84,44 +85,44 @@ export default function TalentFormModal({ onClose, onSuccess, lang, showToast, t
   return (
     <StudioModal onClose={onClose} icon="fa-star" wide
       title={isEdit
-        ? (lang === 'ht' ? 'Modifye Talan' : 'Edit Talent')
-        : (lang === 'ht' ? 'Kreye Talan' : 'Create Talent')}
+        ? (lang === 'ht' ? 'Modifye Talan' : inlineText(lang, 'Edit Talent'))
+        : (lang === 'ht' ? 'Kreye Talan' : inlineText(lang, 'Create Talent'))}
       subtitle={lang === 'ht'
         ? 'Ajoute yon talan pou Explore'
-        : 'Add a talent to the Explore catalog'}>
+        : inlineText(lang, 'Add a talent to the Explore catalog')}>
       <form onSubmit={handleSubmit} className={styles.form}>
         {errors._api && <div className={styles.apiError} role="alert">{errors._api}</div>}
         <LoadingOverlay loading={loading}>
-          <FormField label={lang === 'ht' ? 'Non' : 'Name'} required error={errors.name}>
+          <FormField label={lang === 'ht' ? 'Non' : inlineText(lang, 'Name')} required error={errors.name}>
             <input className={styles.input} value={form.name}
               onChange={(e) => handleChange('name', e.target.value)}
-              placeholder={lang === 'ht' ? 'Antre non talan an' : 'Enter talent name'}
+              placeholder={lang === 'ht' ? 'Antre non talan an' : inlineText(lang, 'Enter talent name')}
               maxLength={120} autoFocus />
           </FormField>
           <div className={styles.row}>
-            <FormField label={lang === 'ht' ? 'Wòl' : 'Role'} required error={errors.role}>
+            <FormField label={lang === 'ht' ? 'Wòl' : inlineText(lang, 'Role')} required error={errors.role}>
               <input className={styles.input} value={form.role}
                 onChange={(e) => handleChange('role', e.target.value)}
-                placeholder={lang === 'ht' ? 'Chantè, Dansè...' : 'Singer, Dancer...'} />
+                placeholder={lang === 'ht' ? 'Chantè, Dansè...' : inlineText(lang, 'Singer, Dancer...')} />
             </FormField>
-            <FormField label={lang === 'ht' ? 'Kote' : 'Location'}>
+            <FormField label={lang === 'ht' ? 'Kote' : inlineText(lang, 'Location')}>
               <input className={styles.input} value={form.location}
                 onChange={(e) => handleChange('location', e.target.value)}
-                placeholder={lang === 'ht' ? 'Potoprens, Ayiti' : 'Port-au-Prince, Haiti'} />
+                placeholder={lang === 'ht' ? 'Potoprens, Ayiti' : inlineText(lang, 'Port-au-Prince, Haiti')} />
             </FormField>
           </div>
-          <FormField label={lang === 'ht' ? 'Biyo' : 'Bio'}>
+          <FormField label={lang === 'ht' ? 'Biyo' : inlineText(lang, 'Bio')}>
             <textarea className={styles.textarea} value={form.bio}
               onChange={(e) => handleChange('bio', e.target.value)}
-              placeholder={lang === 'ht' ? 'Dekri talan an...' : 'Describe the talent...'}
+              placeholder={lang === 'ht' ? 'Dekri talan an...' : inlineText(lang, 'Describe the talent...')}
               rows={3} maxLength={1000} />
           </FormField>
-          <FormField label={lang === 'ht' ? 'Konpetans (separe ak virgül)' : 'Skills (comma separated)'}
-            hint={lang === 'ht' ? 'Egzanp: Chante, Danse, Mizik' : 'e.g. Singing, Dancing, Music'}>
+          <FormField label={lang === 'ht' ? 'Konpetans (separe ak virgül)' : inlineText(lang, 'Skills (comma separated)')}
+            hint={lang === 'ht' ? 'Egzanp: Chante, Danse, Mizik' : inlineText(lang, 'e.g. Singing, Dancing, Music')}>
             <div className={styles.inputWithHelp}>
               <input className={styles.input} value={form.skills}
                 onChange={(e) => handleChange('skills', e.target.value)}
-                placeholder={lang === 'ht' ? 'Chante, Danse, Mizik' : 'Singing, Dancing, Music'} />
+                placeholder={lang === 'ht' ? 'Chante, Danse, Mizik' : inlineText(lang, 'Singing, Dancing, Music')} />
               <HelpTip help={{
                 ht: 'Konpetans yo parèt kòm ti etikèt sou kard talan an. Separe yo ak virgül pou plizyè konpetans. Egzanp: Chante, Konpozisyon, Gita.',
                 en: 'Skills render as small chips on the talent card. Separate multiple ones with commas. e.g. Singing, Songwriting, Guitar.',
@@ -129,12 +130,12 @@ export default function TalentFormModal({ onClose, onSuccess, lang, showToast, t
             </div>
           </FormField>
           <MediaUrlField
-            label={lang === 'ht' ? 'URL Avatè' : 'Avatar URL'}
+            label={lang === 'ht' ? 'URL Avatè' : inlineText(lang, 'Avatar URL')}
             value={form.avatar_url}
             onChange={(v) => handleChange('avatar_url', v)}
             kind="image"
             lang={lang}
-            hint={lang === 'ht' ? 'URL imaj avatè a' : 'Avatar image URL'}
+            hint={lang === 'ht' ? 'URL imaj avatè a' : inlineText(lang, 'Avatar image URL')}
             help={{
               ht: 'Kole yon URL imaj DIRÈK (.jpg, .png, .webp) — foto pwofil talan an. Yon foto kare (1:1) parèt pi byen sou kard la. Preview la ap parèt anba a pou w konfime li bon.',
               en: 'Paste a DIRECT image URL (.jpg, .png, .webp) — the talent profile photo. A square (1:1) photo renders best on the card. The live preview below lets you confirm it before saving.',
@@ -142,12 +143,12 @@ export default function TalentFormModal({ onClose, onSuccess, lang, showToast, t
             placeholder="https://example.com/avatar.jpg"
           />
           <div className={styles.row}>
-            <FormField label={lang === 'ht' ? 'Imèl Kontak' : 'Contact Email'}>
+            <FormField label={lang === 'ht' ? 'Imèl Kontak' : inlineText(lang, 'Contact Email')}>
               <input className={styles.input} value={form.contact_email}
                 onChange={(e) => handleChange('contact_email', e.target.value)}
                 placeholder="email@example.com" type="email" />
             </FormField>
-            <FormField label={lang === 'ht' ? 'Sit Web / URL' : 'Website / URL'}>
+            <FormField label={lang === 'ht' ? 'Sit Web / URL' : inlineText(lang, 'Website / URL')}>
               <input className={styles.input} value={form.contact_url}
                 onChange={(e) => handleChange('contact_url', e.target.value)}
                 placeholder="https://..." type="url" />
@@ -155,11 +156,11 @@ export default function TalentFormModal({ onClose, onSuccess, lang, showToast, t
           </div>
           <div className={styles.toggleRow}>
             <span className={styles.toggleLabel}>
-              {lang === 'ht' ? 'Vizibilite' : 'Visibility'}
+              {lang === 'ht' ? 'Vizibilite' : inlineText(lang, 'Visibility')}
               <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary, #888)', fontWeight: 400 }}>
                 {form.is_active
-                  ? (lang === 'ht' ? 'Vizib nan Explore' : 'Visible in Explore')
-                  : (lang === 'ht' ? 'Kache (pa vizib)' : 'Hidden (not visible)')}
+                  ? (lang === 'ht' ? 'Vizib nan Explore' : inlineText(lang, 'Visible in Explore'))
+                  : (lang === 'ht' ? 'Kache (pa vizib)' : inlineText(lang, 'Hidden (not visible)'))}
               </span>
             </span>
             <button
@@ -168,7 +169,7 @@ export default function TalentFormModal({ onClose, onSuccess, lang, showToast, t
               onClick={() => handleChange('is_active', !form.is_active)}
               role="switch"
               aria-checked={form.is_active}
-              aria-label={lang === 'ht' ? 'Vizibilite talan an' : 'Talent visibility'}
+              aria-label={lang === 'ht' ? 'Vizibilite talan an' : inlineText(lang, 'Talent visibility')}
             >
               <span className={styles.toggleKnob} />
             </button>
@@ -176,15 +177,15 @@ export default function TalentFormModal({ onClose, onSuccess, lang, showToast, t
         </LoadingOverlay>
         <div className={styles.actions}>
           <button type="button" className="btn-secondary" onClick={onClose} disabled={loading}>
-            {lang === 'ht' ? 'Anile' : 'Cancel'}
+            {lang === 'ht' ? 'Anile' : inlineText(lang, 'Cancel')}
           </button>
           <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? (
-              <><i className="fas fa-spinner fa-spin" /> {lang === 'ht' ? 'Ap sove...' : 'Saving...'}</>
+              <><i className="fas fa-spinner fa-spin" /> {lang === 'ht' ? 'Ap sove...' : inlineText(lang, 'Saving...')}</>
             ) : (
               <><i className="fas fa-save" /> {isEdit
-                ? (lang === 'ht' ? 'Mete ajou' : 'Update')
-                : (lang === 'ht' ? 'Kreye Talan' : 'Create Talent')}</>
+                ? (lang === 'ht' ? 'Mete ajou' : inlineText(lang, 'Update'))
+                : (lang === 'ht' ? 'Kreye Talan' : inlineText(lang, 'Create Talent'))}</>
             )}
           </button>
         </div>

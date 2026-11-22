@@ -18,6 +18,7 @@ import api from '../../../services/api';
 import useFetch from '../../../hooks/useFetch';
 import { StudioSkeleton, EmptyState, SectionHeader, fmtDate, fmtCurrency } from '../shared';
 import styles from './sections.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 // Order STATUS_CHOICES from the backend Order model.
 const STATUS_META = {
@@ -63,18 +64,18 @@ export default function OrdersSection({ lang, t }) {
           title={t.studio_no_orders || 'No orders yet'}
           hint={isHt
             ? 'Lè yon achtè achte yon pwodwi ou, lòd la ap parèt isit la ak estati li.'
-            : 'When a customer buys one of your products, the order appears here with its status.'}
+            : inlineText(lang, 'When a customer buys one of your products, the order appears here with its status.')}
         />
       ) : (
         <div className={styles.tableWrap}>
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>{isHt ? 'Lòd' : 'Order'}</th>
-                <th>{isHt ? 'Achtè' : 'Buyer'}</th>
-                <th>{isHt ? 'Atik' : 'Items'}</th>
-                <th>{isHt ? 'Total' : 'Total'}</th>
-                <th>{isHt ? 'Estati' : 'Status'}</th>
+                <th>{isHt ? 'Lòd' : inlineText(lang, 'Order')}</th>
+                <th>{isHt ? 'Achtè' : inlineText(lang, 'Buyer')}</th>
+                <th>{isHt ? 'Atik' : inlineText(lang, 'Items')}</th>
+                <th>{isHt ? 'Total' : inlineText(lang, 'Total')}</th>
+                <th>{isHt ? 'Estati' : inlineText(lang, 'Status')}</th>
               </tr>
             </thead>
             <tbody>
@@ -98,7 +99,7 @@ export default function OrdersSection({ lang, t }) {
                       <td>{o.buyer_username || o.buyer || '—'}</td>
                       <td className={styles.cellName}>
                         {items.length > 0
-                          ? `${items.reduce((s, it) => s + (it.quantity || 1), 0)} ${isHt ? 'atik' : 'items'}`
+                          ? `${items.reduce((s, it) => s + (it.quantity || 1), 0)} ${isHt ? 'atik' : inlineText(lang, 'items')}`
                           : '—'}
                         <span className={styles.cellSub}>
                           {items.slice(0, 2).map((it) => it.product_title).filter(Boolean).join(', ') || ' '}
@@ -118,9 +119,9 @@ export default function OrdersSection({ lang, t }) {
                           <div className={styles.orderDetail}>
                             <div className={styles.orderDetailGrid}>
                               <div>
-                                <span className={styles.orderDetailLabel}>{isHt ? 'Atik yo' : 'Items'}</span>
+                                <span className={styles.orderDetailLabel}>{isHt ? 'Atik yo' : inlineText(lang, 'Items')}</span>
                                 <ul className={styles.orderDetailList}>
-                                  {items.length === 0 && <li>{isHt ? 'Pa gen atik' : 'No items'}</li>}
+                                  {items.length === 0 && <li>{isHt ? 'Pa gen atik' : inlineText(lang, 'No items')}</li>}
                                   {items.map((it, i) => (
                                     <li key={i}>
                                       <strong>{it.product_title || `#${it.product}`}</strong>
@@ -132,37 +133,37 @@ export default function OrdersSection({ lang, t }) {
                                 </ul>
                               </div>
                               <div>
-                                <span className={styles.orderDetailLabel}>{isHt ? 'Peman' : 'Payment'}</span>
+                                <span className={styles.orderDetailLabel}>{isHt ? 'Peman' : inlineText(lang, 'Payment')}</span>
                                 <ul className={styles.orderDetailList}>
-                                  <li>{isHt ? 'Sou-total' : 'Subtotal'}: <strong>{fmtCurrency(o.subtotal)}</strong></li>
-                                  <li>{isHt ? 'Total' : 'Total'}: <strong>{fmtCurrency(o.total)}</strong></li>
+                                  <li>{isHt ? 'Sou-total' : inlineText(lang, 'Subtotal')}: <strong>{fmtCurrency(o.subtotal)}</strong></li>
+                                  <li>{isHt ? 'Total' : inlineText(lang, 'Total')}: <strong>{fmtCurrency(o.total)}</strong></li>
                                 </ul>
                                 {o.shipping_address && (
                                   <>
-                                    <span className={styles.orderDetailLabel}>{isHt ? 'Livrezon' : 'Shipping'}</span>
+                                    <span className={styles.orderDetailLabel}>{isHt ? 'Livrezon' : inlineText(lang, 'Shipping')}</span>
                                     <p className={styles.orderDetailAddr}>{o.shipping_address}</p>
                                   </>
                                 )}
                                 {o.buyer_note && (
                                   <>
-                                    <span className={styles.orderDetailLabel}>{isHt ? 'Nòt achtè' : 'Buyer note'}</span>
+                                    <span className={styles.orderDetailLabel}>{isHt ? 'Nòt achtè' : inlineText(lang, 'Buyer note')}</span>
                                     <p className={styles.orderDetailAddr}>{o.buyer_note}</p>
                                   </>
                                 )}
                                 {Array.isArray(o.printify_fulfillment) && o.printify_fulfillment.length > 0 && (
                                   <>
-                                    <span className={styles.orderDetailLabel}>{isHt ? 'Fulfillment Printify' : 'Printify fulfillment'}</span>
+                                    <span className={styles.orderDetailLabel}>{isHt ? 'Fulfillment Printify' : inlineText(lang, 'Printify fulfillment')}</span>
                                     {o.printify_fulfillment.map((fulfillment) => (
                                       <div key={`${fulfillment.submission_status || 'customer'}-${fulfillment.status || 'pending'}-${(fulfillment.shipments || []).map((shipment) => shipment.number || shipment.url || 'shipment').join(',')}`}>
                                         <p className={styles.orderDetailAddr}>
-                                          {fulfillment.status || fulfillment.submission_status || (isHt ? 'Ap tann mizajou' : 'Awaiting update')}
+                                          {fulfillment.status || fulfillment.submission_status || (isHt ? 'Ap tann mizajou' : inlineText(lang, 'Awaiting update'))}
                                         </p>
                                         {fulfillment.issue && <p className={styles.orderDetailAddr} role="alert">{fulfillment.issue}</p>}
                                         {(fulfillment.shipments || []).map((shipment) => (
                                           <p className={styles.orderDetailAddr} key={shipment.number || shipment.url || shipment.carrier}>
-                                            {shipment.carrier || (isHt ? 'Transpò' : 'Carrier')}{' '}
+                                            {shipment.carrier || (isHt ? 'Transpò' : inlineText(lang, 'Carrier'))}{' '}
                                             {shipment.url?.startsWith('https://')
-                                              ? <a href={shipment.url} target="_blank" rel="noreferrer">{shipment.number || (isHt ? 'Swiv' : 'Track')}</a>
+                                              ? <a href={shipment.url} target="_blank" rel="noreferrer">{shipment.number || (isHt ? 'Swiv' : inlineText(lang, 'Track'))}</a>
                                               : shipment.number}
                                           </p>
                                         ))}

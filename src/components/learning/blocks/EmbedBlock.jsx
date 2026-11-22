@@ -13,6 +13,7 @@
  */
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import VideoEmbedFrame from '../../media/VideoEmbedFrame';
+import { inlineText } from '../../../utils/inlineI18n';
 
 function toEmbedUrl(url) {
   if (!url) return '';
@@ -74,8 +75,8 @@ export default function EmbedBlock({
     <div className="ls-block ls-block--embed" data-block-type="embed">
       {/* Header */}
       <div className="ls-block-header">
-        <span className="ls-block-badge">🌐 {isHt ? 'Embedded' : 'Embed'}</span>
-        <h3 className="ls-block-title">{block.title || (isHt ? 'Kontni ekstèn' : 'External Content')}</h3>
+        <span className="ls-block-badge">🌐 {isHt ? 'Embedded' : inlineText(lang, 'Embed')}</span>
+        <h3 className="ls-block-title">{block.title || (isHt ? 'Kontni ekstèn' : inlineText(lang, 'External Content'))}</h3>
       </div>
 
       {/* Embed container */}
@@ -95,7 +96,7 @@ export default function EmbedBlock({
               src={embedUrl}
               title={block.title || 'Embedded content'}
               lang={lang}
-              loadingText={isHt ? 'Ap chaje kontni entegre a...' : 'Loading embedded content...'}
+              loadingText={isHt ? 'Ap chaje kontni entegre a...' : inlineText(lang, 'Loading embedded content...')}
               style={{ position: 'absolute', inset: 0, aspectRatio: 'auto' }}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
@@ -110,9 +111,9 @@ export default function EmbedBlock({
           color: 'var(--text-secondary)',
         }}>
           <i className="fas fa-link" style={{ fontSize: '1.5rem', marginBottom: 8, display: 'block', opacity: 0.5 }} />
-          <p>{isHt ? 'Pa gen URL embed valab.' : 'No valid embed URL provided.'}</p>
+          <p>{isHt ? 'Pa gen URL embed valab.' : inlineText(lang, 'No valid embed URL provided.')}</p>
           <p style={{ fontSize: '0.8rem', marginTop: 4, opacity: 0.7 }}>
-            {isHt ? 'Ajoute yon URL nan editè a.' : 'Add a URL in the editor.'}
+            {isHt ? 'Ajoute yon URL nan editè a.' : inlineText(lang, 'Add a URL in the editor.')}
           </p>
         </div>
       )}

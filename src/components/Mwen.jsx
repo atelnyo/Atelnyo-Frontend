@@ -49,6 +49,7 @@ import { SHEETS } from '../routes/sheets';
 import { ActivityTimeline } from './ActivityTimeline';
 import { getUserIdentity } from '../utils/userIdentity';
 import { fmtDate, premiumPlanLabel } from '../utils/formatMedia';
+import { inlineText } from '../utils/inlineI18n';
 
 function classNames(...parts) {
   return parts.filter(Boolean).join(' ');
@@ -902,10 +903,10 @@ export function Mwen({
   // ─── Section labels (i18n) ──────────────────────────────────────────
   const sectionLabels = {
     saved_talents: t.mwen_section_saved_talents || (t2(lang, { ht: 'Talan Saved', en: 'Saved Talents' })),
-    saved_music:   t.mwen_section_saved_music   || (lang === 'ht' ? 'Mizik Saved'   : 'Saved Music'),
-    saved_items:   t.mwen_section_saved_items   || (lang === 'ht' ? 'Saves'          : 'Saves'),
-    recent:        t.mwen_section_recent        || (lang === 'ht' ? 'Dènye Aksyon'  : 'Recent'),
-    activity:      t.activity_feed_tab          || (lang === 'ht' ? 'Aktivite'       : 'Activity'),
+    saved_music:   t.mwen_section_saved_music   || (lang === 'ht' ? 'Mizik Saved'   : inlineText(lang, 'Saved Music')),
+    saved_items:   t.mwen_section_saved_items   || (lang === 'ht' ? 'Saves'          : inlineText(lang, 'Saves')),
+    recent:        t.mwen_section_recent        || (lang === 'ht' ? 'Dènye Aksyon'  : inlineText(lang, 'Recent')),
+    activity:      t.activity_feed_tab          || (lang === 'ht' ? 'Aktivite'       : inlineText(lang, 'Activity')),
   };
 
   // ─── Quick-nav cards — data-driven, role-gated ───────────────────
@@ -934,7 +935,7 @@ export function Mwen({
       title: t.business_my_orders_title || (t2(lang, { ht: 'Kòmand mwen', en: 'My Orders' })),
       hint: t.business_my_orders_hint || (lang === 'ht'
         ? 'Swiv kòmand ou yo ak peman Wallet ou.'
-        : 'Track your orders and wallet payments.'),
+        : inlineText(lang, 'Track your orders and wallet payments.')),
       to: SHEETS.BUSINESS_MY_ORDERS,
       gradient: 'linear-gradient(135deg, #0ea5e9, #0284c7)',
       testId: 'mwen-my-orders-card',
@@ -947,7 +948,7 @@ export function Mwen({
       title: t.mwen_messages_title || (t2(lang, { ht: 'Mesaj mwen', en: 'My Messages' })),
       hint: t.mwen_messages_hint || (lang === 'ht'
         ? 'Konvèsasyon ou ak kreyatè, kliyan, etidyan yo.'
-        : 'Your conversations with creators, clients, and students.'),
+        : inlineText(lang, 'Your conversations with creators, clients, and students.')),
       to: SHEETS.MESSAGES,
       gradient: 'linear-gradient(135deg, #10b981, #059669)',
       testId: 'mwen-messages-card',
@@ -1043,14 +1044,14 @@ export function Mwen({
       hint: affiliateState === 'pending'
         ? (lang === 'ht'
           ? 'Demann Affiliate ou ap tann verifikasyon. Nou pral enfòme ou lè yo revize l.'
-          : 'Your affiliate application is pending review. We will notify you once it is reviewed.')
+          : inlineText(lang, 'Your affiliate application is pending review. We will notify you once it is reviewed.'))
         : affiliateState === 'suspended'
           ? (lang === 'ht'
             ? 'Kont Afilye ou sispann. Kontakte sipò pou rezoud pwoblèm nan.'
-            : 'Your affiliate account is suspended. Contact support to resolve this.')
+            : inlineText(lang, 'Your affiliate account is suspended. Contact support to resolve this.'))
           : (lang === 'ht'
             ? 'Aplikasyon ou te rejte. Ou ka aplike nan lòt pwogram kreyatè yo.'
-            : 'Your application was rejected. You can apply to other creator programs.'),
+            : inlineText(lang, 'Your application was rejected. You can apply to other creator programs.')),
       gradient: affiliateState === 'pending'
         ? 'linear-gradient(135deg, #f59e0b, #d97706)'
         : affiliateState === 'suspended'

@@ -20,6 +20,7 @@ import {
 } from '../../learning/blocks/blockSchema';
 import { validateLessonAccessibility, validateCourseAccessibility } from '../../../accessibility/utils/validation';
 import styles from './editor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 /* ─── Score ring ──────────────────────────────────────────────────── */
 function ScoreRing({ score, size = 52 }) {
@@ -174,7 +175,7 @@ export default function ContentValidationEngine({
         a11yValid: a11yResult.valid,
       }));
     } catch (err) {
-      showToast?.(err?.message || (isHt ? 'Pa t kapab valide.' : 'Could not validate.'), 'circle-exclamation');
+      showToast?.(err?.message || (isHt ? 'Pa t kapab valide.' : inlineText(lang, 'Could not validate.')), 'circle-exclamation');
     } finally {
       setLoading(false);
     }
@@ -208,7 +209,7 @@ export default function ContentValidationEngine({
         <div className={styles.validationHeaderLeft}>
           <i className="fas fa-shield-halved" aria-hidden="true" />
           <span className={styles.validationHeaderText}>
-            {isHt ? 'Validasyon Kontni' : 'Content Validation'}
+            {isHt ? 'Validasyon Kontni' : inlineText(lang, 'Content Validation')}
           </span>
         </div>
         <button
@@ -218,13 +219,13 @@ export default function ContentValidationEngine({
           disabled={loading}
         >
           <i className={`fas ${loading ? 'fa-spinner fa-spin' : 'fa-refresh'}`} />
-          {isHt ? 'Rechaje' : 'Refresh'}
+          {isHt ? 'Rechaje' : inlineText(lang, 'Refresh')}
         </button>
       </div>
 
       {loading && !stats ? (
         <div className={styles.validationLoading}>
-          <i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap valide...' : 'Validating...'}
+          <i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap valide...' : inlineText(lang, 'Validating...')}
         </div>
       ) : stats ? (
         <>
@@ -237,21 +238,21 @@ export default function ContentValidationEngine({
               <div className={styles.validationSummaryStatus}>
                 {stats.publishable ? (
                   <span className={styles.validationStatusGood}>
-                    <i className="fas fa-check-circle" /> {isHt ? 'Pibliyab' : 'Publishable'}
+                    <i className="fas fa-check-circle" /> {isHt ? 'Pibliyab' : inlineText(lang, 'Publishable')}
                   </span>
                 ) : (
                   <span className={styles.validationStatusBad}>
-                    <i className="fas fa-exclamation-circle" /> {isHt ? 'Pa pibliyab' : 'Not publishable'}
+                    <i className="fas fa-exclamation-circle" /> {isHt ? 'Pa pibliyab' : inlineText(lang, 'Not publishable')}
                   </span>
                 )}
               </div>
               <div className={styles.validationSummaryCounts}>
-                <span className={styles.validationCountError}>{stats.errorCount} {isHt ? 'erè' : 'errors'}</span>
-                <span className={styles.validationCountWarning}>{stats.warningCount} {isHt ? 'avètisman' : 'warnings'}</span>
-                <span className={styles.validationCountInfo}>{stats.recCount} {isHt ? 'konsèy' : 'tips'}</span>
+                <span className={styles.validationCountError}>{stats.errorCount} {isHt ? 'erè' : inlineText(lang, 'errors')}</span>
+                <span className={styles.validationCountWarning}>{stats.warningCount} {isHt ? 'avètisman' : inlineText(lang, 'warnings')}</span>
+                <span className={styles.validationCountInfo}>{stats.recCount} {isHt ? 'konsèy' : inlineText(lang, 'tips')}</span>
               </div>
               <div className={styles.validationSummaryLessons}>
-                {stats.lessonCount} {isHt ? 'leson' : 'lessons'} · {isHt ? 'eta' : 'status'}: {stats.readinessLevel === 'ready' ? (isHt ? 'pare' : 'ready') : stats.readinessLevel === 'needs_attention' ? (isHt ? 'atansyon' : 'attention') : (isHt ? 'bloke' : 'blocked')}
+                {stats.lessonCount} {isHt ? 'leson' : inlineText(lang, 'lessons')} · {isHt ? 'eta' : inlineText(lang, 'status')}: {stats.readinessLevel === 'ready' ? (isHt ? 'pare' : inlineText(lang, 'ready')) : stats.readinessLevel === 'needs_attention' ? (isHt ? 'atansyon' : inlineText(lang, 'attention')) : (isHt ? 'bloke' : inlineText(lang, 'blocked'))}
               </div>
             </div>
           </div>
@@ -265,7 +266,7 @@ export default function ContentValidationEngine({
                 onClick={() => setShowDetails(!showDetails)}
               >
                 <i className={`fas ${showDetails ? 'fa-chevron-down' : 'fa-chevron-right'}`} />
-                {isHt ? 'Detay problem yo' : 'Issue details'}
+                {isHt ? 'Detay problem yo' : inlineText(lang, 'Issue details')}
               </button>
               {showDetails && (
                 <div className={styles.validationIssueList}>
@@ -307,11 +308,11 @@ export default function ContentValidationEngine({
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 8, background: stats.a11yValid ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)' }}>
                 <span style={{ fontSize: '0.9rem' }}>{stats.a11yValid ? '♿' : '♿'}</span>
                 <span style={{ fontSize: '0.82rem', fontWeight: 600 }}>
-                  {isHt ? 'Aksesibilite' : 'Accessibility'}:
+                  {isHt ? 'Aksesibilite' : inlineText(lang, 'Accessibility')}:
                 </span>
                 <span style={{ fontSize: '0.82rem' }}>
                   {stats.a11yValid
-                    ? (isHt ? 'Pare ✅' : 'Ready ✅')
+                    ? (isHt ? 'Pare ✅' : inlineText(lang, 'Ready ✅'))
                     : (isHt
                         ? `${stats.a11yErrors} erè, ${stats.a11yWarnings} avètisman`
                         : `${stats.a11yErrors} errors, ${stats.a11yWarnings} warnings`)}
@@ -324,7 +325,7 @@ export default function ContentValidationEngine({
           {Object.keys(lessonScores).length > 0 && (
             <div className={styles.validationLessonScores}>
               <h4 className={styles.validationLessonScoresTitle}>
-                {isHt ? 'Sko pa Leson' : 'Scores by Lesson'}
+                {isHt ? 'Sko pa Leson' : inlineText(lang, 'Scores by Lesson')}
               </h4>
               {Object.entries(lessonScores).map(([id, data]) => (
                 <div key={id} className={styles.validationLessonRow}>
@@ -340,7 +341,7 @@ export default function ContentValidationEngine({
         </>
       ) : (
         <p className={styles.validationEmpty}>
-          {isHt ? 'Rechaje pou tcheke kontni an.' : 'Refresh to check content.'}
+          {isHt ? 'Rechaje pou tcheke kontni an.' : inlineText(lang, 'Refresh to check content.')}
         </p>
       )}
     </div>

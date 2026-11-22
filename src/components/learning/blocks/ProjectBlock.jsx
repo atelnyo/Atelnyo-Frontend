@@ -15,6 +15,7 @@
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { blockSubmissionService } from '../../../services/api';
+import { inlineText } from '../../../utils/inlineI18n';
 
 /** Accepts an array or a newline-separated string and returns a list. */
 function asList(value) {
@@ -124,7 +125,7 @@ export default function ProjectBlock({ block, lang = 'en', index, courseId, modu
       {deliverables.length > 0 && (
         <div style={{ marginBottom: 12 }}>
           <h4 style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: 6 }}>
-            {isHt ? 'Livrab:' : 'Deliverables:'}
+            {isHt ? 'Livrab:' : inlineText(lang, 'Deliverables:')}
           </h4>
           <ul style={{ margin: 0, paddingLeft: 20, fontSize: '0.85rem' }}>
             {deliverables.map((d, i) => (
@@ -137,7 +138,7 @@ export default function ProjectBlock({ block, lang = 'en', index, courseId, modu
       {resources.length > 0 && (
         <div style={{ marginBottom: 12 }}>
           <h4 style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: 6 }}>
-            {isHt ? 'Resous:' : 'Resources:'}
+            {isHt ? 'Resous:' : inlineText(lang, 'Resources:')}
           </h4>
           {resources.map((r, i) => (
             <a key={i} href={r.url} target="_blank" rel="noopener noreferrer"
@@ -160,7 +161,7 @@ export default function ProjectBlock({ block, lang = 'en', index, courseId, modu
             padding: 12, borderRadius: 8, background: '#ecfdf5', color: '#065f46',
             fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8,
           }}>
-            <i className="fas fa-check-circle" /> {isHt ? 'Pwojè soumèt!' : 'Project submitted!'}
+            <i className="fas fa-check-circle" /> {isHt ? 'Pwojè soumèt!' : inlineText(lang, 'Project submitted!')}
           </div>
           {notes && (
             <div style={{
@@ -173,7 +174,7 @@ export default function ProjectBlock({ block, lang = 'en', index, courseId, modu
           )}
           {score != null && (
             <div style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: 6 }}>
-              📊 {isHt ? 'Nòt' : 'Score'}: {score}{maxScore ? ` / ${maxScore}` : ''}
+              📊 {isHt ? 'Nòt' : inlineText(lang, 'Score')}: {score}{maxScore ? ` / ${maxScore}` : ''}
             </div>
           )}
           {feedback && (
@@ -192,7 +193,7 @@ export default function ProjectBlock({ block, lang = 'en', index, courseId, modu
               background: 'transparent', cursor: 'pointer', fontSize: '0.8rem',
             }}
           >
-            {isHt ? 'Edit nòt' : 'Edit notes'}
+            {isHt ? 'Edit nòt' : inlineText(lang, 'Edit notes')}
           </button>
         </div>
       ) : showSubmit ? (
@@ -200,7 +201,7 @@ export default function ProjectBlock({ block, lang = 'en', index, courseId, modu
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder={isHt ? 'Ekri nòt sou pwojè ou an...' : 'Add notes about your project...'}
+            placeholder={isHt ? 'Ekri nòt sou pwojè ou an...' : inlineText(lang, 'Add notes about your project...')}
             rows={3}
             style={{
               width: '100%', padding: 12, borderRadius: 8, border: '1px solid var(--border-color, #e5e7eb)',
@@ -210,18 +211,18 @@ export default function ProjectBlock({ block, lang = 'en', index, courseId, modu
           <div style={{ display: 'flex', gap: 8 }}>
             <button type="button" onClick={handleSubmit} disabled={submitting}
               style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: 'var(--color-primary, #d81b60)', color: '#fff', fontWeight: 600, cursor: submitting ? 'default' : 'pointer' }}>
-              {submitting ? (isHt ? 'Ap voye...' : 'Submitting…') : (isHt ? 'Soumèt Pwojè' : 'Submit Project')}
+              {submitting ? (isHt ? 'Ap voye...' : inlineText(lang, 'Submitting…')) : (isHt ? 'Soumèt Pwojè' : inlineText(lang, 'Submit Project'))}
             </button>
             <button type="button" onClick={() => setShowSubmit(false)}
               style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border-color, #e5e7eb)', background: 'transparent', cursor: 'pointer' }}>
-              {isHt ? 'Anile' : 'Cancel'}
+              {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
             </button>
           </div>
         </div>
       ) : (
         <button type="button" onClick={() => setShowSubmit(true)}
           style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: 'var(--color-primary, #d81b60)', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>
-          {isHt ? 'Mwen fini pwojè a' : 'I finished the project'}
+          {isHt ? 'Mwen fini pwojè a' : inlineText(lang, 'I finished the project')}
         </button>
       )}
     </div>

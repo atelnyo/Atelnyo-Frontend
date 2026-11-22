@@ -16,6 +16,7 @@
 import React from 'react';
 import useSafeNavigate from '../../hooks/useSafeNavigate';
 import { SHEETS } from '../../routes/sheets';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function MediaBreadcrumbs({
   media,
@@ -26,7 +27,7 @@ export default function MediaBreadcrumbs({
   const navigate = useSafeNavigate();
   const isHt = lang === 'ht';
 
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
 
   const crumbs = [
     {

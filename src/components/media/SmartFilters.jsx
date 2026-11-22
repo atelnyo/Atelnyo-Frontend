@@ -10,6 +10,7 @@
  *   - Unused, Processing, Failed
  */
 import React from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 const FILTER_GROUPS = [
   {
@@ -108,7 +109,7 @@ export default function SmartFilters({
         aria-expanded={expanded}
       >
         <i className="fas fa-sliders-h" />
-        {isHt ? 'Filtre' : 'Filters'}
+        {isHt ? 'Filtre' : inlineText(lang, 'Filters')}
         <i className={`fas fa-chevron-${expanded ? 'up' : 'down'}`} />
       </button>
 

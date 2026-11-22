@@ -26,6 +26,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { buildContentUrl } from '../../utils/contentUrl';
 import { isNewItem } from './profileUtils';
+import { inlineText } from '../../utils/inlineI18n';
 
 const TYPE_CONFIG = {
   course:    { endpoint: (id) => `/courses/${id}/`, route: (id, data) => (data ? buildContentUrl('course', data) : null),
@@ -68,14 +69,14 @@ const TYPE_CONFIG = {
 /* Localized type labels for the modal badge (replaces the raw lowercase
    type string like "course" with a proper label: "Kou" / "Course"). */
 const TYPE_LABELS = {
-  course: (isHt) => (isHt ? 'Kou' : 'Course'),
-  product: (isHt) => (isHt ? 'Pwodwi' : 'Product'),
-  portfolio: (isHt) => (isHt ? 'Pòtfolyo' : 'Portfolio'),
-  event: (isHt) => (isHt ? 'Evènman' : 'Event'),
-  community: (isHt) => (isHt ? 'Kominote' : 'Community'),
-  talent: (isHt) => (isHt ? 'Talan' : 'Talent'),
-  music: (isHt) => (isHt ? 'Mizik' : 'Music'),
-  job: (isHt) => (isHt ? 'Travay' : 'Job'),
+  course: (lang) => (lang === 'ht' ? 'Kou' : inlineText(lang, 'Course')),
+  product: (lang) => (lang === 'ht' ? 'Pwodwi' : inlineText(lang, 'Product')),
+  portfolio: (lang) => (lang === 'ht' ? 'Pòtfolyo' : inlineText(lang, 'Portfolio')),
+  event: (lang) => (lang === 'ht' ? 'Evènman' : inlineText(lang, 'Event')),
+  community: (lang) => (lang === 'ht' ? 'Kominote' : inlineText(lang, 'Community')),
+  talent: (lang) => (lang === 'ht' ? 'Talan' : inlineText(lang, 'Talent')),
+  music: (lang) => (lang === 'ht' ? 'Mizik' : inlineText(lang, 'Music')),
+  job: (lang) => (lang === 'ht' ? 'Travay' : inlineText(lang, 'Job')),
 };
 
 function fmtCount(n) {
@@ -96,7 +97,7 @@ function formatDate(iso, lang) {
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return '';
     return d.toLocaleDateString(
-      lang === 'ht' ? 'fr-HT' : lang === 'fr' ? 'fr-FR' : 'en-US',
+      lang === 'ht' ? 'fr-HT' : lang === 'fr' ? 'fr-FR' : inlineText(lang, 'en-US'),
       { year: 'numeric', month: 'short', day: 'numeric' },
     );
   } catch (_) { return ''; }
@@ -151,14 +152,14 @@ export default function ItemPreviewModal({ type, id, data, lang = 'en', onClose 
   // counts from the detail payloads (courses + products expose them).
   const badgeInfo = item ? (() => {
     if (item.is_featured) {
-      return { cls: 'csp-modal-badge csp-modal-badge--featured', label: isHt ? 'Rekòmande' : 'Featured' };
+      return { cls: 'csp-modal-badge csp-modal-badge--featured', label: isHt ? 'Rekòmande' : inlineText(lang, 'Featured') };
     }
     if (isNewItem(item.created_at)) {
-      return { cls: 'csp-modal-badge csp-modal-badge--new', label: isHt ? 'Nouvo' : 'New' };
+      return { cls: 'csp-modal-badge csp-modal-badge--new', label: isHt ? 'Nouvo' : inlineText(lang, 'New') };
     }
     const count = Number(item.student_count ?? item.sales_count ?? 0);
     if (count >= 25) {
-      return { cls: 'csp-modal-badge csp-modal-badge--popular', label: isHt ? 'Popilè' : 'Popular' };
+      return { cls: 'csp-modal-badge csp-modal-badge--popular', label: isHt ? 'Popilè' : inlineText(lang, 'Popular') };
     }
     return null;
   })() : null;
@@ -168,19 +169,19 @@ export default function ItemPreviewModal({ type, id, data, lang = 'en', onClose 
     const val = item?.[key];
     if (val == null) return null;
     const labels = {
-      student_count: isHt ? 'Elèv' : 'Students',
-      member_count: isHt ? 'Manm' : 'Members',
-      module_count: isHt ? 'Modil' : 'Modules',
-      sales_count: isHt ? 'Vann' : 'Sold',
-      views: isHt ? 'Vizit' : 'Views',
-      role: isHt ? 'Wòl' : 'Role',
-      location: isHt ? 'Kote' : 'Location',
-      budget_type: isHt ? 'Kalite bidjè' : 'Budget type',
-      proposal_count: isHt ? 'Pwopozisyon' : 'Proposals',
+      student_count: isHt ? 'Elèv' : inlineText(lang, 'Students'),
+      member_count: isHt ? 'Manm' : inlineText(lang, 'Members'),
+      module_count: isHt ? 'Modil' : inlineText(lang, 'Modules'),
+      sales_count: isHt ? 'Vann' : inlineText(lang, 'Sold'),
+      views: isHt ? 'Vizit' : inlineText(lang, 'Views'),
+      role: isHt ? 'Wòl' : inlineText(lang, 'Role'),
+      location: isHt ? 'Kote' : inlineText(lang, 'Location'),
+      budget_type: isHt ? 'Kalite bidjè' : inlineText(lang, 'Budget type'),
+      proposal_count: isHt ? 'Pwopozisyon' : inlineText(lang, 'Proposals'),
       artist: 'Artist',
-      genre: isHt ? 'Jan' : 'Genre',
-      category: isHt ? 'Kategori' : 'Category',
-      date: isHt ? 'Dat' : 'Date',
+      genre: isHt ? 'Jan' : inlineText(lang, 'Genre'),
+      category: isHt ? 'Kategori' : inlineText(lang, 'Category'),
+      date: isHt ? 'Dat' : inlineText(lang, 'Date'),
     };
     const icons = {
       student_count: 'fa-graduation-cap',
@@ -222,12 +223,12 @@ export default function ItemPreviewModal({ type, id, data, lang = 'en', onClose 
 
   return (
     <div className="csp-modal-overlay" onClick={onClose} role="dialog" aria-modal="true"
-      aria-label={isHt ? 'Detay' : 'Item details'}>
+      aria-label={isHt ? 'Detay' : inlineText(lang, 'Item details')}>
       <div className="csp-modal-content csp-modal-content--wide" onClick={(e) => e.stopPropagation()}>
 
         {/* Close button */}
         <button type="button" className="csp-modal-close" onClick={onClose}
-          aria-label={isHt ? 'Fèmen' : 'Close'}>
+          aria-label={isHt ? 'Fèmen' : inlineText(lang, 'Close')}>
           <i className="fas fa-times" />
         </button>
 
@@ -240,7 +241,7 @@ export default function ItemPreviewModal({ type, id, data, lang = 'en', onClose 
         {error && (
           <div className="csp-modal-error">
             <i className="fas fa-exclamation-triangle" style={{ fontSize: '2rem', color: 'var(--text-secondary)' }} />
-            <p>{isHt ? 'Pa ka chaje detay sa a.' : 'Unable to load details.'}</p>
+            <p>{isHt ? 'Pa ka chaje detay sa a.' : inlineText(lang, 'Unable to load details.')}</p>
           </div>
         )}
 
@@ -273,7 +274,7 @@ export default function ItemPreviewModal({ type, id, data, lang = 'en', onClose 
               {/* Title + Type */}
               <div className="csp-modal-type-badge">
                 <i className={`fas ${cfg.icon}`} aria-hidden="true" />
-                {TYPE_LABELS[type]?.(isHt) || type}
+                {TYPE_LABELS[type]?.(lang) || type}
               </div>
               <h2 className="csp-modal-title">{title}</h2>
 
@@ -310,7 +311,7 @@ export default function ItemPreviewModal({ type, id, data, lang = 'en', onClose 
               {description && (
                 <div className="csp-modal-desc-wrap">
                   <h3 className="csp-modal-section-title">
-                    {isHt ? 'Deskripsyon' : 'Description'}
+                    {isHt ? 'Deskripsyon' : inlineText(lang, 'Description')}
                   </h3>
                   <p className="csp-modal-desc">{description}</p>
                 </div>
@@ -325,7 +326,7 @@ export default function ItemPreviewModal({ type, id, data, lang = 'en', onClose 
                     onClick={() => { onClose(); navigate(route); }}
                   >
                     <i className="fas fa-external-link-alt" aria-hidden="true" />
-                    {isHt ? 'Wè plis detay' : 'View full details'}
+                    {isHt ? 'Wè plis detay' : inlineText(lang, 'View full details')}
                   </button>
                 )}
                 <button
@@ -333,7 +334,7 @@ export default function ItemPreviewModal({ type, id, data, lang = 'en', onClose 
                   className="csp-modal-btn csp-modal-btn--secondary"
                   onClick={onClose}
                 >
-                  {isHt ? 'Fèmen' : 'Close'}
+                  {isHt ? 'Fèmen' : inlineText(lang, 'Close')}
                 </button>
               </div>
             </div>

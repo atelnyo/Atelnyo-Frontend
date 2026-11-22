@@ -9,6 +9,7 @@
  *   - Empty state when no transactions
  */
 import React, { useState, useMemo } from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 function fmtCurrency(n) {
   if (n == null) return '—';
@@ -136,7 +137,7 @@ export default function TransactionList({
       <div className="wlt-tx-header">
         <h3 className="wlt-tx-title">
           <i className="fas fa-clock-rotate-left" />
-          {isHt ? 'Istwa Tranzaksyon' : 'Transaction History'}
+          {isHt ? 'Istwa Tranzaksyon' : inlineText(lang, 'Transaction History')}
         </h3>
         {onRefresh && (
           <button type="button" className="wlt-refresh-btn" onClick={onRefresh} disabled={loading}>
@@ -179,7 +180,7 @@ export default function TransactionList({
               onClick={() => { setSortOrder('newest'); setPage(0); }}
             >
               <i className="fas fa-arrow-down-wide-short" />
-              {isHt ? 'Rekan' : 'Newest'}
+              {isHt ? 'Rekan' : inlineText(lang, 'Newest')}
             </button>
             <button
               type="button"
@@ -187,7 +188,7 @@ export default function TransactionList({
               onClick={() => { setSortOrder('oldest'); setPage(0); }}
             >
               <i className="fas fa-arrow-up-short-wide" />
-              {isHt ? 'Ansyen' : 'Oldest'}
+              {isHt ? 'Ansyen' : inlineText(lang, 'Oldest')}
             </button>
           </div>
         </div>
@@ -195,10 +196,10 @@ export default function TransactionList({
 
       {/* Results count */}
       <div className="wlt-tx-count">
-        {filtered.length} {isHt ? 'tranzaksyon' : 'transactions'}
+        {filtered.length} {isHt ? 'tranzaksyon' : inlineText(lang, 'transactions')}
         {filtered.length !== (Array.isArray(transactions) ? transactions.length : 0) && (
           <span className="wlt-tx-filtered">
-            {isHt ? 'filtre' : 'filtered'}
+            {isHt ? 'filtre' : inlineText(lang, 'filtered')}
           </span>
         )}
       </div>
@@ -207,7 +208,7 @@ export default function TransactionList({
       {loading && (
         <div className="wlt-loading">
           <i className="fas fa-spinner fa-spin" />
-          <span>{isHt ? 'Ap chaje...' : 'Loading...'}</span>
+          <span>{isHt ? 'Ap chaje...' : inlineText(lang, 'Loading...')}</span>
         </div>
       )}
 
@@ -215,8 +216,8 @@ export default function TransactionList({
       {!loading && filtered.length === 0 && (
         <div className="wlt-empty">
           <i className="fas fa-receipt" />
-          <h4>{isHt ? 'Pa gen tranzaksyon' : 'No transactions'}</h4>
-          <p>{isHt ? 'Okenn tranzaksyon pa koresponn ak filtre w yo.' : 'No transactions match your filters.'}</p>
+          <h4>{isHt ? 'Pa gen tranzaksyon' : inlineText(lang, 'No transactions')}</h4>
+          <p>{isHt ? 'Okenn tranzaksyon pa koresponn ak filtre w yo.' : inlineText(lang, 'No transactions match your filters.')}</p>
         </div>
       )}
 

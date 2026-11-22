@@ -21,6 +21,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import useLocationContext from '../../hooks/useLocationContext';
 import { COMMON_COUNTRIES } from '../../services/locationService';
+import { inlineText } from '../../utils/inlineI18n';
 
 const COUNTRY_NAMES = Object.fromEntries(COMMON_COUNTRIES.map((c) => [c.code, c.name]));
 
@@ -63,7 +64,7 @@ export default function LocationSettings({ lang = 'en', user, showToast, onProfi
 
   const handleSave = useCallback(async () => {
     if (!user) {
-      showToast?.(isHt ? 'Konekte pou sove lokalizasyon ou.' : 'Sign in to save your location.', 'info-circle');
+      showToast?.(isHt ? 'Konekte pou sove lokalizasyon ou.' : inlineText(lang, 'Sign in to save your location.'), 'info-circle');
       return;
     }
     setSaving(true);
@@ -75,13 +76,13 @@ export default function LocationSettings({ lang = 'en', user, showToast, onProfi
         },
       });
       showToast?.(
-        isHt ? '✅ Lokalizasyon kont sove!' : '✅ Account location saved!',
+        isHt ? '✅ Lokalizasyon kont sove!' : inlineText(lang, '✅ Account location saved!'),
         'check-circle',
       );
       onProfileUpdate?.();
     } catch {
       showToast?.(
-        isHt ? '❌ Pa t kapab sove lokalizasyon an.' : '❌ Could not save location.',
+        isHt ? '❌ Pa t kapab sove lokalizasyon an.' : inlineText(lang, '❌ Could not save location.'),
         'exclamation-triangle',
       );
     } finally {
@@ -94,8 +95,8 @@ export default function LocationSettings({ lang = 'en', user, showToast, onProfi
   const detectedRegion = context?.detected_region || '';
 
   const sectionTitle = t.location_section
-    || (isHt ? 'Lokalizasyon kont' : 'Account location');
-  const detectLabel = isHt ? 'Detekte ankò' : 'Detect again';
+    || (isHt ? 'Lokalizasyon kont' : inlineText(lang, 'Account location'));
+  const detectLabel = isHt ? 'Detekte ankò' : inlineText(lang, 'Detect again');
   const savedRegion = accountLoc.detected_region || '';
 
   return (
@@ -109,7 +110,7 @@ export default function LocationSettings({ lang = 'en', user, showToast, onProfi
                 <i className="fas fa-user-lock" aria-hidden="true" />
               </div>
               <span className="settings-item-label">
-                {isHt ? 'Konekte pou wè ak jere lokalizasyon kont ou.' : 'Sign in to view and manage your account location.'}
+                {isHt ? 'Konekte pou wè ak jere lokalizasyon kont ou.' : inlineText(lang, 'Sign in to view and manage your account location.')}
               </span>
             </div>
           </div>
@@ -120,7 +121,7 @@ export default function LocationSettings({ lang = 'en', user, showToast, onProfi
               <div className="settings-location-detect-head">
                 <i className="fas fa-satellite-dish" aria-hidden="true" />
                 <span className="settings-location-detect-title">
-                  {isHt ? 'Peyi detekte otomatikman' : 'Auto-detected country'}
+                  {isHt ? 'Peyi detekte otomatikman' : inlineText(lang, 'Auto-detected country')}
                 </span>
                 <button
                   type="button"
@@ -134,7 +135,7 @@ export default function LocationSettings({ lang = 'en', user, showToast, onProfi
               </div>
               {context.loading ? (
                 <div className="settings-location-detect-value">
-                  <i className="fas fa-spinner fa-spin" aria-hidden="true" /> {isHt ? 'Ap detekte...' : 'Detecting...'}
+                  <i className="fas fa-spinner fa-spin" aria-hidden="true" /> {isHt ? 'Ap detekte...' : inlineText(lang, 'Detecting...')}
                 </div>
               ) : detectedName ? (
                 <>
@@ -160,13 +161,13 @@ export default function LocationSettings({ lang = 'en', user, showToast, onProfi
                 <div className="settings-location-detect-value">
                   {isHt
                     ? 'Pa t kapab detekte peyi a — mete peyi ou a anba a.'
-                    : 'Could not detect the country — set it below.'}
+                    : inlineText(lang, 'Could not detect the country — set it below.')}
                 </div>
               )}
               <div className="settings-location-detect-hint">
                 {isHt
                   ? 'Estimasyon soti nan IP ak timezone ou. Browser language ou pa sèvi pou detekte peyi. Pa janm piblik — sèlman ou wè li.'
-                  : 'An estimate from your IP and timezone. Your browser language is never used to detect country. Private — only you can see this.'}
+                  : inlineText(lang, 'An estimate from your IP and timezone. Your browser language is never used to detect country. Private — only you can see this.')}
               </div>
             </div>
 
@@ -174,7 +175,7 @@ export default function LocationSettings({ lang = 'en', user, showToast, onProfi
             <div className="settings-item settings-location-form">
               <div className="settings-location-field">
                 <label className="settings-location-label" htmlFor="settings-country">
-                  {isHt ? 'Peyi ou' : 'Your country'}
+                  {isHt ? 'Peyi ou' : inlineText(lang, 'Your country')}
                 </label>
                 <select
                   id="settings-country"
@@ -182,7 +183,7 @@ export default function LocationSettings({ lang = 'en', user, showToast, onProfi
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
                 >
-                  <option value="">{isHt ? '— Chwazi peyi —' : '— Select country —'}</option>
+                  <option value="">{isHt ? '— Chwazi peyi —' : inlineText(lang, '— Select country —')}</option>
                   {COMMON_COUNTRIES.map((c) => (
                     <option key={c.code} value={c.code}>
                       {c.flag} {c.name}
@@ -192,7 +193,7 @@ export default function LocationSettings({ lang = 'en', user, showToast, onProfi
               </div>
               <div className="settings-location-field">
                 <label className="settings-location-label" htmlFor="settings-region">
-                  {isHt ? 'Region / Vil' : 'Region / City'}
+                  {isHt ? 'Region / Vil' : inlineText(lang, 'Region / City')}
                 </label>
                 <input
                   id="settings-region"
@@ -200,7 +201,7 @@ export default function LocationSettings({ lang = 'en', user, showToast, onProfi
                   type="text"
                   value={region}
                   onChange={(e) => setRegion(e.target.value)}
-                  placeholder={isHt ? 'Egz. Port-au-Prince' : 'e.g. Port-au-Prince'}
+                  placeholder={isHt ? 'Egz. Port-au-Prince' : inlineText(lang, 'e.g. Port-au-Prince')}
                   maxLength={100}
                 />
               </div>
@@ -211,13 +212,13 @@ export default function LocationSettings({ lang = 'en', user, showToast, onProfi
                 disabled={saving}
               >
                 {saving
-                  ? <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {isHt ? 'Ap sove...' : 'Saving...'}</>
-                  : <><i className="fas fa-save" aria-hidden="true" /> {isHt ? 'Sove lokalizasyon' : 'Save location'}</>}
+                  ? <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {isHt ? 'Ap sove...' : inlineText(lang, 'Saving...')}</>
+                  : <><i className="fas fa-save" aria-hidden="true" /> {isHt ? 'Sove lokalizasyon' : inlineText(lang, 'Save location')}</>}
               </button>
               <p className="settings-location-hint">
                 {isHt
                   ? 'Chwa sa a pi fò pase deteksyon an — lè ou mete peyi ou, Atelnyo respekte li anvan IP/timezone.'
-                  : 'Your choice is stronger than detection — when set, Atelnyo honors it over IP/timezone.'}
+                  : inlineText(lang, 'Your choice is stronger than detection — when set, Atelnyo honors it over IP/timezone.')}
               </p>
             </div>
           </>

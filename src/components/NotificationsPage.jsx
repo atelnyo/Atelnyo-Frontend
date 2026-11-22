@@ -19,6 +19,7 @@ import { SHEETS } from '../routes/sheets';
 import ActivityTimeline from './ActivityTimeline';
 import ConfirmModal from './common/ConfirmModal';
 import { historyBack, requireLogin } from '../utils/history';
+import { inlineText } from '../utils/inlineI18n';
 
 export default function NotificationsPage({
   lang = 'en',
@@ -54,20 +55,20 @@ export default function NotificationsPage({
     const proposalId = event?.data?.proposal_id;
     if (!proposalId) return;
     setConfirm({
-      title: lang === 'ht' ? 'Aksepte proposal' : 'Accept proposal',
+      title: lang === 'ht' ? 'Aksepte proposal' : inlineText(lang, 'Accept proposal'),
       message: event?.data?.job_title
         ? (lang === 'ht' ? `Aksepte proposal sa a pou "${event.data.job_title}"?` : `Accept this proposal for "${event.data.job_title}"?`)
-        : (lang === 'ht' ? 'Aksepte proposal sa a?' : 'Accept this proposal?'),
+        : (lang === 'ht' ? 'Aksepte proposal sa a?' : inlineText(lang, 'Accept this proposal?')),
       onConfirm: async () => {
         try {
           await proposalService.accept(proposalId, {});
           showToast(
-            lang === 'ht' ? '✅ Proposal aksepte!' : '✅ Proposal accepted!',
+            lang === 'ht' ? '✅ Proposal aksepte!' : inlineText(lang, '✅ Proposal accepted!'),
             'check-circle',
           );
         } catch (err) {
           showToast(
-            err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab aksepte.' : 'Could not accept.'),
+            err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab aksepte.' : inlineText(lang, 'Could not accept.')),
             'circle-exclamation',
           );
         }
@@ -80,21 +81,21 @@ export default function NotificationsPage({
     const proposalId = event?.data?.proposal_id;
     if (!proposalId) return;
     setConfirm({
-      title: lang === 'ht' ? 'Rejte proposal' : 'Reject proposal',
+      title: lang === 'ht' ? 'Rejte proposal' : inlineText(lang, 'Reject proposal'),
       message: event?.data?.job_title
         ? (lang === 'ht' ? `Rejte proposal sa a pou "${event.data.job_title}"?` : `Reject this proposal for "${event.data.job_title}"?`)
-        : (lang === 'ht' ? 'Rejte proposal sa a?' : 'Reject this proposal?'),
+        : (lang === 'ht' ? 'Rejte proposal sa a?' : inlineText(lang, 'Reject this proposal?')),
       variant: 'danger',
       onConfirm: async () => {
         try {
           await proposalService.reject(proposalId, '');
           showToast(
-            lang === 'ht' ? 'Proposal rejte.' : 'Proposal rejected.',
+            lang === 'ht' ? 'Proposal rejte.' : inlineText(lang, 'Proposal rejected.'),
             'ban',
           );
         } catch (err) {
           showToast(
-            err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab rejte.' : 'Could not reject.'),
+            err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab rejte.' : inlineText(lang, 'Could not reject.')),
             'circle-exclamation',
           );
         }
@@ -109,22 +110,22 @@ export default function NotificationsPage({
   const handleAcceptRequest = useCallback((event) => {
     if (!event?.id) return;
     setConfirm({
-      title: lang === 'ht' ? 'Aksepte demann' : 'Accept request',
+      title: lang === 'ht' ? 'Aksepte demann' : inlineText(lang, 'Accept request'),
       message: event?.data?.title || event?.data?.project_title || event?.data?.idea || event?.data?.service_name
         ? (lang === 'ht' ? `Aksepte demann sa a pou "${event.data.title || event.data.project_title || event.data.idea || event.data.service_name}"? Konvèsasyon y ap louvri pou diskite detay yo.` : `Accept this request for "${event.data.title || event.data.project_title || event.data.idea || event.data.service_name}"? A conversation will open to discuss details.`)
-        : (lang === 'ht' ? 'Aksepte demann sa a? Konvèsasyon y ap louvri.' : 'Accept this request? A conversation will open.'),
+        : (lang === 'ht' ? 'Aksepte demann sa a? Konvèsasyon y ap louvri.' : inlineText(lang, 'Accept this request? A conversation will open.')),
       onConfirm: async () => {
         try {
           await activityFeedService.respond(event.id, 'accept');
           showToast(
-            lang === 'ht' ? '✅ Demann aksepte! Konvèsasyon louvri.' : '✅ Request accepted! Conversation opened.',
+            lang === 'ht' ? '✅ Demann aksepte! Konvèsasyon louvri.' : inlineText(lang, '✅ Request accepted! Conversation opened.'),
             'check-circle',
           );
           // Land in the new thread (top of the inbox list).
           navigate('/sheet/messages');
         } catch (err) {
           showToast(
-            err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab aksepte.' : 'Could not accept.'),
+            err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab aksepte.' : inlineText(lang, 'Could not accept.')),
             'circle-exclamation',
           );
         }
@@ -136,21 +137,21 @@ export default function NotificationsPage({
   const handleRejectRequest = useCallback((event) => {
     if (!event?.id) return;
     setConfirm({
-      title: lang === 'ht' ? 'Rejte demann' : 'Reject request',
+      title: lang === 'ht' ? 'Rejte demann' : inlineText(lang, 'Reject request'),
       message: event?.data?.title || event?.data?.project_title || event?.data?.idea || event?.data?.service_name
         ? (lang === 'ht' ? `Rejte demann sa a pou "${event.data.title || event.data.project_title || event.data.idea || event.data.service_name}"?` : `Reject this request for "${event.data.title || event.data.project_title || event.data.idea || event.data.service_name}"?`)
-        : (lang === 'ht' ? 'Rejte demann sa a?' : 'Reject this request?'),
+        : (lang === 'ht' ? 'Rejte demann sa a?' : inlineText(lang, 'Reject this request?')),
       variant: 'danger',
       onConfirm: async () => {
         try {
           await activityFeedService.respond(event.id, 'reject');
           showToast(
-            lang === 'ht' ? 'Demann rejte.' : 'Request rejected.',
+            lang === 'ht' ? 'Demann rejte.' : inlineText(lang, 'Request rejected.'),
             'ban',
           );
         } catch (err) {
           showToast(
-            err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab rejte.' : 'Could not reject.'),
+            err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab rejte.' : inlineText(lang, 'Could not reject.')),
             'circle-exclamation',
           );
         }
@@ -178,12 +179,12 @@ export default function NotificationsPage({
           type="button"
           className="notifications-page__back"
           onClick={handleBack}
-          aria-label={lang === 'ht' ? 'Retounen' : 'Back'}
+          aria-label={lang === 'ht' ? 'Retounen' : inlineText(lang, 'Back')}
         >
           <i className="fas fa-arrow-left" />
         </button>
         <h1 className="notifications-page__title">
-          {lang === 'ht' ? 'Notifikasyon' : 'Notifications'}
+          {lang === 'ht' ? 'Notifikasyon' : inlineText(lang, 'Notifications')}
         </h1>
         <div className="notifications-page__spacer" />
       </div>

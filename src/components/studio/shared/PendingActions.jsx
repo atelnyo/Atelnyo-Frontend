@@ -14,6 +14,7 @@
  */
 import React from 'react';
 import styles from './shared.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function PendingActions({ lang, courses, products }) {
   const isHt = lang === 'ht';
@@ -32,7 +33,7 @@ export default function PendingActions({ lang, courses, products }) {
       <h3 className={styles.sectionSubtitle}>
         <i className="fas fa-clock" aria-hidden="true" />
         {' '}
-        {isHt ? 'Aksyon annatant' : 'Pending Actions'}
+        {isHt ? 'Aksyon annatant' : inlineText(lang, 'Pending Actions')}
       </h3>
       <div className={styles.pendingList}>
         {draftProducts.length > 0 && (
@@ -40,7 +41,7 @@ export default function PendingActions({ lang, courses, products }) {
             <i className="fas fa-cube" aria-hidden="true" />
             <span>
               <strong>{draftProducts.length}</strong>{' '}
-              {isHt ? 'pwodwi nan bouyon — pibliye yo lè yo pare' : 'draft products — publish when ready'}
+              {isHt ? 'pwodwi nan bouyon — pibliye yo lè yo pare' : inlineText(lang, 'draft products — publish when ready')}
             </span>
           </div>
         )}

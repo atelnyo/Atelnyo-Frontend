@@ -21,6 +21,7 @@ import React, { useState } from 'react';
 import { creatorProfileService } from '../../../services/api';
 import { classNames } from '../utils/cardHelpers';
 import CardOpenButton from './CardOpenButton';
+import { inlineText } from '../../../utils/inlineI18n';
 
 /** Simple SVG avatar fallback so a missing image never breaks the rail. */
 function FollowAvatarFallback({ name, lang }) {
@@ -53,7 +54,7 @@ export default function FollowSuggestionCard({
   const followersLabel =
     item.followers_count > 0
       ? `${item.followers_count.toLocaleString()} `
-        + (lang === 'ht' ? 'swiv' : 'followers')
+        + (lang === 'ht' ? 'swiv' : inlineText(lang, 'followers'))
       : '';
 
   function handleOpen() {
@@ -63,7 +64,7 @@ export default function FollowSuggestionCard({
   async function handleFollow(e) {
     e.stopPropagation();
     if (!user) {
-      showToast?.(lang === 'ht' ? 'Konekte pou swiv kreyatè' : 'Log in to follow creators', 'info-circle');
+      showToast?.(lang === 'ht' ? 'Konekte pou swiv kreyatè' : inlineText(lang, 'Log in to follow creators'), 'info-circle');
       return;
     }
     if (followLoading) return;
@@ -82,7 +83,7 @@ export default function FollowSuggestionCard({
     } catch (err) {
       showToast?.(
         err?.response?.data?.detail
-          || (lang === 'ht' ? 'Pa t kapab chanje swivi' : 'Could not update follow'),
+          || (lang === 'ht' ? 'Pa t kapab chanje swivi' : inlineText(lang, 'Could not update follow')),
         'exclamation-circle',
       );
     } finally {

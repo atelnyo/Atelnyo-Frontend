@@ -16,13 +16,14 @@
 import React from 'react';
 import { BlockRenderer } from '../../learning/blocks';
 import styles from './editor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function BlockPreview({ block, lang = 'en', courseId, moduleIndex }) {
   if (!block) {
     return (
       <div className={styles.blockPreviewEmpty}>
         <i className="fas fa-eye-slash" aria-hidden="true" />
-        <p>{lang === 'ht' ? 'Pa gen blok pou afiche.' : 'No block to preview.'}</p>
+        <p>{lang === 'ht' ? 'Pa gen blok pou afiche.' : inlineText(lang, 'No block to preview.')}</p>
       </div>
     );
   }

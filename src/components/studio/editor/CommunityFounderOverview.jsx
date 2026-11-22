@@ -19,6 +19,7 @@ import { communitiesService } from '../../../services/api';
 import { StatCard } from '../shared';
 import PanelSkeleton, { PanelError, useInitialLoading } from './communityPanelUI';
 import styles from './communityEditor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -91,15 +92,15 @@ export default function CommunityFounderOverview({ community, slug, lang = 'en',
     ? { owner: 'Fondatè', admin: 'Admin', moderator: 'Moderatè', member: 'Manm' }[role] || role
     : { owner: 'Founder', admin: 'Admin', moderator: 'Moderator', member: 'Member' }[role] || role;
 
-  if (initialLoading) return <PanelSkeleton variant="overview" label={isHt ? 'Ap chaje apèsi a' : 'Loading overview'} />;
+  if (initialLoading) return <PanelSkeleton variant="overview" label={isHt ? 'Ap chaje apèsi a' : inlineText(lang, 'Loading overview')} />;
 
   return (
     <div>
       {membersError && (
         <PanelError
-          message={isHt ? 'Pat chaje manm yo. Tcheke koneksyon w epi eseye ankò.' : 'Could not load members. Check your connection and try again.'}
+          message={isHt ? 'Pat chaje manm yo. Tcheke koneksyon w epi eseye ankò.' : inlineText(lang, 'Could not load members. Check your connection and try again.')}
           onRetry={retry}
-          retryLabel={isHt ? 'Reyese' : 'Retry'}
+          retryLabel={isHt ? 'Reyese' : inlineText(lang, 'Retry')}
         />
       )}
       {/* ── Founder identity ─────────────────────────────────── */}
@@ -109,13 +110,13 @@ export default function CommunityFounderOverview({ community, slug, lang = 'en',
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div className={styles.founderName}>
-            {founderName ? `@${founderName}` : (isHt ? 'Fondatè a' : 'The founder')}
+            {founderName ? `@${founderName}` : (isHt ? 'Fondatè a' : inlineText(lang, 'The founder'))}
             <span className={styles.pill + ' ' + styles.pillOwner} style={{ marginLeft: 8 }}>{roleLabel}</span>
           </div>
           <div className={styles.founderMeta}>
             {community?.created_at
               ? (isHt ? `Kominote a fonde ${fmtDate(community.created_at)}` : `Founded ${fmtDate(community.created_at)}`)
-              : (isHt ? 'Dat fondasyon an pa disponib' : 'Founding date unavailable')}
+              : (isHt ? 'Dat fondasyon an pa disponib' : inlineText(lang, 'Founding date unavailable'))}
             {community?.category ? ` · ${community.category}` : ''}
           </div>
         </div>
@@ -123,28 +124,28 @@ export default function CommunityFounderOverview({ community, slug, lang = 'en',
 
       {/* ── Numbers ──────────────────────────────────────────── */}
       <div className={styles.statGrid}>
-        <StatCard icon="fa-users" label={isHt ? 'Manm' : 'Members'} value={memberCount} accent="primary" onClick={() => onOpenTab?.('members')} />
+        <StatCard icon="fa-users" label={isHt ? 'Manm' : inlineText(lang, 'Members')} value={memberCount} accent="primary" onClick={() => onOpenTab?.('members')} />
         <StatCard
           icon="fa-user-plus"
-          label={isHt ? 'Nouvo (30 jou)' : 'New (30 days)'}
+          label={isHt ? 'Nouvo (30 jou)' : inlineText(lang, 'New (30 days)')}
           value={newMembers}
-          subtitle={isHt ? 'Sou 50 dènye manm chaje yo' : 'From the latest 50 loaded members'}
+          subtitle={isHt ? 'Sou 50 dènye manm chaje yo' : inlineText(lang, 'From the latest 50 loaded members')}
         />
         <StatCard
           icon="fa-user-clock"
-          label={isHt ? 'Demann annatant' : 'Pending requests'}
+          label={isHt ? 'Demann annatant' : inlineText(lang, 'Pending requests')}
           value={requests.length}
           accent={requests.length > 0 ? 'warning' : 'default'}
           onClick={() => onOpenTab?.('members')}
         />
         <StatCard
           icon="fa-bullhorn"
-          label={isHt ? 'Anons' : 'Announcements'}
+          label={isHt ? 'Anons' : inlineText(lang, 'Announcements')}
           value={announcementCount}
           onClick={() => onOpenTab?.('announcements')}
         />
-        <StatCard icon="fa-comments" label={isHt ? 'Pòs' : 'Posts'} value={postCount} onClick={() => onOpenTab?.('posts')} />
-        <StatCard icon="fa-calendar-days" label={isHt ? 'Evènman' : 'Events'} value={community?.event_count ?? 0} onClick={() => onOpenTab?.('events')} />
+        <StatCard icon="fa-comments" label={isHt ? 'Pòs' : inlineText(lang, 'Posts')} value={postCount} onClick={() => onOpenTab?.('posts')} />
+        <StatCard icon="fa-calendar-days" label={isHt ? 'Evènman' : inlineText(lang, 'Events')} value={community?.event_count ?? 0} onClick={() => onOpenTab?.('events')} />
       </div>
 
       {/* ── Status & checklist ───────────────────────────────── */}
@@ -157,11 +158,11 @@ export default function CommunityFounderOverview({ community, slug, lang = 'en',
               <div className={styles.rowName}>
                 <span className={`${styles.pill} ${styles.pillStaff}`}>{community?.join_mode || 'public'}</span>
                 <span className={`${styles.pill} ${community?.is_active === false ? styles.pillMuted : styles.pillOwner}`}>
-                  {community?.is_active === false ? (isHt ? 'Achive' : 'Archived') : (isHt ? 'Aktif' : 'Active')}
+                  {community?.is_active === false ? (isHt ? 'Achive' : inlineText(lang, 'Archived')) : (isHt ? 'Aktif' : inlineText(lang, 'Active'))}
                 </span>
                 {requests.length > 0 && (
                   <span className={`${styles.pill} ${styles.pillOwner}`}>
-                    {requests.length} {isHt ? 'demand annatant' : 'pending'}
+                    {requests.length} {isHt ? 'demand annatant' : inlineText(lang, 'pending')}
                   </span>
                 )}
               </div>
@@ -179,27 +180,27 @@ export default function CommunityFounderOverview({ community, slug, lang = 'en',
         const checklist = [
           {
             done: Boolean(community?.description),
-            label: isHt ? 'Ajoute yon deskripsyon kominote a' : 'Add a community description',
+            label: isHt ? 'Ajoute yon deskripsyon kominote a' : inlineText(lang, 'Add a community description'),
             tab: 'profile',
           },
           {
             done: (community?.rules?.length || 0) > 0,
-            label: isHt ? 'Defini règleman kominote a' : 'Set community rules',
+            label: isHt ? 'Defini règleman kominote a' : inlineText(lang, 'Set community rules'),
             tab: 'settings',
           },
           {
             done: announcementCount > 0,
-            label: isHt ? 'Pibliye yon premye anons' : 'Publish a first announcement',
+            label: isHt ? 'Pibliye yon premye anons' : inlineText(lang, 'Publish a first announcement'),
             tab: 'announcements',
           },
           {
             done: (community?.event_count ?? 0) > 0,
-            label: isHt ? 'Planifye premye evènman an' : 'Plan your first event',
+            label: isHt ? 'Planifye premye evènman an' : inlineText(lang, 'Plan your first event'),
             tab: 'events',
           },
           {
             done: memberCount > 1,
-            label: isHt ? 'Envite premye manm yo' : 'Invite your first members',
+            label: isHt ? 'Envite premye manm yo' : inlineText(lang, 'Invite your first members'),
             tab: 'members',
           },
         ];
@@ -209,7 +210,7 @@ export default function CommunityFounderOverview({ community, slug, lang = 'en',
           <div className={styles.founderCard} style={{ marginBottom: 12, display: 'block' }}>
             <div className={styles.rowName} style={{ marginBottom: 6 }}>
               <i className="fas fa-list-check" aria-hidden="true" />
-              {isHt ? 'Lis preparasyon' : 'Setup checklist'}
+              {isHt ? 'Lis preparasyon' : inlineText(lang, 'Setup checklist')}
               <span className={styles.pill}>{doneCount}/{checklist.length}</span>
             </div>
             <div style={{ display: 'grid', gap: 6 }}>
@@ -245,27 +246,27 @@ export default function CommunityFounderOverview({ community, slug, lang = 'en',
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
         <button type="button" className={styles.primaryBtn} onClick={() => onOpenTab?.('members')}>
           <i className="fas fa-users-gear" aria-hidden="true" />
-          {isHt ? 'Jere manm yo' : 'Manage members'}
+          {isHt ? 'Jere manm yo' : inlineText(lang, 'Manage members')}
         </button>
         <button type="button" className={styles.secondaryBtn} onClick={() => onOpenTab?.('posts')}>
           <i className="fas fa-comments" aria-hidden="true" />
-          {isHt ? 'Modere pòs' : 'Moderate posts'}
+          {isHt ? 'Modere pòs' : inlineText(lang, 'Moderate posts')}
         </button>
         <button type="button" className={styles.secondaryBtn} onClick={() => onOpenTab?.('announcements')}>
           <i className="fas fa-bullhorn" aria-hidden="true" />
-          {isHt ? 'Ekri yon anons' : 'Write an announcement'}
+          {isHt ? 'Ekri yon anons' : inlineText(lang, 'Write an announcement')}
         </button>
         <button type="button" className={styles.secondaryBtn} onClick={() => onOpenTab?.('events')}>
           <i className="fas fa-calendar-plus" aria-hidden="true" />
-          {isHt ? 'Planifye yon evènman' : 'Plan an event'}
+          {isHt ? 'Planifye yon evènman' : inlineText(lang, 'Plan an event')}
         </button>
         <button type="button" className={styles.secondaryBtn} onClick={() => onOpenTab?.('resources')}>
           <i className="fas fa-folder-plus" aria-hidden="true" />
-          {isHt ? 'Pataje resous' : 'Share resources'}
+          {isHt ? 'Pataje resous' : inlineText(lang, 'Share resources')}
         </button>
         <button type="button" className={styles.secondaryBtn} onClick={() => onOpenTab?.('settings')}>
           <i className="fas fa-sliders" aria-hidden="true" />
-          {isHt ? 'Paramèt' : 'Settings'}
+          {isHt ? 'Paramèt' : inlineText(lang, 'Settings')}
         </button>
       </div>
     </div>

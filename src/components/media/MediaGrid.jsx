@@ -13,6 +13,7 @@ import React, { useState, useMemo } from 'react';
 import MediaCard from './MediaCard';
 import MediaSkeleton from './MediaSkeleton';
 import MediaError from './MediaError';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function MediaGrid({
   items = [],
@@ -121,12 +122,12 @@ export default function MediaGrid({
           <i className="fas fa-photo-video" />
         </div>
         <h3 className="media-grid-empty-title">
-          {isHt ? 'Pa gen medya' : 'No media'}
+          {isHt ? 'Pa gen medya' : inlineText(lang, 'No media')}
         </h3>
         <p className="media-grid-empty-desc">
           {isHt
             ? 'Konekte yon provider epi ajoute URL medya ou yo.'
-            : 'Connect a provider and add your media URLs.'}
+            : inlineText(lang, 'Connect a provider and add your media URLs.')}
         </p>
       </div>
     );
@@ -142,7 +143,7 @@ export default function MediaGrid({
         gap,
       }}
       role="list"
-      aria-label={isHt ? 'Lis medya' : 'Media list'}
+      aria-label={isHt ? 'Lis medya' : inlineText(lang, 'Media list')}
     >
       {processed.map((item, index) => (
         <div key={item.id || item.media_id || index} role="listitem">

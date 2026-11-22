@@ -16,6 +16,7 @@ import useFetch from '../../hooks/useFetch';
 import useSafeNavigate from '../../hooks/useSafeNavigate';
 import { translations } from '../../data/translations';
 import './AffiliateDashboard.css';
+import { inlineText } from '../../utils/inlineI18n';
 
 const DASHBOARD_TABS = [
   { id: 'overview', icon: 'fa-chart-pie',   label: 'Overview',     labelHt: 'Apèsi' },
@@ -79,15 +80,15 @@ function OverviewTab({ lang }) {
   );
 
   if (loading) return <Skeleton rows={4} />;
-  if (!dashboard) return <Empty icon="fa-ban" title={lang === 'ht' ? 'Ou pa afilye' : 'You are not an affiliate'} />;
+  if (!dashboard) return <Empty icon="fa-ban" title={lang === 'ht' ? 'Ou pa afilye' : inlineText(lang, 'You are not an affiliate')} />;
 
   const stats = [
-    { label: lang === 'ht' ? 'Klik' : 'Clicks',           value: fmtCount(dashboard.total_clicks),        icon: 'fa-mouse-pointer' },
-    { label: lang === 'ht' ? 'Konvèsyon' : 'Conversions',   value: fmtCount(dashboard.total_conversions),  icon: 'fa-check-circle' },
-    { label: lang === 'ht' ? 'To Konvèsyon' : 'Conversion Rate', value: `${dashboard.conversion_rate?.toFixed(1) || 0}%`, icon: 'fa-percentage' },
-    { label: lang === 'ht' ? 'Total Touche' : 'Total Earned',       value: fmtCurrency(dashboard.total_earned), icon: 'fa-dollar-sign' },
-    { label: lang === 'ht' ? 'Annatant' : 'Pending',        value: fmtCurrency(dashboard.pending_earnings), icon: 'fa-clock' },
-    { label: lang === 'ht' ? 'Peye' : 'Paid Out',          value: fmtCurrency(dashboard.paid_out),       icon: 'fa-hand-holding-usd' },
+    { label: lang === 'ht' ? 'Klik' : inlineText(lang, 'Clicks'),           value: fmtCount(dashboard.total_clicks),        icon: 'fa-mouse-pointer' },
+    { label: lang === 'ht' ? 'Konvèsyon' : inlineText(lang, 'Conversions'),   value: fmtCount(dashboard.total_conversions),  icon: 'fa-check-circle' },
+    { label: lang === 'ht' ? 'To Konvèsyon' : inlineText(lang, 'Conversion Rate'), value: `${dashboard.conversion_rate?.toFixed(1) || 0}%`, icon: 'fa-percentage' },
+    { label: lang === 'ht' ? 'Total Touche' : inlineText(lang, 'Total Earned'),       value: fmtCurrency(dashboard.total_earned), icon: 'fa-dollar-sign' },
+    { label: lang === 'ht' ? 'Annatant' : inlineText(lang, 'Pending'),        value: fmtCurrency(dashboard.pending_earnings), icon: 'fa-clock' },
+    { label: lang === 'ht' ? 'Peye' : inlineText(lang, 'Paid Out'),          value: fmtCurrency(dashboard.paid_out),       icon: 'fa-hand-holding-usd' },
   ];
 
   return (
@@ -108,11 +109,11 @@ function OverviewTab({ lang }) {
         </span>
         <span className="aff-badge aff-badge-trust">
           <i className="fas fa-shield-alt" aria-hidden="true" />
-          {lang === 'ht' ? 'Konfyans' : 'Trust'}: {dashboard.trust_score}/100
+          {lang === 'ht' ? 'Konfyans' : inlineText(lang, 'Trust')}: {dashboard.trust_score}/100
         </span>
         <span className="aff-badge aff-badge-links">
           <i className="fas fa-link" aria-hidden="true" />
-          {dashboard.active_links} {lang === 'ht' ? 'lyen aktif' : 'active links'}
+          {dashboard.active_links} {lang === 'ht' ? 'lyen aktif' : inlineText(lang, 'active links')}
         </span>
       </div>
     </div>
@@ -137,12 +138,12 @@ function LinksTab({ lang, showToast }) {
       if (form.content_id) payload.content_id = parseInt(form.content_id, 10);
       if (form.label) payload.label = form.label;
       await affiliateApi.createLink(payload);
-      showToast?.(lang === 'ht' ? 'Lyen kreye' : 'Link created', 'check');
+      showToast?.(lang === 'ht' ? 'Lyen kreye' : inlineText(lang, 'Link created'), 'check');
       setShowForm(false);
       setForm({ content_type: 'general', content_id: '', label: '' });
       refetch();
     } catch {
-      showToast?.(lang === 'ht' ? 'Echèk kreye lyen' : 'Failed to create link', 'error');
+      showToast?.(lang === 'ht' ? 'Echèk kreye lyen' : inlineText(lang, 'Failed to create link'), 'error');
     } finally {
       setCreating(false);
     }
@@ -178,7 +179,7 @@ function LinksTab({ lang, showToast }) {
       <div className="aff-section-header">
         <h3>
           <i className="fas fa-link" aria-hidden="true" />
-          {lang === 'ht' ? 'Lyen Afilyasyon' : 'Affiliate Links'}
+          {lang === 'ht' ? 'Lyen Afilyasyon' : inlineText(lang, 'Affiliate Links')}
         </h3>
         <button
           type="button"
@@ -186,26 +187,26 @@ function LinksTab({ lang, showToast }) {
           onClick={() => setShowForm(!showForm)}
         >
           <i className="fas fa-plus" aria-hidden="true" />
-          {lang === 'ht' ? 'Nouvo Lyen' : 'New Link'}
+          {lang === 'ht' ? 'Nouvo Lyen' : inlineText(lang, 'New Link')}
         </button>
       </div>
 
       {showForm && (
         <div className="aff-form-card">
           <div className="aff-form-group">
-            <label>{lang === 'ht' ? 'Kalite Kontni' : 'Content Type'}</label>
+            <label>{lang === 'ht' ? 'Kalite Kontni' : inlineText(lang, 'Content Type')}</label>
             <select
               value={form.content_type}
               onChange={(e) => setForm({ ...form, content_type: e.target.value })}
               className="aff-input"
             >
-              <option value="general">{lang === 'ht' ? 'Jeneral' : 'General'}</option>
-              <option value="product">{lang === 'ht' ? 'Pwodwi' : 'Product'}</option>
-              <option value="course">{lang === 'ht' ? 'Kou' : 'Course'}</option>
+              <option value="general">{lang === 'ht' ? 'Jeneral' : inlineText(lang, 'General')}</option>
+              <option value="product">{lang === 'ht' ? 'Pwodwi' : inlineText(lang, 'Product')}</option>
+              <option value="course">{lang === 'ht' ? 'Kou' : inlineText(lang, 'Course')}</option>
             </select>
           </div>
           <div className="aff-form-group">
-            <label>{lang === 'ht' ? 'ID Kontni (si genyen)' : 'Content ID (optional)'}</label>
+            <label>{lang === 'ht' ? 'ID Kontni (si genyen)' : inlineText(lang, 'Content ID (optional)')}</label>
             <input
               type="number"
               value={form.content_id}
@@ -215,13 +216,13 @@ function LinksTab({ lang, showToast }) {
             />
           </div>
           <div className="aff-form-group">
-            <label>{lang === 'ht' ? ' Etikèt' : 'Label (optional)'}</label>
+            <label>{lang === 'ht' ? ' Etikèt' : inlineText(lang, 'Label (optional)')}</label>
             <input
               type="text"
               value={form.label}
               onChange={(e) => setForm({ ...form, label: e.target.value })}
               className="aff-input"
-              placeholder={lang === 'ht' ? 'Eg: Promosyon mwa sa' : 'e.g. Summer promo'}
+              placeholder={lang === 'ht' ? 'Eg: Promosyon mwa sa' : inlineText(lang, 'e.g. Summer promo')}
             />
           </div>
           <button
@@ -231,9 +232,9 @@ function LinksTab({ lang, showToast }) {
             disabled={creating}
           >
             {creating ? (
-              <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {lang === 'ht' ? 'Kreyasyon...' : 'Creating...'}</>
+              <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {lang === 'ht' ? 'Kreyasyon...' : inlineText(lang, 'Creating...')}</>
             ) : (
-              <><i className="fas fa-save" aria-hidden="true" /> {lang === 'ht' ? 'Kreye Lyen' : 'Create Link'}</>
+              <><i className="fas fa-save" aria-hidden="true" /> {lang === 'ht' ? 'Kreye Lyen' : inlineText(lang, 'Create Link')}</>
             )}
           </button>
         </div>
@@ -242,8 +243,8 @@ function LinksTab({ lang, showToast }) {
       {links.length === 0 ? (
         <div className="aff-empty">
           <i className="fas fa-link" aria-hidden="true" />
-          <h3>{lang === 'ht' ? 'Pokò gen lyen' : 'No links yet'}</h3>
-          <p>{lang === 'ht' ? 'Klike "Nouvo Lyen" pou kòmanse' : 'Click "New Link" to get started'}</p>
+          <h3>{lang === 'ht' ? 'Pokò gen lyen' : inlineText(lang, 'No links yet')}</h3>
+          <p>{lang === 'ht' ? 'Klike "Nouvo Lyen" pou kòmanse' : inlineText(lang, 'Click "New Link" to get started')}</p>
         </div>
       ) : (
         <div className="aff-links-list">
@@ -260,8 +261,8 @@ function LinksTab({ lang, showToast }) {
                   <code>{link.code}</code>
                 </div>
                 <div className="aff-link-stats">
-                  <span>{fmtCount(link.total_clicks)} {lang === 'ht' ? 'klik' : 'clicks'}</span>
-                  <span>· {fmtCount(link.total_conversions)} {lang === 'ht' ? 'konvèsyon' : 'conversions'}</span>
+                  <span>{fmtCount(link.total_clicks)} {lang === 'ht' ? 'klik' : inlineText(lang, 'clicks')}</span>
+                  <span>· {fmtCount(link.total_conversions)} {lang === 'ht' ? 'konvèsyon' : inlineText(lang, 'conversions')}</span>
                   <span>· {fmtDate(link.created_at)}</span>
                 </div>
               </div>
@@ -271,9 +272,9 @@ function LinksTab({ lang, showToast }) {
                 onClick={() => handleCopy(link.code)}
               >
                 {copiedId === link.code ? (
-                  <><i className="fas fa-check" aria-hidden="true" /> {lang === 'ht' ? 'Kopiye' : 'Copied'}</>
+                  <><i className="fas fa-check" aria-hidden="true" /> {lang === 'ht' ? 'Kopiye' : inlineText(lang, 'Copied')}</>
                 ) : (
-                  <><i className="fas fa-copy" aria-hidden="true" /> {lang === 'ht' ? 'Kopye' : 'Copy'}</>
+                  <><i className="fas fa-copy" aria-hidden="true" /> {lang === 'ht' ? 'Kopye' : inlineText(lang, 'Copy')}</>
                 )}
               </button>
             </div>
@@ -295,10 +296,10 @@ function ApplicationsTab({ lang, showToast }) {
 
   const statusBadge = (status) => {
     const map = {
-      pending: { bg: '#f59e0b', label: lang === 'ht' ? 'Annatant' : 'Pending' },
-      approved: { bg: '#10b981', label: lang === 'ht' ? 'Apwouve' : 'Approved' },
-      rejected: { bg: '#ef4444', label: lang === 'ht' ? 'Refize' : 'Rejected' },
-      suspended: { bg: '#6b7280', label: lang === 'ht' ? 'Sispann' : 'Suspended' },
+      pending: { bg: '#f59e0b', label: lang === 'ht' ? 'Annatant' : inlineText(lang, 'Pending') },
+      approved: { bg: '#10b981', label: lang === 'ht' ? 'Apwouve' : inlineText(lang, 'Approved') },
+      rejected: { bg: '#ef4444', label: lang === 'ht' ? 'Refize' : inlineText(lang, 'Rejected') },
+      suspended: { bg: '#6b7280', label: lang === 'ht' ? 'Sispann' : inlineText(lang, 'Suspended') },
     };
     const s = map[status] || map.pending;
     return <span className="aff-badge" style={{ background: s.bg }}>{s.label}</span>;
@@ -308,14 +309,14 @@ function ApplicationsTab({ lang, showToast }) {
     <div className="aff-applications">
       <h3>
         <i className="fas fa-file-alt" aria-hidden="true" />
-        {lang === 'ht' ? 'Aplikasyon Mwen' : 'My Applications'}
+        {lang === 'ht' ? 'Aplikasyon Mwen' : inlineText(lang, 'My Applications')}
       </h3>
 
       {applications.length === 0 ? (
         <Empty
           icon="fa-file-alt"
-          title={lang === 'ht' ? 'Pokò gen aplikasyon' : 'No applications yet'}
-          hint={lang === 'ht' ? 'Aplike nan yon pwogram afilyasyon pou w kòmanse' : 'Apply to an affiliate program to get started'}
+          title={lang === 'ht' ? 'Pokò gen aplikasyon' : inlineText(lang, 'No applications yet')}
+          hint={lang === 'ht' ? 'Aplike nan yon pwogram afilyasyon pou w kòmanse' : inlineText(lang, 'Apply to an affiliate program to get started')}
         />
       ) : (
         <div className="aff-list">
@@ -352,14 +353,14 @@ function EarningsTab({ lang, showToast }) {
     <div className="aff-earnings">
       <h3>
         <i className="fas fa-coins" aria-hidden="true" />
-        {lang === 'ht' ? 'Istorik Salè' : 'Earnings History'}
+        {lang === 'ht' ? 'Istorik Salè' : inlineText(lang, 'Earnings History')}
       </h3>
 
       {conversions.length === 0 ? (
         <div className="aff-empty">
           <i className="fas fa-receipt" aria-hidden="true" />
-          <h3>{lang === 'ht' ? 'Pokò gen salè' : 'No earnings yet'}</h3>
-          <p>{lang === 'ht' ? 'Lè yon moun achte atravè lyen ou, salè ou parèt isit' : 'When someone purchases through your link, earnings appear here'}</p>
+          <h3>{lang === 'ht' ? 'Pokò gen salè' : inlineText(lang, 'No earnings yet')}</h3>
+          <p>{lang === 'ht' ? 'Lè yon moun achte atravè lyen ou, salè ou parèt isit' : inlineText(lang, 'When someone purchases through your link, earnings appear here')}</p>
         </div>
       ) : (
         <div className="aff-conversions-list">
@@ -406,7 +407,7 @@ function ProfileTab({ lang, showToast }) {
   );
 
   if (loading) return <Skeleton rows={3} />;
-  if (!profile) return <Empty icon="fa-user-circle" title={lang === 'ht' ? 'Pa gen pwofil afilye' : 'No affiliate profile'} />;
+  if (!profile) return <Empty icon="fa-user-circle" title={lang === 'ht' ? 'Pa gen pwofil afilye' : inlineText(lang, 'No affiliate profile')} />;
 
   return (
     <div className="aff-profile">
@@ -425,22 +426,22 @@ function ProfileTab({ lang, showToast }) {
 
       <div className="aff-profile-details">
         <div className="aff-profile-row">
-          <span className="aff-profile-label">{lang === 'ht' ? 'Nivo' : 'Level'}</span>
+          <span className="aff-profile-label">{lang === 'ht' ? 'Nivo' : inlineText(lang, 'Level')}</span>
           <span className="aff-profile-value">{profile.level}</span>
         </div>
         <div className="aff-profile-row">
-          <span className="aff-profile-label">{lang === 'ht' ? 'Skò Konfyans' : 'Trust Score'}</span>
+          <span className="aff-profile-label">{lang === 'ht' ? 'Skò Konfyans' : inlineText(lang, 'Trust Score')}</span>
           <span className="aff-profile-value">{profile.trust_score}/100</span>
         </div>
         <div className="aff-profile-row">
-          <span className="aff-profile-label">{lang === 'ht' ? 'Komisyon Pèsonalize' : 'Custom Commission'}</span>
+          <span className="aff-profile-label">{lang === 'ht' ? 'Komisyon Pèsonalize' : inlineText(lang, 'Custom Commission')}</span>
           <span className="aff-profile-value">
-            {profile.custom_commission_pct != null ? `${profile.custom_commission_pct}%` : (lang === 'ht' ? 'Pa defini' : 'Not set')}
+            {profile.custom_commission_pct != null ? `${profile.custom_commission_pct}%` : (lang === 'ht' ? 'Pa defini' : inlineText(lang, 'Not set'))}
           </span>
         </div>
         {profile.group_names?.length > 0 && (
           <div className="aff-profile-row">
-            <span className="aff-profile-label">{lang === 'ht' ? 'Gwoup' : 'Groups'}</span>
+            <span className="aff-profile-label">{lang === 'ht' ? 'Gwoup' : inlineText(lang, 'Groups')}</span>
             <span className="aff-profile-value">
               {profile.group_names.map((g) => (
                 <span key={g} className="aff-badge aff-badge-group">{g}</span>
@@ -449,9 +450,9 @@ function ProfileTab({ lang, showToast }) {
           </div>
         )}
         <div className="aff-profile-row">
-          <span className="aff-profile-label">{lang === 'ht' ? 'Aktif' : 'Active'}</span>
+          <span className="aff-profile-label">{lang === 'ht' ? 'Aktif' : inlineText(lang, 'Active')}</span>
           <span className={`aff-profile-value ${profile.is_active ? 'aff-text-success' : 'aff-text-muted'}`}>
-            {profile.is_active ? (lang === 'ht' ? 'Wi' : 'Yes') : (lang === 'ht' ? 'Non' : 'No')}
+            {profile.is_active ? (lang === 'ht' ? 'Wi' : inlineText(lang, 'Yes')) : (lang === 'ht' ? 'Non' : inlineText(lang, 'No'))}
           </span>
         </div>
       </div>
@@ -481,8 +482,8 @@ export default function AffiliateDashboard({ lang = 'en', showToast }) {
           <i className="fas fa-arrow-left" aria-hidden="true" />
         </button>
         <div>
-          <h1><i className="fas fa-handshake" aria-hidden="true" /> {lang === 'ht' ? 'Afilyasyon' : 'Affiliate'}</h1>
-          <p className="aff-subtitle">{lang === 'ht' ? 'Jere lyen afilyasyon ou ak salè ou' : 'Manage your affiliate links and earnings'}</p>
+          <h1><i className="fas fa-handshake" aria-hidden="true" /> {lang === 'ht' ? 'Afilyasyon' : inlineText(lang, 'Affiliate')}</h1>
+          <p className="aff-subtitle">{lang === 'ht' ? 'Jere lyen afilyasyon ou ak salè ou' : inlineText(lang, 'Manage your affiliate links and earnings')}</p>
         </div>
       </div>
 

@@ -8,6 +8,7 @@
  *   - title: string (optional label)
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function CodeBlock({ block, lang = 'en', index, courseId, moduleIndex, onComplete, onViewed }) {
   const isHt = lang === 'ht';
@@ -43,7 +44,7 @@ export default function CodeBlock({ block, lang = 'en', index, courseId, moduleI
   if (!code) {
     return (
       <div style={{ padding: 16, color: 'var(--text-secondary)', fontStyle: 'italic' }}>
-        {isHt ? 'Pa gen kòd pou bloc sa a.' : 'No code for this block.'}
+        {isHt ? 'Pa gen kòd pou bloc sa a.' : inlineText(lang, 'No code for this block.')}
       </div>
     );
   }

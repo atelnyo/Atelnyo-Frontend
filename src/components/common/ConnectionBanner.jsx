@@ -13,6 +13,7 @@
 import React, { useEffect, useState } from 'react';
 import useConnectionMonitor from '../../hooks/useConnectionMonitor';
 import offlineQueue from '../../services/offlineQueue';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function ConnectionBanner({ lang = 'en' }) {
   const conn = useConnectionMonitor();
@@ -59,7 +60,7 @@ export default function ConnectionBanner({ lang = 'en' }) {
   if (!conn.online) {
     type = 'error';
     icon = 'fa-wifi-slash';
-    heading = isHt ? 'Ou pa konekte' : 'You are offline';
+    heading = isHt ? 'Ou pa konekte' : inlineText(lang, 'You are offline');
     body = isHt
       ? `Ou pèdi koneksyon depi ${secondsOffline}s. Chanjman ou fè yo ap sove lokalman epi yo ap voye lè koneksyon an retabli.`
       : `Lost connection ${secondsOffline}s ago. Your changes are saved locally and will sync when you reconnect.`;
@@ -71,21 +72,21 @@ export default function ConnectionBanner({ lang = 'en' }) {
   } else if (conn.isSlow) {
     type = 'warning';
     icon = 'fa-tachometer-alt';
-    heading = isHt ? 'Koneksyon dousman' : 'Slow connection';
+    heading = isHt ? 'Koneksyon dousman' : inlineText(lang, 'Slow connection');
     body = isHt
       ? 'W ap sou yon rezo 2G/oswa pi dousman. Imaj ak videyo ka pran tan pou chaje.'
-      : 'You are on a slow network. Images and videos may take longer to load.';
+      : inlineText(lang, 'You are on a slow network. Images and videos may take longer to load.');
   } else if (conn.isDataSaver) {
     type = 'info';
     icon = 'fa-mobile-alt';
-    heading = isHt ? 'Mode ekonomize done' : 'Data saver mode';
+    heading = isHt ? 'Mode ekonomize done' : inlineText(lang, 'Data saver mode');
     body = isHt
       ? 'Navigatè ou nan mode ekonomize done. Kontni medya yo ka pa chaje otomatikman.'
-      : 'Your browser is in data-saver mode. Media may not load automatically.';
+      : inlineText(lang, 'Your browser is in data-saver mode. Media may not load automatically.');
   } else if (queueSize > 0) {
     type = 'info';
     icon = 'fa-cloud-upload-alt';
-    heading = isHt ? 'Senkronizasyon annatant' : 'Sync pending';
+    heading = isHt ? 'Senkronizasyon annatant' : inlineText(lang, 'Sync pending');
     body = isHt
       ? `${queueSize} aksyon ap tann koneksyon pou voye.`
       : `${queueSize} actions waiting to sync.`;
@@ -106,14 +107,14 @@ export default function ConnectionBanner({ lang = 'en' }) {
               className="conn-banner-btn"
               onClick={() => conn.drainQueue()}
             >
-              <i className="fas fa-sync-alt" /> {isHt ? 'Eseye' : 'Retry'}
+              <i className="fas fa-sync-alt" /> {isHt ? 'Eseye' : inlineText(lang, 'Retry')}
             </button>
           )}
           <button
             type="button"
             className="conn-banner-dismiss"
             onClick={() => setDismissed(true)}
-            aria-label={isHt ? 'Fèmen' : 'Dismiss'}
+            aria-label={isHt ? 'Fèmen' : inlineText(lang, 'Dismiss')}
           >
             <i className="fas fa-times" />
           </button>

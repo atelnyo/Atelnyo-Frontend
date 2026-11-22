@@ -3,6 +3,7 @@
  * Student fills in fields and sees calculated results.
  */
 import React, { useState, useEffect } from 'react';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function CalculatorBlock({ block, lang = 'en', onComplete, onPortfolioSave }) {
   const isHt = lang === 'ht';
@@ -58,7 +59,7 @@ export default function CalculatorBlock({ block, lang = 'en', onComplete, onPort
       margin: '16px 0',
     }}>
       <h3 style={{ margin: '0 0 12px', color: '#1565c0' }}>
-        🧮 {block?.title || (isHt ? 'Kalkilatè' : 'Calculator')}
+        🧮 {block?.title || (isHt ? 'Kalkilatè' : inlineText(lang, 'Calculator'))}
       </h3>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px', marginBottom: '16px' }}>
         {fields.map((f, i) => (
@@ -84,7 +85,7 @@ export default function CalculatorBlock({ block, lang = 'en', onComplete, onPort
           background: '#fff', border: '2px solid #1976d2', borderRadius: '8px',
           padding: '16px', textAlign: 'center', marginBottom: '16px',
         }}>
-          <div style={{ fontSize: '14px', color: '#666' }}>{isHt ? 'Rezilta:' : 'Result:'}</div>
+          <div style={{ fontSize: '14px', color: '#666' }}>{isHt ? 'Rezilta:' : inlineText(lang, 'Result:')}</div>
           <div style={{ fontSize: '28px', fontWeight: '700', color: '#1565c0' }}>
             ${typeof result === 'number' ? result.toLocaleString(undefined, { maximumFractionDigits: 2 }) : result}
           </div>
@@ -94,7 +95,7 @@ export default function CalculatorBlock({ block, lang = 'en', onComplete, onPort
         padding: '10px 24px', background: '#2196f3', color: '#fff',
         border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '600',
       }}>
-        💾 {isHt ? 'Sove Kalkilasyon' : 'Save Calculation'}
+        💾 {isHt ? 'Sove Kalkilasyon' : inlineText(lang, 'Save Calculation')}
       </button>
     </div>
   );

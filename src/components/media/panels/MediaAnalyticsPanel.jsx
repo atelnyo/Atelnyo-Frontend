@@ -22,6 +22,7 @@
  *   Most Active Day, Last Published, Creator Insights
  */
 import React from 'react';
+import { inlineText } from '../../../utils/inlineI18n';
 
 const METRICS = [
   { key: 'view_count',      labelEn: 'Views',           labelHt: 'Fwa Konsilte',     icon: 'fa-eye',                backendPending: false, derive: (m, a) => a?.view_count ?? m?.view_count ?? 0 },
@@ -49,16 +50,16 @@ export default function MediaAnalyticsPanel({ media, analytics = null, lang = 'e
       <p className="media-panel-intro">
         {isHt
           ? 'Analitik itilizasyon medya sa a. Jaden ki tann yon endpoint backend montre sa yo ap tann.'
-          : 'Usage analytics for this media. Fields waiting on a backend endpoint show as pending.'}
+          : inlineText(lang, 'Usage analytics for this media. Fields waiting on a backend endpoint show as pending.')}
       </p>
       <ul className="media-panel-metrics">
         {METRICS.map((metric) => {
           let display;
           if (metric.backendPending) {
             display = (
-              <span className="media-panel-metric-pending" title={isHt ? 'Tann yon endpoint backend' : 'Awaiting backend endpoint'}>
+              <span className="media-panel-metric-pending" title={isHt ? 'Tann yon endpoint backend' : inlineText(lang, 'Awaiting backend endpoint')}>
                 <i className="fas fa-hourglass-half" />
-                {isHt ? 'Ap tann backend' : 'Backend pending'}
+                {isHt ? 'Ap tann backend' : inlineText(lang, 'Backend pending')}
               </span>
             );
           } else if (metric.list) {

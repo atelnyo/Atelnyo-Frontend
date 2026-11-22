@@ -10,6 +10,7 @@
 import React from 'react';
 import { SkeletonSection } from './ProfileSkeleton';
 import { fmtDate } from './profileUtils';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function ReviewsTab({ reviews, loading, lang }) {
   if (loading) return <SkeletonSection />;
@@ -20,7 +21,7 @@ export default function ReviewsTab({ reviews, loading, lang }) {
         <p>
           {lang === 'ht'
             ? 'Kreyatè sa a poko resevwa revizyon pou kounye a.'
-            : 'No reviews yet.'}
+            : inlineText(lang, 'No reviews yet.')}
         </p>
       </div>
     );

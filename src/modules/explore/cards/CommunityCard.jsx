@@ -6,6 +6,7 @@
 import React, { useState } from 'react';
 import ContentFeedbackMenu from '../../../components/shared/ContentFeedbackMenu';
 import CardOpenButton from './CardOpenButton';
+import { inlineText } from '../../../utils/inlineI18n';
 
 /** SVG fallback — community-themed gradient */
 function CommunityFallback({ name }) {
@@ -60,9 +61,9 @@ export default function CommunityCard({ community, onOpen, t, lang }) {
   const memberStatus = community.my_status
     || (community.is_member ? 'active' : null);
   const memberLabel = memberStatus === 'active'
-    ? (t?.explore_community_member || (isHt ? 'Manm' : 'Member'))
+    ? (t?.explore_community_member || (isHt ? 'Manm' : inlineText(lang, 'Member')))
     : memberStatus === 'pending'
-      ? (t?.explore_community_pending || (isHt ? 'Demann voye' : 'Request sent'))
+      ? (t?.explore_community_pending || (isHt ? 'Demann voye' : inlineText(lang, 'Request sent')))
       : null;
 
   return (
@@ -102,14 +103,14 @@ export default function CommunityCard({ community, onOpen, t, lang }) {
             {joinLabel && (
               <span
                 className={`explore-card-tag explore-card-join explore-card-join-${community.join_mode}`}
-                title={isHt ? 'Kijan moun antre' : 'How to join'}
+                title={isHt ? 'Kijan moun antre' : inlineText(lang, 'How to join')}
               >
                 <i className={`fas ${joinMeta.icon}`} aria-hidden="true" /> {joinLabel}
               </span>
             )}
             {eventCount > 0 && (
               <span className="explore-card-tag explore-card-events">
-                <i className="fas fa-calendar-alt" aria-hidden="true" /> {eventCount} {t?.explore_community_events || (isHt ? 'evènman' : 'events')}
+                <i className="fas fa-calendar-alt" aria-hidden="true" /> {eventCount} {t?.explore_community_events || (isHt ? 'evènman' : inlineText(lang, 'events'))}
               </span>
             )}
             {founder && (

@@ -24,6 +24,7 @@ import {
   SkeletonSpotlightCard, SkeletonPostCard,
 } from '../cards';
 import CardOpenButton from '../cards/CardOpenButton';
+import { inlineText } from '../../../utils/inlineI18n';
 
 // ─── Home-feed localStorage cache (second-visit zero-request) ─────────
 // Anonymous visitors all receive the IDENTICAL cold-start feed, so the
@@ -204,11 +205,11 @@ function resolveCardComponent(item, sectionRenderer) {
 // page. The feed stays fully browsable, no auth wall.
 function GuestWelcomeCard({ lang, t, onSignUp }) {
   const isHt = lang === 'ht';
-  const title = t.feed_guest_title || (isHt ? 'Byenveni sou Atelnyo' : 'Welcome to Atelnyo');
+  const title = t.feed_guest_title || (isHt ? 'Byenveni sou Atelnyo' : inlineText(lang, 'Welcome to Atelnyo'));
   const desc = t.feed_guest_desc || (isHt
     ? 'Dekouvri kou, mizik, talan ak opòtinite. Kreye yon kont gratis pou swiv sa ou renmen ak resevwa rekòmandasyon pèsonalize.'
-    : 'Discover courses, music, talents and opportunities. Create a free account to save what you love and get personalized recommendations.');
-  const cta = t.feed_guest_cta || (isHt ? 'Kreye yon kont gratis' : 'Create a free account');
+    : inlineText(lang, 'Discover courses, music, talents and opportunities. Create a free account to save what you love and get personalized recommendations.'));
+  const cta = t.feed_guest_cta || (isHt ? 'Kreye yon kont gratis' : inlineText(lang, 'Create a free account'));
 
   return (
     <div className="explore-card explore-card-course feed-guest-card explore-card--overlay">
@@ -386,7 +387,7 @@ export default function HomeFeed({
         aria-label={loadingLabel}
       >
         <SectionLabel icon={t.explore_recommended_icon || 'fa-star'}>
-          {t.explore_recommended || (lang === 'ht' ? 'Rekòmande pou ou' : 'Recommended For You')}
+          {t.explore_recommended || (lang === 'ht' ? 'Rekòmande pou ou' : inlineText(lang, 'Recommended For You'))}
         </SectionLabel>
         {/* Counts mirror the real feed (6 per section from
             ``feedService.home(6)``) so the rails don't reflow on arrival. */}
@@ -394,19 +395,19 @@ export default function HomeFeed({
           {Array.from({ length: 6 }).map((_, i) => <SkeletonCourseCard key={`course-${i}`} />)}
         </div>
         <SectionLabel icon="fa-music">
-          {lang === 'ht' ? 'Mizik' : 'Music'}
+          {lang === 'ht' ? 'Mizik' : inlineText(lang, 'Music')}
         </SectionLabel>
         <div className="explore-hscroll" aria-hidden="true">
           {Array.from({ length: 6 }).map((_, i) => <SkeletonMusicCard key={`music-${i}`} />)}
         </div>
         <SectionLabel icon="fa-user-plus">
-          {lang === 'ht' ? 'Talan' : 'Talent'}
+          {lang === 'ht' ? 'Talan' : inlineText(lang, 'Talent')}
         </SectionLabel>
         <div className="explore-hscroll" aria-hidden="true">
           {Array.from({ length: 4 }).map((_, i) => <SkeletonTalentCard key={`talent-${i}`} />)}
         </div>
         <SectionLabel icon="fa-lightbulb">
-          {lang === 'ht' ? 'An premye plan' : 'Spotlight'}
+          {lang === 'ht' ? 'An premye plan' : inlineText(lang, 'Spotlight')}
         </SectionLabel>
         <div className="explore-hscroll" aria-hidden="true">
           {Array.from({ length: 3 }).map((_, i) => <SkeletonSpotlightCard key={`spotlight-${i}`} />)}
@@ -425,7 +426,7 @@ export default function HomeFeed({
         </div>
         <div className="feed-loading-more" aria-hidden="true">
           <i className="fas fa-spinner fa-spin" aria-hidden="true" />
-          <span>{t.explore_loading || (lang === 'ht' ? 'Ap chaje...' : 'Loading...')}</span>
+          <span>{t.explore_loading || (lang === 'ht' ? 'Ap chaje...' : inlineText(lang, 'Loading...'))}</span>
         </div>
       </div>
     );
@@ -453,12 +454,12 @@ export default function HomeFeed({
           <i className="fas fa-compass" aria-hidden="true" />
         </div>
         <h3>
-          {t.explore_empty_title || (lang === 'ht' ? 'Anyen pa jwenn' : 'Nothing found yet')}
+          {t.explore_empty_title || (lang === 'ht' ? 'Anyen pa jwenn' : inlineText(lang, 'Nothing found yet'))}
         </h3>
         <p>
           {t.explore_empty_desc || (lang === 'ht'
             ? 'Pa gen kontni pou montre kounye a. Tcheke pita!'
-            : 'No content to show right now. Check back later!')}
+            : inlineText(lang, 'No content to show right now. Check back later!'))}
         </p>
       </div>
     );

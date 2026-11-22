@@ -17,10 +17,11 @@
 import React, { useState, useCallback } from 'react';
 import { quizService, quizQuestionService } from '../../../services/api';
 import styles from './editor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function QuizEditor({ courseId, moduleIndex, lang = 'en' }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
   const [quizzes, setQuizzes] = useState(null); // null = not loaded
   const [loadError, setLoadError] = useState('');
   const [busy, setBusy] = useState(false);

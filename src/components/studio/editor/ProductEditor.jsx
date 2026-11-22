@@ -43,6 +43,7 @@ import { ImageUrlField, HelpTip, HELP_COPY } from '../modals/shared';
 import ProductVariantsPanel from './ProductVariantsPanel';
 import PrintifyImportPanel from './PrintifyImportPanel';
 import styles from './editor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 // Split a textarea into a clean list: one entry per non-empty line.
 const linesToList = (text) =>
@@ -124,12 +125,12 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
   // ─── Validation (mirrors ProductFormModal) ───────────────────────────
   const validate = useCallback(() => {
     const errs = {};
-    if (!form.title.trim()) errs.title = isHt ? 'Tit oblije' : 'Title required';
+    if (!form.title.trim()) errs.title = isHt ? 'Tit oblije' : inlineText(lang, 'Title required');
     if (!form.price || isNaN(Number(form.price)) || Number(form.price) <= 0) {
-      errs.price = isHt ? 'Pri valab oblije' : 'A valid price is required';
+      errs.price = isHt ? 'Pri valab oblije' : inlineText(lang, 'A valid price is required');
     }
     if (form.kind === 'digital' && form.download_url.trim() && !/^https?:\/\//i.test(form.download_url.trim())) {
-      errs.download_url = isHt ? 'URL la dwe kòmanse ak http(s)://' : 'The URL must start with http(s)://';
+      errs.download_url = isHt ? 'URL la dwe kòmanse ak http(s)://' : inlineText(lang, 'The URL must start with http(s)://');
     }
     return errs;
   }, [form.title, form.price, form.download_url, form.kind, isHt]);
@@ -137,16 +138,16 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
   // ─── Publish-readiness checklist (real rules, clickable) ─────────────
   const readiness = useCallback(() => {
     const items = [];
-    if (!form.title.trim()) items.push({ message: isHt ? 'Ajoute yon non pwodwi' : 'Add the product name', target: 'canvas' });
+    if (!form.title.trim()) items.push({ message: isHt ? 'Ajoute yon non pwodwi' : inlineText(lang, 'Add the product name'), target: 'canvas' });
     if (!form.price || isNaN(Number(form.price)) || Number(form.price) <= 0) {
-      items.push({ message: isHt ? 'Fikse yon pri valab' : 'Set a valid price', target: 'props' });
+      items.push({ message: isHt ? 'Fikse yon pri valab' : inlineText(lang, 'Set a valid price'), target: 'props' });
     }
-    if (!form.image_url.trim()) items.push({ message: isHt ? 'Ajoute yon foto pwodwi' : 'Add a product photo', target: 'props' });
+    if (!form.image_url.trim()) items.push({ message: isHt ? 'Ajoute yon foto pwodwi' : inlineText(lang, 'Add a product photo'), target: 'props' });
     // Digital products: the resource customers receive. Recommended, not
     // a hard block — buyers can still contact the seller per the
     // storefront disclaimer.
     if (form.kind === 'digital' && !form.download_url.trim()) {
-      items.push({ message: isHt ? 'Ajoute resous livrezon an (fichye/lyen)' : 'Add the delivery resource (file/link)', target: 'props' });
+      items.push({ message: isHt ? 'Ajoute resous livrezon an (fichye/lyen)' : inlineText(lang, 'Add the delivery resource (file/link)'), target: 'props' });
     }
     return items;
   }, [form.title, form.price, form.image_url, form.download_url, form.kind, isHt]);
@@ -156,7 +157,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
       setSaveState('dirty');
-      showToast?.(isHt ? 'Gen jaden ki pa konplè — tcheke yo.' : 'Some fields are incomplete — check them.', 'circle-exclamation');
+      showToast?.(isHt ? 'Gen jaden ki pa konplè — tcheke yo.' : inlineText(lang, 'Some fields are incomplete — check them.'), 'circle-exclamation');
       return false;
     }
     setErrors({});
@@ -201,7 +202,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
     } catch (err) {
       const detail = err?.response?.data?.detail || err?.response?.data?.title?.[0]
         || err?.message
-        || (isHt ? 'Pa t kapab sove pwodwi a.' : 'Could not save the product.');
+        || (isHt ? 'Pa t kapab sove pwodwi a.' : inlineText(lang, 'Could not save the product.'));
       setSaveState('error');
       showToast?.(detail, 'circle-exclamation');
       return false;
@@ -244,7 +245,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
       await syncVariants();
     } catch (err) {
       const detail = err?.response?.data?.detail || err?.response?.data?.name?.[0]
-        || err?.message || (isHt ? 'Pa t kapab ajoute variant.' : 'Could not add the variant.');
+        || err?.message || (isHt ? 'Pa t kapab ajoute variant.' : inlineText(lang, 'Could not add the variant.'));
       showToast?.(detail, 'circle-exclamation');
     }
   }, [syncVariants, isHt, showToast]);
@@ -254,7 +255,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
       await marketplaceService.updateVariant(id, patch);
       await syncVariants();
     } catch (err) {
-      const detail = err?.response?.data?.detail || err?.message || (isHt ? 'Pa t kapab mete ajou variant.' : 'Could not update the variant.');
+      const detail = err?.response?.data?.detail || err?.message || (isHt ? 'Pa t kapab mete ajou variant.' : inlineText(lang, 'Could not update the variant.'));
       showToast?.(detail, 'circle-exclamation');
     }
   }, [syncVariants, isHt, showToast]);
@@ -270,7 +271,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
       const n = res?.data?.deleted ?? ids.length;
       showToast?.(isHt ? `${n} variant efase.` : `${n} variant(s) deleted.`, 'check-circle');
     } catch (err) {
-      const detail = err?.response?.data?.detail || err?.response?.data?.ids?.[0] || err?.message || (isHt ? 'Pa t kapab efase variants yo.' : 'Could not delete the variants.');
+      const detail = err?.response?.data?.detail || err?.response?.data?.ids?.[0] || err?.message || (isHt ? 'Pa t kapab efase variants yo.' : inlineText(lang, 'Could not delete the variants.'));
       showToast?.(detail, 'circle-exclamation');
       throw err;
     }
@@ -281,7 +282,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
       await marketplaceService.deleteVariant(id);
       await syncVariants();
     } catch (err) {
-      const detail = err?.response?.data?.detail || err?.message || (isHt ? 'Pa t kapab efase variant.' : 'Could not delete the variant.');
+      const detail = err?.response?.data?.detail || err?.message || (isHt ? 'Pa t kapab efase variant.' : inlineText(lang, 'Could not delete the variant.'));
       showToast?.(detail, 'circle-exclamation');
     }
   }, [syncVariants, isHt, showToast]);
@@ -290,7 +291,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
     const preview = {
       id: savedIdRef.current || 'draft-preview',
       slug: form.title.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'draft-product',
-      title: form.title.trim() || (isHt ? 'Pwodwi Sans Tit' : 'Untitled product'),
+      title: form.title.trim() || (isHt ? 'Pwodwi Sans Tit' : inlineText(lang, 'Untitled product')),
       description: form.description.trim(),
       price: Number(form.price) || 0,
       compare_at_price: form.compare_at_price === '' ? null : Number(form.compare_at_price),
@@ -323,24 +324,24 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
 
   const isLive = form.is_active;
   const kindBadge = {
-    digital: isHt ? 'Dijital' : 'Digital',
-    physical: isHt ? 'Fizik' : 'Physical',
-    service: isHt ? 'Sèvis' : 'Service',
-  }[form.kind] || (isHt ? 'Pwodwi' : 'Product');
+    digital: isHt ? 'Dijital' : inlineText(lang, 'Digital'),
+    physical: isHt ? 'Fizik' : inlineText(lang, 'Physical'),
+    service: isHt ? 'Sèvis' : inlineText(lang, 'Service'),
+  }[form.kind] || (isHt ? 'Pwodwi' : inlineText(lang, 'Product'));
 
   // ─── Status badge for the shell header (spec 36: status obvious) ─────
   const statusBadge = (
     <span className={`${styles.deliveryBadge} ${isLive ? styles.deliveryBadgeOnline : styles.deliveryBadgeExternal}`}>
       <i className={`fas ${isLive ? 'fa-eye' : 'fa-eye-slash'}`} aria-hidden="true" />
-      {isLive ? (isHt ? 'Pibliye' : 'Published') : (isHt ? 'Bouyon' : 'Draft')}
+      {isLive ? (isHt ? 'Pibliye' : inlineText(lang, 'Published')) : (isHt ? 'Bouyon' : inlineText(lang, 'Draft'))}
     </span>
   );
 
   const kindLabel = {
-    digital: isHt ? 'Dijital' : 'Digital',
-    physical: isHt ? 'Fizik' : 'Physical',
-    service: isHt ? 'Sèvis' : 'Service',
-    subscription: isHt ? 'Abònman' : 'Subscription',
+    digital: isHt ? 'Dijital' : inlineText(lang, 'Digital'),
+    physical: isHt ? 'Fizik' : inlineText(lang, 'Physical'),
+    service: isHt ? 'Sèvis' : inlineText(lang, 'Service'),
+    subscription: isHt ? 'Abònman' : inlineText(lang, 'Subscription'),
   }[form.kind] || form.kind;
 
   // ─── Media-first canvas ──────────────────────────────────────────────
@@ -351,9 +352,9 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
           <i className="fas fa-cube" aria-hidden="true" />
         </span>
         <div>
-          <h2 className={styles.editorSectionTitle}>{isHt ? 'Workshop Pwodwi' : 'Product Workspace'}</h2>
+          <h2 className={styles.editorSectionTitle}>{isHt ? 'Workshop Pwodwi' : inlineText(lang, 'Product Workspace')}</h2>
           <p className={styles.editorSectionHint}>
-            {isHt ? 'Foto, non ak deskripsyon pwodwi a.' : 'Product photo, name and description.'}
+            {isHt ? 'Foto, non ak deskripsyon pwodwi a.' : inlineText(lang, 'Product photo, name and description.')}
           </p>
         </div>
       </header>
@@ -362,40 +363,40 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
           {form.image_url ? (
             <img
               src={form.image_url}
-              alt={isHt ? 'Foto pwodwi' : 'Product photo'}
+              alt={isHt ? 'Foto pwodwi' : inlineText(lang, 'Product photo')}
               style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'cover' }}
               onError={(e) => { e.currentTarget.style.display = 'none'; }}
             />
           ) : (
             <div className={styles.mediaPreviewPlaceholder}>
               <i className="fas fa-box-open" aria-hidden="true" />
-              <span>{isHt ? 'Ajoute yon foto pwodwi (jaden Medya a)' : 'Add a product photo (via the Media panel)'}</span>
+              <span>{isHt ? 'Ajoute yon foto pwodwi (jaden Medya a)' : inlineText(lang, 'Add a product photo (via the Media panel)')}</span>
             </div>
           )}
           <span className={styles.mediaPreviewBadge}>
             <i className={`fas ${isLive ? 'fa-eye' : 'fa-eye-slash'}`} aria-hidden="true" />
-            {kindBadge} · {isLive ? (isHt ? 'Pibliye' : 'Published') : (isHt ? 'Bouyon' : 'Draft')}
+            {kindBadge} · {isLive ? (isHt ? 'Pibliye' : inlineText(lang, 'Published')) : (isHt ? 'Bouyon' : inlineText(lang, 'Draft'))}
           </span>
         </div>
         {form.gallery.length > 1 && (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }} aria-label={isHt ? 'Galri foto' : 'Photo gallery'}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }} aria-label={isHt ? 'Galri foto' : inlineText(lang, 'Photo gallery')}>
             {form.gallery.map((src, i) => (
               <div key={src} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                 <button
                   type="button"
                   onClick={() => handleChange('image_url', src)}
                   style={{ width: 80, height: 80, padding: 0, border: src === form.image_url ? '2px solid currentColor' : '1px solid transparent', borderRadius: 6, overflow: 'hidden', cursor: 'pointer', background: 'none' }}
-                  aria-label={isHt ? 'Chwazi foto sa a kòm prensipal' : 'Set as main photo'}
+                  aria-label={isHt ? 'Chwazi foto sa a kòm prensipal' : inlineText(lang, 'Set as main photo')}
                 >
                   <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                 </button>
                 <div style={{ display: 'flex', gap: 4 }}>
                   <button type="button" onClick={() => moveGalleryItem(i, -1)} disabled={i === 0}
-                    aria-label={isHt ? 'Mete foto sa anvan' : 'Move photo earlier'}>
+                    aria-label={isHt ? 'Mete foto sa anvan' : inlineText(lang, 'Move photo earlier')}>
                     <i className="fas fa-chevron-left" aria-hidden="true" />
                   </button>
                   <button type="button" onClick={() => moveGalleryItem(i, 1)} disabled={i === form.gallery.length - 1}
-                    aria-label={isHt ? 'Mete foto sa apre' : 'Move photo later'}>
+                    aria-label={isHt ? 'Mete foto sa apre' : inlineText(lang, 'Move photo later')}>
                     <i className="fas fa-chevron-right" aria-hidden="true" />
                   </button>
                 </div>
@@ -408,7 +409,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
           className={styles.canvasTitle}
           value={form.title}
           onChange={(e) => handleChange('title', e.target.value)}
-          placeholder={isHt ? 'Non pwodwi a...' : 'Product name…'}
+          placeholder={isHt ? 'Non pwodwi a...' : inlineText(lang, 'Product name…')}
           maxLength={200}
           aria-invalid={errors.title ? 'true' : 'false'}
         />
@@ -421,7 +422,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
           className={styles.canvasBody}
           value={form.description}
           onChange={(e) => handleChange('description', e.target.value)}
-          placeholder={isHt ? 'Dekri sa achtè a pral resevwa...' : 'Describe what the buyer receives…'}
+          placeholder={isHt ? 'Dekri sa achtè a pral resevwa...' : inlineText(lang, 'Describe what the buyer receives…')}
           rows={8}
           maxLength={5000}
         />
@@ -435,16 +436,16 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
       <PropertyGroup icon="fa-circle-info" label="Basic Information" labelHt="Enfòmasyon Bazik" lang={lang} defaultOpen>
         <PropField label="Type" labelHt="Kalite" lang={lang}>
           <PropSelect value={form.kind} onChange={(e) => handleChange('kind', e.target.value)}>
-            <option value="digital">{isHt ? 'Dijital' : 'Digital'}</option>
-            <option value="physical">{isHt ? 'Fizik' : 'Physical'}</option>
-            <option value="service">{isHt ? 'Sèvis' : 'Service'}</option>
+            <option value="digital">{isHt ? 'Dijital' : inlineText(lang, 'Digital')}</option>
+            <option value="physical">{isHt ? 'Fizik' : inlineText(lang, 'Physical')}</option>
+            <option value="service">{isHt ? 'Sèvis' : inlineText(lang, 'Service')}</option>
           </PropSelect>
         </PropField>
         <PropField label="Category" labelHt="Kategori" lang={lang}>
           <PropInput
             value={form.category}
             onChange={(e) => handleChange('category', e.target.value)}
-            placeholder={isHt ? 'Modèl, Liv, Mizik...' : 'Template, Book, Music…'}
+            placeholder={isHt ? 'Modèl, Liv, Mizik...' : inlineText(lang, 'Template, Book, Music…')}
           />
         </PropField>
       </PropertyGroup>
@@ -454,7 +455,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
           label="Hashtags"
           labelHt="Hashtags"
           lang={lang}
-          hint={isHt ? 'Separe ak espas — #Kreyol #Art' : 'Separate with spaces — #Kreyol #Art'}
+          hint={isHt ? 'Separe ak espas — #Kreyol #Art' : inlineText(lang, 'Separate with spaces — #Kreyol #Art')}
         >
           <PropInput
             value={form.hashtags}
@@ -482,7 +483,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
           value={form.image_url}
           onChange={(v) => handleChange('image_url', v)}
           kind="image"
-          label={isHt ? 'Imaj Pwodwi' : 'Product Image'}
+          label={isHt ? 'Imaj Pwodwi' : inlineText(lang, 'Product Image')}
           placeholder="https://example.com/product.jpg"
           isPremium={isPremium}
           required
@@ -505,7 +506,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
           label="Old price ($)"
           labelHt="Ansyen pri ($)"
           lang={lang}
-          hint={isHt ? 'Opsyonèl — parèt barre a kote pri a.' : 'Optional — shown struck-through next to the price.'}
+          hint={isHt ? 'Opsyonèl — parèt barre a kote pri a.' : inlineText(lang, 'Optional — shown struck-through next to the price.')}
         >
           <PropInput
             type="number"
@@ -523,7 +524,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
           label="Highlights"
           labelHt="Pwen fò"
           lang={lang}
-          hint={isHt ? 'Yon liy pou chak pwen.' : 'One line per highlight.'}
+          hint={isHt ? 'Yon liy pou chak pwen.' : inlineText(lang, 'One line per highlight.')}
         >
           <PropTextarea
             value={form.highlights}
@@ -536,7 +537,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
           label="Technical details"
           labelHt="Detay teknik"
           lang={lang}
-          hint={isHt ? 'Yon liy pou chak detay.' : 'One line per detail.'}
+          hint={isHt ? 'Yon liy pou chak detay.' : inlineText(lang, 'One line per detail.')}
         >
           <PropTextarea
             value={form.technical_details}
@@ -557,13 +558,13 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
             error={errors.download_url}
             hint={isHt
               ? 'Fichye oswa lyen achtè a resevwa apre acha (PDF, ZIP, EPUB, imaj, videyo…).'
-              : 'The file or link the buyer receives after purchase (PDF, ZIP, EPUB, image, video…).'}
+              : inlineText(lang, 'The file or link the buyer receives after purchase (PDF, ZIP, EPUB, image, video…).')}
           >
             <MediaUploadButton
               value={form.download_url}
               onChange={(v) => handleChange('download_url', v)}
               kind="file"
-              label={isHt ? 'Fichye oswa lyen' : 'File or link'}
+              label={isHt ? 'Fichye oswa lyen' : inlineText(lang, 'File or link')}
               placeholder="https://example.com/file.zip"
               isPremium={isPremium}
               lang={lang}
@@ -572,7 +573,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
           <p className={styles.propsHint}>
             {isHt
               ? 'Achtè yo pa resevwa lyen an dirèkteman — yo resevwa yon lyen SIYE ki ekspire nan 48 èdtan, ak yon limite 5 téléchajman pa acha. Lyen an parèt nan resi email la, nan paj "Kòmand mwen" epi sou paj pwodwi a apre acha. PA pibliye yon lyen ki gen dwa kité moun pa acha a telechaje.'
-              : 'Buyers never receive the raw link — they get a SIGNED link that expires in 48 hours, with a 5-download limit per purchase. It appears in the receipt email, on the "My orders" page, and on the product page after purchase. Don\'t list a link you would not hand a single paying buyer.'}
+              : inlineText(lang, 'Buyers never receive the raw link — they get a SIGNED link that expires in 48 hours, with a 5-download limit per purchase. It appears in the receipt email, on the "My orders" page, and on the product page after purchase. Don\'t list a link you would not hand a single paying buyer.')}
           </p>
         </PropertyGroup>
       )}
@@ -589,7 +590,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
             label="Stock quantity"
             labelHt="Kantite stock"
             lang={lang}
-            hint={isHt ? 'Kite vid si stock la pa limite.' : 'Leave empty for unlimited stock.'}
+            hint={isHt ? 'Kite vid si stock la pa limite.' : inlineText(lang, 'Leave empty for unlimited stock.')}
           >
             <PropInput
               type="number"
@@ -597,13 +598,13 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
               step="1"
               value={form.stock}
               onChange={(e) => handleChange('stock', e.target.value)}
-              placeholder={isHt ? 'Illimite' : 'Unlimited'}
+              placeholder={isHt ? 'Illimite' : inlineText(lang, 'Unlimited')}
             />
           </PropField>
           <p className={styles.propsHint}>
             {isHt
               ? 'Paj piblik la montre stock la — "0" parèt kòm pa gen stock. Acha a mande adrès livrezon nan checkout la.'
-              : 'The public page shows stock — "0" renders as out of stock. Checkout requires a shipping address.'}
+              : inlineText(lang, 'The public page shows stock — "0" renders as out of stock. Checkout requires a shipping address.')}
           </p>
         </PropertyGroup>
       )}
@@ -613,7 +614,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
           <p className={styles.propsHint}>
             {isHt
               ? 'Yon sèvis pa gen fichye ni stock. Achtè a achte sèvis la epi checkout la jere rezèvasyon/kontak — esplike mòd livrezon an (online, an pèsòn, kote...) nan deskripsyon an.'
-              : 'A service has no file or inventory. Buyers purchase the service and checkout handles booking/contact — explain the delivery method (online, in-person, location…) in the description.'}
+              : inlineText(lang, 'A service has no file or inventory. Buyers purchase the service and checkout handles booking/contact — explain the delivery method (online, in-person, location…) in the description.')}
           </p>
         </PropertyGroup>
       )}
@@ -629,7 +630,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
         <p className={styles.propsHint}>
           {isHt
             ? 'Yon pwodwi bouyon kache pou achtè yo. Pibliye l sèlman lè l pare.'
-            : 'A draft product is hidden from buyers. Publish it only when it’s ready.'}
+            : inlineText(lang, 'A draft product is hidden from buyers. Publish it only when it’s ready.')}
         </p>
       </PropertyGroup>
 
@@ -639,7 +640,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
   return (
     <>
       <StudioEditorShell
-        title={isHt ? 'Editè Pwodwi' : 'Product Editor'}
+        title={isHt ? 'Editè Pwodwi' : inlineText(lang, 'Product Editor')}
         icon="fa-cube"
         lang={lang}
         docTitle={form.title.trim()}
@@ -650,10 +651,10 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
         onBack={onClose}
         onPreview={handlePreview}
         onSave={handleSaveDraft}
-        saveLabel={hasSaved ? (isHt ? 'Sove Bouyon' : 'Save Draft') : (isHt ? 'Kreye Pwodwi' : 'Create Product')}
+        saveLabel={hasSaved ? (isHt ? 'Sove Bouyon' : inlineText(lang, 'Save Draft')) : (isHt ? 'Kreye Pwodwi' : inlineText(lang, 'Create Product'))}
         canSave
         onPublish={handlePublish}
-        publishLabel={isHt ? 'Pibliye' : 'Publish'}
+        publishLabel={isHt ? 'Pibliye' : inlineText(lang, 'Publish')}
         validation={readiness()}
         onFixValidation={() => {}}
         editor={editorPanel}
@@ -667,7 +668,7 @@ export default function ProductEditor({ onClose, onSuccess, onImported, onSaved,
               type="button"
               onClick={() => setPreviewOpen(false)}
               style={{ position: 'absolute', top: 18, right: 18, zIndex: 1, border: 'none', borderRadius: 999, width: 42, height: 42, background: 'rgba(15,23,42,0.72)', color: '#fff', fontSize: 18, cursor: 'pointer' }}
-              aria-label={isHt ? 'Fèmen preview' : 'Close preview'}
+              aria-label={isHt ? 'Fèmen preview' : inlineText(lang, 'Close preview')}
             >
               <i className="fas fa-xmark" aria-hidden="true" />
             </button>

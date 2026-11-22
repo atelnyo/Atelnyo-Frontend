@@ -19,6 +19,7 @@
  */
 import React, { useRef, useState, useCallback, useMemo } from 'react';
 import api from '../../../services/api';
+import { inlineText } from '../../../utils/inlineI18n';
 
 // ─── Inline Audio / Video Preview ───────────────────────────────────
 function AudioPreviewInline({ url }) {
@@ -158,7 +159,7 @@ export default function MediaUploadButton({
     // Validate file size (50MB max)
     const maxSize = 50 * 1024 * 1024;
     if (file.size > maxSize) {
-      alert(isHt ? 'Fichye a twò gwo (maks 50MB)' : 'File too large (max 50MB)');
+      alert(isHt ? 'Fichye a twò gwo (maks 50MB)' : inlineText(lang, 'File too large (max 50MB)'));
       return;
     }
 
@@ -194,7 +195,7 @@ export default function MediaUploadButton({
           }
         } catch (err) {
           console.error('Upload failed:', err);
-          alert(isHt ? 'Erè pandan upload' : 'Upload failed');
+          alert(isHt ? 'Erè pandan upload' : inlineText(lang, 'Upload failed'));
         } finally {
           setUploading(false);
           setUploadProgress(0);
@@ -273,14 +274,14 @@ export default function MediaUploadButton({
             className="mu-upload-btn"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            title={isHt ? 'Upload fichye' : 'Upload file'}
+            title={isHt ? 'Upload fichye' : inlineText(lang, 'Upload file')}
           >
             {uploading ? (
               <i className="fas fa-spinner fa-spin" />
             ) : (
               <i className="fas fa-cloud-arrow-up" />
             )}
-            <span>{isHt ? 'Upload' : 'Upload'}</span>
+            <span>{isHt ? 'Upload' : inlineText(lang, 'Upload')}</span>
           </button>
         )}
       </div>
@@ -333,7 +334,7 @@ export default function MediaUploadButton({
       {dragOver && (
         <div className="mu-drag-overlay">
           <i className="fas fa-cloud-arrow-up" />
-          <span>{isHt ? 'Depoze fichye a isit la' : 'Drop file here'}</span>
+          <span>{isHt ? 'Depoze fichye a isit la' : inlineText(lang, 'Drop file here')}</span>
         </div>
       )}
 
@@ -350,7 +351,7 @@ export default function MediaUploadButton({
           <i className="fas fa-star" />{' '}
           {isHt
             ? 'Premium ka upload fichye dirèkteman'
-            : 'Premium users can upload files directly'}
+            : inlineText(lang, 'Premium users can upload files directly')}
         </div>
       )}
 
@@ -367,7 +368,7 @@ export default function MediaUploadButton({
           <span>
             {isHt
               ? 'Depoze fichye a isit la oswa klike pou chwazi'
-              : 'Drop file here or click to choose'}
+              : inlineText(lang, 'Drop file here or click to choose')}
           </span>
         </div>
       )}

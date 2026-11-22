@@ -38,6 +38,7 @@ import { saveFormDraft, restoreFormDraft, removeFormDraft } from '../services/ap
 // relaunch. Content stays in the draftStore; only the id rides the
 // continuity state (meaningful identity, never the payload).
 import continuityManager from '../pwa/continuity/ContinuityManager';
+import { inlineText } from '../utils/inlineI18n';
 
 // ─── Constants ────────────────────────────────────────────────────────────
 
@@ -192,17 +193,17 @@ function IntroductionPage({ lang, onStart }) {
           <i className="fas fa-crown" aria-hidden="true" />
         </div>
         <h1 className="ca-intro-title">
-          {isHt ? 'Vin yon Kreyatè Atelnyo' : 'Become an Atelnyo Creator'}
+          {isHt ? 'Vin yon Kreyatè Atelnyo' : inlineText(lang, 'Become an Atelnyo Creator')}
         </h1>
         <p className="ca-intro-subtitle">
           {isHt
             ? 'Jwenn yon espas pou pataje konesans ou, kreye revni, epi konstwi yon kominote.'
-            : 'Get a space to share your knowledge, earn revenue, and build a community.'}
+            : inlineText(lang, 'Get a space to share your knowledge, earn revenue, and build a community.')}
         </p>
       </div>
 
       <div className="ca-intro-benefits">
-        <h3>{isHt ? 'Avantaj' : 'Benefits'}</h3>
+        <h3>{isHt ? 'Avantaj' : inlineText(lang, 'Benefits')}</h3>
         <div className="ca-intro-benefit-grid">
           {[
             { icon: 'fa-graduation-cap', en: 'Teach Courses', ht: 'Anseye Kou' },
@@ -221,14 +222,14 @@ function IntroductionPage({ lang, onStart }) {
       </div>
 
       <div className="ca-intro-responsibilities">
-        <h4>{isHt ? 'Responsabilite ou' : 'Your Responsibilities'}</h4>
+        <h4>{isHt ? 'Responsabilite ou' : inlineText(lang, 'Your Responsibilities')}</h4>
         <ul>
           {[
-            isHt ? 'Respekte règ platfòm nan' : 'Follow platform rules',
-            isHt ? 'Pataje kontni orijinal' : 'Share original content',
-            isHt ? 'Kenbe yon bon kondwit' : 'Maintain good conduct',
-            isHt ? 'Reponn itilizatè yo' : 'Respond to your audience',
-            isHt ? 'Respekte Copyright' : 'Respect copyright laws',
+            isHt ? 'Respekte règ platfòm nan' : inlineText(lang, 'Follow platform rules'),
+            isHt ? 'Pataje kontni orijinal' : inlineText(lang, 'Share original content'),
+            isHt ? 'Kenbe yon bon kondwit' : inlineText(lang, 'Maintain good conduct'),
+            isHt ? 'Reponn itilizatè yo' : inlineText(lang, 'Respond to your audience'),
+            isHt ? 'Respekte Copyright' : inlineText(lang, 'Respect copyright laws'),
           ].map((r, i) => (
             <li key={i}><i className="fas fa-check-circle ca-benefit-icon" aria-hidden="true" />{r}</li>
           ))}
@@ -236,7 +237,7 @@ function IntroductionPage({ lang, onStart }) {
       </div>
 
       <div className="ca-intro-how-it-works">
-        <h4>{isHt ? 'Kijan approval mache' : 'How Approval Works'}</h4>
+        <h4>{isHt ? 'Kijan approval mache' : inlineText(lang, 'How Approval Works')}</h4>
         <div className="ca-intro-steps">
           {[
             { icon: 'fa-file', en: 'Submit application', ht: 'Voye aplikasyon' },
@@ -256,12 +257,12 @@ function IntroductionPage({ lang, onStart }) {
       <div className="ca-intro-cta">
         <button type="button" className="btn-primary ca-intro-start" onClick={onStart}>
           <i className="fas fa-arrow-right" aria-hidden="true" />
-          {isHt ? 'Kontinye' : 'Continue'}
+          {isHt ? 'Kontinye' : inlineText(lang, 'Continue')}
         </button>
         <p className="ca-intro-disclaimer">
           {isHt
             ? 'Aplikasyon an pran apeprè 10-15 minit.'
-            : 'The application takes about 10-15 minutes.'}
+            : inlineText(lang, 'The application takes about 10-15 minutes.')}
         </p>
       </div>
     </div>
@@ -306,7 +307,7 @@ function StepNav({ currentStep, onNext, onPrev, isSubmitting, lang }) {
       {!isFirst && (
         <button type="button" className="btn-secondary" onClick={onPrev} disabled={isSubmitting}>
           <i className="fas fa-arrow-left" aria-hidden="true" />
-          {lang === 'ht' ? 'Anvan' : 'Previous'}
+          {lang === 'ht' ? 'Anvan' : inlineText(lang, 'Previous')}
         </button>
       )}
       <button
@@ -317,11 +318,11 @@ function StepNav({ currentStep, onNext, onPrev, isSubmitting, lang }) {
         style={{ marginLeft: isFirst ? 0 : 'auto' }}
       >
         {isSubmitting ? (
-          <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {lang === 'ht' ? 'Ap voye...' : 'Submitting...'}</>
+          <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {lang === 'ht' ? 'Ap voye...' : inlineText(lang, 'Submitting...')}</>
         ) : isLast ? (
-          <>{lang === 'ht' ? 'Voye aplikasyon' : 'Submit'} <i className="fas fa-paper-plane" aria-hidden="true" /></>
+          <>{lang === 'ht' ? 'Voye aplikasyon' : inlineText(lang, 'Submit')} <i className="fas fa-paper-plane" aria-hidden="true" /></>
         ) : (
-          <>{lang === 'ht' ? 'Pwochen' : 'Next'} <i className="fas fa-arrow-right" aria-hidden="true" /></>
+          <>{lang === 'ht' ? 'Pwochen' : inlineText(lang, 'Next')} <i className="fas fa-arrow-right" aria-hidden="true" /></>
         )}
       </button>
     </div>
@@ -420,7 +421,7 @@ function RequiredLegend({ lang }) {
   return (
     <p className="ca-req-legend">
       <span className="ca-req-star" aria-hidden="true">*</span>
-      {lang === 'ht' ? ' = champ obligatwa' : ' = required field'}
+      {lang === 'ht' ? ' = champ obligatwa' : inlineText(lang, ' = required field')}
     </p>
   );
 }
@@ -437,26 +438,26 @@ function StepIdentity({ form, setForm, lang, errors = {}, clearError }) {
     <div className="ca-step-content">
       <div className="ca-step-header">
         <i className="fas fa-id-card ca-step-icon" aria-hidden="true" />
-        <h3>{isHt ? 'Idantite' : 'Identity'}</h3>
-        <p>{isHt ? 'Kòmanse ak enfòmasyon debaz ou yo.' : 'Start with your basic identity information.'}</p>
+        <h3>{isHt ? 'Idantite' : inlineText(lang, 'Identity')}</h3>
+        <p>{isHt ? 'Kòmanse ak enfòmasyon debaz ou yo.' : inlineText(lang, 'Start with your basic identity information.')}</p>
         <RequiredLegend lang={lang} />
       </div>
       <div className="ca-field-group">
         <label className="ca-field">
-          <span className="ca-field-label">{isHt ? 'Non Konplè' : 'Full Name'} <span className="ca-req-star" aria-hidden="true">*</span></span>
+          <span className="ca-field-label">{isHt ? 'Non Konplè' : inlineText(lang, 'Full Name')} <span className="ca-req-star" aria-hidden="true">*</span></span>
           <input className={`field-input${invalid('full_name')}`} type="text" value={form.full_name || ''}
             onChange={(e) => { setForm(f => ({ ...f, full_name: e.target.value })); onEdit('full_name'); }}
-            placeholder={isHt ? 'Jan Pierre' : 'John Doe'} {...ari('full_name')} />
+            placeholder={isHt ? 'Jan Pierre' : inlineText(lang, 'John Doe')} {...ari('full_name')} />
           <FieldError id="ca-err-full_name" msg={err.full_name} />
         </label>
         <label className="ca-field">
-          <span className="ca-field-label">{isHt ? 'Dat Nesans' : 'Date of Birth'} <span className="ca-req-star" aria-hidden="true">*</span></span>
+          <span className="ca-field-label">{isHt ? 'Dat Nesans' : inlineText(lang, 'Date of Birth')} <span className="ca-req-star" aria-hidden="true">*</span></span>
           <input className={`field-input${invalid('date_of_birth')}`} type="date" value={form.date_of_birth || ''}
             onChange={(e) => { setForm(f => ({ ...f, date_of_birth: e.target.value })); onEdit('date_of_birth'); }} {...ari('date_of_birth')} />
           <FieldError id="ca-err-date_of_birth" msg={err.date_of_birth} />
         </label>
         <label className="ca-field">
-          <span className="ca-field-label">{isHt ? 'Kalite Idantite' : 'ID Type'} <span className="ca-req-star" aria-hidden="true">*</span></span>
+          <span className="ca-field-label">{isHt ? 'Kalite Idantite' : inlineText(lang, 'ID Type')} <span className="ca-req-star" aria-hidden="true">*</span></span>
           <select className={`field-input${invalid('identity_type')}`} value={form.identity_type || ''}
             onChange={(e) => { setForm(f => ({ ...f, identity_type: e.target.value })); onEdit('identity_type'); }} {...ari('identity_type')}>
             {IDENTITY_TYPES.map(o => (
@@ -466,11 +467,11 @@ function StepIdentity({ form, setForm, lang, errors = {}, clearError }) {
           <FieldError id="ca-err-identity_type" msg={err.identity_type} />
         </label>
         <label className="ca-field">
-          <span className="ca-field-label">{isHt ? 'Lyen Dokiman ID' : 'ID Document URL'} {isHt ? '(si genyen)' : '(if available)'}</span>
+          <span className="ca-field-label">{isHt ? 'Lyen Dokiman ID' : inlineText(lang, 'ID Document URL')} {isHt ? '(si genyen)' : inlineText(lang, '(if available)')}</span>
           <input className="field-input" type="url" value={form.identity_document_url || ''}
             onChange={(e) => setForm(f => ({ ...f, identity_document_url: e.target.value }))}
             placeholder="https://drive.google.com/..." />
-          <span className="ca-field-hint">{isHt ? 'Ou ka mete yon lyen Google Drive, Dropbox, elatriye.' : 'You can link a Google Drive, Dropbox, etc.'}</span>
+          <span className="ca-field-hint">{isHt ? 'Ou ka mete yon lyen Google Drive, Dropbox, elatriye.' : inlineText(lang, 'You can link a Google Drive, Dropbox, etc.')}</span>
         </label>
       </div>
     </div>
@@ -487,14 +488,14 @@ function StepInfo({ form, setForm, lang, errors = {}, clearError }) {
     <div className="ca-step-content">
       <div className="ca-step-header">
         <i className="fas fa-user ca-step-icon" aria-hidden="true" />
-        <h3>{isHt ? 'Enfòmasyon Kreyatè' : 'Creator Information'}</h3>
-        <p>{isHt ? 'Di nou plis sou ou ak sa ou vle fè.' : 'Tell us more about yourself and what you want to do.'}</p>
+        <h3>{isHt ? 'Enfòmasyon Kreyatè' : inlineText(lang, 'Creator Information')}</h3>
+        <p>{isHt ? 'Di nou plis sou ou ak sa ou vle fè.' : inlineText(lang, 'Tell us more about yourself and what you want to do.')}</p>
         <RequiredLegend lang={lang} />
       </div>
       <div className="ca-field-group">
         <div className="ca-field-row">
           <label className="ca-field">
-            <span className="ca-field-label">{isHt ? 'Peyi' : 'Country'} <span className="ca-req-star" aria-hidden="true">*</span></span>
+            <span className="ca-field-label">{isHt ? 'Peyi' : inlineText(lang, 'Country')} <span className="ca-req-star" aria-hidden="true">*</span></span>
             <select className={`field-input${invalid('country')}`} value={form.country || ''}
               onChange={(e) => { setForm(f => ({ ...f, country: e.target.value })); onEdit('country'); }} {...ari('country')}>
               {COUNTRY_PRESETS.map(c => <option key={c.code} value={c.code}>{c.label} ({c.code})</option>)}
@@ -502,34 +503,34 @@ function StepInfo({ form, setForm, lang, errors = {}, clearError }) {
             <FieldError id="ca-err-country" msg={err.country} />
           </label>
           <label className="ca-field">
-            <span className="ca-field-label">{isHt ? 'Vil' : 'City'}</span>
+            <span className="ca-field-label">{isHt ? 'Vil' : inlineText(lang, 'City')}</span>
             <input className="field-input" type="text" value={form.city || ''}
               onChange={(e) => setForm(f => ({ ...f, city: e.target.value }))}
-              placeholder={isHt ? 'Pòtoprens' : 'Port-au-Prince'} />
+              placeholder={isHt ? 'Pòtoprens' : inlineText(lang, 'Port-au-Prince')} />
           </label>
         </div>
         <label className="ca-field">
-          <span className="ca-field-label">{isHt ? 'Biyografi' : 'Biography'} <span className="ca-req-star" aria-hidden="true">*</span></span>
+          <span className="ca-field-label">{isHt ? 'Biyografi' : inlineText(lang, 'Biography')} <span className="ca-req-star" aria-hidden="true">*</span></span>
           <textarea className={`field-input field-textarea${invalid('biography')}`} value={form.biography || ''}
             onChange={(e) => { setForm(f => ({ ...f, biography: e.target.value })); onEdit('biography'); }}
-            placeholder={isHt ? 'Di nou sou ou... Kisa ou anseye? Kisa ou kreye?' : 'Tell us about yourself... What do you teach/create?'}
+            placeholder={isHt ? 'Di nou sou ou... Kisa ou anseye? Kisa ou kreye?' : inlineText(lang, 'Tell us about yourself... What do you teach/create?')}
             rows={4} minLength={20} maxLength={2000} {...ari('biography')} />
           <FieldError id="ca-err-biography" msg={err.biography} />
           <span className="ca-field-counter">{(form.biography || '').length}/2000</span>
         </label>
         <label className="ca-field">
-          <span className="ca-field-label">{isHt ? 'Lang ou pale' : 'Languages'} <span className="ca-req-star" aria-hidden="true">*</span></span>
+          <span className="ca-field-label">{isHt ? 'Lang ou pale' : inlineText(lang, 'Languages')} <span className="ca-req-star" aria-hidden="true">*</span></span>
           <input className={`field-input${invalid('languages')}`} type="text" value={form.languages || ''}
             onChange={(e) => { setForm(f => ({ ...f, languages: e.target.value })); onEdit('languages'); }}
-            placeholder={isHt ? 'Kreyòl, Fransè, Angle' : 'Haitian Creole, French, English'} {...ari('languages')} />
+            placeholder={isHt ? 'Kreyòl, Fransè, Angle' : inlineText(lang, 'Haitian Creole, French, English')} {...ari('languages')} />
           <FieldError id="ca-err-languages" msg={err.languages} />
-          <span className="ca-field-hint">{isHt ? 'Separe ak vigil' : 'Comma separated'}</span>
+          <span className="ca-field-hint">{isHt ? 'Separe ak vigil' : inlineText(lang, 'Comma separated')}</span>
         </label>
         <label className="ca-field">
-          <span className="ca-field-label">{isHt ? 'Poukisa ou vle vin kreyatè?' : 'Why become a creator?'} <span className="ca-req-star" aria-hidden="true">*</span></span>
+          <span className="ca-field-label">{isHt ? 'Poukisa ou vle vin kreyatè?' : inlineText(lang, 'Why become a creator?')} <span className="ca-req-star" aria-hidden="true">*</span></span>
           <textarea className={`field-input field-textarea${invalid('why_creator')}`} value={form.why_creator || ''}
             onChange={(e) => { setForm(f => ({ ...f, why_creator: e.target.value })); onEdit('why_creator'); }}
-            placeholder={isHt ? 'Kisa ki motive ou? Kisa ou vle reyalize?' : 'What motivates you? What do you want to achieve?'}
+            placeholder={isHt ? 'Kisa ki motive ou? Kisa ou vle reyalize?' : inlineText(lang, 'What motivates you? What do you want to achieve?')}
             rows={3} minLength={10} maxLength={1000} {...ari('why_creator')} />
           <FieldError id="ca-err-why_creator" msg={err.why_creator} />
         </label>
@@ -548,13 +549,13 @@ function StepExperience({ form, setForm, lang, errors = {}, clearError }) {
     <div className="ca-step-content">
       <div className="ca-step-header">
         <i className="fas fa-briefcase ca-step-icon" aria-hidden="true" />
-        <h3>{isHt ? 'Eksperyans' : 'Experience'}</h3>
-        <p>{isHt ? 'Pataje eksperyans ou nan domèn ou a.' : 'Share your experience in your field.'}</p>
+        <h3>{isHt ? 'Eksperyans' : inlineText(lang, 'Experience')}</h3>
+        <p>{isHt ? 'Pataje eksperyans ou nan domèn ou a.' : inlineText(lang, 'Share your experience in your field.')}</p>
         <RequiredLegend lang={lang} />
       </div>
       <div className="ca-field-group">
         <label className="ca-field">
-          <span className="ca-field-label">{isHt ? 'Ane Eksperyans' : 'Years of Experience'} <span className="ca-req-star" aria-hidden="true">*</span></span>
+          <span className="ca-field-label">{isHt ? 'Ane Eksperyans' : inlineText(lang, 'Years of Experience')} <span className="ca-req-star" aria-hidden="true">*</span></span>
           <select className={`field-input${invalid('experience_years')}`} value={form.experience_years || ''}
             onChange={(e) => { setForm(f => ({ ...f, experience_years: e.target.value })); onEdit('experience_years'); }} {...ari('experience_years')}>
             {EXPERIENCE_OPTIONS.map(o => (
@@ -564,20 +565,20 @@ function StepExperience({ form, setForm, lang, errors = {}, clearError }) {
           <FieldError id="ca-err-experience_years" msg={err.experience_years} />
         </label>
         <label className="ca-field">
-          <span className="ca-field-label">{isHt ? 'Deskripsyon Eksperyans' : 'Experience Description'} <span className="ca-req-star" aria-hidden="true">*</span></span>
+          <span className="ca-field-label">{isHt ? 'Deskripsyon Eksperyans' : inlineText(lang, 'Experience Description')} <span className="ca-req-star" aria-hidden="true">*</span></span>
           <textarea className={`field-input field-textarea${invalid('experience_description')}`} value={form.experience_description || ''}
             onChange={(e) => { setForm(f => ({ ...f, experience_description: e.target.value })); onEdit('experience_description'); }}
-            placeholder={isHt ? 'Dekri eksperyans ou an detay...' : 'Describe your experience in detail...'}
+            placeholder={isHt ? 'Dekri eksperyans ou an detay...' : inlineText(lang, 'Describe your experience in detail...')}
             rows={4} minLength={20} maxLength={2000} {...ari('experience_description')} />
           <FieldError id="ca-err-experience_description" msg={err.experience_description} />
           <span className="ca-field-counter">{(form.experience_description || '').length}/2000</span>
         </label>
         <label className="ca-field">
-          <span className="ca-field-label">{isHt ? 'Edisyon (si genyen)' : 'Education (if any)'}</span>
+          <span className="ca-field-label">{isHt ? 'Edisyon (si genyen)' : inlineText(lang, 'Education (if any)')}</span>
           <input className="field-input" type="text" value={form.education || ''}
             onChange={(e) => setForm(f => ({ ...f, education: e.target.value }))}
-            placeholder={isHt ? 'Université, Diplôme, Ane' : 'University, Degree, Year'} />
-          <span className="ca-field-hint">{isHt ? 'Enstitisyon, Diplòm, Ane — separe ak vigil' : 'Institution, Degree, Year — comma separated'}</span>
+            placeholder={isHt ? 'Université, Diplôme, Ane' : inlineText(lang, 'University, Degree, Year')} />
+          <span className="ca-field-hint">{isHt ? 'Enstitisyon, Diplòm, Ane — separe ak vigil' : inlineText(lang, 'Institution, Degree, Year — comma separated')}</span>
         </label>
       </div>
     </div>
@@ -594,33 +595,33 @@ function StepCategory({ form, setForm, lang, errors = {}, clearError }) {
     <div className="ca-step-content">
       <div className="ca-step-header">
         <i className="fas fa-tag ca-step-icon" aria-hidden="true" />
-        <h3>{isHt ? 'Kategori & Konpetans' : 'Category & Skills'}</h3>
-        <p>{isHt ? 'Chwazi domèn ou yo ak konpetans ou genyen.' : 'Choose your domains and skills.'}</p>
+        <h3>{isHt ? 'Kategori & Konpetans' : inlineText(lang, 'Category & Skills')}</h3>
+        <p>{isHt ? 'Chwazi domèn ou yo ak konpetans ou genyen.' : inlineText(lang, 'Choose your domains and skills.')}</p>
         <RequiredLegend lang={lang} />
       </div>
       <div className="ca-field-group">
         <label className="ca-field">
-          <span className="ca-field-label">{isHt ? 'Kategori' : 'Categories'} <span className="ca-req-star" aria-hidden="true">*</span></span>
+          <span className="ca-field-label">{isHt ? 'Kategori' : inlineText(lang, 'Categories')} <span className="ca-req-star" aria-hidden="true">*</span></span>
           <input className={`field-input${invalid('categories')}`} type="text" value={form.categories || ''}
             onChange={(e) => { setForm(f => ({ ...f, categories: e.target.value })); onEdit('categories'); }}
-            placeholder={isHt ? 'Kou, Mizik, Devlopman' : 'Courses, Music, Development'} {...ari('categories')} />
+            placeholder={isHt ? 'Kou, Mizik, Devlopman' : inlineText(lang, 'Courses, Music, Development')} {...ari('categories')} />
           <FieldError id="ca-err-categories" msg={err.categories} />
-          <span className="ca-field-hint">{isHt ? 'Separe ak vigil' : 'Comma separated'}</span>
+          <span className="ca-field-hint">{isHt ? 'Separe ak vigil' : inlineText(lang, 'Comma separated')}</span>
         </label>
         <label className="ca-field">
-          <span className="ca-field-label">{isHt ? 'Konpetans' : 'Skills'} <span className="ca-req-star" aria-hidden="true">*</span></span>
+          <span className="ca-field-label">{isHt ? 'Konpetans' : inlineText(lang, 'Skills')} <span className="ca-req-star" aria-hidden="true">*</span></span>
           <input className={`field-input${invalid('skills')}`} type="text" value={form.skills || ''}
             onChange={(e) => { setForm(f => ({ ...f, skills: e.target.value })); onEdit('skills'); }}
-            placeholder={isHt ? 'JavaScript, Python, Mizik, Design' : 'JavaScript, Python, Music, Design'} {...ari('skills')} />
+            placeholder={isHt ? 'JavaScript, Python, Mizik, Design' : inlineText(lang, 'JavaScript, Python, Music, Design')} {...ari('skills')} />
           <FieldError id="ca-err-skills" msg={err.skills} />
-          <span className="ca-field-hint">{isHt ? 'Separe ak vigil' : 'Comma separated'}</span>
+          <span className="ca-field-hint">{isHt ? 'Separe ak vigil' : inlineText(lang, 'Comma separated')}</span>
         </label>
         <label className="ca-field">
-          <span className="ca-field-label">{isHt ? 'Espesyalite' : 'Specialties'}</span>
+          <span className="ca-field-label">{isHt ? 'Espesyalite' : inlineText(lang, 'Specialties')}</span>
           <input className="field-input" type="text" value={form.specialties || ''}
             onChange={(e) => setForm(f => ({ ...f, specialties: e.target.value }))}
-            placeholder={isHt ? 'Web Dev, Mizik Kreyòl, Fotografi' : 'Web Dev, Haitian Music, Photography'} />
-          <span className="ca-field-hint">{isHt ? 'Ki sa ou pi bon nan?' : 'What are you best at?'}</span>
+            placeholder={isHt ? 'Web Dev, Mizik Kreyòl, Fotografi' : inlineText(lang, 'Web Dev, Haitian Music, Photography')} />
+          <span className="ca-field-hint">{isHt ? 'Ki sa ou pi bon nan?' : inlineText(lang, 'What are you best at?')}</span>
         </label>
       </div>
     </div>
@@ -633,21 +634,21 @@ function StepPortfolio({ form, setForm, lang }) {
     <div className="ca-step-content">
       <div className="ca-step-header">
         <i className="fas fa-palette ca-step-icon" aria-hidden="true" />
-        <h3>{isHt ? 'Pòtfolyo' : 'Portfolio'}</h3>
-        <p>{isHt ? 'Montre travay ou yo. Sa bay admin yon lide de sa ou kapab fè.' : 'Showcase your work. This gives admins an idea of your capabilities.'}</p>
+        <h3>{isHt ? 'Pòtfolyo' : inlineText(lang, 'Portfolio')}</h3>
+        <p>{isHt ? 'Montre travay ou yo. Sa bay admin yon lide de sa ou kapab fè.' : inlineText(lang, 'Showcase your work. This gives admins an idea of your capabilities.')}</p>
       </div>
       <div className="ca-field-group">
         <label className="ca-field">
-          <span className="ca-field-label">{isHt ? 'Lyen Pòtfolyo' : 'Portfolio Link'}</span>
+          <span className="ca-field-label">{isHt ? 'Lyen Pòtfolyo' : inlineText(lang, 'Portfolio Link')}</span>
           <input className="field-input" type="url" value={form.portfolio_url || ''}
             onChange={(e) => setForm(f => ({ ...f, portfolio_url: e.target.value }))}
             placeholder="https://github.com/yourname" />
         </label>
         <label className="ca-field">
-          <span className="ca-field-label">{isHt ? 'Deskripsyon Pòtfolyo' : 'Portfolio Description'}</span>
+          <span className="ca-field-label">{isHt ? 'Deskripsyon Pòtfolyo' : inlineText(lang, 'Portfolio Description')}</span>
           <textarea className="field-input field-textarea" value={form.portfolio_description || ''}
             onChange={(e) => setForm(f => ({ ...f, portfolio_description: e.target.value }))}
-            placeholder={isHt ? 'Dekri pi bon pwojè ou yo...' : 'Describe your best projects...'}
+            placeholder={isHt ? 'Dekri pi bon pwojè ou yo...' : inlineText(lang, 'Describe your best projects...')}
             rows={3} maxLength={1000} />
         </label>
       </div>
@@ -665,22 +666,22 @@ function StepSocial({ form, setForm, lang, errors = {}, clearError }) {
     <div className="ca-step-content">
       <div className="ca-step-header">
         <i className="fas fa-share-alt ca-step-icon" aria-hidden="true" />
-        <h3>{isHt ? 'Lyen Sosyal' : 'Social Links'}</h3>
-        <p>{isHt ? 'Pataje lyen rezo sosyal ou yo.' : 'Share your social media links.'}</p>
+        <h3>{isHt ? 'Lyen Sosyal' : inlineText(lang, 'Social Links')}</h3>
+        <p>{isHt ? 'Pataje lyen rezo sosyal ou yo.' : inlineText(lang, 'Share your social media links.')}</p>
         <RequiredLegend lang={lang} />
       </div>
       <div className="ca-field-group">
         <label className="ca-field">
-          <span className="ca-field-label">{isHt ? 'Sit Wèb' : 'Website'}</span>
+          <span className="ca-field-label">{isHt ? 'Sit Wèb' : inlineText(lang, 'Website')}</span>
           <input className="field-input" type="url" value={form.website_url || ''}
             onChange={(e) => setForm(f => ({ ...f, website_url: e.target.value }))}
             placeholder="https://yourwebsite.com" />
         </label>
         <label className="ca-field">
-          <span className="ca-field-label">{isHt ? 'Imèl Kontak' : 'Contact Email'} <span className="ca-req-star" aria-hidden="true">*</span></span>
+          <span className="ca-field-label">{isHt ? 'Imèl Kontak' : inlineText(lang, 'Contact Email')} <span className="ca-req-star" aria-hidden="true">*</span></span>
           <input className={`field-input${invalid('contact_email')}`} type="email" value={form.contact_email || ''}
             onChange={(e) => { setForm(f => ({ ...f, contact_email: e.target.value })); onEdit('contact_email'); }}
-            placeholder={isHt ? 'ou@example.com' : 'you@example.com'} {...ari('contact_email')} />
+            placeholder={isHt ? 'ou@example.com' : inlineText(lang, 'you@example.com')} {...ari('contact_email')} />
           <FieldError id="ca-err-contact_email" msg={err.contact_email} />
         </label>
         {['twitter', 'github', 'linkedin', 'youtube', 'instagram', 'facebook'].map((platform) => (
@@ -709,16 +710,16 @@ function StepTerms({ form, setForm, lang, errors = {}, clearError }) {
   };
   const invalid = (field) => (err[field] ? ' ca-terms-invalid' : '');
   const TERMS_FIELDS = [
-    { key: 'terms_accepted', label: isHt ? 'Kondisyon Itilizasyon' : 'Terms of Service', desc: isHt ? 'Mwen aksepte kondisyon itilizasyon Atelnyo yo.' : 'I accept the Atelnyo Terms of Service.' },
-    { key: 'code_of_conduct_accepted', label: isHt ? 'Kòd Kondwit' : 'Code of Conduct', desc: isHt ? 'Mwen angaje m respekte kòd kondwit platfòm nan.' : 'I commit to following the platform code of conduct.' },
-    { key: 'content_guidelines_accepted', label: isHt ? 'Gid Kontni' : 'Content Guidelines', desc: isHt ? 'Mwen konprann epi m ap swiv gid kontni yo (pa gen copyright, kontni ofansif, elatriye).' : 'I understand and will follow content guidelines (no copyright, offensive content, etc.).' },
+    { key: 'terms_accepted', label: isHt ? 'Kondisyon Itilizasyon' : inlineText(lang, 'Terms of Service'), desc: isHt ? 'Mwen aksepte kondisyon itilizasyon Atelnyo yo.' : inlineText(lang, 'I accept the Atelnyo Terms of Service.') },
+    { key: 'code_of_conduct_accepted', label: isHt ? 'Kòd Kondwit' : inlineText(lang, 'Code of Conduct'), desc: isHt ? 'Mwen angaje m respekte kòd kondwit platfòm nan.' : inlineText(lang, 'I commit to following the platform code of conduct.') },
+    { key: 'content_guidelines_accepted', label: isHt ? 'Gid Kontni' : inlineText(lang, 'Content Guidelines'), desc: isHt ? 'Mwen konprann epi m ap swiv gid kontni yo (pa gen copyright, kontni ofansif, elatriye).' : inlineText(lang, 'I understand and will follow content guidelines (no copyright, offensive content, etc.).') },
   ];
   return (
     <div className="ca-step-content">
       <div className="ca-step-header">
         <i className="fas fa-file-contract ca-step-icon" aria-hidden="true" />
-        <h3>{isHt ? 'Kondisyon & Règ' : 'Terms & Conditions'}</h3>
-        <p>{isHt ? 'Tanpri li epi aksepte kondisyon yo anvan ou kontinye.' : 'Please read and accept the terms before proceeding.'}</p>
+        <h3>{isHt ? 'Kondisyon & Règ' : inlineText(lang, 'Terms & Conditions')}</h3>
+        <p>{isHt ? 'Tanpri li epi aksepte kondisyon yo anvan ou kontinye.' : inlineText(lang, 'Please read and accept the terms before proceeding.')}</p>
         <RequiredLegend lang={lang} />
       </div>
       <div className="ca-terms-list">
@@ -745,34 +746,34 @@ function StepTerms({ form, setForm, lang, errors = {}, clearError }) {
 function StepReview({ form, lang }) {
   const isHt = lang === 'ht';
   const sections = [
-    { label: isHt ? 'Idantite' : 'Identity', fields: [
-      { label: isHt ? 'Non' : 'Name', value: form.full_name },
-      { label: isHt ? 'Dat Nesans' : 'DOB', value: form.date_of_birth },
-      { label: isHt ? 'ID Type' : 'ID Type', value: form.identity_type },
+    { label: isHt ? 'Idantite' : inlineText(lang, 'Identity'), fields: [
+      { label: isHt ? 'Non' : inlineText(lang, 'Name'), value: form.full_name },
+      { label: isHt ? 'Dat Nesans' : inlineText(lang, 'DOB'), value: form.date_of_birth },
+      { label: isHt ? 'ID Type' : inlineText(lang, 'ID Type'), value: form.identity_type },
     ]},
-    { label: isHt ? 'Enfòmasyon' : 'Info', fields: [
-      { label: isHt ? 'Peyi' : 'Country', value: form.country },
-      { label: isHt ? 'Vil' : 'City', value: form.city },
-      { label: isHt ? 'Lang' : 'Languages', value: form.languages },
+    { label: isHt ? 'Enfòmasyon' : inlineText(lang, 'Info'), fields: [
+      { label: isHt ? 'Peyi' : inlineText(lang, 'Country'), value: form.country },
+      { label: isHt ? 'Vil' : inlineText(lang, 'City'), value: form.city },
+      { label: isHt ? 'Lang' : inlineText(lang, 'Languages'), value: form.languages },
     ]},
-    { label: isHt ? 'Eksperyans' : 'Experience', fields: [
-      { label: isHt ? 'Ane' : 'Years', value: form.experience_years },
+    { label: isHt ? 'Eksperyans' : inlineText(lang, 'Experience'), fields: [
+      { label: isHt ? 'Ane' : inlineText(lang, 'Years'), value: form.experience_years },
     ]},
-    { label: isHt ? 'Kategori' : 'Categories', fields: [
-      { label: isHt ? 'Kategori' : 'Categories', value: form.categories },
-      { label: isHt ? 'Konpetans' : 'Skills', value: form.skills },
+    { label: isHt ? 'Kategori' : inlineText(lang, 'Categories'), fields: [
+      { label: isHt ? 'Kategori' : inlineText(lang, 'Categories'), value: form.categories },
+      { label: isHt ? 'Konpetans' : inlineText(lang, 'Skills'), value: form.skills },
     ]},
-    { label: isHt ? 'Kontak' : 'Contact', fields: [
-      { label: isHt ? 'Imèl' : 'Email', value: form.contact_email },
-      { label: isHt ? 'Sit Wèb' : 'Website', value: form.website_url },
+    { label: isHt ? 'Kontak' : inlineText(lang, 'Contact'), fields: [
+      { label: isHt ? 'Imèl' : inlineText(lang, 'Email'), value: form.contact_email },
+      { label: isHt ? 'Sit Wèb' : inlineText(lang, 'Website'), value: form.website_url },
     ]},
   ];
   return (
     <div className="ca-step-content">
       <div className="ca-step-header">
         <i className="fas fa-clipboard-check ca-step-icon" aria-hidden="true" />
-        <h3>{isHt ? 'Revize aplikasyon ou' : 'Review Your Application'}</h3>
-        <p>{isHt ? 'Tcheke tout enfòmasyon yo anvan ou voye.' : 'Check all information before submitting.'}</p>
+        <h3>{isHt ? 'Revize aplikasyon ou' : inlineText(lang, 'Review Your Application')}</h3>
+        <p>{isHt ? 'Tcheke tout enfòmasyon yo anvan ou voye.' : inlineText(lang, 'Check all information before submitting.')}</p>
       </div>
       <div className="ca-review-sections">
         {sections.map((sec) => (
@@ -790,7 +791,7 @@ function StepReview({ form, lang }) {
       {(!form.terms_accepted || !form.code_of_conduct_accepted) && (
         <p className="ca-terms-required">
           <i className="fas fa-exclamation-circle ca-review-error-icon" aria-hidden="true" />
-          {isHt ? 'Ou poko aksepte kondisyon yo. Retounen nan Step 7.' : 'You haven\'t accepted the terms. Go back to Step 7.'}
+          {isHt ? 'Ou poko aksepte kondisyon yo. Retounen nan Step 7.' : inlineText(lang, 'You haven\'t accepted the terms. Go back to Step 7.')}
         </p>
       )}
     </div>
@@ -804,29 +805,29 @@ function StepSubmit({ form, lang, submitting, onSubmit }) {
       <div className="ca-step-submit-icon">
         <i className="fas fa-paper-plane" aria-hidden="true" />
       </div>
-      <h3>{isHt ? 'Pou voye aplikasyon ou!' : 'Ready to Submit!'}</h3>
+      <h3>{isHt ? 'Pou voye aplikasyon ou!' : inlineText(lang, 'Ready to Submit!')}</h3>
       <p>{isHt
         ? 'Klike sou bouton an anba a pou voye aplikasyon ou an. N ap revize li epi n ap kontakte w byento.'
-        : 'Click the button below to submit your application. We\'ll review it and get back to you soon.'}</p>
+        : inlineText(lang, 'Click the button below to submit your application. We\'ll review it and get back to you soon.')}</p>
       <div className="ca-submit-summary">
         <div className="ca-submit-stat">
           <span className="ca-submit-stat-value">{(form.biography || '').length || 0}</span>
-          <span className="ca-submit-stat-label">{isHt ? 'Karaktè Biyografi' : 'Bio Characters'}</span>
+          <span className="ca-submit-stat-label">{isHt ? 'Karaktè Biyografi' : inlineText(lang, 'Bio Characters')}</span>
         </div>
         <div className="ca-submit-stat">
           <span className="ca-submit-stat-value">{(form.skills || '').split(',').filter(Boolean).length || 0}</span>
-          <span className="ca-submit-stat-label">{isHt ? 'Konpetans' : 'Skills'}</span>
+          <span className="ca-submit-stat-label">{isHt ? 'Konpetans' : inlineText(lang, 'Skills')}</span>
         </div>
         <div className="ca-submit-stat">
           <span className="ca-submit-stat-value">{(form.languages || '').split(',').filter(Boolean).length || 0}</span>
-          <span className="ca-submit-stat-label">{isHt ? 'Lang' : 'Languages'}</span>
+          <span className="ca-submit-stat-label">{isHt ? 'Lang' : inlineText(lang, 'Languages')}</span>
         </div>
       </div>
       <button type="button" className="btn-primary ca-submit-btn" onClick={onSubmit} disabled={submitting}>
         {submitting ? (
-          <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {isHt ? 'Ap voye...' : 'Submitting...'}</>
+          <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> {isHt ? 'Ap voye...' : inlineText(lang, 'Submitting...')}</>
         ) : (
-          <><i className="fas fa-paper-plane" aria-hidden="true" /> {isHt ? 'Voye aplikasyon' : 'Submit Application'}</>
+          <><i className="fas fa-paper-plane" aria-hidden="true" /> {isHt ? 'Voye aplikasyon' : inlineText(lang, 'Submit Application')}</>
         )}
       </button>
     </div>
@@ -866,24 +867,24 @@ function StatusDashboard({ app, lang, onResume }) {
       <div className="ca-dash-stats">
         <div className="ca-dash-stat">
           <span className="ca-dash-stat-value">{app.status}</span>
-          <span className="ca-dash-stat-label">{isHt ? 'Estati' : 'Status'}</span>
+          <span className="ca-dash-stat-label">{isHt ? 'Estati' : inlineText(lang, 'Status')}</span>
         </div>
         <div className="ca-dash-stat">
           <span className="ca-dash-stat-value">
             {app.reviewed_at ? new Date(app.reviewed_at).toLocaleDateString() : '—'}
           </span>
-          <span className="ca-dash-stat-label">{isHt ? 'Revize' : 'Reviewed'}</span>
+          <span className="ca-dash-stat-label">{isHt ? 'Revize' : inlineText(lang, 'Reviewed')}</span>
         </div>
         <div className="ca-dash-stat">
           <span className="ca-dash-stat-value">{app.created_at ? new Date(app.created_at).toLocaleDateString() : '—'}</span>
-          <span className="ca-dash-stat-label">{isHt ? 'Kreye' : 'Created'}</span>
+          <span className="ca-dash-stat-label">{isHt ? 'Kreye' : inlineText(lang, 'Created')}</span>
         </div>
       </div>
 
       {/* Timeline */}
       {history.length > 0 && (
         <div className="ca-dash-timeline">
-          <h4>{isHt ? 'Istoryo' : 'Timeline'}</h4>
+          <h4>{isHt ? 'Istoryo' : inlineText(lang, 'Timeline')}</h4>
           {history.map((entry, i) => (
             <div key={i} className="ca-dash-timeline-item">
               <div className="ca-dash-timeline-dot" />
@@ -902,7 +903,7 @@ function StatusDashboard({ app, lang, onResume }) {
         <div className="ca-dash-rejection">
           <i className="fas fa-quote-left" aria-hidden="true" />
           <div>
-            <strong>{isHt ? 'Nòt Admin' : 'Admin Note'}</strong>
+            <strong>{isHt ? 'Nòt Admin' : inlineText(lang, 'Admin Note')}</strong>
             <p>{app.review_note}</p>
           </div>
         </div>
@@ -913,7 +914,7 @@ function StatusDashboard({ app, lang, onResume }) {
         <div className="ca-dash-need-info">
           <i className="fas fa-circle-info ca-info-need-icon" aria-hidden="true" />
           <div>
-            <strong>{isHt ? 'Nou bezwen plis enfòmasyon' : 'We Need More Information'}</strong>
+            <strong>{isHt ? 'Nou bezwen plis enfòmasyon' : inlineText(lang, 'We Need More Information')}</strong>
             <p>{app.review_note}</p>
           </div>
         </div>
@@ -1287,7 +1288,7 @@ export default function CreatorApply({ lang = 'en', showToast, user, onClose }) 
       removeFormDraft(DRAFT_KEY).catch(() => {});
       localStorage.removeItem(DRAFT_KEY);
       showToast?.(
-        isHt ? '✨ Aplikasyon ou an rive! N ap revize li byento.' : '✨ Application submitted! We\'ll review it soon.',
+        isHt ? '✨ Aplikasyon ou an rive! N ap revize li byento.' : inlineText(lang, '✨ Application submitted! We\'ll review it soon.'),
         'paper-plane',
       );
     } catch (err) {
@@ -1306,9 +1307,9 @@ export default function CreatorApply({ lang = 'en', showToast, user, onClose }) 
           });
         fieldErr = msgs.length > 0
           ? msgs.slice(0, 3).join('\n')
-          : (isHt ? 'Erè validasyon.' : 'Validation error.');
+          : (isHt ? 'Erè validasyon.' : inlineText(lang, 'Validation error.'));
       } else {
-        fieldErr = err?.message || (isHt ? 'Pa kapab voye aplikasyon.' : 'Could not submit.');
+        fieldErr = err?.message || (isHt ? 'Pa kapab voye aplikasyon.' : inlineText(lang, 'Could not submit.'));
       }
       setError(fieldErr);
       showToast?.(fieldErr, 'circle-exclamation');
@@ -1352,12 +1353,12 @@ export default function CreatorApply({ lang = 'en', showToast, user, onClose }) 
       <div className="creator-apply-header">
         <button type="button" className="icon-btn"
           onClick={() => { onClose ? onClose() : navigate('/'); }}
-          aria-label={isHt ? 'Fèmen' : 'Close'}>
+          aria-label={isHt ? 'Fèmen' : inlineText(lang, 'Close')}>
           <i className="fas fa-arrow-left" aria-hidden="true" />
         </button>
         <h2>
           <i className="fas fa-chalkboard-teacher" aria-hidden="true" />
-          {isHt ? 'Vin Kreyatè' : 'Become a Creator'}
+          {isHt ? 'Vin Kreyatè' : inlineText(lang, 'Become a Creator')}
         </h2>
       </div>
 
@@ -1369,7 +1370,7 @@ export default function CreatorApply({ lang = 'en', showToast, user, onClose }) 
             <i className="fas fa-circle-exclamation" aria-hidden="true" />
             <p>{error}</p>
             <button type="button" className="btn-primary" onClick={() => window.location.reload()}>
-              {isHt ? 'Eseye ankò' : 'Retry'}
+              {isHt ? 'Eseye ankò' : inlineText(lang, 'Retry')}
             </button>
           </div>
         ) : showIntro ? (

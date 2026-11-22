@@ -10,6 +10,7 @@
  * Toujou gen Retry button.
  */
 import React from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── Error config ─────────────────────────────────────────────────────
 
@@ -156,7 +157,7 @@ export default function MediaError({
           {onRetry && (
             <button type="button" className="media-error-retry" onClick={onRetry}>
               <i className="fas fa-redo" aria-hidden="true" />
-              {isHt ? 'Eseye ankò' : 'Retry'}
+              {isHt ? 'Eseye ankò' : inlineText(lang, 'Retry')}
             </button>
           )}
         </div>
@@ -176,21 +177,21 @@ export default function MediaError({
         <div className="media-error-detail">
           <span className="media-error-detail-label">
             <i className="fas fa-question-circle" aria-hidden="true" />
-            {isHt ? 'Kisa ki rive?' : 'What happened?'}
+            {isHt ? 'Kisa ki rive?' : inlineText(lang, 'What happened?')}
           </span>
           <p className="media-error-detail-text">{why}</p>
         </div>
         <div className="media-error-detail">
           <span className="media-error-detail-label">
             <i className="fas fa-wrench" aria-hidden="true" />
-            {isHt ? 'Kijan pou rezoud?' : 'How to fix it?'}
+            {isHt ? 'Kijan pou rezoud?' : inlineText(lang, 'How to fix it?')}
           </span>
           <p className="media-error-detail-text">{fix}</p>
         </div>
         <div className="media-error-detail">
           <span className="media-error-detail-label">
             <i className="fas fa-arrow-right" aria-hidden="true" />
-            {isHt ? 'Kisa pou w fè apre?' : 'What to do next?'}
+            {isHt ? 'Kisa pou w fè apre?' : inlineText(lang, 'What to do next?')}
           </span>
           <p className="media-error-detail-text">{whatNext}</p>
         </div>
@@ -199,7 +200,7 @@ export default function MediaError({
       {onRetry && (
         <button type="button" className="btn-primary media-error-retry-btn" onClick={onRetry}>
           <i className="fas fa-redo" aria-hidden="true" />
-          {isHt ? 'Eseye ankò' : 'Retry'}
+          {isHt ? 'Eseye ankò' : inlineText(lang, 'Retry')}
         </button>
       )}
     </div>

@@ -18,6 +18,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { mediaProviderService } from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
 
@@ -570,15 +571,15 @@ function ProviderReadme({ provider, readme, t, onBack, onStartSetup, lang: propL
 
   // Build structured sections from readme markdown or defaults
   const sections = {
-    overview: provider.description || (isHt ? 'Pa gen deskripsyon' : 'No description'),
+    overview: provider.description || (isHt ? 'Pa gen deskripsyon' : inlineText(lang, 'No description')),
     advantages: [
-      isHt ? 'Fasil pou itilize' : 'Easy to use',
-      isHt ? 'Gratis pou kòmanse' : 'Free to start',
-      isHt ? 'Bon pèfòmans' : 'Good performance',
+      isHt ? 'Fasil pou itilize' : inlineText(lang, 'Easy to use'),
+      isHt ? 'Gratis pou kòmanse' : inlineText(lang, 'Free to start'),
+      isHt ? 'Bon pèfòmans' : inlineText(lang, 'Good performance'),
     ],
     limitations: [
-      isHt ? 'Limit depo gratis' : 'Free storage limit',
-      isHt ? 'Bezon koneksyon entènèt' : 'Requires internet connection',
+      isHt ? 'Limit depo gratis' : inlineText(lang, 'Free storage limit'),
+      isHt ? 'Bezon koneksyon entènèt' : inlineText(lang, 'Requires internet connection'),
     ],
     supported_formats: provider.media_types
       ? provider.media_types.split(',').map((mt) => mt.trim()).filter(Boolean)
@@ -668,7 +669,7 @@ function ProviderReadme({ provider, readme, t, onBack, onStartSetup, lang: propL
       </div>
 
       {/* Quick Jump Navigation */}
-      <nav className="mpc-readme-nav" aria-label={isHt ? 'Navigasyon rapid' : 'Quick navigation'}>
+      <nav className="mpc-readme-nav" aria-label={isHt ? 'Navigasyon rapid' : inlineText(lang, 'Quick navigation')}>
         {README_SECTIONS.map((section) => (
           <button
             key={section}
@@ -686,7 +687,7 @@ function ProviderReadme({ provider, readme, t, onBack, onStartSetup, lang: propL
         {/* Overview */}
         {activeSection === 'overview' && (
           <div className="mpc-readme-section">
-            <h3 className="mpc-readme-h3">{isHt ? 'Apèsi' : 'Overview'}</h3>
+            <h3 className="mpc-readme-h3">{isHt ? 'Apèsi' : inlineText(lang, 'Overview')}</h3>
             <p className="mpc-readme-p">{sections.overview}</p>
           </div>
         )}
@@ -694,7 +695,7 @@ function ProviderReadme({ provider, readme, t, onBack, onStartSetup, lang: propL
         {/* Advantages */}
         {activeSection === 'advantages' && (
           <div className="mpc-readme-section">
-            <h3 className="mpc-readme-h3">{isHt ? 'Avantaj' : 'Advantages'}</h3>
+            <h3 className="mpc-readme-h3">{isHt ? 'Avantaj' : inlineText(lang, 'Advantages')}</h3>
             <ul className="mpc-readme-ul">
               {sections.advantages.map((adv, i) => (
                 <li key={i} className="mpc-readme-li"><i className="fas fa-check-circle mpc-readme-check" aria-hidden="true" /> {adv}</li>
@@ -706,7 +707,7 @@ function ProviderReadme({ provider, readme, t, onBack, onStartSetup, lang: propL
         {/* Limitations */}
         {activeSection === 'limitations' && (
           <div className="mpc-readme-section">
-            <h3 className="mpc-readme-h3">{isHt ? 'Limit' : 'Limitations'}</h3>
+            <h3 className="mpc-readme-h3">{isHt ? 'Limit' : inlineText(lang, 'Limitations')}</h3>
             <ul className="mpc-readme-ul">
               {sections.limitations.map((lim, i) => (
                 <li key={i} className="mpc-readme-li mpc-readme-li-warn"><i className="fas fa-exclamation-triangle" aria-hidden="true" /> {lim}</li>
@@ -718,7 +719,7 @@ function ProviderReadme({ provider, readme, t, onBack, onStartSetup, lang: propL
         {/* Supported Formats */}
         {activeSection === 'supported_formats' && (
           <div className="mpc-readme-section">
-            <h3 className="mpc-readme-h3">{isHt ? 'Fòma Sipòte' : 'Supported Formats'}</h3>
+            <h3 className="mpc-readme-h3">{isHt ? 'Fòma Sipòte' : inlineText(lang, 'Supported Formats')}</h3>
             <div className="mpc-readme-formats">
               {sections.supported_formats.map((fmt, i) => (
                 <span key={i} className="mpc-readme-format-badge">
@@ -733,7 +734,7 @@ function ProviderReadme({ provider, readme, t, onBack, onStartSetup, lang: propL
         {/* Step by Step */}
         {activeSection === 'step_by_step' && (
           <div className="mpc-readme-section">
-            <h3 className="mpc-readme-h3">{isHt ? 'Gid Etap pa Etap' : 'Step by Step Guide'}</h3>
+            <h3 className="mpc-readme-h3">{isHt ? 'Gid Etap pa Etap' : inlineText(lang, 'Step by Step Guide')}</h3>
             <div className="mpc-readme-steps">
               {sections.step_by_step.map((s) => (
                 <div key={s.step} className="mpc-readme-step-card">
@@ -748,7 +749,7 @@ function ProviderReadme({ provider, readme, t, onBack, onStartSetup, lang: propL
         {/* FAQ */}
         {activeSection === 'faq' && (
           <div className="mpc-readme-section">
-            <h3 className="mpc-readme-h3">{isHt ? 'Kesyon yo poze souvan' : 'FAQ'}</h3>
+            <h3 className="mpc-readme-h3">{isHt ? 'Kesyon yo poze souvan' : inlineText(lang, 'FAQ')}</h3>
             <ReadmeFaqSection questions={sections.faq} lang={lang} />
           </div>
         )}
@@ -756,7 +757,7 @@ function ProviderReadme({ provider, readme, t, onBack, onStartSetup, lang: propL
         {/* Common Errors */}
         {activeSection === 'common_errors' && (
           <div className="mpc-readme-section">
-            <h3 className="mpc-readme-h3">{isHt ? 'Erè komen' : 'Common Errors'}</h3>
+            <h3 className="mpc-readme-h3">{isHt ? 'Erè komen' : inlineText(lang, 'Common Errors')}</h3>
             {sections.common_errors.map((err, i) => (
               <ReadmeErrorCard key={i} error={err} index={i} />
             ))}
@@ -766,7 +767,7 @@ function ProviderReadme({ provider, readme, t, onBack, onStartSetup, lang: propL
         {/* Troubleshooting */}
         {activeSection === 'troubleshooting' && (
           <div className="mpc-readme-section">
-            <h3 className="mpc-readme-h3">{isHt ? 'Depanaj' : 'Troubleshooting'}</h3>
+            <h3 className="mpc-readme-h3">{isHt ? 'Depanaj' : inlineText(lang, 'Troubleshooting')}</h3>
             <ul className="mpc-readme-ul">
               {sections.troubleshooting.map((tip, i) => (
                 <li key={i} className="mpc-readme-li"><i className="fas fa-wrench" aria-hidden="true" /> {isHt ? tip.ht : tip.en}</li>
@@ -778,8 +779,8 @@ function ProviderReadme({ provider, readme, t, onBack, onStartSetup, lang: propL
         {/* Example URLs */}
         {activeSection === 'example_urls' && (
           <div className="mpc-readme-section">
-            <h3 className="mpc-readme-h3">{isHt ? 'Egzanp URL' : 'Example URLs'}</h3>
-            <p className="mpc-readme-p">{isHt ? 'Men kèk egzanp URL ki valab :' : 'Here are some valid example URLs:'}</p>
+            <h3 className="mpc-readme-h3">{isHt ? 'Egzanp URL' : inlineText(lang, 'Example URLs')}</h3>
+            <p className="mpc-readme-p">{isHt ? 'Men kèk egzanp URL ki valab :' : inlineText(lang, 'Here are some valid example URLs:')}</p>
             {sections.example_urls.map((url, i) => (
               <ReadmeUrlExample key={i} url={url} isValid={true} index={i} />
             ))}
@@ -789,8 +790,8 @@ function ProviderReadme({ provider, readme, t, onBack, onStartSetup, lang: propL
         {/* Wrong URLs */}
         {activeSection === 'wrong_urls' && (
           <div className="mpc-readme-section">
-            <h3 className="mpc-readme-h3">{isHt ? 'Move URL' : 'Wrong URLs'}</h3>
-            <p className="mpc-readme-p">{isHt ? 'Men egzanp URL ki pa ap mache :' : 'Here are examples of URLs that will NOT work:'}</p>
+            <h3 className="mpc-readme-h3">{isHt ? 'Move URL' : inlineText(lang, 'Wrong URLs')}</h3>
+            <p className="mpc-readme-p">{isHt ? 'Men egzanp URL ki pa ap mache :' : inlineText(lang, 'Here are examples of URLs that will NOT work:')}</p>
             {sections.wrong_urls.map((item, i) => (
               <ReadmeUrlExample key={i} url={item.url} isValid={false} index={i} />
             ))}
@@ -800,7 +801,7 @@ function ProviderReadme({ provider, readme, t, onBack, onStartSetup, lang: propL
         {/* Security Tips */}
         {activeSection === 'security_tips' && (
           <div className="mpc-readme-section">
-            <h3 className="mpc-readme-h3">{isHt ? 'Konsèy Sekirite' : 'Security Tips'}</h3>
+            <h3 className="mpc-readme-h3">{isHt ? 'Konsèy Sekirite' : inlineText(lang, 'Security Tips')}</h3>
             <ul className="mpc-readme-ul">
               {sections.security_tips.map((tip, i) => (
                 <li key={i} className="mpc-readme-li mpc-readme-li-sec"><i className="fas fa-shield-alt" aria-hidden="true" /> {isHt ? tip.ht : tip.en}</li>
@@ -812,13 +813,13 @@ function ProviderReadme({ provider, readme, t, onBack, onStartSetup, lang: propL
         {/* Contact Support */}
         {activeSection === 'contact_support' && (
           <div className="mpc-readme-section">
-            <h3 className="mpc-readme-h3">{isHt ? 'Kontakte Sipò' : 'Contact Support'}</h3>
+            <h3 className="mpc-readme-h3">{isHt ? 'Kontakte Sipò' : inlineText(lang, 'Contact Support')}</h3>
             <div className="mpc-readme-support-card">
               <i className="fas fa-headset" aria-hidden="true" />
               <p>{isHt ? sections.contact_support.ht : sections.contact_support.en}</p>
               {provider.website_url && (
                 <a href={provider.website_url} target="_blank" rel="noopener noreferrer" className="btn-secondary">
-                  <i className="fas fa-external-link-alt" aria-hidden="true" /> {isHt ? 'Vizite Sit' : 'Visit Site'}
+                  <i className="fas fa-external-link-alt" aria-hidden="true" /> {isHt ? 'Vizite Sit' : inlineText(lang, 'Visit Site')}
                 </a>
               )}
             </div>
@@ -1233,13 +1234,13 @@ function MediaPreview({ url, validationResult, onEditUrl, onSave, lang }) {
     <div className="mpc-preview-page">
       <h3 className="mpc-preview-title">
         <i className="fas fa-eye" aria-hidden="true" />
-        {isHt ? 'Aperçu Medya' : 'Media Preview'}
+        {isHt ? 'Aperçu Medya' : inlineText(lang, 'Media Preview')}
       </h3>
 
       {/* URL Editor */}
       <div className="mpc-preview-url-edit">
         <label className="mpc-preview-url-label">
-          {isHt ? 'URL Medya' : 'Media URL'}
+          {isHt ? 'URL Medya' : inlineText(lang, 'Media URL')}
         </label>
         <div className="mpc-preview-url-row">
           <input
@@ -1249,7 +1250,7 @@ function MediaPreview({ url, validationResult, onEditUrl, onSave, lang }) {
             onChange={(e) => onEditUrl(e.target.value)}
           />
           <button type="button" className="btn-secondary" onClick={() => onSave(r)}>
-            <i className="fas fa-save" aria-hidden="true" /> {isHt ? 'Sove' : 'Save'}
+            <i className="fas fa-save" aria-hidden="true" /> {isHt ? 'Sove' : inlineText(lang, 'Save')}
           </button>
         </div>
       </div>
@@ -1270,19 +1271,19 @@ function MediaPreview({ url, validationResult, onEditUrl, onSave, lang }) {
         {isAudio && (
           <div className="mpc-preview-audio-placeholder">
             <i className="fas fa-music" aria-hidden="true" />
-            <p>{isHt ? 'Fichye Audio' : 'Audio File'}</p>
+            <p>{isHt ? 'Fichye Audio' : inlineText(lang, 'Audio File')}</p>
           </div>
         )}
         {!isImage && !isVideo && !isAudio && r.thumbnail_url && (
           <div className="mpc-preview-doc-placeholder">
             <i className="fas fa-file-alt" aria-hidden="true" />
-            <p>{isHt ? 'Dokiman' : 'Document'}</p>
+            <p>{isHt ? 'Dokiman' : inlineText(lang, 'Document')}</p>
           </div>
         )}
         {!r.thumbnail_url && !r.mime_type && (
           <div className="mpc-preview-no-media">
             <i className="fas fa-question-circle" aria-hidden="true" />
-            <p>{isHt ? 'Pa gen aperçu disponib' : 'No preview available'}</p>
+            <p>{isHt ? 'Pa gen aperçu disponib' : inlineText(lang, 'No preview available')}</p>
           </div>
         )}
       </div>
@@ -1291,31 +1292,31 @@ function MediaPreview({ url, validationResult, onEditUrl, onSave, lang }) {
       <div className="mpc-preview-meta-grid">
         {r.mime_type && (
           <div className="mpc-preview-meta-item">
-            <span className="mpc-preview-meta-label">{isHt ? 'Kalite' : 'Type'}</span>
+            <span className="mpc-preview-meta-label">{isHt ? 'Kalite' : inlineText(lang, 'Type')}</span>
             <span className="mpc-preview-meta-value">{r.mime_type}</span>
           </div>
         )}
         {r.width && r.height && (
           <>
             <div className="mpc-preview-meta-item">
-              <span className="mpc-preview-meta-label">{isHt ? 'Dimansyon' : 'Dimensions'}</span>
+              <span className="mpc-preview-meta-label">{isHt ? 'Dimansyon' : inlineText(lang, 'Dimensions')}</span>
               <span className="mpc-preview-meta-value">{r.width} × {r.height}px</span>
             </div>
             <div className="mpc-preview-meta-item">
-              <span className="mpc-preview-meta-label">{isHt ? 'Rapò' : 'Aspect Ratio'}</span>
+              <span className="mpc-preview-meta-label">{isHt ? 'Rapò' : inlineText(lang, 'Aspect Ratio')}</span>
               <span className="mpc-preview-meta-value">{aspectRatio}</span>
             </div>
           </>
         )}
         {r.detected_provider && (
           <div className="mpc-preview-meta-item">
-            <span className="mpc-preview-meta-label">{isHt ? 'Provider' : 'Provider'}</span>
+            <span className="mpc-preview-meta-label">{isHt ? 'Provider' : inlineText(lang, 'Provider')}</span>
             <span className="mpc-preview-meta-value">{r.detected_provider}</span>
           </div>
         )}
         {r.file_size != null && (
           <div className="mpc-preview-meta-item">
-            <span className="mpc-preview-meta-label">{isHt ? 'Gwosè' : 'Size'}</span>
+            <span className="mpc-preview-meta-label">{isHt ? 'Gwosè' : inlineText(lang, 'Size')}</span>
             <span className="mpc-preview-meta-value">
               {r.file_size > 1_000_000
                 ? `${(r.file_size / 1_000_000).toFixed(1)} MB`
@@ -1327,7 +1328,7 @@ function MediaPreview({ url, validationResult, onEditUrl, onSave, lang }) {
         )}
         {r.response_time_ms != null && (
           <div className="mpc-preview-meta-item">
-            <span className="mpc-preview-meta-label">{isHt ? 'Vitès Chajman' : 'Load Speed'}</span>
+            <span className="mpc-preview-meta-label">{isHt ? 'Vitès Chajman' : inlineText(lang, 'Load Speed')}</span>
             <span className={`mpc-preview-meta-value ${r.response_time_ms < 500 ? 'mpc-speed-fast' : r.response_time_ms < 2000 ? 'mpc-speed-ok' : 'mpc-speed-slow'}`}>
               {r.response_time_ms}ms
               {r.response_time_ms < 500 ? ` ✓` : r.response_time_ms < 2000 ? ` ⚠` : ` ✗`}
@@ -1339,7 +1340,7 @@ function MediaPreview({ url, validationResult, onEditUrl, onSave, lang }) {
       {/* Save Button */}
       <div className="mpc-preview-actions">
         <button type="button" className="btn-primary" onClick={() => onSave(r)}>
-          <i className="fas fa-check-circle" aria-hidden="true" /> {isHt ? 'Konfime epi Sove' : 'Confirm & Save'}
+          <i className="fas fa-check-circle" aria-hidden="true" /> {isHt ? 'Konfime epi Sove' : inlineText(lang, 'Confirm & Save')}
         </button>
       </div>
     </div>

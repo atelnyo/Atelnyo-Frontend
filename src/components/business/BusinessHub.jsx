@@ -19,6 +19,7 @@ import { translations } from '../../data/translations';
 import BusinessCreateModal from './BusinessCreateModal';
 import { businessProfileService } from '../../services/api';
 import '../../styles/business.css';
+import { inlineText } from '../../utils/inlineI18n';
 
 function classNames(...parts) {
   return parts.filter(Boolean).join(' ');
@@ -91,9 +92,9 @@ export default function BusinessHub({ lang = 'en', showToast }) {
   }, [load]);
 
   const statusLabel = (status) => ({
-    active: t?.business_status_active || (isHt ? 'Aktif' : 'Active'),
-    deactivated: t?.business_status_deactivated || (isHt ? 'Dezaktive' : 'Deactivated'),
-    archived: t?.business_status_archived || (isHt ? 'Achive' : 'Archived'),
+    active: t?.business_status_active || (isHt ? 'Aktif' : inlineText(lang, 'Active')),
+    deactivated: t?.business_status_deactivated || (isHt ? 'Dezaktive' : inlineText(lang, 'Deactivated')),
+    archived: t?.business_status_archived || (isHt ? 'Achive' : inlineText(lang, 'Archived')),
   }[status] || status);
 
   const statusColorMap = {
@@ -107,12 +108,12 @@ export default function BusinessHub({ lang = 'en', showToast }) {
       <div className="biz-hub-hero">
         <div className="biz-hub-badge"><i className="fas fa-briefcase" aria-hidden="true" /></div>
         <h1 className="biz-hub-title">
-          {t?.business_hub_title || (isHt ? 'Biznis mwen' : 'My Businesses')}
+          {t?.business_hub_title || (isHt ? 'Biznis mwen' : inlineText(lang, 'My Businesses'))}
         </h1>
         <p className="biz-hub-hint">
           {t?.business_hub_hint || (isHt
             ? 'Jere brand, biznis, oswa òganizasyon ou — separe de pwofil kreatè ou.'
-            : 'Manage your brand, business, or organization — separate from your Creator Profile.')}
+            : inlineText(lang, 'Manage your brand, business, or organization — separate from your Creator Profile.'))}
         </p>
         {!eligLoaded ? (
           // One short beat while the backend truth resolves — no
@@ -128,7 +129,7 @@ export default function BusinessHub({ lang = 'en', showToast }) {
             data-testid="business-hub-create"
           >
             <i className="fas fa-plus" aria-hidden="true" />
-            {t?.business_create || (isHt ? 'Kreye yon Business Profile' : 'Create a Business Profile')}
+            {t?.business_create || (isHt ? 'Kreye yon Business Profile' : inlineText(lang, 'Create a Business Profile'))}
           </button>
         ) : workspaceLocked ? (
           // Phase 10 — the owner's Creator branch is SUSPENDED: no
@@ -141,7 +142,7 @@ export default function BusinessHub({ lang = 'en', showToast }) {
             <p>
               {t?.business_locked_hub_hint || t?.business_locked_hint || (isHt
                 ? 'Kont kreatè w la sispann pa moderasyon platfòm la. Kontakte sipò Atelnyo a pou plis enfòmasyon.'
-                : 'Your creator account is suspended by platform moderation. Contact Atelnyo support for more information.')}
+                : inlineText(lang, 'Your creator account is suspended by platform moderation. Contact Atelnyo support for more information.'))}
             </p>
           </div>
         ) : (
@@ -150,7 +151,7 @@ export default function BusinessHub({ lang = 'en', showToast }) {
             <p>
               {t?.business_creator_required_hint || (isHt
                 ? 'Business Profile yo rezève pou kreatè apwouve. Aplike pou w vin Kreatè an premye — Pwofil Kreatè w la rete entak.'
-                : 'Business Profiles are reserved for approved creators. Apply to become a Creator first — your Creator Profile stays untouched.')}
+                : inlineText(lang, 'Business Profiles are reserved for approved creators. Apply to become a Creator first — your Creator Profile stays untouched.'))}
             </p>
             <button
               type="button"
@@ -159,7 +160,7 @@ export default function BusinessHub({ lang = 'en', showToast }) {
               data-testid="business-hub-apply-creator"
             >
               <i className="fas fa-star" aria-hidden="true" />
-              {t?.business_apply_creator || (isHt ? 'Aplike pou vin Kreatè' : 'Apply to become a Creator')}
+              {t?.business_apply_creator || (isHt ? 'Aplike pou vin Kreatè' : inlineText(lang, 'Apply to become a Creator'))}
             </button>
           </div>
         )}
@@ -172,12 +173,12 @@ export default function BusinessHub({ lang = 'en', showToast }) {
       ) : profiles.length === 0 ? (
         <div className="biz-hub-empty">
           <i className="fas fa-store" aria-hidden="true" />
-          <h3>{t?.business_no_profile || (isHt ? 'Ou poko gen Business Profile.' : "You don't have a Business Profile yet.")}</h3>
+          <h3>{t?.business_no_profile || (isHt ? 'Ou poko gen Business Profile.' : inlineText(lang, "You don't have a Business Profile yet."))}</h3>
           <p>{workspaceLocked
-            ? (isHt ? 'Workspace a rete verrouye pandan sispansyon an.' : 'The workspace stays locked during the suspension.')
+            ? (isHt ? 'Workspace a rete verrouye pandan sispansyon an.' : inlineText(lang, 'The workspace stays locked during the suspension.'))
             : canCreate
-              ? (isHt ? 'Kreye yon premye biznis pou w kòmanse jere li nan Workspace li.' : 'Create your first business to start managing it from its own workspace.')
-              : (isHt ? 'Lè w apwouve kòm Kreatè, ou pral kapab kreye biznis ou isit la.' : 'Once you are an approved Creator, you will be able to create your business here.')}</p>
+              ? (isHt ? 'Kreye yon premye biznis pou w kòmanse jere li nan Workspace li.' : inlineText(lang, 'Create your first business to start managing it from its own workspace.'))
+              : (isHt ? 'Lè w apwouve kòm Kreatè, ou pral kapab kreye biznis ou isit la.' : inlineText(lang, 'Once you are an approved Creator, you will be able to create your business here.'))}</p>
         </div>
       ) : (
         <div className="biz-hub-grid">
@@ -214,7 +215,7 @@ export default function BusinessHub({ lang = 'en', showToast }) {
                       data-testid="business-card-locked"
                     >
                       <i className="fas fa-lock" aria-hidden="true" />
-                      {t?.business_locked_badge || (isHt ? 'Verrouye' : 'Locked')}
+                      {t?.business_locked_badge || (isHt ? 'Verrouye' : inlineText(lang, 'Locked'))}
                     </span>
                   )}
                 </div>
@@ -227,7 +228,7 @@ export default function BusinessHub({ lang = 'en', showToast }) {
                   data-testid="business-enter-workspace"
                 >
                   <i className="fas fa-arrow-right" aria-hidden="true" />
-                  {t?.business_enter || (isHt ? 'Antre nan Workspace' : 'Enter Workspace')}
+                  {t?.business_enter || (isHt ? 'Antre nan Workspace' : inlineText(lang, 'Enter Workspace'))}
                 </button>
               </div>
             </article>

@@ -3,6 +3,7 @@
  * Shows tasks with completion state and progress.
  */
 import React, { useState, useEffect } from 'react';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function TimelineBlock({ block, lang = 'en', onComplete }) {
   const isHt = lang === 'ht';
@@ -42,7 +43,7 @@ export default function TimelineBlock({ block, lang = 'en', onComplete }) {
       margin: '16px 0',
     }}>
       <h3 style={{ margin: '0 0 12px', color: '#880e4f' }}>
-        📅 {block?.title || (isHt ? 'Tanbwa' : 'Timeline')}
+        📅 {block?.title || (isHt ? 'Tanbwa' : inlineText(lang, 'Timeline'))}
       </h3>
       {/* Progress bar */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>

@@ -12,6 +12,7 @@
  */
 import React, { useState, useCallback, useEffect } from 'react';
 import api from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 const apiFaq = {
   list: (params) => api.get('/platform-faqs/', { params }),
@@ -31,7 +32,7 @@ const EMPTY_FORM = { question: '', answer: '', category: '', is_featured: false 
 
 export default function AdminPlatformFAQ({ lang = 'en', showToast, onNavigate }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
 
   const [faqs, setFaqs] = useState([]);
   const [categories, setCategories] = useState([]);

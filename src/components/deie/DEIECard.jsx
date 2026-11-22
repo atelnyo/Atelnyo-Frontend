@@ -14,6 +14,7 @@ import { recordContentView, recordNotInterested } from '../../services/deie';
 import { creatorProfileService } from '../../services/api';
 import { SHEETS } from '../../routes/sheets';
 import { requireLogin } from '../../utils/history';
+import { inlineText } from '../../utils/inlineI18n';
 
 const DEIECard = memo(function DEIECard({ item, sectionType = 'for_you', lang = 'en', user }) {
   const navigate = useNavigate();
@@ -81,7 +82,7 @@ const DEIECard = memo(function DEIECard({ item, sectionType = 'for_you', lang = 
         {showOptions && (
           <div className="deie-card-options-menu">
             <button onClick={handleDismiss}>
-              <i className="fas fa-times" /> {isHt ? 'Pa montre' : 'Not interested'}
+              <i className="fas fa-times" /> {isHt ? 'Pa montre' : inlineText(lang, 'Not interested')}
             </button>
           </div>
         )}
@@ -96,7 +97,7 @@ const DEIECard = memo(function DEIECard({ item, sectionType = 'for_you', lang = 
 
       {/* Score badge */}
       {score > 0 && (
-        <div className="deie-card-score" title={`${isHt ? 'Nòt' : 'Score'}: ${score}`}>
+        <div className="deie-card-score" title={`${isHt ? 'Nòt' : inlineText(lang, 'Score')}: ${score}`}>
           {Math.round(score)}
         </div>
       )}
@@ -140,15 +141,15 @@ const DEIECard = memo(function DEIECard({ item, sectionType = 'for_you', lang = 
                 {followLoading ? (
                   <i className="fas fa-spinner fa-pulse" />
                 ) : isFollowing ? (
-                  <><i className="fas fa-user-check" /> {isHt ? 'Ap swiv' : 'Following'}</>
+                  <><i className="fas fa-user-check" /> {isHt ? 'Ap swiv' : inlineText(lang, 'Following')}</>
                 ) : (
-                  <><i className="fas fa-user-plus" /> {isHt ? 'Swiv' : 'Follow'}</>
+                  <><i className="fas fa-user-plus" /> {isHt ? 'Swiv' : inlineText(lang, 'Follow')}</>
                 )}
               </button>
             ) : (
               <button type="button" className="deie-follow-btn deie-follow-btn--auth"
                  onClick={(e) => { e.stopPropagation(); requireLogin(navigate, location, SHEETS.LOGIN); }}>
-                <i className="fas fa-sign-in-alt" /> {isHt ? 'Konekte pou swiv' : 'Sign in to follow'}
+                <i className="fas fa-sign-in-alt" /> {isHt ? 'Konekte pou swiv' : inlineText(lang, 'Sign in to follow')}
               </button>
             )}
             {item.location && (
@@ -169,7 +170,7 @@ const DEIECard = memo(function DEIECard({ item, sectionType = 'for_you', lang = 
         {affinityScore && (
           <div className="deie-card-affinity">
             <i className="fas fa-heart" style={{ color: '#e91e63' }} />
-            {' '}{Math.round(affinityScore)}% {isHt ? 'matche' : 'matched'}
+            {' '}{Math.round(affinityScore)}% {isHt ? 'matche' : inlineText(lang, 'matched')}
           </div>
         )}
 

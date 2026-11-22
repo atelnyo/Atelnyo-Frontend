@@ -16,6 +16,7 @@
  * Translate completion requirements into useful actions."
  */
 import React from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 /**
  * ProgressExplanation
@@ -67,12 +68,12 @@ export default function ProgressExplanation({
 
   return (
     <div className="ls-progress-explanation" role="list" aria-label={
-      isHt ? 'Sa ki rete pou konplete' : 'What remains to complete'
+      isHt ? 'Sa ki rete pou konplete' : inlineText(lang, 'What remains to complete')
     }>
       <h4 className="ls-progress-explanation-title">
         {allDone
-          ? (isHt ? '✅ Tout aktivite yo konplete!' : '✅ All activities completed!')
-          : (isHt ? `Pou konplete modil sa a:` : `To complete this module:`)}
+          ? (isHt ? '✅ Tout aktivite yo konplete!' : inlineText(lang, '✅ All activities completed!'))
+          : (isHt ? `Pou konplete modil sa a:` : inlineText(lang, `To complete this module:`))}
       </h4>
       <ul className="ls-progress-explanation-list">
         {requiredBlocks.map((block) => {

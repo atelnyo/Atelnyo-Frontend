@@ -22,6 +22,7 @@ import { translations } from '../data/translations';
 import { buildContentUrl, isLegacyContentUrl } from '../utils/contentUrl';
 import { BASE_URL } from '../seo/seoConfig';
 import { ogImageForLang } from './profile/profileConstants';
+import { inlineText } from '../utils/inlineI18n';
 
 function buildOGFallback() {
   try {
@@ -244,7 +245,7 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
   // ─── Meta tags ───────────────────────────────────────────────────
   const fallbackTitle =
     t.spotlight_detail_meta_default_title
-    || (lang === 'ht' ? 'Spotlight · Atelnyo' : 'Spotlight · Atelnyo');
+    || (lang === 'ht' ? 'Spotlight · Atelnyo' : inlineText(lang, 'Spotlight · Atelnyo'));
   let pageTitle = fallbackTitle;
   if (payload && typeof payload.invention_title === 'string' && payload.invention_title.length > 0) {
     const tmpl = t.spotlight_detail_meta_title_template || '{title} · Spotlight · Atelnyo';
@@ -343,7 +344,7 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
     // share handler for visual consistency).
     if (copied && showToast) {
       showToast(
-        t.spotlight_share_copied || (lang === 'ht' ? 'Lyen kopye!' : 'Link copied!'),
+        t.spotlight_share_copied || (lang === 'ht' ? 'Lyen kopye!' : inlineText(lang, 'Link copied!')),
         'check-circle',
       );
     }
@@ -375,7 +376,7 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
         <header className={`cd-sticky-header${scrolled ? ' cd-sticky-header--scrolled' : ''}`}>
           <div className="cd-sticky-header-inner">
             <button type="button" className="cd-header-back" onClick={handleBack}
-              aria-label={t.spotlight_detail_back || (lang === 'ht' ? 'Retounen' : 'Back')}
+              aria-label={t.spotlight_detail_back || (lang === 'ht' ? 'Retounen' : inlineText(lang, 'Back'))}
               data-testid="spotlight-detail-back-btn">
               <i className="fas fa-arrow-left" aria-hidden="true" />
             </button>
@@ -393,8 +394,8 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
               />
               <button type="button" className="cd-header-action-btn" onClick={handleShare}
                 disabled={shareBusy}
-                aria-label={t.share_spotlight || (lang === 'ht' ? 'Pataje' : 'Share')}
-                title={t.share_spotlight || (lang === 'ht' ? 'Pataje' : 'Share')}
+                aria-label={t.share_spotlight || (lang === 'ht' ? 'Pataje' : inlineText(lang, 'Share'))}
+                title={t.share_spotlight || (lang === 'ht' ? 'Pataje' : inlineText(lang, 'Share'))}
                 data-testid="spotlight-detail-share-btn">
                 <i className="fas fa-share-alt" aria-hidden="true" />
               </button>
@@ -435,7 +436,7 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
                   }} />
                 </div>
                 <span style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.4)' }}>
-                  {t.spotlight_detail_loading || (lang === 'ht' ? 'Ap chache envansyon an...' : 'Loading...')}
+                  {t.spotlight_detail_loading || (lang === 'ht' ? 'Ap chache envansyon an...' : inlineText(lang, 'Loading...'))}
                 </span>
               </div>
             ) : errCode === 'not_found' ? (
@@ -458,8 +459,8 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
             ) : errCode === 'load_error' ? (
               <HeroEmptyMessage
                 icon="fa-triangle-exclamation"
-                msg={t.spotlight_detail_load_error || (lang === 'ht' ? 'Nou pa t kapab chaje envansyon an.' : 'Could not load.')}
-                actionLabel={t.spotlight_detail_retry || (lang === 'ht' ? 'Eseye ankò' : 'Try again')}
+                msg={t.spotlight_detail_load_error || (lang === 'ht' ? 'Nou pa t kapab chaje envansyon an.' : inlineText(lang, 'Could not load.'))}
+                actionLabel={t.spotlight_detail_retry || (lang === 'ht' ? 'Eseye ankò' : inlineText(lang, 'Try again'))}
                 onAction={() => setRetryTick((n) => n + 1)}
               />
             ) : payload ? (
@@ -492,7 +493,7 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
                 <section className="cd-section">
                   <h2 className="cd-section-title">
                     <i className="fas fa-info-circle" aria-hidden="true" />
-                    {t.spotlight_detail_invention_label || (lang === 'ht' ? 'Envansyon an' : 'The Invention')}
+                    {t.spotlight_detail_invention_label || (lang === 'ht' ? 'Envansyon an' : inlineText(lang, 'The Invention'))}
                   </h2>
                   <p className="cd-text" style={{ whiteSpace: 'pre-wrap' }}>{payload.invention_description}</p>
                 </section>
@@ -503,7 +504,7 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
                 <section className="cd-section">
                   <h2 className="cd-section-title">
                     <i className="fas fa-user" aria-hidden="true" />
-                    {lang === 'ht' ? 'Apwopo Kreyatè a' : 'About the Creator'}
+                    {lang === 'ht' ? 'Apwopo Kreyatè a' : inlineText(lang, 'About the Creator')}
                   </h2>
                   <p className="cd-text">{creatorProfile.bio}</p>
                 </section>
@@ -514,7 +515,7 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
                 <section className="cd-section">
                   <h2 className="cd-section-title">
                     <i className="fas fa-building" aria-hidden="true" />
-                    {lang === 'ht' ? 'Enfòmasyon' : 'Information'}
+                    {lang === 'ht' ? 'Enfòmasyon' : inlineText(lang, 'Information')}
                   </h2>
                   <div style={{
                     display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16,
@@ -522,21 +523,21 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
                     {(creatorProfile.country || creatorProfile.city) && (
                       <InfoTile
                         icon="fa-map-marker-alt"
-                        label={lang === 'ht' ? 'Kote' : 'Location'}
+                        label={lang === 'ht' ? 'Kote' : inlineText(lang, 'Location')}
                         value={[creatorProfile.city, creatorProfile.country].filter(Boolean).join(', ')}
                       />
                     )}
                     {Array.isArray(creatorProfile.languages) && creatorProfile.languages.length > 0 && (
                       <InfoTile
                         icon="fa-language"
-                        label={lang === 'ht' ? 'Lang' : 'Languages'}
+                        label={lang === 'ht' ? 'Lang' : inlineText(lang, 'Languages')}
                         value={creatorProfile.languages.join(', ')}
                       />
                     )}
                     {creatorProfile.website_url && (
                       <InfoTile
                         icon="fa-globe"
-                        label={lang === 'ht' ? 'Sit web' : 'Website'}
+                        label={lang === 'ht' ? 'Sit web' : inlineText(lang, 'Website')}
                         value={creatorProfile.website_url.replace(/^https?:\/\//, '')}
                         isLink
                         href={creatorProfile.website_url}
@@ -545,14 +546,14 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
                     {payload.created_at && (
                       <InfoTile
                         icon="fa-calendar"
-                        label={lang === 'ht' ? 'Kreye' : 'Created'}
+                        label={lang === 'ht' ? 'Kreye' : inlineText(lang, 'Created')}
                         value={formatDate(payload.created_at, lang)}
                       />
                     )}
                     {creatorProfile?.profile_completeness != null && (
                       <InfoTile
                         icon="fa-chart-line"
-                        label={lang === 'ht' ? 'Konplete' : 'Completeness'}
+                        label={lang === 'ht' ? 'Konplete' : inlineText(lang, 'Completeness')}
                         value={`${Math.round(creatorProfile.profile_completeness)}%`}
                       />
                     )}
@@ -565,7 +566,7 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
                 <section className="cd-section">
                   <h2 className="cd-section-title">
                     <i className="fas fa-cogs" aria-hidden="true" />
-                    {lang === 'ht' ? 'Konpetans' : 'Skills'}
+                    {lang === 'ht' ? 'Konpetans' : inlineText(lang, 'Skills')}
                   </h2>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                     {creatorProfile.skills.map((s) => (
@@ -592,7 +593,7 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
                 <section className="cd-section">
                   <h2 className="cd-section-title">
                     <i className="fas fa-share-alt" aria-hidden="true" />
-                    {lang === 'ht' ? 'Rezo Sosyo' : 'Social Links'}
+                    {lang === 'ht' ? 'Rezo Sosyo' : inlineText(lang, 'Social Links')}
                   </h2>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
                     {Object.entries(creatorProfile.social_links).map(([platform, url]) => {
@@ -640,7 +641,7 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
                   <div className="cd-price-card-info">
                     <span className="cd-price-label">
                       <i className="fas fa-external-link-alt" style={{ marginRight: 6 }} />
-                      {t.spotlight_detail_open_demo || (lang === 'ht' ? 'Demo' : 'Demo')}
+                      {t.spotlight_detail_open_demo || (lang === 'ht' ? 'Demo' : inlineText(lang, 'Demo'))}
                     </span>
                     {typeof payload.created_at === 'string' && payload.created_at.length > 0 && (
                       <span style={{ fontSize: '0.82rem', color: 'var(--cd-text-secondary, #64748b)', marginTop: 2 }}>
@@ -658,14 +659,14 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
                       window.open(payload.link_url, '_blank', 'noopener,noreferrer')
                     }>
                       <i className="fas fa-external-link-alt" aria-hidden="true" />
-                      {t.spotlight_detail_open_demo || (lang === 'ht' ? 'Ouvri demo' : 'Open demo')}
+                      {t.spotlight_detail_open_demo || (lang === 'ht' ? 'Ouvri demo' : inlineText(lang, 'Open demo'))}
                     </button>
                     ) : (
                     <button type="button" className="cd-cta-btn" disabled style={{
                       opacity: 0.5, cursor: 'default', filter: 'grayscale(1)',
                     }}>
                       <i className="fas fa-link" aria-hidden="true" />
-                      {lang === 'ht' ? 'Pa gen demo' : 'No demo'}
+                      {lang === 'ht' ? 'Pa gen demo' : inlineText(lang, 'No demo')}
                     </button>
                     )}
                 </div>
@@ -677,7 +678,7 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
                       || creatorProfile?.artist_name
                       || (typeof payload.username === 'string' && payload.username.length > 0
                         ? payload.username.replace(/@.*$/, '')
-                        : (lang === 'ht' ? 'Endiskitab' : 'Unknown')),
+                        : (lang === 'ht' ? 'Endiskitab' : inlineText(lang, 'Unknown'))),
                   )}
                   {creatorProfile?.slug && (
                     <span style={{ marginLeft: 4, opacity: 0.6 }}>· @{creatorProfile.slug}</span>
@@ -692,7 +693,7 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
                     <div className="cd-price-card-info">
                       <span className="cd-price-label">
                         <i className="fas fa-envelope" style={{ marginRight: 6 }} />
-                        {lang === 'ht' ? 'Kontakte Kreyatè a' : 'Contact Creator'}
+                        {lang === 'ht' ? 'Kontakte Kreyatè a' : inlineText(lang, 'Contact Creator')}
                       </span>
                       {creatorProfile.availability && (
                         <span style={{
@@ -700,11 +701,11 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
                           fontWeight: 600, marginTop: 2,
                         }}>
                           {creatorProfile.availability === 'available'
-                            ? (lang === 'ht' ? 'Disponib' : 'Available')
+                            ? (lang === 'ht' ? 'Disponib' : inlineText(lang, 'Available'))
                             : creatorProfile.availability === 'busy'
-                              ? (lang === 'ht' ? 'Okipe' : 'Busy')
+                              ? (lang === 'ht' ? 'Okipe' : inlineText(lang, 'Busy'))
                               : creatorProfile.availability === 'hiring'
-                                ? (lang === 'ht' ? 'Ap anbochE' : 'Hiring')
+                                ? (lang === 'ht' ? 'Ap anbochE' : inlineText(lang, 'Hiring'))
                                 : creatorProfile.availability}
                         </span>
                       )}
@@ -712,7 +713,7 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
                     <a href={`mailto:${creatorProfile.contact_email}`}
                       className="cd-cta-btn" style={{ textDecoration: 'none' }}>
                       <i className="fas fa-paper-plane" aria-hidden="true" />
-                      {lang === 'ht' ? 'Voye imèl' : 'Send email'}
+                      {lang === 'ht' ? 'Voye imèl' : inlineText(lang, 'Send email')}
                     </a>
                   </div>
                   {creatorProfile.contact_phone && (
@@ -728,28 +729,28 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
               <div className="cd-section">
                 <h2 className="cd-section-title">
                   <i className="fas fa-chart-bar" aria-hidden="true" />
-                  {lang === 'ht' ? 'Estatistik' : 'Stats'}
+                  {lang === 'ht' ? 'Estatistik' : inlineText(lang, 'Stats')}
                 </h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 }}>
                   <StatTile
                     icon="fa-eye"
-                    label={lang === 'ht' ? 'View' : 'Views'}
+                    label={lang === 'ht' ? 'View' : inlineText(lang, 'Views')}
                     value={payload.view_count || 0}
                   />
                   <StatTile
                     icon="fa-calendar"
-                    label={lang === 'ht' ? 'Kreye' : 'Created'}
+                    label={lang === 'ht' ? 'Kreye' : inlineText(lang, 'Created')}
                     value={formatDate(payload.created_at, lang)}
                   />
                   <StatTile
                     icon="fa-share-nodes"
-                    label={lang === 'ht' ? 'Pataje' : 'Shares'}
+                    label={lang === 'ht' ? 'Pataje' : inlineText(lang, 'Shares')}
                     value={payload.share_count || 0}
                   />
                   {payload.rejection_count > 0 && (
                     <StatTile
                       icon="fa-rotate-left"
-                      label={lang === 'ht' ? 'Rejete' : 'Rejected'}
+                      label={lang === 'ht' ? 'Rejete' : inlineText(lang, 'Rejected')}
                       value={`${payload.rejection_count}x`}
                       color="#f59e0b"
                     />
@@ -762,12 +763,12 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
                 {payload.username && (
                   <button type="button" className="cd-cta-btn" onClick={handleFollow}>
                     <i className="fas fa-user-plus" aria-hidden="true" />
-                    {lang === 'ht' ? 'Swivi Kreyatè a' : 'Follow Creator'}
+                    {lang === 'ht' ? 'Swivi Kreyatè a' : inlineText(lang, 'Follow Creator')}
                   </button>
                 )}
                 <button type="button" className="cd-cta-btn cd-cta-btn-secondary" onClick={handleShare} disabled={shareBusy}>
                   <i className="fas fa-share-nodes" aria-hidden="true" />
-                  {lang === 'ht' ? 'Pataje' : 'Share'}
+                  {lang === 'ht' ? 'Pataje' : inlineText(lang, 'Share')}
                 </button>
               </div>
 
@@ -776,7 +777,7 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
                 <div className="cd-section" aria-busy="true" data-testid="spotlight-related-skeleton">
                   <h2 className="cd-section-title">
                     <i className="fas fa-lightbulb" aria-hidden="true" />
-                    {lang === 'ht' ? 'Lòt Envansyon' : 'More Inventions'}
+                    {lang === 'ht' ? 'Lòt Envansyon' : inlineText(lang, 'More Inventions')}
                   </h2>
                   <div className="spotlight-related-skeleton-grid" aria-hidden="true">
                     {[0, 1, 2].map((i) => (
@@ -794,7 +795,7 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
                   <p className="cd-text" style={{ marginTop: 0 }}>
                     {lang === 'ht'
                       ? 'Nou pa t kapab chaje lòt envansyon yo.'
-                      : 'Could not load more inventions.'}
+                      : inlineText(lang, 'Could not load more inventions.')}
                   </p>
                   <button
                     type="button"
@@ -802,7 +803,7 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
                     onClick={() => setRelatedRetryTick((n) => n + 1)}
                   >
                     <i className="fas fa-rotate-right" aria-hidden="true" />{' '}
-                    {lang === 'ht' ? 'Eseye ankò' : 'Try again'}
+                    {lang === 'ht' ? 'Eseye ankò' : inlineText(lang, 'Try again')}
                   </button>
                 </div>
               )}
@@ -810,7 +811,7 @@ export default function SpotlightDetail({ lang = 'en', contentId, user, showToas
                 <div className="cd-section">
                   <h2 className="cd-section-title">
                     <i className="fas fa-lightbulb" aria-hidden="true" />
-                    {lang === 'ht' ? 'Lòt Envansyon' : 'More Inventions'}
+                    {lang === 'ht' ? 'Lòt Envansyon' : inlineText(lang, 'More Inventions')}
                   </h2>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 12 }}>
                     {relatedSpotlights.map((item) => (
@@ -903,7 +904,7 @@ function HeroContent({ payload, creatorProfile, creatorLoading, t, lang, resolve
             || creatorProfile?.display_name
             || (typeof payload.username === 'string' && payload.username.length > 0
               ? payload.username.replace(/@.*$/, '')
-              : (lang === 'ht' ? 'Endiskitab' : 'Unknown')),
+              : (lang === 'ht' ? 'Endiskitab' : inlineText(lang, 'Unknown'))),
         )}
         {creatorProfile?.slug && (
           <span style={{ opacity: 0.6 }}> · @{creatorProfile.slug}</span>
@@ -966,7 +967,7 @@ function CreatorCardSection({ payload, creatorProfile, creatorLoading, t, lang, 
             )}
           <div className="cd-creator-info" style={{ flex: 1 }}>
             <span className="cd-creator-label">
-              {lang === 'ht' ? 'Kreyatè' : 'Creator'}
+              {lang === 'ht' ? 'Kreyatè' : inlineText(lang, 'Creator')}
               {creatorProfile?.is_verified && (
                 <i className="fas fa-check-circle" style={{ marginLeft: 4, color: '#3b82f6', fontSize: '0.7rem' }} />
               )}
@@ -1155,7 +1156,7 @@ function RelatedSpotlightCard({ item, t, lang, onClick, resolveCategoryLabel }) 
         </span>
       </div>
       <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--cd-text, #1e293b)', lineHeight: 1.3 }}>
-        {title || (lang === 'ht' ? 'Envansyon' : 'Invention')}
+        {title || (lang === 'ht' ? 'Envansyon' : inlineText(lang, 'Invention'))}
       </div>
       {item.invention_description && (
         <div style={{
@@ -1167,7 +1168,7 @@ function RelatedSpotlightCard({ item, t, lang, onClick, resolveCategoryLabel }) 
       )}
       <div style={{ ...S.flexRow, gap: 6, marginTop: 'auto', paddingTop: 8, borderTop: '1px solid var(--cd-border, #e2e8f0)' }}>
         <span style={{ fontSize: '0.75rem', color: 'var(--cd-text-secondary, #64748b)' }}>
-          {item.display_name || `@${item.username || (lang === 'ht' ? 'Endiskitab' : 'Unknown')}`}
+          {item.display_name || `@${item.username || (lang === 'ht' ? 'Endiskitab' : inlineText(lang, 'Unknown'))}`}
         </span>
         {Number(item.view_count) > 0 && (
           <span style={{
@@ -1186,7 +1187,7 @@ function RelatedSpotlightCard({ item, t, lang, onClick, resolveCategoryLabel }) 
           </span>
         )}
         <span style={{ marginLeft: 'auto', fontSize: '0.7rem', color: cfg.color, fontWeight: 600 }}>
-          {lang === 'ht' ? 'Wè plis' : 'View'} <i className="fas fa-arrow-right" style={{ fontSize: '0.6rem' }} />
+          {lang === 'ht' ? 'Wè plis' : inlineText(lang, 'View')} <i className="fas fa-arrow-right" style={{ fontSize: '0.6rem' }} />
         </span>
       </div>
     </div>

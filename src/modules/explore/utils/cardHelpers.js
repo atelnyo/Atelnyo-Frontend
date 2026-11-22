@@ -54,7 +54,7 @@ export function formatEventDate(iso) {
 
 /** Get a localized chip label from a CHIPS entry. */
 export function getChipLabel(chip, lang) {
-  const langKey = ['ht', 'en', 'fr'].includes(lang) ? lang : 'en';
+  const langKey = ['ht', 'en', 'fr', 'es'].includes(lang) ? lang : 'en';
   return chip[langKey] || chip.en;
 }
 

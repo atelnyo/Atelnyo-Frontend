@@ -16,6 +16,7 @@
  */
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { aiWorkerService } from '../../../services/api';
+import { inlineText } from '../../../utils/inlineI18n';
 
 // ─── System prompt ────────────────────────────────────────────────
 const SYSTEM_PROMPT = {
@@ -95,7 +96,7 @@ export default function StudioAIChat({
 
   // Build context from course form
   const buildContext = useCallback(() => {
-    let ctx = SYSTEM_PROMPT[isHt ? 'ht' : 'en'] + '\n\n';
+    let ctx = SYSTEM_PROMPT[isHt ? 'ht' : inlineText(lang, 'en')] + '\n\n';
     if (courseForm) {
       ctx += '--- KOU AKTYÈL LA ---\n';
       if (courseForm.title) ctx += `Tit: ${courseForm.title}\n`;
@@ -136,11 +137,11 @@ export default function StudioAIChat({
         system_instruction: systemInstruction,
         lang,
       });
-      const answer = res?.data?.text || res?.text || (isHt ? 'M pa kapab repon kounye a.' : 'I cannot answer right now.');
+      const answer = res?.data?.text || res?.text || (isHt ? 'M pa kapab repon kounye a.' : inlineText(lang, 'I cannot answer right now.'));
       setMessages(prev => [...prev, { role: 'assistant', text: answer, insertable: true }]);
     } catch (err) {
       console.error('[StudioAIChat]', err);
-      setError(isHt ? 'Erè. Eseye ankò.' : 'Error. Try again.');
+      setError(isHt ? 'Erè. Eseye ankò.' : inlineText(lang, 'Error. Try again.'));
     } finally {
       setLoading(false);
     }
@@ -261,8 +262,8 @@ export default function StudioAIChat({
           <div style={S.header}>
             <div style={S.headerIcon}><i className="fas fa-wand-magic-sparkles" /></div>
             <div style={S.headerText}>
-              <div style={S.headerTitle}>{isHt ? 'Asistan Kreyatè' : 'Creator Assistant'}</div>
-              <div style={S.headerSub}>{isHt ? 'Ede ou kreye kontni pou kou ou' : 'Helps you create course content'}</div>
+              <div style={S.headerTitle}>{isHt ? 'Asistan Kreyatè' : inlineText(lang, 'Creator Assistant')}</div>
+              <div style={S.headerSub}>{isHt ? 'Ede ou kreye kontni pou kou ou' : inlineText(lang, 'Helps you create course content')}</div>
             </div>
             <button style={S.closeBtn} onClick={() => setOpen(false)}><i className="fas fa-times" /></button>
           </div>
@@ -271,7 +272,7 @@ export default function StudioAIChat({
             {messages.length === 0 && (
               <div style={{ textAlign: 'center', color: '#64748b', fontSize: '0.78rem', padding: 20 }}>
                 <i className="fas fa-wand-magic-sparkles" style={{ fontSize: '1.5rem', marginBottom: 8, display: 'block' }} />
-                {isHt ? 'Mwen ka ede ou kreye ak amelyore kontni kou ou!' : 'I can help you create and improve your course content!'}
+                {isHt ? 'Mwen ka ede ou kreye ak amelyore kontni kou ou!' : inlineText(lang, 'I can help you create and improve your course content!')}
               </div>
             )}
             {messages.map((msg, i) => (
@@ -280,19 +281,19 @@ export default function StudioAIChat({
                 {msg.insertable && onInsertContent && (
                   <button style={S.insertBtn} onClick={() => handleInsert(msg.text)}>
                     <i className="fas fa-plus" style={{ marginRight: 3 }} />
-                    {isHt ? 'Enspòte nan kou a' : 'Insert into course'}
+                    {isHt ? 'Enspòte nan kou a' : inlineText(lang, 'Insert into course')}
                   </button>
                 )}
               </div>
             ))}
-            {loading && <div style={S.typing}><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap panse...' : 'Thinking...'}</div>}
+            {loading && <div style={S.typing}><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap panse...' : inlineText(lang, 'Thinking...')}</div>}
             {error && <div style={S.error}>{error}</div>}
             <div ref={messagesEndRef} />
           </div>
 
           {messages.length === 0 && (
             <div style={S.suggestions}>
-              {SUGGESTIONS[isHt ? 'ht' : 'en'].map((s, i) => (
+              {SUGGESTIONS[isHt ? 'ht' : inlineText(lang, 'en')].map((s, i) => (
                 <button key={i} style={S.suggestBtn} onClick={() => handleSend(s.text)}>
                   <i className={`fas ${s.icon}`} />{s.text}
                 </button>
@@ -307,7 +308,7 @@ export default function StudioAIChat({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-              placeholder={isHt ? 'Mande m yon bagay...' : 'Ask me something...'}
+              placeholder={isHt ? 'Mande m yon bagay...' : inlineText(lang, 'Ask me something...')}
               disabled={loading}
             />
             <button style={S.sendBtn} onClick={() => handleSend()} disabled={loading || !input.trim()}>

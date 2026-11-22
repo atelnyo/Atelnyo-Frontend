@@ -1,3 +1,4 @@
+import { inlineText } from '../utils/inlineI18n';
 /**
  * src/services/userActivity.js
  *
@@ -164,13 +165,13 @@ class UserActivityTracker {
     } else if (c.type === 'creator_profile' && c.creatorSlug) {
       parts.push(isHt ? `li sou paj kreyatè: ${c.creatorSlug}` : `viewing creator: ${c.creatorSlug}`);
     } else if (c.type === 'community') {
-      parts.push(isHt ? 'li sou yon kominote' : 'viewing a community');
+      parts.push(isHt ? 'li sou yon kominote' : inlineText(lang, 'viewing a community'));
     } else if (c.type === 'learning') {
-      parts.push(isHt ? 'li nan espas aprantisaj' : 'in the learning space');
+      parts.push(isHt ? 'li nan espas aprantisaj' : inlineText(lang, 'in the learning space'));
     } else if (c.type === 'studio') {
-      parts.push(isHt ? 'li nan Studio Kreyatè' : 'in Creator Studio');
+      parts.push(isHt ? 'li nan Studio Kreyatè' : inlineText(lang, 'in Creator Studio'));
     } else if (c.type === 'marketplace') {
-      parts.push(isHt ? 'li sou mache a' : 'browsing the marketplace');
+      parts.push(isHt ? 'li sou mache a' : inlineText(lang, 'browsing the marketplace'));
     } else {
       parts.push(isHt ? `li sou ${c.page}` : `on ${c.page}`);
     }
@@ -182,14 +183,14 @@ class UserActivityTracker {
 
     // Flow context
     if (ctx.flow.pattern === 'browsing' && ctx.recentPages.length > 2) {
-      parts.push(isHt ? 'ap browse diferan kontni' : 'browsing different content');
+      parts.push(isHt ? 'ap browse diferan kontni' : inlineText(lang, 'browsing different content'));
     } else if (ctx.flow.pattern === 'learning') {
-      parts.push(isHt ? 'ap aprann' : 'learning');
+      parts.push(isHt ? 'ap aprann' : inlineText(lang, 'learning'));
     }
 
     // Scroll engagement
     if (c.scrollDepth > 80) {
-      parts.push(isHt ? 'li manyen anba paj la' : 'scrolled deep into the page');
+      parts.push(isHt ? 'li manyen anba paj la' : inlineText(lang, 'scrolled deep into the page'));
     }
 
     return parts.join(' · ') || null;

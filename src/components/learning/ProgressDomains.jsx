@@ -12,6 +12,7 @@
  *         Required Course Completion Progress."
  */
 import React from 'react';
+import { inlineText } from '../../utils/inlineI18n';
 
 /**
  * @param {Object} props
@@ -73,16 +74,16 @@ export default function ProgressDomains({
   const optionalProgress = calcDomainProgress(domains.optional);
 
   const domainConfig = [
-    { key: 'learning', label: isHt ? 'Kontni' : 'Content', progress: learningProgress, icon: 'fa-book-open', color: '#3b82f6' },
-    { key: 'assessment', label: isHt ? 'Evalyasyon' : 'Assessment', progress: assessmentProgress, icon: 'fa-clipboard-check', color: '#8b5cf6' },
-    { key: 'activity', label: isHt ? 'Aktivite' : 'Activity', progress: activityProgress, icon: 'fa-dumbbell', color: '#10b981' },
-    { key: 'optional', label: isHt ? 'Opsyonèl' : 'Optional', progress: optionalProgress, icon: 'fa-star', color: '#f59e0b' },
+    { key: 'learning', label: isHt ? 'Kontni' : inlineText(lang, 'Content'), progress: learningProgress, icon: 'fa-book-open', color: '#3b82f6' },
+    { key: 'assessment', label: isHt ? 'Evalyasyon' : inlineText(lang, 'Assessment'), progress: assessmentProgress, icon: 'fa-clipboard-check', color: '#8b5cf6' },
+    { key: 'activity', label: isHt ? 'Aktivite' : inlineText(lang, 'Activity'), progress: activityProgress, icon: 'fa-dumbbell', color: '#10b981' },
+    { key: 'optional', label: isHt ? 'Opsyonèl' : inlineText(lang, 'Optional'), progress: optionalProgress, icon: 'fa-star', color: '#f59e0b' },
   ].filter((d) => d.progress !== null);
 
   if (domainConfig.length === 0) return null;
 
   return (
-    <div className="ls-progress-domains" role="list" aria-label={isHt ? 'Pwogrè pa domèn' : 'Progress by domain'}>
+    <div className="ls-progress-domains" role="list" aria-label={isHt ? 'Pwogrè pa domèn' : inlineText(lang, 'Progress by domain')}>
       {domainConfig.map(({ key, label, progress, icon, color }) => (
         <div key={key} className="ls-progress-domain" role="listitem">
           <div className="ls-progress-domain-header">

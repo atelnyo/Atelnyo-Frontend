@@ -5,13 +5,14 @@
  * locally by title/description on input change.
  */
 import React, { useRef, useEffect } from 'react';
+import { inlineText } from '../utils/inlineI18n';
 
 function SearchBar({ lang, translations, onSearch }) {
   const inputRef = useRef(null);
   const t = translations?.[lang] || translations?.en || {};
 
   const placeholder = t.search_placeholder
-    || (lang === 'ht' ? 'Chèche kou yo...' : 'Search courses...');
+    || (lang === 'ht' ? 'Chèche kou yo...' : inlineText(lang, 'Search courses...'));
 
   // Escape to blur
   useEffect(() => {

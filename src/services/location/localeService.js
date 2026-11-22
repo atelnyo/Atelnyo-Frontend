@@ -21,7 +21,6 @@
  * Privacy: pure browser introspection, no network, no storage.
  */
 import { SUPPORTED_LANGUAGES } from '../../config/markets';
-import { normalizeSupportedLanguage } from '../../utils/i18n';
 
 /**
  * Ordered browser locale list.
@@ -56,7 +55,7 @@ export function getPrimaryLocale() {
  * Extract the BCP-47 language tag (lowercased, region stripped).
  *
  * @param {string} [locale] Defaults to the primary browser locale.
- * @returns {string|null} e.g. 'fr', 'ht', 'en'. Null when no locale.
+ * @returns {string|null} e.g. 'fr', 'ht', 'en', 'es'. Null when no locale.
  */
 export function getLocaleLanguage(locale = null) {
   const value = locale ?? getPrimaryLocale();
@@ -92,7 +91,7 @@ export function getLocaleRegion(locale = null) {
  * still gets their language.
  *
  * @param {string[]} [supported] Allowlist of BCP-47 language codes
- *   (e.g. ['ht','en','fr'] from markets-data.json). Null/omitted
+ *   (e.g. ['ht','en','fr','es'] from markets-data.json). Null/omitted
  *   = use the platform's supported UI-language list.
  * @returns {string|null} e.g. 'fr'. Null when no match / no locale.
  */
@@ -107,9 +106,6 @@ export function getSupportedBrowserLanguage(supported = SUPPORTED_LANGUAGES) {
   if (allowed.length) {
     for (const lang of langs) {
       if (allowed.includes(lang)) return lang;
-    }
-    if (langs.includes('es') && allowed.includes(normalizeSupportedLanguage('es'))) {
-      return normalizeSupportedLanguage('es');
     }
     return null;
   }

@@ -33,6 +33,7 @@ import BusinessFaqSection from './BusinessFaqSection';
 import BusinessInquiriesSection from './BusinessInquiriesSection';
 import { businessProfileService } from '../../services/api';
 import '../../styles/business.css';
+import { inlineText } from '../../utils/inlineI18n';
 
 function classNames(...parts) {
   return parts.filter(Boolean).join(' ');
@@ -80,9 +81,9 @@ export default function BusinessWorkspace({ lang = 'en', showToast }) {
   }, [slug]);
 
   const statusLabel = (status) => ({
-    active: t?.business_status_active || (isHt ? 'Aktif' : 'Active'),
-    deactivated: t?.business_status_deactivated || (isHt ? 'Dezaktive' : 'Deactivated'),
-    archived: t?.business_status_archived || (isHt ? 'Achive' : 'Archived'),
+    active: t?.business_status_active || (isHt ? 'Aktif' : inlineText(lang, 'Active')),
+    deactivated: t?.business_status_deactivated || (isHt ? 'Dezaktive' : inlineText(lang, 'Deactivated')),
+    archived: t?.business_status_archived || (isHt ? 'Achive' : inlineText(lang, 'Archived')),
   }[status] || status);
 
   const statusColor = {
@@ -102,14 +103,14 @@ export default function BusinessWorkspace({ lang = 'en', showToast }) {
       if (data?.id) setProfile(data);
       showToast?.(
         action === 'deactivate'
-          ? (isHt ? 'Business Profile dezaktive.' : 'Business profile deactivated.')
-          : (isHt ? 'Business Profile re-aktive!' : 'Business profile reactivated!'),
+          ? (isHt ? 'Business Profile dezaktive.' : inlineText(lang, 'Business profile deactivated.'))
+          : (isHt ? 'Business Profile re-aktive!' : inlineText(lang, 'Business profile reactivated!')),
         'check-circle',
       );
     } catch (err) {
       showToast?.(
         err?.response?.data?.detail
-        || (isHt ? 'Aksyon an pa t mache.' : 'The action failed.'),
+        || (isHt ? 'Aksyon an pa t mache.' : inlineText(lang, 'The action failed.')),
         'circle-exclamation',
       );
     } finally {
@@ -121,7 +122,7 @@ export default function BusinessWorkspace({ lang = 'en', showToast }) {
 
   const confirmMessage = () => (t?.business_confirm_deactivate || (isHt
     ? 'Eske w sèten ou vle dezaktive "{name}"? Ou ka re-aktive li nenpòt lè.'
-    : 'Are you sure you want to deactivate "{name}"? You can reactivate it anytime.'))
+    : inlineText(lang, 'Are you sure you want to deactivate "{name}"? You can reactivate it anytime.')))
     .replace('{name}', profile?.name || '');
 
   if (loading) {
@@ -141,10 +142,10 @@ export default function BusinessWorkspace({ lang = 'en', showToast }) {
           <i className="fas fa-store-slash" aria-hidden="true" />
           <h2>{t?.business_error_not_found || (isHt
             ? 'Business Profile sa pa egziste oswa se pa ou ki posede l.'
-            : "This business profile does not exist or you don't own it.")}</h2>
+            : inlineText(lang, "This business profile does not exist or you don't own it."))}</h2>
           <Link className="biz-btn biz-btn-primary" to={SHEETS.BUSINESS}>
             <i className="fas fa-arrow-left" aria-hidden="true" />
-            {t?.business_back_hub || (isHt ? 'Biznis mwen' : 'My Businesses')}
+            {t?.business_back_hub || (isHt ? 'Biznis mwen' : inlineText(lang, 'My Businesses'))}
           </Link>
         </div>
       </div>
@@ -171,7 +172,7 @@ export default function BusinessWorkspace({ lang = 'en', showToast }) {
         <div className="biz-ws-header-text">
           <p className="biz-ws-kicker">
             <i className="fas fa-briefcase" aria-hidden="true" />
-            {t?.business_context_label || (isHt ? 'Business Profile:' : 'Business Profile:')}
+            {t?.business_context_label || (isHt ? 'Business Profile:' : inlineText(lang, 'Business Profile:'))}
           </p>
           <h1 className="biz-ws-title">{profile.name}</h1>
           <div className="biz-ws-meta">
@@ -194,11 +195,11 @@ export default function BusinessWorkspace({ lang = 'en', showToast }) {
       <div className="biz-ws-return">
         <Link className="biz-btn biz-btn-ghost" to={SHEETS.STUDIO} data-testid="business-return-creator">
           <i className="fas fa-arrow-left" aria-hidden="true" />
-          {t?.business_return_creator || (isHt ? '← Retounen nan Creator Studio' : '← Return to Creator Studio')}
+          {t?.business_return_creator || (isHt ? '← Retounen nan Creator Studio' : inlineText(lang, '← Return to Creator Studio'))}
         </Link>
         <Link className="biz-btn biz-btn-ghost" to={SHEETS.BUSINESS}>
           <i className="fas fa-th-large" aria-hidden="true" />
-          {t?.business_back_hub || (isHt ? 'Biznis mwen' : 'My Businesses')}
+          {t?.business_back_hub || (isHt ? 'Biznis mwen' : inlineText(lang, 'My Businesses'))}
         </Link>
         <Link
           className="biz-btn biz-btn-ghost"
@@ -208,7 +209,7 @@ export default function BusinessWorkspace({ lang = 'en', showToast }) {
           rel="noopener noreferrer"
         >
           <i className="fas fa-eye" aria-hidden="true" />
-          {t?.business_public_view || (isHt ? 'Wè paj piblik' : 'View public page')}
+          {t?.business_public_view || (isHt ? 'Wè paj piblik' : inlineText(lang, 'View public page'))}
         </Link>
       </div>
     </header>
@@ -224,21 +225,21 @@ export default function BusinessWorkspace({ lang = 'en', showToast }) {
               <i className="fas fa-user-slash" aria-hidden="true" />
             </div>
             <h2>
-              {t?.business_locked_title || (isHt ? 'Workspace verrouye' : 'Workspace locked')}
+              {t?.business_locked_title || (isHt ? 'Workspace verrouye' : inlineText(lang, 'Workspace locked'))}
             </h2>
             <p>
               {t?.business_locked_hint || (isHt
                 ? 'Kont kreatè w la sispann pa moderasyon platfòm la. Kontakte sipò Atelnyo anvan w jere biznis sa a. Paj piblik la rete aktif pou kliyan w yo.'
-                : 'Your creator account is suspended by platform moderation. Contact Atelnyo support before managing this business. Your public page stays live for your customers.')}
+                : inlineText(lang, 'Your creator account is suspended by platform moderation. Contact Atelnyo support before managing this business. Your public page stays live for your customers.'))}
             </p>
             <div className="biz-workspace-locked-actions">
               <Link className="biz-btn biz-btn-primary" to={SHEETS.STUDIO}>
                 <i className="fas fa-arrow-left" aria-hidden="true" />
-                {t?.business_return_creator || (isHt ? '← Retounen nan Creator Studio' : '← Return to Creator Studio')}
+                {t?.business_return_creator || (isHt ? '← Retounen nan Creator Studio' : inlineText(lang, '← Return to Creator Studio'))}
               </Link>
               <Link className="biz-btn biz-btn-ghost" to={SHEETS.BUSINESS}>
                 <i className="fas fa-th-large" aria-hidden="true" />
-                {t?.business_back_hub || (isHt ? 'Biznis mwen' : 'My Businesses')}
+                {t?.business_back_hub || (isHt ? 'Biznis mwen' : inlineText(lang, 'My Businesses'))}
               </Link>
             </div>
           </div>
@@ -253,7 +254,7 @@ export default function BusinessWorkspace({ lang = 'en', showToast }) {
       {wsHeader}
 
       {/* ─── Section rail ──────────────────────────────────────── */}
-      <nav className="biz-ws-rail" aria-label={isHt ? 'Seksyon Workspace' : 'Workspace sections'}>
+      <nav className="biz-ws-rail" aria-label={isHt ? 'Seksyon Workspace' : inlineText(lang, 'Workspace sections')}>
         <button
           type="button"
           className={classNames('biz-ws-tab', section === 'overview' && 'biz-ws-tab-active')}
@@ -261,7 +262,7 @@ export default function BusinessWorkspace({ lang = 'en', showToast }) {
           data-testid="business-tab-overview"
         >
           <i className="fas fa-gauge-high" aria-hidden="true" />
-          {t?.business_section_overview || (isHt ? 'Apèsi' : 'Overview')}
+          {t?.business_section_overview || (isHt ? 'Apèsi' : inlineText(lang, 'Overview'))}
         </button>
         <button
           type="button"
@@ -270,7 +271,7 @@ export default function BusinessWorkspace({ lang = 'en', showToast }) {
           data-testid="business-tab-catalog"
         >
           <i className="fas fa-box-open" aria-hidden="true" />
-          {t?.business_section_catalog || (isHt ? 'Katalòg' : 'Catalog')}
+          {t?.business_section_catalog || (isHt ? 'Katalòg' : inlineText(lang, 'Catalog'))}
         </button>
         <button
           type="button"
@@ -279,7 +280,7 @@ export default function BusinessWorkspace({ lang = 'en', showToast }) {
           data-testid="business-tab-orders"
         >
           <i className="fas fa-cart-shopping" aria-hidden="true" />
-          {t?.business_section_orders || (isHt ? 'Kòmand' : 'Orders')}
+          {t?.business_section_orders || (isHt ? 'Kòmand' : inlineText(lang, 'Orders'))}
         </button>
         <button
           type="button"
@@ -288,7 +289,7 @@ export default function BusinessWorkspace({ lang = 'en', showToast }) {
           data-testid="business-tab-faqs"
         >
           <i className="fas fa-circle-question" aria-hidden="true" />
-          {t?.business_section_faqs || (isHt ? 'FAQ' : 'FAQs')}
+          {t?.business_section_faqs || (isHt ? 'FAQ' : inlineText(lang, 'FAQs'))}
         </button>
         <button
           type="button"
@@ -297,7 +298,7 @@ export default function BusinessWorkspace({ lang = 'en', showToast }) {
           data-testid="business-tab-inquiries"
         >
           <i className="fas fa-envelope" aria-hidden="true" />
-          {t?.business_section_inquiries || (isHt ? 'Mesaj' : 'Messages')}
+          {t?.business_section_inquiries || (isHt ? 'Mesaj' : inlineText(lang, 'Messages'))}
         </button>
         <button
           type="button"
@@ -306,7 +307,7 @@ export default function BusinessWorkspace({ lang = 'en', showToast }) {
           data-testid="business-tab-analytics"
         >
           <i className="fas fa-chart-pie" aria-hidden="true" />
-          {t?.business_section_analytics || (isHt ? 'Analitik' : 'Analytics')}
+          {t?.business_section_analytics || (isHt ? 'Analitik' : inlineText(lang, 'Analytics'))}
         </button>
         <button
           type="button"
@@ -315,7 +316,7 @@ export default function BusinessWorkspace({ lang = 'en', showToast }) {
           data-testid="business-tab-seller"
         >
           <i className="fas fa-hand-holding-dollar" aria-hidden="true" />
-          {t?.business_section_seller || (isHt ? 'Seller' : 'Seller')}
+          {t?.business_section_seller || (isHt ? 'Seller' : inlineText(lang, 'Seller'))}
         </button>
         <button
           type="button"
@@ -324,7 +325,7 @@ export default function BusinessWorkspace({ lang = 'en', showToast }) {
           data-testid="business-tab-settings"
         >
           <i className="fas fa-gear" aria-hidden="true" />
-          {t?.business_section_settings || (isHt ? 'Anviwònman' : 'Settings')}
+          {t?.business_section_settings || (isHt ? 'Anviwònman' : inlineText(lang, 'Settings'))}
         </button>
       </nav>
 
@@ -336,26 +337,26 @@ export default function BusinessWorkspace({ lang = 'en', showToast }) {
               <div className="biz-ws-card">
                 <h3 className="biz-ws-card-title">
                   <i className="fas fa-circle-info" aria-hidden="true" />
-                  {isHt ? 'Enfòmasyon' : 'Information'}
+                  {isHt ? 'Enfòmasyon' : inlineText(lang, 'Information')}
                 </h3>
-                {profile.tagline && <p className="biz-ws-card-line"><strong>{isHt ? 'Slogan:' : 'Tagline:'}</strong> {profile.tagline}</p>}
-                {profile.description && <p className="biz-ws-card-line"><strong>{isHt ? 'Deskripsyon:' : 'Description:'}</strong> {profile.description}</p>}
-                <p className="biz-ws-card-line"><strong>{isHt ? 'Slug:' : 'Slug:'}</strong> {profile.slug}</p>
+                {profile.tagline && <p className="biz-ws-card-line"><strong>{isHt ? 'Slogan:' : inlineText(lang, 'Tagline:')}</strong> {profile.tagline}</p>}
+                {profile.description && <p className="biz-ws-card-line"><strong>{isHt ? 'Deskripsyon:' : inlineText(lang, 'Description:')}</strong> {profile.description}</p>}
+                <p className="biz-ws-card-line"><strong>{isHt ? 'Slug:' : inlineText(lang, 'Slug:')}</strong> {profile.slug}</p>
                 <p className="biz-ws-card-line">
-                  <strong>{t?.business_created_at || (isHt ? 'Kreye:' : 'Created:')}</strong>{' '}
-                  {new Date(profile.created_at).toLocaleDateString(isHt ? 'fr-HT' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  <strong>{t?.business_created_at || (isHt ? 'Kreye:' : inlineText(lang, 'Created:'))}</strong>{' '}
+                  {new Date(profile.created_at).toLocaleDateString(isHt ? 'fr-HT' : inlineText(lang, 'en-US'), { year: 'numeric', month: 'long', day: 'numeric' })}
                 </p>
               </div>
 
               <div className="biz-ws-card">
                 <h3 className="biz-ws-card-title">
                   <i className="fas fa-power-off" aria-hidden="true" />
-                  {isHt ? 'Sik lavi' : 'Lifecycle'}
+                  {isHt ? 'Sik lavi' : inlineText(lang, 'Lifecycle')}
                 </h3>
                 <p className="biz-ws-card-line">
                   {isHt
                     ? 'Dezaktivasyon se yon transisyon dou (pa efase). Ou ka re-aktive nenpòt lè.'
-                    : 'Deactivation is a soft transition (never a delete). You can reactivate anytime.'}
+                    : inlineText(lang, 'Deactivation is a soft transition (never a delete). You can reactivate anytime.')}
                 </p>
                 {profile.status === 'active' ? (
                   confirmingDeactivate ? (
@@ -368,7 +369,7 @@ export default function BusinessWorkspace({ lang = 'en', showToast }) {
                           onClick={() => setConfirmingDeactivate(false)}
                           disabled={busy}
                         >
-                          {isHt ? 'Anile' : 'Cancel'}
+                          {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
                         </button>
                         <button
                           type="button"
@@ -377,7 +378,7 @@ export default function BusinessWorkspace({ lang = 'en', showToast }) {
                           disabled={busy}
                         >
                           <i className={`fas ${busy ? 'fa-spinner fa-spin' : 'fa-circle-pause'}`} aria-hidden="true" />
-                          {isHt ? 'Wi, dezaktive' : 'Yes, deactivate'}
+                          {isHt ? 'Wi, dezaktive' : inlineText(lang, 'Yes, deactivate')}
                         </button>
                       </div>
                     </div>
@@ -390,7 +391,7 @@ export default function BusinessWorkspace({ lang = 'en', showToast }) {
                       data-testid="business-deactivate"
                     >
                       <i className="fas fa-circle-pause" aria-hidden="true" />
-                      {t?.business_deactivate || (isHt ? 'Dezaktive' : 'Deactivate')}
+                      {t?.business_deactivate || (isHt ? 'Dezaktive' : inlineText(lang, 'Deactivate'))}
                     </button>
                   )
                 ) : (
@@ -402,7 +403,7 @@ export default function BusinessWorkspace({ lang = 'en', showToast }) {
                     data-testid="business-activate"
                   >
                     <i className={`fas ${busy ? 'fa-spinner fa-spin' : 'fa-circle-play'}`} aria-hidden="true" />
-                    {t?.business_activate || (isHt ? 'Re-aktive' : 'Reactivate')}
+                    {t?.business_activate || (isHt ? 'Re-aktive' : inlineText(lang, 'Reactivate'))}
                   </button>
                 )}
               </div>

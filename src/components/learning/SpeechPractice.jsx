@@ -24,6 +24,7 @@ import { transcribeTakeOnServer } from '../../modules/learning/serverTranscripti
 import { aiService, speechSubmissionService } from '../../services/api';
 import SpeechRecorder from './SpeechRecorder';
 import styles from './learning.module.css';
+import { inlineText } from '../../utils/inlineI18n';
 
 function resolveSpeechLang(block, lang) {
   const raw = (block?.recognitionLang || block?.targetLang || '').trim();
@@ -36,7 +37,7 @@ function resolveSpeechLang(block, lang) {
 
 export default function SpeechPractice({ block, lang = 'en', courseId, moduleIndex, reportComplete }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
   const speechLang = resolveSpeechLang(block, lang);
   const [recordingUrl, setRecordingUrl] = useState(null);
   const [feedback, setFeedback] = useState(null); // { transcript, confidence, matched, kind, analysis? }

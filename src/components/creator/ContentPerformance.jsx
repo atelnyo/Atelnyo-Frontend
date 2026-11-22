@@ -14,6 +14,7 @@
  */
 import React, { useState, useEffect, useMemo } from 'react';
 import api from '../../services/api';
+import { inlineText } from '../../utils/inlineI18n';
 
 // ─── Helpers ───────────────────────────────────────────────────────
 
@@ -276,7 +277,7 @@ export default function ContentPerformance({ lang = 'en', showToast, user }) {
         <p className="cp-subtitle">
           {lang === 'ht'
             ? 'Analize kijan kontni ou ap fè'
-            : 'Analyze how your content is performing'}
+            : inlineText(lang, 'Analyze how your content is performing')}
         </p>
       </div>
 

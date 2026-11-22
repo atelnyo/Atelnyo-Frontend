@@ -1,3 +1,4 @@
+import { inlineText } from '../../../utils/inlineI18n';
 /**
  * src/components/studio/editor/communityTemplates.js
  *
@@ -182,7 +183,7 @@ export function buildTemplateDraft(template, lang = 'en') {
   if (!template) {
     return null;
   }
-  const key = lang === 'ht' ? 'ht' : 'en';
+  const key = lang === 'ht' ? 'ht' : inlineText(lang, 'en');
   return {
     description: template.description[key] || template.description.en,
     category: template.category,

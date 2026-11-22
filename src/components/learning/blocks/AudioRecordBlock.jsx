@@ -11,6 +11,7 @@
  * Reports completion when the learner records and plays back their audio.
  */
 import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function AudioRecordBlock({
   block,
@@ -73,7 +74,7 @@ export default function AudioRecordBlock({
     } catch (err) {
       setError(isHt
         ? 'Pa t kapab jwenn mikwofòn la. Tcheke pèmisyon navigatè a.'
-        : 'Could not access microphone. Check browser permissions.');
+        : inlineText(lang, 'Could not access microphone. Check browser permissions.'));
     }
   }, [isHt]);
 
@@ -113,8 +114,8 @@ export default function AudioRecordBlock({
     <div className="ls-block ls-block--audio-record" data-block-type="audio_record">
       {/* Header */}
       <div className="ls-block-header">
-        <span className="ls-block-badge">🎙️ {isHt ? 'Anrejistre' : 'Record'}</span>
-        <h3 className="ls-block-title">{block.title || (isHt ? 'Anrejistre vwa ou' : 'Record your voice')}</h3>
+        <span className="ls-block-badge">🎙️ {isHt ? 'Anrejistre' : inlineText(lang, 'Record')}</span>
+        <h3 className="ls-block-title">{block.title || (isHt ? 'Anrejistre vwa ou' : inlineText(lang, 'Record your voice'))}</h3>
       </div>
 
       {/* Prompt */}
@@ -141,7 +142,7 @@ export default function AudioRecordBlock({
       {block.referenceAudio && (
         <div style={{ marginBottom: 16 }}>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: 4, fontWeight: 600 }}>
-            {isHt ? '🔊 Odyo referans:' : '🔊 Reference audio:'}
+            {isHt ? '🔊 Odyo referans:' : inlineText(lang, '🔊 Reference audio:')}
           </p>
           <audio controls src={block.referenceAudio} style={{ width: '100%', maxWidth: 400 }} />
         </div>
@@ -173,7 +174,7 @@ export default function AudioRecordBlock({
                 }}
               >
                 <i className="fas fa-circle" style={{ fontSize: '0.7rem' }} />
-                {isHt ? 'Kòmanse anrejistre' : 'Start recording'}
+                {isHt ? 'Kòmanse anrejistre' : inlineText(lang, 'Start recording')}
               </button>
             ) : (
               <button
@@ -186,13 +187,13 @@ export default function AudioRecordBlock({
                 }}
               >
                 <i className="fas fa-stop" />
-                {isHt ? 'Stop' : 'Stop'} ({formatDuration(duration)})
+                {isHt ? 'Stop' : inlineText(lang, 'Stop')} ({formatDuration(duration)})
               </button>
             )}
             {recording && (
               <span style={{ color: '#ef4444', fontSize: '0.85rem', fontWeight: 600 }}>
                 <i className="fas fa-circle" style={{ animation: 'pulse 1s infinite', marginRight: 4 }} />
-                {isHt ? 'Ap anrejistre...' : 'Recording...'}
+                {isHt ? 'Ap anrejistre...' : inlineText(lang, 'Recording...')}
               </span>
             )}
           </>
@@ -216,7 +217,7 @@ export default function AudioRecordBlock({
               }}
             >
               <i className="fas fa-redo" style={{ marginRight: 4 }} />
-              {isHt ? 'Rekòmanse' : 'Re-record'}
+              {isHt ? 'Rekòmanse' : inlineText(lang, 'Re-record')}
             </button>
           </>
         )}
@@ -225,10 +226,10 @@ export default function AudioRecordBlock({
       {/* Duration info */}
       {recordedUrl && (
         <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: 8 }}>
-          {isHt ? 'Dire:' : 'Duration:'} {formatDuration(duration)}
+          {isHt ? 'Dire:' : inlineText(lang, 'Duration:')} {formatDuration(duration)}
           {hasPlayed && (
             <span style={{ color: '#10b981', marginLeft: 8 }}>
-              <i className="fas fa-check-circle" /> {isHt ? 'Tande!' : 'Listened!'}
+              <i className="fas fa-check-circle" /> {isHt ? 'Tande!' : inlineText(lang, 'Listened!')}
             </span>
           )}
         </p>
@@ -241,7 +242,7 @@ export default function AudioRecordBlock({
           background: 'rgba(16,185,129,0.1)', color: '#10b981',
           fontSize: '0.9rem', fontWeight: 600,
         }}>
-          🎉 {isHt ? 'Brav! Ou anrejistre epi tande vwa ou!' : 'Well done! You recorded and listened to your voice!'}
+          🎉 {isHt ? 'Brav! Ou anrejistre epi tande vwa ou!' : inlineText(lang, 'Well done! You recorded and listened to your voice!')}
         </div>
       )}
     </div>

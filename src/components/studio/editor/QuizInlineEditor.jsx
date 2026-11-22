@@ -17,10 +17,11 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { quizService } from '../../../services/api';
 import styles from './editor.module.css';
+import { inlineText } from '../../../utils/inlineI18n';
 
 export default function QuizInlineEditor({ block, onChange, lang = 'en', courseId, moduleIndex }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
 
   const [quizzes, setQuizzes] = useState(null); // null = loading
   const [loadError, setLoadError] = useState('');
@@ -133,7 +134,7 @@ export default function QuizInlineEditor({ block, onChange, lang = 'en', courseI
         </span>
         {linkedQuiz && (
           <span className={styles.quizInlineBadge}>
-            {questionCount} {isHt ? 'kesyon' : 'questions'}
+            {questionCount} {isHt ? 'kesyon' : inlineText(lang, 'questions')}
           </span>
         )}
       </div>
@@ -244,7 +245,7 @@ export default function QuizInlineEditor({ block, onChange, lang = 'en', courseI
               <i className="fas fa-clipboard-question" aria-hidden="true" />
               <span>{quiz.title}</span>
               <span className={styles.quizInlineListMeta}>
-                {quiz.questions?.length || 0} {isHt ? 'kesyon' : 'questions'} · {quiz.pass_score}%
+                {quiz.questions?.length || 0} {isHt ? 'kesyon' : inlineText(lang, 'questions')} · {quiz.pass_score}%
               </span>
             </button>
           ))}
@@ -269,7 +270,7 @@ const QUESTION_TYPES = [
 
 function QuizQuestionsInline({ quiz, lang, courseId, onRefresh }) {
   const isHt = lang === 'ht';
-  const t = (en, ht) => (isHt ? ht : en);
+  const t = (en, ht) => (isHt ? ht : inlineText(lang, en));
   const [questions, setQuestions] = useState(() =>
     (quiz?.questions || []).map((q) => ({
       ...q,
@@ -373,7 +374,7 @@ function QuizQuestionsInline({ quiz, lang, courseId, onRefresh }) {
     <div className={styles.quizInlineQuestionsInner}>
       {/* Header with add buttons */}
       <div className={styles.quizInlineQuestionsHeader}>
-        <span>{questions.length} {isHt ? 'kesyon' : 'questions'}</span>
+        <span>{questions.length} {isHt ? 'kesyon' : inlineText(lang, 'questions')}</span>
       </div>
 
       {err && <p className={styles.quizInlineErr} role="alert">{err}</p>}
@@ -414,7 +415,7 @@ function QuizQuestionsInline({ quiz, lang, courseId, onRefresh }) {
                     <i className={`fas ${typeMeta.icon}`} aria-hidden="true" />
                   </span>
                   <span className={styles.quizInlineQPromptPreview}>
-                    {q.prompt || <em>{isHt ? 'Pa gen tèks' : 'No text'}</em>}
+                    {q.prompt || <em>{isHt ? 'Pa gen tèks' : inlineText(lang, 'No text')}</em>}
                   </span>
                   <i className={`fas fa-chevron-down ${styles.quizInlineQChevron} ${isExpanded ? styles.quizInlineQChevronOpen : ''}`} aria-hidden="true" />
                 </div>
@@ -584,7 +585,7 @@ function QuizQuestionsInline({ quiz, lang, courseId, onRefresh }) {
                         onChange={(e) => patchQuestion(i, { explanation: e.target.value })}
                         rows={2}
                         maxLength={500}
-                        placeholder={isHt ? 'Eksplike repons lan…' : 'Explain the answer…'}
+                        placeholder={isHt ? 'Eksplike repons lan…' : inlineText(lang, 'Explain the answer…')}
                       />
                     </label>
 

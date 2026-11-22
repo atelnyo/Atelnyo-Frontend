@@ -12,6 +12,7 @@ import { SkeletonSection } from './ProfileSkeleton';
 import { fmtCount, isNewItem } from './profileUtils';
 import { RatingStars } from './ProfileCoursesTab';
 import ProfileCatalogCard from './ProfileCatalogCard';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function ProductsTab({ products, loading, onItemClick, lang }) {
   if (loading) return <SkeletonSection />;
@@ -22,7 +23,7 @@ export default function ProductsTab({ products, loading, onItemClick, lang }) {
         <p>
           {lang === 'ht'
             ? 'Kreyatè sa a poko mete pwodwi pou kounye a.'
-            : 'No products yet.'}
+            : inlineText(lang, 'No products yet.')}
         </p>
       </div>
     );
@@ -36,19 +37,19 @@ export default function ProductsTab({ products, loading, onItemClick, lang }) {
           image={product.image_url}
           description={product.description}
           icon="fa-cube"
-          typeLabel={lang === 'ht' ? 'Pwodwi' : 'Product'}
+          typeLabel={lang === 'ht' ? 'Pwodwi' : inlineText(lang, 'Product')}
           price={`$${product.price || 0}`}
-          freeLabel={lang === 'ht' ? 'Gratis' : 'Free'}
+          freeLabel={lang === 'ht' ? 'Gratis' : inlineText(lang, 'Free')}
           rating={product.rating}
           isFeatured={!!product.is_featured}
           isNew={isNewItem(product.created_at)}
           isPopular={product.sales_count >= 25}
           badgeLabels={{
-            featured: lang === 'ht' ? 'Rekòmande' : 'Featured',
-            new: lang === 'ht' ? 'Nouvo' : 'New',
-            popular: lang === 'ht' ? 'Popilè' : 'Popular',
+            featured: lang === 'ht' ? 'Rekòmande' : inlineText(lang, 'Featured'),
+            new: lang === 'ht' ? 'Nouvo' : inlineText(lang, 'New'),
+            popular: lang === 'ht' ? 'Popilè' : inlineText(lang, 'Popular'),
           }}
-          extra={product.sales_count > 0 ? <span>· {fmtCount(product.sales_count)} {lang === 'ht' ? 'vann' : 'sold'}</span> : null}
+          extra={product.sales_count > 0 ? <span>· {fmtCount(product.sales_count)} {lang === 'ht' ? 'vann' : inlineText(lang, 'sold')}</span> : null}
           onOpen={() => onItemClick?.('product', product.id, product)}
         />
       ))}

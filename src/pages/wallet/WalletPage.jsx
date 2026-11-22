@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import WalletSection from '../../components/studio/sections/WalletSection';
 import WithdrawModal from '../../components/studio/modals/WithdrawModal';
 import VerificationModal from '../../components/studio/modals/VerificationModal';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function WalletPage({ lang = 'en', t = {}, showToast, user }) {
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
@@ -18,7 +19,7 @@ export default function WalletPage({ lang = 'en', t = {}, showToast, user }) {
     return (
       <div className="wallet-page-gate">
         <i className="fas fa-lock" />
-        <h3>{lang === 'ht' ? 'Konekte pou wè bous ou.' : 'Sign in to view your wallet.'}</h3>
+        <h3>{lang === 'ht' ? 'Konekte pou wè bous ou.' : inlineText(lang, 'Sign in to view your wallet.')}</h3>
       </div>
     );
   }

@@ -11,6 +11,7 @@
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import api from '../../../services/api';
+import { inlineText } from '../../../utils/inlineI18n';
 
 /**
  * §17 — Debounced autosave: changes update memory immediately,
@@ -42,7 +43,7 @@ function useDebouncedSave(callback, delay = 800) {
   return trigger;
 }
 
-export default function FieldRenderer({ field, onSave, isHt }) {
+export default function FieldRenderer({ field, onSave, isHt, lang = 'en' }) {
   const [localValue, setLocalValue] = useState(() => {
     if (field.field_type === 'number' || field.field_type === 'currency') {
       return field.value_number != null ? String(field.value_number) : '';
@@ -87,7 +88,7 @@ export default function FieldRenderer({ field, onSave, isHt }) {
 
   const validate = useCallback((value) => {
     if (isRequired && !value && value !== 0) {
-      return isHt ? 'Chanp sa a obligatwa.' : 'This field is required.';
+      return isHt ? 'Chanp sa a obligatwa.' : inlineText(lang, 'This field is required.');
     }
     if (value && validation_rules?.minLength && String(value).length < validation_rules.minLength) {
       return isHt
@@ -100,7 +101,7 @@ export default function FieldRenderer({ field, onSave, isHt }) {
         : `Text is too long (max: ${validation_rules.maxLength} characters).`;
     }
     if (value && validation_rules?.pattern && !new RegExp(validation_rules.pattern).test(String(value))) {
-      return isHt ? 'Fòma a pa kòrèk.' : 'Invalid format.';
+      return isHt ? 'Fòma a pa kòrèk.' : inlineText(lang, 'Invalid format.');
     }
     return '';
   }, [isRequired, validation_rules, isHt]);
@@ -121,7 +122,7 @@ export default function FieldRenderer({ field, onSave, isHt }) {
         {label}
         {isRequired && <span className="pw-field-required" aria-hidden="true">*</span>}
         {required_status === 'recommended' && (
-          <span className="pw-field-recommended">{isHt ? '(rekomande)' : '(recommended)'}</span>
+          <span className="pw-field-recommended">{isHt ? '(rekomande)' : inlineText(lang, '(recommended)')}</span>
         )}
       </label>
 
@@ -129,7 +130,7 @@ export default function FieldRenderer({ field, onSave, isHt }) {
         <p className="pw-field-help" id={helpId}>{help_text}</p>
       )}
 
-      {renderInput(fieldId, field_type, localValue, handleChange, setTouched, placeholder, options, isHt, validation_rules, isRequired, describedBy)}
+      {renderInput(fieldId, field_type, localValue, handleChange, setTouched, placeholder, options, isHt, lang, validation_rules, isRequired, describedBy)}
 
       {error && <p className="pw-field-error" id={errorId} role="alert">{error}</p>}
     </div>
@@ -149,7 +150,7 @@ const FILE_ICONS = {
 };
 const FILE_MAX_MB = 50;
 
-function FileUploadField({ id, field_type, value, onChange, onBlur, placeholder, isHt }) {
+function FileUploadField({ id, field_type, value, onChange, onBlur, placeholder, isHt, lang = 'en' }) {
   const fileInputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -191,7 +192,7 @@ function FileUploadField({ id, field_type, value, onChange, onBlur, placeholder,
           }
         } catch (err) {
           console.error('[FileUpload] upload failed:', err);
-          setUploadError(isHt ? 'Erè pandan telechajman.' : 'Upload failed.');
+          setUploadError(isHt ? 'Erè pandan telechajman.' : inlineText(lang, 'Upload failed.'));
         } finally {
           setUploading(false);
           setUploadProgress(0);
@@ -251,7 +252,7 @@ function FileUploadField({ id, field_type, value, onChange, onBlur, placeholder,
           ) : (
             <i className="fas fa-cloud-arrow-up" aria-hidden="true" />
           )}
-          <span>{isHt ? 'Telechaje' : 'Upload'}</span>
+          <span>{isHt ? 'Telechaje' : inlineText(lang, 'Upload')}</span>
         </button>
       </div>
 
@@ -308,7 +309,7 @@ function FileUploadField({ id, field_type, value, onChange, onBlur, placeholder,
       {dragOver && (
         <div className="pw-file-drag-overlay">
           <i className="fas fa-cloud-arrow-up" aria-hidden="true" />
-          <span>{isHt ? 'Depoze fichye a isit la' : 'Drop file here'}</span>
+          <span>{isHt ? 'Depoze fichye a isit la' : inlineText(lang, 'Drop file here')}</span>
         </div>
       )}
 
@@ -324,7 +325,7 @@ function FileUploadField({ id, field_type, value, onChange, onBlur, placeholder,
         <span>
           {isHt
             ? 'Depoze fichye a isit la oswa klike pou chwazi'
-            : 'Drop file here or click to browse'}
+            : inlineText(lang, 'Drop file here or click to browse')}
         </span>
       </div>
 
@@ -335,7 +336,7 @@ function FileUploadField({ id, field_type, value, onChange, onBlur, placeholder,
   );
 }
 
-function renderInput(id, type, value, onChange, onBlur, placeholder, options, isHt, validationRules, isRequired, describedBy) {
+function renderInput(id, type, value, onChange, onBlur, placeholder, options, isHt, lang = 'en', validationRules, isRequired, describedBy) {
   switch (type) {
     case 'long_text':
       return (
@@ -345,7 +346,7 @@ function renderInput(id, type, value, onChange, onBlur, placeholder, options, is
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onBlur={onBlur}
-          placeholder={placeholder || (isHt ? 'Ekri isit la...' : 'Write here...')}
+          placeholder={placeholder || (isHt ? 'Ekri isit la...' : inlineText(lang, 'Write here...'))}
           rows={6}
           maxLength={10000}
           aria-required={isRequired || undefined}
@@ -362,7 +363,7 @@ function renderInput(id, type, value, onChange, onBlur, placeholder, options, is
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onBlur={onBlur}
-          placeholder={placeholder || (isHt ? 'Ekri isit la...' : 'Write here...')}
+          placeholder={placeholder || (isHt ? 'Ekri isit la...' : inlineText(lang, 'Write here...'))}
           maxLength={500}
           aria-required={isRequired || undefined}
           aria-describedby={describedBy}
@@ -379,7 +380,7 @@ function renderInput(id, type, value, onChange, onBlur, placeholder, options, is
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onBlur={onBlur}
-          placeholder={placeholder || (isHt ? 'Antre yon nimewo...' : 'Enter a number...')}
+          placeholder={placeholder || (isHt ? 'Antre yon nimewo...' : inlineText(lang, 'Enter a number...'))}
           min={validationRules?.min}
           max={validationRules?.max}
           step={type === 'currency' ? '0.01' : '1'}
@@ -413,7 +414,7 @@ function renderInput(id, type, value, onChange, onBlur, placeholder, options, is
           aria-required={isRequired || undefined}
           aria-describedby={describedBy}
         >
-          <option value="">{placeholder || (isHt ? 'Chwazi...' : 'Select...')}</option>
+          <option value="">{placeholder || (isHt ? 'Chwazi...' : inlineText(lang, 'Select...'))}</option>
           {(options || []).map((opt) => (
             <option key={opt.value || opt} value={opt.value || opt}>
               {opt.label || opt}
@@ -498,7 +499,7 @@ function renderInput(id, type, value, onChange, onBlur, placeholder, options, is
           onChange={onChange}
           onBlur={onBlur}
           placeholder={placeholder}
-          isHt={isHt}
+          isHt={isHt} lang={lang}
         />
       );
 
@@ -510,7 +511,7 @@ function renderInput(id, type, value, onChange, onBlur, placeholder, options, is
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onBlur={onBlur}
-          placeholder={placeholder || (isHt ? 'Ekri tablo a isit la...' : 'Enter table data here...')}
+          placeholder={placeholder || (isHt ? 'Ekri tablo a isit la...' : inlineText(lang, 'Enter table data here...'))}
           rows={8}
         />
       );
@@ -523,7 +524,7 @@ function renderInput(id, type, value, onChange, onBlur, placeholder, options, is
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onBlur={onBlur}
-          placeholder={placeholder || (isHt ? 'Ekri isit la...' : 'Write here...')}
+          placeholder={placeholder || (isHt ? 'Ekri isit la...' : inlineText(lang, 'Write here...'))}
           rows={4}
         />
       );

@@ -10,6 +10,7 @@
  */
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import MediaCard from './MediaCard';
+import { inlineText } from '../../utils/inlineI18n';
 
 export default function MediaCarousel({
   items = [],
@@ -84,7 +85,7 @@ export default function MediaCarousel({
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       role="region"
-      aria-label={isHt ? 'Karousèl medya' : 'Media carousel'}
+      aria-label={isHt ? 'Karousèl medya' : inlineText(lang, 'Media carousel')}
       aria-roledescription="carousel"
     >
       {/* ─── Track ─────────────────────────────────────────────── */}
@@ -101,7 +102,7 @@ export default function MediaCarousel({
             className="media-carousel-slide"
             role="group"
             aria-roledescription="slide"
-            aria-label={`${isHt ? 'Diapozitif' : 'Slide'} ${index +1} ${isHt ? 'sou' : 'of'} ${total}`}
+            aria-label={`${isHt ? 'Diapozitif' : inlineText(lang, 'Slide')} ${index +1} ${isHt ? 'sou' : inlineText(lang, 'of')} ${total}`}
             aria-hidden={index !== currentIndex}
           >
             <MediaCard
@@ -123,7 +124,7 @@ export default function MediaCarousel({
             type="button"
             className="media-carousel-arrow media-carousel-arrow-prev"
             onClick={(e) => { e.stopPropagation(); goPrev(); }}
-            aria-label={isHt ? 'Anvan' : 'Previous'}
+            aria-label={isHt ? 'Anvan' : inlineText(lang, 'Previous')}
           >
             <i className="fas fa-chevron-left" aria-hidden="true" />
           </button>
@@ -131,7 +132,7 @@ export default function MediaCarousel({
             type="button"
             className="media-carousel-arrow media-carousel-arrow-next"
             onClick={(e) => { e.stopPropagation(); goNext(); }}
-            aria-label={isHt ? 'Apre' : 'Next'}
+            aria-label={isHt ? 'Apre' : inlineText(lang, 'Next')}
           >
             <i className="fas fa-chevron-right" aria-hidden="true" />
           </button>
@@ -149,7 +150,7 @@ export default function MediaCarousel({
               onClick={() => goTo(index)}
               role="tab"
               aria-selected={index === currentIndex}
-              aria-label={`${isHt ? 'Diapozitif' : 'Slide'} ${index + 1}`}
+              aria-label={`${isHt ? 'Diapozitif' : inlineText(lang, 'Slide')} ${index + 1}`}
             />
           ))}
         </div>

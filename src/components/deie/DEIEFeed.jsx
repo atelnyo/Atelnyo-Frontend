@@ -25,6 +25,7 @@ import { SHEETS } from '../../routes/sheets';
 import { requireLogin } from '../../utils/history';
 import SkeletonCard from '../SkeletonCard';
 import DEIECard from './DEIECard';
+import { inlineText } from '../../utils/inlineI18n';
 
 const SECTION_ICONS = {
   following: 'fa-user-friends',
@@ -90,14 +91,14 @@ const DEIEFeed = memo(function DEIEFeed({ user, lang = 'en', limit = 6 }) {
         <div className="deie-auth-icon">
           <i className="fas fa-user-lock" />
         </div>
-        <h3>{isHt ? 'Konekte pou wè feed la' : 'Sign in to see your feed'}</h3>
+        <h3>{isHt ? 'Konekte pou wè feed la' : inlineText(lang, 'Sign in to see your feed')}</h3>
         <p>
           {isHt
             ? 'Konekte oswa kreye yon kont pou resevwa rekòmandasyon pèsonalize.'
-            : 'Sign in or create an account to get personalized recommendations.'}
+            : inlineText(lang, 'Sign in or create an account to get personalized recommendations.')}
         </p>
         <button type="button" className="deie-auth-btn" onClick={() => requireLogin(navigate, location, SHEETS.LOGIN)}>
-          <i className="fas fa-sign-in-alt" /> {isHt ? 'Konekte' : 'Sign in'}
+          <i className="fas fa-sign-in-alt" /> {isHt ? 'Konekte' : inlineText(lang, 'Sign in')}
         </button>
       </div>
     );
@@ -131,11 +132,11 @@ const DEIEFeed = memo(function DEIEFeed({ user, lang = 'en', limit = 6 }) {
           <i className="fas fa-exclamation-triangle" />
         </div>
         <p className="deie-error-title">
-          {isHt ? 'Nou pa ka chaje feed la.' : 'Could not load the feed.'}
+          {isHt ? 'Nou pa ka chaje feed la.' : inlineText(lang, 'Could not load the feed.')}
         </p>
         <p className="deie-feed-error-detail">{error}</p>
         <button type="button" className="deie-retry-btn" onClick={fetchFeed}>
-          <i className="fas fa-redo" /> {isHt ? 'Rekòmanse' : 'Retry'}
+          <i className="fas fa-redo" /> {isHt ? 'Rekòmanse' : inlineText(lang, 'Retry')}
         </button>
       </div>
     );
@@ -146,11 +147,11 @@ const DEIEFeed = memo(function DEIEFeed({ user, lang = 'en', limit = 6 }) {
     return (
       <div className="deie-feed deie-feed-empty">
         <i className="fas fa-newspaper" />
-        <h3>{isHt ? 'Pa gen kontni nan feed la' : 'No content in your feed'}</h3>
+        <h3>{isHt ? 'Pa gen kontni nan feed la' : inlineText(lang, 'No content in your feed')}</h3>
         <p>
           {isHt
             ? 'Eseye swiv kreyatè oswa rantre nan kominote yo pou nouri feed ou.'
-            : 'Try following creators or joining communities to populate your feed.'}
+            : inlineText(lang, 'Try following creators or joining communities to populate your feed.')}
         </p>
       </div>
     );
@@ -162,7 +163,7 @@ const DEIEFeed = memo(function DEIEFeed({ user, lang = 'en', limit = 6 }) {
       {feed.is_personalized && (
         <div className="deie-feed-personalized-badge">
           <i className="fas fa-magic" />
-          <span>{isHt ? 'Feed pèsonalize' : 'Personalized feed'}</span>
+          <span>{isHt ? 'Feed pèsonalize' : inlineText(lang, 'Personalized feed')}</span>
         </div>
       )}
 
@@ -176,7 +177,7 @@ const DEIEFeed = memo(function DEIEFeed({ user, lang = 'en', limit = 6 }) {
               </h2>
               {section.is_personalized && (
                 <span className="deie-section-personalized-tag">
-                  {isHt ? 'Pou ou' : 'For you'}
+                  {isHt ? 'Pou ou' : inlineText(lang, 'For you')}
                 </span>
               )}
             </div>
