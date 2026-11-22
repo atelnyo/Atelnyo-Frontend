@@ -2073,6 +2073,23 @@ body.dark-mode .ad-cfg-input {
   flex-wrap: wrap;
 }
 
+/* Pinned environment switch in the Payments header — the mode must never
+   depend on scrolling to one row. */
+.ad-cfg-group-mode {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: center;
+}
+
+.ad-cfg-group-mode-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary, #64748b);
+}
+
 .ad-cfg-group-title {
   font-size: 0.85rem;
   font-weight: 700;

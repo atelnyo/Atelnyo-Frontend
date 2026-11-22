@@ -445,6 +445,49 @@ export default function AdminPlatformConfig({ lang = 'en', showToast }) {
     setPolicyCountryDraft('');
   };
 
+  // One switch, rendered twice: on the row's own controls and pinned in the
+  // Payments header. The environment is the most expensive thing to get wrong
+  // here, so it must never depend on scrolling to (or finding) a single row.
+  const renderModeSwitch = (row) => {
+    const current = String(editing[row.key] ?? row.value ?? '').trim().toLowerCase();
+    const busy = savingKey === row.key;
+    return (
+      <div
+        className="ad-cfg-mode-switch"
+        role="group"
+        aria-label={t('PayPal environment', 'Anviwònman PayPal')}
+      >
+        {PAYPAL_MODES.map((mode) => {
+          const active = current === mode;
+          return (
+            <button
+              key={mode}
+              type="button"
+              className={`ad-cfg-mode-btn ad-cfg-mode-${mode}${active ? ' is-active' : ''}`}
+              aria-pressed={active}
+              disabled={busy || active}
+              onClick={() => handleSetMode(row, mode)}
+              title={mode === 'live'
+                ? t(
+                  'Live mode — real cards are charged. Selecting it saves immediately.',
+                  'Mòd live — kat reyèl ap peye. Lè w chwazi l, li sove touswit.',
+                )
+                : t(
+                  'Sandbox mode — test payments only, no real money. Selecting it saves immediately.',
+                  'Mòd sandbox — peman tès sèlman, pa gen lajan reyèl. Lè w chwazi l, li sove touswit.',
+                )}
+            >
+              {busy && !active
+                ? <i className="fas fa-spinner fa-spin" aria-hidden="true" />
+                : <i className={`fas ${mode === 'live' ? 'fa-bolt' : 'fa-flask'}`} aria-hidden="true" />}
+              {' '}{mode === 'live' ? t('Live', 'Live') : t('Sandbox', 'Sandbox')}
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
+
   const renderRow = (row) => {
     const label = KEY_LABELS[row.key];
     const isBool = row.value_type === 'bool';
@@ -555,40 +598,7 @@ export default function AdminPlatformConfig({ lang = 'en', showToast }) {
               <span>{draft === 'true' ? (isHt ? 'Aktive' : inlineText(lang, 'Enabled')) : (isHt ? 'Fèmen' : inlineText(lang, 'Disabled'))}</span>
             </label>
           ) : row.key === 'paypal_mode' ? (
-            <div
-              className="ad-cfg-mode-switch"
-              role="group"
-              aria-label={t('PayPal environment', 'Anviwònman PayPal')}
-            >
-              {PAYPAL_MODES.map((mode) => {
-                const active = String(draft).trim().toLowerCase() === mode;
-                const busy = savingKey === row.key;
-                return (
-                  <button
-                    key={mode}
-                    type="button"
-                    className={`ad-cfg-mode-btn ad-cfg-mode-${mode}${active ? ' is-active' : ''}`}
-                    aria-pressed={active}
-                    disabled={busy || active}
-                    onClick={() => handleSetMode(row, mode)}
-                    title={mode === 'live'
-                      ? t(
-                        'Live mode — real cards are charged. Selecting it saves immediately.',
-                        'Mòd live — kat reyèl ap peye. Lè w chwazi l, li sove touswit.',
-                      )
-                      : t(
-                        'Sandbox mode — test payments only, no real money. Selecting it saves immediately.',
-                        'Mòd sandbox — peman tès sèlman, pa gen lajan reyèl. Lè w chwazi l, li sove touswit.',
-                      )}
-                  >
-                    {busy && !active
-                      ? <i className="fas fa-spinner fa-spin" aria-hidden="true" />
-                      : <i className={`fas ${mode === 'live' ? 'fa-bolt' : 'fa-flask'}`} aria-hidden="true" />}
-                    {' '}{mode === 'live' ? t('Live', 'Live') : t('Sandbox', 'Sandbox')}
-                  </button>
-                );
-              })}
-            </div>
+            renderModeSwitch(row)
           ) : MULTILINE_KEYS.has(row.key) ? (
             <>
               <textarea
@@ -841,6 +851,14 @@ export default function AdminPlatformConfig({ lang = 'en', showToast }) {
                     <span className="ad-cfg-group-desc">
                       {isHt ? group.desc.ht : group.desc.en}
                     </span>
+                    {group.key === 'payments' && rowByKey['paypal_mode'] && (
+                      <span className="ad-cfg-group-mode">
+                        <span className="ad-cfg-group-mode-label">
+                          {t('PayPal environment', 'Anviwònman PayPal')}
+                        </span>
+                        {renderModeSwitch(rowByKey['paypal_mode'])}
+                      </span>
+                    )}
                   </div>
                   {missing.length > 0 && (
                     <p className="ad-cfg-hint">

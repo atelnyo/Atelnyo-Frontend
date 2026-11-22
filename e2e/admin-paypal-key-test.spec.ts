@@ -150,7 +150,11 @@ test('admin PayPal Test sends the pair on screen and shows why it failed', async
   await expect(health).toContainText('live mode');
   await expect(health).toContainText('Client Authentication failed');
 
-  // 4. paypal_mode is a switch: one click saves the exact token the gateway
+  // 4. The env switch is pinned in the Payments header too — it must not
+  //    depend on finding the paypal_mode row in the list.
+  await expect(page.locator('.ad-cfg-group-head .ad-cfg-mode-switch')).toBeVisible();
+
+  // 5. paypal_mode is a switch: one click saves the exact token the gateway
   //    understands, so a typo can no longer leave the store silently in the
   //    wrong environment.
   const modeRow = page.locator('.ad-cfg-row').filter({ has: page.locator('.ad-cfg-mode-switch') });
