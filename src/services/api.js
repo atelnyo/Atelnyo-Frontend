@@ -438,11 +438,12 @@ api.interceptors.response.use(
     }
 
     // Skip refresh for login/refresh/logout endpoints to avoid infinite loops.
-    const skipRefresh =
-      original?.url?.includes('/login/') ||
-      original?.url?.includes('/logout/') ||
-      original?.url?.includes('/refresh/') ||
-      original?.url?.includes('/password/');
+    // Match WITHOUT the leading slash: services call these as relative paths
+    // (``api.post('login/')``), so '/login/' never matched them.
+    const requestUrl = String(original?.url || '');
+    const skipRefresh = [
+      'login/', 'logout/', 'refresh/', 'password/', 'signup/',
+    ].some((path) => requestUrl.includes(path));
 
     if (status === 401 && refresh && !skipRefresh && !original._retry) {
       original._retry = true;
@@ -468,6 +469,20 @@ api.interceptors.response.use(
         broadcastLogout();
         return Promise.reject(refreshErr);
       }
+    }
+
+    // A 401 on a request that DID carry an access token, with no refresh
+    // token left to renew it, is a dead session — not a guest hitting a
+    // private endpoint (that case sends no Authorization header). Clear it
+    // and notify listeners (App.jsx resets the Zustand store): otherwise the
+    // UI keeps showing a signed-in user while the API treats every call as
+    // anonymous, and checkout fails with "guest_email is required".
+    const sentAuthHeader = Boolean(
+      original?.headers?.Authorization || original?.headers?.['X-Authorization'],
+    );
+    if (status === 401 && !skipRefresh && !refresh && sentAuthHeader) {
+      clearTokenPair();
+      broadcastLogout();
     }
 
     return Promise.reject(error);
