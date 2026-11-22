@@ -107,6 +107,22 @@
 .store-account dl { display: grid; grid-template-columns: max-content 1fr; gap: 8px 16px; margin: 0 0 20px; }
 .store-account dt { color: var(--store-muted); }
 .store-account dd { margin: 0; }
+.store-account__actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.store-account__actions a { text-decoration: none; }
+.store-account__section-title { font-size: 1.1rem; margin: 0 0 10px; }
+.store-account__orders { list-style: none; margin: 0 0 20px; padding: 0; display: grid; gap: 10px; }
+.store-account__order {
+  border: 1px solid var(--store-border); border-radius: 10px; padding: 12px;
+  display: grid; gap: 6px;
+}
+.store-account__order-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.store-account__order-id { font-weight: 700; text-decoration: none; }
+.store-account__order-date { margin-left: 8px; color: var(--store-muted); font-size: 0.85rem; }
+.store-account__order-status {
+  font-size: 0.75rem; font-weight: 700; padding: 2px 8px;
+  border-radius: 999px; white-space: nowrap;
+}
+.store-account__order-items { margin: 0; color: var(--store-muted); font-size: 0.9rem; }
 
 .store-btn {
   padding: 10px 18px; border: 0; border-radius: 8px; cursor: pointer;

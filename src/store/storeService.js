@@ -35,8 +35,14 @@ export const storeService = {
       provider,
       ...(pendingShippingConfirmation ? { pending_shipping_confirmation: true } : {}),
     }, guestHeaders(guestToken)),
+  // No password when the shopper is already signed in: the claim then links
+  // the order to the signed-in account instead of creating a new one.
   claimOrder: (orderId, guestToken, password) =>
-    api.post('marketplace/orders/claim/', { order_id: orderId, guest_token: guestToken, password }),
+    api.post('marketplace/orders/claim/', {
+      order_id: orderId,
+      guest_token: guestToken,
+      ...(password ? { password } : {}),
+    }),
   listFavorites: (params) => api.get('marketplace/favorites/', { params }),
   addFavorite: (productId) => api.post('marketplace/favorites/', { product: productId }),
   removeFavorite: (favoriteId) => api.delete(`marketplace/favorites/${favoriteId}/`),
