@@ -94,6 +94,40 @@ describe('StoreCartPage checkout preparation', () => {
     config.mockResolvedValue({ data: { configured: true, client_id: 'cid', sandbox: true } });
   });
 
+  it('shows the field-level reason when the order is rejected for a missing guest email', async () => {
+    createOrder.mockRejectedValue({
+      response: {
+        status: 400,
+        data: { guest_email: ['A valid email is required to check out as a guest.'] },
+      },
+    });
+
+    renderCart();
+    await waitFor(() => expect(screen.queryByText('Loading product…')).toBeNull());
+    fireEvent.click(screen.getByRole('button', { name: 'Proceed to Payment' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert').textContent)
+        .toMatch(/A valid email is required to check out as a guest\./);
+    });
+    expect(screen.getByRole('alert').textContent).not.toMatch(/could not be started/);
+  });
+
+  it('tells the shopper to sign in again when the order request is unauthorized', async () => {
+    createOrder.mockRejectedValue({
+      response: { status: 401, data: { detail: 'Authentication credentials were not provided.' } },
+    });
+
+    renderCart();
+    await waitFor(() => expect(screen.queryByText('Loading product…')).toBeNull());
+    fireEvent.click(screen.getByRole('button', { name: 'Proceed to Payment' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert').textContent).toMatch(/session expired/i);
+    });
+    expect(screen.getByRole('link', { name: 'Sign in' })).toBeTruthy();
+  });
+
   it('shows a loading placeholder and a busy label while the PayPal buttons are being prepared', async () => {
     const pending = deferred();
     renderButtons = () => pending.promise;

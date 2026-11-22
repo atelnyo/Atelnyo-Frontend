@@ -7,6 +7,36 @@ import SEOHead from '../components/shared/SEOHead';
 import { loadPayPalScript } from '../components/CheckoutModal';
 import { paymentConfigService, checkoutService } from '../services/api';
 
+/**
+ * Human-readable reason a checkout request failed.
+ *
+ * The server answers with ``{"detail": ...}``, ``{"error": ...}`` (the
+ * checkout action) or field errors such as ``{"guest_email": [...]}``; a
+ * blocked or failed request has no body at all. Showing only "Checkout
+ * could not be started." hid every one of those reasons — including a
+ * session the backend no longer accepts (it then treats the shopper as a
+ * guest, so the order is rejected for a missing guest email).
+ */
+function checkoutErrorMessage(err) {
+  const status = err?.response?.status;
+  if (status === 401) {
+    return 'Your session expired. Sign in again, or check out as a guest.';
+  }
+  const body = err?.response?.data;
+  const direct = body?.detail || body?.error;
+  if (typeof direct === 'string' && direct.trim()) return direct.trim();
+  if (body && typeof body === 'object') {
+    for (const value of Object.values(body)) {
+      const text = Array.isArray(value) ? value[0] : value;
+      if (typeof text === 'string' && text.trim()) return text.trim();
+    }
+  }
+  if (!err?.response) {
+    return 'We could not reach the store. Check your connection and try again.';
+  }
+  return 'Checkout could not be started.';
+}
+
 export default function StoreCartPage() {
   const [items, setItems] = useState(() => loadCart());
   // Display-only details (name, image, price) fetched per product id.
@@ -360,9 +390,15 @@ export default function StoreCartPage() {
       // (especially on a slow connection). The placeholder below covers it.
       setStatus('preparing');
     } catch (err) {
-      const detail =
-        err?.response?.data?.detail || err?.response?.data?.error || 'Checkout could not be started.';
-      setMessage(String(detail));
+      const body = err?.response?.data;
+      setMessage(checkoutErrorMessage(err));
+      // A shopper the UI still shows as signed in, but whose token the API no
+      // longer accepts, lands in the server's guest branch and is rejected
+      // for a missing guest email (400 {"guest_email": ...}). Offer the
+      // sign-in route instead of a dead-end error.
+      if (err?.response?.status === 401 || (user && body?.guest_email)) {
+        setLoginLink(`/store/login?next=${encodeURIComponent('/store/cart')}`);
+      }
       setStatus('error');
     }
   };
