@@ -1996,6 +1996,38 @@ body.dark-mode .ad-cfg-input {
   vertical-align: middle;
 }
 
+.ad-cfg-source-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 1px 6px;
+  border-radius: 999px;
+  vertical-align: middle;
+  border: 1px solid transparent;
+}
+
+.ad-cfg-source-database {
+  color: #047857;
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.ad-cfg-source-environment {
+  color: #1d4ed8;
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.ad-cfg-source-empty {
+  color: var(--text-secondary, #64748b);
+  background: rgba(148, 163, 184, 0.14);
+  border-color: rgba(148, 163, 184, 0.3);
+}
+
 .ad-cfg-desc {
   color: var(--text-secondary, #64748b);
   font-style: italic;

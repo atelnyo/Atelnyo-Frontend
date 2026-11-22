@@ -406,6 +406,31 @@ export default function AdminPlatformConfig({ lang = 'en', showToast }) {
           </div>
           <div className="ad-cfg-key">
             <code>{row.key}</code> · {row.value_type}
+            {row.source && (
+              <span
+                className={`ad-cfg-source-badge ad-cfg-source-${row.source}`}
+                title={row.source === 'environment'
+                  ? t(
+                    `This row is empty — the live value comes from the ${row.source_env_var || 'environment'} env var. Saving here only fixes it if nothing reads the env var first.`,
+                    `Liy sa a vid — se varyab anviwònman ${row.source_env_var || 'environment'} ki bay valè an efè a. Sove isit la pa chanje anyen si yon sèvis li env var la anvan.`,
+                  )
+                  : row.source === 'database'
+                    ? t(
+                      'Stored in this row — the platform reads this value.',
+                      'Sove nan liy sa a — se valè sa a platfòm nan li.',
+                    )
+                    : t(
+                      'Nothing stored and no env var in effect.',
+                      'Pa gen valè sere e pa gen varyab anviwònman an efè.',
+                    )}
+              >
+                {row.source === 'database'
+                  ? t('database', 'baz done')
+                  : row.source === 'environment'
+                    ? t('env', 'env')
+                    : t('empty', 'vid')}
+              </span>
+            )}
             {!editingDesc && (
               <>
                 {row.description
