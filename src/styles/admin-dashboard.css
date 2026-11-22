@@ -1905,6 +1905,54 @@ body.dark-mode .ad-spot-kyc-grid div strong {
   gap: var(--sp-sm, 8px);
 }
 
+/* PayPal environment switch — live/sandbox is a two-state save, not free text. */
+.ad-cfg-mode-switch {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 999px;
+  background: rgba(107, 114, 128, 0.12);
+  border: 1px solid var(--border-color, rgba(216, 27, 96, 0.2));
+}
+
+.ad-cfg-mode-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary, #6b7280);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.ad-cfg-mode-btn:disabled {
+  cursor: default;
+}
+
+.ad-cfg-mode-sandbox.is-active {
+  background: #0ea5e9;
+  color: #fff;
+}
+
+.ad-cfg-mode-live.is-active {
+  background: #dc2626;
+  color: #fff;
+}
+
+body.dark-mode .ad-cfg-mode-switch {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+body.dark-mode .ad-cfg-mode-btn {
+  color: #cbd5e1;
+}
+
 .ad-cfg-input {
   width: 110px;
   padding: 6px 10px;

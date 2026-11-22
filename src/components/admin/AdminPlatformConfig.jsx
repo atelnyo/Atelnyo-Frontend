@@ -75,6 +75,11 @@ const KEY_LABELS = {
 // input (long raw HTML/script snippets).
 const MULTILINE_KEYS = new Set(['custom_head_html', 'printify_shipping_policy']);
 
+// ``paypal_mode`` is a two-state switch, not free text: anything get_mode()
+// does not recognise ("Live ", "production", "test") silently falls back to
+// sandbox, so a typo looked like a working live store.
+const PAYPAL_MODES = ['sandbox', 'live'];
+
 // ─── Grouped sections shown in the panel ──────────────────────────────
 const CONFIG_GROUPS = [
   {
@@ -243,6 +248,31 @@ export default function AdminPlatformConfig({ lang = 'en', showToast }) {
       setSavingKey(null);
     }
   }, [editing, showToast, t]);
+
+  // Flip paypal_mode between sandbox and live. One click saves the exact
+  // token the gateway understands — no free-text value to mistype.
+  const handleSetMode = useCallback(async (row, mode) => {
+    setSavingKey(row.key);
+    try {
+      await adminPlatformConfigService.update(row.id, { value: mode });
+      showToast?.(
+        mode === 'live'
+          ? t('✅ Live mode saved — PayPal now charges real cards.', '✅ Mòd live sove — PayPal ap pran kat reyèl kounya.')
+          : t('✅ Sandbox mode saved — payments are test-only.', '✅ Mòd sandbox sove — peman yo se tès sèlman.'),
+        'check-circle',
+      );
+      setEditing((e) => { const next = { ...e }; delete next[row.key]; return next; });
+      setReloadKey((k) => k + 1);
+    } catch (err) {
+      const detail = err?.response?.data?.value?.[0]
+        || err?.response?.data?.error
+        || err?.response?.data?.detail
+        || t('Could not change the PayPal mode.', 'Pa t kapab chanje mòd PayPal la.');
+      showToast?.(detail, 'circle-exclamation');
+    } finally {
+      setSavingKey(null);
+    }
+  }, [showToast, t]);
 
   const handleAdd = useCallback(async () => {
     const key = addDraft.key.trim();
@@ -495,6 +525,41 @@ export default function AdminPlatformConfig({ lang = 'en', showToast }) {
               />
               <span>{draft === 'true' ? (isHt ? 'Aktive' : inlineText(lang, 'Enabled')) : (isHt ? 'Fèmen' : inlineText(lang, 'Disabled'))}</span>
             </label>
+          ) : row.key === 'paypal_mode' ? (
+            <div
+              className="ad-cfg-mode-switch"
+              role="group"
+              aria-label={t('PayPal environment', 'Anviwònman PayPal')}
+            >
+              {PAYPAL_MODES.map((mode) => {
+                const active = String(draft).trim().toLowerCase() === mode;
+                const busy = savingKey === row.key;
+                return (
+                  <button
+                    key={mode}
+                    type="button"
+                    className={`ad-cfg-mode-btn ad-cfg-mode-${mode}${active ? ' is-active' : ''}`}
+                    aria-pressed={active}
+                    disabled={busy || active}
+                    onClick={() => handleSetMode(row, mode)}
+                    title={mode === 'live'
+                      ? t(
+                        'Live mode — real cards are charged. Selecting it saves immediately.',
+                        'Mòd live — kat reyèl ap peye. Lè w chwazi l, li sove touswit.',
+                      )
+                      : t(
+                        'Sandbox mode — test payments only, no real money. Selecting it saves immediately.',
+                        'Mòd sandbox — peman tès sèlman, pa gen lajan reyèl. Lè w chwazi l, li sove touswit.',
+                      )}
+                  >
+                    {busy && !active
+                      ? <i className="fas fa-spinner fa-spin" aria-hidden="true" />
+                      : <i className={`fas ${mode === 'live' ? 'fa-bolt' : 'fa-flask'}`} aria-hidden="true" />}
+                    {' '}{mode === 'live' ? t('Live', 'Live') : t('Sandbox', 'Sandbox')}
+                  </button>
+                );
+              })}
+            </div>
           ) : MULTILINE_KEYS.has(row.key) ? (
             <>
               <textarea

@@ -20,9 +20,7 @@ import { test, expect } from '@playwright/test';
 const USER = {
   id: 1, username: 'admin', email: 'admin@test.dev',
   is_staff: true, is_superuser: true, first_name: 'Admin', last_name: 'User',
-};
-
-// Masked echoes, exactly what the backend returns for secret rows.
+};  // Masked echoes, exactly what the backend returns for secret rows.
 const ROWS = [
   {
     id: 11, key: 'paypal_client_id', value: '••••••••TBEq8', value_type: 'str',
@@ -57,6 +55,7 @@ test('admin PayPal Test sends the pair on screen and shows why it failed', async
   }, USER);
 
   let testBody: Record<string, unknown> | null = null;
+  let patchBody: Record<string, unknown> | null = null;
   await page.route(/\api\//, async (route) => {
     const url = decodeURIComponent(route.request().url());
     const method = route.request().method();
@@ -69,6 +68,10 @@ test('admin PayPal Test sends the pair on screen and shows why it failed', async
     if (method === 'POST' && url.includes('/api/admin/platform-config/') && url.endsWith('/test/')) {
       testBody = route.request().postDataJSON() as Record<string, unknown>;
       return route.fulfill({ status: 200, json: { ok: false, message: REASON } });
+    }
+    if (method === 'PATCH' && /\/api\/admin\/platform-config\/\d+\/$/.test(url)) {
+      patchBody = route.request().postDataJSON() as Record<string, unknown>;
+      return route.fulfill({ status: 200, json: { ...ROWS[2], ...(patchBody as object) } });
     }
     // Generic admin payload: the dashboard slices several collections
     // (certificates, content intelligence) without guarding, so an empty
@@ -120,4 +123,14 @@ test('admin PayPal Test sends the pair on screen and shows why it failed', async
   // 2. The admin sees the actionable reason, not a dead end.
   await expect(page.getByText(/invalid_client/).first()).toBeVisible();
   await expect(page.getByText(/same REST app/).first()).toBeVisible();
+
+  // 3. paypal_mode is a switch: one click saves the exact token the gateway
+  //    understands, so a typo can no longer leave the store silently in the
+  //    wrong environment.
+  const modeRow = page.locator('.ad-cfg-row').filter({ has: page.locator('.ad-cfg-mode-switch') });
+  await expect(modeRow).toBeVisible();
+  const sandboxBtn = modeRow.locator('.ad-cfg-mode-sandbox');
+  await expect(sandboxBtn).toBeEnabled();
+  await sandboxBtn.click();
+  await expect.poll(() => patchBody).toMatchObject({ value: 'sandbox' });
 });
