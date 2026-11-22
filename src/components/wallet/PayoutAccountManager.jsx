@@ -51,7 +51,7 @@ export default function PayoutAccountManager({
         setConnectError(data.message || (isHt ? 'Erè konekte PayPal' : inlineText(lang, 'PayPal connection failed')));
       }
     }
-  }, [onAdd, isHt]);
+  }, [onAdd, isHt, lang]);
 
   useEffect(() => {
     window.addEventListener('message', handleMessage);
@@ -71,32 +71,58 @@ export default function PayoutAccountManager({
   const handleConnectPayPal = useCallback(async () => {
     setConnecting(true);
     setConnectError('');
+
+    // Open the popup synchronously inside the click gesture. Opening it
+    // after `await` lets browsers treat it as an unsolicited popup.
+    const w = 600, h = 700;
+    const left = (window.screen.width - w) / 2;
+    const top = (window.screen.height - h) / 2;
+    const popup = window.open(
+      'about:blank',
+      'paypal_connect',
+      `width=${w},height=${h},left=${left},top=${top},scrollbars=yes`,
+    );
+    if (!popup) {
+      setConnecting(false);
+      setConnectError(isHt
+        ? 'Popup la bloke — pèmèt popup pou sit sa a epi eseye ankò.'
+        : inlineText(lang, 'Popup blocked — allow popups for this site and retry.'));
+      return;
+    }
+    popupRef.current = popup;
+
     try {
       const res = await walletService.paypalConnect();
       const authUrl = res?.data?.auth_url;
       if (!authUrl) {
+        popup.close();
+        popupRef.current = null;
         setConnecting(false);
         setConnectError(isHt
           ? 'Pa resevwa lyen otorizasyon PayPal.'
           : inlineText(lang, 'No PayPal authorization URL received.'));
         return;
       }
-      // Open PayPal in a popup (600x700 centered)
-      const w = 600, h = 700;
-      const left = (window.screen.width - w) / 2;
-      const top = (window.screen.height - h) / 2;
-      popupRef.current = window.open(
-        authUrl,
-        'paypal_connect',
-        `width=${w},height=${h},left=${left},top=${top},scrollbars=yes`,
-      );
+      // The window can be closed while the URL is in flight; navigating a
+      // closed popup throws, which would surface as a bogus connection error.
+      if (popup.closed) {
+        popupRef.current = null;
+        setConnecting(false);
+        setConnectError(isHt
+          ? 'Ou fèmen fenèt PayPal la anvan koneksyon an fini.'
+          : inlineText(lang, 'You closed the PayPal window before connecting.'));
+        return;
+      }
+      popup.location.href = authUrl;
     } catch (err) {
+      popup.close();
+      popupRef.current = null;
       setConnecting(false);
       setConnectError(err?.response?.data?.error || err?.message || (isHt
         ? 'Erè lansman koneksyon PayPal.'
         : inlineText(lang, 'Failed to start PayPal connection.')));
     }
-  }, [isHt]);
+  }, [isHt, lang]);
 
   return (
     <div className={`wlt-payout-mgr ${className}`}>
