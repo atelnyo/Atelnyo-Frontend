@@ -62,7 +62,8 @@ test('admin PayPal Test sends the pair on screen and shows why it failed', async
     if (method === 'GET' && url.endsWith('/api/me/')) {
       return route.fulfill({ status: 200, json: USER });
     }
-    if (method === 'GET' && url.endsWith('/api/admin/platform-config/')) {
+    // The panel walks pages (`?page=N`), so match on the path alone.
+    if (method === 'GET' && url.split('?')[0].endsWith('/api/admin/platform-config/')) {
       return route.fulfill({ status: 200, json: ROWS });
     }
     // The panel's "why did PayPal fail" record — the reason reached the owner

@@ -202,27 +202,41 @@ export default function AdminPlatformConfig({ lang = 'en', showToast }) {
   // retry simply bumps reloadKey to re-run this effect. ──────────────
   useEffect(() => {
     let cancelled = false;
-    adminPlatformConfigService.list()
-      .then((resp) => {
-        if (cancelled) {return;}
-        const data = Array.isArray(resp?.data) ? resp.data : (resp?.data?.results || []);
-        setRows(data);
+    // The list is paginated (20 rows/page, ordered by key) and ``paypal_mode``
+    // sorts past the first page — a single-page fetch silently hid the PayPal
+    // environment row (and therefore the live/sandbox switch) from the panel,
+    // while the group still claimed defaults were "in effect". Follow ``next``
+    // until every row is loaded.
+    (async () => {
+      try {
+        const collected = [];
+        let page = 1;
+        for (;;) {
+          const resp = await adminPlatformConfigService.list({ page });
+          const data = resp?.data;
+          collected.push(...(Array.isArray(data) ? data : (data?.results || [])));
+          const hasNext = !Array.isArray(data) && !!data?.next;
+          // Hard stop so a broken ``next`` can never loop forever.
+          if (!hasNext || page >= 25) { break; }
+          page += 1;
+        }
+        if (cancelled) { return; }
+        setRows(collected);
         setError(null);
-      })
-      .catch((err) => {
-        if (cancelled) {return;}
+      } catch (err) {
+        if (cancelled) { return; }
         const status = err?.response?.status;
         setError(
           status === 403
             ? (isHt ? 'Aksè admin obligatwa.' : inlineText(lang, 'Admin access required.'))
             : (isHt ? 'Pa t kapab chaje konfigirasyon an.' : inlineText(lang, 'Could not load config.')),
         );
-      })
-      .finally(() => {
-        if (!cancelled) {setLoading(false);}
-      });
+      } finally {
+        if (!cancelled) { setLoading(false); }
+      }
+    })();
     return () => { cancelled = true; };
-  }, [reloadKey, isHt]);
+  }, [reloadKey, isHt, lang]);
 
   const rowByKey = useMemo(() => {    const map = {};
     rows.forEach((r) => { map[r.key] = r; });
