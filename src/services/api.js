@@ -1789,6 +1789,10 @@ export const adminPlatformConfigService = {
     if (related && Object.keys(related).length) body.related = related;
     return api.post(`admin/platform-config/${id}/test/`, body);
   },
+  // GET /api/admin/platform-config/paypal-health/ — the last PayPal OAuth
+  // failure (environment + PayPal's own reason) and the last success, so the
+  // panel can show why a real checkout died without anyone opening the log.
+  paypalHealth: () => api.get('admin/platform-config/paypal-health/'),
 };
 
 // ─── Events (Phase 34) ──────────────────────────────────────────────────

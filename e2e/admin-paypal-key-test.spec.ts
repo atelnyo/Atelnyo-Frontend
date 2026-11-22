@@ -65,6 +65,24 @@ test('admin PayPal Test sends the pair on screen and shows why it failed', async
     if (method === 'GET' && url.endsWith('/api/admin/platform-config/')) {
       return route.fulfill({ status: 200, json: ROWS });
     }
+    // The panel's "why did PayPal fail" record — the reason reached the owner
+    // without the server log.
+    if (method === 'GET' && url.endsWith('/api/admin/platform-config/paypal-health/')) {
+      return route.fulfill({
+        status: 200,
+        json: {
+          mode: 'live', base_url: 'https://api-m.paypal.com', configured: true,
+          last_success: null,
+          last_failure: {
+            at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+            mode: 'live', base_url: 'https://api-m.paypal.com',
+            http_status: 401, error_code: 'invalid_client',
+            error_description: 'Client Authentication failed',
+            client_id_tail: 'TBEq8',
+          },
+        },
+      });
+    }
     if (method === 'POST' && url.includes('/api/admin/platform-config/') && url.endsWith('/test/')) {
       testBody = route.request().postDataJSON() as Record<string, unknown>;
       return route.fulfill({ status: 200, json: { ok: false, message: REASON } });
@@ -124,7 +142,15 @@ test('admin PayPal Test sends the pair on screen and shows why it failed', async
   await expect(page.getByText(/invalid_client/).first()).toBeVisible();
   await expect(page.getByText(/same REST app/).first()).toBeVisible();
 
-  // 3. paypal_mode is a switch: one click saves the exact token the gateway
+  // 3. The last rejection is visible in the panel: PayPal's code, the mode it
+  //    was used in, and PayPal's own description — no server log needed.
+  const health = page.locator('.ad-cfg-paypal-health');
+  await expect(health).toBeVisible();
+  await expect(health).toContainText('invalid_client');
+  await expect(health).toContainText('live mode');
+  await expect(health).toContainText('Client Authentication failed');
+
+  // 4. paypal_mode is a switch: one click saves the exact token the gateway
   //    understands, so a typo can no longer leave the store silently in the
   //    wrong environment.
   const modeRow = page.locator('.ad-cfg-row').filter({ has: page.locator('.ad-cfg-mode-switch') });

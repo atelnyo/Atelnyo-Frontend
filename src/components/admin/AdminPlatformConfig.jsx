@@ -157,6 +157,21 @@ const CONFIG_GROUPS = [
 
 const VALUE_TYPES = ['str', 'int', 'float', 'bool', 'json'];
 
+// "3 h de sa" / "12 min ago" — a raw ISO timestamp tells an operator nothing
+// about whether the failure is from the checkout they just ran or from last
+// week.
+function relativeTime(iso, isHt) {
+  const then = Date.parse(iso || '');
+  if (!Number.isFinite(then)) { return ''; }
+  const mins = Math.max(0, Math.round((Date.now() - then) / 60000));
+  if (mins < 1) { return isHt ? 'kounya' : 'just now'; }
+  if (mins < 60) { return isHt ? `${mins} min de sa` : `${mins} min ago`; }
+  const hours = Math.round(mins / 60);
+  if (hours < 24) { return isHt ? `${hours} h de sa` : `${hours}h ago`; }
+  const days = Math.round(hours / 24);
+  return isHt ? `${days} jou de sa` : `${days}d ago`;
+}
+
 export default function AdminPlatformConfig({ lang = 'en', showToast }) {
   const isHt = lang === 'ht';
   // Memoized so useCallback deps below (`handleSave`) stay stable.
@@ -173,6 +188,7 @@ export default function AdminPlatformConfig({ lang = 'en', showToast }) {
   const [descDraft, setDescDraft] = useState({}); // key -> description draft
   const [descEditingKey, setDescEditingKey] = useState(null);
   const [descSavingKey, setDescSavingKey] = useState(null);
+  const [paypalHealth, setPaypalHealth] = useState(null);
   const [error, setError] = useState(null);
   const [reloadKey, setReloadKey] = useState(0);
 
@@ -208,11 +224,21 @@ export default function AdminPlatformConfig({ lang = 'en', showToast }) {
     return () => { cancelled = true; };
   }, [reloadKey, isHt]);
 
-  const rowByKey = useMemo(() => {
-    const map = {};
+  const rowByKey = useMemo(() => {    const map = {};
     rows.forEach((r) => { map[r.key] = r; });
     return map;
   }, [rows]);
+
+  // The last PayPal OAuth failure (mode + PayPal's own reason). Checkout only
+  // ever shows the shopper "temporarily unavailable", so this is the one place
+  // an owner can read WHY a real payment failed without the server log.
+  useEffect(() => {
+    let cancelled = false;
+    adminPlatformConfigService.paypalHealth()
+      .then((resp) => { if (!cancelled) { setPaypalHealth(resp?.data || null); } })
+      .catch(() => { if (!cancelled) { setPaypalHealth(null); } });
+    return () => { cancelled = true; };
+  }, [reloadKey]);
 
   // Rows whose key is not part of any CONFIG_GROUP (custom keys added
   // via the "Add Key" form) still need a home — they render in their
@@ -336,6 +362,9 @@ export default function AdminPlatformConfig({ lang = 'en', showToast }) {
       showToast?.(detail, 'circle-exclamation');
     } finally {
       setTestingKey(null);
+      // Refresh the health strip: a failing Test must show up as the last
+      // recorded failure, not just as a toast that disappears.
+      setReloadKey((k) => k + 1);
     }
   }, [showToast, t, editing]);
 
@@ -818,6 +847,54 @@ export default function AdminPlatformConfig({ lang = 'en', showToast }) {
                       {t('Defaults / env in effect for:', 'Valè defo / env ap itilize pou:')}{' '}
                       {missing.join(', ')}
                     </p>
+                  )}                  {group.key === 'payments' && (
+                    <div className={`ad-cfg-paypal-health${paypalHealth?.last_failure ? ' is-failed' : ''}`}>
+                      <div className="ad-cfg-paypal-health-head">
+                        <i
+                          className={`fas ${paypalHealth?.last_failure ? 'fa-circle-exclamation' : 'fa-circle-check'}`}
+                          aria-hidden="true"
+                        />
+                        <span>
+                          {paypalHealth?.last_failure
+                            ? t(
+                              `Last PayPal rejection: ${paypalHealth.last_failure.error_code || 'unknown'}`
+                              + ` (HTTP ${paypalHealth.last_failure.http_status ?? '—'})`
+                              + ` in ${paypalHealth.last_failure.mode || '?'} mode,`
+                              + ` ${relativeTime(paypalHealth.last_failure.at, false)}.`,
+                              `Dènye refi PayPal: ${paypalHealth.last_failure.error_code || 'enkoni'}`
+                              + ` (HTTP ${paypalHealth.last_failure.http_status ?? '—'})`
+                              + ` nan mòd ${paypalHealth.last_failure.mode || '?'},`
+                              + ` ${relativeTime(paypalHealth.last_failure.at, true)}.`,
+                            )
+                            : t(
+                              'No PayPal rejection recorded by the worker that served this page.',
+                              'Pa gen refi PayPal ki anrejistre pa worker ki sèvi paj sa a.',
+                            )}
+                        </span>
+                        <button
+                          type="button"
+                          className="ad-cfg-paypal-health-refresh"
+                          onClick={() => setReloadKey((k) => k + 1)}
+                          title={t('Refresh', 'Rafraîchi')}
+                          aria-label={t('Refresh the PayPal failure record', 'Rafraîchi dosye echèk PayPal la')}
+                        >
+                          <i className="fas fa-rotate" aria-hidden="true" />
+                        </button>
+                      </div>
+                      {paypalHealth?.last_failure?.error_description && (
+                        <p className="ad-cfg-paypal-health-detail">
+                          {paypalHealth.last_failure.error_description}
+                        </p>
+                      )}
+                      <p className="ad-cfg-paypal-health-meta">
+                        {t('mode', 'mòd')}: <code>{paypalHealth?.mode || '—'}</code>
+                        {' · '}
+                        {t('last success', 'dènye siksè')}:{' '}
+                        {paypalHealth?.last_success
+                          ? relativeTime(paypalHealth.last_success.at, isHt)
+                          : t('never', 'pa janm')}
+                      </p>
+                    </div>
                   )}
                   <div className="ad-cfg-list">
                     {groupRows.map(renderRow)}

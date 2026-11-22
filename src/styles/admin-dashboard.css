@@ -1905,6 +1905,70 @@ body.dark-mode .ad-spot-kyc-grid div strong {
   gap: var(--sp-sm, 8px);
 }
 
+/* Last PayPal OAuth rejection — the reason a real checkout died, without the log. */
+.ad-cfg-paypal-health {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  background: rgba(34, 197, 94, 0.08);
+  color: #15803d;
+  font-size: 0.78rem;
+}
+
+.ad-cfg-paypal-health.is-failed {
+  border-color: rgba(220, 38, 38, 0.35);
+  background: rgba(220, 38, 38, 0.08);
+  color: #b91c1c;
+}
+
+.ad-cfg-paypal-health-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.ad-cfg-paypal-health-head span {
+  flex: 1;
+}
+
+.ad-cfg-paypal-health-detail {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  opacity: 0.85;
+  word-break: break-word;
+}
+
+.ad-cfg-paypal-health-meta {
+  margin: 0;
+  font-size: 0.72rem;
+  opacity: 0.8;
+}
+
+.ad-cfg-paypal-health-refresh {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  padding: 2px 4px;
+  touch-action: manipulation;
+}
+
+body.dark-mode .ad-cfg-paypal-health {
+  background: rgba(255, 255, 255, 0.04);
+  color: #86efac;
+}
+
+body.dark-mode .ad-cfg-paypal-health.is-failed {
+  background: rgba(220, 38, 38, 0.15);
+  color: #fca5a5;
+}
+
 /* PayPal environment switch — live/sandbox is a two-state save, not free text. */
 .ad-cfg-mode-switch {
   display: inline-flex;
