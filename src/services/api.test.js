@@ -44,6 +44,17 @@ describe('adminPlatformConfigService.test', () => {
     await adminPlatformConfigService.test(3);
     expect(mockPost).toHaveBeenCalledWith('admin/platform-config/3/test/', {});
   });
+
+  it('sends sibling drafts so a new PayPal pair is tested together', async () => {
+    mockPost.mockResolvedValue({ data: { ok: true } });
+    await adminPlatformConfigService.test(7, 'AQ-new-id', {
+      paypal_client_secret: 'new-secret-value',
+    });
+    expect(mockPost).toHaveBeenCalledWith(
+      'admin/platform-config/7/test/',
+      { value: 'AQ-new-id', related: { paypal_client_secret: 'new-secret-value' } },
+    );
+  });
 });
 
 describe('marketplaceService.bulkDeleteVariants', () => {

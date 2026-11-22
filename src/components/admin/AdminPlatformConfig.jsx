@@ -283,7 +283,17 @@ export default function AdminPlatformConfig({ lang = 'en', showToast }) {
   const handleTest = useCallback(async (row) => {
     setTestingKey(row.key);
     try {
-      const resp = await adminPlatformConfigService.test(row.id, editing[row.key]);
+      // A new PayPal ID + Secret (or mode) is often typed before either row
+      // is saved. Send the sibling drafts so the test probes the pair that is
+      // on screen instead of pairing a new value with the stale stored one.
+      const related = {};
+      if (row.key.startsWith('paypal')) {
+        ['paypal_client_id', 'paypal_client_secret', 'paypal_mode'].forEach((key) => {
+          const draft = editing[key];
+          if (typeof draft === 'string' && draft.trim()) related[key] = draft;
+        });
+      }
+      const resp = await adminPlatformConfigService.test(row.id, editing[row.key], related);
       const { ok, message } = resp?.data || {};
       showToast?.(
         message || (ok ? t('Key looks good.', 'Kle a sanble bon.') : t('Key check failed.', 'Tès kle a echwe.')),

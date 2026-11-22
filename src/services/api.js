@@ -1780,11 +1780,15 @@ export const adminPlatformConfigService = {
   // DELETE /api/admin/platform-config/<id>/ — remove a key
   remove: (id) => api.delete(`admin/platform-config/${id}/`),
   // POST /api/admin/platform-config/<id>/test/ — validate the key. The
-  // optional ``value`` is the draft currently on screen (test-before-save).
-  test: (id, value) => api.post(
-    `admin/platform-config/${id}/test/`,
-    typeof value === 'string' ? { value } : {},
-  ),
+  // optional ``value`` is the draft currently on screen and ``related`` the
+  // other drafts that belong with it (a new PayPal pair or mode), so the test
+  // can validate the whole group before anything is saved.
+  test: (id, value, related) => {
+    const body = {};
+    if (typeof value === 'string') body.value = value;
+    if (related && Object.keys(related).length) body.related = related;
+    return api.post(`admin/platform-config/${id}/test/`, body);
+  },
 };
 
 // ─── Events (Phase 34) ──────────────────────────────────────────────────
