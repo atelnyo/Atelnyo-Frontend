@@ -149,6 +149,12 @@ export const SHEETS = Object.freeze({
   // public-page route in React Router's ranking, so "orders/mine" can
   // never be swallowed by a slug.
   BUSINESS_MY_ORDERS: '/business/orders/mine',
+  // Buyer order detail + delivery tracking. Loaded from
+  // GET /api/marketplace/orders/<id>/ (buyer-scoped) so EVERY Store
+  // order has a follow-up page, including orders with no Printify
+  // submission yet.
+  BUSINESS_MY_ORDER_DETAIL: '/business/orders/mine/:orderId',
+  BUSINESS_MY_ORDER_URL: (id) => `/business/orders/mine/${encodeURIComponent(id)}`,
   // Phase ∞ — Creator Studio. A full workspace for creators to manage
   // their courses, music, products, portfolio, wallet, analytics,
   // messages, and settings — all in one place. Only visible to users

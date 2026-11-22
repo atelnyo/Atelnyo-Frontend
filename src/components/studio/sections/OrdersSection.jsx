@@ -37,13 +37,69 @@ function statusMeta(status) {
 export default function OrdersSection({ lang, t }) {
   const isHt = lang === 'ht';
   const [expanded, setExpanded] = useState(null);
-  const { data: orders, loading } = useFetch(
+  // Manual tracking form — sellers shipping from their own stock have no
+  // Printify submission to pull tracking from, so they enter it here.
+  const [trackingForm, setTrackingForm] = useState({ carrier: '', number: '', url: '' });
+  const [trackingBusy, setTrackingBusy] = useState(false);
+  const [trackingNotice, setTrackingNotice] = useState(null);
+  const { data: orders, loading, updateLocal } = useFetch(
     () => api.get('marketplace/orders/sales/', { params: { limit: 50 } }),
     {
       defaultValue: [],
       transform: (d) => (Array.isArray(d?.results || d) ? (d?.results || d) : []),
     },
   );
+
+  const openRow = (order) => {
+    const next = expanded === order.id ? null : order.id;
+    setExpanded(next);
+    setTrackingNotice(null);
+    const tracking = order.tracking || {};
+    setTrackingForm({
+      carrier: tracking.carrier || '',
+      number: tracking.number || '',
+      url: tracking.url || '',
+    });
+  };
+
+  const saveTracking = async (order) => {
+    if (!trackingForm.number.trim()) {
+      setTrackingNotice({
+        orderId: order.id,
+        kind: 'error',
+        text: isHt ? 'Antre nimewo swivi a.' : inlineText(lang, 'Enter the tracking number.'),
+      });
+      return;
+    }
+    setTrackingBusy(true);
+    setTrackingNotice(null);
+    try {
+      const { data } = await api.post(`marketplace/orders/${order.id}/tracking/`, {
+        carrier: trackingForm.carrier.trim(),
+        number: trackingForm.number.trim(),
+        url: trackingForm.url.trim(),
+      });
+      updateLocal((row) => row.id === order.id, {
+        tracking: data.tracking,
+        status: data.status,
+      });
+      setTrackingNotice({
+        orderId: order.id,
+        kind: 'ok',
+        text: isHt ? 'Swivi anrejistre — achtè a wè l.' : inlineText(lang, 'Tracking saved — the buyer can see it now.'),
+      });
+    } catch (err) {
+      const body = err?.response?.data || {};
+      const detail = body.detail || body.number || body.url;
+      setTrackingNotice({
+        orderId: order.id,
+        kind: 'error',
+        text: String(detail || (isHt ? 'Pa t ka anrejistre swivi a.' : inlineText(lang, 'Could not save the tracking.'))),
+      });
+    } finally {
+      setTrackingBusy(false);
+    }
+  };
 
   if (loading) return <StudioSkeleton rows={4} />;
 
@@ -87,7 +143,7 @@ export default function OrdersSection({ lang, t }) {
                   <React.Fragment key={o.id}>
                     <tr
                       className={styles.orderRow}
-                      onClick={() => setExpanded(isOpen ? null : o.id)}
+                      onClick={() => openRow(o)}
                       style={{ cursor: 'pointer' }}
                     >
                       <td className={styles.cellName}>
@@ -170,6 +226,56 @@ export default function OrdersSection({ lang, t }) {
                                       </div>
                                     ))}
                                   </>
+                                )}
+                                <span className={styles.orderDetailLabel}>
+                                  {isHt ? 'Swivi livrezon (manyèl)' : inlineText(lang, 'Delivery tracking (manual)')}
+                                </span>
+                                {o.tracking && (
+                                  <p className={styles.orderDetailAddr}>
+                                    {o.tracking.carrier || (isHt ? 'Transpò' : inlineText(lang, 'Carrier'))}{' '}
+                                    {o.tracking.url?.startsWith('https://')
+                                      ? <a href={o.tracking.url} target="_blank" rel="noreferrer">{o.tracking.number}</a>
+                                      : o.tracking.number}
+                                  </p>
+                                )}
+                                <div className={styles.printifyRow}>
+                                  <input
+                                    className={styles.formInput}
+                                    placeholder={isHt ? 'Transpòtè (USPS, DHL…)' : inlineText(lang, 'Carrier (USPS, DHL…)')}
+                                    value={trackingForm.carrier}
+                                    onChange={(e) => setTrackingForm((f) => ({ ...f, carrier: e.target.value }))}
+                                    aria-label={isHt ? 'Transpòtè' : inlineText(lang, 'Carrier')}
+                                  />
+                                  <input
+                                    className={styles.formInput}
+                                    placeholder={isHt ? 'Nimewo swivi' : inlineText(lang, 'Tracking number')}
+                                    value={trackingForm.number}
+                                    onChange={(e) => setTrackingForm((f) => ({ ...f, number: e.target.value }))}
+                                    aria-label={isHt ? 'Nimewo swivi' : inlineText(lang, 'Tracking number')}
+                                  />
+                                  <input
+                                    className={styles.formInput}
+                                    placeholder="https://…"
+                                    value={trackingForm.url}
+                                    onChange={(e) => setTrackingForm((f) => ({ ...f, url: e.target.value }))}
+                                    aria-label={isHt ? 'Lyen swivi' : inlineText(lang, 'Tracking URL')}
+                                  />
+                                  <button
+                                    type="button"
+                                    className={styles.secondaryBtn}
+                                    onClick={() => saveTracking(o)}
+                                    disabled={trackingBusy}
+                                  >
+                                    {trackingBusy ? '…' : (isHt ? 'Anrejistre swivi' : inlineText(lang, 'Save tracking'))}
+                                  </button>
+                                </div>
+                                {trackingNotice?.orderId === o.id && (
+                                  <p
+                                    className={trackingNotice.kind === 'error' ? styles.printifyError : styles.printifyText}
+                                    role={trackingNotice.kind === 'error' ? 'alert' : 'status'}
+                                  >
+                                    {trackingNotice.text}
+                                  </p>
                                 )}
                               </div>
                             </div>

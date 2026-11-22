@@ -297,6 +297,7 @@ const NOTIFICATION_ROUTES = {
   order_paid:             (d) => (d?.business_slug ? `/business/${d.business_slug}/workspace` : null),
   order_cancelled:        (d) => (d?.business_slug ? `/business/${d.business_slug}/workspace` : null),
   order_status_updated:   () => '/business/orders/mine',
+  order_tracking_added:   () => '/business/orders/mine',
   printify_order_update:  () => '/business/orders/mine',
   order_refunded:         () => '/business/orders/mine',
   // A review is addressed to the OWNER — open their workspace.

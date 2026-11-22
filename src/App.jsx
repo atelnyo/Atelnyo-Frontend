@@ -105,6 +105,7 @@ const BusinessHub = lazy(() => import('./components/business/BusinessHub'));
 const BusinessWorkspace = lazy(() => import('./components/business/BusinessWorkspace'));
 const BusinessPublicPage = lazy(() => import('./components/business/BusinessPublicPage'));
 const BusinessMyOrdersPage = lazy(() => import('./components/business/BusinessMyOrdersPage'));
+const BusinessOrderDetailPage = lazy(() => import('./components/business/BusinessOrderDetailPage'));
 const AdminCreatorReview= lazy(() => import('./components/admin/AdminCreatorReview'));
 const AdminDashboard    = lazy(() => import('./components/admin/AdminDashboard'));
 const AdminMediaManager = lazy(() => import('./components/admin/AdminMediaManager'));
@@ -3522,6 +3523,14 @@ function App() {
         <Route path={SHEETS.BUSINESS_MY_ORDERS} element={
           <AuthGate user={user}>
             <BusinessMyOrdersPage lang={lang} showToast={showToast} />
+          </AuthGate>
+        } />
+        {/* Buyer order detail + delivery tracking. The 4-segment path
+            outranks both the 3-segment workspace route and the
+            2-segment public business page. */}
+        <Route path={SHEETS.BUSINESS_MY_ORDER_DETAIL} element={
+          <AuthGate user={user}>
+            <BusinessOrderDetailPage lang={lang} />
           </AuthGate>
         } />
         <Route

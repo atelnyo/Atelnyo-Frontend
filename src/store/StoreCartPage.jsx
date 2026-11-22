@@ -6,6 +6,7 @@ import { loadCart, saveCart, setQuantity, removeFromCart } from './cart';
 import SEOHead from '../components/shared/SEOHead';
 import { loadPayPalScript } from '../components/CheckoutModal';
 import { paymentConfigService, checkoutService } from '../services/api';
+import { SHEETS } from '../routes/sheets';
 
 /**
  * Human-readable reason a checkout request failed.
@@ -83,6 +84,9 @@ export default function StoreCartPage() {
   const [shippingMethod, setShippingMethod] = useState('');
   const [shippingBusy, setShippingBusy] = useState(false);
   const [orderTotal, setOrderTotal] = useState(null);
+  // The order whose payment just settled — the empty-cart screen uses it
+  // to point the buyer at the tracking page instead of a dead end.
+  const [paidOrderId, setPaidOrderId] = useState(null);
   const [loginLink, setLoginLink] = useState(null);
   const [providerShippingConfirmation, setProviderShippingConfirmation] = useState(null);
   const [confirmProviderShipping, setConfirmProviderShipping] = useState(false);
@@ -151,6 +155,7 @@ export default function StoreCartPage() {
                 txnId, data.orderID || paypalOrderId, guestToken, confirmShippingRef.current,
               );
               update([]);
+              setPaidOrderId(orderId);
               setPaypalOrderId(null);
               setMessage(`Payment received for order #${orderId}.`);
               setStatus('idle');
@@ -418,6 +423,7 @@ export default function StoreCartPage() {
     try {
       await checkoutService.capturePaypal(txnId, paypalOrderId, guestToken, true);
       update([]);
+      setPaidOrderId(orderId);
       setPaypalOrderId(null);
       setPendingShippingConfirmation(false);
       setProviderShippingConfirmation(null);
@@ -442,8 +448,34 @@ export default function StoreCartPage() {
         <SEOHead title="Cart" url="/store/cart" noindex />
         <div className="store-cart-empty__icon" aria-hidden="true">🛒</div>
         <h1 className="store-title">Your cart is empty</h1>
-        <p className="store-state">Looks like you haven't added anything yet.</p>
-        <Link to="/store" className="store-btn store-cart-empty__cta">Continue shopping</Link>
+        {paidOrderId ? (
+          <>
+            <p className="store-state">
+              <strong>Payment received for order #{paidOrderId}.</strong>{' '}
+              {user
+                ? 'Track its status, downloads and delivery from My Orders.'
+                : 'Check your email for the link that creates your account and lets you track this order.'}
+            </p>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+              {user && (
+                <Link to={SHEETS.BUSINESS_MY_ORDER_URL(paidOrderId)} className="store-btn store-cart-empty__cta">
+                  View order #{paidOrderId}
+                </Link>
+              )}
+              {user && (
+                <Link to={SHEETS.BUSINESS_MY_ORDERS} className="store-btn store-btn--ghost">
+                  View my orders
+                </Link>
+              )}
+              <Link to="/store" className="store-btn store-btn--ghost">Continue shopping</Link>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="store-state">Looks like you haven't added anything yet.</p>
+            <Link to="/store" className="store-btn store-cart-empty__cta">Continue shopping</Link>
+          </>
+        )}
       </section>
     );
   }

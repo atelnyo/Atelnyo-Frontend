@@ -33,6 +33,7 @@ import { SHEETS } from '../../routes/sheets';
 import { historyBack } from '../../utils/history';
 import { translations } from '../../data/translations';
 import { businessOrderService, marketplaceService } from '../../services/api';
+import { fulfillmentLabel, storeOrderStatus } from './storeOrderStatus';
 import '../../styles/business.css';
 import { inlineText } from '../../utils/inlineI18n';
 
@@ -166,18 +167,13 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
     }
   };
 
-  // ─── Digital marketplace downloads (connected to Mwen card) ──
-  // Flatten paid marketplace orders → digital items with a real
-  // server-gated download URL (OrderItemSerializer). Empty string on
-  // any line means: not paid yet / not a digital product.
-  const digitalItems = (mpOrders || []).flatMap((o) => (
-    (Array.isArray(o?.items) ? o.items : [])
-      .filter((it) => it?.download_url)
-      .map((it) => ({ ...it, order_id: o.id, order_status: o.status }))
-  ));
-  const printifyOrders = (mpOrders || []).filter((order) => (
-    Array.isArray(order?.printify_fulfillment) && order.printify_fulfillment.length > 0
-  ));
+  // ─── Store orders (marketplace) ─────────────────────────────
+  // EVERY order the signed-in buyer placed is listed — paid, awaiting
+  // payment, cancelled, refunded. The old surface dropped any order
+  // without a Printify submission or a digital download link, so a paid
+  // order could vanish completely.
+  const storeOrders = Array.isArray(mpOrders) ? mpOrders : [];
+  const openOrderDetail = (order) => navigate(SHEETS.BUSINESS_MY_ORDER_URL(order.id));
 
   const openDownload = (item) => {
     if (!item?.download_url) return;
@@ -252,8 +248,8 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
         </h1>
         <p className="biz-hub-hint">
           {t?.business_my_orders_hint || (isHt
-            ? 'Swiv kòmand ou yo nan tout biznis — peye ak Wallet ou oswa anile yon kòmand ki poko peye.'
-            : inlineText(lang, 'Track your orders across businesses — pay with your Wallet or cancel an unpaid order.'))}
+            ? 'Swiv tout kòmand ou yo — acha Store, peman, livrezon ak kòmand biznis.'
+            : inlineText(lang, 'Track all your orders — Store purchases, payments, delivery, and business orders.'))}
         </p>
         <button
           type="button"
@@ -266,103 +262,123 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
         </button>
       </div>
 
-      {/* ─── My digital products — marketplace downloads ────────── */}
+      {/* ─── My Store orders — marketplace purchases ────────────── */}
       <section data-testid="mwen-digital-downloads">
-        {printifyOrders.length > 0 && (
-          <div className="biz-orders-list" style={{ maxWidth: 720, margin: '0 auto 24px' }} data-testid="mwen-printify-orders">
-            <h3 style={{ margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <i className="fas fa-box" aria-hidden="true" />
-              {isHt ? 'Kòmand fizik mwen yo' : inlineText(lang, 'My physical orders')}
-            </h3>
-            {printifyOrders.map((order) => (
-              <div className="biz-order-card" key={`printify-${order.id}`} data-testid="mwen-printify-order">
+        <div className="biz-orders-list" style={{ maxWidth: 720, margin: '0 auto 24px' }}>
+          <h3 style={{ margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <i className="fas fa-bag-shopping" aria-hidden="true" />
+            {isHt ? 'Kòmand Store mwen' : inlineText(lang, 'My Store orders')}
+          </h3>
+          {mpOrders === null ? (
+            <div className="biz-hub-loading">
+              <i className="fas fa-spinner fa-pulse fa-lg" aria-hidden="true" />
+            </div>
+          ) : storeOrders.length === 0 ? (
+            <div className="biz-hub-empty" style={{ padding: '14px 0' }}>
+              <i className="fas fa-bag-shopping" aria-hidden="true" />
+              <h3>{isHt ? 'Ou poko gen kòmand Store' : inlineText(lang, 'No Store orders yet')}</h3>
+              <p>{isHt
+                ? 'Achte yon pwodwi nan Store a — kòmand ou ak estati peman l ap parèt isit la.'
+                : inlineText(lang, 'Buy a product in the Store — your order and its payment status will appear here.')}</p>
+            </div>
+          ) : storeOrders.map((order) => {
+            const status = storeOrderStatus(order.status, isHt);
+            const items = Array.isArray(order?.items) ? order.items : [];
+            const downloads = items.filter((item) => item?.download_url);
+            const fulfillment = Array.isArray(order?.printify_fulfillment) ? order.printify_fulfillment : [];
+            return (
+              <div className="biz-order-card" key={`store-${order.id}`} data-testid="mwen-store-order">
                 <div className="biz-order-main">
-                  <span className="biz-order-name">{(order.items || []).map((item) => item.product_title).filter(Boolean).join(', ')}</span>
-                  <p className="biz-order-meta">
-                    <i className="fas fa-receipt" aria-hidden="true" />{' '}
-                    {isHt ? 'Kòmand' : inlineText(lang, 'Order')} #{order.id}{' · '}
-                    {order.printify_fulfillment.map((fulfillment) => (
-                      <span key={`${order.id}-${fulfillment.status || 'unknown'}-${(fulfillment.shipments || []).map((shipment) => shipment.number || shipment.url || 'shipment').join(',')}`}>
-                        {({
-                          pending: isHt ? 'Ap tann' : inlineText(lang, 'Pending'),
-                          'on-hold': isHt ? 'An atant' : inlineText(lang, 'On hold'),
-                          'in-production': isHt ? 'An pwodiksyon' : inlineText(lang, 'In production'),
-                          'partially-fulfilled': isHt ? 'Kèk atik voye' : inlineText(lang, 'Partially shipped'),
-                          fulfilled: isHt ? 'Voye' : inlineText(lang, 'Shipped'),
-                          canceled: isHt ? 'Anile' : inlineText(lang, 'Cancelled'),
-                        })[fulfillment.status] || fulfillment.status || (isHt ? 'Ap tann mizajou' : inlineText(lang, 'Awaiting update'))}
-                        {fulfillment.shipments?.map((shipment) => (
-                          <span key={`${shipment.number || shipment.url || shipment.carrier || 'shipment'}`}>
-                            {' · '}{shipment.carrier || (isHt ? 'Transpò' : inlineText(lang, 'Carrier'))}{' '}
-                            {shipment.url?.startsWith('https://') ? (
-                              <a href={shipment.url} target="_blank" rel="noreferrer">
-                                {shipment.number || (isHt ? 'Swiv livrezon' : inlineText(lang, 'Track shipment'))}
-                              </a>
-                            ) : (shipment.number || '')}
-                            {shipment.delivered_at && (
-                              <span>{' · '}{isHt ? 'Livre' : inlineText(lang, 'Delivered')}</span>
-                            )}
-                          </span>
-                        ))}
-                      </span>
-                    ))}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-        {mpOrders === null ? (
-          <div className="biz-hub-loading">
-            <i className="fas fa-spinner fa-pulse fa-lg" aria-hidden="true" />
-          </div>
-        ) : digitalItems.length === 0 ? (
-          <div className="biz-hub-empty" style={{ padding: '14px 0' }}>
-            <i className="fas fa-file-arrow-down" aria-hidden="true" />
-            <h3>{isHt ? 'Ou poko gen pwodwi dijital' : inlineText(lang, 'No digital products yet')}</h3>
-            <p>{isHt
-              ? 'Achte yon pwodwi dijital sou Marketplace a — li parèt isit la epi li ale nan email ou tou, dirèkteman apre peman an.'
-              : inlineText(lang, 'Buy a digital product on the Marketplace — it appears here (and in your receipt email) right after payment.')}</p>
-          </div>
-        ) : (
-          <div className="biz-orders-list" style={{ maxWidth: 720, margin: '0 auto', marginBottom: 24 }}>
-            <h3 style={{ margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <i className="fas fa-file-arrow-down" aria-hidden="true" />
-              {isHt ? 'Pwodwi dijital mwen' : inlineText(lang, 'My digital products')}
-            </h3>
-            {digitalItems.map((item) => (
-              <div className="biz-order-card" key={`${item.order_id}-${item.id}`} data-testid="mwen-digital-item">
-                <div className="biz-order-main">
-                  <span className="biz-order-name">{item.product_title}</span>
-                  <p className="biz-order-meta">
-                    <i className="fas fa-receipt" aria-hidden="true" />{' '}
-                    Lòd #{item.order_id}{' · '}<strong>{money(item.unit_price, lang)}</strong>
-                    {' · '}
-                    <span className="biz-status-pill" style={{ background: '#34d3991f', color: '#34d399', border: '1px solid #34d39955' }}>
-                      {isHt ? 'Peye' : inlineText(lang, 'Paid')}
+                  <div className="biz-order-title-row">
+                    <span className="biz-order-name">
+                      {isHt ? 'Kòmand' : inlineText(lang, 'Order')} #{order.id}
                     </span>
+                    <span
+                      className="biz-status-pill"
+                      data-testid="mwen-store-order-status"
+                      style={{
+                        background: `${status.color}1f`,
+                        color: status.color,
+                        border: `1px solid ${status.color}55`,
+                      }}
+                    >
+                      {status.label}
+                    </span>
+                  </div>
+                  <p className="biz-order-meta">
+                    {items.map((item) => `${item.product_title || (isHt ? 'Atik' : inlineText(lang, 'Item'))} ×${item.quantity}`).join(', ')}
+                    {' · '}<strong>{money(order.total, lang)} USD</strong>
                   </p>
+                  {order.tracking && (
+                    <p className="biz-order-meta" data-testid="mwen-store-order-tracking">
+                      <i className="fas fa-truck-fast" aria-hidden="true" />{' '}
+                      {order.tracking.carrier || (isHt ? 'Transpòtè' : inlineText(lang, 'Carrier'))}{' '}
+                      {order.tracking.url?.startsWith('https://') ? (
+                        <a href={order.tracking.url} target="_blank" rel="noreferrer">
+                          {order.tracking.number}
+                        </a>
+                      ) : order.tracking.number}
+                    </p>
+                  )}
+                  {fulfillment.length > 0 ? (
+                    <p className="biz-order-meta">
+                      <i className="fas fa-truck-fast" aria-hidden="true" />{' '}
+                      {fulfillment.map((entry, index) => (
+                        <span key={`${order.id}-fulfillment-${index}`}>
+                          {index > 0 && ' · '}
+                          {fulfillmentLabel(entry.status, isHt)}
+                          {(entry.shipments || []).map((shipment, shipmentIndex) => (
+                            <span key={`${order.id}-shipment-${index}-${shipmentIndex}`}>
+                              {' · '}{shipment.carrier || (isHt ? 'Transpò' : inlineText(lang, 'Carrier'))}{' '}
+                              {shipment.url?.startsWith('https://') ? (
+                                <a href={shipment.url} target="_blank" rel="noreferrer">
+                                  {shipment.number || (isHt ? 'Swiv livrezon' : inlineText(lang, 'Track shipment'))}
+                                </a>
+                              ) : (shipment.number || '')}
+                              {shipment.delivered_at && (
+                                <>{' · '}{isHt ? 'Livre' : inlineText(lang, 'Delivered')}</>
+                              )}
+                            </span>
+                          ))}
+                        </span>
+                      ))}
+                    </p>
+                  ) : order.tracking ? null : ['paid', 'fulfilled', 'completed'].includes(order.status) ? (
+                    <p className="biz-order-meta" style={{ opacity: 0.75 }}>
+                      <i className="fas fa-truck-fast" aria-hidden="true" />{' '}
+                      {isHt
+                        ? 'Peman konfime — vandè a ap prepare livrezon an.'
+                        : inlineText(lang, 'Payment confirmed — the seller is preparing delivery.')}
+                    </p>
+                  ) : null}
                 </div>
                 <div className="biz-order-actions">
+                  {downloads.map((item) => (
+                    <button
+                      key={`download-${order.id}-${item.id}`}
+                      type="button"
+                      className="biz-btn biz-btn-primary biz-btn-sm"
+                      onClick={() => openDownload(item)}
+                      data-testid="mwen-digital-download"
+                    >
+                      <i className="fas fa-download" aria-hidden="true" />
+                      {isHt ? 'Telechaje' : inlineText(lang, 'Download')}
+                    </button>
+                  ))}
                   <button
                     type="button"
-                    className="biz-btn biz-btn-primary biz-btn-sm"
-                    onClick={() => openDownload(item)}
-                    data-testid="mwen-digital-download"
+                    className="biz-btn biz-btn-ghost biz-btn-sm"
+                    onClick={() => openOrderDetail(order)}
+                    data-testid="mwen-store-order-open"
                   >
-                    <i className="fas fa-download" aria-hidden="true" />
-                    {isHt ? 'Telechaje' : inlineText(lang, 'Download')}
+                    <i className="fas fa-arrow-up-right-from-square" aria-hidden="true" />
+                    {isHt ? 'Wè detay' : inlineText(lang, 'View details')}
                   </button>
                 </div>
               </div>
-            ))}
-            <p style={{ opacity: 0.7, fontSize: '0.8rem', margin: '6px 4px 0' }}>
-              <i className="fas fa-shield-halved" aria-hidden="true" />{' '}
-              {isHt ? 'Lyen yo siye epi yo ekspire nan 48 èdtan —mentaire pou ou pale wè resi email la tou. Gen 5 téléchajman pa pwodwi achte.'
-                : inlineText(lang, 'Links are signed and expire after 48 hours — the receipt email carries them too. 5 downloads per purchased product.')}
-            </p>
-          </div>
-        )}
+            );
+          })}
+        </div>
       </section>
 
       {orders === null ? (
@@ -372,13 +388,17 @@ export default function BusinessMyOrdersPage({ lang = 'en', showToast }) {
       ) : orders.length === 0 ? (
         <div className="biz-hub-empty">
           <i className="fas fa-receipt" aria-hidden="true" />
-          <h3>{t?.business_my_orders_empty || (isHt ? 'Ou poko gen kòmand' : inlineText(lang, 'No orders yet'))}</h3>
+          <h3>{t?.business_my_orders_empty || (isHt ? 'Ou poko gen kòmand biznis' : inlineText(lang, 'No business orders yet'))}</h3>
           <p>{isHt
             ? 'Lè w kòmande yon atik sou paj piblik yon biznis, li ap parèt isit la.'
             : inlineText(lang, 'When you order an item on a business public page, it will appear here.')}</p>
         </div>
       ) : (
         <div className="biz-orders-list" style={{ maxWidth: 720, margin: '0 auto' }}>
+          <h3 style={{ margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <i className="fas fa-store" aria-hidden="true" />
+            {isHt ? 'Kòmand biznis' : inlineText(lang, 'Business orders')}
+          </h3>
           {orders.map((order) => {
             const pc = payColor(order.payment_status);
             const canCancel = order.status === 'new' && order.payment_status === 'unpaid';
