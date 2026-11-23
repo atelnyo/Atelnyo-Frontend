@@ -122,6 +122,7 @@ const AdminUserManagement = lazy(() => import('./components/admin/AdminUserManag
 const AdminRuleEngine = lazy(() => import('./components/admin/AdminRuleEngine'));
 const AdminFAQ = lazy(() => import('./components/admin/AdminFAQ'));
 const AdminPlatformFAQ = lazy(() => import('./components/admin/AdminPlatformFAQ'));
+const AdminPendingOrders = lazy(() => import('./components/admin/AdminPendingOrders'));
 const FAQPage = lazy(() => import('./components/FAQPage'));
 const HelpPage = lazy(() => import('./components/HelpPage'));
 const CertificateVerify = lazy(() => import('./components/CertificateVerify'));
@@ -3335,6 +3336,19 @@ function App() {
                 lang={lang}
                 showToast={showToast}
                 onNavigate={navigateRR}
+              />
+            </RequireRole>
+          </AuthGate>
+        } />
+        {/* Store — unpaid pending orders with a manual cancel action. */}
+        <Route path={SHEETS.ADMIN_PENDING_ORDERS} element={
+          <AuthGate user={user}>
+            <RequireRole user={user} role="staff" redirect="/">
+              <AdminPendingOrders
+                lang={lang}
+                showToast={showToast}
+                user={user}
+                onNavigate={handleNavigate}
               />
             </RequireRole>
           </AuthGate>

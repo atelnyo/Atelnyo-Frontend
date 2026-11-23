@@ -192,6 +192,8 @@ export const SHEETS = Object.freeze({
   // admin panel is the approve surface for premium entitlements,
   // mirroring the AdminCreatorReview approve flow).
   ADMIN_USERS: '/sheet/admin/users',
+  // Store moderation — unpaid pending orders, manually cancellable.
+  ADMIN_PENDING_ORDERS: '/sheet/admin/pending-orders',
   // Phase 47/48 — Admin Spotlight Application Manager
   ADMIN_SPOTLIGHT: '/sheet/admin/spotlight',
   ADMIN_BUSINESS_SPOTLIGHT: '/sheet/admin/business-spotlight',

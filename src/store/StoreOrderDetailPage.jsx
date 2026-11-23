@@ -178,6 +178,22 @@ export default function StoreOrderDetailPage() {
             </ol>
           )}
 
+          {order.status === 'pending' && (
+            <section className="store-order__card">
+              <h2>Complete your payment</h2>
+              <p className="store-order__hint">
+                This order is still waiting for payment. Your items are reserved —
+                resume checkout to pay for this same order.
+              </p>
+              <Link
+                className="store-btn"
+                to={`/store/cart?resume_order=${order.id}`}
+              >
+                Resume payment
+              </Link>
+            </section>
+          )}
+
           <section className="store-order__card">
             <h2>Items</h2>
             <ul className="store-order__items">

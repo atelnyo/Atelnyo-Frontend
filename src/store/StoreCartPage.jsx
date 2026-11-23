@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { storeService } from './storeService';
 import { useAuthStore } from './useAuthStore';
 import { loadCart, saveCart, setQuantity, removeFromCart } from './cart';
@@ -39,10 +39,66 @@ function checkoutErrorMessage(err) {
 }
 
 export default function StoreCartPage() {
+  const [searchParams] = useSearchParams();
+  const resumeOrderId = searchParams.get('resume_order');
   const [items, setItems] = useState(() => loadCart());
+  // Resuming an existing unpaid order: the items, totals and stock were
+  // already reserved at checkout, so the page pays THAT order instead of
+  // creating a second one (which would decrement stock twice).
+  const [resumeOrder, setResumeOrder] = useState(null);
+  const [resumeLoading, setResumeLoading] = useState(Boolean(resumeOrderId));
+  const [resumeError, setResumeError] = useState('');
   // Display-only details (name, image, price) fetched per product id.
   // The server recalculates the real total at checkout.
   const [details, setDetails] = useState({});
+
+  useEffect(() => {
+    if (!resumeOrderId) {
+      setResumeOrder(null);
+      setResumeLoading(false);
+      setResumeError('');
+      return undefined;
+    }
+    let cancelled = false;
+    setResumeLoading(true);
+    setResumeError('');
+    storeService.getOrder(resumeOrderId)
+      .then(({ data }) => {
+        if (cancelled) return;
+        if (data?.status !== 'pending') {
+          setResumeError(`Order #${resumeOrderId} is already ${data?.status || 'closed'}.`);
+          setResumeLoading(false);
+          return;
+        }
+        const lines = (data.items || [])
+          .filter((item) => item.product)
+          .map((item) => ({
+            productId: Number(item.product),
+            variantId: item.variant == null ? null : Number(item.variant),
+            quantity: Number(item.quantity) || 1,
+          }));
+        if (!lines.length) {
+          setResumeError(`Order #${resumeOrderId} has no items to pay for.`);
+          setResumeLoading(false);
+          return;
+        }
+        setItems(lines);
+        setOrderId(Number(data.id));
+        setOrderTotal(data.total);
+        setResumeOrder(data);
+        setResumeLoading(false);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setResumeError(
+          err?.response?.status === 404
+            ? 'This order was not found on your account.'
+            : 'We could not load this order. Try again from My orders.',
+        );
+        setResumeLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [resumeOrderId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -109,8 +165,9 @@ export default function StoreCartPage() {
   const detailsReady = items.every((line) => details[line.productId] !== undefined);
   const requiresShipping = items.some((line) => details[line.productId]?.kind === 'physical') || !detailsReady;
   const hasPrintifyItems = items.some((line) => details[line.productId]?.printify_product_id);
-  // Require shipping details upfront for physical items so shipping cost is calculated.
-  const needsShippingForm = requiresShipping;
+  // A resumed order already captured its shipping address/method.
+  // Require shipping details upfront for NEW physical items only.
+  const needsShippingForm = requiresShipping && !resumeOrder;
 
   // One label per in-flight step so the Checkout button always says what is
   // happening instead of flickering back to "Checkout" while the payment
@@ -308,7 +365,7 @@ export default function StoreCartPage() {
       setMessage('Review and confirm the final payment-provider delivery address to continue.');
       return;
     }
-    const resumeExistingOrder = pendingShippingConfirmation;
+    const resumeExistingOrder = pendingShippingConfirmation || Boolean(resumeOrder);
     // Require shipping quote and method for physical items
     if (!resumeExistingOrder && needsShippingForm) {
       if (!shippingQuote) {
@@ -327,7 +384,7 @@ export default function StoreCartPage() {
         return;
       }
     }
-    const guest = !user;
+    const guest = !user && !resumeOrder;
     if (guest && (!guestEmail.trim() || !guestEmail.includes('@'))) {
       setMessage('Enter a valid email to check out.');
       setStatus('error');
@@ -346,7 +403,7 @@ export default function StoreCartPage() {
       // resumes the same provider order; it never creates or charges twice.
       let orderRes = { data: { id: orderId, total: orderTotal, guest_token: guestToken } };
       try {
-        if (!resumeExistingOrder) orderRes = await storeService.createOrder(
+        if (!resumeExistingOrder && !resumeOrder) orderRes = await storeService.createOrder(
         items.map((it) => ({
           product_id: it.productId,
           variant_id: it.variantId,
@@ -369,7 +426,7 @@ export default function StoreCartPage() {
         }
         throw err;
       }
-      const resolvedOrderId = orderRes?.data?.id || orderId;
+      const resolvedOrderId = resumeOrder?.id || orderRes?.data?.id || orderId;
       setOrderTotal(orderRes?.data?.total ?? orderTotal);
       const token = orderRes?.data?.guest_token || guestToken || null;
       setGuestToken(token);
@@ -442,6 +499,27 @@ export default function StoreCartPage() {
     }
   };
 
+  if (resumeLoading) {
+    return (
+      <section className="store-cart-empty" role="status">
+        <SEOHead title="Resume payment" url="/store/cart" noindex />
+        <h1 className="store-title">Resume payment</h1>
+        <p className="store-state">Loading order #{resumeOrderId}…</p>
+      </section>
+    );
+  }
+
+  if (resumeError) {
+    return (
+      <section className="store-cart-empty" role="alert">
+        <SEOHead title="Resume payment" url="/store/cart" noindex />
+        <h1 className="store-title">Resume payment</h1>
+        <p className="store-state store-state--error">{resumeError}</p>
+        <Link to="/account" className="store-btn">Back to My orders</Link>
+      </section>
+    );
+  }
+
   if (!items.length) {
     return (
       <section className="store-cart-empty" role="status">
@@ -499,8 +577,14 @@ export default function StoreCartPage() {
           animation: slideDown 0.4s ease-out;
         }
       `}</style>
-      <SEOHead title="Cart" url="/store/cart" noindex />
-      <h1 className="store-title">Cart</h1>
+      <SEOHead title={resumeOrder ? 'Resume payment' : 'Cart'} url="/store/cart" noindex />
+      <h1 className="store-title">{resumeOrder ? `Resume payment · Order #${resumeOrder.id}` : 'Cart'}</h1>
+      {resumeOrder && (
+        <p className="store-state" role="status">
+          This order is still waiting for payment. Your items and stock are
+          reserved — paying now completes this same order.
+        </p>
+      )}
       <ul className="store-cart">
         {items.map((line) => {
           const detail = details[line.productId];
@@ -521,6 +605,7 @@ export default function StoreCartPage() {
                 {lineTotal == null ? '' : new Intl.NumberFormat('en-US', { style: 'currency', currency: detail.currency || 'USD' }).format(lineTotal)}
               </span>
             </div>
+            {!resumeOrder && (
             <div className="store-cart__actions">
             <div className="store-cart__qty" role="group" aria-label="Quantity">
               <button
@@ -545,12 +630,17 @@ export default function StoreCartPage() {
               Remove
             </button>
             </div>
+            )}
           </li>
           );
         })}
       </ul>
-      <p className="store-state">Totals are calculated by the server at checkout.</p>
-      {!user && !showShippingForm && (
+      <p className="store-state">
+        {resumeOrder
+          ? 'This order keeps the total and shipping quoted when you first checked out.'
+          : 'Totals are calculated by the server at checkout.'}
+      </p>
+      {!user && !resumeOrder && !showShippingForm && (
         <div className="store-guest">
           <label>
             Email (receipt and order access)
@@ -757,8 +847,8 @@ export default function StoreCartPage() {
         if (providerShippingConfirmation) {
           return null;
         }
-        const shippingReady = !needsShippingForm || (shippingQuote?.status === 'ELIGIBLE' && shippingQuote.shipping_methods?.length > 0 && shippingMethod);
-        const guestReady = user || (guestEmail.trim() && guestEmail.includes('@'));
+        const shippingReady = Boolean(resumeOrder) || !needsShippingForm || (shippingQuote?.status === 'ELIGIBLE' && shippingQuote.shipping_methods?.length > 0 && shippingMethod);
+        const guestReady = Boolean(resumeOrder) || user || (guestEmail.trim() && guestEmail.includes('@'));
         if (!shippingReady || !guestReady) {
           return null;
         }
@@ -774,7 +864,7 @@ export default function StoreCartPage() {
                 {busyLabel}<span className="store-cart__dots" aria-hidden="true"><i /><i /><i /></span>
               </span>
             ) : (
-              'Proceed to Payment'
+              resumeOrder ? 'Resume payment' : 'Proceed to Payment'
             )}
           </button>
         );

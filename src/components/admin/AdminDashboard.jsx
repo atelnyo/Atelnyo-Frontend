@@ -279,6 +279,7 @@ function CertificatePreviewPanel({ lang: _lang, onNavigate }) {
 const QUICK_LINKS = [
   { href: SHEETS.ADMIN_CREATORS, icon: 'fa-users-gear', label: 'Creator Review', desc: 'Approve/reject creator applications' },
   { href: SHEETS.ADMIN_USERS,    icon: 'fa-crown',       label: 'Premium Users',  desc: 'Grant & manage premium access' },
+  { href: SHEETS.ADMIN_PENDING_ORDERS, icon: 'fa-hourglass-half', label: 'Pending orders', desc: 'Review & cancel unpaid Store orders' },
   { href: SHEETS.ADMIN_MEDIA,    icon: 'fa-cloud-upload-alt', label: 'Media Providers', desc: 'Manage media storage providers' },
   { href: SHEETS.ADMIN_PROVIDER_HEALTH, icon: 'fa-heart-pulse', label: 'Provider Health', desc: 'Monitor provider uptime & metrics' },
   { href: SHEETS.ADMIN_MEDIA_MONITOR, icon: 'fa-tv', label: 'Media Monitor', desc: 'Real-time media system monitoring' },

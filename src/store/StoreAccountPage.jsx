@@ -118,6 +118,15 @@ export default function StoreAccountPage() {
                   {items.map((item) => `${item.product_title || 'Item'} ×${item.quantity}`).join(', ') || '—'}
                   {order.total ? ` · ${money(order.total)}` : ''}
                 </p>
+                {order.status === 'pending' && (
+                  <Link
+                    className="store-btn store-btn--ghost"
+                    to={`/store/cart?resume_order=${order.id}`}
+                    style={{ marginTop: 8, display: 'inline-block' }}
+                  >
+                    Pay now
+                  </Link>
+                )}
               </li>
             );
           })}
