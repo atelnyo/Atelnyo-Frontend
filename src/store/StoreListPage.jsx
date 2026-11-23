@@ -4,6 +4,7 @@ import { storeService } from './storeService';
 import SEOHead from '../components/shared/SEOHead';
 import ProductCard from './ProductCard';
 import { clearRecentlyViewed, loadRecentlyViewed } from './recentlyViewed';
+import { prefetchProductRoute } from './prefetchProductRoute';
 
 const SORT_OPTIONS = [
   { value: '', label: 'Default' },
@@ -31,6 +32,12 @@ export default function StoreListPage() {
   const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
 
   const [recent, setRecent] = useState(() => loadRecentlyViewed());
+  // Warm the product page chunk while the listing is on screen. Desktop
+  // hover already does this, but a touch tap has no hover phase; without
+  // the warm-up the click would still wait for the lazy chunk download.
+  useEffect(() => {
+    prefetchProductRoute();
+  }, []);
   useEffect(() => {
     const refresh = () => setRecent(loadRecentlyViewed());
     window.addEventListener('storage', refresh);

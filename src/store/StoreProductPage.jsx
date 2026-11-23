@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { storeService } from './storeService';
+import { readCachedProduct, rememberProduct } from './productCache';
 import { useAuthStore } from './useAuthStore';
 import { addToCart, loadCart, saveCart } from './cart';
 import SEOHead from '../components/shared/SEOHead';
@@ -44,9 +45,30 @@ const Stars = ({ value }) => {
 
 export default function StoreProductPage() {
   const { slug } = useParams();
-  const [state, setState] = useState({ status: 'loading', product: null });
+  const location = useLocation();
+  // The listing card already holds the full product and passes it through
+  // router state; the cache covers back/forward and repeat visits. Either
+  // way the first paint is immediate instead of waiting ~1.4s for the API.
+  const routeProduct = location.state?.storeProduct;
+  const seededProduct = (
+    routeProduct
+    && (String(routeProduct.slug) === String(slug) || String(routeProduct.id) === String(slug))
+  ) ? routeProduct : readCachedProduct(slug);
+  const [state, setState] = useState(() => (
+    seededProduct
+      ? { status: 'ready', product: seededProduct }
+      : { status: 'loading', product: null }
+  ));
+  // Last product id actually painted — lets a silent revalidation refresh
+  // the data without resetting the shopper's selected variant/quantity.
+  const shownIdRef = useRef(seededProduct?.id ?? null);
   const [activeImg, setActiveImg] = useState(0);
-  const [variantId, setVariantId] = useState(null);
+  // Seed the first variant too: when the page paints from router state or
+  // cache, the effect skips the reset path (same product id), so a null
+  // initial value would add the base product instead of the first option.
+  const [variantId, setVariantId] = useState(
+    () => seededProduct?.variants?.[0]?.id ?? null,
+  );
   const [quantity, setQuantity] = useState(1);
   const [notice, setNotice] = useState({ kind: '', text: '' });
   // { productId, id } of the saved favorite for the product on screen.
@@ -67,28 +89,55 @@ export default function StoreProductPage() {
 
   useEffect(() => {
     let cancelled = false;
+    const routeData = location.state?.storeProduct;
+    const seeded = (
+      routeData
+      && (String(routeData.slug) === String(slug) || String(routeData.id) === String(slug))
+    ) ? routeData : readCachedProduct(slug);
+
+    if (seeded) {
+      if (shownIdRef.current !== seeded.id) {
+        setActiveImg(0);
+        setVariantId(seeded?.variants?.[0]?.id ?? null);
+        setQuantity(1);
+        shownIdRef.current = seeded.id;
+      }
+      setState({ status: 'ready', product: seeded });
+    } else {
+      shownIdRef.current = null;
+      setState({ status: 'loading', product: null });
+    }
+
+    // Always revalidate in the background: a stale price/stock must correct
+    // itself, but the shopper sees the cached product immediately.
     storeService
       .getProduct(slug)
       .then(({ data }) => {
         if (cancelled) {
           return;
         }
-        setActiveImg(0);
-        setVariantId(data?.variants?.[0]?.id ?? null);
-        setQuantity(1);
+        rememberProduct(data);
+        if (shownIdRef.current !== data?.id) {
+          setActiveImg(0);
+          setVariantId(data?.variants?.[0]?.id ?? null);
+          setQuantity(1);
+          shownIdRef.current = data?.id ?? null;
+        }
         setState({ status: 'ready', product: data });
       })
       .catch((err) => {
         if (cancelled) {
           return;
         }
+        // A failed refresh never replaces a product we can already show.
+        if (seeded) return;
         const notFound = err?.response?.status === 404;
         setState({ status: notFound ? 'notfound' : 'error', product: null });
       });
     return () => {
       cancelled = true;
     };
-  }, [slug, productRetry]);
+  }, [slug, productRetry, location.state]);
 
   // Local-only browsing history; never sent to the server.
   useEffect(() => {
@@ -98,19 +147,22 @@ export default function StoreProductPage() {
   }, [state]);
 
   const loadedId = state.product?.id;
-  // Load the buyer's orders once the product is known so a review can
-  // reference the purchase the backend requires.
+  // Review eligibility needs the buyer's orders, but loading them on page
+  // open competed with the product image and the related rail. Load them
+  // only when the review form is touched (or a review is submitted).
+  const eligiblePromiseRef = useRef(null);
   useEffect(() => {
-    if (!user || !loadedId) {
-      setEligibleOrders(null);
-      return undefined;
-    }
-    let cancelled = false;
     setEligibleOrders(null);
-    storeService
+    eligiblePromiseRef.current = null;
+  }, [user, loadedId]);
+
+  const ensureEligibleOrders = () => {
+    if (!user || !loadedId) return Promise.resolve([]);
+    if (Array.isArray(eligibleOrders)) return Promise.resolve(eligibleOrders);
+    if (eligiblePromiseRef.current) return eligiblePromiseRef.current;
+    eligiblePromiseRef.current = storeService
       .listOrders()
       .then(({ data }) => {
-        if (cancelled) return;
         const rows = Array.isArray(data) ? data : data?.results || [];
         const matching = rows.filter((o) =>
           Array.isArray(o?.items) && o.items.some((it) => Number(it?.product) === Number(loadedId)),
@@ -118,14 +170,17 @@ export default function StoreProductPage() {
         // Newest purchase first so the review attaches to the latest order.
         matching.sort((a, b) => Number(b?.id) - Number(a?.id));
         setEligibleOrders(matching);
+        return matching;
       })
       .catch(() => {
-        if (!cancelled) setEligibleOrders([]);
+        setEligibleOrders([]);
+        return [];
+      })
+      .finally(() => {
+        eligiblePromiseRef.current = null;
       });
-    return () => {
-      cancelled = true;
-    };
-  }, [user, loadedId]);
+    return eligiblePromiseRef.current;
+  };
   useEffect(() => {
     if (!user || !loadedId) {
       return undefined;
@@ -281,20 +336,20 @@ export default function StoreProductPage() {
       setReviewNotice({ kind: 'error', text: 'Choose a rating from 1 to 5.' });
       return;
     }
+    setReviewBusy(true);
+    setReviewNotice({ kind: '', text: '' });
     // The backend rejects reviews without a purchase backing them — pick
     // the buyer's latest order containing this product.
-    const orderId = Array.isArray(eligibleOrders) && eligibleOrders.length > 0
-      ? eligibleOrders[0].id
-      : null;
-    if (eligibleOrders !== null && !orderId) {
+    const orders = await ensureEligibleOrders();
+    const orderId = Array.isArray(orders) && orders.length > 0 ? orders[0].id : null;
+    if (!orderId) {
       setReviewNotice({
         kind: 'error',
         text: 'You can only review products you have purchased. Buy it first, then come back to leave a review.',
       });
+      setReviewBusy(false);
       return;
     }
-    setReviewBusy(true);
-    setReviewNotice({ kind: '', text: '' });
     try {
       await storeService.createReview({
         product: p.id,
@@ -434,7 +489,10 @@ export default function StoreProductPage() {
         <section className="store-review" aria-labelledby="store-review-title">
           <h2 id="store-review-title">Write a review</h2>
           {user ? (
-            <form onSubmit={onSubmitReview}>
+            <form
+              onSubmit={onSubmitReview}
+              onFocus={() => { ensureEligibleOrders(); }}
+            >
               <fieldset className="store-review__rating">
                 <legend>Your rating</legend>
                 {[1, 2, 3, 4, 5].map((n) => (

@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { addToCart, loadCart, saveCart } from './cart';
 import { storeService } from './storeService';
 import { useAuthStore } from './useAuthStore';
+import { prefetchProduct } from './productCache';
+import { prefetchProductRoute } from './prefetchProductRoute';
 
 const NEW_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -44,6 +46,13 @@ export default function ProductCard({ product: p }) {
   const [favoriteId, setFavoriteId] = useState(null);
   const [favBusy, setFavBusy] = useState(false);
   const images = [p.image_url, ...(Array.isArray(p.gallery) ? p.gallery : [])].filter(Boolean);
+  // Hover/focus/touch = intent to open: warm the lazy chunk and the API
+  // response while the shopper is still deciding. The click then renders
+  // from history state/cache instead of waiting on the network.
+  const warmProduct = () => {
+    prefetchProductRoute();
+    prefetchProduct(p.slug || p.id);
+  };
   const [imgIdx, setImgIdx] = useState(0);
   const [imgError, setImgError] = useState(false);
   const [hovered, setHovered] = useState(false);
@@ -159,7 +168,15 @@ export default function ProductCard({ product: p }) {
 
   return (
     <li className="store-card" ref={cardRef}>
-      <Link to={href} className="store-card__link" aria-label={p.title ? `View ${p.title}` : 'View product'}>
+      <Link
+        to={href}
+        state={{ storeProduct: p }}
+        className="store-card__link"
+        aria-label={p.title ? `View ${p.title}` : 'View product'}
+        onMouseEnter={warmProduct}
+        onFocus={warmProduct}
+        onTouchStart={warmProduct}
+      >
         <div className="store-card__media" onMouseEnter={onMediaEnter} onMouseMove={onMediaMove} onMouseLeave={onMediaLeave}>
           {images.length > 0 && !imgError ? (
             images.map((src, i) => (
