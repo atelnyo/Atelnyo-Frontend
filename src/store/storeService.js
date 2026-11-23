@@ -9,6 +9,24 @@ function guestHeaders(guestToken) {
   return guestToken ? { headers: { 'X-Guest-Order-Token': guestToken } } : undefined;
 }
 
+const ORDER_LANGS = ['ht', 'en', 'fr', 'es'];
+
+/**
+ * Active interface language, sent with the order so guest emails (receipt,
+ * shipping, delivery, claim link) render in the language the shopper used.
+ */
+function currentLanguage() {
+  try {
+    const stored = String(localStorage.getItem('atelnyo_lang') || '')
+      .slice(0, 2)
+      .toLowerCase();
+    if (ORDER_LANGS.includes(stored)) return stored;
+  } catch {
+    // Private-mode storage can throw; the app default still applies.
+  }
+  return 'en';
+}
+
 export const storeService = {
   listProducts: (params) => api.get('marketplace/products/', { params }),
   listCategories: (signal) => api.get('categories/', {
@@ -23,6 +41,7 @@ export const storeService = {
     api.post('marketplace/orders/', {
       items,
       hold_payment: true,
+      language: currentLanguage(),
       ...(guest ? { guest_email: guest.email, guest_name: guest.name } : {}),
       ...(shippingAddress ? { shipping_address: shippingAddress } : {}),
       ...(shippingMethod ? { shipping_method: shippingMethod } : {}),
