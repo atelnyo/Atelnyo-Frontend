@@ -59,7 +59,12 @@ export default function StoreAccountPage() {
         <title>Account · Atelnyo Store</title>
         <meta name="robots" content="noindex" />
       </Helmet>
-      <h1 className="store-title">Account</h1>
+      <div className="store-account__head">
+        <h1 className="store-title">Account</h1>
+        <button type="button" className="store-btn store-btn--ghost" onClick={onSignOut}>
+          Sign out
+        </button>
+      </div>
       <dl>
         <dt>Name</dt>
         <dd>{user.display_name || user.username || '—'}</dd>
@@ -133,11 +138,6 @@ export default function StoreAccountPage() {
         </ul>
       )}
 
-      <div className="store-account__actions">
-        <button type="button" className="store-btn store-btn--ghost" onClick={onSignOut}>
-          Sign out
-        </button>
-      </div>
     </section>
   );
 }

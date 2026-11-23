@@ -13,6 +13,7 @@ export default function StoreLayout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const navRef = useRef(null);
   const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
 
   // Close the mobile menu on a click outside it or on Escape.
   useEffect(() => {
@@ -47,6 +48,12 @@ export default function StoreLayout() {
     e.preventDefault();
     const q = query.trim();
     navigate(q ? `/store/search?q=${encodeURIComponent(q)}` : '/store/search');
+  };
+
+  const onSignOut = async () => {
+    setMenuOpen(false);
+    await logout();
+    navigate('/store', { replace: true });
   };
 
   return (
@@ -94,9 +101,30 @@ export default function StoreLayout() {
                 {user ? 'Account' : 'Sign in'}
               </Link>
             </li>
+            {user && (
+              <li>
+                <button type="button" onClick={onSignOut}>Sign out</button>
+              </li>
+            )}
           </ul>
         </nav>
         <div className="store-header__actions">
+          {user && (
+            <button
+              type="button"
+              className="store-header__signout"
+              onClick={onSignOut}
+              aria-label="Sign out"
+              title="Sign out"
+            >
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+              <span className="store-header__signout-label">Sign out</span>
+            </button>
+          )}
           <Link
             to={user ? '/account' : '/store/login'}
             className="store-header__account"

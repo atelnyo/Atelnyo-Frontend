@@ -47,6 +47,23 @@
   display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px;
   border-radius: 50%; background: #fff; border: 1px solid var(--store-border); color: var(--store-navy);
 }
+/* Sign out is a first-class header action: the Store used to hide it at the
+   bottom of the Account page, below every order. */
+.store-header__signout {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 40px; padding: 0 14px; border-radius: 999px; background: #fff;
+  border: 1px solid var(--store-border); color: var(--store-navy);
+  font: inherit; font-weight: 600; cursor: pointer;
+}
+.store-header__signout:hover { background: var(--store-surface); }
+@media (max-width: 640px) {
+  .store-header__signout-label { display: none; }
+  .store-header__signout { width: 40px; padding: 0; }
+}
+.store-header__menu button {
+  background: none; border: 0; padding: 0; color: inherit; font: inherit;
+  cursor: pointer; text-align: left;
+}
 .store-badge {
   display: inline-block; min-width: 22px; padding: 0 6px; border-radius: 999px;
   background: var(--store-navy); color: #fff; text-align: center; font-size: 12px;
@@ -109,6 +126,11 @@
 .store-account dd { margin: 0; }
 .store-account__actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .store-account__actions a { text-decoration: none; }
+.store-account__head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin: 0 0 16px;
+}
+.store-account__head .store-title { margin: 0; }
 .store-account__section-title { font-size: 1.1rem; margin: 0 0 10px; }
 .store-account__orders { list-style: none; margin: 0 0 20px; padding: 0; display: grid; gap: 10px; }
 .store-account__order {
