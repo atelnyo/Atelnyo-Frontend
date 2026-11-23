@@ -157,6 +157,7 @@ const StoreCartPage      = lazy(() => import('./store/StoreCartPage'));
 const StoreClaimPage     = lazy(() => import('./store/StoreClaimPage'));
 const StoreFavoritesPage = lazy(() => import('./store/StoreFavoritesPage'));
 const StoreAccountPage = lazy(() => import('./store/StoreAccountPage'));
+const StoreOrderDetailPage = lazy(() => import('./store/StoreOrderDetailPage'));
 const StoreLoginPage = lazy(() => import('./store/StoreLoginPage'));
 const PortfolioDetail    = lazy(() => import('./components/PortfolioDetail'));
 const PolicyPageView = lazy(() => import('./components/legal/PolicyPageView'));
@@ -1417,6 +1418,11 @@ function App() {
 
   const handleLoginSuccess = (userData) => {
     setUser(userData);
+    // The Store pages read the shared zustand store, not this App state.
+    // Syncing it here makes a login in the main app visible on /store in
+    // the same tick — no reload needed. setUser broadcasts to the rest of
+    // the app (header/routes) so the reverse direction stays in sync too.
+    try { useAuthStore.getState().setUser(userData); } catch (_) { /* best-effort */ }
     setIsAuthOpen(false);
     // Refresh the permissions matrix so the new user's current_role
     // (e.g. 'authenticated') replaces the previously-cached
@@ -1579,6 +1585,7 @@ function App() {
   const refreshUser = () => {
     authService.getMe().then(res => {
       setUser(res.data);
+      try { useAuthStore.getState().setUser(res.data); } catch (_) { /* best-effort */ }
       localStorage.setItem('user', JSON.stringify(res.data));
     }).catch(err => console.error("Refresh error:", err));
   };
@@ -1630,10 +1637,16 @@ function App() {
     // (Header avatar, username, is_creator gate) updates immediately —
     // no reload, no re-login required.
     const onUserUpdated = (e) => {
-      if (e?.detail?.user) {
-        setUser(e.detail.user);
-        try { localStorage.setItem('user', JSON.stringify(e.detail.user)); } catch { /* ignore */ }
-      }
+      // ``user: null`` is the store's sign-out broadcast, so test for the
+      // presence of the key rather than its truthiness. This is what makes
+      // a Store login/logout reach the header without a reload.
+      if (!e?.detail || !('user' in e.detail)) return;
+      const nextUser = e.detail.user || null;
+      setUser(nextUser);
+      try {
+        if (nextUser) localStorage.setItem('user', JSON.stringify(nextUser));
+        else localStorage.removeItem('user');
+      } catch { /* ignore */ }
     };
     window.addEventListener('atelnyo:auth:user-updated', onUserUpdated);
 
@@ -3694,6 +3707,8 @@ function App() {
         {/* Account page uses the store template (header, search, cart, footer). */}
         <Route path="/account" element={<StoreLayout />}>
           <Route index element={<StoreAccountPage />} />
+          {/* Buyer order detail + delivery tracking, in the Store template. */}
+          <Route path="orders/:orderId" element={<StoreOrderDetailPage />} />
         </Route>
         <Route path="/store/login" element={<StoreLoginPage />} />
         <Route path="/store" element={<StoreLayout />}>

@@ -50,9 +50,6 @@ describe('StoreAccountPage', () => {
     expect(screen.getByText('Amy')).toBeTruthy();
     expect(screen.getByText('amy@example.com')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Sign out' })).toBeTruthy();
-    // The old link-only surface is now backed by the real list.
-    expect(screen.getByRole('link', { name: 'View all orders' }).getAttribute('href'))
-      .toBe('/business/orders/mine');
     expect(await screen.findByText(/No orders yet/)).toBeTruthy();
   });
 
@@ -73,7 +70,7 @@ describe('StoreAccountPage', () => {
     renderAt();
 
     const orderLink = await screen.findByRole('link', { name: 'Order #42' });
-    expect(orderLink.getAttribute('href')).toBe('/business/orders/mine/42');
+    expect(orderLink.getAttribute('href')).toBe('/account/orders/42');
     expect(screen.getByText('Paid')).toBeTruthy();
     expect(screen.getByText(/Book ×2/)).toBeTruthy();
     expect(screen.getByText(/\$25\.00/)).toBeTruthy();

@@ -4,26 +4,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { storeService } from './storeService';
 import { useAuthStore } from './useAuthStore';
 import { storeOrderStatus } from '../components/business/storeOrderStatus';
-import { SHEETS } from '../routes/sheets';
-
-const money = (value) => {
-  const n = Number(value);
-  if (!Number.isFinite(n)) {
-    return '';
-  }
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
-};
-
-const formatDate = (value) => {
-  if (!value) {
-    return '';
-  }
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return '';
-  }
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-};
+import { formatDate, money } from './storeFormat';
 
 export default function StoreAccountPage() {
   const user = useAuthStore((s) => s.user);
@@ -115,7 +96,7 @@ export default function StoreAccountPage() {
                 <div className="store-account__order-head">
                   <span>
                     <Link
-                      to={SHEETS.BUSINESS_MY_ORDER_URL(order.id)}
+                      to={`/account/orders/${order.id}`}
                       className="store-account__order-id"
                     >
                       Order #{order.id}
@@ -144,9 +125,6 @@ export default function StoreAccountPage() {
       )}
 
       <div className="store-account__actions">
-        <Link to={SHEETS.BUSINESS_MY_ORDERS} className="store-btn store-btn--ghost">
-          View all orders
-        </Link>
         <button type="button" className="store-btn store-btn--ghost" onClick={onSignOut}>
           Sign out
         </button>

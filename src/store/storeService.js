@@ -48,6 +48,8 @@ export const storeService = {
   removeFavorite: (favoriteId) => api.delete(`marketplace/favorites/${favoriteId}/`),
   createReview: (payload) => api.post('marketplace/reviews/', payload),
   listOrders: () => api.get('marketplace/orders/'),
+  // Buyer-scoped detail: strangers get a 404, guests must claim first.
+  getOrder: (orderId) => api.get(`marketplace/orders/${encodeURIComponent(orderId)}/`),
 };
 
 export default storeService;

@@ -15,6 +15,27 @@
 import { create } from 'zustand';
 import { authService } from '../services/api';
 
+/**
+ * Tell the rest of the app a session changed.
+ *
+ * ``App.jsx`` keeps its own ``user`` state for the header and the gated
+ * routes, while the Store pages read this zustand store. Without a
+ * broadcast, signing in on one side leaves the other showing "Sign in"
+ * until a full page reload re-hydrates both from localStorage. The event
+ * is one-way (store → listeners) so it cannot loop back into setUser.
+ * A ``null`` user means signed out.
+ */
+const broadcastUser = (user) => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.dispatchEvent(new CustomEvent('atelnyo:auth:user-updated', {
+      detail: { user: user || null },
+    }));
+  } catch {
+    // A listener must never break the auth flow itself.
+  }
+};
+
 const initialState = {
   /** Current user object (null = anonymous) */
   user: null,
@@ -36,11 +57,14 @@ export const useAuthStore = create((set, get) => ({
      ══════════════════════════════════════════════════════════════ */
 
   /** Set the authenticated user (called after login / token refresh) */
-  setUser: (user) => set({
-    user,
-    loading: false,
-    error: null,
-  }),
+  setUser: (user) => {
+    broadcastUser(user);
+    set({
+      user,
+      loading: false,
+      error: null,
+    });
+  },
 
   /** Set tokens from login/refresh response */
   setTokens: (access, refresh) => {
@@ -54,6 +78,7 @@ export const useAuthStore = create((set, get) => ({
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     set({ ...initialState, loading: false, _refreshToken: null });
+    broadcastUser(null);
   },
 
   /** Set loading state */

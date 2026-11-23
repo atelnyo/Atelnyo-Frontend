@@ -86,7 +86,7 @@ export default function StoreLayout() {
             <li><Link to="/store" onClick={() => setMenuOpen(false)}>All products</Link></li>
             <li><Link to="/store/favorites" onClick={() => setMenuOpen(false)}>Favorites</Link></li>
             {user && (
-              <li><Link to="/business/orders/mine" onClick={() => setMenuOpen(false)}>My orders</Link></li>
+              <li><Link to="/account" onClick={() => setMenuOpen(false)}>My orders</Link></li>
             )}
             <li><Link to="/" onClick={() => setMenuOpen(false)}>Back to Atelnyo</Link></li>
             <li>
