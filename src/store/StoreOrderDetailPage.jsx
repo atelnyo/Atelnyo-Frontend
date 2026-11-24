@@ -12,6 +12,26 @@ const CLOSED_STATUSES = new Set(['cancelled', 'refunded']);
 const PREPARING_STATUSES = new Set([
   'pending', 'on-hold', 'in-production', 'partially-fulfilled',
 ]);
+// Delivery-address fields shown when the buyer corrects the order address.
+const ADDRESS_FIELDS = [
+  ['first_name', 'First name'],
+  ['last_name', 'Last name'],
+  ['email', 'Email'],
+  ['phone', 'Phone'],
+  ['address1', 'Address line 1'],
+  ['address2', 'Apartment, suite, etc. (optional)'],
+  ['city', 'City'],
+  ['region', 'State / Province / Region'],
+  ['zip', 'Postal / ZIP code'],
+  ['country', 'Country (2-letter code)'],
+];
+const ADDRESS_FIELD_STYLE = {
+  width: '100%',
+  padding: '0.6rem 0.75rem',
+  borderRadius: '10px',
+  border: '1px solid #d8dee9',
+  font: 'inherit',
+};
 
 const addressLines = (address) => {
   if (!address || typeof address !== 'object') return [];
@@ -82,6 +102,11 @@ export default function StoreOrderDetailPage() {
   const [contactBody, setContactBody] = useState('');
   const [contactBusy, setContactBusy] = useState(false);
   const [contactNotice, setContactNotice] = useState(null);
+  // Address correction — allowed until the supplier has the order.
+  const [addressEditing, setAddressEditing] = useState(false);
+  const [addressForm, setAddressForm] = useState(null);
+  const [addressBusy, setAddressBusy] = useState(false);
+  const [addressNotice, setAddressNotice] = useState(null);
 
   useEffect(() => {
     if (!user) {
@@ -126,6 +151,53 @@ export default function StoreOrderDetailPage() {
   const fulfillments = Array.isArray(order?.printify_fulfillment) ? order.printify_fulfillment : [];
   const lines = addressLines(order?.shipping_address);
   const hasPhysical = items.some((item) => item.product_kind !== 'digital');
+
+  const startAddressEdit = () => {
+    const saved = order?.shipping_address || {};
+    setAddressForm({
+      first_name: saved.first_name || '',
+      last_name: saved.last_name || '',
+      email: saved.email || '',
+      phone: saved.phone || '',
+      address1: saved.address1 || '',
+      address2: saved.address2 || '',
+      city: saved.city || '',
+      region: saved.region || '',
+      zip: saved.zip || '',
+      country: saved.country || '',
+    });
+    setAddressNotice(null);
+    setAddressEditing(true);
+  };
+
+  const saveAddress = async () => {
+    if (!addressForm) {
+      return;
+    }
+    setAddressBusy(true);
+    setAddressNotice(null);
+    try {
+      const { data } = await storeService.updateShippingAddress(orderId, addressForm);
+      setOrder((previous) => ({
+        ...previous,
+        shipping_address: data.shipping_address,
+        can_edit_shipping: data.can_edit_shipping,
+      }));
+      setAddressEditing(false);
+      setAddressNotice({
+        kind: 'ok',
+        text: 'Address updated — the seller will ship to this one.',
+      });
+    } catch (err) {
+      const detail = err?.response?.data?.detail;
+      setAddressNotice({
+        kind: 'error',
+        text: String(detail || 'Could not update the address. Try again or message the seller.'),
+      });
+    } finally {
+      setAddressBusy(false);
+    }
+  };
 
   const sendSellerMessage = async (seller) => {
     const body = contactBody.trim();
@@ -293,14 +365,75 @@ export default function StoreOrderDetailPage() {
             </dl>
           </section>
 
-          {lines.length > 0 && (
+          {(lines.length > 0 || order.can_edit_shipping) && (
             <section className="store-order__card">
               <h2>Shipping address</h2>
-              <address className="store-order__address">
-                {lines.map((line, index) => (
-                  <span key={`${index}-${line}`}>{line}<br /></span>
-                ))}
-              </address>
+              {addressNotice && (
+                <p
+                  className="store-order__hint"
+                  role={addressNotice.kind === 'error' ? 'alert' : 'status'}
+                >
+                  {addressNotice.text}
+                </p>
+              )}
+              {addressEditing && addressForm ? (
+                <div>
+                  {ADDRESS_FIELDS.map(([key, label]) => (
+                    <label key={key} style={{ display: 'block', marginBottom: '0.5rem' }}>
+                      <span className="store-order__hint">{label}</span>
+                      <input
+                        type={key === 'email' ? 'email' : 'text'}
+                        value={addressForm[key]}
+                        maxLength={key === 'country' ? 2 : 250}
+                        onChange={(event) => setAddressForm((form) => (
+                          { ...form, [key]: event.target.value }
+                        ))}
+                        aria-label={label}
+                        style={ADDRESS_FIELD_STYLE}
+                      />
+                    </label>
+                  ))}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
+                    <button
+                      type="button"
+                      className="store-btn"
+                      onClick={saveAddress}
+                      disabled={addressBusy}
+                    >
+                      {addressBusy ? 'Saving…' : 'Save address'}
+                    </button>
+                    <button
+                      type="button"
+                      className="store-btn store-btn--ghost"
+                      onClick={() => setAddressEditing(false)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <address className="store-order__address">
+                    {lines.map((line, index) => (
+                      <span key={`${index}-${line}`}>{line}<br /></span>
+                    ))}
+                  </address>
+                  {order.can_edit_shipping ? (
+                    <button
+                      type="button"
+                      className="store-btn store-btn--ghost"
+                      onClick={startAddressEdit}
+                    >
+                      Edit address
+                    </button>
+                  ) : order.status === 'paid' && (
+                    <p className="store-order__hint">
+                      The seller already has this order. Message them below to
+                      change the delivery address.
+                    </p>
+                  )}
+                </>
+              )}
             </section>
           )}
 

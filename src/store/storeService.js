@@ -75,6 +75,11 @@ export const storeService = {
     `marketplace/orders/${encodeURIComponent(orderId)}/contact-seller/`,
     sellerId != null ? { body, seller_id: sellerId } : { body },
   ),
+  // Correct the delivery address while the supplier does not have the order.
+  updateShippingAddress: (orderId, shippingAddress) => api.post(
+    `marketplace/orders/${encodeURIComponent(orderId)}/shipping-address/`,
+    { shipping_address: shippingAddress },
+  ),
 };
 
 export default storeService;

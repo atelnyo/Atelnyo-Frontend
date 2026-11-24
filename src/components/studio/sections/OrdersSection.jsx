@@ -34,6 +34,18 @@ function statusMeta(status) {
   return STATUS_META[status] || { cls: 'badgeArchived', icon: 'fa-circle', label: { en: status, ht: status } };
 }
 
+// The order stores the recipient as a JSON object; render it as readable
+// lines (a raw object cannot be a React child and hides the address).
+function addressLines(address) {
+  if (!address || typeof address !== 'object') return [];
+  const name = [address.first_name, address.last_name].filter(Boolean).join(' ');
+  const cityLine = [address.city, address.region].filter(Boolean).join(', ');
+  const cityZip = [cityLine, address.zip].filter(Boolean).join(' ');
+  const contact = [address.email, address.phone].filter(Boolean).join(' · ');
+  return [name, address.address1, address.address2, cityZip, address.country, contact]
+    .filter(Boolean);
+}
+
 export default function OrdersSection({ lang, t }) {
   const isHt = lang === 'ht';
   const [expanded, setExpanded] = useState(null);
@@ -275,7 +287,11 @@ export default function OrdersSection({ lang, t }) {
                                 {o.shipping_address && (
                                   <>
                                     <span className={styles.orderDetailLabel}>{isHt ? 'Livrezon' : inlineText(lang, 'Shipping')}</span>
-                                    <p className={styles.orderDetailAddr}>{o.shipping_address}</p>
+                                    <p className={styles.orderDetailAddr}>
+                                      {addressLines(o.shipping_address).map((line, index) => (
+                                        <React.Fragment key={`${index}-${line}`}>{line}<br /></React.Fragment>
+                                      ))}
+                                    </p>
                                   </>
                                 )}
                                 {o.buyer_note && (

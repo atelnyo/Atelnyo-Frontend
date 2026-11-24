@@ -9,11 +9,13 @@ import { useAuthStore } from './useAuthStore';
 
 const getOrder = vi.fn();
 const contactSeller = vi.fn();
+const updateShippingAddress = vi.fn();
 
 vi.mock('./storeService', () => ({
   storeService: {
     getOrder: (...args) => getOrder(...args),
     contactSeller: (...args) => contactSeller(...args),
+    updateShippingAddress: (...args) => updateShippingAddress(...args),
   },
 }));
 
@@ -40,6 +42,7 @@ const order = {
     shipped_at: '2026-11-03T12:00:00Z',
   },
   printify_fulfillment: [],
+  can_edit_shipping: false,
   sellers: [{ id: 7, username: 'atelier' }],
   items: [{
     id: 1,
@@ -70,6 +73,10 @@ describe('StoreOrderDetailPage', () => {
     getOrder.mockResolvedValue({ data: order });
     contactSeller.mockReset();
     contactSeller.mockResolvedValue({ data: { conversation_id: 1 } });
+    updateShippingAddress.mockReset();
+    updateShippingAddress.mockResolvedValue({
+      data: { shipping_address: order.shipping_address, can_edit_shipping: false },
+    });
     useAuthStore.setState({ user: null, loading: false });
   });
 
@@ -121,6 +128,21 @@ describe('StoreOrderDetailPage', () => {
 
     const step = await screen.findByText('Preparing');
     expect(step.closest('li').getAttribute('aria-current')).toBe('step');
+  });
+
+  it('lets the buyer correct the delivery address before the seller ships', async () => {
+    getOrder.mockResolvedValue({ data: { ...order, can_edit_shipping: true } });
+    useAuthStore.setState({ user: { id: 1, username: 'amy' } });
+    renderAt();
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Edit address' }));
+    fireEvent.change(screen.getByLabelText('City'), { target: { value: 'Cap-Haïtien' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save address' }));
+
+    await waitFor(() => expect(updateShippingAddress).toHaveBeenCalledWith(
+      '42',
+      expect.objectContaining({ city: 'Cap-Haïtien', address1: '12 Rue Capois' }),
+    ));
   });
 
   it('keeps the buyer in touch with the seller who is preparing the order', async () => {
