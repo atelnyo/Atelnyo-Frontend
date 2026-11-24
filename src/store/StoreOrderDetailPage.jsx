@@ -63,6 +63,12 @@ export default function StoreOrderDetailPage() {
   // 'not_found' | 'failed' — null while loading and after a successful load.
   const [error, setError] = useState(null);
   const [reloadTick, setReloadTick] = useState(0);
+  // "Contact the seller" — the seller is reachable from the order itself,
+  // so a missing parcel never dead-ends at a generic support page.
+  const [contactOpen, setContactOpen] = useState(false);
+  const [contactBody, setContactBody] = useState('');
+  const [contactBusy, setContactBusy] = useState(false);
+  const [contactNotice, setContactNotice] = useState(null);
 
   useEffect(() => {
     if (!user) {
@@ -106,6 +112,32 @@ export default function StoreOrderDetailPage() {
   const fulfillments = Array.isArray(order?.printify_fulfillment) ? order.printify_fulfillment : [];
   const lines = addressLines(order?.shipping_address);
   const hasPhysical = items.some((item) => item.product_kind !== 'digital');
+
+  const sendSellerMessage = async () => {
+    const body = contactBody.trim();
+    if (!body) {
+      return;
+    }
+    setContactBusy(true);
+    setContactNotice(null);
+    try {
+      await storeService.contactSeller(orderId, body);
+      setContactBody('');
+      setContactOpen(false);
+      setContactNotice({
+        kind: 'ok',
+        text: 'Message sent — the seller replies in your messages.',
+      });
+    } catch (err) {
+      const detail = err?.response?.data?.detail || err?.response?.data?.body;
+      setContactNotice({
+        kind: 'error',
+        text: String(detail || 'Could not send the message. Try again or contact support.'),
+      });
+    } finally {
+      setContactBusy(false);
+    }
+  };
 
   return (
     <section className="store-order">
@@ -303,6 +335,71 @@ export default function StoreOrderDetailPage() {
               <p className="store-order__hint">{order.buyer_note}</p>
             </section>
           )}
+
+          <section className="store-order__card">
+            <h2>Contact the seller</h2>
+            <p className="store-order__hint">
+              Delivery problem? Message the seller directly about this order —
+              the thread and the reply live in your messages.
+            </p>
+            {contactNotice && (
+              <p
+                className="store-order__hint"
+                role={contactNotice.kind === 'error' ? 'alert' : 'status'}
+              >
+                {contactNotice.text}
+              </p>
+            )}
+            {contactOpen ? (
+              <>
+                <textarea
+                  rows={4}
+                  maxLength={4000}
+                  value={contactBody}
+                  onChange={(event) => setContactBody(event.target.value)}
+                  placeholder="Describe the issue with this order"
+                  aria-label="Message to the seller"
+                  style={{
+                    width: '100%',
+                    minHeight: '96px',
+                    padding: '0.75rem',
+                    borderRadius: '10px',
+                    border: '1px solid #d8dee9',
+                    font: 'inherit',
+                    resize: 'vertical',
+                  }}
+                />
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
+                  <button
+                    type="button"
+                    className="store-btn"
+                    onClick={sendSellerMessage}
+                    disabled={contactBusy || !contactBody.trim()}
+                  >
+                    {contactBusy ? 'Sending…' : 'Send message'}
+                  </button>
+                  <button
+                    type="button"
+                    className="store-btn store-btn--ghost"
+                    onClick={() => {
+                      setContactOpen(false);
+                      setContactNotice(null);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </>
+            ) : (
+              <button
+                type="button"
+                className="store-btn"
+                onClick={() => setContactOpen(true)}
+              >
+                Message the seller
+              </button>
+            )}
+          </section>
 
           <p className="store-order__hint">
             Need help with this order? <Link to="/contact">Contact support</Link>.

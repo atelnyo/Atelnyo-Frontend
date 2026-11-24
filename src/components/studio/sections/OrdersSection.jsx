@@ -41,6 +41,8 @@ export default function OrdersSection({ lang, t }) {
   // Printify submission to pull tracking from, so they enter it here.
   const [trackingForm, setTrackingForm] = useState({ carrier: '', number: '', url: '' });
   const [trackingBusy, setTrackingBusy] = useState(false);
+  // Submission id currently being replayed (Printify rejection recovery).
+  const [retryingSubmission, setRetryingSubmission] = useState(null);
   const [trackingNotice, setTrackingNotice] = useState(null);
   const { data: orders, loading, updateLocal } = useFetch(
     () => api.get('marketplace/orders/sales/', { params: { limit: 50 } }),
@@ -60,6 +62,44 @@ export default function OrdersSection({ lang, t }) {
       number: tracking.number || '',
       url: tracking.url || '',
     });
+  };
+
+  // A paid order whose Printify submission was rejected is stuck: the
+  // submit job is done and nothing re-enqueues it. The seller fixes the
+  // mapping/token and replays it from here.
+  const retrySubmission = async (order, fulfillment) => {
+    if (!fulfillment?.submission_id) return;
+    setRetryingSubmission(fulfillment.submission_id);
+    setTrackingNotice(null);
+    try {
+      const { data } = await api.post(
+        `marketplace/printify/submissions/${fulfillment.submission_id}/retry/`,
+      );
+      const accepted = data.status === 'submitted';
+      updateLocal((row) => row.id === order.id, {
+        printify_fulfillment: (order.printify_fulfillment || []).map((row) => (
+          row.submission_id === fulfillment.submission_id
+            ? { ...row, submission_status: data.status, issue: data.issue, retryable: !accepted }
+            : row
+        )),
+      });
+      setTrackingNotice({
+        orderId: order.id,
+        kind: accepted ? 'ok' : 'error',
+        text: accepted
+          ? (isHt ? 'Soumisyon an pase — atik la nan pwodiksyon.' : inlineText(lang, 'Submission accepted — the item is in production.'))
+          : String(data.issue || (isHt ? 'Soumisyon an rete bloke.' : inlineText(lang, 'The submission is still blocked.'))),
+      });
+    } catch (err) {
+      const detail = err?.response?.data?.detail;
+      setTrackingNotice({
+        orderId: order.id,
+        kind: 'error',
+        text: String(detail || (isHt ? 'Pa t ka eseye ankò.' : inlineText(lang, 'Could not retry the submission.'))),
+      });
+    } finally {
+      setRetryingSubmission(null);
+    }
   };
 
   const saveTracking = async (order) => {
@@ -215,6 +255,18 @@ export default function OrdersSection({ lang, t }) {
                                           {fulfillment.status || fulfillment.submission_status || (isHt ? 'Ap tann mizajou' : inlineText(lang, 'Awaiting update'))}
                                         </p>
                                         {fulfillment.issue && <p className={styles.orderDetailAddr} role="alert">{fulfillment.issue}</p>}
+                                        {fulfillment.retryable && fulfillment.submission_id && (
+                                          <button
+                                            type="button"
+                                            className={styles.secondaryBtn}
+                                            onClick={() => retrySubmission(o, fulfillment)}
+                                            disabled={retryingSubmission === fulfillment.submission_id}
+                                          >
+                                            {retryingSubmission === fulfillment.submission_id
+                                              ? '…'
+                                              : (isHt ? 'Eseye ankò' : inlineText(lang, 'Retry'))}
+                                          </button>
+                                        )}
                                         {(fulfillment.shipments || []).map((shipment) => (
                                           <p className={styles.orderDetailAddr} key={shipment.number || shipment.url || shipment.carrier}>
                                             {shipment.carrier || (isHt ? 'Transpò' : inlineText(lang, 'Carrier'))}{' '}
