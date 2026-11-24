@@ -12,6 +12,7 @@
 export { default as StatCard } from './StatCard';
 export { default as EmptyState } from './EmptyState';
 export { default as StudioSkeleton } from './StudioSkeleton';
+export { default as CourseSectionSkeleton } from './CourseSectionSkeleton';
 export { default as WelcomeHeader } from './WelcomeHeader';
 export { default as QuickActions } from './QuickActions';
 export { default as PendingActions } from './PendingActions';

@@ -458,6 +458,51 @@
   color: #fff;
 }
 
+/* Compact per-status tally inside a filter chip. Rendered aria-hidden so
+   the chip's accessible name stays exactly its label. */
+.filterChipCount {
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 14%, transparent);
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Row + toolbar checkboxes for the course bulk bar. Not a table, so it
+   cannot reuse .selectCell (scoped to .table th/td). */
+.courseSelectAll {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  accent-color: var(--brand-primary, #0084ff);
+  cursor: pointer;
+}
+
+.courseSelectAll:disabled { cursor: not-allowed; }
+
+.courseSort {
+  padding: 7px 12px;
+  border: var(--border-w-sm) solid var(--border-color);
+  border-radius: 999px;
+  background: var(--surface-card);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  max-width: 100%;
+}
+
+.courseSort:hover {
+  border-color: var(--brand-primary, #0084ff);
+}
+
+.courseSort:focus-visible {
+  outline: 2px solid var(--brand-primary, #0084ff);
+  outline-offset: 2px;
+}
+
 .productCount {
   margin-left: auto;
   color: var(--text-secondary);

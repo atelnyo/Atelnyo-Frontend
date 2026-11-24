@@ -266,6 +266,114 @@
   100% { background-position: -200% 0; }
 }
 
+/* ─── Course list skeleton — mirrors a real course row ────────────────
+   Same thumb / body / action geometry as .listItem in the sections
+   styles so the list does not reflow when the courses arrive. */
+
+.courseSkeletonList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-sm);
+}
+
+.courseSkeletonRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-xl);
+  padding: var(--sp-lg) var(--sp-2xl);
+  background: var(--surface-card);
+  border-radius: var(--radius-xl);
+  border: var(--border-w-sm) solid var(--border-color);
+}
+
+.courseSkeletonThumb {
+  width: 52px;
+  height: 38px;
+  border-radius: var(--radius-lg);
+  flex-shrink: 0;
+}
+
+.courseSkeletonBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.courseSkeletonThumb,
+.courseSkeletonLine,
+.courseSkeletonAction {
+  display: block;
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-from, #f0f0f0) 25%,
+    var(--skeleton-to, #e0e0e0) 50%,
+    var(--skeleton-from, #f0f0f0) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.courseSkeletonLine {
+  height: 12px;
+  border-radius: var(--radius-md);
+}
+
+.courseSkeletonTitle {
+  width: min(260px, 70%);
+}
+
+.courseSkeletonMeta {
+  width: min(180px, 48%);
+  height: 10px;
+}
+
+.courseSkeletonActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.courseSkeletonAction {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 640px) {
+  .courseSkeletonRow {
+    gap: var(--sp-md);
+    padding: var(--sp-md) var(--sp-lg);
+  }
+
+  .courseSkeletonActions {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .courseSkeletonThumb,
+  .courseSkeletonLine,
+  .courseSkeletonAction {
+    animation: none;
+    background: var(--skeleton-from, #f0f0f0);
+  }
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    WELCOME HEADER
    ═══════════════════════════════════════════════════════════════════════════ */

@@ -15,6 +15,7 @@ import {
   LoadingOverlay, MediaUrlField, HelpTip, FieldTip, HELP_COPY,
 } from './shared';
 import { parseHashtags, hashtagsToInput } from '../../../utils/hashtags';
+import TemplatePicker from '../editor/TemplatePicker';
 import styles from './modals.module.css';
 import { inlineText } from '../../../utils/inlineI18n';
 
@@ -28,6 +29,10 @@ export default function CourseFormModal({ onClose, onSuccess, lang, showToast, i
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  // Starter template chosen for a NEW course. It is applied server-side
+  // after creation (POST courses/<id>/template/), so it never blocks the
+  // form: the creator still writes the title and description.
+  const [templateKey, setTemplateKey] = useState('');
 
   const handleChange = useCallback((field, value) => {
     setForm((f) => ({ ...f, [field]: value }));
@@ -64,17 +69,38 @@ export default function CourseFormModal({ onClose, onSuccess, lang, showToast, i
         image_url: form.image_url.trim() || undefined,
         video_url: form.video_url.trim() || undefined,
       };
+      let templateFailed = false;
       if (isEdit) {
         await courseService.update(item.id, payload);
       } else {
-        await api.post('courses/', payload);
+        const created = await api.post('courses/', payload);
+        const createdId = created?.data?.id ?? created?.data?.data?.id ?? null;
+        // The template fills the new draft's syllabus (modules + blocks).
+        // A failed apply must not lose the course the creator just made:
+        // keep it and say plainly that the outline was not added.
+        if (createdId && templateKey && templateKey !== 'blank') {
+          try {
+            await courseService.applyTemplate(createdId, templateKey);
+          } catch {
+            templateFailed = true;
+          }
+        }
       }
-      showToast?.(
-        isEdit
-          ? (lang === 'ht' ? '✅ Kou mete ajou!' : inlineText(lang, '✅ Course updated!'))
-          : (lang === 'ht' ? '✅ Kou kreye avèk siksè!' : inlineText(lang, '✅ Course created successfully!')),
-        'check-circle',
-      );
+      if (templateFailed) {
+        showToast?.(
+          lang === 'ht'
+            ? 'Kou a kreye, men modèl la pa t aplike. Ou ka ajoute modil yo nan editè a.'
+            : inlineText(lang, 'Course created, but the template did not apply. You can add modules in the editor.'),
+          'circle-exclamation',
+        );
+      } else {
+        showToast?.(
+          isEdit
+            ? (lang === 'ht' ? '✅ Kou mete ajou!' : inlineText(lang, '✅ Course updated!'))
+            : (lang === 'ht' ? '✅ Kou kreye avèk siksè!' : inlineText(lang, '✅ Course created successfully!')),
+          'check-circle',
+        );
+      }
       onSuccess?.();
       onClose?.();
     } catch (err) {
@@ -87,7 +113,7 @@ export default function CourseFormModal({ onClose, onSuccess, lang, showToast, i
     } finally {
       setLoading(false);
     }
-  }, [form, lang, showToast, onSuccess, onClose]);
+  }, [form, lang, showToast, onSuccess, onClose, templateKey]);
 
   return (
     <StudioModal
@@ -106,6 +132,22 @@ export default function CourseFormModal({ onClose, onSuccess, lang, showToast, i
           </div>
         )}
         <LoadingOverlay loading={loading}>
+          {!isEdit && (
+            <FormSection
+              icon="fa-wand-magic-sparkles"
+              title={lang === 'ht' ? 'Kòmanse ak yon modèl' : inlineText(lang, 'Start from a template')}
+              hint={lang === 'ht'
+                ? 'Yon modèl ba w yon plan kou deja fèt (modil ak blòk). Ou ka chanje tout bagay apre.'
+                : inlineText(lang, 'A template gives you a ready-made outline (modules and blocks). You can change everything afterwards.')}
+            >
+              <TemplatePicker
+                lang={lang}
+                value={templateKey}
+                onSelect={setTemplateKey}
+                heading={false}
+              />
+            </FormSection>
+          )}
           <FormSection
             icon="fa-info-circle"
             title={lang === 'ht' ? 'Enfòmasyon Bazik' : inlineText(lang, 'Basic Information')}

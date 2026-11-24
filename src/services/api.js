@@ -499,6 +499,14 @@ export const courseService = {
   // URL for external courses). Owner/staff only; 400 with {errors} when
   // the gate fails.
   publish: (id) => api.post(`courses/${id}/publish/`),
+  // GET /api/courses/templates/ — starter syllabi for the Studio course
+  // create flow (modules + suggested blocks, never a full course).
+  templates: () => api.get('courses/templates/'),
+  // POST /api/courses/<id>/template/ — fill an empty draft's syllabus
+  // from a template. The backend refuses when the course already has
+  // content, so this runs once, right after creation.
+  applyTemplate: (id, templateKey) =>
+    api.post(`courses/${id}/template/`, { template_key: templateKey }),
   // Intelligence workspace admin routes are separately permission-gated
   // so creator ownership elsewhere in Studio does not grant admin actions.
   getIntelligenceManaged: (id) => api.get(`intelligence/admin-course/${id}/`),
