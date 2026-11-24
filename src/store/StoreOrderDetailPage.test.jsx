@@ -1,17 +1,19 @@
 // @vitest-environment jsdom
 import React from 'react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import StoreOrderDetailPage from './StoreOrderDetailPage';
 import { useAuthStore } from './useAuthStore';
 
 const getOrder = vi.fn();
+const contactSeller = vi.fn();
 
 vi.mock('./storeService', () => ({
   storeService: {
     getOrder: (...args) => getOrder(...args),
+    contactSeller: (...args) => contactSeller(...args),
   },
 }));
 
@@ -38,6 +40,7 @@ const order = {
     shipped_at: '2026-11-03T12:00:00Z',
   },
   printify_fulfillment: [],
+  sellers: [{ id: 7, username: 'atelier' }],
   items: [{
     id: 1,
     product_title: 'Design pack',
@@ -65,6 +68,8 @@ describe('StoreOrderDetailPage', () => {
   beforeEach(() => {
     getOrder.mockReset();
     getOrder.mockResolvedValue({ data: order });
+    contactSeller.mockReset();
+    contactSeller.mockResolvedValue({ data: { conversation_id: 1 } });
     useAuthStore.setState({ user: null, loading: false });
   });
 
@@ -100,5 +105,37 @@ describe('StoreOrderDetailPage', () => {
 
     expect(await screen.findByText(/This order is cancelled/)).toBeTruthy();
     expect(screen.queryByRole('list', { name: 'Order progress' })).toBeNull();
+  });
+
+  it('shows production progress while the seller is preparing the order', async () => {
+    getOrder.mockResolvedValue({
+      data: {
+        ...order,
+        tracking: null,
+        printify_fulfillment: [{ status: 'in-production', shipments: [] }],
+        items: [{ ...order.items[0], product_kind: 'physical' }],
+      },
+    });
+    useAuthStore.setState({ user: { id: 1, username: 'amy' } });
+    renderAt();
+
+    const step = await screen.findByText('Preparing');
+    expect(step.closest('li').getAttribute('aria-current')).toBe('step');
+  });
+
+  it('keeps the buyer in touch with the seller who is preparing the order', async () => {
+    useAuthStore.setState({ user: { id: 1, username: 'amy' } });
+    renderAt();
+
+    expect(await screen.findByText('atelier')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Message atelier' }));
+    fireEvent.change(screen.getByLabelText('Message to the seller'), {
+      target: { value: 'Kote kòmand mwen?' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Send message' }));
+
+    await waitFor(() => expect(contactSeller).toHaveBeenCalledWith(
+      '42', 'Kote kòmand mwen?', 7,
+    ));
   });
 });

@@ -6,8 +6,12 @@ import { useAuthStore } from './useAuthStore';
 import { fulfillmentLabel, storeOrderStatus } from '../components/business/storeOrderStatus';
 import { formatDate, money } from './storeFormat';
 
-const STEP_LABELS = ['Order placed', 'Paid', 'Shipped', 'Completed'];
+const STEP_LABELS = ['Order placed', 'Paid', 'Preparing', 'Shipped', 'Completed'];
 const CLOSED_STATUSES = new Set(['cancelled', 'refunded']);
+// Printify stages that mean "the seller is working on it, not shipped yet".
+const PREPARING_STATUSES = new Set([
+  'pending', 'on-hold', 'in-production', 'partially-fulfilled',
+]);
 
 const addressLines = (address) => {
   if (!address || typeof address !== 'object') return [];
@@ -50,9 +54,16 @@ const collectShipments = (order) => {
 
 const stepIndex = (order, shipments) => {
   if (CLOSED_STATUSES.has(order.status)) return -1;
-  if (order.status === 'completed') return 3;
-  if (order.status === 'fulfilled' || shipments.length > 0) return 2;
-  if (order.status === 'paid') return 1;
+  if (order.status === 'completed') return 4;
+  if (order.status === 'fulfilled' || shipments.length > 0) return 3;
+  if (order.status === 'paid') {
+    // A paid POD order is printed before it ships — show that, so the buyer
+    // sees movement instead of a silent "Paid" while the parcel is produced.
+    const preparing = (order.printify_fulfillment || []).some(
+      (row) => PREPARING_STATUSES.has(row?.status),
+    );
+    return preparing ? 2 : 1;
+  }
   return 0;
 };
 
@@ -65,7 +76,9 @@ export default function StoreOrderDetailPage() {
   const [reloadTick, setReloadTick] = useState(0);
   // "Contact the seller" — the seller is reachable from the order itself,
   // so a missing parcel never dead-ends at a generic support page.
-  const [contactOpen, setContactOpen] = useState(false);
+  // Which seller's thread is open. A paid cart can hold several shops, so
+  // the buyer must be able to pick who they are writing to.
+  const [contactSellerId, setContactSellerId] = useState(null);
   const [contactBody, setContactBody] = useState('');
   const [contactBusy, setContactBusy] = useState(false);
   const [contactNotice, setContactNotice] = useState(null);
@@ -107,13 +120,14 @@ export default function StoreOrderDetailPage() {
 
   const status = order ? storeOrderStatus(order.status, false) : null;
   const items = Array.isArray(order?.items) ? order.items : [];
+  const sellers = Array.isArray(order?.sellers) ? order.sellers : [];
   const shipments = order ? collectShipments(order) : [];
   const currentStep = order ? stepIndex(order, shipments) : 0;
   const fulfillments = Array.isArray(order?.printify_fulfillment) ? order.printify_fulfillment : [];
   const lines = addressLines(order?.shipping_address);
   const hasPhysical = items.some((item) => item.product_kind !== 'digital');
 
-  const sendSellerMessage = async () => {
+  const sendSellerMessage = async (seller) => {
     const body = contactBody.trim();
     if (!body) {
       return;
@@ -121,12 +135,12 @@ export default function StoreOrderDetailPage() {
     setContactBusy(true);
     setContactNotice(null);
     try {
-      await storeService.contactSeller(orderId, body);
+      await storeService.contactSeller(orderId, body, seller.id);
       setContactBody('');
-      setContactOpen(false);
+      setContactSellerId(null);
       setContactNotice({
         kind: 'ok',
-        text: 'Message sent — the seller replies in your messages.',
+        text: `Message sent to ${seller.username || 'the seller'} — the reply lands in your messages.`,
       });
     } catch (err) {
       const detail = err?.response?.data?.detail || err?.response?.data?.body;
@@ -336,70 +350,88 @@ export default function StoreOrderDetailPage() {
             </section>
           )}
 
-          <section className="store-order__card">
-            <h2>Contact the seller</h2>
-            <p className="store-order__hint">
-              Delivery problem? Message the seller directly about this order —
-              the thread and the reply live in your messages.
-            </p>
-            {contactNotice && (
-              <p
-                className="store-order__hint"
-                role={contactNotice.kind === 'error' ? 'alert' : 'status'}
-              >
-                {contactNotice.text}
+          {sellers.length > 0 && (
+            <section className="store-order__card">
+              <h2>{sellers.length > 1 ? 'Your sellers' : 'Your seller'}</h2>
+              <p className="store-order__hint">
+                Delivery question? Message whoever is preparing this order —
+                the thread and the reply live in your messages.
               </p>
-            )}
-            {contactOpen ? (
-              <>
-                <textarea
-                  rows={4}
-                  maxLength={4000}
-                  value={contactBody}
-                  onChange={(event) => setContactBody(event.target.value)}
-                  placeholder="Describe the issue with this order"
-                  aria-label="Message to the seller"
-                  style={{
-                    width: '100%',
-                    minHeight: '96px',
-                    padding: '0.75rem',
-                    borderRadius: '10px',
-                    border: '1px solid #d8dee9',
-                    font: 'inherit',
-                    resize: 'vertical',
-                  }}
-                />
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
-                  <button
-                    type="button"
-                    className="store-btn"
-                    onClick={sendSellerMessage}
-                    disabled={contactBusy || !contactBody.trim()}
-                  >
-                    {contactBusy ? 'Sending…' : 'Send message'}
-                  </button>
-                  <button
-                    type="button"
-                    className="store-btn store-btn--ghost"
-                    onClick={() => {
-                      setContactOpen(false);
-                      setContactNotice(null);
-                    }}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </>
-            ) : (
-              <button
-                type="button"
-                className="store-btn"
-                onClick={() => setContactOpen(true)}
-              >
-                Message the seller
-              </button>
-            )}
-          </section>
+              {contactNotice && (
+                <p
+                  className="store-order__hint"
+                  role={contactNotice.kind === 'error' ? 'alert' : 'status'}
+                >
+                  {contactNotice.text}
+                </p>
+              )}
+              <ul className="store-order__items">
+                {sellers.map((seller) => (
+                  <li key={seller.id}>
+                    <div className="store-order__item-main">
+                      <span className="store-order__item-title">
+                        {seller.username || 'Seller'}
+                      </span>
+                    </div>
+                    {contactSellerId === seller.id ? (
+                      <div className="store-order__item-side">
+                        <textarea
+                          rows={4}
+                          maxLength={4000}
+                          value={contactBody}
+                          onChange={(event) => setContactBody(event.target.value)}
+                          placeholder="Describe the issue with this order"
+                          aria-label="Message to the seller"
+                          style={{
+                            width: '100%',
+                            minWidth: '260px',
+                            minHeight: '96px',
+                            padding: '0.75rem',
+                            borderRadius: '10px',
+                            border: '1px solid #d8dee9',
+                            font: 'inherit',
+                            resize: 'vertical',
+                          }}
+                        />
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
+                          <button
+                            type="button"
+                            className="store-btn"
+                            onClick={() => sendSellerMessage(seller)}
+                            disabled={contactBusy || !contactBody.trim()}
+                          >
+                            {contactBusy ? 'Sending…' : 'Send message'}
+                          </button>
+                          <button
+                            type="button"
+                            className="store-btn store-btn--ghost"
+                            onClick={() => {
+                              setContactSellerId(null);
+                              setContactBody('');
+                              setContactNotice(null);
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        className="store-btn"
+                        onClick={() => {
+                          setContactSellerId(seller.id);
+                          setContactNotice(null);
+                        }}
+                      >
+                        Message {seller.username || 'the seller'}
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           <p className="store-order__hint">
             Need help with this order? <Link to="/contact">Contact support</Link>.

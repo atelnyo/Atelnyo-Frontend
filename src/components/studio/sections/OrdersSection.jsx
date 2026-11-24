@@ -44,6 +44,12 @@ export default function OrdersSection({ lang, t }) {
   // Submission id currently being replayed (Printify rejection recovery).
   const [retryingSubmission, setRetryingSubmission] = useState(null);
   const [trackingNotice, setTrackingNotice] = useState(null);
+  // Order-scoped thread with the buyer (the other direction of the same
+  // conversation the buyer's order page opens).
+  const [buyerMessageOpen, setBuyerMessageOpen] = useState(null);
+  const [buyerMessage, setBuyerMessage] = useState('');
+  const [buyerMessageBusy, setBuyerMessageBusy] = useState(false);
+  const [buyerMessageNotice, setBuyerMessageNotice] = useState(null);
   const { data: orders, loading, updateLocal } = useFetch(
     () => api.get('marketplace/orders/sales/', { params: { limit: 50 } }),
     {
@@ -56,6 +62,9 @@ export default function OrdersSection({ lang, t }) {
     const next = expanded === order.id ? null : order.id;
     setExpanded(next);
     setTrackingNotice(null);
+    setBuyerMessageOpen(null);
+    setBuyerMessage('');
+    setBuyerMessageNotice(null);
     const tracking = order.tracking || {};
     setTrackingForm({
       carrier: tracking.carrier || '',
@@ -99,6 +108,35 @@ export default function OrdersSection({ lang, t }) {
       });
     } finally {
       setRetryingSubmission(null);
+    }
+  };
+
+  // A blocked Printify submission often needs an answer only the buyer has
+  // (missing phone, wrong address). The buyer can already message the seller;
+  // this is the other direction of the same order-scoped thread.
+  const sendBuyerMessage = async (order) => {
+    const body = buyerMessage.trim();
+    if (!body) return;
+    setBuyerMessageBusy(true);
+    setBuyerMessageNotice(null);
+    try {
+      await api.post(`marketplace/orders/${order.id}/contact-buyer/`, { body });
+      setBuyerMessage('');
+      setBuyerMessageOpen(null);
+      setBuyerMessageNotice({
+        orderId: order.id,
+        kind: 'ok',
+        text: isHt ? 'Mesaj voye — repons lan ap parèt nan Mesaj.' : inlineText(lang, 'Message sent — the reply lands in Messages.'),
+      });
+    } catch (err) {
+      const detail = err?.response?.data?.detail || err?.response?.data?.body;
+      setBuyerMessageNotice({
+        orderId: order.id,
+        kind: 'error',
+        text: String(detail || (isHt ? 'Pa t ka voye mesaj la.' : inlineText(lang, 'Could not send the message.'))),
+      });
+    } finally {
+      setBuyerMessageBusy(false);
     }
   };
 
@@ -244,6 +282,63 @@ export default function OrdersSection({ lang, t }) {
                                   <>
                                     <span className={styles.orderDetailLabel}>{isHt ? 'Nòt achtè' : inlineText(lang, 'Buyer note')}</span>
                                     <p className={styles.orderDetailAddr}>{o.buyer_note}</p>
+                                  </>
+                                )}
+                                {o.buyer && (
+                                  <>
+                                    <span className={styles.orderDetailLabel}>
+                                      {isHt ? 'Mesaj bay achtè a' : inlineText(lang, 'Message the buyer')}
+                                    </span>
+                                    {buyerMessageOpen === o.id ? (
+                                      <>
+                                        <textarea
+                                          className={styles.formInput}
+                                          rows={3}
+                                          maxLength={4000}
+                                          value={buyerMessage}
+                                          onChange={(e) => setBuyerMessage(e.target.value)}
+                                          placeholder={isHt ? 'Ekri achtè a sou kòmand sa a…' : inlineText(lang, 'Ask the buyer about this order…')}
+                                          aria-label={isHt ? 'Mesaj pou achtè a' : inlineText(lang, 'Message to the buyer')}
+                                        />
+                                        <div className={styles.printifyRow}>
+                                          <button
+                                            type="button"
+                                            className={styles.secondaryBtn}
+                                            onClick={() => sendBuyerMessage(o)}
+                                            disabled={buyerMessageBusy || !buyerMessage.trim()}
+                                          >
+                                            {buyerMessageBusy ? '…' : (isHt ? 'Voye mesaj' : inlineText(lang, 'Send message'))}
+                                          </button>
+                                          <button
+                                            type="button"
+                                            className={styles.secondaryBtn}
+                                            onClick={() => {
+                                              setBuyerMessageOpen(null);
+                                              setBuyerMessage('');
+                                              setBuyerMessageNotice(null);
+                                            }}
+                                          >
+                                            {isHt ? 'Anile' : inlineText(lang, 'Cancel')}
+                                          </button>
+                                        </div>
+                                      </>
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        className={styles.secondaryBtn}
+                                        onClick={() => setBuyerMessageOpen(o.id)}
+                                      >
+                                        {isHt ? 'Kontakte achtè a' : inlineText(lang, 'Message the buyer')}
+                                      </button>
+                                    )}
+                                    {buyerMessageNotice?.orderId === o.id && (
+                                      <p
+                                        className={buyerMessageNotice.kind === 'error' ? styles.printifyError : styles.printifyText}
+                                        role={buyerMessageNotice.kind === 'error' ? 'alert' : 'status'}
+                                      >
+                                        {buyerMessageNotice.text}
+                                      </p>
+                                    )}
                                   </>
                                 )}
                                 {Array.isArray(o.printify_fulfillment) && o.printify_fulfillment.length > 0 && (

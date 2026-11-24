@@ -70,9 +70,10 @@ export const storeService = {
   // Buyer-scoped detail: strangers get a 404, guests must claim first.
   getOrder: (orderId) => api.get(`marketplace/orders/${encodeURIComponent(orderId)}/`),
   // Opens (or reuses) the buyer↔seller message thread for this order.
-  contactSeller: (orderId, body) => api.post(
+  // sellerId disambiguates a cart that holds items from several shops.
+  contactSeller: (orderId, body, sellerId) => api.post(
     `marketplace/orders/${encodeURIComponent(orderId)}/contact-seller/`,
-    { body },
+    sellerId != null ? { body, seller_id: sellerId } : { body },
   ),
 };
 
