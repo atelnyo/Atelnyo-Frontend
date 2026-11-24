@@ -64,6 +64,17 @@ import {
 } from '../modules/explore/hooks/useExploreCache';
 import { inlineText } from '../utils/inlineI18n';
 
+// ─── Catalog visibility guard ──────────────────────────────────────────
+// A course belongs in Explore only while its lifecycle status is
+// 'published'; a product only while it is ACTIVE (is_active=True). The
+// catalog endpoint also returns the viewer's OWN drafts (Studio editing)
+// and every status for staff, and the localStorage snapshot can predate
+// an unpublish — so every Explore surface (cache restore, API response,
+// render, cache write) re-checks publication instead of trusting a row.
+import {
+  isPublicCourse, isPublicProduct, applyPublicVisibility,
+} from '../modules/explore/utils/publicVisibility';
+
 // ─── Filter chips ───────────────────────────────────────────────────────────
 const CHIPS = [
   { id: 'all',      icon: 'fa-globe',        ht: 'Tout',     en: 'All',         fr: 'Tout',     es: 'Todo' },
@@ -961,12 +972,22 @@ export function Explore({
   // cached snapshot.
   const cacheFreshAtMountRef = useRef(false);
   const mountUserIdRef = useRef(user?.id || null);
+  // True while the UI is painting a snapshot read from localStorage.
+  // The cache-write effect must NOT persist that snapshot back: re-writing
+  // it would give stale prices / unpublished rows a brand-new 30-min TTL.
+  // Only a completed network cycle may overwrite the snapshot (the
+  // catalog fetch effect clears this flag).
+  const restoredSnapshotRef = useRef(false);
 
   useEffect(() => {
     if (cacheRestoredRef.current) return;
-    const { data: cached, isFresh } = readExploreCache(user?.id);
-    cacheFreshAtMountRef.current = isFresh && Boolean(cached && cached._courses);
+    const { data: rawCached, isFresh } = readExploreCache(user?.id);
+    // Strip rows that are no longer public (an unpublished product keeps
+    // is_active=False in the snapshot until a fresh cycle overwrites it).
+    const cached = applyPublicVisibility(rawCached);
+    cacheFreshAtMountRef.current = isFresh && Boolean(rawCached && rawCached._courses);
     if (cached && cached._courses) {
+      restoredSnapshotRef.current = true;
       // One-shot restore of the localStorage snapshot for instant
       // paint (runs once via cacheRestoredRef). Synchronous setState
       // here is the whole point — hydrate state from the cache before
@@ -1014,8 +1035,24 @@ export function Explore({
 
   useEffect(() => {
     const allDone = Object.values(loadingSections).every((v) => !v);
-    if (allDone && !wroteCacheRef.current) {
-      writeExploreCache({
+    // Never persist the mount-time snapshot: it may predate a price edit
+    // or an unpublish, and writing it back would refresh its TTL so the
+    // stale card outlives the intended window. The catalog fetch effect
+    // clears this flag, so the next completed network cycle writes the
+    // fresh rows below.
+    if (restoredSnapshotRef.current || !allDone) {
+      return;
+    }
+    // Debounce: the catalog requests land a few hundred ms apart. Waiting
+    // for a short quiet window persists the COMPLETE fresh cycle, never a
+    // mix of fresh rows and cached ones — the old one-shot write fired on
+    // the first response and then never updated the snapshot again, which
+    // is why an edited price (or a newly unpublished row) kept reappearing
+    // from localStorage.
+    const timer = setTimeout(() => {
+      // Same guard as the restore pass — a row that became non-public is
+      // never persisted back into a fresh snapshot.
+      writeExploreCache(applyPublicVisibility({
         _courses: courses,
         _music: apiMusic,
         _talents: apiTalents,
@@ -1035,9 +1072,10 @@ export function Explore({
         _recommendedProducts: recommendedProducts,
         _saveCounts: saveCounts,
         _catOptions: catOptions,
-      }, user?.id);
+      }), user?.id);
       wroteCacheRef.current = true;
-    }
+    }, 250);
+    return () => clearTimeout(timer);
   }, [loadingSections, user?.id, courses, apiMusic, apiTalents, apiCommunities, apiJobs,
       apiPortfolio, apiMarketplace, apiEvents, apiSpotlight,
       recommendedMusic, recommendedTalents, recommendedCourses,
@@ -1121,6 +1159,9 @@ export function Explore({
 
   useEffect(() => {
     const mySeq = ++seqRef.current;
+    // The UI is no longer serving the localStorage snapshot: a fetch
+    // cycle is about to run, so allow its result to replace the cache.
+    restoredSnapshotRef.current = false;
 
     // ─── Faz 1 (unified search routing) ───────────────────────────
     // When the user types a real query (2+ chars — the backend enforces
@@ -1337,7 +1378,8 @@ export function Explore({
     marketplaceService.list({ ...(q ? { q } : {}), ...(market ? { market } : {}) }).then((r) => {
         if (seqRef.current !== mySeq) return;
         const items = Array.isArray(r?.data) ? r.data : Array.isArray(r?.data?.results) ? r.data.results : [];
-        setApiMarketplace(items);
+        // Public rail: unpublished products belong to the Studio only.
+        setApiMarketplace(items.filter(isPublicProduct));
         setLoadErrors((p) => ({ ...p, marketplace: null }));
     }).catch((err) => {
         if (seqRef.current === mySeq) {
@@ -1498,7 +1540,7 @@ export function Explore({
   const q = search.trim().toLowerCase();
 
   const filteredCourses = useMemo(() => {
-    let list = courses;
+    let list = courses.filter(isPublicCourse);
     if (q) {
       list = list.filter((c) =>
         (c.title || '').toLowerCase().includes(q) ||
@@ -1612,7 +1654,7 @@ export function Explore({
   }, [q, apiPortfolio, catId]);
 
   const filteredMarketplace = useMemo(() => {
-    let list = apiMarketplace || [];
+    let list = (apiMarketplace || []).filter(isPublicProduct);
     if (q) {
       list = list.filter((p) =>
         (p.title || '').toLowerCase().includes(q) ||
@@ -1907,25 +1949,36 @@ export function Explore({
   }
 
   // ─── Phase 22 scoped Recommended rail ───────────────────────────────
+  // The rail is a public discovery surface too: a draft returned for
+  // staff (or restored from an old snapshot) must never render as a
+  // live card.
+  const publicRecommendedCourses = useMemo(
+    () => recommendedCourses.filter(isPublicCourse),
+    [recommendedCourses],
+  );
+  const publicRecommendedProducts = useMemo(
+    () => recommendedProducts.filter(isPublicProduct),
+    [recommendedProducts],
+  );
   const recTypes = RECOMMENDED_SCOPE[filter];
   const hasAnyRecommended =
-    recommendedCourses.length > 0 ||
+    publicRecommendedCourses.length > 0 ||
     recommendedMusic.length > 0 ||
     recommendedTalents.length > 0 ||
     recommendedEvents.length > 0 ||
     recommendedCommunities.length > 0 ||
     recommendedJobs.length > 0 ||
-    recommendedProducts.length > 0;
+    publicRecommendedProducts.length > 0;
   const showRecommendedRail = recTypes
     ? recTypes.some((type) => {
         switch (type) {
-          case 'courses': return recommendedCourses.length > 0;
+          case 'courses': return publicRecommendedCourses.length > 0;
           case 'music': return recommendedMusic.length > 0;
           case 'talents': return recommendedTalents.length > 0;
           case 'events': return recommendedEvents.length > 0;
           case 'communities': return recommendedCommunities.length > 0;
           case 'jobs': return recommendedJobs.length > 0;
-          case 'products': return recommendedProducts.length > 0;
+          case 'products': return publicRecommendedProducts.length > 0;
           default: return false;
         }
       })
@@ -2220,9 +2273,9 @@ export function Explore({
                 <SectionLabel icon="fa-magic" accent="recommended">
                   {t.explore_recommended || 'Rekòmande pou ou'}
                 </SectionLabel>
-                {(!recTypes || recTypes.includes('courses')) && recommendedCourses.length > 0 && (
+                {(!recTypes || recTypes.includes('courses')) && publicRecommendedCourses.length > 0 && (
                   <div className="explore-hscroll">
-                    {recommendedCourses.map((c) => (
+                    {publicRecommendedCourses.map((c) => (
                       <RecommendedRailCard key={`rc-${c.id}`} itemType="course" itemId={c.id} onDismiss={dismissRecommended} t={t}>
                         <CourseCard course={c} onOpen={handleLogAndOpenCourse} lang={lang} t={t} saveCount={saveCounts.course?.[c.id]} user={user} />
                       </RecommendedRailCard>
@@ -2298,9 +2351,9 @@ export function Explore({
                     ))}
                   </div>
                 )}
-                {(!recTypes || recTypes.includes('products')) && recommendedProducts.length > 0 && (
+                {(!recTypes || recTypes.includes('products')) && publicRecommendedProducts.length > 0 && (
                   <div className="explore-hscroll">
-                    {recommendedProducts.map((p) => (
+                    {publicRecommendedProducts.map((p) => (
                       <RecommendedRailCard key={`rp-${p.id}`} itemType="product" itemId={p.id} onDismiss={dismissRecommended} t={t}>
                         <ProductCard product={p} t={t} onOpen={handleLogAndOpenProduct} showToast={showToast} onOpenCheckout={onOpenCheckout} saveCount={saveCounts.product?.[p.id]} />
                       </RecommendedRailCard>
