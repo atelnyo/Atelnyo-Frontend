@@ -16,6 +16,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 
 const getProduct = vi.fn();
+const getOrder = vi.fn();
 const createOrder = vi.fn();
 const capturePaypal = vi.fn();
 const checkoutOrder = vi.fn();
@@ -28,6 +29,7 @@ let renderButtons; // what paypal.Buttons().render() returns for this test
 vi.mock('./storeService', () => ({
   storeService: {
     getProduct: (...args) => getProduct(...args),
+    getOrder: (...args) => getOrder(...args),
     createOrder: (...args) => createOrder(...args),
     quoteShipping: (...args) => quoteShipping(...args),
     checkoutOrder: (...args) => checkoutOrder(...args),
@@ -35,8 +37,10 @@ vi.mock('./storeService', () => ({
   },
 }));
 
+// Mutable so a single test can act as a signed-out guest.
+const authState = vi.hoisted(() => ({ user: { id: 1, username: 'buyer' } }));
 vi.mock('./useAuthStore', () => ({
-  useAuthStore: (selector) => selector({ user: { id: 1, username: 'buyer' } }),
+  useAuthStore: (selector) => selector({ user: authState.user }),
 }));
 
 vi.mock('../services/api', () => ({
@@ -59,14 +63,16 @@ const deferred = () => {
   return { promise, resolve };
 };
 
-const renderCart = () =>
+const renderCartAt = (path = '/store/cart') =>
   render(
     <HelmetProvider>
-      <MemoryRouter initialEntries={['/store/cart']}>
+      <MemoryRouter initialEntries={[path]}>
         <StoreCartPage />
       </MemoryRouter>
     </HelmetProvider>,
   );
+
+const renderCart = () => renderCartAt();
 
 // The cart's primary CTA is "Proceed to Payment" (the Checkout label was
 // retired when the shipping-first flow landed).
@@ -80,6 +86,7 @@ const startCheckout = async () => {
 describe('StoreCartPage checkout preparation', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    authState.user = { id: 1, username: 'buyer' };
     localStorage.clear();
     saveCart([{ productId: 5, variantId: null, quantity: 1 }]);
     createOrder.mockResolvedValue({ data: { id: 15, total: '25.00', guest_token: 'guest-token' } });
@@ -238,6 +245,31 @@ describe('StoreCartPage checkout preparation', () => {
     expect(checkoutOrder).toHaveBeenCalledTimes(1);
     expect(createOrder).toHaveBeenCalledTimes(1);
     await waitFor(() => expect(screen.getByText('Your cart is empty')).toBeTruthy());
+  });
+
+  it('lets a guest pay an unpaid order from the link in their email', async () => {
+    authState.user = null;
+    renderButtons = () => Promise.resolve();
+    loadPayPalScript.mockResolvedValue({
+      Buttons: (callbacks) => { paypalCallbacks = callbacks; return { render: renderButtons }; },
+    });
+    getOrder.mockResolvedValue({ data: {
+      id: 15,
+      status: 'pending',
+      total: '20.00',
+      items: [{ product: 5, variant: null, quantity: 1 }],
+    } });
+
+    renderCartAt('/store/cart?resume_order=15&token=signed-tok');
+
+    // The order read and the payment both carry the guest's signed token.
+    await waitFor(() => expect(getOrder).toHaveBeenCalledWith('15', 'signed-tok'));
+    await waitFor(() => expect(screen.getByText('Resume payment · Order #15')).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: 'Resume payment' }));
+
+    await waitFor(() => expect(checkoutOrder).toHaveBeenCalledWith(
+      15, 'paypal', 'signed-tok', false,
+    ));
   });
 
   it('names a timed-out SDK load and lets the shopper try again', async () => {

@@ -6,6 +6,67 @@ import { useAuthStore } from './useAuthStore';
 
 const MY_ORDERS = '/business/orders/mine';
 
+/**
+ * A guest who lost the claim link (closed the email, cleared the browser,
+ * opened it on another phone) can have it re-sent. The backend answers the
+ * same way whether or not the pair matches, so this form never reveals
+ * whether an order or an address exists.
+ */
+function RequestLinkForm({ defaultOrderId = '' }) {
+  const [orderId, setOrderId] = useState(defaultOrderId || '');
+  const [email, setEmail] = useState('');
+  const [state, setState] = useState('idle');
+  const [notice, setNotice] = useState('');
+
+  const onSubmit = async (event) => {
+    event.preventDefault();
+    setState('sending');
+    setNotice('');
+    try {
+      const res = await storeService.requestClaimLink(orderId, email);
+      setNotice(
+        res?.data?.detail
+          || 'If those details match an unclaimed order, we emailed the link.',
+      );
+      setState('done');
+    } catch {
+      setNotice('Could not send the link. Try again in a moment.');
+      setState('error');
+    }
+  };
+
+  return (
+    <form onSubmit={onSubmit} style={{ marginTop: 20 }}>
+      <p>Lost the link? Enter the order number and the email you used at checkout.</p>
+      <label style={{ display: 'block', marginBottom: 8 }}>
+        Order number
+        <input
+          required
+          inputMode="numeric"
+          value={orderId}
+          onChange={(e) => setOrderId(e.target.value)}
+        />
+      </label>
+      <label style={{ display: 'block', marginBottom: 8 }}>
+        Email
+        <input
+          type="email"
+          required
+          autoComplete="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+      </label>
+      <button type="submit" className="store-btn" disabled={state === 'sending'}>
+        {state === 'sending' ? 'Sending…' : 'Email me the link'}
+      </button>
+      {notice && (
+        <p role={state === 'error' ? 'alert' : 'status'}>{notice}</p>
+      )}
+    </form>
+  );
+}
+
 export default function StoreClaimPage() {
   const [params] = useSearchParams();
   const location = useLocation();
@@ -24,7 +85,11 @@ export default function StoreClaimPage() {
     return (
       <section className="store-state">
         <h1 className="store-title">Link not valid</h1>
-        <p>This account link is incomplete. Check the link in your email.</p>
+        <p>
+          This account link is incomplete. Check the link in your email — or
+          have a new one sent.
+        </p>
+        <RequestLinkForm defaultOrderId={orderId} />
       </section>
     );
   }
@@ -145,6 +210,7 @@ export default function StoreClaimPage() {
       </form>
       {message && <p role="alert" className="store-state store-state--error">{message}</p>}
       {signInActions}
+      {status === 'error' && <RequestLinkForm defaultOrderId={orderId} />}
     </section>
   );
 }

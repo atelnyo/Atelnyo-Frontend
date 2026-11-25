@@ -8,11 +8,13 @@ import StoreClaimPage from './StoreClaimPage';
 import { useAuthStore } from './useAuthStore';
 
 const claimOrder = vi.fn();
+const requestClaimLink = vi.fn();
 const login = vi.fn();
 
 vi.mock('./storeService', () => ({
   storeService: {
     claimOrder: (...args) => claimOrder(...args),
+    requestClaimLink: (...args) => requestClaimLink(...args),
   },
 }));
 
@@ -32,6 +34,8 @@ const renderAt = (path = '/store/claim?order=7&token=abc') =>
 describe('StoreClaimPage', () => {
   beforeEach(() => {
     claimOrder.mockReset();
+    requestClaimLink.mockReset();
+    requestClaimLink.mockResolvedValue({ data: { detail: 'If those details match an unclaimed order, we emailed the link.' } });
     login.mockReset();
     login.mockResolvedValue({ id: 1, email: 'guest@test.local' });
     useAuthStore.setState({ user: null, loading: false, login });
@@ -88,5 +92,20 @@ describe('StoreClaimPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
 
     expect(await screen.findByRole('link', { name: 'Sign in to claim this order' })).toBeTruthy();
+  });
+
+  it('lets a guest request a new link when the old one is missing', async () => {
+    renderAt('/store/claim?order=7');
+
+    expect(screen.getByText(/Lost the link/)).toBeTruthy();
+    fireEvent.change(screen.getByLabelText('Email'), {
+      target: { value: 'guest@test.local' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Email me the link' }));
+
+    await waitFor(() =>
+      expect(requestClaimLink).toHaveBeenCalledWith('7', 'guest@test.local'),
+    );
+    expect(await screen.findByText(/we emailed the link/)).toBeTruthy();
   });
 });

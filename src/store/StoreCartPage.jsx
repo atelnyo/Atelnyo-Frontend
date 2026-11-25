@@ -41,6 +41,10 @@ function checkoutErrorMessage(err) {
 export default function StoreCartPage() {
   const [searchParams] = useSearchParams();
   const resumeOrderId = searchParams.get('resume_order');
+  // A guest resumes payment from the link in their own email. The signed
+  // token travels in the URL (same proof the order page uses) and is handed
+  // to both the order read and the payment call.
+  const resumeToken = searchParams.get('token') || '';
   const [items, setItems] = useState(() => loadCart());
   // Resuming an existing unpaid order: the items, totals and stock were
   // already reserved at checkout, so the page pays THAT order instead of
@@ -62,7 +66,7 @@ export default function StoreCartPage() {
     let cancelled = false;
     setResumeLoading(true);
     setResumeError('');
-    storeService.getOrder(resumeOrderId)
+    storeService.getOrder(resumeOrderId, resumeToken)
       .then(({ data }) => {
         if (cancelled) return;
         if (data?.status !== 'pending') {
@@ -86,6 +90,8 @@ export default function StoreCartPage() {
         setOrderId(Number(data.id));
         setOrderTotal(data.total);
         setResumeOrder(data);
+        // Carry the guest proof into checkout + capture below.
+        if (resumeToken) setGuestToken(resumeToken);
         setResumeLoading(false);
       })
       .catch((err) => {
@@ -93,12 +99,14 @@ export default function StoreCartPage() {
         setResumeError(
           err?.response?.status === 404
             ? 'This order was not found on your account.'
-            : 'We could not load this order. Try again from My orders.',
+            : resumeToken
+              ? 'This order link is no longer valid. Open the link in your email again.'
+              : 'We could not load this order. Try again from My orders.',
         );
         setResumeLoading(false);
       });
     return () => { cancelled = true; };
-  }, [resumeOrderId]);
+  }, [resumeOrderId, resumeToken]);
 
   useEffect(() => {
     let cancelled = false;

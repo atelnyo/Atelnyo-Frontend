@@ -67,8 +67,25 @@ export const storeService = {
   removeFavorite: (favoriteId) => api.delete(`marketplace/favorites/${favoriteId}/`),
   createReview: (payload) => api.post('marketplace/reviews/', payload),
   listOrders: () => api.get('marketplace/orders/'),
-  // Buyer-scoped detail: strangers get a 404, guests must claim first.
-  getOrder: (orderId) => api.get(`marketplace/orders/${encodeURIComponent(orderId)}/`),
+  // Buyer-scoped detail: strangers get a 404. A guest passes the checkout
+  // token, so the page works before an account exists.
+  getOrder: (orderId, guestToken) => api.get(
+    `marketplace/orders/${encodeURIComponent(orderId)}/`,
+    guestHeaders(guestToken),
+  ),
+  // Guest orders placed with the signed-in account's email but never linked.
+  listUnclaimedOrders: () => api.get('marketplace/orders/unclaimed/'),
+  // Public recovery for a guest who lost the link: order id + the email
+  // used at checkout. The answer never reveals whether the pair matched.
+  requestClaimLink: (orderId, email) => api.post(
+    'marketplace/orders/request-claim-link/',
+    { order_id: orderId, email },
+  ),
+  // Emails a fresh signed claim link to the account's own address only.
+  sendClaimLink: (orderId) => api.post(
+    'marketplace/orders/send-claim-link/',
+    orderId != null ? { order_id: orderId } : {},
+  ),
   // Opens (or reuses) the buyer↔seller message thread for this order.
   // sellerId disambiguates a cart that holds items from several shops.
   contactSeller: (orderId, body, sellerId) => api.post(
@@ -81,9 +98,12 @@ export const storeService = {
     { shipping_address: shippingAddress },
   ),
   // Release an unpaid order: the units reserved at checkout return to stock
-  // immediately instead of waiting for the 24h abandoned-order sweep.
-  cancelOrder: (orderId) => api.post(
+  // immediately instead of waiting for the 24h abandoned-order sweep. A guest
+  // passes their token, so cancelling never requires creating an account.
+  cancelOrder: (orderId, guestToken) => api.post(
     `marketplace/orders/${encodeURIComponent(orderId)}/cancel/`,
+    {},
+    guestHeaders(guestToken),
   ),
 };
 

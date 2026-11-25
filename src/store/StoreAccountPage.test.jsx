@@ -1,17 +1,21 @@
 // @vitest-environment jsdom
 import React from 'react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import StoreAccountPage from './StoreAccountPage';
 import { useAuthStore } from './useAuthStore';
 
 const listOrders = vi.fn();
+const listUnclaimedOrders = vi.fn();
+const sendClaimLink = vi.fn();
 
 vi.mock('./storeService', () => ({
   storeService: {
     listOrders: (...args) => listOrders(...args),
+    listUnclaimedOrders: (...args) => listUnclaimedOrders(...args),
+    sendClaimLink: (...args) => sendClaimLink(...args),
   },
 }));
 
@@ -33,6 +37,9 @@ describe('StoreAccountPage', () => {
   beforeEach(() => {
     listOrders.mockReset();
     listOrders.mockResolvedValue({ data: { results: [] } });
+    listUnclaimedOrders.mockReset();
+    listUnclaimedOrders.mockResolvedValue({ data: { count: 0, orders: [] } });
+    sendClaimLink.mockReset();
     useAuthStore.setState({ user: null, loading: false });
   });
 
@@ -74,5 +81,27 @@ describe('StoreAccountPage', () => {
     expect(screen.getByText('Paid')).toBeTruthy();
     expect(screen.getByText(/Book ×2/)).toBeTruthy();
     expect(screen.getByText(/\$25\.00/)).toBeTruthy();
+  });
+
+  it('offers to email a claim link for guest orders on the same email', async () => {
+    listUnclaimedOrders.mockResolvedValue({ data: { count: 1, orders: [{ id: 9 }] } });
+    sendClaimLink.mockResolvedValue({ data: { sent: 1 } });
+    useAuthStore.setState({ user: { id: 1, username: 'amy', email: 'amy@example.com' } });
+
+    renderAt();
+
+    expect(await screen.findByText(/guest order/)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Email me the link' }));
+    await waitFor(() => expect(sendClaimLink).toHaveBeenCalled());
+    expect(await screen.findByText(/Link sent/)).toBeTruthy();
+  });
+
+  it('stays quiet when there is no guest order to recover', async () => {
+    useAuthStore.setState({ user: { id: 1, username: 'amy', email: 'amy@example.com' } });
+
+    renderAt();
+
+    await screen.findByText(/No orders yet/);
+    expect(screen.queryByText(/guest order/)).toBeNull();
   });
 });

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { storeService } from './storeService';
 import { useAuthStore } from './useAuthStore';
 import { fulfillmentLabel, storeOrderStatus } from '../components/business/storeOrderStatus';
@@ -89,7 +89,30 @@ const stepIndex = (order, shipments) => {
 
 export default function StoreOrderDetailPage() {
   const { orderId } = useParams();
+  const [params] = useSearchParams();
   const user = useAuthStore((s) => s.user);
+  // Guest access: the token from checkout (query string, then this tab's
+  // session) is the only proof a guest can present. Keeping it means the
+  // order page survives a reload — and lets the receipt link straight here.
+  const tokenParam = params.get('token') || '';
+  const [guestToken, setGuestToken] = useState(() => {
+    if (tokenParam) return tokenParam;
+    try {
+      return sessionStorage.getItem(`atelnyo_guest_order_${orderId}`) || '';
+    } catch {
+      return '';
+    }
+  });
+  useEffect(() => {
+    if (!tokenParam) return;
+    try {
+      sessionStorage.setItem(`atelnyo_guest_order_${orderId}`, tokenParam);
+    } catch {
+      // Storage may be unavailable (private mode); the URL still carries it.
+    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setGuestToken(tokenParam);
+  }, [tokenParam, orderId]);
   const [order, setOrder] = useState(null);
   // 'not_found' | 'failed' — null while loading and after a successful load.
   const [error, setError] = useState(null);
@@ -114,14 +137,14 @@ export default function StoreOrderDetailPage() {
   const [cancelNotice, setCancelNotice] = useState(null);
 
   useEffect(() => {
-    if (!user) {
+    if (!user && !guestToken) {
       return undefined;
     }
     let cancelled = false;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setOrder(null);
     setError(null);
-    storeService.getOrder(orderId)
+    storeService.getOrder(orderId, guestToken)
       .then((res) => {
         if (cancelled) {
           return;
@@ -137,9 +160,11 @@ export default function StoreOrderDetailPage() {
     return () => {
       cancelled = true;
     };
-  }, [orderId, user, reloadTick]);
+  }, [orderId, user, guestToken, reloadTick]);
 
-  if (!user) {
+  const isGuest = !user && Boolean(guestToken);
+
+  if (!user && !guestToken) {
     return (
       <Navigate
         to={`/store/login?next=${encodeURIComponent(`/account/orders/${orderId}`)}`}
@@ -208,7 +233,7 @@ export default function StoreOrderDetailPage() {
     setCancelBusy(true);
     setCancelNotice(null);
     try {
-      const { data } = await storeService.cancelOrder(orderId);
+      const { data } = await storeService.cancelOrder(orderId, guestToken);
       setOrder(data);
       setCancelConfirm(false);
       setCancelNotice({
@@ -308,6 +333,22 @@ export default function StoreOrderDetailPage() {
 
       {order && (
         <>
+          {isGuest && (
+            <section className="store-order__card">
+              <h2>Keep following this order</h2>
+              <p className="store-order__hint">
+                You checked out as a guest. Create an account with the email you
+                used to keep the tracking, downloads and seller messages in one
+                place.
+              </p>
+              <Link
+                className="store-btn"
+                to={`/store/claim?order=${order.id}&token=${encodeURIComponent(guestToken)}`}
+              >
+                Create my account
+              </Link>
+            </section>
+          )}
           {currentStep === -1 ? (
             <p className="store-order__cancelled" role="status">
               This order is {status.label.toLowerCase()}. Contact support if you need help with it.
@@ -342,7 +383,7 @@ export default function StoreOrderDetailPage() {
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
                 <Link
                   className="store-btn"
-                  to={`/store/cart?resume_order=${order.id}`}
+                  to={`/store/cart?resume_order=${order.id}${isGuest ? `&token=${encodeURIComponent(guestToken)}` : ''}`}
                 >
                   Resume payment
                 </Link>
@@ -492,7 +533,7 @@ export default function StoreOrderDetailPage() {
                       <span key={`${index}-${line}`}>{line}<br /></span>
                     ))}
                   </address>
-                  {order.can_edit_shipping ? (
+                  {order.can_edit_shipping && !isGuest ? (
                     <button
                       type="button"
                       className="store-btn store-btn--ghost"
@@ -557,7 +598,7 @@ export default function StoreOrderDetailPage() {
             </section>
           )}
 
-          {sellers.length > 0 && (
+          {sellers.length > 0 && !isGuest && (
             <section className="store-order__card">
               <h2>{sellers.length > 1 ? 'Your sellers' : 'Your seller'}</h2>
               <p className="store-order__hint">

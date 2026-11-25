@@ -56,10 +56,10 @@ const order = {
   }],
 };
 
-const renderAt = () =>
+const renderAt = (path = '/account/orders/42') =>
   render(
     <HelmetProvider>
-      <MemoryRouter initialEntries={['/account/orders/42']}>
+      <MemoryRouter initialEntries={[path]}>
         <Routes>
           <Route path="/account/orders/:orderId" element={<StoreOrderDetailPage />} />
           <Route path="/account" element={<p>ACCOUNT PAGE</p>} />
@@ -81,6 +81,7 @@ describe('StoreOrderDetailPage', () => {
     });
     cancelOrder.mockReset();
     useAuthStore.setState({ user: null, loading: false });
+    sessionStorage.clear();
   });
 
   it('sends an anonymous visitor to sign in with a way back', () => {
@@ -103,7 +104,29 @@ describe('StoreOrderDetailPage', () => {
       .toBe('https://cdn.example/signed');
     expect(screen.getByText(/12 Rue Capois/)).toBeTruthy();
     expect(screen.getAllByText('$25.00').length).toBeGreaterThan(0);
-    expect(getOrder).toHaveBeenCalledWith('42');
+    expect(getOrder).toHaveBeenCalledWith('42', '');
+  });
+
+  it('lets a guest follow the order with the checkout token', async () => {
+    renderAt('/account/orders/42?token=guest-tok');
+
+    expect(await screen.findByText('Order #42')).toBeTruthy();
+    expect(screen.queryByText('LOGIN PAGE')).toBeNull();
+    expect(getOrder).toHaveBeenCalledWith('42', 'guest-tok');
+    expect(screen.getByText('DHL')).toBeTruthy();
+    expect(
+      screen.getByRole('link', { name: 'Create my account' }).getAttribute('href'),
+    ).toBe('/store/claim?order=42&token=guest-tok');
+    // Seller tools belong to an account: a guest never sees the composer.
+    expect(screen.queryByText(/Message\$/)).toBeNull();
+  });
+
+  it('keeps the guest token for a reload of the same tab', async () => {
+    sessionStorage.setItem('atelnyo_guest_order_42', 'kept-token');
+    renderAt();
+
+    expect(await screen.findByText('Order #42')).toBeTruthy();
+    expect(getOrder).toHaveBeenCalledWith('42', 'kept-token');
   });
 
   it('shows a closure notice instead of progress steps for a cancelled order', async () => {
@@ -159,8 +182,28 @@ describe('StoreOrderDetailPage', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Cancel order' }));
     fireEvent.click(screen.getByRole('button', { name: 'Yes, cancel it' }));
 
-    await waitFor(() => expect(cancelOrder).toHaveBeenCalledWith('42'));
+    await waitFor(() => expect(cancelOrder).toHaveBeenCalledWith('42', ''));
     expect(await screen.findByText(/reserved items are back in stock/)).toBeTruthy();
+  });
+
+  it('lets a guest cancel an unpaid order without creating an account', async () => {
+    getOrder.mockResolvedValue({ data: { ...order, status: 'pending', tracking: null } });
+    cancelOrder.mockResolvedValue({
+      data: { ...order, status: 'cancelled', tracking: null, restored_units: 1 },
+    });
+    renderAt('/account/orders/42?token=guest-tok');
+
+    // A guest pays, cancels and tracks from the same link — no account needed.
+    await screen.findByRole('button', { name: 'Cancel order' });
+    expect(screen.getByRole('link', { name: 'Resume payment' }).getAttribute('href'))
+      .toBe('/store/cart?resume_order=42&token=guest-tok');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel order' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Yes, cancel it' }));
+
+    await waitFor(() => expect(cancelOrder).toHaveBeenCalledWith('42', 'guest-tok'));
+    expect(await screen.findByText(/reserved items are back in stock/)).toBeTruthy();
+    expect(screen.queryByText(/Create an account above to pay or cancel/)).toBeNull();
   });
 
   it('keeps the buyer in touch with the seller who is preparing the order', async () => {
