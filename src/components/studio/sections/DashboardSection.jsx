@@ -21,6 +21,7 @@ import DailyCreatorCenter from '../DailyCreatorCenter';
 import CreatorProgression from '../CreatorProgression';
 import CreatorGoals from '../CreatorGoals';
 import CourseOverview from './CourseOverview';
+import StudioOverviewCards from './StudioOverviewCards';
 import {
   StatCard,
   StudioSkeleton,
@@ -65,7 +66,7 @@ export default function DashboardSection({
     return () => { cancelled = true; };
   }, []);
 
-  if (loading) return <StudioSkeleton rows={6} />;
+  if (loading) return <StudioSkeleton rows={4} variant="stats" />;
 
   const stats = [
     { key: 'revenue', icon: 'fa-dollar-sign', label: t.studio_revenue || 'Revenue', value: summary?.total_revenue, formatter: fmtCurrency, accent: 'emerald' },
@@ -107,6 +108,9 @@ export default function DashboardSection({
         setShowProjectModal={setShowProjectModal}
         showToast={showToast}
       />
+
+      {/* Workspace at a glance — ONE aggregated /studio/overview/ request */}
+      <StudioOverviewCards lang={lang} t={t} />
 
       {/* Course Overview — course metrics + top performers */}
       <CourseOverview lang={lang} onNavigate={setActiveSection} />

@@ -9,7 +9,7 @@
 import React, { useState } from 'react';
 import useFetch from '../../../hooks/useFetch';
 import { jobService } from '../../../services/api';
-import { StudioSkeleton, EmptyState, SectionHeader } from '../shared';
+import { StudioSkeleton, EmptyState, LoadError, SectionHeader } from '../shared';
 import ConfirmModal from '../../common/ConfirmModal';
 import styles from './sections.module.css';
 import { inlineText } from '../../../utils/inlineI18n';
@@ -34,7 +34,7 @@ const STATUS_LABEL = {
 export default function JobsSection({ lang, t, showToast, setShowJobModal, onEdit }) {
   const [confirm, setConfirm] = useState(null);
   const [confirmBusy, setConfirmBusy] = useState(false);
-  const { data: jobs, loading, refetch, removeLocal } = useFetch(
+  const { data: jobs, loading, error, refetch, removeLocal } = useFetch(
     () => jobService.mine(),
     { defaultValue: [], transform: (d) => {
       if (Array.isArray(d)) return d;
@@ -80,7 +80,18 @@ export default function JobsSection({ lang, t, showToast, setShowJobModal, onEdi
     }
   };
 
-  if (loading && jobs.length === 0) return <StudioSkeleton rows={3} />;
+  if (loading && jobs.length === 0) return <StudioSkeleton rows={3} variant="rows" />;
+
+  if (error && jobs.length === 0) {
+    return (
+      <LoadError
+        lang={lang}
+        title={lang === 'ht' ? 'Pa t kapab chaje travay ou' : 'Could not load your jobs'}
+        error={error}
+        onRetry={refetch}
+      />
+    );
+  }
 
   const isEmpty = jobs.length === 0;
 

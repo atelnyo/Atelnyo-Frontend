@@ -16,7 +16,7 @@
 import React, { useState } from 'react';
 import api from '../../../services/api';
 import useFetch from '../../../hooks/useFetch';
-import { StudioSkeleton, EmptyState, SectionHeader, fmtDate, fmtCurrency } from '../shared';
+import { StudioSkeleton, EmptyState, LoadError, SectionHeader, fmtDate, fmtCurrency } from '../shared';
 import styles from './sections.module.css';
 import { inlineText } from '../../../utils/inlineI18n';
 
@@ -62,7 +62,7 @@ export default function OrdersSection({ lang, t }) {
   const [buyerMessage, setBuyerMessage] = useState('');
   const [buyerMessageBusy, setBuyerMessageBusy] = useState(false);
   const [buyerMessageNotice, setBuyerMessageNotice] = useState(null);
-  const { data: orders, loading, updateLocal } = useFetch(
+  const { data: orders, loading, error, refetch, updateLocal } = useFetch(
     () => api.get('marketplace/orders/sales/', { params: { limit: 50 } }),
     {
       defaultValue: [],
@@ -191,7 +191,18 @@ export default function OrdersSection({ lang, t }) {
     }
   };
 
-  if (loading) return <StudioSkeleton rows={4} />;
+  if (loading) return <StudioSkeleton rows={4} variant="table" columns={5} />;
+
+  if (error && orders.length === 0) {
+    return (
+      <LoadError
+        lang={lang}
+        title={lang === 'ht' ? 'Pa t kapab chaje lòd ou' : 'Could not load your orders'}
+        error={error}
+        onRetry={refetch}
+      />
+    );
+  }
 
   return (
     <div className={styles.section}>

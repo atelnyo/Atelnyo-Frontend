@@ -354,6 +354,25 @@
   white-space: nowrap;
 }
 
+/* Actionable count in the nav (drafts, pending orders). <em>, not <span>,
+   so the label's `.navItem span { flex: 1 }` rule above doesn't stretch it. */
+.navBadge {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 var(--sp-sm);
+  border-radius: 999px;
+  background: var(--color-amber, #f59e0b);
+  color: #1f2937;
+  font-size: 0.68rem;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .navItem i {
   width: 20px;
   text-align: center;

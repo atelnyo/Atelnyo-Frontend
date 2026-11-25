@@ -502,6 +502,9 @@ export const courseService = {
   // GET /api/courses/templates/ — starter syllabi for the Studio course
   // create flow (modules + suggested blocks, never a full course).
   templates: () => api.get('courses/templates/'),
+  // Full outline of ONE template — modules, block mix and time estimate,
+  // shown before the creator applies it.
+  templateDetail: (key) => api.get(`courses/templates/${encodeURIComponent(key)}/`),
   // POST /api/courses/<id>/template/ — fill an empty draft's syllabus
   // from a template. The backend refuses when the course already has
   // content, so this runs once, right after creation.
@@ -2411,6 +2414,23 @@ export const creatorProfileHealthService = {
 };
 
 // ─── Creator Profile (existing) ─────────────────────────────
+// ONE aggregated request for the Creator Studio dashboard: per-type
+// publication counts, the seller order funnel + revenue, wallet snapshot.
+// Replaces the per-type list fan-out that painted the same numbers.
+// Concurrent callers (the Studio shell's sidebar badges and the dashboard
+// KPI strip mount together) share one request. The promise is cleared the
+// moment it settles, so a later mount still refetches real data.
+let overviewInFlight = null;
+export const studioService = {
+  overview: () => {
+    if (!overviewInFlight) {
+      overviewInFlight = api.get('studio/overview/')
+        .finally(() => { overviewInFlight = null; });
+    }
+    return overviewInFlight;
+  },
+};
+
 export const creatorProfileService = {
   // GET /api/creator-profiles/ — list all visible profiles
   list: (params) => api.get('creator-profiles/', { params }),

@@ -12,6 +12,7 @@
  */
 import React, { useMemo, useState } from 'react';
 import { marketplaceService } from '../../../services/api';
+import { notifyStudioChanged } from '../studioEvents';
 import useFetch from '../../../hooks/useFetch';
 import { EmptyState, SectionHeader, fmtCurrency, fmtCount } from '../shared';
 import ConfirmModal from '../../common/ConfirmModal';
@@ -288,6 +289,7 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
           }
 
           const deletedCount = count - failedIds.size;
+          if (deletedCount > 0) { notifyStudioChanged({ section: 'products' }); }
           if (failedIds.size === 0) {
             showToast?.(
               lang === 'ht'
@@ -332,6 +334,7 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
     updateLocal((row) => row.id === product.id, { is_active: nextActive });
     try {
       await marketplaceService.update(product.id, { is_active: nextActive });
+      notifyStudioChanged({ section: 'products' });
       showToast?.(
         nextActive
           ? (lang === 'ht' ? '✅ Pwodwi pibliye!' : inlineText(lang, '✅ Product is now published!'))
@@ -375,6 +378,7 @@ export default function ProductsSection({ lang, t, showToast, setShowProductModa
         (async () => {
           try {
             await marketplaceService.delete(item.id);
+            notifyStudioChanged({ section: 'products' });
             showToast?.(lang === 'ht' ? '✅ Pwodwi efase!' : inlineText(lang, '✅ Product deleted!'), 'check-circle');
           } catch (err) {
             showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase.' : inlineText(lang, 'Could not delete.')), 'circle-exclamation');

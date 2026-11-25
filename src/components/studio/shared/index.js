@@ -11,6 +11,7 @@
 
 export { default as StatCard } from './StatCard';
 export { default as EmptyState } from './EmptyState';
+export { default as LoadError } from './LoadError';
 export { default as StudioSkeleton } from './StudioSkeleton';
 export { default as CourseSectionSkeleton } from './CourseSectionSkeleton';
 export { default as WelcomeHeader } from './WelcomeHeader';

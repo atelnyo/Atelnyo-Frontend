@@ -66,7 +66,7 @@ export default function AnalyticsSection({ lang, t, showToast }) {
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
-  if (loading && !summary) return <StudioSkeleton rows={6} />;
+  if (loading && !summary) return <StudioSkeleton rows={4} variant="stats" />;
 
   const kpis = summary ? [
     { key: 'revenue', icon: 'fa-dollar-sign', label: t.studio_revenue || 'Revenue', value: summary.total_revenue, formatter: fmtCurrency, accent: 'emerald' },

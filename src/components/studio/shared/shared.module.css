@@ -239,6 +239,92 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   LOAD ERROR (LoadError) — a failed fetch must never look like "empty"
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.loadError {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-md);
+  padding: var(--sp-3xl) var(--sp-4xl);
+  text-align: left;
+  background: var(--surface-card);
+  border: var(--border-w-sm) solid color-mix(in srgb, var(--color-error) 35%, var(--border-color));
+  border-radius: var(--radius-2xl);
+}
+
+.loadErrorIcon {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-xl);
+  background: color-mix(in srgb, var(--color-error) 12%, transparent);
+  color: var(--color-error);
+  font-size: var(--text-md);
+}
+
+.loadErrorTitle {
+  margin: 0;
+  font-size: var(--text-normal);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.loadErrorHint {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: var(--line-relaxed);
+}
+
+.loadErrorDetail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-sm);
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  word-break: break-word;
+}
+
+.loadErrorStatus {
+  padding: 2px 8px;
+  border-radius: var(--radius-pill-lg);
+  background: color-mix(in srgb, var(--color-error) 10%, transparent);
+  color: var(--color-error);
+  font-weight: var(--font-weight-semibold);
+}
+
+.loadErrorRetry {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-sm);
+  padding: var(--sp-md) var(--sp-2xl);
+  border-radius: var(--radius-lg);
+  border: var(--border-w-sm) solid var(--border-color);
+  background: var(--surface-card-alt);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.loadErrorRetry:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.loadErrorRetry:active {
+  transform: scale(0.98);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    SKELETON (Loading)
    ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -264,6 +350,196 @@
 @keyframes shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+/* ─── Layout-matched variants (StudioSkeleton) ────────────────────────
+   `.skeletonBlock` is the single shimmer source; each variant only adds
+   the geometry of the real component it stands in for, so swapping the
+   skeleton for data does not reflow the page. */
+
+.skeletonBlock {
+  display: block;
+  border-radius: var(--radius-md);
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-from, #f0f0f0) 25%,
+    var(--skeleton-to, #e0e0e0) 50%,
+    var(--skeleton-from, #f0f0f0) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* rows — same thumb / body / actions grid as .listItem */
+.skeletonRowItem {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-xl);
+  padding: var(--sp-lg) var(--sp-2xl);
+  background: var(--surface-card);
+  border-radius: var(--radius-xl);
+  border: var(--border-w-sm) solid var(--border-color);
+}
+
+.skeletonRowThumb {
+  width: 52px;
+  height: 38px;
+  border-radius: var(--radius-lg);
+  flex-shrink: 0;
+}
+
+.skeletonRowBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-sm);
+}
+
+.skeletonRowTitle {
+  height: 12px;
+  width: min(260px, 70%);
+}
+
+.skeletonRowMeta {
+  height: 10px;
+  width: min(180px, 48%);
+}
+
+.skeletonRowActions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-xs);
+  flex-shrink: 0;
+}
+
+.skeletonRowAction {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+}
+
+/* cards — cover + title + meta, same column widths as a real card grid */
+.skeletonCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
+  gap: var(--sp-md);
+}
+
+.skeletonCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-md);
+  padding: var(--sp-xl);
+  background: var(--surface-card);
+  border: var(--border-w-sm) solid var(--border-color);
+  border-radius: var(--radius-xl);
+}
+
+.skeletonCardCover {
+  height: 120px;
+  border-radius: var(--radius-lg);
+}
+
+.skeletonCardTitle {
+  height: 14px;
+  width: 64%;
+}
+
+.skeletonCardLine {
+  height: 11px;
+  width: 88%;
+}
+
+.skeletonCardShort {
+  height: 11px;
+  width: 42%;
+}
+
+/* stats — same icon / label / value rhythm as StatCard */
+.skeletonStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
+  gap: var(--sp-md);
+}
+
+.skeletonStatCard {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-xl);
+  padding: var(--sp-2xl) var(--sp-4xl);
+  background: var(--surface-card);
+  border: var(--border-w-sm) solid var(--border-color);
+  border-radius: var(--radius-2xl);
+}
+
+.skeletonStatIcon {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-xl);
+  flex-shrink: 0;
+}
+
+.skeletonStatBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-sm);
+}
+
+.skeletonStatLabel {
+  height: 10px;
+  width: 60%;
+}
+
+.skeletonStatValue {
+  height: 22px;
+  width: 45%;
+  border-radius: var(--radius-lg);
+}
+
+/* table — header row + data rows with the real table's cell padding */
+.skeletonTableWrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.skeletonTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.skeletonTable th,
+.skeletonTable td {
+  padding: var(--sp-lg) var(--sp-2xl);
+  border-bottom: var(--border-w-sm) solid var(--border-color);
+  text-align: left;
+}
+
+.skeletonTable th {
+  background: var(--surface-card-alt);
+}
+
+.skeletonCellBar {
+  height: 12px;
+  width: min(88%, 160px);
+}
+
+@media (max-width: 640px) {
+  .skeletonRowItem {
+    gap: var(--sp-md);
+    padding: var(--sp-md) var(--sp-lg);
+  }
+
+  .skeletonRowActions {
+    display: none;
+  }
+
+  .skeletonTable th,
+  .skeletonTable td {
+    padding: var(--sp-md) var(--sp-lg);
+  }
 }
 
 /* ─── Course list skeleton — mirrors a real course row ────────────────
@@ -368,7 +644,9 @@
 @media (prefers-reduced-motion: reduce) {
   .courseSkeletonThumb,
   .courseSkeletonLine,
-  .courseSkeletonAction {
+  .courseSkeletonAction,
+  .skeletonRow,
+  .skeletonBlock {
     animation: none;
     background: var(--skeleton-from, #f0f0f0);
   }

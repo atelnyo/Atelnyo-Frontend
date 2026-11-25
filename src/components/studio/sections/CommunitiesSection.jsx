@@ -22,7 +22,7 @@ import useFetch from '../../../hooks/useFetch';
 import useSafeNavigate from '../../../hooks/useSafeNavigate';
 import { communitiesService } from '../../../services/api';
 import { buildContentUrl } from '../../../utils/contentUrl';
-import { StudioSkeleton, EmptyState, SectionHeader } from '../shared';
+import { StudioSkeleton, EmptyState, LoadError, SectionHeader } from '../shared';
 import ConfirmModal from '../../common/ConfirmModal';
 import styles from './sections.module.css';
 import { inlineText } from '../../../utils/inlineI18n';
@@ -42,7 +42,7 @@ export default function CommunitiesSection({ lang, t, showToast, user, setShowCo
 
   // Founded: the ?created_by= filter exists exactly for the public
   // profile dashboard (see CommunityViewSet.get_queryset) — reuse it.
-  const { data: founded, loading: loadingFounded, refetch: refetchFounded } = useFetch(
+  const { data: founded, loading: loadingFounded, error: errorFounded, refetch: refetchFounded } = useFetch(
     // eslint-disable-next-line react/prop-types -- user comes from the router/session, untyped by convention
     () => communitiesService.list({ created_by: user?.id, limit: 50 }),
     {
@@ -54,7 +54,7 @@ export default function CommunitiesSection({ lang, t, showToast, user, setShowCo
 
   // Joined: the public catalog carries ``is_member`` per row for the
   // authenticated caller; intersect it with founded to avoid doubles.
-  const { data: joined, loading: loadingJoined } = useFetch(
+  const { data: joined, loading: loadingJoined, error: errorJoined, refetch: refetchJoined } = useFetch(
     () => communitiesService.list({ limit: 100 }),
     {
       defaultValue: [],
@@ -146,7 +146,20 @@ export default function CommunitiesSection({ lang, t, showToast, user, setShowCo
   }, [user, isHt, t, showToast, setShowCommunityEditor]);
 
   const loading = loadingFounded || loadingJoined;
-  if (loading) { return <StudioSkeleton rows={3} />; }
+  if (loading) { return <StudioSkeleton rows={3} variant="rows" />; }
+
+  // Only when BOTH lists failed: a partial failure still renders the
+  // communities that did load.
+  if ((errorFounded || errorJoined) && founded.length === 0 && joined.length === 0) {
+    return (
+      <LoadError
+        lang={lang}
+        title={isHt ? 'Pa t kapab chaje kominote ou' : inlineText(lang, 'Could not load your communities')}
+        error={errorFounded || errorJoined}
+        onRetry={() => { refetchFounded(); refetchJoined(); }}
+      />
+    );
+  }
 
   const pendingQueues = (requestQueues || []).filter((q) => q.requests.length > 0);
   const noFounded = founded.length === 0;
@@ -222,7 +235,7 @@ export default function CommunitiesSection({ lang, t, showToast, user, setShowCo
       <div className="cm-section">
         {/* ── Pending join requests (approval-mode communities) ────── */}
         {loadingRequests ? (
-          <StudioSkeleton rows={1} />
+          <StudioSkeleton rows={1} variant="rows" />
         ) : (
           pendingQueues.map(({ community, requests }) => (
             <div key={`req-${community.id}`}>

@@ -1980,7 +1980,7 @@ function App() {
   // global <Header> + BottomNav. This is the general rule — /search was only
   // the most visible instance of it.
   const rendersInContentContainer = effectivePathname === '/' || effectivePathname === '/404';
-  const isSheetRoute = effectivePathname === '/legal' || effectivePathname.startsWith('/sheet/') || effectivePathname.startsWith('/creator/') || effectivePathname.startsWith('/portfolio/') || effectivePathname.startsWith('/marketplace/') || effectivePathname.match(/^\/c\//) || effectivePathname.match(/^\/(@|%40)/i) || effectivePathname.startsWith('/legal/') || effectivePathname === '/themes' || effectivePathname === '/faq' || effectivePathname === '/help' || effectivePathname === '/about' || effectivePathname === '/trust' || effectivePathname === '/contact' || effectivePathname === '/accessibility' || effectivePathname === '/status' || effectivePathname === '/developers' || effectivePathname === '/verify' || effectivePathname.startsWith('/affiliate') || effectivePathname.startsWith('/page/') || effectivePathname.startsWith('/company/') || effectivePathname.startsWith('/community/') || effectivePathname === '/business' || effectivePathname.startsWith('/business/') || effectivePathname === SHEETS.LOGIN || effectivePathname === SHEETS.SIGNUP || isContentRoutePath(effectivePathname) || effectivePathname === '/explore' || effectivePathname.startsWith('/explore/');
+  const isSheetRoute = effectivePathname === '/legal' || effectivePathname.startsWith('/sheet/') || effectivePathname === '/studio' || effectivePathname.startsWith('/studio/') || effectivePathname.startsWith('/creator/') || effectivePathname.startsWith('/portfolio/') || effectivePathname.startsWith('/marketplace/') || effectivePathname.match(/^\/c\//) || effectivePathname.match(/^\/(@|%40)/i) || effectivePathname.startsWith('/legal/') || effectivePathname === '/themes' || effectivePathname === '/faq' || effectivePathname === '/help' || effectivePathname === '/about' || effectivePathname === '/trust' || effectivePathname === '/contact' || effectivePathname === '/accessibility' || effectivePathname === '/status' || effectivePathname === '/developers' || effectivePathname === '/verify' || effectivePathname.startsWith('/affiliate') || effectivePathname.startsWith('/page/') || effectivePathname.startsWith('/company/') || effectivePathname.startsWith('/community/') || effectivePathname === '/business' || effectivePathname.startsWith('/business/') || effectivePathname === SHEETS.LOGIN || effectivePathname === SHEETS.SIGNUP || isContentRoutePath(effectivePathname) || effectivePathname === '/explore' || effectivePathname.startsWith('/explore/');
 
   // ─── Sheet isolation ────────────────────────────────────────────────
   // Phase 36.1 — toggles `body.sheet-open` whenever the URL is under
@@ -3426,6 +3426,21 @@ function App() {
             is not a creator. We also wrap with AuthGate to catch
             anonymous users BEFORE the component mounts. */}
         <Route path={SHEETS.STUDIO} element={
+          <AuthGate user={user}>
+            <RequireRole user={user} role="creator" redirect="/">
+              <CreatorStudio
+                lang={lang}
+                showToast={showToast}
+                user={user}
+              />
+            </RequireRole>
+          </AuthGate>
+        } />
+        {/* Canonical Studio address — /studio and /studio/<section> — so a
+            section is a real, shareable URL and browser Back moves between
+            sections. `/sheet/studio?section=` keeps working as the legacy
+            shape (Help, activity feed, editor CTAs). Same gates as above. */}
+        <Route path="/studio/:section?" element={
           <AuthGate user={user}>
             <RequireRole user={user} role="creator" redirect="/">
               <CreatorStudio

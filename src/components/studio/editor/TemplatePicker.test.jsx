@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('../../../services/api', () => ({
-  courseService: { templates: vi.fn() },
+  courseService: { templates: vi.fn(), templateDetail: vi.fn() },
 }));
 
 import { courseService } from '../../../services/api';
@@ -36,6 +36,9 @@ const TEMPLATES = [
 describe('TemplatePicker', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // No preview payload by default: tests that care about the outline
+    // opt in explicitly.
+    courseService.templateDetail.mockResolvedValue({ data: null });
   });
 
   it('shows a busy card skeleton while templates load, then the catalog', async () => {
@@ -73,6 +76,43 @@ describe('TemplatePicker', () => {
 
     await userEvent.click(business);
     expect(onSelect).toHaveBeenLastCalledWith('');
+  });
+
+  it('previews the outline of the selected template before applying', async () => {
+    courseService.templates.mockResolvedValue({ data: { templates: TEMPLATES } });
+    courseService.templateDetail.mockResolvedValue({
+      data: {
+        key: 'business',
+        module_count: 2,
+        block_count: 3,
+        estimated_hours: 1.5,
+        objectives: ['Objektif youn'],
+        objectives_en: ['First objective'],
+        modules: [
+          { position: 1, title: 'Entwodiksyon', block_count: 2, estimated_minutes: 25, block_types: ['text'] },
+          { position: 2, title: 'Pratik', block_count: 1, estimated_minutes: 15, block_types: ['exercise'] },
+        ],
+      },
+    });
+
+    render(<TemplatePicker lang="en" value="business" onSelect={vi.fn()} />);
+
+    expect(await screen.findByText('What this template gives you')).toBeTruthy();
+    expect(courseService.templateDetail).toHaveBeenCalledWith('business');
+    expect(screen.getByText('First objective')).toBeTruthy();
+    expect(screen.getByText('Entwodiksyon')).toBeTruthy();
+    expect(screen.getByText(/1\.5 h/)).toBeTruthy();
+    expect(screen.getByText(/2 modules · 3 blocks/)).toBeTruthy();
+  });
+
+  it('still offers the template when only the preview request fails', async () => {
+    courseService.templates.mockResolvedValue({ data: { templates: TEMPLATES } });
+    courseService.templateDetail.mockRejectedValue(new Error('offline'));
+
+    render(<TemplatePicker lang="en" value="business" onSelect={vi.fn()} />);
+
+    expect(await screen.findByText(/preview could not load/i)).toBeTruthy();
+    expect(screen.getByText(/applied to the course right after/i)).toBeTruthy();
   });
 
   it('offers a retry when the catalog request fails', async () => {

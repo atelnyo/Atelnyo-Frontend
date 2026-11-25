@@ -9,8 +9,9 @@
  */
 import React, { useState } from 'react';
 import { portfolioService } from '../../../services/api';
+import { notifyStudioChanged } from '../studioEvents';
 import useFetch from '../../../hooks/useFetch';
-import { StudioSkeleton, EmptyState, SectionHeader, fmtCount } from '../shared';
+import { StudioSkeleton, EmptyState, LoadError, SectionHeader, fmtCount } from '../shared';
 import ConfirmModal from '../../common/ConfirmModal';
 import styles from './sections.module.css';
 import { inlineText } from '../../../utils/inlineI18n';
@@ -18,7 +19,7 @@ import { inlineText } from '../../../utils/inlineI18n';
 export default function PortfolioSection({ lang, t, showToast, setShowProjectModal, onEdit }) {
   const [confirm, setConfirm] = useState(null);
   const [confirmBusy, setConfirmBusy] = useState(false);
-  const { data: projects, loading, refetch, removeLocal } = useFetch(
+  const { data: projects, loading, error, refetch, removeLocal } = useFetch(
     () => portfolioService.list({ limit: 10, mine: true }),
     { defaultValue: [], transform: (d) => (Array.isArray(d?.results || d) ? (d?.results || d) : []) },
   );
@@ -40,6 +41,7 @@ export default function PortfolioSection({ lang, t, showToast, setShowProjectMod
         (async () => {
           try {
             await portfolioService.delete(item.id);
+            notifyStudioChanged({ section: 'portfolio' });
             showToast?.(lang === 'ht' ? '✅ Pwojè efase!' : inlineText(lang, '✅ Project deleted!'), 'check-circle');
           } catch (err) {
             showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase.' : inlineText(lang, 'Could not delete.')), 'circle-exclamation');
@@ -50,7 +52,18 @@ export default function PortfolioSection({ lang, t, showToast, setShowProjectMod
     });
   };
 
-  if (loading && projects.length === 0) return <StudioSkeleton rows={3} />;
+  if (loading && projects.length === 0) return <StudioSkeleton rows={3} variant="rows" />;
+
+  if (error && projects.length === 0) {
+    return (
+      <LoadError
+        lang={lang}
+        title={lang === 'ht' ? 'Pa t kapab chaje pòtfolyo ou' : 'Could not load your portfolio'}
+        error={error}
+        onRetry={refetch}
+      />
+    );
+  }
 
   const isEmpty = projects.length === 0;
 

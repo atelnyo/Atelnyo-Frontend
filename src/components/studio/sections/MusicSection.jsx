@@ -9,7 +9,7 @@
 import React, { useState } from 'react';
 import { exploreService, musicService } from '../../../services/api';
 import useFetch from '../../../hooks/useFetch';
-import { StudioSkeleton, EmptyState, SectionHeader, fmtCount } from '../shared';
+import { StudioSkeleton, EmptyState, LoadError, SectionHeader, fmtCount } from '../shared';
 import ConfirmModal from '../../common/ConfirmModal';
 import styles from './sections.module.css';
 import { inlineText } from '../../../utils/inlineI18n';
@@ -17,7 +17,7 @@ import { inlineText } from '../../../utils/inlineI18n';
 export default function MusicSection({ lang, t, showToast, setShowMusicModal, onEdit }) {
   const [confirm, setConfirm] = useState(null);
   const [confirmBusy, setConfirmBusy] = useState(false);
-  const { data: music, loading, refetch, removeLocal } = useFetch(
+  const { data: music, loading, error, refetch, removeLocal } = useFetch(
     () => exploreService.music({ mine: true }),
     { defaultValue: [], transform: (d) => (Array.isArray(d) ? d : (d?.results || [])) },
   );
@@ -68,7 +68,20 @@ export default function MusicSection({ lang, t, showToast, setShowMusicModal, on
     });
   };
 
-  if (loading && music.length === 0) return <StudioSkeleton rows={3} />;
+  if (loading && music.length === 0) return <StudioSkeleton rows={3} variant="rows" />;
+
+  // A failed request is not an empty catalogue — say what happened and
+  // let the creator retry without leaving the section.
+  if (error && music.length === 0) {
+    return (
+      <LoadError
+        lang={lang}
+        title={lang === 'ht' ? 'Pa t kapab chaje mizik ou' : 'Could not load your music'}
+        error={error}
+        onRetry={refetch}
+      />
+    );
+  }
 
   const isEmpty = music.length === 0;
 

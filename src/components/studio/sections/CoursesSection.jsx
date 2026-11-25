@@ -8,6 +8,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { courseService } from '../../../services/api';
+import { notifyStudioChanged } from '../studioEvents';
 import useFetch from '../../../hooks/useFetch';
 import { CourseSectionSkeleton, EmptyState, SectionHeader, fmtCount } from '../shared';
 import ConfirmModal from '../../common/ConfirmModal';
@@ -135,6 +136,7 @@ export default function CoursesSection({ lang, t, showToast, setShowCourseModal,
     if (!confirmed) return;
     try {
       await courseService.delete(item.id);
+      notifyStudioChanged({ section: 'courses' });
       showToast?.(lang === 'ht' ? '✅ Kou efase!' : inlineText(lang, '✅ Course deleted!'), 'check-circle');
       refetch();
     } catch (err) {
@@ -159,6 +161,7 @@ export default function CoursesSection({ lang, t, showToast, setShowCourseModal,
         (async () => {
           try {
             await courseService.delete(item.id);
+            notifyStudioChanged({ section: 'courses' });
             showToast?.(lang === 'ht' ? '✅ Kou efase!' : inlineText(lang, '✅ Course deleted!'), 'check-circle');
           } catch (err) {
             showToast?.(err?.response?.data?.detail || (lang === 'ht' ? 'Pa t kapab efase.' : inlineText(lang, 'Could not delete.')), 'circle-exclamation');
@@ -180,6 +183,7 @@ export default function CoursesSection({ lang, t, showToast, setShowCourseModal,
       const res = await courseService.publish(item.id);
       if (res?.data?.status === 'published') {
         showToast?.(lang === 'ht' ? '🚀 Kou pibliye! Vizitè yo ka wè l kounye a.' : inlineText(lang, '🚀 Course published! Visitors can see it now.'), 'check-circle');
+        notifyStudioChanged({ section: 'courses' });
         refetch();
       }
     } catch (err) {

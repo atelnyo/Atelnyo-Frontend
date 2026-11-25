@@ -25,10 +25,10 @@
  * Uses user?.is_creator from the Django UserSerializer.
  */
 import React, { useEffect, useState, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useParams, useSearchParams } from 'react-router-dom';
 import useSafeNavigate from '../../hooks/useSafeNavigate';
 import { translations } from '../../data/translations';
-import { creatorProfileService, courseService } from '../../services/api';
+import { creatorProfileService } from '../../services/api';
 import { getUserIdentity } from '../../utils/userIdentity';
 // Continuity — the Studio is the WORKSPACE slice of the continuity
 // state; it reports which section/media tab the user is on via the
@@ -39,7 +39,14 @@ import MediaProviderSection from './MediaProviderSection';
 import MediaLibrary from './MediaLibrary';
 import MediaHub from './MediaHub';
 import MyMediaDashboard from './MyMediaDashboard';
+import StudioSectionNotFound from './StudioSectionNotFound';
+import {
+  STUDIO_ROOT, resolveStudioSection, studioSectionPath,
+} from './studioRoute';
 import WelcomeChecklist from '../WelcomeChecklist';
+import { navBadges, formatBadge } from './studioNav';
+import { useStudioOverview } from './studioOverview';
+import { notifyStudioChanged, onStudioChanged } from './studioEvents';
 import CreatorProfileHealth from './CreatorProfileHealth';
 import {
   WithdrawModal,
@@ -157,6 +164,7 @@ const SIDEBAR_CATEGORIES = [
 
 // Flat list (deep-links, lookups) — category order preserved.
 const SIDEBAR_SECTIONS = SIDEBAR_CATEGORIES.flatMap((cat) => cat.items);
+const STUDIO_SECTION_IDS = SIDEBAR_SECTIONS.map((section) => section.id);
 
 // Last studio section + media sub-tab, kept in localStorage so a refresh
 // (or a return visit without ?section=) reopens the same place.
@@ -195,20 +203,23 @@ export default function CreatorStudio({ lang = 'en', showToast, user }) {
   const navigate = useSafeNavigate();
   const t = translations?.[lang] || translations?.en || {};
   const identity = getUserIdentity(user);
-  // Deep-link support: /sheet/studio?section=public_profile (used by the
-  // "Edit profile" button on the public page and the Profile Settings CTA
-  // in the editor) opens the studio on the requested section.
+  // Deep-link contract:
+  //   /studio/<section>          canonical path route (shareable; Back works)
+  //   /sheet/studio?section=<id> legacy links (Help, activity feed, CTAs)
+  // Both resolve through studioRoute.resolveStudioSection: explicit route →
+  // last visited section → dashboard.
   const [searchParams, setSearchParams] = useSearchParams();
-  const [activeSection, setActiveSection] = useState(() => {
-    const fromUrl = searchParams.get('section');
-    if (fromUrl) {
-      return SIDEBAR_SECTIONS.some((s) => s.id === fromUrl) ? fromUrl : 'dashboard';
-    }
-    const saved = readStudioNav();
-    return saved.section && SIDEBAR_SECTIONS.some((s) => s.id === saved.section)
-      ? saved.section
-      : 'dashboard';
+  const { pathname } = useLocation();
+  const routeParams = useParams();
+  const isPathRoute = pathname === STUDIO_ROOT || pathname.startsWith(`${STUDIO_ROOT}/`);
+  const requestedSection = routeParams.section || searchParams.get('section') || null;
+  const initialRoute = resolveStudioSection(STUDIO_SECTION_IDS, {
+    pathSection: routeParams.section,
+    querySection: searchParams.get('section'),
+    savedSection: readStudioNav().section,
   });
+  const [activeSection, setActiveSection] = useState(initialRoute.section);
+  const [unknownSection, setUnknownSection] = useState(initialRoute.unknown);
   const [activeMediaTab, setActiveMediaTab] = useState(() => {
     const fromUrl = searchParams.get('mediaTab');
     if (fromUrl) {
@@ -218,18 +229,54 @@ export default function CreatorStudio({ lang = 'en', showToast, user }) {
     return ['hub', 'provider', 'library'].includes(saved.mediaTab) ? saved.mediaTab : 'hub';
   });
   const [mobileSidebar, setMobileSidebar] = useState(false);
-  // Keep the open section (and media sub-tab) in the URL, so a page refresh
-  // reopens the same place. Existing ?section= links keep working.
+  // Adopt whatever the URL points at: first mount, a deep link clicked while
+  // the Studio is already mounted, and browser Back/Forward all land here.
+  // The URL is therefore the source of truth for navigation history, while
+  // the saved section only decides where a bare visit resumes.
   useEffect(() => {
+    if (!requestedSection) return;
+    const next = resolveStudioSection(STUDIO_SECTION_IDS, {
+      pathSection: routeParams.section,
+      querySection: searchParams.get('section'),
+    });
+    setUnknownSection(next.unknown);
+    if (!next.unknown) setActiveSection(next.section);
+  }, [requestedSection, routeParams.section, searchParams]);
+
+  // Keep the address in step with the open section. Writes are `replace`
+  // (settling state must not flood history); a user click goes through
+  // handleSectionChange, which PUSHES so Back returns to the previous
+  // section. A dead /studio/<section> URL is left untouched — the
+  // not-found panel explains it, and rewriting it would hide the mistake.
+  useEffect(() => {
+    // A dead URL must not overwrite where the creator actually was.
+    if (unknownSection) return;
+    writeStudioNav({ section: activeSection, mediaTab: activeMediaTab });
+
     const next = new URLSearchParams(searchParams);
-    next.set('section', activeSection);
     if (activeSection === 'media') next.set('mediaTab', activeMediaTab);
     else next.delete('mediaTab');
+
+    if (isPathRoute) {
+      // The path is the source of truth on /studio/*; drop the legacy
+      // ?section= param so both shapes never disagree.
+      next.delete('section');
+      if (next.toString() !== searchParams.toString()) {
+        setSearchParams(next, { replace: true });
+      }
+      const target = studioSectionPath(activeSection);
+      if (pathname !== target) navigate(target, { replace: true });
+      return;
+    }
+
+    next.set('section', activeSection);
     if (next.toString() !== searchParams.toString()) {
       setSearchParams(next, { replace: true });
     }
-    writeStudioNav({ section: activeSection, mediaTab: activeMediaTab });
-  }, [activeSection, activeMediaTab, searchParams, setSearchParams]);
+  }, [
+    activeSection, activeMediaTab, unknownSection, isPathRoute, pathname,
+    searchParams, setSearchParams, navigate,
+  ]);
   // Modal state — one per section type (replaces placeholder toasts)
   // Course creation never starts with a form: a delivery-type chooser
   // (Teach on Atelnyo / Teach elsewhere) opens first, then the editor.
@@ -246,7 +293,13 @@ export default function CreatorStudio({ lang = 'en', showToast, user }) {
   // and refetches its list (the section is already open, so switching to
   // it alone does not reload anything).
   const [sectionVersion, setSectionVersion] = useState(0);
-  const bumpSection = useCallback(() => setSectionVersion((v) => v + 1), []);
+  const bumpSection = useCallback(() => {
+    setSectionVersion((v) => v + 1);
+    // Every create/update/import flow funnels through here AFTER the server
+    // confirmed it, so this is the honest place to invalidate the overview
+    // (nav badges, KPI strip, checklist counts).
+    notifyStudioChanged();
+  }, []);
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -265,8 +318,6 @@ export default function CreatorStudio({ lang = 'en', showToast, user }) {
 
   // ─── Profile data for WelcomeChecklist auto-detection ───────────
   const [profileData, setProfileData] = useState(null);
-  const [coursesCount, setCoursesCount] = useState(0);
-  const [portfolioCount, setPortfolioCount] = useState(0);
 
   // Only users with is_creator: true can access the Studio. Non-creators
   // get redirected to / with a helpful toast.
@@ -275,6 +326,45 @@ export default function CreatorStudio({ lang = 'en', showToast, user }) {
   // but we add an extra safety check here for defense-in-depth.
   const isAnonymous = !user;
 
+  // One aggregated read for the whole shell: published counts for the
+  // checklist, actionable nav badges and the dashboard KPI strip all read
+  // this shared snapshot (never three separate requests).
+  const { data: overview, refresh: refreshOverview } = useStudioOverview(isCreator);
+
+  // The checklist steps say "Publish First …", so these are PUBLISHED
+  // counts — a draft must not tick them. The old code counted every owned
+  // course, drafts included, and marked the step done too early.
+  const coursesCount = overview?.content?.courses?.published || 0;
+  const portfolioCount = overview?.content?.portfolio?.published || 0;
+
+  // Keep the numbers honest after real work: refresh when the creator moves
+  // between sections and when the tab regains focus (a publish here or in
+  // another tab shows up without a reload). Single-flight collapses the
+  // burst of calls that navigation can cause.
+  useEffect(() => {
+    if (!isCreator) { return undefined; }
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') { refreshOverview(); }
+    };
+    window.addEventListener('focus', refreshOverview);
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.removeEventListener('focus', refreshOverview);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [isCreator, refreshOverview]);
+
+  useEffect(() => {
+    if (isCreator) { refreshOverview(); }
+  }, [activeSection, isCreator, refreshOverview]);
+
+  // A mutation that succeeded announces itself (bumpSection, section
+  // deletes). Refresh in place instead of waiting for the next navigation.
+  useEffect(() => {
+    if (!isCreator) { return undefined; }
+    return onStudioChanged(() => { refreshOverview(); });
+  }, [isCreator, refreshOverview]);
+
   // Must be declared BEFORE any conditional return (rules-of-hooks)
   const handleSectionChange = useCallback((sectionId) => {
     // Special case: FAQ navigates to the /faq route
@@ -282,9 +372,13 @@ export default function CreatorStudio({ lang = 'en', showToast, user }) {
       navigate('/faq');
       return;
     }
+    setUnknownSection(null);
     setActiveSection(sectionId);
     setMobileSidebar(false);
-  }, [navigate]);
+    // Path routes get a real history entry, so Back moves between sections.
+    // The legacy ?section= shape is written by the sync effect above.
+    if (isPathRoute) navigate(studioSectionPath(sectionId));
+  }, [isPathRoute, navigate]);
 
   // ─── Edit handler — open modal pre-filled with item data ───────
   const handleEdit = useCallback((item, type) => {
@@ -354,30 +448,17 @@ export default function CreatorStudio({ lang = 'en', showToast, user }) {
       })
       .catch(() => { if (!cancelled) { setProfileData(null); } });
 
-    // Fetch courses count — the owner sees ALL their courses (drafts
-    // included), so this uses the authenticated /courses/?mine=1 view,
-    // NOT the public-profile endpoint (which lists published only — a
-    // creator with drafts would otherwise show "0 courses").
-    courseService.getAll({ mine: true })
-      .then((res) => {
-        if (cancelled) { return; }
-        const data = res?.data;
-        const list = Array.isArray(data) ? data : (data?.results || []);
-        setCoursesCount(list.length);
-      })
-      .catch(() => {});
-
-    // Fetch portfolio count
-    creatorProfileService.portfolio(identity.creatorLookupKey)
-      .then((res) => {
-        if (cancelled) { return; }
-        const data = res?.data;
-        setPortfolioCount(Array.isArray(data) ? data.length : (data?.results?.length || 0));
-      })
-      .catch(() => {});
-
     return () => { cancelled = true; };
   }, [identity.creatorLookupKey, isCreator]);
+
+  const badges = navBadges(overview);
+  const badgeTitle = (sectionId) => {
+    const n = badges[sectionId];
+    if (sectionId === 'courses') {
+      return lang === 'ht' ? `${n} bouyon` : `${n} drafts`;
+    }
+    return lang === 'ht' ? `${n} lòd annatant` : `${n} pending orders`;
+  };
   useEffect(() => {
     if (user && !isCreator) {
       showToast?.('Only creators can access the Studio. Apply to become a creator!', 'user-lock');
@@ -404,6 +485,23 @@ export default function CreatorStudio({ lang = 'en', showToast, user }) {
   }
 
 
+
+  // A `/studio/<section>` URL that names a section this Studio no longer
+  // has must say so — silently opening the dashboard would make a stale
+  // link look like it worked. The address stays visible in the panel.
+  if (unknownSection) {
+    return (
+      <StudioSectionNotFound
+        section={unknownSection}
+        lang={lang}
+        onBack={() => {
+          setUnknownSection(null);
+          setActiveSection('dashboard');
+          navigate(studioSectionPath('dashboard'), { replace: true });
+        }}
+      />
+    );
+  }
 
   // ─── Render active section ───────────────────────────────────────
   const renderSection = () => {
@@ -629,6 +727,14 @@ export default function CreatorStudio({ lang = 'en', showToast, user }) {
                       >
                         <i className={`fas ${section.icon}`} aria-hidden="true" />
                         <span>{lang === 'ht' ? section.labelHt : section.label}</span>
+                        {formatBadge(badges[section.id]) && (
+                          <em
+                            className={styles.navBadge}
+                            title={badgeTitle(section.id)}
+                          >
+                            {formatBadge(badges[section.id])}
+                          </em>
+                        )}
                       </button>
                     </li>
                   ))}
@@ -741,7 +847,7 @@ export default function CreatorStudio({ lang = 'en', showToast, user }) {
             lang={lang}
             showToast={showToast}
             onClose={() => setShowWithdrawModal(false)}
-            onSuccess={() => { setActiveSection('wallet'); }}
+            onSuccess={() => { notifyStudioChanged(); setActiveSection('wallet'); }}
             onOpenVerification={() => {
               // KYC gate → hand off to the verification modal (which has
               // the submission form). Close the withdraw modal so the two

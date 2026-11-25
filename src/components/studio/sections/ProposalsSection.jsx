@@ -16,7 +16,7 @@
 import React, { useState, useCallback } from 'react';
 import useFetch from '../../../hooks/useFetch';
 import { jobService, proposalService } from '../../../services/api';
-import { StudioSkeleton, EmptyState, SectionHeader } from '../shared';
+import { StudioSkeleton, EmptyState, LoadError, SectionHeader } from '../shared';
 import ProposalDecisionModal from '../modals/ProposalDecisionModal';
 import styles from './sections.module.css';
 import { inlineText } from '../../../utils/inlineI18n';
@@ -44,7 +44,7 @@ export default function ProposalsSection({ lang, t, showToast }) {
   // ─── User's jobs (for the filter) ─────────────────────────────────────
   // refetchJobs keeps the hired progress (hired_count/positions) fresh
   // after an accept fills a slot.
-  const { data: jobs, loading: jobsLoading, refetch: refetchJobs } = useFetch(
+  const { data: jobs, loading: jobsLoading, error: jobsError, refetch: refetchJobs } = useFetch(
     () => jobService.mine(),
     { defaultValue: [], transform: (d) => {
       if (Array.isArray(d)) return d;
@@ -57,7 +57,7 @@ export default function ProposalsSection({ lang, t, showToast }) {
   // deps: [selectedJob] is REQUIRED — useFetch keys its effect on the deps
   // array, so the job filter select must re-trigger the fetch when it
   // changes (without deps it would fetch once and never update).
-  const { data: proposals, loading, refetch } = useFetch(
+  const { data: proposals, loading, error, refetch } = useFetch(
     () => proposalService.list({ job: selectedJob !== 'all' ? selectedJob : undefined }),
     {
       deps: [selectedJob],
@@ -92,7 +92,18 @@ export default function ProposalsSection({ lang, t, showToast }) {
     refetchJobs?.();
   }, [lang, showToast, refetch, refetchJobs]);
 
-  if (jobsLoading || loading) return <StudioSkeleton rows={4} />;
+  if (jobsLoading || loading) return <StudioSkeleton rows={4} variant="rows" />;
+
+  if ((error || jobsError) && proposals.length === 0) {
+    return (
+      <LoadError
+        lang={lang}
+        title={lang === 'ht' ? 'Pa t kapab chaje pwopozisyon ou' : 'Could not load your proposals'}
+        error={error || jobsError}
+        onRetry={() => { refetch(); refetchJobs(); }}
+      />
+    );
+  }
 
   const isEmpty = proposals.length === 0;
   const pendingCount = proposals.filter((p) => p.status === 'pending').length;

@@ -21,7 +21,7 @@ import React, { useState, useCallback } from 'react';
 import useFetch from '../../../hooks/useFetch';
 import { contractService, milestoneService } from '../../../services/api';
 import CheckoutModal from '../../CheckoutModal';
-import { StudioSkeleton, EmptyState, SectionHeader } from '../shared';
+import { StudioSkeleton, EmptyState, LoadError, SectionHeader } from '../shared';
 import ConfirmModal from '../../common/ConfirmModal';
 import styles from './sections.module.css';
 import { inlineText } from '../../../utils/inlineI18n';
@@ -70,7 +70,7 @@ export default function ContractsSection({ lang, t, showToast, user }) {
   const [confirm, setConfirm] = useState(null);
   const currentUserId = user?.id;
 
-  const { data: contracts, loading, refetch } = useFetch(
+  const { data: contracts, loading, error, refetch } = useFetch(
     () => contractService.list(),
     {
       defaultValue: [],
@@ -241,7 +241,18 @@ export default function ContractsSection({ lang, t, showToast, user }) {
     }
   }, [fundTarget, loadMilestones, refetch]);
 
-  if (loading) return <StudioSkeleton rows={4} />;
+  if (loading) return <StudioSkeleton rows={4} variant="rows" />;
+
+  if (error && contracts.length === 0) {
+    return (
+      <LoadError
+        lang={lang}
+        title={lang === 'ht' ? 'Pa t kapab chaje kontra ou' : 'Could not load your contracts'}
+        error={error}
+        onRetry={refetch}
+      />
+    );
+  }
 
   const isEmpty = contracts.length === 0;
 

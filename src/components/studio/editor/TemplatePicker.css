@@ -153,6 +153,125 @@
   margin-top: 3px;
 }
 
+/* ─── Outline preview — what will actually be written ─────────────── */
+
+.tp-preview {
+  margin-top: var(--sp-lg);
+  padding: var(--sp-xl);
+  border: var(--border-w-sm) solid var(--border-color);
+  border-radius: var(--radius-xl);
+  background: var(--surface-card-alt);
+  animation: tpReveal 180ms ease-out;
+}
+
+.tp-preview-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-sm);
+  margin-bottom: var(--sp-md);
+}
+
+.tp-preview-head h4 {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.tp-preview-head h4 i {
+  color: var(--color-primary);
+}
+
+.tp-preview-total {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.tp-objectives {
+  list-style: none;
+  margin: 0 0 var(--sp-lg);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-xs);
+}
+
+.tp-objectives li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-sm);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  line-height: var(--line-relaxed);
+}
+
+.tp-objectives li i {
+  color: var(--color-emerald);
+  margin-top: 3px;
+  font-size: var(--text-xs);
+}
+
+.tp-outline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.tp-outline-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-md);
+  padding: var(--sp-sm) 0;
+  border-top: var(--border-w-sm) solid var(--border-color);
+  font-size: var(--text-sm);
+}
+
+.tp-outline-title {
+  color: var(--text-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.tp-outline-meta {
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+}
+
+.tp-preview-loading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-sm);
+}
+
+.tp-preview-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-sm);
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.tp-preview-note i {
+  color: var(--color-amber-dark);
+  margin-top: 3px;
+}
+
+@keyframes tpReveal {
+  from { opacity: 0; transform: translateY(-2px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tp-preview { animation: none; }
+}
+
 /* ─── Loading skeleton — mirrors the real card, never an empty box ─── */
 
 .tp-skeleton-card {

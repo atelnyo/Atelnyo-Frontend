@@ -9,7 +9,7 @@
 import React, { useState, useCallback } from 'react';
 import useFetch from '../../../hooks/useFetch';
 import { communityEventsService } from '../../../services/api';
-import { StudioSkeleton, EmptyState, SectionHeader } from '../shared';
+import { StudioSkeleton, EmptyState, LoadError, SectionHeader } from '../shared';
 import ConfirmModal from '../../common/ConfirmModal';
 import styles from './sections.module.css';
 import { inlineText } from '../../../utils/inlineI18n';
@@ -32,7 +32,7 @@ function formatWhen(ev, lang) {
 export default function EventsSection({ lang, t, showToast, setShowEventModal, onEdit, user }) {
   const [confirm, setConfirm] = useState(null);
   const [confirmBusy, setConfirmBusy] = useState(false);
-  const { data: events, loading, refetch, removeLocal } = useFetch(
+  const { data: events, loading, error, refetch, removeLocal } = useFetch(
     () => communityEventsService.list({ created_by: user?.id, limit: 50 }),
     { defaultValue: [], transform: (d) => {
       if (Array.isArray(d)) return d;
@@ -105,7 +105,18 @@ export default function EventsSection({ lang, t, showToast, setShowEventModal, o
     }
   }, [expandedAtt, attendees, lang, showToast]);
 
-  if (loading && events.length === 0) return <StudioSkeleton rows={3} />;
+  if (loading && events.length === 0) return <StudioSkeleton rows={3} variant="rows" />;
+
+  if (error && events.length === 0) {
+    return (
+      <LoadError
+        lang={lang}
+        title={lang === 'ht' ? 'Pa t kapab chaje evènman ou' : 'Could not load your events'}
+        error={error}
+        onRetry={refetch}
+      />
+    );
+  }
 
   const isEmpty = events.length === 0;
 

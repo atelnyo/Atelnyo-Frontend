@@ -154,7 +154,7 @@ export default function WalletSection({ lang, t, showToast, setShowWithdrawModal
 
   const loading = walletLoading || txLoading;
 
-  if (loading) return <StudioSkeleton rows={4} />;
+  if (loading) return <StudioSkeleton rows={4} variant="rows" />;
 
   return (
     <div className={styles.section}>
