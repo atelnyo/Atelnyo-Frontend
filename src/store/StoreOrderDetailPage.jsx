@@ -107,6 +107,11 @@ export default function StoreOrderDetailPage() {
   const [addressForm, setAddressForm] = useState(null);
   const [addressBusy, setAddressBusy] = useState(false);
   const [addressNotice, setAddressNotice] = useState(null);
+  // An unpaid order reserves its stock; the buyer can release it instead of
+  // waiting for the abandoned-order sweep to do it.
+  const [cancelConfirm, setCancelConfirm] = useState(false);
+  const [cancelBusy, setCancelBusy] = useState(false);
+  const [cancelNotice, setCancelNotice] = useState(null);
 
   useEffect(() => {
     if (!user) {
@@ -199,6 +204,28 @@ export default function StoreOrderDetailPage() {
     }
   };
 
+  const cancelOrder = async () => {
+    setCancelBusy(true);
+    setCancelNotice(null);
+    try {
+      const { data } = await storeService.cancelOrder(orderId);
+      setOrder(data);
+      setCancelConfirm(false);
+      setCancelNotice({
+        kind: 'ok',
+        text: 'Order cancelled — the reserved items are back in stock.',
+      });
+    } catch (err) {
+      const detail = err?.response?.data?.detail;
+      setCancelNotice({
+        kind: 'error',
+        text: String(detail || 'Could not cancel this order. Try again or contact support.'),
+      });
+    } finally {
+      setCancelBusy(false);
+    }
+  };
+
   const sendSellerMessage = async (seller) => {
     const body = contactBody.trim();
     if (!body) {
@@ -250,6 +277,15 @@ export default function StoreOrderDetailPage() {
         )}
       </div>
       {order && <p className="store-order__date">Placed {formatDate(order.created_at)}</p>}
+
+      {order && cancelNotice && (
+        <p
+          className="store-order__hint"
+          role={cancelNotice.kind === 'error' ? 'alert' : 'status'}
+        >
+          {cancelNotice.text}
+        </p>
+      )}
 
       {!order && error === 'not_found' && (
         <p className="store-state" role="alert">
@@ -303,12 +339,50 @@ export default function StoreOrderDetailPage() {
                 This order is still waiting for payment. Your items are reserved —
                 resume checkout to pay for this same order.
               </p>
-              <Link
-                className="store-btn"
-                to={`/store/cart?resume_order=${order.id}`}
-              >
-                Resume payment
-              </Link>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
+                <Link
+                  className="store-btn"
+                  to={`/store/cart?resume_order=${order.id}`}
+                >
+                  Resume payment
+                </Link>
+                {cancelConfirm ? (
+                  <>
+                    <button
+                      type="button"
+                      className="store-btn"
+                      onClick={cancelOrder}
+                      disabled={cancelBusy}
+                    >
+                      {cancelBusy ? 'Cancelling…' : 'Yes, cancel it'}
+                    </button>
+                    <button
+                      type="button"
+                      className="store-btn store-btn--ghost"
+                      onClick={() => setCancelConfirm(false)}
+                      disabled={cancelBusy}
+                    >
+                      Keep my order
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    className="store-btn store-btn--ghost"
+                    onClick={() => {
+                      setCancelConfirm(true);
+                      setCancelNotice(null);
+                    }}
+                  >
+                    Cancel order
+                  </button>
+                )}
+              </div>
+              {cancelConfirm && (
+                <p className="store-order__hint">
+                  Cancelling releases the reserved items — you can order again later.
+                </p>
+              )}
             </section>
           )}
 

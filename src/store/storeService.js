@@ -80,6 +80,11 @@ export const storeService = {
     `marketplace/orders/${encodeURIComponent(orderId)}/shipping-address/`,
     { shipping_address: shippingAddress },
   ),
+  // Release an unpaid order: the units reserved at checkout return to stock
+  // immediately instead of waiting for the 24h abandoned-order sweep.
+  cancelOrder: (orderId) => api.post(
+    `marketplace/orders/${encodeURIComponent(orderId)}/cancel/`,
+  ),
 };
 
 export default storeService;

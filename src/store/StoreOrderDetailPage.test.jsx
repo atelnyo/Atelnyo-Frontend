@@ -10,12 +10,14 @@ import { useAuthStore } from './useAuthStore';
 const getOrder = vi.fn();
 const contactSeller = vi.fn();
 const updateShippingAddress = vi.fn();
+const cancelOrder = vi.fn();
 
 vi.mock('./storeService', () => ({
   storeService: {
     getOrder: (...args) => getOrder(...args),
     contactSeller: (...args) => contactSeller(...args),
     updateShippingAddress: (...args) => updateShippingAddress(...args),
+    cancelOrder: (...args) => cancelOrder(...args),
   },
 }));
 
@@ -77,6 +79,7 @@ describe('StoreOrderDetailPage', () => {
     updateShippingAddress.mockResolvedValue({
       data: { shipping_address: order.shipping_address, can_edit_shipping: false },
     });
+    cancelOrder.mockReset();
     useAuthStore.setState({ user: null, loading: false });
   });
 
@@ -143,6 +146,21 @@ describe('StoreOrderDetailPage', () => {
       '42',
       expect.objectContaining({ city: 'Cap-Haïtien', address1: '12 Rue Capois' }),
     ));
+  });
+
+  it('lets the buyer release an unpaid order and its reserved stock', async () => {
+    getOrder.mockResolvedValue({ data: { ...order, status: 'pending', tracking: null } });
+    cancelOrder.mockResolvedValue({
+      data: { ...order, status: 'cancelled', tracking: null, restored_units: 2 },
+    });
+    useAuthStore.setState({ user: { id: 1, username: 'amy' } });
+    renderAt();
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Cancel order' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Yes, cancel it' }));
+
+    await waitFor(() => expect(cancelOrder).toHaveBeenCalledWith('42'));
+    expect(await screen.findByText(/reserved items are back in stock/)).toBeTruthy();
   });
 
   it('keeps the buyer in touch with the seller who is preparing the order', async () => {
