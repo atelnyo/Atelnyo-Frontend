@@ -1774,6 +1774,16 @@ export const walletService = {
   submitIdentity: (data) => api.post('identity/verification/', data),
 };
 
+// ─── Direct messages (Conversation + Message) ──────────────────────────
+// The universal inbox: a profile message, a reply, the Studio Messages
+// tab and the header badge all read the same participant-scoped routes.
+export const messagesService = {
+  conversations: (params) => api.get('messages/conversations/', { params }),
+  thread: (conversationId) => api.get(`messages/conversations/${conversationId}/messages/`),
+  reply: (conversationId, body) => api.post(`messages/conversations/${conversationId}/messages/`, { body }),
+  unreadCount: () => api.get('messages/conversations/unread-count/'),
+};
+
 // ─── Wallet top-up — deposit funds into the wallet balance via PayPal ──
 // The backend owns the amount + capture; the frontend only exchanges safe
 // PayPal order ids (same contract as checkoutService).

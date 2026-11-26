@@ -6,6 +6,7 @@
  *   - Brand name
  *   - Search trigger
  *   - Notification bell
+ *   - Messages shortcut with its own unread badge (the DM inbox)
  *   - Theme toggle
  *   - Profile menu (avatar + username + dropdown)
  *   - Language switcher dropdown
@@ -16,7 +17,7 @@
 import React, { useState, useRef, useEffect, startTransition } from 'react';
 import { useLocation } from 'react-router-dom';
 import useSafeNavigate from '../hooks/useSafeNavigate';
-import { creatorProfileService, enrollmentService } from '../services/api';
+import { creatorProfileService, enrollmentService, messagesService } from '../services/api';
 import { SHEETS } from '../routes/sheets';
 import { getUserIdentity } from '../utils/userIdentity';
 import { t2 } from '../utils/i18n';
@@ -65,6 +66,38 @@ const Header = ({
       .catch(() => { if (!cancelled) { setIsLearner(false); } });
     return () => { cancelled = true; };
   }, [user?.id]);
+
+  // ─── Unread direct messages (header badge) ──────────────────────
+  // Same participant-scoped count the inbox uses. Polled slowly and on
+  // focus/route change: a badge is not worth a socket, and it clears as
+  // soon as the creator opens a conversation (the thread marks it read).
+  const [unreadMessages, setUnreadMessages] = useState(0);
+  useEffect(() => {
+    if (!user) {
+      // Intentional sync reset when the session ends.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setUnreadMessages(0);
+      return undefined;
+    }
+    let cancelled = false;
+    const load = () => {
+      messagesService.unreadCount()
+        .then((res) => {
+          if (!cancelled) {
+            setUnreadMessages(Number(res?.data?.unread_count) || 0);
+          }
+        })
+        .catch(() => {});
+    };
+    load();
+    const timer = setInterval(load, 60000);
+    window.addEventListener('focus', load);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+      window.removeEventListener('focus', load);
+    };
+  }, [user?.id, location.pathname]);
 
   // ─── Fetch creator avatar_url from CreatorProfile ────────────────
   const [creatorAvatarUrl, setCreatorAvatarUrl] = useState(null);
@@ -208,6 +241,29 @@ const Header = ({
             aria-label={t2(lang, { ht: 'Chèche', fr: 'Rechercher', es: 'Buscar', en: 'Search' })}
           >
             <i className="fas fa-search" aria-hidden="true" />
+          </button>
+        )}
+
+        {/* Direct messages — the same inbox a profile reply lands in */}
+        {user && (
+          <button
+            type="button"
+            className={`icon-btn header-btn notif-bell-btn header-msg-btn${unreadMessages > 0 ? ' has-unread' : ''}`}
+            onClick={() => navigate(SHEETS.MESSAGES)}
+            title={t2(lang, { ht: 'Mesaj', fr: 'Messages', es: 'Mensajes', en: 'Messages' })}
+            aria-label={t2(lang, {
+              ht: `${unreadMessages} mesaj nouvo`,
+              fr: `${unreadMessages} nouveaux messages`,
+              es: `${unreadMessages} mensajes nuevos`,
+              en: `${unreadMessages} new messages`,
+            })}
+          >
+            <i className="fas fa-envelope" aria-hidden="true" />
+            {unreadMessages > 0 && (
+              <span key={unreadMessages} className={`notif-bell-badge${unreadMessages > 99 ? ' is-many' : ''}`} aria-hidden="true">
+                {unreadMessages > 99 ? '99+' : unreadMessages}
+              </span>
+            )}
           </button>
         )}
 
