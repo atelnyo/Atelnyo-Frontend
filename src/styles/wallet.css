@@ -969,6 +969,71 @@ body.dark-mode .wlt-tip-name { color: #ddd; }
 }
 
 
+/* ─── Wallet — where the money comes from ──────────────────────────── */
+
+.wlt-sources {
+  padding: 16px;
+  background: var(--card-bg, #fff);
+  border-radius: 12px;
+  border: 1px solid var(--border-color, rgba(216,27,96,0.08));
+}
+body.dark-mode .wlt-sources {
+  background: rgba(255,255,255,0.03);
+  border-color: rgba(255,255,255,0.06);
+}
+.wlt-sources-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.wlt-sources-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main, #222);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+body.dark-mode .wlt-sources-title { color: #eee; }
+.wlt-sources-total {
+  font-size: 0.78rem;
+  color: var(--text-secondary, #888);
+}
+.wlt-sources-empty {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-secondary, #888);
+}
+.wlt-sources-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 8px;
+}
+.wlt-source-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--bg-highlight, rgba(0,0,0,0.03));
+  font-size: 0.82rem;
+  color: var(--text-main, #222);
+}
+body.dark-mode .wlt-source-row { color: #ddd; }
+.wlt-source-row i { color: var(--pink-primary, #d81b60); }
+.wlt-source-row-empty { opacity: 0.45; }
+.wlt-source-label { flex: 1; min-width: 0; }
+.wlt-source-amount { font-weight: 700; white-space: nowrap; }
+.wlt-sources-out {
+  margin: 12px 0 0;
+  font-size: 0.78rem;
+  color: var(--text-secondary, #888);
+}
+
 /* ─── Wallet Responsive ────────────────────────────────────────────── */
 
 @media (max-width: 768px) {

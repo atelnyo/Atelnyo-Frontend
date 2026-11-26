@@ -27,7 +27,7 @@
  */
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import api from '../../../services/api';
-import { StudioSkeleton, EmptyState, SectionHeader, fmtDate } from '../shared';
+import { EmptyState, SectionHeader, fmtDate } from '../shared';
 import styles from './sections.module.css';
 import { inlineText } from '../../../utils/inlineI18n';
 
@@ -39,6 +39,75 @@ const MESSAGES_HELP = {
   ht: 'Bwat mesaj ou — konvèsasyon ak etidyan, kliyan ak lòt kreyatè yo. Klike sou yon konvèsasyon pou li mesaj yo.',
   en: 'Your inbox — conversations with students, clients and fellow creators. Click a conversation to read its messages.',
 };
+
+// Canned replies — the fastest way to answer the questions creators get
+// most (price, delivery, thanks for a tip). Inserted into the draft, never
+// sent straight away: the creator edits then sends.
+const REPLY_TEMPLATES = [
+  {
+    id: 'greeting',
+    icon: 'fa-hand-wave',
+    ht: 'Bonjou! Mèsi pou mesaj ou. Ki jan mwen ka ede w?',
+    en: 'Hi! Thanks for reaching out. How can I help?',
+  },
+  {
+    id: 'quote',
+    icon: 'fa-tag',
+    ht: 'Mèsi pou enterè w. Pri a se $— . Mwen ka voye detay yo si w vle.',
+    en: 'Thanks for your interest. The price is $—. I can send the details if you want.',
+  },
+  {
+    id: 'delivery',
+    icon: 'fa-truck',
+    ht: 'Kòmand ou an ap prepare. Li ap soti nan 2 a 3 jou ouvrab epi w ap resevwa yon imèl ak nimewo swivi a.',
+    en: 'Your order is being prepared. It ships in 2–3 business days and you will get a tracking email.',
+  },
+  {
+    id: 'tip',
+    icon: 'fa-hand-holding-heart',
+    ht: 'Mèsi anpil pou tip la — sa ede m kontinye kreye!',
+    en: 'Thank you so much for the tip — it keeps me creating!',
+  },
+  {
+    id: 'later',
+    icon: 'fa-clock',
+    ht: 'Mèsi pou mesaj ou. M ap reponn ou pi vit posib.',
+    en: 'Thanks for your message. I will reply as soon as I can.',
+  },
+];
+
+// Layout-matched loading state: the inbox is a list + a chat pane, so the
+// placeholder copies that geometry instead of flashing generic bars.
+function MessagesSkeleton() {
+  return (
+    <div
+      className={styles.section}
+      role="status"
+      aria-busy="true"
+      aria-label="Loading messages"
+    >
+      <div className={styles.messagesSkeletonLayout} aria-hidden="true">
+        <div className={styles.messagesSkeletonList}>
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className={styles.conversationSkeleton}>
+              <span className={styles.skeletonDot} />
+              <span className={styles.skeletonStack}>
+                <span className={styles.skeletonLineLg} />
+                <span className={styles.skeletonLineSm} />
+              </span>
+            </div>
+          ))}
+        </div>
+        <div className={styles.messagesSkeletonChat}>
+          <span className={styles.skeletonLineSm} style={{ width: '35%' }} />
+          <span className={`${styles.chatSkeletonBubble} ${styles.chatSkeletonTheirs}`} />
+          <span className={`${styles.chatSkeletonBubble} ${styles.chatSkeletonMine}`} />
+          <span className={`${styles.chatSkeletonBubble} ${styles.chatSkeletonTheirs} ${styles.chatSkeletonShort}`} />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function MessagesSection({ lang, t, showToast }) {
   const isHt = lang === 'ht';
@@ -53,7 +122,9 @@ export default function MessagesSection({ lang, t, showToast }) {
   const [threadLoading, setThreadLoading] = useState(false);
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
+  const [templateOpen, setTemplateOpen] = useState(false);
   const threadEndRef = useRef(null);
+  const composerRef = useRef(null);
 
   const load = useCallback(() => {
     let cancelled = false;
@@ -92,6 +163,7 @@ export default function MessagesSection({ lang, t, showToast }) {
   // the local unread badge for the conversation we just opened.
   const openChat = useCallback((convId) => {
     setActiveChat(convId);
+    setTemplateOpen(false);
     setThread(null);
     setThreadLoading(true);
     api.get(`${CONVERSATIONS_URL}${convId}/messages/`)
@@ -110,6 +182,14 @@ export default function MessagesSection({ lang, t, showToast }) {
       })
       .finally(() => setThreadLoading(false));
   }, [isHt, showToast]);
+
+  // Insert a canned reply into the draft (editable before sending).
+  const insertTemplate = useCallback((tpl) => {
+    const text = isHt ? tpl.ht : inlineText(lang, tpl.en);
+    setDraft((prev) => (prev.trim() ? `${prev.trim()} ${text}` : text));
+    setTemplateOpen(false);
+    composerRef.current?.focus();
+  }, [isHt, lang]);
 
   // Auto-scroll the thread to the newest message whenever it changes.
   useEffect(() => {
@@ -146,7 +226,7 @@ export default function MessagesSection({ lang, t, showToast }) {
       .finally(() => setSending(false));
   }, [draft, sending, activeChat, isHt, showToast]);
 
-  if (loading) return <StudioSkeleton rows={4} />;
+  if (loading) return <MessagesSkeleton />;
 
   // ─── Messaging not deployed on this backend (404) ────────────────
   if (state === 'unavailable') {
@@ -281,9 +361,17 @@ export default function MessagesSection({ lang, t, showToast }) {
                 </p>
               </div>
             ) : threadLoading ? (
-              <div className={styles.chatPlaceholder}>
-                <i className="fas fa-spinner fa-spin" aria-hidden="true" />
-                <p>{isHt ? 'Ap chaje...' : inlineText(lang, 'Loading...')}</p>
+              <div
+                className={styles.chatPane}
+                role="status"
+                aria-busy="true"
+                aria-label={isHt ? 'Ap chaje konvèsasyon an' : inlineText(lang, 'Loading conversation')}
+              >
+                <div className={styles.chatThread} aria-hidden="true">
+                  <span className={`${styles.chatSkeletonBubble} ${styles.chatSkeletonTheirs}`} />
+                  <span className={`${styles.chatSkeletonBubble} ${styles.chatSkeletonMine}`} />
+                  <span className={`${styles.chatSkeletonBubble} ${styles.chatSkeletonTheirs} ${styles.chatSkeletonShort}`} />
+                </div>
               </div>
             ) : (
               <div className={styles.chatPane}>
@@ -317,30 +405,64 @@ export default function MessagesSection({ lang, t, showToast }) {
                   })}
                   <div ref={threadEndRef} />
                 </div>
-                <form
-                  className={styles.chatComposer}
-                  onSubmit={(e) => { e.preventDefault(); sendReply(); }}
-                >
-                  <input
-                    type="text"
-                    className={styles.chatComposerInput}
-                    value={draft}
-                    onChange={(e) => setDraft(e.target.value)}
-                    placeholder={isHt ? 'Ekri yon mesaj...' : inlineText(lang, 'Type a message...')}
-                    aria-label={isHt ? 'Mesaj' : inlineText(lang, 'Message')}
-                    maxLength={2000}
-                  />
-                  <button
-                    type="submit"
-                    className={styles.chatComposerSend}
-                    disabled={sending || !draft.trim()}
-                    aria-label={isHt ? 'Voye' : inlineText(lang, 'Send')}
+                <div className={styles.chatComposeArea}>
+                  {templateOpen && (
+                    <div
+                      className={styles.chatTemplates}
+                      role="menu"
+                      aria-label={isHt ? 'Modèl repons' : inlineText(lang, 'Reply templates')}
+                    >
+                      {REPLY_TEMPLATES.map((tpl) => (
+                        <button
+                          key={tpl.id}
+                          type="button"
+                          role="menuitem"
+                          className={styles.chatTemplateItem}
+                          onClick={() => insertTemplate(tpl)}
+                        >
+                          <i className={`fas ${tpl.icon}`} aria-hidden="true" />
+                          <span>{isHt ? tpl.ht : inlineText(lang, tpl.en)}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <form
+                    className={styles.chatComposer}
+                    onSubmit={(e) => { e.preventDefault(); sendReply(); }}
                   >
-                    {sending
-                      ? <i className="fas fa-spinner fa-spin" aria-hidden="true" />
-                      : <i className="fas fa-paper-plane" aria-hidden="true" />}
-                  </button>
-                </form>
+                    <button
+                      type="button"
+                      className={styles.chatTemplatesToggle}
+                      onClick={() => setTemplateOpen((open) => !open)}
+                      aria-expanded={templateOpen}
+                      aria-haspopup="menu"
+                      aria-label={isHt ? 'Modèl repons' : inlineText(lang, 'Reply templates')}
+                      title={isHt ? 'Modèl repons' : inlineText(lang, 'Reply templates')}
+                    >
+                      <i className="fas fa-wand-magic-sparkles" aria-hidden="true" />
+                    </button>
+                    <input
+                      ref={composerRef}
+                      type="text"
+                      className={styles.chatComposerInput}
+                      value={draft}
+                      onChange={(e) => setDraft(e.target.value)}
+                      placeholder={isHt ? 'Ekri yon mesaj...' : inlineText(lang, 'Type a message...')}
+                      aria-label={isHt ? 'Mesaj' : inlineText(lang, 'Message')}
+                      maxLength={2000}
+                    />
+                    <button
+                      type="submit"
+                      className={styles.chatComposerSend}
+                      disabled={sending || !draft.trim()}
+                      aria-label={isHt ? 'Voye' : inlineText(lang, 'Send')}
+                    >
+                      {sending
+                        ? <i className="fas fa-spinner fa-spin" aria-hidden="true" />
+                        : <i className="fas fa-paper-plane" aria-hidden="true" />}
+                    </button>
+                  </form>
+                </div>
               </div>
             )}
           </div>

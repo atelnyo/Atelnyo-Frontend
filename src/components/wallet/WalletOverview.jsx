@@ -3,6 +3,8 @@
  *
  * Shows:
  *   - Balance card (available, pending, total earned, lifetime received)
+ *   - "Where your money comes from" — per-source totals from the ledger
+ *     (tips, Store sales, subscriptions, contracts, tickets, added funds)
  *   - Stats grid (transactions count, payout accounts, tips received/sent)
  *   - Quick action buttons (Deposit, Withdraw, Manage Payout Accounts)
  */
@@ -34,6 +36,70 @@ function StatCard({ icon, label, value, color, subtitle }) {
         {subtitle && <div className="wlt-stat-sub">{subtitle}</div>}
       </div>
     </div>
+  );
+}
+
+// Ledger sources, in the order a creator thinks about them. A guardrail:
+// the wallet only ever shows real ledger totals, never an estimate.
+const MONEY_SOURCES = [
+  { key: 'tips', icon: 'fa-hand-holding-heart', en: 'Tips', ht: 'Tips' },
+  { key: 'sales', icon: 'fa-bag-shopping', en: 'Store sales', ht: 'Vant Store' },
+  { key: 'subscriptions', icon: 'fa-crown', en: 'Subscriptions', ht: 'Abònman' },
+  { key: 'contracts', icon: 'fa-file-signature', en: 'Contract milestones', ht: 'Etap kontra' },
+  { key: 'tickets', icon: 'fa-ticket', en: 'Event tickets', ht: 'Tikè evènman' },
+  { key: 'deposits', icon: 'fa-circle-dollar-to-slot', en: 'Funds you added', ht: 'Lajan ou ajoute' },
+];
+
+function MoneySources({ breakdown, lang = 'en' }) {
+  const isHt = lang === 'ht';
+  const data = breakdown || {};
+  const rows = MONEY_SOURCES.map((source) => ({
+    ...source,
+    amount: Number(data[source.key] || 0),
+  }));
+  const anyMoney = rows.some((row) => row.amount > 0);
+  const withdrawn = Number(data.withdrawn || 0);
+
+  return (
+    <section className="wlt-sources" aria-label={isHt ? 'Kote lajan ou soti' : inlineText(lang, 'Where your money comes from')}>
+      <div className="wlt-sources-head">
+        <h3 className="wlt-sources-title">
+          <i className="fas fa-arrow-down-wide-short" />
+          {isHt ? 'Kote lajan ou soti' : inlineText(lang, 'Where your money comes from')}
+        </h3>
+        <span className="wlt-sources-total">
+          {isHt ? 'Total touche' : inlineText(lang, 'Total earned')}: {fmtCurrency(data.total_earned)}
+        </span>
+      </div>
+
+      {!anyMoney ? (
+        <p className="wlt-sources-empty">
+          {isHt
+            ? 'Poko gen lajan ki antre. Tips, vant Store, abònman ak kontra ap parèt isit la.'
+            : inlineText(lang, 'Nothing has come in yet. Tips, Store sales, subscriptions and contracts will show up here.')}
+        </p>
+      ) : (
+        <div className="wlt-sources-grid">
+          {rows.map((row) => (
+            <div
+              key={row.key}
+              className={`wlt-source-row ${row.amount > 0 ? '' : 'wlt-source-row-empty'}`}
+            >
+              <i className={`fas ${row.icon}`} aria-hidden="true" />
+              <span className="wlt-source-label">{isHt ? row.ht : inlineText(lang, row.en)}</span>
+              <span className="wlt-source-amount">{fmtCurrency(row.amount)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {withdrawn > 0 && (
+        <p className="wlt-sources-out">
+          <i className="fas fa-arrow-up" aria-hidden="true" />
+          {isHt ? 'Deja retire' : inlineText(lang, 'Already withdrawn')}: {fmtCurrency(withdrawn)}
+        </p>
+      )}
+    </section>
   );
 }
 
@@ -110,6 +176,9 @@ export default function WalletOverview({
           )}
         </div>
       </div>
+
+      {/* ─── Money Sources (how the balance got here) ────────── */}
+      <MoneySources breakdown={wallet.earnings_breakdown} lang={lang} />
 
       {/* ─── Stats Grid ────────────────────────────────────── */}
       <div className="wlt-stats-grid">

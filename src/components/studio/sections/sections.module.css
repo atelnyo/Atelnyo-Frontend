@@ -1716,6 +1716,185 @@
   cursor: not-allowed;
 }
 
+/* ─── Messages — reply templates ─────────────────────────────────── */
+.chatComposeArea {
+  display: flex;
+  flex-direction: column;
+  border-top: var(--border-w-sm) solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.chatComposeArea .chatComposer {
+  border-top: none;
+}
+
+.chatTemplatesToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: var(--border-w-sm) solid var(--border-color);
+  border-radius: var(--radius-full);
+  background: var(--surface-card-alt);
+  color: var(--text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.chatTemplatesToggle:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.chatTemplates {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-xxs);
+  padding: var(--sp-md) var(--sp-3xl);
+  border-bottom: var(--border-w-sm) solid var(--border-color);
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.chatTemplateItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-md);
+  padding: var(--sp-sm) var(--sp-md);
+  border: var(--border-w-sm) solid transparent;
+  border-radius: var(--radius-lg);
+  background: transparent;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.chatTemplateItem:hover {
+  background: var(--bg-highlight);
+  border-color: var(--border-color);
+}
+
+.chatTemplateItem i {
+  color: var(--color-primary);
+  margin-top: 2px;
+}
+
+/* ─── Messages — layout-matched loading skeleton ─────────────────── */
+.messagesSkeletonLayout {
+  display: flex;
+  min-height: 400px;
+  background: var(--surface-card);
+  border-radius: var(--radius-2xl);
+  border: var(--border-w-sm) solid var(--border-color);
+  overflow: hidden;
+}
+
+.messagesSkeletonList {
+  width: 260px;
+  flex-shrink: 0;
+  border-right: var(--border-w-sm) solid var(--border-color);
+}
+
+@media (max-width: 640px) {
+  .messagesSkeletonLayout {
+    flex-direction: column;
+    min-height: auto;
+  }
+  .messagesSkeletonList {
+    width: 100%;
+    border-right: none;
+    border-bottom: var(--border-w-sm) solid var(--border-color);
+  }
+}
+
+.conversationSkeleton {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-lg);
+  padding: var(--sp-xl) var(--sp-3xl);
+  border-bottom: var(--border-w-sm) solid var(--border-color);
+}
+
+.messagesSkeletonChat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-xl);
+  padding: var(--sp-3xl);
+}
+
+.skeletonDot {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-full);
+  background: var(--bg-highlight-medium);
+  flex-shrink: 0;
+  animation: msSkelPulse 1.4s ease-in-out infinite;
+}
+
+.skeletonStack {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.skeletonLineLg {
+  height: 10px;
+  width: 70%;
+  border-radius: 6px;
+  background: var(--bg-highlight-medium);
+  animation: msSkelPulse 1.4s ease-in-out infinite;
+}
+
+.skeletonLineSm {
+  height: 8px;
+  width: 45%;
+  border-radius: 6px;
+  background: var(--bg-highlight);
+  animation: msSkelPulse 1.4s ease-in-out infinite;
+}
+
+.chatSkeletonBubble {
+  height: 40px;
+  border-radius: var(--radius-2xl);
+  background: var(--bg-highlight-medium);
+  animation: msSkelPulse 1.4s ease-in-out infinite;
+}
+
+.chatSkeletonTheirs {
+  width: 60%;
+  align-self: flex-start;
+}
+
+.chatSkeletonMine {
+  width: 48%;
+  align-self: flex-end;
+  background: color-mix(in srgb, var(--color-primary) 22%, transparent);
+}
+
+.chatSkeletonShort {
+  width: 38%;
+}
+
+@keyframes msSkelPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeletonDot,
+  .skeletonLineLg,
+  .skeletonLineSm,
+  .chatSkeletonBubble {
+    animation: none;
+  }
+}
+
 /* ─── Messages — feature-unavailable / error states ────────────────
    Honest states instead of a misleading empty inbox: 404 on the
    conversations endpoint means the backend hasn't shipped messaging
