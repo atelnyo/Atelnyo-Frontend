@@ -395,6 +395,15 @@ export default function StoreProductPage() {
           <span>{reviewCount > 0 ? `${reviewCount} ${reviewCount === 1 ? 'review' : 'reviews'}` : 'No reviews yet'}</span>
         </div>
 
+        {p.seller_username && (
+          <p className="store-product__seller">
+            Sold by{' '}
+            <Link to={`/store/sellers/${encodeURIComponent(p.seller_username)}`}>
+              {p.seller_username}
+            </Link>
+          </p>
+        )}
+
         <div className="store-product__pricebox">
           <p className="store-product__price">{money(price, currency)}</p>
           {showCompare && (

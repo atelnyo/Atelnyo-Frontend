@@ -66,6 +66,20 @@ describe('ProductCard', () => {
     });
   });
 
+  it('links the seller to their storefront from the card', () => {
+    renderCard({ ...PRODUCT, seller_username: 'atelier-rose' });
+
+    const seller = screen.getByRole('link', { name: 'by @atelier-rose' });
+    expect(seller.getAttribute('href')).toBe('/store/sellers/atelier-rose');
+    expect(screen.getByRole('link', { name: 'View Poster' }).contains(seller)).toBe(false);
+  });
+
+  it('omits the seller line when the product has no seller username', () => {
+    renderCard();
+
+    expect(screen.queryByText(/^by @/)).toBeNull();
+  });
+
   it('disables add-to-cart for an out-of-stock product', () => {
     renderCard({ ...PRODUCT, stock: 0 });
 

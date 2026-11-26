@@ -168,6 +168,7 @@ describe('StoreOrderDetailPage', () => {
     await waitFor(() => expect(updateShippingAddress).toHaveBeenCalledWith(
       '42',
       expect.objectContaining({ city: 'Cap-Haïtien', address1: '12 Rue Capois' }),
+      '',
     ));
   });
 
@@ -218,7 +219,39 @@ describe('StoreOrderDetailPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Send message' }));
 
     await waitFor(() => expect(contactSeller).toHaveBeenCalledWith(
-      '42', 'Kote kòmand mwen?', 7,
+      '42', 'Kote kòmand mwen?', 7, '',
     ));
+  });
+
+  it('lets a guest correct the delivery address with their token', async () => {
+    getOrder.mockResolvedValue({ data: { ...order, can_edit_shipping: true } });
+    renderAt('/account/orders/42?token=guest-tok');
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Edit address' }));
+    fireEvent.change(screen.getByLabelText('City'), { target: { value: 'Cap-Haïtien' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save address' }));
+
+    await waitFor(() => expect(updateShippingAddress).toHaveBeenCalledWith(
+      '42',
+      expect.objectContaining({ city: 'Cap-Haïtien' }),
+      'guest-tok',
+    ));
+  });
+
+  it('lets a guest message the seller from their order link', async () => {
+    useAuthStore.setState({ user: { id: 1, username: 'amy' } });
+    useAuthStore.setState({ user: null, loading: false });
+    renderAt('/account/orders/42?token=guest-tok');
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Message atelier' }));
+    fireEvent.change(screen.getByLabelText('Message to the seller'), {
+      target: { value: 'Adrès la pa bon' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Send message' }));
+
+    await waitFor(() => expect(contactSeller).toHaveBeenCalledWith(
+      '42', 'Adrès la pa bon', 7, 'guest-tok',
+    ));
+    expect(await screen.findByText(/reply goes to the email on this order/)).toBeTruthy();
   });
 });

@@ -207,7 +207,7 @@ export default function StoreOrderDetailPage() {
     setAddressBusy(true);
     setAddressNotice(null);
     try {
-      const { data } = await storeService.updateShippingAddress(orderId, addressForm);
+      const { data } = await storeService.updateShippingAddress(orderId, addressForm, guestToken);
       setOrder((previous) => ({
         ...previous,
         shipping_address: data.shipping_address,
@@ -259,12 +259,14 @@ export default function StoreOrderDetailPage() {
     setContactBusy(true);
     setContactNotice(null);
     try {
-      await storeService.contactSeller(orderId, body, seller.id);
+      await storeService.contactSeller(orderId, body, seller.id, guestToken);
       setContactBody('');
       setContactSellerId(null);
       setContactNotice({
         kind: 'ok',
-        text: `Message sent to ${seller.username || 'the seller'} — the reply lands in your messages.`,
+        text: isGuest
+          ? `Message sent to ${seller.username || 'the seller'} — the reply goes to the email on this order.`
+          : `Message sent to ${seller.username || 'the seller'} — the reply lands in your messages.`,
       });
     } catch (err) {
       const detail = err?.response?.data?.detail || err?.response?.data?.body;
@@ -533,7 +535,7 @@ export default function StoreOrderDetailPage() {
                       <span key={`${index}-${line}`}>{line}<br /></span>
                     ))}
                   </address>
-                  {order.can_edit_shipping && !isGuest ? (
+                  {order.can_edit_shipping ? (
                     <button
                       type="button"
                       className="store-btn store-btn--ghost"
@@ -598,12 +600,14 @@ export default function StoreOrderDetailPage() {
             </section>
           )}
 
-          {sellers.length > 0 && !isGuest && (
+          {sellers.length > 0 && (
             <section className="store-order__card">
               <h2>{sellers.length > 1 ? 'Your sellers' : 'Your seller'}</h2>
               <p className="store-order__hint">
                 Delivery question? Message whoever is preparing this order —
-                the thread and the reply live in your messages.
+                {isGuest
+                  ? ' as a guest, their reply goes to the email you used at checkout.'
+                  : ' the thread and the reply live in your messages.'}
               </p>
               {contactNotice && (
                 <p
@@ -620,6 +624,14 @@ export default function StoreOrderDetailPage() {
                       <span className="store-order__item-title">
                         {seller.username || 'Seller'}
                       </span>
+                      {seller.username && (
+                        <Link
+                          className="store-order__seller-link"
+                          to={`/store/sellers/${encodeURIComponent(seller.username)}`}
+                        >
+                          Visit store
+                        </Link>
+                      )}
                     </div>
                     {contactSellerId === seller.id ? (
                       <div className="store-order__item-side">

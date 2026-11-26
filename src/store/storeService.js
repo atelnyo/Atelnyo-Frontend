@@ -36,6 +36,15 @@ export const storeService = {
   getProduct: (slugOrId) => api.get(`marketplace/products/${encodeURIComponent(slugOrId)}/`),
   // Up to 8 live products related by category (seller fallback).
   listRelated: (id) => api.get(`marketplace/products/${encodeURIComponent(id)}/related/`),
+  // One seller's live catalog (the catalog API filters on seller username).
+  listSellerProducts: (username, params) => api.get('marketplace/products/', {
+    params: { seller: username, ...(params || {}) },
+  }),
+  // Shop identity for the seller storefront. Best-effort: a seller without
+  // a public creator profile 404s and the page falls back to @username.
+  getSellerProfile: (username) => api.get(
+    `creator-profiles/${encodeURIComponent(username)}/`,
+  ),
   // Guests pass { email, name }; signed-in buyers pass nothing.
   createOrder: (items, guest, shippingAddress, shippingMethod) =>
     api.post('marketplace/orders/', {
@@ -87,15 +96,20 @@ export const storeService = {
     orderId != null ? { order_id: orderId } : {},
   ),
   // Opens (or reuses) the buyer↔seller message thread for this order.
-  // sellerId disambiguates a cart that holds items from several shops.
-  contactSeller: (orderId, body, sellerId) => api.post(
+  // sellerId disambiguates a cart that holds items from several shops. A
+  // guest sends their token: with no account there is no thread, so the
+  // backend emails the seller with the guest's address as Reply-To.
+  contactSeller: (orderId, body, sellerId, guestToken) => api.post(
     `marketplace/orders/${encodeURIComponent(orderId)}/contact-seller/`,
     sellerId != null ? { body, seller_id: sellerId } : { body },
+    guestHeaders(guestToken),
   ),
   // Correct the delivery address while the supplier does not have the order.
-  updateShippingAddress: (orderId, shippingAddress) => api.post(
+  // A guest passes their token for the same reason they can read the order.
+  updateShippingAddress: (orderId, shippingAddress, guestToken) => api.post(
     `marketplace/orders/${encodeURIComponent(orderId)}/shipping-address/`,
     { shipping_address: shippingAddress },
+    guestHeaders(guestToken),
   ),
   // Release an unpaid order: the units reserved at checkout return to stock
   // immediately instead of waiting for the 24h abandoned-order sweep. A guest

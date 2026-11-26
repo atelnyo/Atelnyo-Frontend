@@ -219,6 +219,16 @@ export default function ProductCard({ product: p }) {
           {hasSale && <s className="store-card__price-was">{money(p.compare_at_price, currency)}</s>}
         </p>
       </Link>
+      {/* Sibling of the link (anchors cannot nest): the seller's storefront
+          is reachable from the grid without opening the product first. */}
+      {p.seller_username && (
+        <Link
+          className="store-card__seller"
+          to={`/store/sellers/${encodeURIComponent(p.seller_username)}`}
+        >
+          by @{p.seller_username}
+        </Link>
+      )}
       {/* Sibling of the link (not a nested button inside an anchor): a
           favorite click must never navigate to the product page. */}
       <button

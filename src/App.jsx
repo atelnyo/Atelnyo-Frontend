@@ -153,6 +153,7 @@ const ProductDetail      = lazy(() => import('./components/ProductDetail'));
 const StoreLayout        = lazy(() => import('./store/StoreLayout'));
 const StoreNotFound      = lazy(() => import('./store/StoreLayout').then((m) => ({ default: m.StoreNotFound })));
 const StoreListPage      = lazy(() => import('./store/StoreListPage'));
+const StoreSellerPage    = lazy(() => import('./store/StoreSellerPage'));
 const StoreProductPage   = lazy(() => import('./store/StoreProductPage'));
 const StoreCartPage      = lazy(() => import('./store/StoreCartPage'));
 const StoreClaimPage     = lazy(() => import('./store/StoreClaimPage'));
@@ -3745,6 +3746,7 @@ function App() {
           <Route path="search" element={<StoreListPage />} />
           <Route path="categories/:categorySlug" element={<StoreListPage />} />
           <Route path="products/:slug" element={<StoreProductPage />} />
+          <Route path="sellers/:username" element={<StoreSellerPage />} />
           <Route path="cart" element={<StoreCartPage />} />
           <Route path="claim" element={<StoreClaimPage />} />
           <Route path="favorites" element={<StoreFavoritesPage />} />
