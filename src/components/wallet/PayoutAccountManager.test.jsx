@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 /**
- * PayoutAccountManager — PayPal OAuth popup behavior.
+ * PayoutAccountManager — PayPal OAuth window behavior.
  *
- * The OAuth popup must be opened inside the click gesture, before the
- * network request. Opening it after `await` lets browsers block it, which
- * leaves the creator with no PayPal window and no callback.
+ * The window must open at the real PayPal URL, never at about:blank: a slow
+ * or rejected /paypal/connect/ used to leave a blank tab with no message.
+ * If the browser blocks the popup (common after an await), the URL stays on
+ * screen as a link so the next click still reaches PayPal.
  */
 import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
@@ -16,15 +17,9 @@ vi.mock('../../services/api', () => ({
   walletService: { paypalConnect: vi.fn() },
 }));
 
-function deferred() {
-  let resolve;
-  const promise = new Promise((resolver) => {
-    resolve = resolver;
-  });
-  return { promise, resolve };
-}
+const AUTH_URL = 'https://www.paypal.com/connect?flowEntry=static&client_id=abc';
 
-describe('PayoutAccountManager — PayPal OAuth popup', () => {
+describe('PayoutAccountManager — PayPal OAuth window', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -33,60 +28,60 @@ describe('PayoutAccountManager — PayPal OAuth popup', () => {
     vi.restoreAllMocks();
   });
 
-  it('opens the popup before awaiting the auth URL', async () => {
-    const pending = deferred();
-    walletService.paypalConnect.mockReturnValue(pending.promise);
-    const popup = {
-      location: { href: 'about:blank' },
-      close: vi.fn(),
-      closed: false,
-    };
-    const openSpy = vi.spyOn(window, 'open').mockReturnValue(popup);
+  it('opens the window at the PayPal URL, never at about:blank', async () => {
+    walletService.paypalConnect.mockResolvedValue({
+      data: { auth_url: AUTH_URL },
+    });
+    const openSpy = vi.spyOn(window, 'open').mockReturnValue({ closed: false, close: vi.fn() });
 
     render(<PayoutAccountManager accounts={[]} lang="en" />);
     fireEvent.click(screen.getByRole('button', { name: /connect with paypal/i }));
 
-    expect(openSpy).toHaveBeenCalledWith(
-      'about:blank',
-      'paypal_connect',
-      expect.stringContaining('width=600'),
-    );
-    expect(walletService.paypalConnect).toHaveBeenCalledTimes(1);
-
-    pending.resolve({
-      data: { auth_url: 'https://www.paypal.com/connect?flowEntry=static' },
-    });
-
     await waitFor(() => {
-      expect(popup.location.href).toBe(
-        'https://www.paypal.com/connect?flowEntry=static',
+      expect(openSpy).toHaveBeenCalledWith(
+        AUTH_URL,
+        'paypal_connect',
+        expect.stringContaining('width=600'),
       );
     });
+    expect(openSpy).not.toHaveBeenCalledWith(
+      'about:blank',
+      expect.anything(),
+      expect.anything(),
+    );
   });
 
-  it('reports a closed window instead of a bogus connection failure', async () => {
-    const pending = deferred();
-    walletService.paypalConnect.mockReturnValue(pending.promise);
-    const popup = {
-      location: { href: 'about:blank' },
-      close: vi.fn(),
-      closed: false,
-    };
-    vi.spyOn(window, 'open').mockReturnValue(popup);
+  it('shows the API error instead of leaving a blank window', async () => {
+    walletService.paypalConnect.mockRejectedValue({
+      response: {
+        data: {
+          error: 'PayPal rejected the configured credentials for sandbox mode.',
+        },
+      },
+    });
+    const openSpy = vi.spyOn(window, 'open');
 
     render(<PayoutAccountManager accounts={[]} lang="en" />);
     fireEvent.click(screen.getByRole('button', { name: /connect with paypal/i }));
 
-    // The user closes the popup while the auth URL request is still running.
-    popup.closed = true;
-    pending.resolve({
-      data: { auth_url: 'https://www.paypal.com/connect?flowEntry=static' },
-    });
-
     await waitFor(() => {
-      expect(screen.getByText(/closed the PayPal window/i)).toBeTruthy();
+      expect(screen.getByText(/rejected the configured credentials/i)).toBeTruthy();
     });
-    expect(popup.location.href).toBe('about:blank');
+    expect(openSpy).not.toHaveBeenCalled();
+  });
+
+  it('offers the PayPal URL as a link when the popup is blocked', async () => {
+    walletService.paypalConnect.mockResolvedValue({
+      data: { auth_url: AUTH_URL },
+    });
+    vi.spyOn(window, 'open').mockReturnValue(null);
+
+    render(<PayoutAccountManager accounts={[]} lang="en" />);
+    fireEvent.click(screen.getByRole('button', { name: /connect with paypal/i }));
+
+    const link = await screen.findByRole('link', { name: /open paypal/i });
+    expect(link.getAttribute('href')).toBe(AUTH_URL);
+    expect(screen.getByText(/window was blocked/i)).toBeTruthy();
   });
 
   it('adds a payout account from a typed PayPal email', async () => {
@@ -120,15 +115,5 @@ describe('PayoutAccountManager — PayPal OAuth popup', () => {
       expect(screen.getByText(/valid paypal email/i)).toBeTruthy();
     });
     expect(onAdd).not.toHaveBeenCalled();
-  });
-
-  it('shows an error and skips the API when the popup is blocked', () => {
-    vi.spyOn(window, 'open').mockReturnValue(null);
-
-    render(<PayoutAccountManager accounts={[]} lang="en" />);
-    fireEvent.click(screen.getByRole('button', { name: /connect with paypal/i }));
-
-    expect(screen.getByText(/popup blocked/i)).toBeTruthy();
-    expect(walletService.paypalConnect).not.toHaveBeenCalled();
   });
 });

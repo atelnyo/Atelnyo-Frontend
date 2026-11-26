@@ -6,7 +6,9 @@
  *
  * Features:
  *   - List payout accounts with method icons and labels
- *   - "Connect with PayPal" OAuth button (popup flow)
+ *   - "Connect with PayPal" OAuth button — the window is opened only once
+ *     the auth URL is known, so a slow/failed request can never leave the
+ *     creator staring at an about:blank tab
  *   - Manual PayPal email fallback — PayPal OAuth only works once the
  *     PayPal app has "Log in with PayPal" enabled and this exact Return
  *     URL registered; until then a payout account is still just an email
@@ -38,6 +40,9 @@ export default function PayoutAccountManager({
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [connecting, setConnecting] = useState(false);
   const [connectError, setConnectError] = useState('');
+  // Held only when the browser refused the popup, so the creator still has
+  // a one-click way to reach PayPal instead of a dead end.
+  const [authUrl, setAuthUrl] = useState('');
   const [manualEmail, setManualEmail] = useState('');
   const [manualError, setManualError] = useState('');
   const [savingManual, setSavingManual] = useState(false);
@@ -128,56 +133,48 @@ export default function PayoutAccountManager({
     }
   }, [manualEmail, onAdd, accounts.length, isHt, lang]);
 
-  // ── Open PayPal OAuth popup ────────────────────────────────────────
+  // ── Start PayPal OAuth ─────────────────────────────────────────────
+  // The auth URL is fetched FIRST. Pre-opening an empty window made every
+  // slow or rejected request look like a broken page: PayPal answers in
+  // seconds when its app config is wrong, but the request still has to
+  // travel to the API, and the creator was left on about:blank with no
+  // message until it returned.
   const handleConnectPayPal = useCallback(async () => {
     setConnecting(true);
     setConnectError('');
-
-    // Open the popup synchronously inside the click gesture. Opening it
-    // after `await` lets browsers treat it as an unsolicited popup.
-    const w = 600, h = 700;
-    const left = (window.screen.width - w) / 2;
-    const top = (window.screen.height - h) / 2;
-    const popup = window.open(
-      'about:blank',
-      'paypal_connect',
-      `width=${w},height=${h},left=${left},top=${top},scrollbars=yes`,
-    );
-    if (!popup) {
-      setConnecting(false);
-      setConnectError(isHt
-        ? 'Popup la bloke — pèmèt popup pou sit sa a epi eseye ankò.'
-        : inlineText(lang, 'Popup blocked — allow popups for this site and retry.'));
-      return;
-    }
-    popupRef.current = popup;
+    setAuthUrl('');
 
     try {
       const res = await walletService.paypalConnect();
-      const authUrl = res?.data?.auth_url;
-      if (!authUrl) {
-        popup.close();
-        popupRef.current = null;
+      const url = res?.data?.auth_url;
+      if (!url) {
         setConnecting(false);
         setConnectError(isHt
           ? 'Pa resevwa lyen otorizasyon PayPal.'
           : inlineText(lang, 'No PayPal authorization URL received.'));
         return;
       }
-      // The window can be closed while the URL is in flight; navigating a
-      // closed popup throws, which would surface as a bogus connection error.
-      if (popup.closed) {
-        popupRef.current = null;
+
+      const w = 600, h = 700;
+      const left = (window.screen.width - w) / 2;
+      const top = (window.screen.height - h) / 2;
+      const popup = window.open(
+        url,
+        'paypal_connect',
+        `width=${w},height=${h},left=${left},top=${top},scrollbars=yes`,
+      );
+      if (!popup) {
+        // Popup blocked (common after an await). Keep the URL on screen so
+        // the next click is a direct user gesture the browser allows.
+        setAuthUrl(url);
         setConnecting(false);
         setConnectError(isHt
-          ? 'Ou fèmen fenèt PayPal la anvan koneksyon an fini.'
-          : inlineText(lang, 'You closed the PayPal window before connecting.'));
+          ? 'Fenèt PayPal la bloke. Klike "Ouvri PayPal" anba a pou kontinye.'
+          : inlineText(lang, 'The PayPal window was blocked. Click "Open PayPal" below to continue.'));
         return;
       }
-      popup.location.href = authUrl;
+      popupRef.current = popup;
     } catch (err) {
-      popup.close();
-      popupRef.current = null;
       setConnecting(false);
       setConnectError(err?.response?.data?.error || err?.message || (isHt
         ? 'Erè lansman koneksyon PayPal.'
@@ -228,6 +225,17 @@ export default function PayoutAccountManager({
           </button>
           {connectError && (
             <div className="wlt-form-error" style={{ marginTop: '0.5rem' }}>{connectError}</div>
+          )}
+          {authUrl && (
+            <a
+              className="btn-secondary wlt-paypal-connect-btn"
+              style={{ marginTop: '0.5rem' }}
+              href={authUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <i className={`fab ${PAYPAL_ICON}`} /> {isHt ? 'Ouvri PayPal' : inlineText(lang, 'Open PayPal')}
+            </a>
           )}
           <p className="wlt-paypal-connect-hint">
             {isHt
