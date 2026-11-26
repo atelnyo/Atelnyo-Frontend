@@ -29,6 +29,7 @@ const KEY_LABELS = {
   paypal_client_secret: { en: 'PayPal Client Secret',        ht: 'PayPal Sekrè Kliyan' },
   paypal_webhook_id:    { en: 'PayPal Webhook ID',           ht: 'PayPal Webhook ID' },
   paypal_mode:          { en: 'PayPal Mode',                 ht: 'PayPal Mode' },
+  paypal_return_url:    { en: 'PayPal Return URL',            ht: 'PayPal Return URL' },
   stripe_secret_key:    { en: 'Stripe Secret Key',           ht: 'Stripe Kle Sekrè' },
   stripe_webhook_secret:{ en: 'Stripe Webhook Secret',       ht: 'Stripe Webhook Sekrè' },
   printify_shipping_policy: { en: 'Printify destination policy (JSON)', ht: 'Règle destinasyon Printify (JSON)' },
@@ -89,7 +90,7 @@ const CONFIG_GROUPS = [
     desc: { en: 'PayPal & Stripe credentials for checkout and payouts', ht: 'Kle PayPal & Stripe pou acha ak peman' },
     keys: [
       'paypal_client_id', 'paypal_client_secret', 'paypal_webhook_id', 'paypal_mode',
-      'stripe_secret_key', 'stripe_webhook_secret',
+      'paypal_return_url', 'stripe_secret_key', 'stripe_webhook_secret',
     ],
   },
   {
