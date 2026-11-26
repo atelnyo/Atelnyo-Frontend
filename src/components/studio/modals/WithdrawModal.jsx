@@ -125,7 +125,9 @@ export default function WithdrawModal({ onClose, onSuccess, lang, showToast, onO
       if (form.payout_account) {
         payload.payout_account = Number(form.payout_account);
       } else {
-        payload.account_details = form.account_details.trim();
+        // No saved account: the backend stores what was typed so finance
+        // has a real destination to pay.
+        payload.payout_details = form.account_details.trim();
       }
       await api.post('wallet/payouts/', payload);
       showToast?.(

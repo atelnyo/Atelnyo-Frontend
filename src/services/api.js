@@ -1750,6 +1750,11 @@ export const walletService = {
   // Payout requests (withdrawals).
   payouts: (params) => api.get('wallet/payouts/', { params }),
   requestPayout: (data) => api.post('wallet/payouts/', data),
+  // Staff: withdrawal queue + the finance totals (pending oldest first).
+  payoutQueue: (params) => api.get('wallet/payouts/queue/', { params }),
+  // Staff: mark a withdrawal paid (external_ref = provider transaction id)
+  // or failed (the reserved funds are refunded to the creator's wallet).
+  processPayout: (id, data) => api.post(`wallet/payouts/${id}/process/`, data),
   // Tips.
   tipsSent: (params) => api.get('tips/sent/', { params }),
   tipsReceived: (params) => api.get('tips/received/', { params }),
@@ -1760,6 +1765,10 @@ export const walletService = {
   // server-side order, then capture it after the payer approves.
   tipPaypalOrder: (data) => api.post('tips/paypal/order/', data),
   tipPaypalCapture: (data) => api.post('tips/paypal/capture/', data),
+  // Staff: find a creator's wallet (username, email or id) and credit it.
+  // The manual path that works even when PayPal is unavailable.
+  adminLookup: (q) => api.get('wallet/admin/lookup/', { params: { q } }),
+  adminCredit: (data) => api.post('wallet/deposit/', data),
   // Identity verification (payout gate).
   identityStatus: () => api.get('identity/verification/'),
   submitIdentity: (data) => api.post('identity/verification/', data),

@@ -136,6 +136,16 @@ export default function DepositModal({ onClose, onSuccess, lang, showToast }) {
         setPhase('processing');
         try {
           const capture = await walletTopupService.capture(depositRef.paypal_order_id);
+          if (capture?.data?.credited === false) {
+            // The provider took the money but the ledger credit did not
+            // apply — never tell the creator the wallet is funded.
+            setPhase('failed');
+            setErrorMsg(capture?.data?.error || t(
+              'PayPal took the payment but the wallet was not credited. Contact support with the reference.',
+              'PayPal pran peman an men bous la pa resevwa lajan an. Kontakte sipò ak referans lan.',
+            ));
+            return;
+          }
           setPhase('success');
           showToastRef.current?.(
             t('✅ Wallet funded successfully!', '✅ Bous ou fin ranpli avèk siksè!'),

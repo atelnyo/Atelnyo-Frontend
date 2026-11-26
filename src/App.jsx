@@ -123,6 +123,8 @@ const AdminRuleEngine = lazy(() => import('./components/admin/AdminRuleEngine'))
 const AdminFAQ = lazy(() => import('./components/admin/AdminFAQ'));
 const AdminPlatformFAQ = lazy(() => import('./components/admin/AdminPlatformFAQ'));
 const AdminPendingOrders = lazy(() => import('./components/admin/AdminPendingOrders'));
+const AdminPayouts = lazy(() => import('./components/admin/AdminPayouts'));
+const AdminWalletCredit = lazy(() => import('./components/admin/AdminWalletCredit'));
 const FAQPage = lazy(() => import('./components/FAQPage'));
 const HelpPage = lazy(() => import('./components/HelpPage'));
 const CertificateVerify = lazy(() => import('./components/CertificateVerify'));
@@ -3349,6 +3351,30 @@ function App() {
                 lang={lang}
                 showToast={showToast}
                 user={user}
+                onNavigate={handleNavigate}
+              />
+            </RequireRole>
+          </AuthGate>
+        } />
+        {/* Wallet — creator withdrawals waiting to be paid out. */}
+        <Route path={SHEETS.ADMIN_PAYOUTS} element={
+          <AuthGate user={user}>
+            <RequireRole user={user} role="staff" redirect="/">
+              <AdminPayouts
+                lang={lang}
+                showToast={showToast}
+                onNavigate={handleNavigate}
+              />
+            </RequireRole>
+          </AuthGate>
+        } />
+        {/* Wallet — staff manual credit (works without PayPal). */}
+        <Route path={SHEETS.ADMIN_WALLETS} element={
+          <AuthGate user={user}>
+            <RequireRole user={user} role="staff" redirect="/">
+              <AdminWalletCredit
+                lang={lang}
+                showToast={showToast}
                 onNavigate={handleNavigate}
               />
             </RequireRole>
