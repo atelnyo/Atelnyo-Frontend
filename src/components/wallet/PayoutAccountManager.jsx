@@ -7,6 +7,9 @@
  * Features:
  *   - List payout accounts with method icons and labels
  *   - "Connect with PayPal" OAuth button (popup flow)
+ *   - Manual PayPal email fallback — PayPal OAuth only works once the
+ *     PayPal app has "Log in with PayPal" enabled and this exact Return
+ *     URL registered; until then a payout account is still just an email
  *   - Delete account with confirmation
  *   - Set default account
  */
@@ -35,6 +38,9 @@ export default function PayoutAccountManager({
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [connecting, setConnecting] = useState(false);
   const [connectError, setConnectError] = useState('');
+  const [manualEmail, setManualEmail] = useState('');
+  const [manualError, setManualError] = useState('');
+  const [savingManual, setSavingManual] = useState(false);
   const popupRef = useRef(null);
 
   // ── Listen for postMessage from PayPal OAuth popup ─────────────────
@@ -66,6 +72,61 @@ export default function PayoutAccountManager({
       }
     };
   }, []);
+
+  // ── Stop "Connecting…" when the popup closes without a result ──────
+  // PayPal shows its own error page when the app's Return URL is not
+  // registered or "Log in with PayPal" is not enabled, and never redirects
+  // back. The popup just sits there, then closes — leaving the button
+  // spinning forever with no explanation.
+  useEffect(() => {
+    if (!connecting) return undefined;
+    const startedAt = Date.now();
+    const timer = setInterval(() => {
+      const popup = popupRef.current;
+      const abandoned = popup && popup.closed;
+      const timedOut = Date.now() - startedAt > 5 * 60 * 1000;
+      if (!abandoned && !timedOut) return;
+      clearInterval(timer);
+      setConnecting(false);
+      if (abandoned) popupRef.current = null;
+      setConnectError((current) => current || (isHt
+        ? 'Fenèt PayPal la fèmen san repons. Eseye ankò, oswa antre imèl PayPal ou anba a.'
+        : inlineText(lang, 'The PayPal window closed without a result. Try again, or enter your PayPal email below.')));
+    }, 800);
+    return () => clearInterval(timer);
+  }, [connecting, isHt, lang]);
+
+  // ── Manual fallback: save a PayPal email as the payout account ──────
+  const handleManualSubmit = useCallback(async (event) => {
+    event.preventDefault();
+    const email = manualEmail.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setManualError(isHt
+        ? 'Antre yon imèl PayPal valid.'
+        : inlineText(lang, 'Enter a valid PayPal email.'));
+      return;
+    }
+    setManualError('');
+    setSavingManual(true);
+    try {
+      await onAdd?.({
+        method: 'paypal',
+        label: `PayPal (${email})`,
+        paypal_email: email,
+        is_default: accounts.length === 0,
+      });
+      setManualEmail('');
+    } catch (err) {
+      setManualError(
+        err?.response?.data?.error
+        || err?.response?.data?.detail
+        || err?.message
+        || (isHt ? 'Pa t ka anrejistre imèl la.' : inlineText(lang, 'Could not save that PayPal email.')),
+      );
+    } finally {
+      setSavingManual(false);
+    }
+  }, [manualEmail, onAdd, accounts.length, isHt, lang]);
 
   // ── Open PayPal OAuth popup ────────────────────────────────────────
   const handleConnectPayPal = useCallback(async () => {
@@ -173,6 +234,41 @@ export default function PayoutAccountManager({
               ? 'Ou pral konekte sou paypal.com pou verifye kont ou.'
               : inlineText(lang, 'You\'ll authenticate on PayPal.com to verify your account.')}
           </p>
+        </div>
+      )}
+
+      {/* Manual fallback — PayPal OAuth needs "Log in with PayPal" enabled
+          and this exact Return URL registered on the PayPal app. Until that
+          is done the popup dead-ends on PayPal, so let the creator connect
+          the payout email directly and withdraw anyway. */}
+      {!loading && (
+        <div className="wlt-payout-form">
+          <h4 className="wlt-form-title">
+            <i className="fas fa-keyboard" /> {isHt ? 'Pa ka konekte? Antre imèl PayPal ou' : inlineText(lang, 'Can\u2019t connect? Enter your PayPal email')}
+          </h4>
+          <form onSubmit={handleManualSubmit} noValidate>
+            <div className="wlt-form-field">
+              <label className="wlt-form-label" htmlFor="wlt-paypal-email">
+                {isHt ? 'Imèl PayPal' : inlineText(lang, 'PayPal email')}
+              </label>
+              <input
+                id="wlt-paypal-email"
+                className="wlt-form-input"
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                placeholder="you@example.com"
+                value={manualEmail}
+                onChange={(e) => { setManualEmail(e.target.value); setManualError(''); }}
+              />
+            </div>
+            {manualError && <div className="wlt-form-error">{manualError}</div>}
+            <button type="submit" className="btn-secondary" disabled={savingManual || !manualEmail.trim()}>
+              {savingManual
+                ? <><i className="fas fa-spinner fa-spin" /> {isHt ? 'Ap anrejistre...' : inlineText(lang, 'Saving...')}</>
+                : <><i className="fas fa-plus" /> {isHt ? 'Ajoute kont PayPal' : inlineText(lang, 'Add PayPal account')}</>}
+            </button>
+          </form>
         </div>
       )}
 

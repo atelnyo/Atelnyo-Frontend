@@ -89,6 +89,39 @@ describe('PayoutAccountManager — PayPal OAuth popup', () => {
     expect(popup.location.href).toBe('about:blank');
   });
 
+  it('adds a payout account from a typed PayPal email', async () => {
+    const onAdd = vi.fn().mockResolvedValue(undefined);
+    render(<PayoutAccountManager accounts={[]} onAdd={onAdd} lang="en" />);
+
+    fireEvent.change(screen.getByLabelText(/paypal email/i), {
+      target: { value: 'creator@paypal.dev' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /add paypal account/i }));
+
+    await waitFor(() => {
+      expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({
+        method: 'paypal',
+        paypal_email: 'creator@paypal.dev',
+        is_default: true,
+      }));
+    });
+  });
+
+  it('rejects an invalid PayPal email without calling the API', async () => {
+    const onAdd = vi.fn();
+    render(<PayoutAccountManager accounts={[]} onAdd={onAdd} lang="en" />);
+
+    fireEvent.change(screen.getByLabelText(/paypal email/i), {
+      target: { value: 'not-an-email' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /add paypal account/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/valid paypal email/i)).toBeTruthy();
+    });
+    expect(onAdd).not.toHaveBeenCalled();
+  });
+
   it('shows an error and skips the API when the popup is blocked', () => {
     vi.spyOn(window, 'open').mockReturnValue(null);
 

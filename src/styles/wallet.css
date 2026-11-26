@@ -649,6 +649,14 @@ body.dark-mode .wlt-payout-connect {
   border-radius: 12px;
   border: 1px solid var(--border-color, rgba(216,27,96,0.1));
 }
+.wlt-payout-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+.wlt-payout-form .wlt-form-field { width: 100%; }
+.wlt-payout-form .wlt-form-input { width: 100%; box-sizing: border-box; }
 body.dark-mode .wlt-payout-form {
   background: rgba(255,255,255,0.03);
   border-color: rgba(255,255,255,0.08);
