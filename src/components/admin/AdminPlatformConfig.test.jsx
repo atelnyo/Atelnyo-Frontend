@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 
 const list = vi.fn();
 const update = vi.fn();
+const test = vi.fn();
 const paypalHealth = vi.fn();
 
 vi.mock('../../services/api', () => ({
@@ -13,7 +14,7 @@ vi.mock('../../services/api', () => ({
     update: (...args) => update(...args),
     create: vi.fn(),
     remove: vi.fn(),
-    test: vi.fn(),
+    test: (...args) => test(...args),
     paypalHealth: (...args) => paypalHealth(...args),
   },
 }));
@@ -58,6 +59,7 @@ describe('AdminPlatformConfig', () => {
   beforeEach(() => {
     list.mockReset();
     update.mockReset();
+    test.mockReset();
     paypalHealth.mockReset().mockResolvedValue({
       data: { mode: 'live', last_failure: null, last_success: null },
     });
@@ -83,5 +85,37 @@ describe('AdminPlatformConfig', () => {
     // A single click saves the exact token the gateway understands.
     fireEvent.click(container.querySelector('.ad-cfg-group-head .ad-cfg-mode-sandbox'));
     await waitFor(() => expect(update).toHaveBeenCalledWith(21, { value: 'sandbox' }));
+  });
+
+  it('shows the PayPal Return URL in Payments and tests it in live mode', async () => {
+    const callback = 'https://api.atelnyo.site/api/wallet/payout-accounts/paypal/callback/';
+    const message = 'Return URL kòrèk — anrejiste l egzakteman nan app PayPal live la.';
+    list.mockResolvedValue({
+      data: {
+        results: [
+          row(1, 'paypal_mode', { value: 'live', source: 'database' }),
+          row(2, 'paypal_return_url', { value: callback, source: 'database' }),
+        ],
+        count: 2,
+        next: null,
+      },
+    });
+    test.mockResolvedValue({ data: { ok: true, message } });
+    const showToast = vi.fn();
+
+    render(<AdminPlatformConfig lang="en" showToast={showToast} />);
+
+    // The row lives in the Payments group, not in "other keys".
+    const label = await screen.findByText('PayPal Return URL');
+    const group = label.closest('.ad-cfg-group');
+    expect(group).toBeTruthy();
+    expect(group).toHaveTextContent('Payments');
+
+    // Its Test button probes the callback on screen and reports the live result.
+    const rowEl = label.closest('.ad-cfg-row');
+    fireEvent.click(rowEl.querySelector('.ad-cfg-btn-test'));
+
+    await waitFor(() => expect(test).toHaveBeenCalledWith(2, undefined, {}));
+    await waitFor(() => expect(showToast).toHaveBeenCalledWith(message, 'check-circle'));
   });
 });
