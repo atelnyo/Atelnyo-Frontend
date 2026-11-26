@@ -26,7 +26,7 @@
  * Extracted from CreatorStudio.jsx during Etap 2 refactor.
  */
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import api from '../../../services/api';
+import api, { messagesService } from '../../../services/api';
 import { EmptyState, SectionHeader, fmtDate } from '../shared';
 import styles from './sections.module.css';
 import { inlineText } from '../../../utils/inlineI18n';
@@ -123,6 +123,9 @@ export default function MessagesSection({ lang, t, showToast }) {
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
   const [templateOpen, setTemplateOpen] = useState(false);
+  // The creator's own saved replies, next to the five built-in ones.
+  const [savedTemplates, setSavedTemplates] = useState([]);
+  const [templateSaving, setTemplateSaving] = useState(false);
   const threadEndRef = useRef(null);
   const composerRef = useRef(null);
 
@@ -183,13 +186,62 @@ export default function MessagesSection({ lang, t, showToast }) {
       .finally(() => setThreadLoading(false));
   }, [isHt, showToast]);
 
+  // Load the creator's saved replies once (and on retry).
+  useEffect(() => {
+    let cancelled = false;
+    messagesService.templates()
+      .then((res) => {
+        if (cancelled) return;
+        const data = res?.data;
+        setSavedTemplates(Array.isArray(data) ? data : (data?.results || []));
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [retryKey]);
+
   // Insert a canned reply into the draft (editable before sending).
-  const insertTemplate = useCallback((tpl) => {
-    const text = isHt ? tpl.ht : inlineText(lang, tpl.en);
-    setDraft((prev) => (prev.trim() ? `${prev.trim()} ${text}` : text));
+  const insertTemplate = useCallback((text) => {
+    const value = String(text || '').trim();
+    if (!value) return;
+    setDraft((prev) => (prev.trim() ? `${prev.trim()} ${value}` : value));
     setTemplateOpen(false);
     composerRef.current?.focus();
-  }, [isHt, lang]);
+  }, []);
+
+  // Save the current draft as the creator's own template — the title is
+  // the first few words so it is recognisable in the menu without asking
+  // for a second form.
+  const saveTemplate = useCallback(() => {
+    const body = draft.trim();
+    if (!body || templateSaving) return;
+    const title = body.split(/\s+/).slice(0, 4).join(' ').slice(0, 60);
+    setTemplateSaving(true);
+    messagesService.createTemplate({ title, body })
+      .then((res) => {
+        setSavedTemplates((prev) => [res.data, ...prev]);
+        showToast?.(
+          isHt ? 'Modèl sove.' : inlineText(lang, 'Template saved.'),
+          'check-circle',
+        );
+      })
+      .catch((err) => {
+        showToast?.(
+          err?.response?.data?.detail
+          || (isHt ? 'Pa t kapab sove modèl la.' : inlineText(lang, 'Could not save the template.')),
+          'exclamation-triangle',
+        );
+      })
+      .finally(() => setTemplateSaving(false));
+  }, [draft, templateSaving, isHt, lang, showToast]);
+
+  const removeTemplate = useCallback((id) => {
+    messagesService.deleteTemplate(id)
+      .then(() => setSavedTemplates((prev) => prev.filter((tpl) => tpl.id !== id)))
+      .catch(() => showToast?.(
+        isHt ? 'Pa t kapab efase modèl la.' : inlineText(lang, 'Could not delete the template.'),
+        'exclamation-triangle',
+      ));
+  }, [isHt, lang, showToast]);
 
   // Auto-scroll the thread to the newest message whenever it changes.
   useEffect(() => {
@@ -412,18 +464,59 @@ export default function MessagesSection({ lang, t, showToast }) {
                       role="menu"
                       aria-label={isHt ? 'Modèl repons' : inlineText(lang, 'Reply templates')}
                     >
+                      {savedTemplates.length > 0 && (
+                        <>
+                          <div className={styles.chatTemplatesGroup} role="presentation">
+                            {isHt ? 'Modèl pa m' : inlineText(lang, 'My templates')}
+                          </div>
+                          {savedTemplates.map((tpl) => (
+                            <div key={tpl.id} className={styles.chatTemplateRow}>
+                              <button
+                                type="button"
+                                role="menuitem"
+                                className={styles.chatTemplateItem}
+                                onClick={() => insertTemplate(tpl.body)}
+                              >
+                                <i className="fas fa-bookmark" aria-hidden="true" />
+                                <span>{tpl.title}</span>
+                              </button>
+                              <button
+                                type="button"
+                                className={styles.chatTemplateDelete}
+                                onClick={() => removeTemplate(tpl.id)}
+                                aria-label={`${isHt ? 'Efase modèl' : inlineText(lang, 'Delete template')}: ${tpl.title}`}
+                                title={isHt ? 'Efase modèl' : inlineText(lang, 'Delete template')}
+                              >
+                                <i className="fas fa-trash" aria-hidden="true" />
+                              </button>
+                            </div>
+                          ))}
+                          <div className={styles.chatTemplatesGroup} role="presentation">
+                            {isHt ? 'Modèl debaz' : inlineText(lang, 'Built-in templates')}
+                          </div>
+                        </>
+                      )}
                       {REPLY_TEMPLATES.map((tpl) => (
                         <button
                           key={tpl.id}
                           type="button"
                           role="menuitem"
                           className={styles.chatTemplateItem}
-                          onClick={() => insertTemplate(tpl)}
+                          onClick={() => insertTemplate(isHt ? tpl.ht : inlineText(lang, tpl.en))}
                         >
                           <i className={`fas ${tpl.icon}`} aria-hidden="true" />
                           <span>{isHt ? tpl.ht : inlineText(lang, tpl.en)}</span>
                         </button>
                       ))}
+                      <button
+                        type="button"
+                        className={styles.chatTemplatesSave}
+                        onClick={saveTemplate}
+                        disabled={!draft.trim() || templateSaving}
+                      >
+                        <i className={`fas ${templateSaving ? 'fa-spinner fa-spin' : 'fa-plus'}`} aria-hidden="true" />
+                        {isHt ? 'Sove mesaj sa a kòm modèl' : inlineText(lang, 'Save this message as a template')}
+                      </button>
                     </div>
                   )}
                   <form

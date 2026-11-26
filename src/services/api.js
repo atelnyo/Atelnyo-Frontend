@@ -1782,6 +1782,10 @@ export const messagesService = {
   thread: (conversationId) => api.get(`messages/conversations/${conversationId}/messages/`),
   reply: (conversationId, body) => api.post(`messages/conversations/${conversationId}/messages/`, { body }),
   unreadCount: () => api.get('messages/conversations/unread-count/'),
+  // The creator's own saved replies (owner scoped on the backend).
+  templates: () => api.get('messages/templates/'),
+  createTemplate: (data) => api.post('messages/templates/', data),
+  deleteTemplate: (id) => api.delete(`messages/templates/${id}/`),
 };
 
 // ─── Wallet top-up — deposit funds into the wallet balance via PayPal ──
