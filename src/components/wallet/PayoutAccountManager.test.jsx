@@ -14,14 +14,23 @@ import PayoutAccountManager from './PayoutAccountManager';
 import { walletService } from '../../services/api';
 
 vi.mock('../../services/api', () => ({
-  walletService: { paypalConnect: vi.fn() },
+  walletService: { paypalConnect: vi.fn(), paypalStatus: vi.fn() },
 }));
 
 const AUTH_URL = 'https://www.paypal.com/connect?flowEntry=static&client_id=abc';
 
+function isBefore(node, other) {
+  return Boolean(
+    node.compareDocumentPosition(other) & Node.DOCUMENT_POSITION_FOLLOWING,
+  );
+}
+
 describe('PayoutAccountManager — PayPal OAuth window', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    walletService.paypalStatus.mockResolvedValue({
+      data: { configured: true, oauth_ready: true },
+    });
   });
 
   afterEach(() => {
@@ -100,6 +109,57 @@ describe('PayoutAccountManager — PayPal OAuth window', () => {
         is_default: true,
       }));
     });
+  });
+
+  it('leads with the PayPal email form when OAuth is not ready', async () => {
+    walletService.paypalStatus.mockResolvedValue({
+      data: { configured: true, oauth_ready: false },
+    });
+    const { container } = render(<PayoutAccountManager accounts={[]} lang="en" />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/direct paypal sign-in/i)).toBeTruthy();
+    });
+    const form = container.querySelector('.wlt-payout-form');
+    const connect = container.querySelector('.wlt-payout-connect');
+    expect(isBefore(form, connect)).toBe(true);
+    expect(screen.getByRole('heading', { name: /enter your paypal email/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /add paypal account/i }).className)
+      .toBe('btn-primary');
+  });
+
+  it('hides Connect with PayPal when no credentials are configured', async () => {
+    walletService.paypalStatus.mockResolvedValue({
+      data: { configured: false, oauth_ready: false },
+    });
+    render(<PayoutAccountManager accounts={[]} lang="en" />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/direct paypal sign-in/i)).toBeTruthy();
+    });
+    expect(screen.queryByRole('button', { name: /connect with paypal/i })).toBeNull();
+  });
+
+  it('moves the email form to the top once PayPal refuses the app', async () => {
+    walletService.paypalConnect.mockRejectedValue({
+      response: {
+        data: {
+          error: 'PayPal refused to open its login page for this app.',
+          redirect_uri: 'https://api.atelnyo.site/cb',
+        },
+      },
+    });
+    const { container } = render(<PayoutAccountManager accounts={[]} lang="en" />);
+
+    fireEvent.click(screen.getByRole('button', { name: /connect with paypal/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/refused to open its login page/i)).toBeTruthy();
+    });
+    expect(isBefore(
+      container.querySelector('.wlt-payout-form'),
+      container.querySelector('.wlt-payout-connect'),
+    )).toBe(true);
   });
 
   it('rejects an invalid PayPal email without calling the API', async () => {

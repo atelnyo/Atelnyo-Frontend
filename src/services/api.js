@@ -1743,6 +1743,9 @@ export const walletService = {
   deletePayoutAccount: (id) => api.delete(`wallet/payout-accounts/${id}/`),
   setDefaultPayoutAccount: (id) =>
     api.patch(`wallet/payout-accounts/${id}/`, { is_default: true }),
+  // Is "Connect with PayPal" usable? When it is not (keys missing, PayPal
+  // app not approved), the wallet leads with the typed PayPal email.
+  paypalStatus: () => api.get('wallet/payout-accounts/paypal/status/'),
   // PayPal OAuth Connect — link a PayPal account for payouts.
   paypalConnect: (redirectUri) => api.get('wallet/payout-accounts/paypal/connect/', {
     params: redirectUri ? { redirect_uri: redirectUri } : {},
