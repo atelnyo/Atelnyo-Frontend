@@ -1279,6 +1279,140 @@ select.input {
    DEPOSIT MODAL (PayPal top-up)
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* Amount field — the "$" is part of the control, not a placeholder trick. */
+.depositAmountRow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding-left: var(--sp-xl);
+  border: var(--border-w-sm) solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-input);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.depositAmountRow:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent);
+}
+
+.depositCurrency {
+  flex-shrink: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-semibold);
+  pointer-events: none;
+}
+
+.depositAmountInput {
+  flex: 1;
+  min-width: 0;
+  padding: var(--sp-lg) var(--sp-xl) var(--sp-lg) var(--sp-sm);
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: var(--text-base);
+  font-variant-numeric: tabular-nums;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.depositAmountInput:focus {
+  outline: none;
+}
+
+/* The number input's spinners fight the "$" prefix — hide them. */
+.depositAmountInput::-webkit-outer-spin-button,
+.depositAmountInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Quick amounts */
+.depositPresets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-sm);
+}
+
+.depositPreset {
+  flex: 1 1 auto;
+  min-width: 68px;
+  padding: var(--sp-sm) var(--sp-lg);
+  border: var(--border-w-sm) solid var(--border-color);
+  border-radius: var(--radius-pill-lg, 999px);
+  background: var(--surface-card-alt, var(--bg-highlight));
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
+}
+
+.depositPreset:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.depositPreset:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.depositPresetActive,
+.depositPresetActive:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-white);
+}
+
+/* Real wallet context next to the amount the creator is about to add. */
+.depositBalance {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-xs);
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.depositBalance i {
+  color: var(--color-primary);
+  font-size: var(--text-sm);
+}
+
+.depositBalance strong {
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Recovery action after an approval whose capture was never confirmed. */
+.depositRetryBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-sm);
+  align-self: flex-start;
+  padding: var(--sp-sm) var(--sp-xl);
+  border: var(--border-w-sm) solid var(--border-color);
+  border-radius: var(--radius-pill-lg, 999px);
+  background: var(--surface-card-alt, transparent);
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.depositRetryBtn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
 .depositPaypal {
   display: flex;
   flex-direction: column;
@@ -1289,22 +1423,167 @@ select.input {
   border: var(--border-w-sm) solid var(--border-color, rgba(216,27,96,0.12));
 }
 
+/* Receipt line above the PayPal buttons: what exactly is being charged. */
+.depositSummary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-md);
+  padding: var(--sp-lg) var(--sp-xl);
+  border-radius: var(--radius-lg);
+  border: var(--border-w-sm) dashed var(--border-color);
+  background: var(--surface-card-alt, transparent);
+}
+
+.depositSummaryLabel {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.depositSummaryAmount {
+  font-size: 1.35rem;
+  font-weight: var(--font-weight-bold, 700);
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
 .depositButtons {
   min-height: 46px;
 }
 
-.depositSuccess {
+/* PayPal slot while the SDK finishes — real shimmer, not a blank div. */
+.depositButtonsLoading {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sp-md);
-  padding: var(--sp-4xl);
-  color: var(--color-emerald, #10b981);
-  font-weight: var(--font-weight-semibold);
+  flex-direction: column;
+  gap: var(--sp-sm);
 }
 
-.depositSuccess i {
-  font-size: var(--text-3xl);
+.depositButtonGhost {
+  height: 46px;
+  border-radius: var(--radius-lg);
+}
+
+/* Boot skeleton — mirrors the real form's geometry. */
+.depositSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-md);
+}
+
+.depositSkeletonLabel {
+  height: 10px;
+  width: 108px;
+  border-radius: 6px;
+}
+
+.depositSkeletonField {
+  height: 46px;
+  border-radius: var(--radius-lg);
+}
+
+.depositSkeletonPresets {
+  display: flex;
+  gap: var(--sp-sm);
+}
+
+.depositSkeletonChip {
+  flex: 1;
+  height: 34px;
+  border-radius: var(--radius-pill-lg, 999px);
+}
+
+.depositSkeletonSlot {
+  height: 104px;
+  margin-top: var(--sp-sm);
+}
+
+.depositSkeletonHint {
+  height: 8px;
+  width: 58%;
+  border-radius: 6px;
+}
+
+.depositButtonGhost,
+.depositSkeletonLabel,
+.depositSkeletonField,
+.depositSkeletonChip,
+.depositSkeletonHint {
+  background: linear-gradient(
+    90deg,
+    var(--bg-highlight-medium, rgba(0, 0, 0, 0.06)) 25%,
+    var(--bg-highlight, rgba(0, 0, 0, 0.03)) 37%,
+    var(--bg-highlight-medium, rgba(0, 0, 0, 0.06)) 63%
+  );
+  background-size: 400% 100%;
+  animation: depositShimmer 1.4s ease infinite;
+}
+
+@keyframes depositShimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .depositButtonGhost,
+  .depositSkeletonLabel,
+  .depositSkeletonField,
+  .depositSkeletonChip,
+  .depositSkeletonHint {
+    animation: none;
+  }
+}
+
+.depositSuccess {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-sm);
+  padding: var(--sp-4xl);
+  text-align: center;
+}
+
+.depositSuccessIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--color-emerald, #10b981);
+  font-size: var(--text-2xl, 1.4rem);
+}
+
+.depositSuccessTitle {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.depositSuccessAmount {
+  font-size: 1.35rem;
+  font-weight: var(--font-weight-bold, 700);
+  color: var(--color-emerald, #10b981);
+  font-variant-numeric: tabular-nums;
+}
+
+.depositSuccessBalance {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 480px) {
+  .depositPreset {
+    min-width: 0;
+    flex: 1 1 30%;
+  }
+
+  .depositSummary {
+    padding: var(--sp-md) var(--sp-lg);
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

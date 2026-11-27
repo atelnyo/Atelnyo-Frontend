@@ -319,6 +319,9 @@ export default function WalletSection({ lang, t, showToast, setShowWithdrawModal
         <DepositModal
           lang={lang}
           showToast={showToast}
+          // Real balance from the wallet we just fetched, so the modal can
+          // say "current balance $X" instead of guessing.
+          currentBalance={wallet?.balance}
           onClose={() => setShowDeposit(false)}
           onSuccess={() => { refetchWallet(); refetchTransactions(); }}
         />
