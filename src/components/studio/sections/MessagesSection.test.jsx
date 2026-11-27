@@ -15,7 +15,9 @@ const get = vi.fn();
 const post = vi.fn();
 const templates = vi.fn();
 const createTemplate = vi.fn();
+const updateTemplate = vi.fn();
 const deleteTemplate = vi.fn();
+const markAllRead = vi.fn();
 
 vi.mock('../../../services/api', () => ({
   default: {
@@ -25,7 +27,9 @@ vi.mock('../../../services/api', () => ({
   messagesService: {
     templates: (...args) => templates(...args),
     createTemplate: (...args) => createTemplate(...args),
+    updateTemplate: (...args) => updateTemplate(...args),
     deleteTemplate: (...args) => deleteTemplate(...args),
+    markAllRead: (...args) => markAllRead(...args),
   },
 }));
 
@@ -57,7 +61,9 @@ describe('MessagesSection — inbox', () => {
     vi.clearAllMocks();
     templates.mockResolvedValue({ data: { results: [] } });
     createTemplate.mockResolvedValue({ data: SAVED });
+    updateTemplate.mockResolvedValue({ data: { ...SAVED, title: 'Pricing' } });
     deleteTemplate.mockResolvedValue({ data: {} });
+    markAllRead.mockResolvedValue({ data: { marked_read: 1, unread_count: 0 } });
   });
 
   it('shows a layout skeleton while the inbox loads', () => {
@@ -67,6 +73,143 @@ describe('MessagesSection — inbox', () => {
 
     const status = screen.getByRole('status');
     expect(status.getAttribute('aria-busy')).toBe('true');
+  });
+
+  it('returns from a thread to the conversation list (mobile back)', async () => {
+    await openConversation();
+
+    // The back control is the phone-only way out of a thread — the list
+    // is hidden behind the chat pane on narrow screens.
+    expect(screen.getByRole('button', { name: /back to conversations/i })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /back to conversations/i }));
+
+    expect(screen.getByText('Select a conversation')).toBeTruthy();
+    expect(screen.queryByRole('textbox')).toBeNull();
+  });
+
+  it('clears the whole inbox unread state in one tap', async () => {
+    get.mockImplementation((url) => Promise.resolve({
+      data: url.endsWith('/messages/') ? [] : [CONV],
+    }));
+    render(<MessagesSection lang="en" t={{}} />);
+    await waitFor(() => expect(screen.getByText('Alice')).toBeTruthy());
+
+    fireEvent.click(screen.getByRole('button', { name: /mark all as read/i }));
+
+    await waitFor(() => expect(markAllRead).toHaveBeenCalledTimes(1));
+    // Badge + button disappear together — both read from unreadTotal.
+    await waitFor(() => expect(
+      screen.queryByRole('button', { name: /mark all as read/i }),
+    ).toBeNull());
+  });
+
+  it('filters the inbox as you type', async () => {
+    const bob = {
+      ...CONV,
+      id: 6,
+      participant_id: 10,
+      participant_name: 'Bob Ménard',
+      unread_count: 0,
+      last_message: 'hey',
+    };
+    get.mockImplementation((url) => Promise.resolve({
+      data: url.endsWith('/messages/') ? [] : [CONV, bob],
+    }));
+    render(<MessagesSection lang="en" t={{}} />);
+    await waitFor(() => expect(screen.getByText('Bob Ménard')).toBeTruthy());
+
+    // Accent-folded: "menard" still finds "Ménard".
+    fireEvent.change(screen.getByRole('searchbox', { name: /search conversations/i }), {
+      target: { value: 'menard' },
+    });
+
+    expect(screen.getByText('Bob Ménard')).toBeTruthy();
+    expect(screen.queryByText('Alice')).toBeNull();
+  });
+
+  it('says so when nothing matches the search', async () => {
+    get.mockImplementation((url) => Promise.resolve({
+      data: url.endsWith('/messages/') ? [] : [CONV],
+    }));
+    render(<MessagesSection lang="en" t={{}} />);
+    await waitFor(() => expect(screen.getByText('Alice')).toBeTruthy());
+
+    fireEvent.change(screen.getByRole('searchbox', { name: /search conversations/i }), {
+      target: { value: 'zzz' },
+    });
+
+    expect(screen.getByText(/no conversations match your search/i)).toBeTruthy();
+  });
+
+  it('draws a day divider only where the day changes', async () => {
+    const thread = [
+      { id: 1, sender_id: 9, body: 'Bonjou', created_at: '2026-01-05T10:00:00Z' },
+      { id: 2, sender_id: 9, body: 'Toujou la', created_at: '2026-01-05T11:00:00Z' },
+      { id: 3, sender_id: 480018, body: 'Wi', created_at: '2026-01-07T09:00:00Z' },
+    ];
+    get.mockImplementation((url) => Promise.resolve({
+      data: url.endsWith('/messages/') ? thread : [CONV],
+    }));
+    render(<MessagesSection lang="en" t={{}} />);
+    await waitFor(() => expect(screen.getByText('Alice')).toBeTruthy());
+    fireEvent.click(screen.getByText('Alice'));
+
+    await waitFor(() => expect(screen.getByText('Bonjou')).toBeTruthy());
+    expect(screen.getAllByRole('separator')).toHaveLength(2);
+  });
+
+  it('loads older messages page by page', async () => {
+    const page = Array.from({ length: 50 }, (_, i) => ({
+      id: i + 10,
+      sender_id: 9,
+      body: `msg ${i}`,
+      created_at: new Date(Date.UTC(2026, 0, 2, 0, i)).toISOString(),
+    }));
+    const olderPage = [
+      { id: 2, sender_id: 9, body: 'older one', created_at: '2026-01-01T10:00:00Z' },
+      { id: 3, sender_id: 9, body: 'older two', created_at: '2026-01-01T11:00:00Z' },
+    ];
+    get.mockImplementation((url, config) => {
+      if (url.includes('/messages/')) {
+        return Promise.resolve({ data: config?.params?.before ? olderPage : page });
+      }
+      return Promise.resolve({ data: [CONV] });
+    });
+    render(<MessagesSection lang="en" t={{}} />);
+    await waitFor(() => expect(screen.getByText('Alice')).toBeTruthy());
+    fireEvent.click(screen.getByText('Alice'));
+
+    fireEvent.click(await screen.findByRole('button', { name: /load older messages/i }));
+
+    await waitFor(() => expect(screen.getByText('older one')).toBeTruthy());
+    expect(get).toHaveBeenCalledWith('messages/conversations/5/messages/', {
+      params: { limit: 50, before: 10 },
+    });
+    // A short page means the top of the thread was reached.
+    await waitFor(() => expect(
+      screen.queryByRole('button', { name: /load older messages/i }),
+    ).toBeNull());
+  });
+
+  it('invites a first message when the thread is empty', async () => {
+    await openConversation();
+
+    expect(screen.getByText(/no messages in this conversation yet/i)).toBeTruthy();
+  });
+
+  it("renames one of the creator's saved replies", async () => {
+    templates.mockResolvedValue({ data: { results: [SAVED] } });
+    await openConversation();
+
+    fireEvent.click(screen.getByRole('button', { name: /reply templates/i }));
+    fireEvent.click(screen.getByRole('button', { name: /edit template: my price/i }));
+    fireEvent.change(screen.getByRole('textbox', { name: /template title/i }), {
+      target: { value: 'Pricing' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /save title/i }));
+
+    await waitFor(() => expect(updateTemplate).toHaveBeenCalledWith(1, { title: 'Pricing' }));
+    expect(screen.getByRole('menuitem', { name: /pricing/i })).toBeTruthy();
   });
 
   it('inserts a built-in reply into the composer without sending it', async () => {

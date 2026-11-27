@@ -1416,6 +1416,41 @@
    MESSAGES LAYOUT
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* Header action cluster: the unread badge plus inbox triage. */
+.messagesHeaderActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--sp-sm);
+}
+
+.messagesMarkAllRead {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-xs);
+  padding: var(--sp-xs) var(--sp-md);
+  border: var(--border-w-sm) solid var(--border-color);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card-alt);
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.messagesMarkAllRead:hover:not(:disabled) {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.messagesMarkAllRead:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .messagesLayout {
   display: flex;
   gap: 0;
@@ -1437,16 +1472,101 @@
   width: 260px;
   border-right: var(--border-w-sm) solid var(--border-color);
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   flex-shrink: 0;
 }
 
+/* ─── Phone: one pane at a time ─────────────────────────────────────
+   Two columns on a 360px viewport leaves neither half usable, so the
+   open thread takes over the whole surface and the header's back
+   button returns to the list. An idle inbox drops the "select a
+   conversation" placeholder — the list itself is the answer. */
 @media (max-width: 640px) {
   .conversationList {
     width: 100%;
     border-right: none;
-    border-bottom: var(--border-w-sm) solid var(--border-color);
-    max-height: 220px;
+    border-bottom: none;
   }
+
+  .messagesLayoutChatOpen .conversationList {
+    display: none;
+  }
+
+  .messagesLayoutIdle .chatView {
+    display: none;
+  }
+}
+
+/* Search stays pinned while the list scrolls underneath it. */
+.conversationSearchWrap {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+  padding: var(--sp-md) var(--sp-lg);
+  border-bottom: var(--border-w-sm) solid var(--border-color);
+  background: var(--surface-card);
+}
+
+.conversationSearchWrap > i {
+  flex-shrink: 0;
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+}
+
+.conversationSearch {
+  flex: 1;
+  min-width: 0;
+  padding: var(--sp-xs) 0;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: var(--text-sm);
+}
+
+.conversationSearch:focus {
+  outline: none;
+}
+
+.conversationSearch::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* Safari paints its own grey cancel glyph on type=search — ours is the
+   real control and it carries the accessible label. */
+.conversationSearch::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.conversationSearchClear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--bg-highlight-medium);
+  color: var(--text-secondary);
+  font-size: 0.6rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.conversationSearchClear:hover {
+  color: var(--text-primary);
+}
+
+.conversationNoMatch {
+  margin: 0;
+  padding: var(--sp-3xl) var(--sp-xl);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  text-align: center;
 }
 
 .conversationItem {
@@ -1580,6 +1700,30 @@
   flex-shrink: 0;
 }
 
+/* Back to the list — only rendered as a control on phones; on wider
+   screens the conversation list is always visible next to the thread. */
+.chatHeaderBack {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: var(--text-base);
+  cursor: pointer;
+  flex-shrink: 0;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: background var(--transition-fast);
+}
+
+.chatHeaderBack:hover {
+  background: var(--bg-highlight);
+}
+
 .chatHeaderAvatar {
   width: 30px;
   height: 30px;
@@ -1617,11 +1761,41 @@
 
 .chatThread {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: var(--sp-3xl);
   display: flex;
   flex-direction: column;
   gap: var(--sp-md);
+}
+
+/* "Load older messages" — its own pill at the top of the transcript. */
+.chatLoadOlder {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  gap: var(--sp-sm);
+  margin-bottom: var(--sp-sm);
+  padding: var(--sp-sm) var(--sp-xl);
+  border: var(--border-w-sm) solid var(--border-color);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card-alt);
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.chatLoadOlder:hover:not(:disabled) {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.chatLoadOlder:disabled {
+  opacity: 0.6;
+  cursor: progress;
 }
 
 .chatBubble {
@@ -1657,6 +1831,54 @@
   font-size: 0.62rem;
   opacity: 0.75;
   text-align: right;
+}
+
+/* Day boundary in the thread — a quiet label with a rule either side. */
+.chatDayDivider {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-md);
+  align-self: stretch;
+  margin: var(--sp-sm) 0;
+  font-size: 0.65rem;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.chatDayDivider::before,
+.chatDayDivider::after {
+  content: '';
+  flex: 1;
+  height: var(--border-w-sm);
+  background: var(--border-color);
+}
+
+/* Thread that exists but has no messages yet (a brand new conversation
+   opened from a profile's Message button). */
+.chatEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-md);
+  flex: 1;
+  padding: var(--sp-3xl) var(--sp-xl);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.chatEmpty i {
+  font-size: var(--text-3xl);
+  color: var(--color-primary);
+  opacity: 0.35;
+}
+
+.chatEmpty p {
+  margin: 0;
+  font-size: var(--text-sm);
+  max-width: 280px;
 }
 
 .chatComposer {
@@ -1784,12 +2006,24 @@
 }
 
 .chatTemplatesGroup {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-md);
   padding: var(--sp-xxs) var(--sp-md);
   font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--text-tertiary);
+}
+
+/* "7/30" — the backend refuses the 31st saved reply, so say so early. */
+.chatTemplatesCount {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  text-transform: none;
+  font-weight: var(--font-weight-semibold);
 }
 
 .chatTemplateRow {
@@ -1821,6 +2055,56 @@
   color: #ef4444;
 }
 
+/* Inline rename row — replaces the template's two actions while editing. */
+.chatTemplateEdit {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-xs);
+  flex: 1;
+  min-width: 0;
+}
+
+.chatTemplateEditInput {
+  flex: 1;
+  min-width: 0;
+  padding: var(--sp-sm) var(--sp-md);
+  border: var(--border-w-sm) solid var(--color-primary);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card-alt);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: var(--text-sm);
+}
+
+.chatTemplateEditInput:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+
+.chatTemplateEditBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.chatTemplateEditBtn:hover:not(:disabled) {
+  background: var(--bg-highlight);
+  color: var(--color-primary);
+}
+
+.chatTemplateEditBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .chatTemplatesSave {
   display: flex;
   align-items: center;
@@ -1845,6 +2129,112 @@
 .chatTemplatesSave:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* ─── Messages — phone layout ──────────────────────────────────────
+   The thread replaces the list on phones (see .messagesLayoutChatOpen),
+   so it needs its own height: a fixed viewport slice keeps the composer
+   on screen while the messages scroll inside the pane. */
+@media (max-width: 640px) {
+  .chatHeaderBack {
+    display: inline-flex;
+  }
+
+  .chatHeader {
+    gap: var(--sp-sm);
+    padding: var(--sp-md) var(--sp-lg);
+  }
+
+  .chatHeaderName {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  .chatHeaderSubject {
+    max-width: 45%;
+  }
+
+  .chatView {
+    align-items: stretch;
+  }
+
+  /* Fallback first, then dvh where the mobile browser supports it so
+     the pane does not jump when the URL bar collapses. */
+  .chatPane {
+    height: 65vh;
+    min-height: 340px;
+  }
+
+  @supports (height: 100dvh) {
+    .chatPane {
+      height: 68dvh;
+    }
+  }
+
+  .chatThread {
+    padding: var(--sp-lg);
+  }
+
+  .chatBubble {
+    max-width: 88%;
+  }
+
+  .chatComposer {
+    gap: var(--sp-xs);
+    padding: var(--sp-md) var(--sp-lg) calc(var(--sp-md) + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* 16px keeps iOS Safari from zooming the viewport when the composer
+     gets focus — and 44px is the smallest comfortable tap target. */
+  .chatComposerInput {
+    font-size: 16px;
+  }
+
+  .chatTemplatesToggle,
+  .chatComposerSend {
+    width: 44px;
+    height: 44px;
+  }
+
+  .messagesMarkAllRead {
+    padding: var(--sp-xs) var(--sp-sm);
+    font-size: 0.72rem;
+  }
+
+  .chatTemplates {
+    max-height: 45vh;
+    padding: var(--sp-md) var(--sp-lg);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  @supports (height: 100dvh) {
+    .chatTemplates {
+      max-height: 42dvh;
+    }
+  }
+
+  .chatTemplatesSave {
+    padding: var(--sp-md);
+  }
+
+  .conversationItem {
+    padding: var(--sp-lg) var(--sp-xl);
+  }
+
+  /* iOS zooms the viewport on focus below 16px. */
+  .conversationSearch,
+  .chatTemplateEditInput {
+    font-size: 16px;
+  }
+
+  .chatTemplateEditBtn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .chatDayDivider {
+    margin: var(--sp-xxs) 0;
+  }
 }
 
 /* ─── Messages — layout-matched loading skeleton ─────────────────── */
@@ -1872,6 +2262,13 @@
     width: 100%;
     border-right: none;
     border-bottom: var(--border-w-sm) solid var(--border-color);
+  }
+  .messagesSkeletonChat {
+    min-height: 220px;
+    padding: var(--sp-lg);
+  }
+  .conversationSkeleton {
+    padding: var(--sp-lg) var(--sp-xl);
   }
 }
 

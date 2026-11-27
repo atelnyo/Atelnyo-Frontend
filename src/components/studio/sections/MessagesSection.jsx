@@ -23,15 +23,31 @@
  * conversation is always 1:1, ``sender_id === conv.participant_id`` means
  * the bubble is from the other person — everything else is mine.
  *
+ * Responsive: on phones the split pane becomes two screens, not two
+ * stacked boxes — the list fills the width until a conversation is
+ * opened, then the thread takes over and the chat header's back button
+ * returns to the list (see ``.messagesLayoutChatOpen`` in the CSS).
+ *
+ * Platform behaviours: the inbox refreshes itself every 30s (paused while
+ * the tab is hidden) so a reply does not need a page reload, the list
+ * filters as you type (accent-folded), the thread marks day boundaries,
+ * and the creator's saved replies can be inserted, renamed (PATCH) and
+ * deleted up to the backend's 30-template cap.
+ *
  * Extracted from CreatorStudio.jsx during Etap 2 refactor.
  */
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useState, useCallback, useRef } from 'react';
 import api, { messagesService } from '../../../services/api';
 import { EmptyState, SectionHeader, fmtDate } from '../shared';
 import styles from './sections.module.css';
 import { inlineText } from '../../../utils/inlineI18n';
 
 const CONVERSATIONS_URL = 'messages/conversations/';
+
+// Thread page size — matches THREAD_PAGE_SIZE in messaging/views.py. A long
+// conversation loads newest-first; a page shorter than this means the top
+// of the thread has been reached.
+const THREAD_PAGE_SIZE = 50;
 
 // Shared bilingual help for the page header — reused across the
 // unavailable / error / main render paths so the copy stays in one place.
@@ -75,6 +91,43 @@ const REPLY_TEMPLATES = [
     en: 'Thanks for your message. I will reply as soon as I can.',
   },
 ];
+
+// Backend cap — MessageTemplate.MAX_PER_OWNER in messaging/models.py.
+// Mirrored here only to show the creator where they stand ("12/30").
+const MAX_TEMPLATES = 30;
+
+// Accent-insensitive haystack so "jose" finds "José" and "yè" finds "ye".
+function normalize(value) {
+  return String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+// One key per calendar day, so the thread only draws a divider where the
+// day actually changes instead of above every bubble.
+function dayKey(iso) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+}
+
+function dayLabel(iso, lang) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const day = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const diffDays = Math.round((today - day) / 86400000);
+  const isHt = lang === 'ht';
+  if (diffDays === 0) return isHt ? 'Jodi a' : inlineText(lang, 'Today');
+  if (diffDays === 1) return isHt ? 'Yè' : inlineText(lang, 'Yesterday');
+  return d.toLocaleDateString(isHt ? 'fr' : undefined, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
 
 // Layout-matched loading state: the inbox is a list + a chat pane, so the
 // placeholder copies that geometry instead of flashing generic bars.
@@ -126,14 +179,30 @@ export default function MessagesSection({ lang, t, showToast }) {
   // The creator's own saved replies, next to the five built-in ones.
   const [savedTemplates, setSavedTemplates] = useState([]);
   const [templateSaving, setTemplateSaving] = useState(false);
+  // Which saved reply is being renamed ({ id, title }) — null when idle.
+  const [editingTemplate, setEditingTemplate] = useState(null);
+  // Inbox filter — local, because the list endpoint returns the whole
+  // inbox for this user rather than one page of it.
+  const [query, setQuery] = useState('');
+  const [markingAllRead, setMarkingAllRead] = useState(false);
+  // Pagination of the open thread: is there more above the first page?
+  const [hasMoreOlder, setHasMoreOlder] = useState(false);
+  const [olderLoading, setOlderLoading] = useState(false);
   const threadEndRef = useRef(null);
+  const threadRef = useRef(null);
   const composerRef = useRef(null);
+  // Scroll bookkeeping for "load older": remember the height before the
+  // prepend, and skip the jump-to-bottom that a new thread normally does.
+  const pendingScrollRef = useRef(null);
+  const skipAutoScrollRef = useRef(false);
 
   const load = useCallback(() => {
     let cancelled = false;
     setLoading(true);
     setState('ok');
-    api.get(CONVERSATIONS_URL, { params: { limit: 20 } })
+    // No page param on purpose: the list endpoint returns the user's whole
+    // inbox, which is what the search box filters over.
+    api.get(CONVERSATIONS_URL)
       .then((res) => {
         if (!cancelled) {
           const data = res.data?.results || res.data || [];
@@ -161,6 +230,42 @@ export default function MessagesSection({ lang, t, showToast }) {
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => load(), [load]);
 
+  // Keep the inbox live while it is on screen: a platform inbox cannot
+  // make people reload the page to see a reply. Silent — no skeleton, no
+  // toast — and paused while the tab is hidden. The thread is fetched
+  // first because its GET marks inbound messages read, so the badge
+  // counts the conversation list then reports are already correct.
+  useEffect(() => {
+    if (state !== 'ok') return undefined;
+    const tick = async () => {
+      if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
+      try {
+        if (activeChat != null && !sending) {
+          const threadRes = await api.get(`${CONVERSATIONS_URL}${activeChat}/messages/`, {
+            params: { limit: THREAD_PAGE_SIZE },
+          });
+          const fresh = Array.isArray(threadRes.data) ? threadRes.data : [];
+          // Refresh only the newest window — older pages the reader
+          // loaded stay where they are.
+          setThread((prev) => {
+            if (!prev || prev.length === 0) return fresh;
+            if (fresh.length === 0) return prev;
+            const oldestFreshId = fresh[0].id;
+            return [...prev.filter((m) => m.id < oldestFreshId), ...fresh];
+          });
+        }
+        const res = await api.get(CONVERSATIONS_URL);
+        const data = res.data?.results || res.data || [];
+        setConversations(Array.isArray(data) ? data : []);
+      } catch {
+        // A dropped poll is not worth interrupting the user — the next
+        // tick retries, and the retry button still covers real failures.
+      }
+    };
+    const id = setInterval(tick, 30000);
+    return () => clearInterval(id);
+  }, [state, activeChat, sending]);
+
   // ─── Open a conversation → fetch its thread ───────────────────────────
   // GET also marks every inbound message as read server-side, so zero out
   // the local unread badge for the conversation we just opened.
@@ -169,10 +274,13 @@ export default function MessagesSection({ lang, t, showToast }) {
     setTemplateOpen(false);
     setThread(null);
     setThreadLoading(true);
-    api.get(`${CONVERSATIONS_URL}${convId}/messages/`)
+    api.get(`${CONVERSATIONS_URL}${convId}/messages/`, {
+      params: { limit: THREAD_PAGE_SIZE },
+    })
       .then((res) => {
         const data = Array.isArray(res.data) ? res.data : [];
         setThread(data);
+        setHasMoreOlder(data.length === THREAD_PAGE_SIZE);
         // Inbound messages are now read — drop the badge locally so the
         // list reflects the server state without a refetch.
         setConversations((prev) => (prev || []).map((c) =>
@@ -185,6 +293,53 @@ export default function MessagesSection({ lang, t, showToast }) {
       })
       .finally(() => setThreadLoading(false));
   }, [isHt, showToast]);
+
+  // Back to the conversation list — the mobile half of the two-pane
+  // layout, where the thread replaces the list instead of sitting next
+  // to it. Clearing the thread also drops any open template menu.
+  const closeChat = useCallback(() => {
+    setActiveChat(null);
+    setThread(null);
+    setTemplateOpen(false);
+    setHasMoreOlder(false);
+  }, []);
+
+  // Prepend the page above the oldest message we hold. The scroll position
+  // is anchored on the message the reader was looking at, not reset to
+  // the top — that is the whole difference between "history" and "jump".
+  const loadOlder = useCallback(() => {
+    if (olderLoading || activeChat == null) return;
+    const oldest = (thread || [])[0];
+    if (!oldest) return;
+    pendingScrollRef.current = threadRef.current ? threadRef.current.scrollHeight : null;
+    skipAutoScrollRef.current = true;
+    setOlderLoading(true);
+    api.get(`${CONVERSATIONS_URL}${activeChat}/messages/`, {
+      params: { limit: THREAD_PAGE_SIZE, before: oldest.id },
+    })
+      .then((res) => {
+        const older = Array.isArray(res.data) ? res.data : [];
+        if (older.length === 0) {
+          // Nothing older: stop offering the button, and do not swallow
+          // the next real scroll with the skip flag.
+          setHasMoreOlder(false);
+          pendingScrollRef.current = null;
+          skipAutoScrollRef.current = false;
+          return;
+        }
+        setThread((prev) => [...older, ...(prev || [])]);
+        setHasMoreOlder(older.length === THREAD_PAGE_SIZE);
+      })
+      .catch(() => {
+        pendingScrollRef.current = null;
+        skipAutoScrollRef.current = false;
+        showToast?.(
+          isHt ? 'Pa t kapab chaje plis mesaj.' : inlineText(lang, 'Could not load older messages.'),
+          'exclamation-triangle',
+        );
+      })
+      .finally(() => setOlderLoading(false));
+  }, [olderLoading, activeChat, thread, isHt, lang, showToast]);
 
   // Load the creator's saved replies once (and on retry).
   useEffect(() => {
@@ -236,17 +391,79 @@ export default function MessagesSection({ lang, t, showToast }) {
 
   const removeTemplate = useCallback((id) => {
     messagesService.deleteTemplate(id)
-      .then(() => setSavedTemplates((prev) => prev.filter((tpl) => tpl.id !== id)))
+      .then(() => {
+        setSavedTemplates((prev) => prev.filter((tpl) => tpl.id !== id));
+        setEditingTemplate((current) => (current?.id === id ? null : current));
+      })
       .catch(() => showToast?.(
         isHt ? 'Pa t kapab efase modèl la.' : inlineText(lang, 'Could not delete the template.'),
         'exclamation-triangle',
       ));
   }, [isHt, lang, showToast]);
 
-  // Auto-scroll the thread to the newest message whenever it changes.
+  // Clear every unread inbound message in one tap. Optimistic — the
+  // badges drop immediately and are restored if the call fails, because
+  // a triage button that waits on the network feels broken.
+  const markAllRead = useCallback(() => {
+    if (markingAllRead) return;
+    const before = conversations || [];
+    setMarkingAllRead(true);
+    setConversations((prev) => (prev || []).map((conv) => (
+      conv.unread_count > 0 ? { ...conv, unread_count: 0 } : conv
+    )));
+    messagesService.markAllRead()
+      .then(() => showToast?.(
+        isHt ? 'Tout mesaj make kòm li.' : inlineText(lang, 'All messages marked as read.'),
+        'check-circle',
+      ))
+      .catch(() => {
+        setConversations(before);
+        showToast?.(
+          isHt ? 'Pa t kapab make mesaj yo kòm li.' : inlineText(lang, 'Could not mark messages as read.'),
+          'exclamation-triangle',
+        );
+      })
+      .finally(() => setMarkingAllRead(false));
+  }, [markingAllRead, conversations, isHt, lang, showToast]);
+
+  // Rename a saved reply in place. Only the title goes up (PATCH), so the
+  // creator's wording survives the rename untouched.
+  const renameTemplate = useCallback((id, title) => {
+    const next = String(title || '').trim();
+    if (!next) return;
+    messagesService.updateTemplate(id, { title: next })
+      .then((res) => {
+        setSavedTemplates((prev) => prev.map((tpl) => (
+          tpl.id === id ? { ...tpl, ...res.data } : tpl
+        )));
+        setEditingTemplate(null);
+      })
+      .catch((err) => showToast?.(
+        err?.response?.data?.title?.[0]
+        || err?.response?.data?.detail
+        || (isHt ? 'Pa t kapab chanje non modèl la.' : inlineText(lang, 'Could not rename the template.')),
+        'exclamation-triangle',
+      ));
+  }, [isHt, lang, showToast]);
+
+  // Auto-scroll the thread to the newest message whenever it changes —
+  // except when the change WAS an older page being prepended.
   useEffect(() => {
+    if (skipAutoScrollRef.current) {
+      skipAutoScrollRef.current = false;
+      return;
+    }
     threadEndRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'end' });
   }, [thread, threadLoading]);
+
+  // Keep the reader's place after a page is prepended: layout effects run
+  // before the passive auto-scroll above, so this wins.
+  useLayoutEffect(() => {
+    const el = threadRef.current;
+    if (!el || pendingScrollRef.current == null) return;
+    el.scrollTop = el.scrollHeight - pendingScrollRef.current;
+    pendingScrollRef.current = null;
+  }, [thread]);
 
   // ─── Send a reply ─────────────────────────────────────────────────────
   const sendReply = useCallback(() => {
@@ -348,6 +565,19 @@ export default function MessagesSection({ lang, t, showToast }) {
 
   const isEmpty = !conversations || conversations.length === 0;
   const activeConv = (conversations || []).find((c) => c.id === activeChat) || null;
+  // Unread across the whole inbox — drives the header badge and whether
+  // "mark all as read" is worth showing at all.
+  const unreadTotal = (conversations || []).reduce(
+    (total, conv) => total + (conv.unread_count || 0), 0,
+  );
+  // Filter as you type — name AND last message, so "invoice" finds the
+  // thread where somebody asked about one.
+  const needle = normalize(query).trim();
+  const conversationRows = needle
+    ? (conversations || []).filter((conv) => normalize(
+      `${conv.participant_name || ''} ${conv.last_message || ''}`,
+    ).includes(needle))
+    : (conversations || []);
   // Thread subject — the first message that carries one (messages sent
   // from the public-profile contact modal include the visitor's subject
   // line; plain chat replies have none, so the header falls back to the
@@ -361,11 +591,25 @@ export default function MessagesSection({ lang, t, showToast }) {
         title={t.studio_messages || 'Messages'}
         lang={lang}
         help={MESSAGES_HELP}
-        action={!isEmpty ? (
-          <span className={`${styles.badge} ${styles.unreadCount}`}>
-            {conversations.filter((c) => c.unread_count > 0).length}{' '}
-            {isHt ? 'nouvo' : inlineText(lang, 'new')}
-          </span>
+        action={!isEmpty && unreadTotal > 0 ? (
+          <div className={styles.messagesHeaderActions}>
+            <span className={`${styles.badge} ${styles.unreadCount}`}>
+              {conversations.filter((c) => c.unread_count > 0).length}{' '}
+              {isHt ? 'nouvo' : inlineText(lang, 'new')}
+            </span>
+            <button
+              type="button"
+              className={styles.messagesMarkAllRead}
+              onClick={markAllRead}
+              disabled={markingAllRead}
+            >
+              <i
+                className={`fas ${markingAllRead ? 'fa-spinner fa-spin' : 'fa-check-double'}`}
+                aria-hidden="true"
+              />
+              {isHt ? 'Make tout kòm li' : inlineText(lang, 'Mark all as read')}
+            </button>
+          </div>
         ) : null}
       />
       {isEmpty ? (
@@ -375,9 +619,36 @@ export default function MessagesSection({ lang, t, showToast }) {
           hint={t.studio_no_messages_hint || 'When students or clients contact you, their conversations will appear here.'}
         />
       ) : (
-        <div className={styles.messagesLayout}>
+        <div
+          className={`${styles.messagesLayout} ${
+            activeConv != null
+              ? styles.messagesLayoutChatOpen
+              : styles.messagesLayoutIdle
+          }`}
+        >
           <div className={styles.conversationList}>
-            {conversations.map((conv) => (
+            <div className={styles.conversationSearchWrap}>
+              <i className="fas fa-magnifying-glass" aria-hidden="true" />
+              <input
+                type="search"
+                className={styles.conversationSearch}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={isHt ? 'Chèche yon konvèsasyon…' : inlineText(lang, 'Search conversations…')}
+                aria-label={isHt ? 'Chèche konvèsasyon' : inlineText(lang, 'Search conversations')}
+              />
+              {query && (
+                <button
+                  type="button"
+                  className={styles.conversationSearchClear}
+                  onClick={() => setQuery('')}
+                  aria-label={isHt ? 'Efase rechèch la' : inlineText(lang, 'Clear search')}
+                >
+                  <i className="fas fa-xmark" aria-hidden="true" />
+                </button>
+              )}
+            </div>
+            {conversationRows.map((conv) => (
               <button
                 key={conv.id}
                 type="button"
@@ -403,6 +674,13 @@ export default function MessagesSection({ lang, t, showToast }) {
                 </div>
               </button>
             ))}
+            {conversationRows.length === 0 && (
+              <p className={styles.conversationNoMatch}>
+                {isHt
+                  ? 'Pa gen konvèsasyon ki matche ak rechèch la.'
+                  : inlineText(lang, 'No conversations match your search.')}
+              </p>
+            )}
           </div>
           <div className={styles.chatView}>
             {activeConv == null ? (
@@ -428,6 +706,17 @@ export default function MessagesSection({ lang, t, showToast }) {
             ) : (
               <div className={styles.chatPane}>
                 <div className={styles.chatHeader}>
+                  {/* Mobile-only: the list is hidden while a thread is
+                      open, so this is the way back to it. */}
+                  <button
+                    type="button"
+                    className={styles.chatHeaderBack}
+                    onClick={closeChat}
+                    aria-label={isHt ? 'Tounen nan konvèsasyon yo' : inlineText(lang, 'Back to conversations')}
+                    title={isHt ? 'Tounen' : inlineText(lang, 'Back')}
+                  >
+                    <i className="fas fa-arrow-left" aria-hidden="true" />
+                  </button>
                   <div className={styles.chatHeaderAvatar}>
                     {activeConv.participant_name?.charAt(0)?.toUpperCase() || '?'}
                   </div>
@@ -440,19 +729,62 @@ export default function MessagesSection({ lang, t, showToast }) {
                     </span>
                   )}
                 </div>
-                <div className={styles.chatThread}>
-                  {(thread || []).map((msg) => {
+                {/* role="log" is the chat-transcript role: additions (a
+                    polled reply, your own send) are announced politely. */}
+                <div
+                  className={styles.chatThread}
+                  role="log"
+                  ref={threadRef}
+                  aria-label={isHt ? 'Konvèsasyon an' : inlineText(lang, 'Conversation')}
+                >
+                  {hasMoreOlder && (
+                    <button
+                      type="button"
+                      className={styles.chatLoadOlder}
+                      onClick={loadOlder}
+                      disabled={olderLoading}
+                    >
+                      <i
+                        className={`fas ${olderLoading ? 'fa-spinner fa-spin' : 'fa-clock-rotate-left'}`}
+                        aria-hidden="true"
+                      />
+                      {olderLoading
+                        ? (isHt ? 'Ap chaje…' : inlineText(lang, 'Loading…'))
+                        : (isHt ? 'Chaje ansyen mesaj' : inlineText(lang, 'Load older messages'))}
+                    </button>
+                  )}
+                  {(thread || []).length === 0 && (
+                    <div className={styles.chatEmpty}>
+                      <i className="fas fa-comment-dots" aria-hidden="true" />
+                      <p>
+                        {isHt
+                          ? 'Poko gen mesaj nan konvèsasyon sa a. Voye yon bonjou.'
+                          : inlineText(lang, 'No messages in this conversation yet. Say hello.')}
+                      </p>
+                    </div>
+                  )}
+                  {(thread || []).map((msg, index, all) => {
                     const mine = msg.sender_id !== activeConv.participant_id;
+                    // Draw the day divider only where the day changes.
+                    const key = dayKey(msg.created_at);
+                    const prevKey = index > 0 ? dayKey(all[index - 1]?.created_at) : null;
+                    const showDay = Boolean(key) && key !== prevKey;
                     return (
-                      <div
-                        key={msg.id}
-                        className={`${styles.chatBubble} ${mine ? styles.chatBubbleMine : styles.chatBubbleTheirs}`}
-                      >
-                        <div className={styles.chatBubbleText}>{msg.body}</div>
-                        <div className={styles.chatBubbleTime}>
-                          {fmtDate(msg.created_at)}
+                      <React.Fragment key={msg.id}>
+                        {showDay && (
+                          <div className={styles.chatDayDivider} role="separator">
+                            <span>{dayLabel(msg.created_at, lang)}</span>
+                          </div>
+                        )}
+                        <div
+                          className={`${styles.chatBubble} ${mine ? styles.chatBubbleMine : styles.chatBubbleTheirs}`}
+                        >
+                          <div className={styles.chatBubbleText}>{msg.body}</div>
+                          <div className={styles.chatBubbleTime}>
+                            {fmtDate(msg.created_at)}
+                          </div>
                         </div>
-                      </div>
+                      </React.Fragment>
                     );
                   })}
                   <div ref={threadEndRef} />
@@ -467,28 +799,79 @@ export default function MessagesSection({ lang, t, showToast }) {
                       {savedTemplates.length > 0 && (
                         <>
                           <div className={styles.chatTemplatesGroup} role="presentation">
-                            {isHt ? 'Modèl pa m' : inlineText(lang, 'My templates')}
+                            <span>{isHt ? 'Modèl pa m' : inlineText(lang, 'My templates')}</span>
+                            <span className={styles.chatTemplatesCount}>
+                              {savedTemplates.length}/{MAX_TEMPLATES}
+                            </span>
                           </div>
                           {savedTemplates.map((tpl) => (
                             <div key={tpl.id} className={styles.chatTemplateRow}>
-                              <button
-                                type="button"
-                                role="menuitem"
-                                className={styles.chatTemplateItem}
-                                onClick={() => insertTemplate(tpl.body)}
-                              >
-                                <i className="fas fa-bookmark" aria-hidden="true" />
-                                <span>{tpl.title}</span>
-                              </button>
-                              <button
-                                type="button"
-                                className={styles.chatTemplateDelete}
-                                onClick={() => removeTemplate(tpl.id)}
-                                aria-label={`${isHt ? 'Efase modèl' : inlineText(lang, 'Delete template')}: ${tpl.title}`}
-                                title={isHt ? 'Efase modèl' : inlineText(lang, 'Delete template')}
-                              >
-                                <i className="fas fa-trash" aria-hidden="true" />
-                              </button>
+                              {editingTemplate?.id === tpl.id ? (
+                                <form
+                                  className={styles.chatTemplateEdit}
+                                  onSubmit={(e) => {
+                                    e.preventDefault();
+                                    renameTemplate(tpl.id, editingTemplate.title);
+                                  }}
+                                >
+                                  <input
+                                    className={styles.chatTemplateEditInput}
+                                    value={editingTemplate.title}
+                                    onChange={(e) => setEditingTemplate({
+                                      id: tpl.id,
+                                      title: e.target.value,
+                                    })}
+                                    maxLength={80}
+                                    aria-label={isHt ? 'Non modèl la' : inlineText(lang, 'Template title')}
+                                  />
+                                  <button
+                                    type="submit"
+                                    className={styles.chatTemplateEditBtn}
+                                    disabled={!editingTemplate.title.trim()}
+                                    aria-label={isHt ? 'Sove non an' : inlineText(lang, 'Save title')}
+                                  >
+                                    <i className="fas fa-check" aria-hidden="true" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className={styles.chatTemplateEditBtn}
+                                    onClick={() => setEditingTemplate(null)}
+                                    aria-label={isHt ? 'Anile' : inlineText(lang, 'Cancel')}
+                                  >
+                                    <i className="fas fa-xmark" aria-hidden="true" />
+                                  </button>
+                                </form>
+                              ) : (
+                                <>
+                                  <button
+                                    type="button"
+                                    role="menuitem"
+                                    className={styles.chatTemplateItem}
+                                    onClick={() => insertTemplate(tpl.body)}
+                                  >
+                                    <i className="fas fa-bookmark" aria-hidden="true" />
+                                    <span>{tpl.title}</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className={styles.chatTemplateDelete}
+                                    onClick={() => setEditingTemplate({ id: tpl.id, title: tpl.title })}
+                                    aria-label={`${isHt ? 'Chanje non modèl' : inlineText(lang, 'Edit template')}: ${tpl.title}`}
+                                    title={isHt ? 'Chanje non modèl' : inlineText(lang, 'Edit template')}
+                                  >
+                                    <i className="fas fa-pen" aria-hidden="true" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className={styles.chatTemplateDelete}
+                                    onClick={() => removeTemplate(tpl.id)}
+                                    aria-label={`${isHt ? 'Efase modèl' : inlineText(lang, 'Delete template')}: ${tpl.title}`}
+                                    title={isHt ? 'Efase modèl' : inlineText(lang, 'Delete template')}
+                                  >
+                                    <i className="fas fa-trash" aria-hidden="true" />
+                                  </button>
+                                </>
+                              )}
                             </div>
                           ))}
                           <div className={styles.chatTemplatesGroup} role="presentation">
