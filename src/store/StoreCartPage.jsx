@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { storeService } from './storeService';
 import { useAuthStore } from './useAuthStore';
 import { loadCart, saveCart, setQuantity, removeFromCart } from './cart';
+import { useShippingDestinations } from './useShippingDestinations';
 import SEOHead from '../components/shared/SEOHead';
 import { loadPayPalScript } from '../components/CheckoutModal';
 import { paymentConfigService, checkoutService } from '../services/api';
@@ -140,6 +141,9 @@ export default function StoreCartPage() {
   const [guestToken, setGuestToken] = useState(null);
   const [guestEmail, setGuestEmail] = useState('');
   const [guestName, setGuestName] = useState('');
+  // Enabled countries + state/province codes come from the backend policy,
+  // so an admin toggling a destination changes this form immediately.
+  const destinations = useShippingDestinations();
   const [shippingAddress, setShippingAddress] = useState({
     first_name: '', last_name: '', email: '', phone: '', country: 'US',
     region: '', address1: '', address2: '', city: '', zip: '',
@@ -266,7 +270,13 @@ export default function StoreCartPage() {
 
   const onShippingAddressChange = (event) => {
     const { name, value } = event.target;
-    setShippingAddress((current) => ({ ...current, [name]: value }));
+    setShippingAddress((current) => ({
+      ...current,
+      [name]: value,
+      // US and CA use different code sets, so switching country invalidates
+      // the picked province; make the shopper choose it again.
+      ...(name === 'country' ? { region: '' } : {}),
+    }));
     setShippingQuote(null);
     setShippingMethod('');
     setOrderTotal(null);
@@ -738,21 +748,37 @@ export default function StoreCartPage() {
             ].map(([name, label]) => (
               <label key={name} className="store-shipping-address__field">
                 <span className="store-shipping-address__label">{label}{!label.includes('optional') && <span style={{ color: '#dc2626', marginLeft: '4px' }}>*</span>}</span>
-                <input
-                  name={name}
-                  type={name === 'email' ? 'email' : name === 'phone' ? 'tel' : 'text'}
-                  autoComplete={name === 'address1' ? 'address-line1' : name === 'address2' ? 'address-line2' : name === 'zip' ? 'postal-code' : name === 'region' ? 'address-level1' : name === 'city' ? 'address-level2' : name === 'email' ? 'email' : name === 'first_name' ? 'given-name' : name === 'last_name' ? 'family-name' : name === 'phone' ? 'tel' : name}
-                  value={name === 'email' && shippingAddress.email === '' && !user ? guestEmail : shippingAddress[name] || (name === 'email' && user ? user.email || '' : shippingAddress[name])}
-                  onChange={onShippingAddressChange}
-                  required={!label.includes('optional')}
-                  style={shippingFieldErrors[name] ? { borderColor: '#dc2626', boxShadow: '0 0 0 3px rgba(220, 38, 38, 0.08)' } : {}}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && name === 'phone') {
-                      e.preventDefault();
-                      onQuoteShipping();
-                    }
-                  }}
-                />
+                {name === 'region' ? (
+                  <select
+                    name="region"
+                    autoComplete="address-level1"
+                    value={shippingAddress.region}
+                    onChange={onShippingAddressChange}
+                    required
+                    style={shippingFieldErrors.region ? { borderColor: '#dc2626', boxShadow: '0 0 0 3px rgba(220, 38, 38, 0.08)' } : {}}
+                  >
+                    <option value="">Select state / province</option>
+                    {(destinations.find((country) => country.code === shippingAddress.country)?.regions || []).map((region) => (
+                      <option key={region.code} value={region.code}>{region.code} — {region.name}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    name={name}
+                    type={name === 'email' ? 'email' : name === 'phone' ? 'tel' : 'text'}
+                    autoComplete={name === 'address1' ? 'address-line1' : name === 'address2' ? 'address-line2' : name === 'zip' ? 'postal-code' : name === 'city' ? 'address-level2' : name === 'email' ? 'email' : name === 'first_name' ? 'given-name' : name === 'last_name' ? 'family-name' : name === 'phone' ? 'tel' : name}
+                    value={name === 'email' && shippingAddress.email === '' && !user ? guestEmail : shippingAddress[name] || (name === 'email' && user ? user.email || '' : shippingAddress[name])}
+                    onChange={onShippingAddressChange}
+                    required={!label.includes('optional')}
+                    style={shippingFieldErrors[name] ? { borderColor: '#dc2626', boxShadow: '0 0 0 3px rgba(220, 38, 38, 0.08)' } : {}}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && name === 'phone') {
+                        e.preventDefault();
+                        onQuoteShipping();
+                      }
+                    }}
+                  />
+                )}
                 {shippingFieldErrors[name] && <span style={{ fontSize: '0.75rem', color: '#dc2626' }}>Required</span>}
               </label>
             ))}
@@ -760,16 +786,14 @@ export default function StoreCartPage() {
               <span className="store-shipping-address__label">Country</span>
               <select name="country" autoComplete="country" value={shippingAddress.country}
                 onChange={onShippingAddressChange} required>
-                {/* Only countries active in the backend printify_shipping_policy.
-                    US + CA: cheap North-American rates, no customs paperwork,
-                    no business registration needed. HT/DO disabled by owner
-                    (forwarder fees too high, no business papers); all other
-                    countries disabled (expensive international postage +
-                    EU/UK tax-registration requirements). The live Printify
-                    quote is the final check — keep this list in sync with
-                    the backend policy when an admin enables a country. */}
-                <option value="US">United States (US)</option>
-                <option value="CA">Canada (CA)</option>
+                {/* Server-driven: only countries active in the backend
+                    printify_shipping_policy are listed (US/CA/AU by default;
+                    EU/UK/NO stay disabled because Printify adds VAT to the
+                    invoice for non-EU providers unless the merchant has a
+                    VAT ID). The live Printify quote is the final check. */}
+                {destinations.map((country) => (
+                  <option key={country.code} value={country.code}>{country.name} ({country.code})</option>
+                ))}
               </select>
             </label>
           </div>
@@ -786,6 +810,9 @@ export default function StoreCartPage() {
                     onChange={() => { setShippingMethod(method.id); setMessage(''); }} />
                   <div className="store-shipping-methods__info">
                     <span className="store-shipping-methods__name">{method.name}</span>
+                    {method.estimate && (
+                      <span className="store-shipping-methods__eta">{method.estimate}</span>
+                    )}
                     <span className="store-shipping-methods__price">{new Intl.NumberFormat('en-US', { style: 'currency', currency: method.currency || 'USD' }).format(Number(method.price))}</span>
                   </div>
                 </label>
@@ -795,6 +822,9 @@ export default function StoreCartPage() {
           {shippingQuote?.status === 'ELIGIBLE' && shippingQuote.shipping_methods?.length > 0 && shippingMethod && (
             <p className="store-shipping-summary" role="status">
               Shipping cost: {new Intl.NumberFormat('en-US', { style: 'currency', currency: shippingQuote.currency || 'USD' }).format(Number(shippingQuote.shipping_methods.find((method) => method.id === shippingMethod)?.price || 0))}
+              {shippingQuote.shipping_methods.find((method) => method.id === shippingMethod)?.estimate
+                ? ` · ${shippingQuote.shipping_methods.find((method) => method.id === shippingMethod).estimate}`
+                : ''}
             </p>
           )}
         </div>

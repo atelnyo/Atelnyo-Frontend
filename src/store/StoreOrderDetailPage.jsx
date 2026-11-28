@@ -3,6 +3,8 @@ import { Helmet } from 'react-helmet-async';
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { storeService } from './storeService';
 import { useAuthStore } from './useAuthStore';
+import { regionCodeFor } from './regions';
+import { useShippingDestinations } from './useShippingDestinations';
 import { fulfillmentLabel, storeOrderStatus } from '../components/business/storeOrderStatus';
 import { formatDate, money } from './storeFormat';
 
@@ -91,6 +93,8 @@ export default function StoreOrderDetailPage() {
   const { orderId } = useParams();
   const [params] = useSearchParams();
   const user = useAuthStore((s) => s.user);
+  // Region choices mirror the enabled backend destinations.
+  const destinations = useShippingDestinations();
   // Guest access: the token from checkout (query string, then this tab's
   // session) is the only proof a guest can present. Keeping it means the
   // order page survives a reload — and lets the receipt link straight here.
@@ -192,12 +196,31 @@ export default function StoreOrderDetailPage() {
       address1: saved.address1 || '',
       address2: saved.address2 || '',
       city: saved.city || '',
-      region: saved.region || '',
+      // A legacy full name ("California") becomes the code Printify expects.
+      region: regionCodeFor(saved.country, saved.region),
       zip: saved.zip || '',
       country: saved.country || '',
     });
     setAddressNotice(null);
     setAddressEditing(true);
+  };
+
+  const setAddressField = (key, value) => {
+    setAddressForm((form) => {
+      if (!form) {
+        return form;
+      }
+      const next = { ...form, [key]: key === 'country' ? value.toUpperCase() : value };
+      if (key === 'country') {
+        // US and CA use different code sets; drop a province that no longer
+        // matches the chosen country.
+        const options = destinations.find((country) => country.code === next.country);
+        if (options && !options.regions.some((region) => region.code === next.region)) {
+          next.region = '';
+        }
+      }
+      return next;
+    });
   };
 
   const saveAddress = async () => {
@@ -495,21 +518,39 @@ export default function StoreOrderDetailPage() {
               )}
               {addressEditing && addressForm ? (
                 <div>
-                  {ADDRESS_FIELDS.map(([key, label]) => (
-                    <label key={key} style={{ display: 'block', marginBottom: '0.5rem' }}>
-                      <span className="store-order__hint">{label}</span>
-                      <input
-                        type={key === 'email' ? 'email' : 'text'}
-                        value={addressForm[key]}
-                        maxLength={key === 'country' ? 2 : 250}
-                        onChange={(event) => setAddressForm((form) => (
-                          { ...form, [key]: event.target.value }
-                        ))}
-                        aria-label={label}
-                        style={ADDRESS_FIELD_STYLE}
-                      />
-                    </label>
-                  ))}
+                  {ADDRESS_FIELDS.map(([key, label]) => {
+                    const countryEntry = key === 'region'
+                      ? destinations.find((country) => country.code === String(addressForm.country || '').toUpperCase())
+                      : null;
+                    const regionOptions = countryEntry?.regions || null;
+                    return (
+                      <label key={key} style={{ display: 'block', marginBottom: '0.5rem' }}>
+                        <span className="store-order__hint">{label}</span>
+                        {regionOptions ? (
+                          <select
+                            value={addressForm.region}
+                            onChange={(event) => setAddressField(key, event.target.value)}
+                            aria-label={label}
+                            style={ADDRESS_FIELD_STYLE}
+                          >
+                            <option value="">Select state / province</option>
+                            {regionOptions.map((region) => (
+                              <option key={region.code} value={region.code}>{region.code} — {region.name}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            type={key === 'email' ? 'email' : 'text'}
+                            value={addressForm[key]}
+                            maxLength={key === 'country' ? 2 : 250}
+                            onChange={(event) => setAddressField(key, event.target.value)}
+                            aria-label={label}
+                            style={ADDRESS_FIELD_STYLE}
+                          />
+                        )}
+                      </label>
+                    );
+                  })}
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
                     <button
                       type="button"

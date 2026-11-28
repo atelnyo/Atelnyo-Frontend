@@ -770,6 +770,11 @@
   gap: 0.5rem;
 }
 
+.store-shipping-methods__eta {
+  font-size: 0.8125rem;
+  color: var(--store-muted);
+}
+
 .store-shipping-methods__name {
   font-size: 0.9rem;
   color: var(--store-navy);

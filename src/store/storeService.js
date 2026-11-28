@@ -56,6 +56,8 @@ export const storeService = {
       ...(shippingMethod ? { shipping_method: shippingMethod } : {}),
     }),
   quoteShipping: (items, address) => api.post('marketplace/printify/shipping-quote/', { items, address }),
+  // Countries the Store may ship to (admin policy is the source of truth).
+  shippingDestinations: () => api.get('marketplace/shipping-destinations/'),
   // guestToken is the one-time token returned when a guest creates the order.
   checkoutOrder: (orderId, provider = 'paypal', guestToken, pendingShippingConfirmation = false) =>
     api.post('checkout/order/', {

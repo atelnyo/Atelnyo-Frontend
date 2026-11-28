@@ -18,6 +18,7 @@ vi.mock('./storeService', () => ({
     contactSeller: (...args) => contactSeller(...args),
     updateShippingAddress: (...args) => updateShippingAddress(...args),
     cancelOrder: (...args) => cancelOrder(...args),
+    shippingDestinations: () => Promise.resolve({ data: { countries: [] } }),
   },
 }));
 

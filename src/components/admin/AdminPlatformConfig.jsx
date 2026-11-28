@@ -97,7 +97,7 @@ const CONFIG_GROUPS = [
     key: 'printify',
     icon: 'fa-truck-fast',
     title: { en: 'Printify Store', ht: 'Boutik Printify' },
-    desc: { en: 'Country codes must be explicitly enabled; live product and address quotes are still required at checkout.', ht: 'Ou dwe aktive kòd peyi yo klèman; quote pwodwi ak adrès an dirèk toujou obligatwa nan checkout.' },
+    desc: { en: 'The Store address form and quote gate read this policy, so changes apply immediately. Live product and address quotes are still required at checkout.', ht: 'Fòm adrès Store la ak kontwòl quote yo li règle sa a, kidonk chanjman yo aplike touswit. Quote pwodwi ak adrès an dirèk toujou obligatwa nan checkout.' },
     keys: ['printify_shipping_policy'],
   },
   {

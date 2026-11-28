@@ -21,6 +21,7 @@ const createOrder = vi.fn();
 const capturePaypal = vi.fn();
 const checkoutOrder = vi.fn();
 const quoteShipping = vi.fn();
+const shippingDestinations = vi.fn();
 const config = vi.fn();
 const loadPayPalScript = vi.fn();
 let paypalCallbacks;
@@ -32,6 +33,7 @@ vi.mock('./storeService', () => ({
     getOrder: (...args) => getOrder(...args),
     createOrder: (...args) => createOrder(...args),
     quoteShipping: (...args) => quoteShipping(...args),
+    shippingDestinations: (...args) => shippingDestinations(...args),
     checkoutOrder: (...args) => checkoutOrder(...args),
     claimOrder: vi.fn(),
   },
@@ -92,8 +94,22 @@ describe('StoreCartPage checkout preparation', () => {
     createOrder.mockResolvedValue({ data: { id: 15, total: '25.00', guest_token: 'guest-token' } });
     capturePaypal.mockResolvedValue({ data: { status: 'succeeded' } });
     quoteShipping.mockResolvedValue({ data: {
-      status: 'ELIGIBLE', shipping_methods: [{ id: 'standard', name: 'Standard', price: '5.00', currency: 'USD' }],
+      status: 'ELIGIBLE', shipping_methods: [{
+        id: 'standard', name: 'Standard', price: '5.00', currency: 'USD',
+        estimate: '2–5 business days',
+      }],
     } });
+    // The address form renders this server catalog, not a hardcoded list.
+    shippingDestinations.mockResolvedValue({ data: { countries: [
+      {
+        code: 'US', name: 'United States',
+        regions: [{ code: 'CA', name: 'California' }],
+      },
+      {
+        code: 'AU', name: 'Australia',
+        regions: [{ code: 'NSW', name: 'New South Wales' }],
+      },
+    ] } });
     getProduct.mockResolvedValue({ data: { title: 'Poster', price: '20.00', currency: 'USD' } });
     checkoutOrder.mockResolvedValue({
       data: { paypal_order_id: 'PP-1', transaction_id: 9, amount: '20.00' },
@@ -194,7 +210,10 @@ describe('StoreCartPage checkout preparation', () => {
     } });
     quoteShipping.mockResolvedValue({ data: {
       status: 'ELIGIBLE',
-      shipping_methods: [{ id: 'standard', name: 'Standard', price: '5.00', currency: 'USD' }],
+      shipping_methods: [{
+        id: 'standard', name: 'Standard', price: '5.00', currency: 'USD',
+        estimate: '2–5 business days',
+      }],
     } });
     renderButtons = () => Promise.resolve();
     loadPayPalScript.mockResolvedValue({
@@ -214,6 +233,9 @@ describe('StoreCartPage checkout preparation', () => {
     await waitFor(() => expect(screen.getByText('Print')).toBeTruthy());
     // The shipping form only appears once the shopper opts into shipping.
     fireEvent.click(screen.getByRole('button', { name: 'Continue to shipping address' }));
+    // Only destinations active in the backend Printify policy are offered.
+    expect(screen.getByRole('option', { name: 'Australia (AU)' })).toBeTruthy();
+    expect(screen.queryByRole('option', { name: /United Kingdom/ })).toBeNull();
     // Required labels carry a trailing "*" marker, hence the regex matchers.
     fireEvent.change(screen.getByLabelText(/^First name/), { target: { value: 'Ada' } });
     fireEvent.change(screen.getByLabelText(/^Last name/), { target: { value: 'Lovelace' } });
@@ -226,6 +248,9 @@ describe('StoreCartPage checkout preparation', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: 'Calculate shipping options' })).toBeTruthy());
     fireEvent.click(screen.getByRole('button', { name: 'Calculate shipping options' }));
     await waitFor(() => expect(screen.getByRole('radio', { name: /Standard/ })).toBeTruthy());
+    // Each method shows the delivery window beside its price (and the
+    // selected-method summary repeats it).
+    expect(screen.getAllByText('2–5 business days').length).toBeGreaterThan(0);
     fireEvent.click(screen.getByRole('radio', { name: /Standard/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Proceed to Payment' }));
     await waitFor(() => expect(checkoutOrder).toHaveBeenCalled());
